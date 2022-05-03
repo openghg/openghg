@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Standardisation functions &#8212; OpenGHG 0+untagged.1.gba382a1.dirty documentation</title>
+    <title>Standardisation functions &#8212; OpenGHG 0+untagged.1.gc47e8df.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -433,7 +433,7 @@ the processed data has been assigned to</p>
 <h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.meta.assign_attributes">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">assign_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_attributes.html#assign_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.assign_attributes" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">assign_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_attributes.html#assign_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.assign_attributes" title="Permalink to this definition">#</a></dt>
 <dd><p>Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
 are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
 to the Datasource allowing more detailed searching of data.</p>
@@ -441,7 +441,7 @@ to the Datasource allowing more detailed searching of data.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Dictionary containing data, metadata and attributes</p></li>
-<li><p><strong>site</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Site code</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site code</p></li>
 <li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Number of seconds for which air
 sample is taken. Only for time variable attribute</p></li>
 <li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Network name</p></li>

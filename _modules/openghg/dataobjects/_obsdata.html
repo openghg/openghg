@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._obsdata &#8212; OpenGHG 0+untagged.1.gba382a1.dirty documentation</title>
+    <title>openghg.dataobjects._obsdata &#8212; OpenGHG 0+untagged.1.gc47e8df.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -216,12 +216,6 @@
         <span class="c1"># Fixed length as 1 at the moment but may need to update if other key</span>
         <span class="c1"># values are added.</span>
         <span class="k">return</span> <span class="mi">1</span></div>
-
-<div class="viewcode-block" id="ObsData.__eq__"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.ObsData.__eq__">[docs]</a>    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ObsData</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">NotImplemented</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">metadata</span></div>
 
 <div class="viewcode-block" id="ObsData.plot_timeseries"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.ObsData.plot_timeseries">[docs]</a>    <span class="k">def</span> <span class="nf">plot_timeseries</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
