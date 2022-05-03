@@ -6,10 +6,10 @@ import plotly.graph_objects as go
 def plot_timeseries(
     data: Union[ObsData, List[ObsData]],
     title: Optional[str] = None,
-    x_var: Optional[str] = None,
-    y_var: Optional[str] = None,
-    x_label: Optional[str] = None,
-    y_label: Optional[str] = None,
+    xvar: Optional[str] = None,
+    yvar: Optional[str] = None,
+    xlabel: Optional[str] = None,
+    ylabel: Optional[str] = None,
     units: Optional[str] = None,
 ) -> go.Figure:
     """Plot a timeseries
@@ -17,10 +17,10 @@ def plot_timeseries(
     Args:
         data: ObsData object or list of objects
         title: Title for figure
-        x_var: x axis variable, defaults to time
-        y_var: y axis variable, defaults to species
-        x_label: Label for x axis
-        y_label: Label for y axis
+        xvar: x axis variable, defaults to time
+        yvar: y axis variable, defaults to species
+        xlabel: Label for x axis
+        ylabel: Label for y axis
         units: Units for y axis
     Returns:
         go.Figure: Plotly Graph Object Figure
@@ -34,19 +34,19 @@ def plot_timeseries(
     if title is None:
         title = ""
 
-    if x_label is None:
-        x_label = "Date"
+    if xlabel is None:
+        xlabel = "Date"
 
-    if y_label is None:
-        y_label = "Concentration"
+    if ylabel is None:
+        ylabel = "Concentration"
 
     if units is not None:
-        y_label += f"  ({units})"
+        ylabel += f"  ({units})"
 
     layout = go.Layout(
         title=title_layout,
-        xaxis=dict(title=x_label),
-        yaxis=dict(title=y_label),
+        xaxis=dict(title=xlabel),
+        yaxis=dict(title=ylabel),
         font=font,
     )
 
@@ -63,13 +63,13 @@ def plot_timeseries(
 
         legend = f"{site} - {species} - {inlet}"
 
-        if x_var is not None:
-            x_data = dataset[x_var]
+        if xvar is not None:
+            x_data = dataset[xvar]
         else:
             x_data = dataset.time
 
-        if y_var is not None:
-            y_data = dataset[y_var]
+        if yvar is not None:
+            y_data = dataset[yvar]
         else:
             try:
                 y_data = dataset[species]
@@ -82,16 +82,16 @@ def plot_timeseries(
 
 
 # def plot_timeseries(
-#     data: Union[ObsData, List[ObsData]], x_var: str, y_var: str, x_label: str, y_label: str
+#     data: Union[ObsData, List[ObsData]], xvar: str, yvar: str, xlabel: str, ylabel: str
 # ) -> None:
 #     """Plot timeseries data using Plotly
 
 #     Args:
 #         data: One or more ObsData objects
-#         x_var: Variable to plot on x axis
-#         y_var: Variable to plot on y axis
-#         x_label: Label for x axis
-#         y_label: Label for y axis
+#         xvar: Variable to plot on x axis
+#         yvar: Variable to plot on y axis
+#         xlabel: Label for x axis
+#         ylabel: Label for y axis
 #     Returns:
 #         plot type
 #     """

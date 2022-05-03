@@ -1,0 +1,6 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Usage question
+    url: https://github.com/openghg/openghg/discussions
+    about: |
+      Ask questions and get help with OpenGHG here.

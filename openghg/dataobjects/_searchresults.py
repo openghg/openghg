@@ -18,11 +18,13 @@ __all__ = ["SearchResults"]
 
 @dataclass
 class SearchResults:
-    """This class is used to return data from the search function
+    """This class is used to return data from the search function. It
+    has member functions to retrieve data from the object store.
 
     Args:
         results: Search results
         ranked_data: True if results are ranked, else False
+        cloud: True if running in cloud
     """
 
     T = TypeVar("T", bound="SearchResults")

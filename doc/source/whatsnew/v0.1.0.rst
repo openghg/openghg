@@ -1,6 +1,6 @@
-=======
-v0.1.0
-=======
+===================
+What's new - v0.1.0
+===================
 
 Features
 ========
@@ -10,3 +10,4 @@ command. See the documentation at [ADD DOCS] and tutorial [ADD TUTORIAL] for fur
 
 Fixes
 =====
+

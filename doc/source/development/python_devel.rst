@@ -44,14 +44,12 @@ deactivate the environment and return to your system Python using;
 Clone OpenGHG
 -------------
 
-As OpenGHG is currently in its very early stages and is not yet available on ``pip`` we need
-clone the OpenGHG repository and then move into it and install the required dependencies.
+To get a copy of the repo and ensure you have all the required depdencies for development run
 
 .. code-block:: bash
 
     git clone https://github.com/openghg/openghg.git
     cd openghg
-    pip install -r requirements.txt
     pip install -r requirements-dev.txt
 
 OpenGHG should now be installed within your virtual environment.
@@ -190,8 +188,10 @@ Now create and switch to a feature branch. This should be prefixed with
 Pre-commit
 ----------
 
-This project uses `pre-commit <https://pre-commit.com/>`__ to ensure code is linted and formatted. This ensures
-errors are caught before the code is checked in the CI pipeline. To install the hook
+This project uses `pre-commit <https://pre-commit.com/>`__ to ensure code is linted and formatted using tools such as flake8,
+black and others. This ensures errors are caught before the code is checked in the CI pipeline.
+
+To install the hook
 
 .. code-block:: bash
 
