@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 4: Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.gb477d70.dirty documentation</title>
+    <title>Workflow 4: Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.gba382a1.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -21,8 +21,8 @@
     href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -37,8 +37,6 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
-    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -237,17 +235,17 @@
               
               <div>
                 
-  <section class="tex2jax_ignore mathjax_ignore" id="workflow-4-working-with-carbon-dioxide">
+  <section id="workflow-4-working-with-carbon-dioxide">
 <h1>Workflow 4: Working with carbon dioxide<a class="headerlink" href="#workflow-4-working-with-carbon-dioxide" title="Permalink to this headline">#</a></h1>
 <p>For carbon dioxide data, the natural diurnal cycle must be taken into account when comparing any expected measurements against our observations.</p>
-<p>In order to compare our measurements to modelled data for carbon dioxide (<span class="math notranslate nohighlight">\(\mathrm{CO_2}\)</span>), we need high frequency inputs for both the footprint and flux files. For NAME footprints these should contain an additional “H_back” dimension to store hourly footprints overall an initial time period for each release time. For any natural flux data to compare against, this should have a frequency of less than 24 hours.</p>
-<p><em>Operations around <span class="math notranslate nohighlight">\(CO_2\)</span> and high resolution data may run slow at the moment, the plan is to profile this so we can optimise performance.</em></p>
+<p>In order to compare our measurements to modelled data for carbon dioxide ($\mathrm{CO_2}$), we need high frequency inputs for both the footprint and flux files. For NAME footprints these should contain an additional “H_back” dimension to store hourly footprints overall an initial time period for each release time. For any natural flux data to compare against, this should have a frequency of less than 24 hours.</p>
+<p><em>Operations around $CO_2$ and high resolution data may run slow at the moment, the plan is to profile this so we can optimise performance.</em></p>
 <blockquote>
 <div><p><strong><em>NOTE:</em></strong>  Plots created within this tutorial may not show up on the online documentation version of this notebook.</p>
 </div></blockquote>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 
 <span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
@@ -264,7 +262,7 @@
 <p>For this tutorial we will again set up a temporary object store to store our data. See <a class="reference internal" href="1_Adding_observation_data.html"><span class="doc std std-doc">1_Adding_observation_data.ipynb</span></a> for more details around this.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">## Defining inputs</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Defining inputs</span>
 
 <span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;TAC&quot;</span>
 <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;DECC&quot;</span>
@@ -278,7 +276,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">## Observations</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Observations</span>
 <span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">process_obs</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
@@ -295,7 +293,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">## Emissions</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Emissions</span>
 <span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">process_flux</span>
 
 <span class="n">flux_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;flux/co2-flux_EUROPE_2017.tar.gz&quot;</span><span class="p">)</span>
@@ -318,7 +316,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">## Footprints</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Footprints</span>
 <span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">process_footprint</span>
 
 <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;footprint/tac_footprint_co2_201707.tar.gz&quot;</span><span class="p">)</span>
@@ -341,7 +339,7 @@
 <p>To link together our observations to our ancillary data we can create a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object, as shown in the previous tutorial <a class="reference internal" href="3_Comparing_with_emissions.html"><span class="doc std std-doc">3_Comparing_with_emissions.ipynb</span></a>, using suitable keywords to grab the data from the object store.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.analyse</span> <span class="kn">import</span> <span class="n">ModelScenario</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.analyse</span> <span class="kn">import</span> <span class="n">ModelScenario</span>
 
 <span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;2017-07-01&quot;</span>
 <span class="n">end_date</span> <span class="o">=</span> <span class="s2">&quot;2017-07-07&quot;</span>
@@ -360,7 +358,7 @@
 <p>We can plot our observation timeseries using the <code class="docutils literal notranslate"><span class="pre">ModelScenario.plot_timeseries()</span></code> method as before:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -368,7 +366,7 @@
 <p>We can also check trace details of the extracted data by checking the available metadata. For instance for our footprint data we would expect this to have an associated species and for this to be labelled as “co2”:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">footprint_metadata</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">footprint_metadata</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span>
 <span class="n">footprint_species</span> <span class="o">=</span> <span class="n">footprint_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Our linked footprint has an associated species of &#39;</span><span class="si">{</span><span class="n">footprint_species</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 </pre></div>
@@ -381,7 +379,7 @@
 <p>Once the correct high frequency emissions and footprints have been linked for our carbon dioxide data, we can start to plot comparisons between the sources and our measurement data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_comparison</span><span class="p">(</span><span class="n">baseline</span><span class="o">=</span><span class="s2">&quot;percentile&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_comparison</span><span class="p">(</span><span class="n">baseline</span><span class="o">=</span><span class="s2">&quot;percentile&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -389,7 +387,7 @@
 <p>As in the previous tutorial, multiple fluxes can be linked to your <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object if required. This can include additional high frequency (&lt;24 hourly) or low frequency flux data. In this case we have added monthly “fossil fuel” emissions:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> 
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> 
                   <span class="n">source</span><span class="o">=</span><span class="n">source_fossil</span><span class="p">,</span>
                   <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
 </pre></div>
@@ -398,7 +396,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fossil_flux</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="n">source_fossil</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fossil_flux</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="n">source_fossil</span><span class="p">]</span>
 <span class="n">fossil_flux</span>
 </pre></div>
 </div>
@@ -407,7 +405,7 @@
 <p>If we plot the modelled measurement comparison, this will stack the natural and fossil fuel flux sources and combine with the footprint data in an appropriate way:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_comparison</span><span class="p">(</span><span class="n">baseline</span><span class="o">=</span><span class="s2">&quot;percentile&quot;</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_comparison</span><span class="p">(</span><span class="n">baseline</span><span class="o">=</span><span class="s2">&quot;percentile&quot;</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

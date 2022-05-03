@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 5: Explore NOAA ObsPack &#8212; OpenGHG 0+untagged.1.gb477d70.dirty documentation</title>
+    <title>Workflow 5: Explore NOAA ObsPack &#8212; OpenGHG 0+untagged.1.gba382a1.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -21,8 +21,8 @@
     href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -247,7 +247,7 @@
               
               <div>
                 
-  <section class="tex2jax_ignore mathjax_ignore" id="workflow-5-explore-noaa-obspack">
+  <section id="workflow-5-explore-noaa-obspack">
 <h1>Workflow 5: Explore NOAA ObsPack<a class="headerlink" href="#workflow-5-explore-noaa-obspack" title="Permalink to this headline">#</a></h1>
 <p>The NOAA ObsPack products are collections of observation data from many sites which have been collated and standardised. ObsPack data products are prepared by NOAA in consultation with data providers. Available ObsPack products can be accessed and downlaoded from the <a class="reference external" href="https://gml.noaa.gov/ccgg/obspack/data.php">ObsPack download</a> page.</p>
 <p>In this tutorial, we will demonstrate how the NOAA ObsPack can be loaded into the object store, explored and plotted.</p>
@@ -255,7 +255,7 @@
 <h2>1. Loading the NOAA ObsPack data<a class="headerlink" href="#loading-the-noaa-obspack-data" title="Permalink to this headline">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 
 <span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
@@ -270,7 +270,7 @@
 <p>As the ObsPack products contain a large amount of data we’ll use the temporary directory we’ve created for the object store above to download and unpack the data. If you’re using a different path for the object store you can uncomment the cell below and use that directory instead. Remember to use <code class="docutils literal notranslate"><span class="pre">tmp_download.cleanup()</span></code> if you do.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># tmp_download = tempfile.TemporaryDirectory()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># tmp_download = tempfile.TemporaryDirectory()</span>
 <span class="c1"># tmp_download_path = tmp_download.name</span>
 </pre></div>
 </div>
@@ -281,7 +281,7 @@
 <p>For convenience we have included a copy of the “obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24” to be retrieved from our example database. Once this has been downloaded, this can be processd using the <code class="docutils literal notranslate"><span class="pre">add_noaa_obspack()</span></code> function available from <code class="docutils literal notranslate"><span class="pre">openghg.store</span></code> subpackage. The file is ~ 128 MB in size so might take a short time to download depending on your internet connection.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">add_noaa_obspack</span>
 
 <span class="n">noaa_obspack_directory</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;obspack/obspack_ch4_example.tar.gz&quot;</span><span class="p">,</span> 
@@ -295,7 +295,7 @@
 <h3>Process and store the data<a class="headerlink" href="#process-and-store-the-data" title="Permalink to this headline">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">add_noaa_obspack</span><span class="p">(</span><span class="n">noaa_obspack_directory</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">add_noaa_obspack</span><span class="p">(</span><span class="n">noaa_obspack_directory</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -306,7 +306,7 @@
 <p>The object store should now contain a larage amount of CH4, we can visualise the structure of the store like so:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">visualise_store</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">visualise_store</span>
 
 <span class="n">visualise_store</span><span class="p">()</span>
 </pre></div>
@@ -320,7 +320,7 @@
 <p>Now we can query the object store and find all the flask data for example</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">search</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">search</span>
 
 <span class="n">search</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">measurement_type</span><span class="o">=</span><span class="s2">&quot;flask&quot;</span><span class="p">)</span>
 </pre></div>
@@ -330,7 +330,7 @@
 <p>Or we can do an all in one search and retrieve using <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code>. Here we find CH4 data from Estevan Point, British Columbia, retrieve it and plot it.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
 
 <span class="n">data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;HPB&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
 </pre></div>
@@ -340,14 +340,14 @@
 <p>As there isn’t any ranking data set (see tutorial 2) <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> doesn’t know which inlet to select, we need to tell it.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;HPB&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;93m&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;HPB&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;93m&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
