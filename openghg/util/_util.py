@@ -90,7 +90,7 @@ def find_matching_site(site_name: str, possible_sites: Dict) -> str:
         return f"No suggestion for {site_name}."
     elif scores[0] > cutoff_score and scores[0] > scores[1]:
         best_match = matches[0][0]
-        return f"Did you mean {best_match.title()}, code: {possible_sites[best_match]} ?"
+        return f"Did you mean {best_match.upper()}, code: {possible_sites[best_match]} ?"
     elif scores[0] == scores[1]:
         suggestions = [f"{match.title()}, code: {possible_sites[match]}" for match, _, _ in matches]
         nl_char = "\n"

@@ -69,6 +69,24 @@ def retrieve_surface(
 
     # If we're going to be using site, species and inlet here we should check that that
     # information is in the metadata
+    if not {"site", "inlet"} <= metadata.keys():
+        try:
+            site_name = metadata["site_long_name"]
+        except KeyError:
+            print("Error: cannot read site from metadata")
+        else:
+            # TODO - add site code lookup here
+            metadata["site"] = site_name
+
+        try:
+            # Here we need to do a lookup to get the site code
+            _inlet = str(int(metadata["inlet_height_magl"])) + "m"
+        except KeyError:
+            print("Error: cannot read inlet from metadata.")
+            return None
+        else:
+            metadata["inlet"] = _inlet
+
     to_store = {key: {"data": dataset, "metadata": metadata}}
 
     ObsSurface.store_data(data=to_store)

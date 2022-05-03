@@ -72,7 +72,7 @@ class BaseStore:
         c._creation_datetime = timestamp_tzaware(data["creation_datetime"])
         c._datasource_uuids = data["datasource_uuids"]
         c._file_hashes = data["file_hashes"]
-        c._retrieved_hashes = data["retrieved_hashes"]
+        c._retrieved_hashes = data.get("retrieved_hashes", {})
         c._datasource_table = aDict(data["datasource_table"])
         c._rank_data = aDict(data["rank_data"])
         c._stored = False
