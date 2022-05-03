@@ -14,10 +14,12 @@ from openghg.util import (
 TupleTimeType = Tuple[Union[int, float], str]
 
 
-def infer_date_range(time: DataArray,
-                     filepath: Optional[Union[str, Path]] = None,
-                     period: Optional[Union[str, tuple]] = None,
-                     continuous: bool = True) -> Tuple[Timestamp, Timestamp, str]:
+def infer_date_range(
+    time: DataArray,
+    filepath: Optional[Union[str, Path]] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
+) -> Tuple[Timestamp, Timestamp, str]:
     """
     Infer the date range from the time dimension. If the time dimension
     only includes one value the date range will be:
@@ -101,7 +103,9 @@ def infer_date_range(time: DataArray,
 
         # Check input period against inferred period
         if inferred_freq != freq:
-            print(f"Warning: Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})")
+            print(
+                f"Warning: Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})"
+            )
 
         # Create time offset and use to create start and end datetime
         time_delta = relative_time_offset(unit=time_unit, value=time_value)
@@ -117,7 +121,9 @@ def infer_date_range(time: DataArray,
         inferred_period = pd.infer_freq(timestamps)
         if inferred_period is None:
             if continuous:
-                raise ValueError("Continuous data with no gaps is expected but no time period can be inferred. Run with continous=False to remove this constraint.")
+                raise ValueError(
+                    "Continuous data with no gaps is expected but no time period can be inferred. Run with continous=False to remove this constraint."
+                )
             else:
                 inferred_freq = None
                 time_value, time_unit = None, None

@@ -198,11 +198,12 @@ class ModelScenario:
         Use appropriate get function to search for data in object store.
         """
 
-        get_functions = {"obs_surface": get_obs_surface,
-                         "footprint": get_footprint,
-                         "flux": get_flux,
-                         "boundary_conditions": get_bc,
-                         }
+        get_functions = {
+            "obs_surface": get_obs_surface,
+            "footprint": get_footprint,
+            "flux": get_flux,
+            "boundary_conditions": get_bc,
+        }
 
         # TODO: Add/write footprint and flux search? What's the syntax?
         search_functions = {"obs_surface": search}
@@ -696,7 +697,14 @@ class ModelScenario:
         if units is not None:
             combined_dataset.update({"fp": (combined_dataset.fp.dims, (combined_dataset["fp"].data / units))})
             if self.species == "co2":
-                combined_dataset.update({"fp_HiTRes": (combined_dataset.fp_HiTRes.dims, (combined_dataset.fp_HiTRes.data / units))})
+                combined_dataset.update(
+                    {
+                        "fp_HiTRes": (
+                            combined_dataset.fp_HiTRes.dims,
+                            (combined_dataset.fp_HiTRes.data / units),
+                        )
+                    }
+                )
 
         attributes = {}
         attributes_obs = obs.data.attrs
@@ -795,11 +803,13 @@ class ModelScenario:
             footprint_data = footprint_data.resample(indexer={"time": resample_to}, base=base).mean()
             return footprint_data
 
-    def _param_setup(self,
-                     param: str = "modelled_obs",
-                     resample_to: str = "coarsest",
-                     platform: Optional[str] = None,
-                     recalculate: bool = False) -> bool:
+    def _param_setup(
+        self,
+        param: str = "modelled_obs",
+        resample_to: str = "coarsest",
+        platform: Optional[str] = None,
+        recalculate: bool = False,
+    ) -> bool:
         """
         Decide if calculation is needed for input parameter and set up
         underlying parameters accordingly. This will populate the
@@ -833,10 +843,9 @@ class ModelScenario:
         if parameter is None or recalculate:
             # Check if observations are present and use these for resampling
             if self.obs is not None:
-                self.combine_obs_footprint(resample_to,
-                                           platform=platform,
-                                           recalculate=recalculate,
-                                           cache=True)
+                self.combine_obs_footprint(
+                    resample_to, platform=platform, recalculate=recalculate, cache=True
+                )
             else:
                 self.scenario = self._check_footprint_resample(resample_to)
         else:
@@ -900,10 +909,9 @@ class ModelScenario:
 
         self._check_data_is_present(need=["footprint", "fluxes"])
 
-        param_calculate = self._param_setup(param="modelled_obs",
-                                            resample_to=resample_to,
-                                            platform=platform,
-                                            recalculate=recalculate)
+        param_calculate = self._param_setup(
+            param="modelled_obs", resample_to=resample_to, platform=platform, recalculate=recalculate
+        )
 
         if not param_calculate:
             modelled_obs = cast(DataArray, self.modelled_obs)
@@ -1256,12 +1264,13 @@ class ModelScenario:
 
         return None
 
-    def calc_modelled_baseline(self,
-                               resample_to: str = "coarsest",
-                               platform: Optional[str] = None,
-                               cache: bool = True,
-                               recalculate: bool = False,
-                               ) -> DataArray:
+    def calc_modelled_baseline(
+        self,
+        resample_to: str = "coarsest",
+        platform: Optional[str] = None,
+        cache: bool = True,
+        recalculate: bool = False,
+    ) -> DataArray:
         """
         Calculate the modelled baseline points based on site footprint and boundary conditions.
         Boundary conditions are multipled by any loss (exp(-t/lifetime)) for the species.
@@ -1291,10 +1300,9 @@ class ModelScenario:
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)
 
-        param_calculate = self._param_setup(param="modelled_baseline",
-                                            resample_to=resample_to,
-                                            platform=platform,
-                                            recalculate=recalculate)
+        param_calculate = self._param_setup(
+            param="modelled_baseline", resample_to=resample_to, platform=platform, recalculate=recalculate
+        )
 
         if not param_calculate:
             modelled_baseline = cast(DataArray, self.modelled_baseline)
@@ -1307,6 +1315,7 @@ class ModelScenario:
 
         species_info = load_json(filename="acrg_species_info.json")
         species = self.species
+
         try:
             species_data = species_info[species]
         except KeyError:
@@ -1322,18 +1331,20 @@ class ModelScenario:
                 lifetime_monthly = lifetime
                 lifetime = None
             else:
-                raise ValueError(f"Did not recognise input for lifetime for {species_upper} from 'acrg_species_info.json'")
+                raise ValueError(
+                    f"Did not recognise input for lifetime for {species_upper} from 'acrg_species_info.json'"
+                )
 
         if lifetime is not None:
             short_lifetime = True
             lt_time_delta = time_offset(period=lifetime)
-            lifetime_hrs: Union[float, np.ndarray] = lt_time_delta.total_seconds() / 3600.
+            lifetime_hrs: Union[float, np.ndarray] = lt_time_delta.total_seconds() / 3600.0
         elif lifetime_monthly:
             short_lifetime = True
             lifetime_monthly_hrs = []
             for lt in lifetime_monthly:
                 lt_time_delta = time_offset(period=lt)
-                lt_hrs = lt_time_delta.total_seconds() / 3600.
+                lt_hrs = lt_time_delta.total_seconds() / 3600.0
                 lifetime_monthly_hrs.append(lt_hrs)
 
             # calculate the lifetime_hrs associated with each time point in scenario data
@@ -1345,16 +1356,46 @@ class ModelScenario:
 
         # Include loss condition if lifetime of species is specified
         if short_lifetime:
-            expected_vars = ("mean_age_particles_n", "mean_age_particles_e", "mean_age_particles_s", "mean_age_particles_w")
+            expected_vars = (
+                "mean_age_particles_n",
+                "mean_age_particles_e",
+                "mean_age_particles_s",
+                "mean_age_particles_w",
+            )
             for var in expected_vars:
                 if var not in scenario.data_vars:
-                    raise ValueError(f"Unable to calculate baseline for short-lived species {species} without species specific footprint.")
+                    raise ValueError(
+                        f"Unable to calculate baseline for short-lived species {species} without species specific footprint."
+                    )
 
             # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
+<<<<<<< HEAD
             loss_n: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename('loss_n')  # type: ignore
             loss_e: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename('loss_e')  # type: ignore
             loss_s: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename('loss_s')  # type: ignore
             loss_w: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename('loss_w')  # type: ignore
+=======
+            loss_n: Union[DataArray, float] = np.exp(
+                -1 * scenario["mean_age_particles_n"] / lifetime_hrs
+            ).rename(
+                "loss_n"
+            )  # type:ignore
+            loss_e: Union[DataArray, float] = np.exp(
+                -1 * scenario["mean_age_particles_e"] / lifetime_hrs
+            ).rename(
+                "loss_e"
+            )  # type:ignore
+            loss_s: Union[DataArray, float] = np.exp(
+                -1 * scenario["mean_age_particles_s"] / lifetime_hrs
+            ).rename(
+                "loss_s"
+            )  # type:ignore
+            loss_w: Union[DataArray, float] = np.exp(
+                -1 * scenario["mean_age_particles_w"] / lifetime_hrs
+            ).rename(
+                "loss_w"
+            )  # type:ignore
+>>>>>>> f3db2f5f2d93e1418b791e23a2713d33994a59bb
 
         else:
 
@@ -1363,10 +1404,12 @@ class ModelScenario:
             loss_s = 1.0
             loss_w = 1.0
 
-        modelled_baseline = (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n).sum(["height", "lon"]) + \
-                            (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e).sum(["height", "lat"]) + \
-                            (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s).sum(["height", "lon"]) + \
-                            (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w).sum(["height", "lat"])
+        modelled_baseline = (
+            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n).sum(["height", "lon"])
+            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e).sum(["height", "lat"])
+            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s).sum(["height", "lon"])
+            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w).sum(["height", "lat"])
+        )
 
         modelled_baseline.attrs["resample_to"] = resample_to
         modelled_baseline = modelled_baseline.rename("bc_mod")
@@ -1445,7 +1488,9 @@ class ModelScenario:
                 name = modelled_baseline.name
                 combined_dataset = combined_dataset.assign({name: modelled_baseline})
             else:
-                print("Unable to calculate baseline data. Add boundary conditions using ModelScenarion.add_bc(...) to do this.")
+                print(
+                    "Unable to calculate baseline data. Add boundary conditions using ModelScenarion.add_bc(...) to do this."
+                )
 
         if cache:
             self.scenario = combined_dataset
@@ -1468,13 +1513,15 @@ class ModelScenario:
 
         return fig
 
-    def plot_comparison(self,
-                        baseline: Optional[str] = "boundary_conditions",
-                        sources: Optional[Union[str, List]] = None,
-                        resample_to: str = "coarsest",
-                        platform: Optional[str] = None,
-                        cache: bool = True,
-                        recalculate: bool = False) -> Any:
+    def plot_comparison(
+        self,
+        baseline: Optional[str] = "boundary_conditions",
+        sources: Optional[Union[str, List]] = None,
+        resample_to: str = "coarsest",
+        platform: Optional[str] = None,
+        cache: bool = True,
+        recalculate: bool = False,
+    ) -> Any:
         """
         Plot comparison between observation and modelled timeseries data.
 
@@ -1526,7 +1573,8 @@ class ModelScenario:
         if baseline == "boundary_conditions":
             if self.bc is not None:
                 modelled_baseline = self.calc_modelled_baseline(
-                    resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate)
+                    resample_to=resample_to, platform=platform, cache=cache, recalculate=recalculate
+                )
                 y_baseline = modelled_baseline.data
                 y_data = y_data + y_baseline
             else:

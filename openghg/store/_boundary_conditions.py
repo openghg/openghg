@@ -112,11 +112,9 @@ class BoundaryConditions(BaseStore):
         # Currently ACRG boundary conditions are split by month or year
         bc_time = bc_data.time
 
-        start_date, end_date, period_str \
-            = infer_date_range(bc_time,
-                               filepath=filepath,
-                               period=period,
-                               continuous=continuous)
+        start_date, end_date, period_str = infer_date_range(
+            bc_time, filepath=filepath, period=period, continuous=continuous
+        )
 
         if "year" in period_str:
             date = f"{start_date.year}"
@@ -181,20 +179,22 @@ class BoundaryConditions(BaseStore):
         TODO: Implement this!
         """
         dims = ["lat", "lon", "time", "height"]
-        data_vars = {"vmr_n": ("time", "height", "lon"),
-                     "vmr_e": ("time", "height", "lat"),
-                     "vmr_s": ("time", "height", "lon"),
-                     "vmr_w": ("time", "height", "lat")
-                     }
-        data_types = {"lat": np.float32,
-                      "lon": np.float32,
-                      "height": np.float32,
-                      "time": np.datetime64,
-                      "vmr_n": np.float64,
-                      "vmr_e": np.float64,
-                      "vmr_s": np.float64,
-                      "vmr_w": np.float64,
-                      }
+        data_vars = {
+            "vmr_n": ("time", "height", "lon"),
+            "vmr_e": ("time", "height", "lat"),
+            "vmr_s": ("time", "height", "lon"),
+            "vmr_w": ("time", "height", "lat"),
+        }
+        data_types = {
+            "lat": np.float32,
+            "lon": np.float32,
+            "height": np.float32,
+            "time": np.datetime64,
+            "vmr_n": np.float64,
+            "vmr_e": np.float64,
+            "vmr_s": np.float64,
+            "vmr_w": np.float64,
+        }
 
         data_format = {"dims": dims, "data_vars": data_vars, "data_types": data_types}
 

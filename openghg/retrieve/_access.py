@@ -68,12 +68,11 @@ def get_obs_surface(
         raise ValueError(f"Unable to find results for {species} at {site}")
 
     retrieved_data: Union[ObsData, None] = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
-    
+
     if retrieved_data is None:
         return None
 
     data = retrieved_data.data
-
 
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
