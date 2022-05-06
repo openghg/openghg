@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._eulerian_model &#8212; OpenGHG 0+untagged.1.gc47e8df.dirty documentation</title>
+    <title>openghg.store._eulerian_model &#8212; OpenGHG 0+untagged.1.gb30e042.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -329,7 +329,9 @@
             <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">em_store</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">keyed_metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+        <span class="n">em_store</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span>
+            <span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">keyed_metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span>
+        <span class="p">)</span>
 
         <span class="c1"># Record the file hash in case we see this file again</span>
         <span class="n">em_store</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
