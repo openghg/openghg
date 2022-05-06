@@ -118,10 +118,9 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.util import daterange_overlap, create_daterange_str, relative_time_offset
+        from openghg.util import daterange_overlap
         from xarray import concat as xr_concat
         from numpy import unique as np_unique
-        from pandas import Timedelta
 
         # Group by year
         year_group = data.groupby("time.year")
