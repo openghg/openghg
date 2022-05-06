@@ -130,33 +130,8 @@ class Datasource:
         new_data = {}
 
         # Extract period associated with data from metadata
-        # This will be the "sampling_period" for obs and "time_period" for other
-        metadata = self._metadata
-        time_period_attrs = ["sampling_period", "time_period"]
-        for attr in time_period_attrs:
-            value = metadata.get(attr)
-            if value is not None:
-                # For sampling period data, expect this to be in seconds
-                if attr == "sampling_period":
-                    if value.endswith("s"):  # Check if str includes "s"
-                        period = value
-                    else:
-                        try:
-                            value_num = int(value)
-                        except ValueError:
-                            try:
-                                value_num = int(float(value))
-                            except ValueError:
-                                value_num = None
-                                continue
-                        period = f"{value_num}s"
-                else:
-                    # Expect period data to include value and time unit
-                    period = value
-
-                break
-        else:
-            period = None
+        # TODO: May want to add period as a potential data variable so would need to extract from there if needed
+        period = self.get_period()
 
         for _, data in year_group:
             daterange_str = self.get_representative_daterange_str(data, period=period)
@@ -191,7 +166,7 @@ class Datasource:
                         dv_ex = set(ex.data_vars.keys())
                         dv_new = set(new.data_vars.keys())
 
-                        # Check difference between datasets and fill any 
+                        # Check difference between datasets and fill any
                         # missing variables with NaN values.
                         dv_not_in_new = dv_ex - dv_new
                         for dv in dv_not_in_new:
@@ -315,9 +290,51 @@ class Datasource:
         if start_date == end_date:
             end_date += Timedelta(seconds=1)
 
-        daterange_str = create_daterange_str(start=start_date, end=end_date) 
+        daterange_str = create_daterange_str(start=start_date, end=end_date)
 
         return daterange_str
+
+    def get_period(self) -> Optional[str]:
+        """
+        Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
+        "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
+
+        Returns:
+            str : time period in the form of number and time unit e.g. "12s"
+
+            This is a suitable format to use to create a pandas Timedelta or DataOffset object.
+        """
+        # Extract period associated with data from metadata
+        # This will be the "sampling_period" for obs and "time_period" for other
+        metadata = self._metadata
+
+        time_period_attrs = ["sampling_period", "time_period"]
+        for attr in time_period_attrs:
+            value = metadata.get(attr)
+            if value is not None:
+                # For sampling period data, expect this to be in seconds
+                if attr == "sampling_period":
+                    if value.endswith("s"):  # Check if str includes "s"
+                        period = value
+                    else:
+                        try:
+                            value_num = int(value)
+                        except ValueError:
+                            try:
+                                value_num = int(float(value))
+                            except ValueError:
+                                value_num = None
+                                continue
+                        period = f"{value_num}s"
+                else:
+                    # Expect period data to include value and time unit
+                    period = value
+
+                break
+        else:
+            period = None
+
+        return period
 
     @staticmethod
     def exists(datasource_id: str, bucket: Optional[str] = None) -> bool:
