@@ -267,7 +267,7 @@ class Datasource:
 
         return daterange_str
 
-    def get_representative_daterange_str(self, dataset: Dataset, period: Optional[str] = None):
+    def get_representative_daterange_str(self, dataset: Dataset, period: Optional[str] = None) -> str:
         """
         Get representative daterange which incorporates any period the data covers.
         """
@@ -314,10 +314,10 @@ class Datasource:
                 # For sampling period data, expect this to be in seconds
                 if attr == "sampling_period":
                     if value.endswith("s"):  # Check if str includes "s"
-                        period = value
+                        period: Optional[str] = value
                     else:
                         try:
-                            value_num = int(value)
+                            value_num: Optional[int] = int(value)
                         except ValueError:
                             try:
                                 value_num = int(float(value))
