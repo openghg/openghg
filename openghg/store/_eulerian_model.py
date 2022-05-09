@@ -163,9 +163,7 @@ class EulerianModel(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(
-            uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore
-        )
+        em_store.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
