@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.gcb8fbe7.dirty documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.gb4e6aff.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -316,7 +316,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> is not a valid data type, please select one of </span><span class="si">{</span><span class="n">valid_data_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># Assume we want timeseries data</span>
-    <span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsSurface</span><span class="p">,</span> <span class="n">Footprints</span><span class="p">,</span> <span class="n">Emissions</span><span class="p">,</span> <span class="n">EulerianModel</span><span class="p">]</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsSurface</span><span class="p">,</span> <span class="n">Footprints</span><span class="p">,</span> <span class="n">Emissions</span><span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">EulerianModel</span><span class="p">]</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;footprints&quot;</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>

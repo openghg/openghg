@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._emissions &#8212; OpenGHG 0+untagged.1.gcb8fbe7.dirty documentation</title>
+    <title>openghg.store._emissions &#8212; OpenGHG 0+untagged.1.gb4e6aff.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -270,11 +270,9 @@
 
         <span class="n">em_time</span> <span class="o">=</span> <span class="n">em_data</span><span class="o">.</span><span class="n">time</span>
 
-        <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">period_str</span> \
-            <span class="o">=</span> <span class="n">infer_date_range</span><span class="p">(</span><span class="n">em_time</span><span class="p">,</span>
-                               <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
-                               <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-                               <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">)</span>
+        <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">period_str</span> <span class="o">=</span> <span class="n">infer_date_range</span><span class="p">(</span>
+            <span class="n">em_time</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Check for how granular we should make the date label</span>

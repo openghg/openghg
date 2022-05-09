@@ -51,7 +51,7 @@ Then check Docker is working correctly
     sudo docker run hello-world
 
 As Fn does not currently work with rootless docker we need to add our current user to the ``docker`` group.
-Note that this does come with security implications which
+Note that this does come with security implications which 
 are `outlined here <https://docs.docker.com/engine/security/#docker-daemon-attack-surface>`.
 
 .. code-block:: bash
@@ -71,7 +71,7 @@ We can now install Fn
     # If not carefully check the bash script
     bash install_fn.sh
 
-Note: if
+Note: if 
 
 Then start Fn to make sure everything runs correctly. On first start some images will be downloaded.
 
@@ -174,9 +174,9 @@ To allow access from the outside world we need to setup rules to allow ``ssh``, 
 
 .. code-block:: bash
 
-    sudo firewall-cmd --zone=public --add-service=ssh --permanent
-    sudo firewall-cmd --zone=public --add-service=https --permanent
-    sudo firewall-cmd --zone=public --add-service=http --permanent
+    sudo firewall-cmd --zone=public --add-service=ssh --permanent 
+    sudo firewall-cmd --zone=public --add-service=https --permanent 
+    sudo firewall-cmd --zone=public --add-service=http --permanent 
 
 Note that we perform the command and then the same command again with the ``--permanent`` argument to add
 the rule first to the current session and then to the permanent rule-set.
@@ -187,7 +187,7 @@ We also need to tell SELinux to allow HTTP worker_connections
 
     sudo setsebool -P httpd_can_network_connect 1
 
-On a CentOS 8 VM on the Oracle Cloud you may need to modify some `iptables` rules to allow any connections to be made to your
+On a CentOS 8 VM on the Oracle Cloud you may need to modify some `iptables` rules to allow any connections to be made to your 
 server.
 
 .. code-block:: bash
@@ -195,10 +195,10 @@ server.
     sudo iptables -L INPUT --line-numbers
 
     Chain INPUT (policy ACCEPT)
-    num  target     prot opt source               destination
+    num  target     prot opt source               destination         
     1    ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
-    2    ACCEPT     icmp --  anywhere             anywhere
-    3    ACCEPT     all  --  anywhere             anywhere
+    2    ACCEPT     icmp --  anywhere             anywhere            
+    3    ACCEPT     all  --  anywhere             anywhere            
     4    ACCEPT     tcp  --  anywhere             anywhere             state NEW tcp dpt:ssh
     5    REJECT     all  --  anywhere             anywhere             reject-with icmp-host-prohibited
 
@@ -271,3 +271,6 @@ If you want to build the Docker images without using the cache you can pass the 
 
 Manually Triggering Functions
 -----------------------------
+
+
+
