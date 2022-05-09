@@ -16,15 +16,6 @@ example_metadata = {
 }
 
 
-def test_wmo_retrieve():
-    from openghg.retrieve.icos import retrieve
-
-    site = "WAO"  # Weybourne
-    species = "ch4"
-
-    out = retrieve(site, species)
-
-
 def test_icos_retrieve_no_local(mocker):
     pid_csv = get_icos_test_file(filename="test_pids_icos.csv.gz")
     pid_df = pd.read_csv(pid_csv)
@@ -51,7 +42,7 @@ def test_icos_retrieve_no_local(mocker):
     dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", return_value=mock_Dobj)
     get_mock = mocker.patch.object(Dobj, "get", return_value=sample_icos_data)
 
-    toh_metadata_path = get_icos_test_file(filename="toh_metadata.json")
+    toh_metadata_path = get_icos_test_file(filename="toh_co2_10m_metadata.json")
     toh_metadata = toh_metadata_path.read_bytes()
 
     mocker.patch("openghg.util.download_data", return_value=toh_metadata)
@@ -101,7 +92,7 @@ def test_icos_retrieve_no_local(mocker):
         "data_owner": "dagmar kubistin",
         "data_owner_email": "dagmar.kubistin@dwd.de",
         "station_height_masl": 801.0,
-        "citation_string": "kubistin, d., plaß-dülmer, c., arnold, s., lindauer, m., müller-williams, j., schumacher, m., icos ri, 2021. icos atc co2 release, torfhaus (147.0 m), 2017-12-12–2021-01-31, https://hdl.handle.net/11676/y3-5_i70nw_f5pyn4i8m7wjo",
+        "citation_string": "kubistin, d., plaß-dülmer, c., arnold, s., lindauer, m., müller-williams, j., schumacher, m., icos ri, 2021. icos atc co2 release, torfhaus (10.0 m), 2017-12-12–2021-01-31, https://hdl.handle.net/11676/zyxccjfqcv0gmfmio4nturag",
         "licence": "https://creativecommons.org/licenses/by/4.0",
         "instrument": "co2-ch4-h2o picarro analyzer",
         "instrument_data": [
