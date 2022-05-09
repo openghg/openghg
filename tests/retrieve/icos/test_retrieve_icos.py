@@ -16,6 +16,15 @@ example_metadata = {
 }
 
 
+def test_wmo_retrieve():
+    from openghg.retrieve.icos import retrieve
+
+    site = "WAO"  # Weybourne
+    species = "ch4"
+
+    out = retrieve(site, species)
+
+
 def test_icos_retrieve_no_local(mocker):
     pid_csv = get_icos_test_file(filename="test_pids_icos.csv.gz")
     pid_df = pd.read_csv(pid_csv)
