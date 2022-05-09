@@ -11,6 +11,7 @@ def retrieve_icos(
     sampling_height: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
+    data_level: int = 2,
     force_retrieval: bool = False,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -39,4 +40,5 @@ def retrieve_icos(
             start_date=start_date,
             end_date=end_date,
             force_retrieval=force_retrieval,
+            data_level=data_level,
         )

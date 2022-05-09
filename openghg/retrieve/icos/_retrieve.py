@@ -52,6 +52,7 @@ def retrieve(
         data_source="icoscp",
         start_date=start_date,
         end_date=end_date,
+        icos_data_level=data_level,
         skip_ranking=True,
     )
 
@@ -70,7 +71,9 @@ def retrieve(
         obs_data = []
         for data in standardised_data.values():
             measurement_data = data["data"]
-            metadata = to_lowercase(data["metadata"])
+            # These contain URLs that are case sensitive so skip lowercasing these
+            skip_keys = ["citation_string", "instrument_data", "dobj_pid"]
+            metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
     if isinstance(obs_data, list) and len(obs_data) == 1:
@@ -215,6 +218,7 @@ def _retrieve_remote(
         metadata["network"] = "ICOS"
         metadata["data_type"] = "timeseries"
         metadata["data_source"] = "icoscp"
+        metadata["icos_data_level"] = str(data_level)
 
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
@@ -284,7 +288,7 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
 
     metadata = {}
 
-    metadata["dobj_pid"] = _get_value(df=spec_data, col="dobj", index=0)
+    metadata["dobj_pid"] = _get_value(df=spec_data, col="dobj", index=0, lower=False)
     metadata["species"] = _get_value(df=measurement_data, col="colName", index=4)
 
     metadata["meas_type"] = _get_value(df=measurement_data, col="valueType", index=4)
@@ -312,7 +316,7 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     return metadata
 
 
-def _get_value(df: DataFrame, col: str, index: int) -> str:
+def _get_value(df: DataFrame, col: str, index: int, lower=True) -> str:
     """Wrap the retrieval of data from the metadata DataFrame in a try/except
 
     Args:
@@ -323,6 +327,8 @@ def _get_value(df: DataFrame, col: str, index: int) -> str:
         str: Metadata value
     """
     try:
-        return str(df[col][index]).lower()
+        val = str(df[col][index])
     except (KeyError, TypeError):
         return "NA"
+    else:
+        return val.lower() if lower else val
