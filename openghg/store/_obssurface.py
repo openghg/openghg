@@ -281,6 +281,7 @@ class ObsSurface(BaseStore):
 
         # Record the Datasources we've created / appended to
         obs.add_datasources(uuids=datasource_uuids, metadata=metadata, metastore=metastore)
+        obs.store_hashes(hashes=hashes)
 
         metastore.close()
         obs.save()
@@ -315,6 +316,19 @@ class ObsSurface(BaseStore):
             )
 
         return lookup_results
+
+    def store_hashes(self, hashes: Dict) -> None:
+        """Store hashes of data retrieved from a remote data source such as
+        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
+        seen before and adds the new.
+
+        Args:
+            hashes: Dictionary of hashes provided by the hash_retrieved_data function
+        Returns:
+            None
+        """
+        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
+        self._retrieved_hashes.update(new)
 
     def add_datasources(self, uuids: Dict, metadata: Dict, metastore: TinyDB) -> None:
         """Add the passed list of Datasources to the current list
