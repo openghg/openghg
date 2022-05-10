@@ -1352,7 +1352,7 @@ class ModelScenario:
             for var in expected_vars:
                 if var not in scenario.data_vars:
                     raise ValueError(
-                        f"Unable to calculate baseline for short-lived species {species} without species specific footprint."
+                        f"Unable to calculate baseline for short-lived species {self.species} without species specific footprint."
                     )
 
             # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray

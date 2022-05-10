@@ -112,3 +112,16 @@ def test_datasource_add_lookup():
 
         assert lookup["co2_gppcardamom_europe_2012"] == fake_datasource["co2_gppcardamom_europe_2012"]["uuid"]
 
+
+def test_flux_schema():
+    """Check expected data variables are being included for default Emissions schema"""
+    data_schema = Emissions.schema()
+
+    data_vars = data_schema.data_vars
+    assert "flux" in data_vars
+
+    assert "time" in data_vars["flux"]
+    assert "lat" in data_vars["flux"]
+    assert "lon" in data_vars["flux"]
+
+    # TODO: Could also add checks for dims and dtypes?

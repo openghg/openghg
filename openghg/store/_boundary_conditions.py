@@ -126,9 +126,7 @@ class BoundaryConditions(BaseStore):
             date = start_date.astype("datetime64[s]").astype(str)
 
         # Checking against expected format for boundary conditions
-        # TODO: Apply this to Emissions, Footprints as well
-        bc_data_schema = BoundaryConditions.schema()
-        bc_data_schema.validate_data(bc_data)
+        BoundaryConditions.validate_data(bc_data)
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)
@@ -200,6 +198,12 @@ class BoundaryConditions(BaseStore):
                                  dims=dims)
 
         return data_format
+
+    @staticmethod
+    def validate_data(data):
+        """Validate data against schema"""
+        data_schema = BoundaryConditions.schema()
+        data_schema.validate_data(data)
 
     def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to

@@ -111,8 +111,7 @@ class Emissions(BaseStore):
         )
 
         # Checking against expected format for Emissions
-        em_data_schema = Emissions.schema()
-        em_data_schema.validate_data(em_data)
+        Emissions.validate_data(em_data)
 
         if date is None:
             # Check for how granular we should make the date label
@@ -173,7 +172,6 @@ class Emissions(BaseStore):
                     }
         dtypes = {"lat": np.floating,
                   "lon": np.floating,
-                  "height": np.floating,
                   "time": np.datetime64,
                   "flux": np.floating,
                  }
@@ -183,6 +181,12 @@ class Emissions(BaseStore):
                                  dims=dims)
 
         return data_format
+
+    @staticmethod
+    def validate_data(data):
+        """Validate data against schema"""
+        data_schema = Emissions.schema()
+        data_schema.validate_data(data)    
 
     def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
