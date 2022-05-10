@@ -1,6 +1,6 @@
 
 from dataclasses import dataclass
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Tuple
 from xarray import Dataset
 import numpy as np
 
@@ -19,7 +19,7 @@ class DataSchema:
     """
     # TODO : Change or add additional checks as needed
 
-    data_vars: Optional[Dict[str, tuple]] = None
+    data_vars: Optional[Dict[str, Tuple[str, ...]]] = None
     dtypes: Optional[Dict[str, type]] = None
     dims: Optional[List[str]] = None
 
@@ -27,12 +27,19 @@ class DataSchema:
         """
         Check data variables and their dimensions of data against the schema. 
         """
+        expected_data_vars = self.data_vars
+        if expected_data_vars is None:
+            print("No data variables to check against schema")
+            return None
+        else:
+            expected_dv = expected_data_vars.keys()
+
         data_vars = data.data_vars
-        expected_dv = self.data_vars.keys()
+
         for edv in expected_dv:
             if edv in data_vars:
                 dims = data[edv].dims
-                expected_dv_dims = self.data_vars[edv]
+                expected_dv_dims = expected_data_vars[edv]
                 for edim in expected_dv_dims:
                     if edim not in dims:
                         raise ValueError(f"Missing dimension for data variable: {edv}, {edim}. Current dims: {dims}")
@@ -43,8 +50,13 @@ class DataSchema:
         """
         Check dimensions of data against the the schema.
         """
-        dims = data.dims
         expected_dims = self.dims
+        if expected_dims is None:
+            print("No dims to check against schema")
+            return None
+
+        dims = data.dims
+        
         for edim in expected_dims:
             if edim not in dims:
                 raise ValueError(f"Expected dimension: {edim} not present in standardised data")
@@ -54,6 +66,10 @@ class DataSchema:
         Check dtypes of variables and coordinates of data against the schema.
         """
         expected_data_types = self.dtypes
+        if expected_data_types is None:
+            print("No data types to check against schema")
+            return None
+
         for variable, edata_type in expected_data_types.items():
             if variable in data:
                 dtype = data[variable].dtype

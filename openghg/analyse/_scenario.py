@@ -1313,14 +1313,15 @@ class ModelScenario:
 
         bc_data = bc_data.reindex_like(scenario, "ffill")
 
-        lifetime = species_lifetime(self.species)
-        check_monthly = check_lifetime_monthly(lifetime)
+        lifetime_value = species_lifetime(self.species)
+        check_monthly = check_lifetime_monthly(lifetime_value)
 
         if check_monthly:
-            lifetime_monthly = lifetime
-            lifetime = None
+            lifetime_monthly = cast(Optional[List[str]], lifetime_value)
+            lifetime: Optional[str] = None
         else:
             lifetime_monthly = None
+            lifetime = cast(Optional[str], lifetime_value)
 
         if lifetime is not None:
             short_lifetime = True

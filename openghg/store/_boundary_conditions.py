@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union, Tuple
 from xarray import Dataset
 from tinydb import TinyDB
 import numpy as np
@@ -178,11 +178,11 @@ class BoundaryConditions(BaseStore):
         Define schema for boundary conditions Dataset.
         """
         dims = ["lat", "lon", "time", "height"]
-        data_vars = {"vmr_n": ("time", "height", "lon"),
-                     "vmr_e": ("time", "height", "lat"),
-                     "vmr_s": ("time", "height", "lon"),
-                     "vmr_w": ("time", "height", "lat")
-                     }
+        data_vars: Dict[str, Tuple[str, ...]] \
+            = {"vmr_n": ("time", "height", "lon"),
+               "vmr_e": ("time", "height", "lat"),
+               "vmr_s": ("time", "height", "lon"),
+               "vmr_w": ("time", "height", "lat")}
         dtypes = {"lat": np.floating,
                   "lon": np.floating,
                   "height": np.floating,
@@ -199,7 +199,7 @@ class BoundaryConditions(BaseStore):
         return data_format
 
     @staticmethod
-    def validate_data(data):
+    def validate_data(data: Dataset) -> None:
         """Validate data against schema"""
         data_schema = BoundaryConditions.schema()
         data_schema.validate_data(data)

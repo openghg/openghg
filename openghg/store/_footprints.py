@@ -1,5 +1,5 @@
 from tinydb import TinyDB
-from typing import DefaultDict, Dict, List, Optional, Union, NoReturn
+from typing import DefaultDict, Dict, List, Optional, Union, NoReturn, Tuple
 from pathlib import Path
 from pandas import Timestamp
 from xarray import Dataset
@@ -239,7 +239,7 @@ class Footprints(BaseStore):
         """
 
         # Names of data variables and associated dimensions (as a tuple)
-        data_vars = {}
+        data_vars: Dict[str, Tuple[str, ...]] = {}
         # Internal data types of data variables and coordinates
         dtypes = {"lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
                   "lon": np.floating,
@@ -318,13 +318,12 @@ class Footprints(BaseStore):
                       particle_locations: bool = True,
                       high_spatial_res: bool = False,
                       high_time_res: bool = False,
-                      short_lifetime: bool = False,):
+                      short_lifetime: bool = False) -> None:
         """Validate data against schema - see Footprints.schema() method for details"""
         data_schema = Footprints.schema(particle_locations=particle_locations,
                                         high_spatial_res=high_spatial_res,
                                         high_time_res=high_time_res,
-                                        short_lifetime=short_lifetime,
-                                        )
+                                        short_lifetime=short_lifetime)
         data_schema.validate_data(data)
 
     def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
