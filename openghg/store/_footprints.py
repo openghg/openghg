@@ -99,7 +99,7 @@ class Footprints(BaseStore):
                 high_time_res = True
         
         if short_lifetime and not species:
-            raise ValueError("For species with short lifetimes, species input must be included")
+            raise ValueError("When indicating footprint is for short lived species, 'species' input must be included")
         elif not short_lifetime and species:
             lifetime = species_lifetime(species)
             if lifetime is not None:
@@ -107,20 +107,13 @@ class Footprints(BaseStore):
                 print("Updating short_lifetime to True since species has an associated lifetime")
                 short_lifetime = True
 
-        # TODO: Maybe update to add to schema instead.
-        if high_spatial_res == True or high_time_res == True:
-            footprint_label = False
-        else:
-            footprint_label = True
-
         # Checking against expected format for footprints 
         # Based on configuration (some user defined, some inferred)
-        fp_data_schema = Footprints.schema(footprint=footprint_label,
-                                           high_spatial_res=high_spatial_res,
-                                           high_time_res=high_time_res,
-                                           short_lifetime=short_lifetime,
-                                           )
-        fp_data_schema.validate_data(fp_data)
+        Footprints.validate_data(fp_data,
+                                 high_spatial_res=high_spatial_res,
+                                 high_time_res=high_time_res,
+                                 short_lifetime=short_lifetime,
+                                 )
 
         # Need to read the metadata from the footprints and then store it
         # Do we need to chunk the footprints / will a Datasource store it correctly?
@@ -217,14 +210,32 @@ class Footprints(BaseStore):
         return datasource_uuids
 
     @staticmethod
-    def schema(footprint: bool = True,
-               particle_locations: bool = True,
+    def schema(particle_locations: bool = True,
                high_spatial_res: bool = False,
                high_time_res: bool = False,
-               short_lifetime: bool = False
+               short_lifetime: bool = False,
                ) -> DataSchema:
         """
         Define format for footprint Dataset.
+
+        The returned schema depends on what the footprint represents,
+        indicated using the keywords.
+        By default, this will include "fp" variable but this will be superceded
+        if high_spatial_res or high_time_res are specified.
+
+        Args:
+            particle_locations: Include 4-directional particle location variables:
+                - "particle_location_[nesw]"
+                and include associated additional dimensions ("height") 
+            high_spatial_res : Set footprint variables include high and low resolution options:
+                - "fp_low"
+                - "fp_high"
+                and include associated additional dimensions ("lat_high", "lon_high").
+            high_time_res : Set footprint variable to be high time resolution
+                - "fp_HiTRes"
+                and include associated dimensions ("H_back").
+            short_lifetime: Include additional particle age parameters for short lived species:
+                - "mean_age_particles_[nesw]"
         """
         
         # Names of data variables and associated dimensions (as a tuple)
@@ -236,11 +247,31 @@ class Footprints(BaseStore):
                  }
         # Summary of dimensions (as a list)
         dims = ["time", "lat", "lon"]
-        
-        # Includes standard footprint variable
-        if footprint:
+
+        if not high_time_res and not high_spatial_res:
+            # Includes standard footprint variable
             data_vars["fp"] = ("time", "lat", "lon")
             dtypes["fp"] = np.floating
+
+        if high_spatial_res:
+            # Include options for high spatial resolution footprint
+            # This includes footprint data on multiple resolutions
+
+            data_vars["fp_low"] = ("time", "lat", "lon")
+            data_vars["fp_high"] = ("time", "lat_high", "lon_high")
+
+            dtypes["fp_low"] = np.floating
+            dtypes["fp_high"] = np.floating
+
+            dims.extend(["lat_high", "lon_high"])
+
+        if high_time_res:
+            # Include options for high time resolution footprint (usually co2)
+            # This includes a footprint data with an additional hourly back dimension
+            data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
+            dtypes["fp_HiTRes"] = np.floating
+            dtypes["H_back"] = np.integer
+            dims.append("H_back")
 
         # Includes particle location directions - one for each regional boundary
         if particle_locations:
@@ -260,25 +291,6 @@ class Footprints(BaseStore):
         # TODO: Could also add check for meteorological + other data
         # "pressure", "wind_speed", "wind_direction", "PBLH"
         # "release_lon", "release_lat"
-
-        # Include options for high spatial resolution footprint
-        # This includes footprint data on multiple resolutions
-        if high_spatial_res:
-            data_vars["fp_low"] = ("time", "lat", "lon")
-            data_vars["fp_high"] = ("time", "lat_high", "lon_high")
-
-            dtypes["fp_low"] = np.floating
-            dtypes["fp_high"] = np.floating
-
-            dims.extend(["lat_high", "lon_high"])
-
-        # Include options for high time resolution footprint (usually co2)
-        # This includes a footprint data with an additional hourly back dimension
-        if high_time_res:
-            data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
-            dtypes["fp_HiTRes"] = np.floating
-            dtypes["H_back"] = np.integer
-            dims.append("H_back")
 
         # Include options for short lifetime footprints (short-lived species)
         # This includes additional particle ages (allow calculation of decay based on particle lifetimes)
@@ -301,6 +313,20 @@ class Footprints(BaseStore):
                                  dims=dims)
 
         return data_format
+
+    @staticmethod
+    def validate_data(data: Dataset, 
+                      particle_locations: bool = True,
+                      high_spatial_res: bool = False,
+                      high_time_res: bool = False,
+                      short_lifetime: bool = False,):
+        """Validate data against schema - see Footprints.schema() method for details"""
+        data_schema = Footprints.schema(particle_locations=particle_locations,
+                                        high_spatial_res=high_spatial_res,
+                                        high_time_res=high_time_res,
+                                        short_lifetime=short_lifetime,
+                                        )
+        data_schema.validate_data(data)
 
     def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to
