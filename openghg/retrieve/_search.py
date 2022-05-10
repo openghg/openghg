@@ -150,7 +150,7 @@ def search(**kwargs):  # type: ignore
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
     # Assume we want timeseries data
-    obj: Union[ObsSurface, Footprints, Emissions, EulerianModel] = ObsSurface.load()
+    obj: Union[ObsSurface, Footprints, Emissions, BoundaryConditions, EulerianModel] = ObsSurface.load()
 
     if data_type == "footprints":
         obj = Footprints.load()
