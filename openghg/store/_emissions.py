@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union, Any
+from typing import DefaultDict, Dict, Optional, Union
 from xarray import Dataset
 import numpy as np
 from tinydb import TinyDB
@@ -168,13 +168,11 @@ class Emissions(BaseStore):
         Define format for emissions Dataset.
         """
         dims = ["time", "lat", "lon"]
-        data_vars = {"flux": ("time", "lat", "lon"),
-                    }
+        data_vars = {"flux": ("time", "lat", "lon")}
         dtypes = {"lat": np.floating,
                   "lon": np.floating,
                   "time": np.datetime64,
-                  "flux": np.floating,
-                 }
+                  "flux": np.floating}
 
         data_format = DataSchema(data_vars=data_vars,
                                  dtypes=dtypes,

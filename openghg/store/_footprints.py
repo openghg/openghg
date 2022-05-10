@@ -1,5 +1,5 @@
 from tinydb import TinyDB
-from typing import DefaultDict, Dict, List, Optional, Union, NoReturn, Any
+from typing import DefaultDict, Dict, List, Optional, Union, NoReturn
 from pathlib import Path
 from pandas import Timestamp
 from xarray import Dataset
@@ -97,7 +97,7 @@ class Footprints(BaseStore):
             if not high_time_res:
                 print("Updating high_time_res to True for co2 data")
                 high_time_res = True
-        
+
         if short_lifetime and not species:
             raise ValueError("When indicating footprint is for short lived species, 'species' input must be included")
         elif not short_lifetime and species:
@@ -237,14 +237,13 @@ class Footprints(BaseStore):
             short_lifetime: Include additional particle age parameters for short lived species:
                 - "mean_age_particles_[nesw]"
         """
-        
+
         # Names of data variables and associated dimensions (as a tuple)
         data_vars = {}
         # Internal data types of data variables and coordinates
         dtypes = {"lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
                   "lon": np.floating,
-                  "time": np.datetime64,
-                 }
+                  "time": np.datetime64}
         # Summary of dimensions (as a list)
         dims = ["time", "lat", "lon"]
 

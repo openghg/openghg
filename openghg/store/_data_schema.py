@@ -1,11 +1,12 @@
 
 from dataclasses import dataclass
-from typing import Optional, Union, Any, Dict, List
+from typing import Optional, Dict, List
 from xarray import Dataset
 import numpy as np
 
 __all__ = ["DataSchema"]
-   
+
+
 @dataclass
 class DataSchema:
     """

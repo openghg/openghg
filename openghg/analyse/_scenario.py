@@ -1315,7 +1315,7 @@ class ModelScenario:
 
         lifetime = species_lifetime(self.species)
         check_monthly = check_lifetime_monthly(lifetime)
-        
+
         if check_monthly:
             lifetime_monthly = lifetime
             lifetime = None
