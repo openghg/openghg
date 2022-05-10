@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.ga00702a.dirty documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.gcfc6f5c.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -165,13 +165,11 @@
                 
   <h1>Source code for openghg.store._footprints</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">TinyDB</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">NoReturn</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Footprints&quot;</span><span class="p">]</span>
@@ -199,7 +197,6 @@
         <span class="n">retrieve_met</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="c1"># model_params: Optional[Dict] = None,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
@@ -220,10 +217,9 @@
 <span class="sd">            retrieve_met: Whether to also download meterological data for this footprints area</span>
 <span class="sd">            high_spatial_res : Indicate footprints include both a low and high spatial resolution.</span>
 <span class="sd">            high_time_res: Indicate footprints are high time resolution (include H_back dimension)</span>
-<span class="sd">                           Note this will be set to True automatically if species=&quot;co2&quot; (Carbon Dioxide).</span>
-<span class="sd">            short_lifetime: Indicate footprint is for a short-lived species. Needs species input.</span>
-<span class="sd">                            Note this will be set to True if species has an associated lifetime.</span>
+<span class="sd">                           Note this will be set to True automatically for Carbon Dioxide data.</span>
 <span class="sd">            overwrite: Overwrite any currently stored data</span>
+<span class="sd">            high_res: ***</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: UUIDs of Datasources data has been assigned to</span>
@@ -234,7 +230,6 @@
             <span class="n">hash_file</span><span class="p">,</span>
             <span class="n">timestamp_now</span><span class="p">,</span>
             <span class="n">clean_string</span><span class="p">,</span>
-            <span class="n">species_lifetime</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">infer_date_range</span><span class="p">,</span> <span class="n">load_metastore</span>
 
@@ -257,29 +252,6 @@
             <span class="p">)</span>
 
         <span class="n">fp_data</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
-            <span class="c1"># Expect co2 data to have high time resolution</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">high_time_res</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updating high_time_res to True for co2 data&quot;</span><span class="p">)</span>
-                <span class="n">high_time_res</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="k">if</span> <span class="n">short_lifetime</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">species</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;When indicating footprint is for short lived species, &#39;species&#39; input must be included&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="n">short_lifetime</span> <span class="ow">and</span> <span class="n">species</span><span class="p">:</span>
-            <span class="n">lifetime</span> <span class="o">=</span> <span class="n">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">lifetime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># TODO: May want to add a check on length of lifetime here</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updating short_lifetime to True since species has an associated lifetime&quot;</span><span class="p">)</span>
-                <span class="n">short_lifetime</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="c1"># Checking against expected format for footprints </span>
-        <span class="c1"># Based on configuration (some user defined, some inferred)</span>
-        <span class="n">Footprints</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">fp_data</span><span class="p">,</span>
-                                 <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
-                                 <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
-                                 <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
-                                 <span class="p">)</span>
 
         <span class="c1"># Need to read the metadata from the footprints and then store it</span>
         <span class="c1"># Do we need to chunk the footprints / will a Datasource store it correctly?</span>
@@ -315,6 +287,12 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
 
+        <span class="c1"># TODO: Pull out links to underlying data format into a separate format function</span>
+        <span class="c1">#  - high_spatial_res - data vars - &quot;fp_low&quot;, &quot;fp_high&quot;, coords - &quot;lat_high&quot;, &quot;lon_high&quot;</span>
+        <span class="c1">#  - high_time_res - data vars - &quot;fp_HiTRes&quot;, coords - &quot;H_back&quot;</span>
+
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;spatial_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_spatial_resolution&quot;</span>
+
         <span class="k">if</span> <span class="n">high_spatial_res</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lon_high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
@@ -325,13 +303,18 @@
                 <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;spatial_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;high_spatial_resolution&quot;</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Expected high spatial resolution. Unable to find lat_high or lon_high data.&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;spatial_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_spatial_resolution&quot;</span>  
+
+        <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
+            <span class="c1"># Expect co2 data to have high time resolution</span>
+            <span class="n">high_time_res</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_time_resolution&quot;</span>
 
         <span class="k">if</span> <span class="n">high_time_res</span><span class="p">:</span>
-            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;high_time_resolution&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard_time_resolution&quot;</span>
+            <span class="k">if</span> <span class="s2">&quot;fp_HiTRes&quot;</span> <span class="ow">in</span> <span class="n">fp_data</span><span class="p">:</span>
+                <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;high_time_resolution&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Expected high time resolution. Unable to find fp_HiTRes data.&quot;</span><span class="p">)</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;heights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">fp_data</span><span class="o">.</span><span class="n">height</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
         <span class="c1"># Do we also need to save all the variables we have available in this footprints?</span>
@@ -374,123 +357,6 @@
         <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
-
-<div class="viewcode-block" id="Footprints.schema"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.schema">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span><span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-               <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-               <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-               <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-               <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Define format for footprint Dataset.</span>
-
-<span class="sd">        The returned schema depends on what the footprint represents,</span>
-<span class="sd">        indicated using the keywords.</span>
-<span class="sd">        By default, this will include &quot;fp&quot; variable but this will be superceded</span>
-<span class="sd">        if high_spatial_res or high_time_res are specified.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            particle_locations: Include 4-directional particle location variables:</span>
-<span class="sd">                - &quot;particle_location_[nesw]&quot;</span>
-<span class="sd">                and include associated additional dimensions (&quot;height&quot;) </span>
-<span class="sd">            high_spatial_res : Set footprint variables include high and low resolution options:</span>
-<span class="sd">                - &quot;fp_low&quot;</span>
-<span class="sd">                - &quot;fp_high&quot;</span>
-<span class="sd">                and include associated additional dimensions (&quot;lat_high&quot;, &quot;lon_high&quot;).</span>
-<span class="sd">            high_time_res : Set footprint variable to be high time resolution</span>
-<span class="sd">                - &quot;fp_HiTRes&quot;</span>
-<span class="sd">                and include associated dimensions (&quot;H_back&quot;).</span>
-<span class="sd">            short_lifetime: Include additional particle age parameters for short lived species:</span>
-<span class="sd">                - &quot;mean_age_particles_[nesw]&quot;</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Names of data variables and associated dimensions (as a tuple)</span>
-        <span class="n">data_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># Internal data types of data variables and coordinates</span>
-        <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>  <span class="c1"># Covers np.float16, np.float32, np.float64 types</span>
-                  <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>
-                  <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">}</span>
-        <span class="c1"># Summary of dimensions (as a list)</span>
-        <span class="n">dims</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">high_time_res</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">high_spatial_res</span><span class="p">:</span>
-            <span class="c1"># Includes standard footprint variable</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;fp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">)</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;fp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-
-        <span class="k">if</span> <span class="n">high_spatial_res</span><span class="p">:</span>
-            <span class="c1"># Include options for high spatial resolution footprint</span>
-            <span class="c1"># This includes footprint data on multiple resolutions</span>
-
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;fp_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">)</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;fp_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat_high&quot;</span><span class="p">,</span> <span class="s2">&quot;lon_high&quot;</span><span class="p">)</span>
-
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;fp_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;fp_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-
-            <span class="n">dims</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;lat_high&quot;</span><span class="p">,</span> <span class="s2">&quot;lon_high&quot;</span><span class="p">])</span>
-
-        <span class="k">if</span> <span class="n">high_time_res</span><span class="p">:</span>
-            <span class="c1"># Include options for high time resolution footprint (usually co2)</span>
-            <span class="c1"># This includes a footprint data with an additional hourly back dimension</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;fp_HiTRes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;fp_HiTRes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;H_back&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span>
-            <span class="n">dims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;H_back&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Includes particle location directions - one for each regional boundary</span>
-        <span class="k">if</span> <span class="n">particle_locations</span><span class="p">:</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;particle_locations_n&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">)</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;particle_locations_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">)</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;particle_locations_s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">)</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;particle_locations_w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">)</span>
-
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;particle_locations_n&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;particle_locations_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;particle_locations_s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;particle_locations_w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-
-            <span class="n">dims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">)</span>
-
-        <span class="c1"># TODO: Could also add check for meteorological + other data</span>
-        <span class="c1"># &quot;pressure&quot;, &quot;wind_speed&quot;, &quot;wind_direction&quot;, &quot;PBLH&quot;</span>
-        <span class="c1"># &quot;release_lon&quot;, &quot;release_lat&quot;</span>
-
-        <span class="c1"># Include options for short lifetime footprints (short-lived species)</span>
-        <span class="c1"># This includes additional particle ages (allow calculation of decay based on particle lifetimes)</span>
-        <span class="k">if</span> <span class="n">short_lifetime</span><span class="p">:</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_n&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">)</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">)</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">)</span>
-            <span class="n">data_vars</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">)</span>
-
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_n&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-            <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
-
-            <span class="k">if</span> <span class="s2">&quot;height&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">:</span>
-                <span class="n">dims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">)</span>
-
-        <span class="n">data_format</span> <span class="o">=</span> <span class="n">DataSchema</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span>
-                                 <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">,</span>
-                                 <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">data_format</span></div>
-
-<div class="viewcode-block" id="Footprints.validate_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.validate_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> 
-                      <span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                      <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                      <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                      <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Validate data against schema - see Footprints.schema() method for details&quot;&quot;&quot;</span>
-        <span class="n">data_schema</span> <span class="o">=</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">particle_locations</span><span class="o">=</span><span class="n">particle_locations</span><span class="p">,</span>
-                                        <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
-                                        <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
-                                        <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">)</span>
-        <span class="n">data_schema</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Footprints.datasource_lookup"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.datasource_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">datasource_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metastore</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Find the Datasource we should assign the data to</span>
