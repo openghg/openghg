@@ -34,7 +34,7 @@ def test_process_footprint():
     model = "test_model"
 
     results = process_footprint(
-        files=datapath, site=site, model=model, network=network, height=height, domain=domain
+        files=datapath, site=site, model=model, network=network, height=height, domain=domain, high_spatial_res=True,
     )
 
     assert "error" not in results

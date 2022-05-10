@@ -1295,7 +1295,7 @@ class ModelScenario:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
-        from openghg.util import load_json, time_offset
+        from openghg.util import time_offset, species_lifetime, check_lifetime_monthly
 
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)
@@ -1313,27 +1313,14 @@ class ModelScenario:
 
         bc_data = bc_data.reindex_like(scenario, "ffill")
 
-        species_info = load_json(filename="acrg_species_info.json")
-        species = self.species
-
-        try:
-            species_data = species_info[species]
-        except KeyError:
-            species_upper = species.upper()
-            species_data = species_info[species_upper]
-
-        # Check for lifetime details
-        lifetime: Optional[str] = species_data.get("lifetime", None)
-        lifetime_monthly: Optional[list] = species_data.get("lifetime_monthly", None)
-
-        if isinstance(lifetime, list) and len(lifetime) == 12:
-            if len(lifetime) == 12:
-                lifetime_monthly = lifetime
-                lifetime = None
-            else:
-                raise ValueError(
-                    f"Did not recognise input for lifetime for {species_upper} from 'acrg_species_info.json'"
-                )
+        lifetime = species_lifetime(self.species)
+        check_monthly = check_lifetime_monthly(lifetime)
+        
+        if check_monthly:
+            lifetime_monthly = lifetime
+            lifetime = None
+        else:
+            lifetime_monthly = None
 
         if lifetime is not None:
             short_lifetime = True
