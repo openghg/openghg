@@ -311,12 +311,12 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     site_specific = site_metadata[site.upper()]
     metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
     metadata["data_owner_email"] = site_specific["email"]
-    metadata["station_height_masl"] = site_specific["eas"]
+    metadata["station_height_masl"] = f"{int(float(site_specific['eas']))}m"
 
     return metadata
 
 
-def _get_value(df: DataFrame, col: str, index: int, lower=True) -> str:
+def _get_value(df: DataFrame, col: str, index: int, lower: bool = True) -> str:
     """Wrap the retrieval of data from the metadata DataFrame in a try/except
 
     Args:

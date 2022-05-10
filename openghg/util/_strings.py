@@ -43,27 +43,27 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
 
 
 @overload
-def to_lowercase(d: Dict) -> Dict:
+def to_lowercase(d: Dict, skip_keys: Optional[List] = None) -> Dict:
     ...
 
 
 @overload
-def to_lowercase(d: List) -> List:
+def to_lowercase(d: List, skip_keys: Optional[List] = None) -> List:
     ...
 
 
 @overload
-def to_lowercase(d: Tuple) -> Tuple:
+def to_lowercase(d: Tuple, skip_keys: Optional[List] = None) -> Tuple:
     ...
 
 
 @overload
-def to_lowercase(d: Set) -> Set:
+def to_lowercase(d: Set, skip_keys: Optional[List] = None) -> Set:
     ...
 
 
 @overload
-def to_lowercase(d: str) -> str:
+def to_lowercase(d: str, skip_keys: Optional[List] = None) -> str:
     ...
 
 
@@ -83,7 +83,7 @@ def to_lowercase(
         dict: Dictionary of lower case keys and values
     """
     if skip_keys is None:
-        skip_keys = {}
+        skip_keys = []
 
     if isinstance(d, dict):
         lowercased = {k.lower(): to_lowercase(v) for k, v in d.items() if k not in skip_keys}

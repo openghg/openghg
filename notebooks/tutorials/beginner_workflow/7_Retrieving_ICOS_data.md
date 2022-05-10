@@ -28,11 +28,11 @@ You can find the stations available in ICOS using [their map interface](https://
 
 +++
 
-!["Zoomed in screenshot of ICOS site map"](images/icos_map.jpg "Title")
+!["Zoomed in screenshot of ICOS site map"](images/icos_map.jpg "ICOS site map")
 
 +++
 
-You can also use the [search page](https://data.icos-cp.eu/portal/#%7B%22filterCategories%22:%7B%22project%22:%5B%22icos%22%5D,%22level%22:%5B1,2%5D,%22stationclass%22:%5B%22ICOS%22%5D%7D%7D) to find available data at a given site
+You can also use the [search page](https://data.icos-cp.eu/portal/#%7B%22filterCategories%22:%7B%22project%22:%5B%22icos%22%5D,%22level%22:%5B1,2%5D,%22stationclass%22:%5B%22ICOS%22%5D%7D%7D) to find available data at a given site.
 
 +++
 
@@ -42,9 +42,6 @@ First we'll import `retrieve_icos` from the `client` submodule, then we'll retri
 
 ```{code-cell} ipython3
 from openghg.client import retrieve_icos
-
-%load_ext autoreload
-%autoreload 2
 ```
 
 ```{code-cell} ipython3
@@ -116,7 +113,9 @@ You can see that we've now got data from 2021-07-01 - 2022-04-24. The ability to
 
 > **_NOTE:_**  level 1 data may not have been quality checked.
 
-+++
+```{code-cell} ipython3
+wao_data_level1.plot_timeseries(title="TOH - Level 1 data")
+```
 
 ## Forcing retrieval
 
@@ -128,10 +127,4 @@ If you retrieve data using `retrieve_icos` and notice that it does not return th
 new_data = retrieve_icos(site="WAO", species="CH4", data_level=1, force_retrieval=True)
 ```
 
-```{code-cell} ipython3
-new_data
-```
-
-```{code-cell} ipython3
-
-```
+Here you may notice we get a message telling us there is no new data to process, if you force a retrieval and there is no newer data you'll see this message.

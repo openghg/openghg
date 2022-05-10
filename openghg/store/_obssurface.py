@@ -260,13 +260,13 @@ class ObsSurface(BaseStore):
         seen_before = {next(iter(v)) for k, v in hashes.items() if k in obs._retrieved_hashes}
 
         if len(seen_before) == len(data):
-            print("There is no new data to process.")
+            print("Note: There is no new data to process.")
             return None
 
         keys_to_process = set(data.keys())
         if seen_before:
             # TODO - add this to log
-            print(f"We've seen {seen_before} before. Processing new data only.")
+            print(f"Note: We've seen {seen_before} before. Processing new data only.")
             keys_to_process -= seen_before
 
         to_process = {k: v for k, v in data.items() if k in keys_to_process}
