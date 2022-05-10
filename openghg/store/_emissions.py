@@ -164,7 +164,7 @@ class Emissions(BaseStore):
         return datasource_uuids
 
     @staticmethod
-    def schema() -> Dict[str, Any]:
+    def schema() -> DataSchema:
         """
         Define format for emissions Dataset.
         """

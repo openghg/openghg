@@ -107,6 +107,7 @@ class Footprints(BaseStore):
                 print("Updating short_lifetime to True since species has an associated lifetime")
                 short_lifetime = True
 
+        # TODO: Maybe update to add to schema instead.
         if high_spatial_res == True or high_time_res == True:
             footprint_label = False
         else:
@@ -221,7 +222,7 @@ class Footprints(BaseStore):
                high_spatial_res: bool = False,
                high_time_res: bool = False,
                short_lifetime: bool = False
-               ) -> Dict[str, Any]:
+               ) -> DataSchema:
         """
         Define format for footprint Dataset.
         """
