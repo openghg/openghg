@@ -409,15 +409,12 @@ def get_footprint(
     """
     from openghg.store import recombine_datasets
     from openghg.retrieve import search
-<<<<<<< HEAD
-=======
     from openghg.dataobjects import FootprintData
     from openghg.util import clean_string
 
     # Find the correct synonym for the passed species
     if species is not None:
         species = clean_string(_synonyms(species))
->>>>>>> devel
 
     results = search(
         site=site,
