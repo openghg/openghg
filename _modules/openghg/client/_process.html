@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.client._process &#8212; OpenGHG 0+untagged.1.gb4e6aff.dirty documentation</title>
+    <title>openghg.client._process &#8212; OpenGHG 0+untagged.1.ga00702a.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -272,6 +272,7 @@
     <span class="n">retrieve_met</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Reads footprint data files and returns the UUIDs of the Datasources</span>
@@ -288,6 +289,8 @@
 <span class="sd">        high_spatial_res : Indicate footprints include both a low and high spatial resolution.</span>
 <span class="sd">        high_time_res: Indicate footprints are high time resolution (include H_back dimension)</span>
 <span class="sd">                        Note this will be set to True automatically for Carbon Dioxide data.</span>
+<span class="sd">        short_lifetime: Indicate footprint is for a short-lived species. Needs species input.</span>
+<span class="sd">                        Note this will be set to True if species has an associated lifetime.</span>
 <span class="sd">        overwrite: Overwrite any currently stored data</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: UUIDs of Datasources data has been assigned to</span>
@@ -311,6 +314,7 @@
             <span class="n">retrieve_met</span><span class="o">=</span><span class="n">retrieve_met</span><span class="p">,</span>
             <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
             <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
+            <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
             <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -425,6 +429,7 @@
     <span class="n">retrieve_met</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Reads footprints data files and returns the UUIDs of the Datasources</span>
@@ -441,6 +446,8 @@
 <span class="sd">        high_spatial_res : Indicate footprints include both a low and high spatial resolution.</span>
 <span class="sd">        high_time_res: Indicate footprints are high time resolution (include H_back dimension)</span>
 <span class="sd">                        Note this will be set to True automatically for Carbon Dioxide data.</span>
+<span class="sd">        short_lifetime: Indicate footprint is for a short-lived species. Needs species input.</span>
+<span class="sd">                        Note this will be set to True if species has an associated lifetime.        </span>
 <span class="sd">        overwrite: Overwrite any currently stored data</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of Datasource UUIDs data assigned to</span>
@@ -459,6 +466,7 @@
         <span class="n">retrieve_met</span><span class="o">=</span><span class="n">retrieve_met</span><span class="p">,</span>
         <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
         <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
+        <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
     <span class="p">)</span>
 
