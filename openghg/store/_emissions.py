@@ -1,8 +1,10 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union, Any
 from xarray import Dataset
+import numpy as np
 from tinydb import TinyDB
 
+from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 
 __all__ = ["Emissions"]
@@ -108,6 +110,10 @@ class Emissions(BaseStore):
             em_time, filepath=filepath, period=period, continuous=continuous
         )
 
+        # Checking against expected format for Emissions
+        em_data_schema = Emissions.schema()
+        em_data_schema.validate_data(em_data)
+
         if date is None:
             # Check for how granular we should make the date label
             if "year" in period_str:
@@ -156,6 +162,27 @@ class Emissions(BaseStore):
         metastore.close()
 
         return datasource_uuids
+
+    @staticmethod
+    def schema() -> Dict[str, Any]:
+        """
+        Define format for emissions Dataset.
+        """
+        dims = ["time", "lat", "lon"]
+        data_vars = {"flux": ("time", "lat", "lon"),
+                    }
+        dtypes = {"lat": np.floating,
+                  "lon": np.floating,
+                  "height": np.floating,
+                  "time": np.datetime64,
+                  "flux": np.floating,
+                 }
+
+        data_format = DataSchema(data_vars=data_vars,
+                                 dtypes=dtypes,
+                                 dims=dims)
+
+        return data_format
 
     def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource
