@@ -1,4 +1,3 @@
-
 class InvalidSiteError(Exception):
     """Raised if an invalid site is passed"""
 
