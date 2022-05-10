@@ -20,7 +20,7 @@ def species_lifetime(species: Union[str, None]) -> LifetimeType:
 
     Args:
         species : Species name e.g. "ch4" or "co2"
-    
+
     Returns:
         str / list / None : Extracted lifetime or None is no lifetime was present.
     """
@@ -30,8 +30,8 @@ def species_lifetime(species: Union[str, None]) -> LifetimeType:
         try:
             species_data = species_info[species]
         except KeyError:
-                species_upper = species.upper()
-                species_data = species_info[species_upper]
+            species_upper = species.upper()
+            species_data = species_info[species_upper]
     else:
         return None
 
@@ -56,7 +56,7 @@ def check_lifetime_monthly(lifetime: LifetimeType) -> bool:
 
     Args:
         lifetime : str or list representation of lifetime value
-    
+
     Returns:
         bool : True of lifetime matches criteria for monthly data, False otherwise
 

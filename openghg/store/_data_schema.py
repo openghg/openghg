@@ -56,7 +56,7 @@ class DataSchema:
             return None
 
         dims = data.dims
-        
+
         for edim in expected_dims:
             if edim not in dims:
                 raise ValueError(f"Expected dimension: {edim} not present in standardised data")
