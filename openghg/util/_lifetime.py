@@ -2,7 +2,13 @@ from typing import Optional, Union
 from openghg.util._file import load_json
 
 
+__all__ = ["species_lifetime", "check_lifetime_monthly"]
+
+
 LifetimeType = Optional[Union[float, int, list]]
+
+
+# TODO: Incorporate species synonyms?
 
 
 def species_lifetime(species: Union[str, None]) -> LifetimeType:
