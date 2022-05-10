@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
 
 from addict import Dict as aDict
@@ -27,8 +27,8 @@ class SearchResults:
 
     T = TypeVar("T", bound="SearchResults")
 
-    results: Dict
-    ranked_data: bool
+    results: Dict = field(default_factory=dict)
+    ranked_data: bool = False
     # Local or cloud service to be used
     cloud: bool = False
 

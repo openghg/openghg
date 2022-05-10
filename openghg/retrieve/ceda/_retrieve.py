@@ -1,5 +1,5 @@
 from openghg.dataobjects import ObsData
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 
 def retrieve_surface(
@@ -7,6 +7,8 @@ def retrieve_surface(
     species: Optional[str] = None,
     inlet: Optional[str] = None,
     url: Optional[str] = None,
+    force_retrieval: bool = False,
+    additional_metadata: Optional[Dict] = None,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve surface observations data from the CEDA archive. You can pass
     search terms and the object store will be searched. To retrieve data from th
@@ -20,27 +22,20 @@ def retrieve_surface(
         url: URL of data in CEDA archive
     Returns:
         ObsData or None: ObsData if data found / retrieved successfully.
-
     """
     import io
     import xarray as xr
     from openghg.util import download_data
     from openghg.store import ObsSurface
     from openghg.retrieve import search
-    from openghg.util import parse_url_filename, timestamp_now
+    from openghg.util import parse_url_filename, timestamp_now, verify_site
+    from openghg.types import InvalidSiteError
 
-    if url is None:
-        results = search(site=site, species=species, inlet=inlet, data_source="ceda_archive")
+    results = search(site=site, species=species, inlet=inlet, data_source="ceda_archive")
 
-        if results:
-            obs_data: Union[ObsData, List[ObsData]] = results.retrieve_all()
-            return obs_data
-        else:
-            print(
-                "No results found, please try with other search terms or pass the data "
-                + "URL from the CEDA website to retrieve this data"
-            )
-            return None
+    if results and not force_retrieval or url is None:
+        obs_data: Union[ObsData, List[ObsData]] = results.retrieve_all()
+        return obs_data
 
     filename = parse_url_filename(url=url)
     extension = filename.split(".")[-1].lower()
@@ -52,6 +47,7 @@ def retrieve_surface(
     binary_data = download_data(url=url)
 
     if binary_data is None:
+        print("Error: No data retrieved.")
         return None
 
     with io.BytesIO(binary_data) as buf:
@@ -71,21 +67,20 @@ def retrieve_surface(
     # information is in the metadata
     if not {"site", "inlet"} <= metadata.keys():
         try:
-            site_name = metadata["site_long_name"]
-        except KeyError:
-            print("Error: cannot read site from metadata")
+            site_name = metadata["station_long_name"]
+            site_code = verify_site(site=site_name)
+        except InvalidSiteError:
+            print("Error: cannot find site code")
+            return None
         else:
             # TODO - add site code lookup here
-            metadata["site"] = site_name
+            metadata["site"] = site_code
 
         try:
-            # Here we need to do a lookup to get the site code
-            _inlet = str(int(metadata["inlet_height_magl"])) + "m"
+            metadata["inlet"] = f"{int(metadata['inlet_height_magl'])}m"
         except KeyError:
             print("Error: cannot read inlet from metadata.")
             return None
-        else:
-            metadata["inlet"] = _inlet
 
     to_store = {key: {"data": dataset, "metadata": metadata}}
 

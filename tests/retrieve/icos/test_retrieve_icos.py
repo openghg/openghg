@@ -3,7 +3,7 @@ import pytest
 import pandas as pd
 from openghg.retrieve.icos import retrieve
 from openghg.dataobjects import SearchResults
-from helpers import get_icos_test_file, metadata_checker_obssurface
+from helpers import get_retrieval_data_file, metadata_checker_obssurface
 
 from icoscp.station.station import Station
 from icoscp.cpb.dobj import Dobj  # type: ignore
@@ -17,7 +17,7 @@ example_metadata = {
 
 
 def test_icos_retrieve_no_local(mocker):
-    pid_csv = get_icos_test_file(filename="test_pids_icos.csv.gz")
+    pid_csv = get_retrieval_data_file(filename="test_pids_icos.csv.gz")
     pid_df = pd.read_csv(pid_csv)
 
     valid_station = Station()
@@ -26,7 +26,7 @@ def test_icos_retrieve_no_local(mocker):
     mocker.patch("icoscp.station.station.get", return_value=valid_station)
     mocker.patch.object(Station, "data", return_value=pid_df)
 
-    mock_dobj_file = get_icos_test_file(filename="sample_icos_site.csv.gz")
+    mock_dobj_file = get_retrieval_data_file(filename="sample_icos_site.csv.gz")
     sample_icos_data = pd.read_csv(mock_dobj_file)
 
     metadata = []
@@ -42,7 +42,7 @@ def test_icos_retrieve_no_local(mocker):
     dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", return_value=mock_Dobj)
     get_mock = mocker.patch.object(Dobj, "get", return_value=sample_icos_data)
 
-    toh_metadata_path = get_icos_test_file(filename="toh_metadata.json")
+    toh_metadata_path = get_retrieval_data_file(filename="toh_metadata.json")
     toh_metadata = toh_metadata_path.read_bytes()
 
     mocker.patch("openghg.util.download_data", return_value=toh_metadata)
@@ -132,7 +132,7 @@ def test_icos_retrieve_invalid_site(mocker, capfd):
 
 
 def test_icos_retrieve_and_store(mocker):
-    pid_csv = get_icos_test_file(filename="test_pids_icos.csv.gz")
+    pid_csv = get_retrieval_data_file(filename="test_pids_icos.csv.gz")
     pid_df = pd.read_csv(pid_csv)
 
     valid_station = Station()
@@ -141,7 +141,7 @@ def test_icos_retrieve_and_store(mocker):
     mocker.patch("icoscp.station.station.get", return_value=valid_station)
     mocker.patch.object(Station, "data", return_value=pid_df)
 
-    mock_dobj_file = get_icos_test_file(filename="sample_icos_site.csv.gz")
+    mock_dobj_file = get_retrieval_data_file(filename="sample_icos_site.csv.gz")
     sample_icos_data = pd.read_csv(mock_dobj_file)
 
     metadata = []
@@ -157,7 +157,7 @@ def test_icos_retrieve_and_store(mocker):
     dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", return_value=mock_Dobj)
     get_mock = mocker.patch.object(Dobj, "get", return_value=sample_icos_data)
 
-    toh_metadata_path = get_icos_test_file(filename="toh_metadata.json")
+    toh_metadata_path = get_retrieval_data_file(filename="toh_metadata.json")
     toh_metadata = toh_metadata_path.read_bytes()
 
     mocker.patch("openghg.util.download_data", return_value=toh_metadata)

@@ -181,6 +181,9 @@ def search(**kwargs):  # type: ignore
     # Find the Datasources that contain matching metadata
     matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
 
+    if not matching_sources:
+        return SearchResults()
+
     # TODO - Update this as it only uses the ACRG repo JSON at the moment
     # Check if this site only has one inlet, if so skip ranking
     # if "site" in search_kwargs:
