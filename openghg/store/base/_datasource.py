@@ -270,6 +270,21 @@ class Datasource:
     def get_representative_daterange_str(self, dataset: Dataset, period: Optional[str] = None) -> str:
         """
         Get representative daterange which incorporates any period the data covers.
+
+        A representative daterange covers the start - end time + any additional period that is covered
+        by each time point. The start and end times can be extracted from the input dataset and
+        any supplied period used to extend the end of the date range to cover the representative period.
+
+        If there is only one time point (i.e. start and end datetimes are the same) and no period is
+        supplied 1 additional second will be added to ensure these values are not identical.
+
+        Args:
+            dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.
+            period: Value representing a time period e.g. "12H", "1AS" "3MS". Should be suitable for
+                creation of a pandas Timedelta or DataOffset object.
+
+        Returns:
+            str : Date string covering representative date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
         """
         from openghg.util import create_daterange_str, relative_time_offset
         from pandas import Timedelta
@@ -298,10 +313,10 @@ class Datasource:
         Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
         "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
 
+        This is a suitable format to use to create a pandas Timedelta or DataOffset object.
+
         Returns:
             str : time period in the form of number and time unit e.g. "12s"
-
-            This is a suitable format to use to create a pandas Timedelta or DataOffset object.
         """
         # Extract period associated with data from metadata
         # This will be the "sampling_period" for obs and "time_period" for other

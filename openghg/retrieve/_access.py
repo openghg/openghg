@@ -503,9 +503,6 @@ def metadata_difference(data: multDataTypes,
 
     Returns:
         list : Keys from the metadata with differences
-
-        If print_output is True:
-            prints summarised output to screen
     """
     metadata = [d.metadata for d in data]
     if params is not None:
