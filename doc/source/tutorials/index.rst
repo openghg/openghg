@@ -2,14 +2,9 @@
 Tutorials
 =========
 
-These tutorials will get you up and running with OpenGHG so you can process, analyse and query data from the cloud
-or a local object store. The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
-repository.
-
-Running the tutorials locally
------------------------------
-
-If you'd like to try out the tutorials locally accessing the notebooks is covered on the Local Tutorials page :ref:`Local Tutorials`.
+These tutorials will get you up and running with OpenGHG so you can process, analyse and query data.
+The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
+repository under ``notebooks/beginner_workflow``.
 
 
 Tutorial 1 - Adding observation data
@@ -36,7 +31,7 @@ functions.
 Tutorial 3 - Comparing observations to emissions
 ------------------------------------------------
 
-This tutorial covers the workflow comparing observations data to emissions using the new ``ModelScenario`` class. 
+This tutorial covers the workflow comparing observations data to emissions using the new ``ModelScenario`` class.
 This replaces the ``footprint_data_merge`` function with an object that can be used to retrieve and manipulate observations,
 emissions and footprint data (with boundary conditions in the pipeline).
 
@@ -60,3 +55,19 @@ Tutorial 5 - Exploring the NOAA ObsPack data
    :maxdepth: 1
 
    beginner_workflow/5_Explore_NOAA_ObsPack
+
+Tutorial 6 - Searching and plotting
+-----------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   beginner_workflow/6_Searching_and_plotting
+
+Tutorial 7 - Retrieving data from ICOS and CEDA
+-----------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   beginner_workflow/7_Retrieving_remote_data

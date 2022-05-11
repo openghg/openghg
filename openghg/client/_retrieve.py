@@ -1,8 +1,60 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
 from openghg.retrieve.icos import retrieve as icos_retrieve
+from openghg.retrieve.ceda import retrieve_surface
 from openghg.util import running_in_cloud
+
+
+def retrieve_ceda(
+    site: Optional[str] = None,
+    species: Optional[str] = None,
+    inlet: Optional[str] = None,
+    url: Optional[str] = None,
+    force_retrieval: bool = False,
+    additional_metadata: Optional[Dict] = None,
+) -> Union[ObsData, List[ObsData], None]:
+    """Retrieve surface observations data from the CEDA archive. You can pass
+    search terms and the object store will be searched. To retrieve data from th
+    CEDA Archive please browse the website (https://data.ceda.ac.uk/badc) to find
+    the URL of the dataset to retrieve.
+
+    Args:
+        site: Site name
+        species: Species name
+        inlet: Inlet height
+        url: URL of data in CEDA archive
+        force_retrieval: Force the retrieval of data from a URL
+        additional_metadata: Additional metadata to pass if the returned data
+        doesn't contain everythging we need. At the moment we try and find site and inlet
+        keys if they aren't found in the dataset's attributes.
+        For example:
+            {"site": "AAA", "inlet": "10m"}
+    Returns:
+        ObsData or None: ObsData if data found / retrieved successfully.
+    Examples:
+        To retrieve data from CEDA using a url
+
+        >>> url = https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-crds_heathfield_20130101_co2-100m.nc?download=1
+        >>> data = retrieve_ceda(url=url)
+
+        To retrieve previously downloaded data
+
+        >>> data = retrieve_ceda(site="hfd", species="co2")
+    """
+    cloud = running_in_cloud()
+
+    if cloud:
+        raise NotImplementedError
+    else:
+        return retrieve_surface(
+            site=site,
+            species=species,
+            inlet=inlet,
+            url=url,
+            force_retrieval=force_retrieval,
+            additional_metadata=additional_metadata,
+        )
 
 
 def retrieve_icos(
@@ -25,7 +77,7 @@ def retrieve_icos(
         end_date: End date
         force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
     Returns:
-        ObsData, list[ObsData] or None
+        ObsData, list[ObsData], None: ObsData or a list of ObsData objects if data found, else None
     """
     cloud = running_in_cloud()
 

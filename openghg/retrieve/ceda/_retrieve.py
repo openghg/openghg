@@ -20,6 +20,12 @@ def retrieve_surface(
         species: Species name
         inlet: Inlet height
         url: URL of data in CEDA archive
+        force_retrieval: Force the retrieval of data from a URL
+        additional_metadata: Additional metadata to pass if the returned data
+        doesn't contain everythging we need. At the moment we try and find site and inlet
+        keys if they aren't found in the dataset's attributes.
+        For example:
+            {"site": "AAA", "inlet": "10m"}
     Returns:
         ObsData or None: ObsData if data found / retrieved successfully.
     """
@@ -75,17 +81,15 @@ def retrieve_surface(
         site_name = metadata["station_long_name"]
         site_code = site_code_finder(site_name=site_name)
 
-        if site_code is None and additional_metadata is None:
-            print("Error: cannot find site code, please pass additional metadata.")
-            return None
-
-        if additional_metadata is None:
-            metadata["site"] = site_code
-        else:
-            try:
-                metadata["site"] = additional_metadata["site"]
-            except KeyError:
-                print("Unable to read site from additional_metadata.")
+        if site_code is None:
+            if additional_metadata:
+                try:
+                    metadata["site"] = additional_metadata["site"]
+                except KeyError:
+                    print("Unable to read site from additional_metadata.")
+                    return None
+            else:
+                print("Error: cannot find site code, please pass additional metadata.")
                 return None
 
         try:
