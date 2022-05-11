@@ -81,7 +81,9 @@ def retrieve_surface(
         site_name = metadata["station_long_name"]
         site_code = site_code_finder(site_name=site_name)
 
-        if site_code is None:
+        if site_code is not None:
+            metadata["site"] = site_code
+        else:
             if additional_metadata:
                 try:
                     metadata["site"] = additional_metadata["site"]
