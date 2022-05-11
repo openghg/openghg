@@ -626,4 +626,4 @@ def test_store_icos_carbonportal_data(mocker):
 
     second_result = ObsSurface.store_data(data=data)
 
-    assert second_result == {'co2': {'uuid': 'test-uuid-1', 'new': False}}
+    assert second_result is None
