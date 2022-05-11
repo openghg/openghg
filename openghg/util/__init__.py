@@ -2,9 +2,10 @@
     Utility functions for OpenGHG
 """
 
+from ._download import download_data
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import get_datapath, load_json, load_surface_parser, read_header
-from ._hashing import hash_file, hash_string
+from ._hashing import hash_file, hash_string, hash_retrieved_data
 from ._strings import clean_string, remove_punctuation, to_lowercase, is_number
 from ._time import (
     check_date,

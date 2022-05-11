@@ -9,7 +9,7 @@ __all__ = [
     "get_bc_datapath",
     "get_footprint_datapath",
     "glob_files",
-    "get_datapath_mobile",
+    # "get_datapath_mobile",
 ]
 
 
@@ -55,6 +55,10 @@ def get_footprint_datapath(filename: str) -> Path:
 def get_datapath_base(data_type: str, filename: str) -> Path:
     """Return the path to the footprints test data file"""
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/{data_type}/{filename}")
+
+
+def get_icos_test_file(filename: str):
+    return Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/retrieve/{filename}")
 
 
 def glob_files(search_str: str, data_type: str) -> List:

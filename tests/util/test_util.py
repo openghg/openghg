@@ -53,3 +53,9 @@ def test_to_lowercase():
     lower = util.to_lowercase(d)
 
     assert lower == {"this": "isanuppercase", "spam": {"also_big": "foo", "baaar": 123}}
+
+    skip_keys = ["THIS"]
+
+    with_skipped = util.to_lowercase(d, skip_keys=skip_keys)
+
+    assert with_skipped == {"spam": {"also_big": "foo", "baaar": 123}, "THIS": "ISANUPPERCASE"}
