@@ -78,7 +78,7 @@ def site_code_finder(site_name: str) -> Optional[str]:
         return None
 
     matched_site = matches[0][0]
-    site_code = inverted[matched_site]
+    site_code: str = inverted[matched_site]
 
     return site_code
 

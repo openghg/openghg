@@ -1,6 +1,5 @@
 import os
 import pytest
-from openghg import util
 from openghg.util import site_code_finder, verify_site, read_header, to_lowercase
 from openghg.types import InvalidSiteError
 

@@ -30,6 +30,9 @@ def retrieve_surface(
     from openghg.retrieve import search
     from openghg.util import parse_url_filename, timestamp_now, site_code_finder
 
+    if additional_metadata is None:
+        additional_metadata = {}
+
     results = search(site=site, species=species, inlet=inlet, data_source="ceda_archive")
 
     if results and not force_retrieval or url is None:
@@ -50,7 +53,7 @@ def retrieve_surface(
         return None
 
     with io.BytesIO(binary_data) as buf:
-        dataset = xr.open_dataset(buf)
+        dataset = xr.open_dataset(buf).load()
 
     now = str(timestamp_now())
 
@@ -61,6 +64,10 @@ def retrieve_surface(
 
     metadata["data_type"] = "timeseries"
     metadata["data_source"] = "ceda_archive"
+    # TODO - how should we find these? Need to change how we're retrieving Datasources
+    # using metadata
+    metadata["network"] = metadata.get("network", "CEDA_RETRIEVED")
+    metadata["sampling_period"] = metadata.get("sampling_period", "NA")
 
     # If we're going to be using site, species and inlet here we should check that that
     # information is in the metadata
