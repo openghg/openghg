@@ -35,4 +35,12 @@ from ._time import (
     relative_time_offset,
 )
 from ._tutorial import bilsdale_datapaths, retrieve_example_data
-from ._util import multiple_inlets, pairwise, running_in_cloud, unanimous, verify_site, find_matching_site
+from ._util import (
+    multiple_inlets,
+    pairwise,
+    running_in_cloud,
+    unanimous,
+    verify_site,
+    find_matching_site,
+    site_code_finder,
+)

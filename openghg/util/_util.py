@@ -5,15 +5,6 @@ from typing import Any, Dict, Tuple, Optional, Iterator
 from collections.abc import Iterable
 
 
-__all__ = [
-    "unanimous",
-    "verify_site",
-    "pairwise",
-    "multiple_inlets",
-    "running_in_cloud",
-]
-
-
 def running_in_cloud() -> bool:
     """Are we running in the cloud?
 
@@ -65,24 +56,31 @@ def pairwise(iterable: Iterable) -> Iterator[Tuple[Any, Any]]:
     return zip(a, b)
 
 
-def find_site_code(site_name: str, possible_sites: Dict) -> Optional[str]:
-    """Find the three letter site code for a given site name
+def site_code_finder(site_name: str) -> Optional[str]:
+    """Find the site code for a given site name.
 
     Args:
-        site_name: Site name
+        site_name: Site long name
     Returns:
-        str or None: Three letter site code if found, else None
+        str or None: Three letter site code if found
     """
     from rapidfuzz import process
+    from openghg.util import load_json
 
-    site = remove_punctuation(site)
-    name_lookup: Dict[str, str] = {value["short_name"]: code for code, value in site_data.items()}
+    sites = load_json("site_lookup.json")
 
-    site_list = possible_sites.keys()
+    inverted = {s["short_name"]: c for c, s in sites.items()}
 
-    matches = process.extract(site_name, site_list)
+    matches = process.extract(query=site_name, choices=inverted.keys())
+    highest_score = matches[0][1]
 
-    scores = [s for m, s, _ in matches]
+    if highest_score < 90:
+        return None
+
+    matched_site = matches[0][0]
+    site_code = inverted[matched_site]
+
+    return site_code
 
 
 def find_matching_site(site_name: str, possible_sites: Dict) -> str:
@@ -117,35 +115,6 @@ def find_matching_site(site_name: str, possible_sites: Dict) -> str:
         return f"Did you mean one of : \n {nl_char.join(suggestions)}"
     else:
         return f"Unknown site: {site_name}"
-
-
-def find_site_code(site: str) -> str:
-    """Check if the passed site is a valid one and returns the three
-    letter site code if found. Otherwise we use fuzzy text matching to suggest
-    sites with similar names.
-
-    Args:
-        site: Three letter site code or site name
-    Returns:
-        str: Verified three letter site code if valid site
-    """
-    from openghg.util import load_json, remove_punctuation
-    from openghg.types import InvalidSiteError
-
-    site_data = load_json("site_lookup.json")
-
-    if site.upper() in site_data:
-        return site.lower()
-    else:
-        site = remove_punctuation(site)
-        name_lookup: Dict[str, str] = {value["short_name"]: code for code, value in site_data.items()}
-
-        try:
-            return name_lookup[site].lower()
-        except KeyError:
-            long_names = {value["long_name"]: code for code, value in site_data.items()}
-            message = find_matching_site(site_name=site, possible_sites=long_names)
-            raise InvalidSiteError(message)
 
 
 def verify_site(site: str) -> str:

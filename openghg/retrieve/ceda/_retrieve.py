@@ -28,8 +28,7 @@ def retrieve_surface(
     from openghg.util import download_data
     from openghg.store import ObsSurface
     from openghg.retrieve import search
-    from openghg.util import parse_url_filename, timestamp_now, verify_site
-    from openghg.types import InvalidSiteError
+    from openghg.util import parse_url_filename, timestamp_now, site_code_finder
 
     results = search(site=site, species=species, inlet=inlet, data_source="ceda_archive")
 
@@ -66,21 +65,30 @@ def retrieve_surface(
     # If we're going to be using site, species and inlet here we should check that that
     # information is in the metadata
     if not {"site", "inlet"} <= metadata.keys():
-        try:
-            site_name = metadata["station_long_name"]
-            site_code = verify_site(site=site_name)
-        except InvalidSiteError:
-            print("Error: cannot find site code")
+        site_name = metadata["station_long_name"]
+        site_code = site_code_finder(site_name=site_name)
+
+        if site_code is None and additional_metadata is None:
+            print("Error: cannot find site code, please pass additional metadata.")
             return None
-        else:
-            # TODO - add site code lookup here
+
+        if additional_metadata is None:
             metadata["site"] = site_code
+        else:
+            try:
+                metadata["site"] = additional_metadata["site"]
+            except KeyError:
+                print("Unable to read site from additional_metadata.")
+                return None
 
         try:
             metadata["inlet"] = f"{int(metadata['inlet_height_magl'])}m"
         except KeyError:
-            print("Error: cannot read inlet from metadata.")
-            return None
+            try:
+                metadata["inlet"] = additional_metadata["inlet"]
+            except KeyError:
+                print("Unable to read inlet from data or additional_metadata.")
+                return None
 
     to_store = {key: {"data": dataset, "metadata": metadata}}
 
