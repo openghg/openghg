@@ -53,6 +53,12 @@ def test_to_lowercase():
     lower = to_lowercase(d)
 
     assert lower == {"this": "isanuppercase", "spam": {"also_big": "foo", "baaar": 123}}
+    
+    skip_keys = ["THIS"]
+
+    with_skipped = to_lowercase(d, skip_keys=skip_keys)
+
+    assert with_skipped == {"spam": {"also_big": "foo", "baaar": 123}, "THIS": "ISANUPPERCASE"}
 
 
 def test_site_code_finder():
@@ -62,3 +68,4 @@ def test_site_code_finder():
     assert site_code_finder("jungfraujoch") == "JFJ"
 
     assert site_code_finder("nonsensical") is None
+

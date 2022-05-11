@@ -33,7 +33,9 @@ def surface_standardise(
 
             if is_number(attr_value):
                 if not math.isclose(float(attr_value), float(value), rel_tol=relative_tolerance):
-                    raise ValueError(f"Value not within tolerance, metadata: {value} - attributes: {attr_value}")
+                    raise ValueError(
+                        f"Value not within tolerance, metadata: {value} - attributes: {attr_value}"
+                    )
             else:
                 if str(value).lower() != str(attr_value).lower():
                     raise ValueError(f"Metadata mismatch, metadata: {value} - attributes: {attr_value}")

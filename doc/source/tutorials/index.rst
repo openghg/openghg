@@ -56,6 +56,7 @@ Tutorial 5 - Exploring the NOAA ObsPack data
 
    beginner_workflow/5_Explore_NOAA_ObsPack
 
+
 Tutorial 6 - Searching and plotting
 -----------------------------------
 
@@ -64,6 +65,7 @@ Tutorial 6 - Searching and plotting
 
    beginner_workflow/6_Searching_and_plotting
 
+
 Tutorial 7 - Retrieving data from ICOS and CEDA
 -----------------------------------------------
 
@@ -71,3 +73,4 @@ Tutorial 7 - Retrieving data from ICOS and CEDA
    :maxdepth: 1
 
    beginner_workflow/7_Retrieving_remote_data
+

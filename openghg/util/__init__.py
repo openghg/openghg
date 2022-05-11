@@ -33,6 +33,7 @@ from ._time import (
     parse_period,
     create_frequency_str,
     relative_time_offset,
+    time_offset,
 )
 from ._tutorial import bilsdale_datapaths, retrieve_example_data
 from ._util import (

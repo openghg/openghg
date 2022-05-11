@@ -5,9 +5,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.13.6
+    jupytext_version: 1.13.7
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -50,7 +50,7 @@ The OpenGHG platform uses what's called an *object store* to save data. Any save
 
 When using OpenGHG on a local machine the location of the object store is set using an `OPENGHG_PATH` environment variable (explained below) and this can be any directory on your local system.
 
-For this tutorial, we will create a temporary object store which we can add data to. This path is fine for this purpose but as it is a temporary directory it may not survive a reboot of the computer. 
+For this tutorial, we will create a temporary object store which we can add data to. This path is fine for this purpose but as it is a temporary directory it may not survive a reboot of the computer.
 
 The `OPENGHG_PATH` environment variable can be set up in the following way.
 
@@ -172,7 +172,7 @@ We can add these files to the object store in the same way as the DECC data by i
  - network - `"AGAGE"`
 
 ```{code-cell} ipython3
-agage_results = process_obs(files=capegrim_tuple, data_type="GCWERKS", site="CGO", 
+agage_results = process_obs(files=capegrim_tuple, data_type="GCWERKS", site="CGO",
                               network="AGAGE", instrument="medusa")
 ```
 
@@ -186,7 +186,7 @@ agage_results
 
 Datasources are objects that are stored in the object store (++add link to object store notes++) that hold the data and metadata associated with each measurement we upload to the platform.
 
-For example, if we upload a file that contains readings for three gas species from a single site at a specific inlet height OpenGHG    will assign this data to three different Datasources, one for each species. Metadata such as the site, inlet height, species, network etc are stored alongside the measurements for easy searching. 
+For example, if we upload a file that contains readings for three gas species from a single site at a specific inlet height OpenGHG    will assign this data to three different Datasources, one for each species. Metadata such as the site, inlet height, species, network etc are stored alongside the measurements for easy searching.
 
 Datasources can also handle multiple versions of data from a single site, so if scales or other factors change multiple versions may be stored for easy future comparison.
 
@@ -240,6 +240,37 @@ For this site you can see this contains details of each of the species as well a
 
 +++
 
+### Quickly retrieve data
+
++++
+
+Say we want to retrieve all the `co2` data from Tacolneston, we can perform perform a search and expect a [`SearchResults`](https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult) object to be returned. If no results are found `None` is returned.
+
+```{code-cell} ipython3
+results = search(site="tac", species="co2")
+```
+
+```{code-cell} ipython3
+results
+```
+
+We can retrive either some or all of the data easily using the `retrieve` function.
+
+```{code-cell} ipython3
+inlet_54m_data = results.retrieve(inlet="54m")
+inlet_54m_data
+```
+
+Or we can retrieve all of the data and get a list of `ObsData` objects.
+
+```{code-cell} ipython3
+all_co2_data = results.retrieve_all()
+```
+
+```{code-cell} ipython3
+all_co2_data
+```
+
 ## 4. Retrieving data
 
 +++
@@ -284,5 +315,5 @@ You can also pass any of `title`, `xlabel`, `ylabel` and `units` to the `plot_ti
 If you used the `tmp_dir` as a location for your object store at the start of the tutorial you can run the cell below to remove any files that were created to make sure any persistant data is refreshed when the notebook is re-run.
 
 ```{code-cell} ipython3
-tmp_dir.cleanup()
+# tmp_dir.cleanup()
 ```

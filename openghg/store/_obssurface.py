@@ -260,13 +260,13 @@ class ObsSurface(BaseStore):
         seen_before = {next(iter(v)) for k, v in hashes.items() if k in obs._retrieved_hashes}
 
         if len(seen_before) == len(data):
-            print("There is no new data to process.")
+            print("Note: There is no new data to process.")
             return None
 
         keys_to_process = set(data.keys())
         if seen_before:
             # TODO - add this to log
-            print(f"We've seen {seen_before} before. Processing new data only.")
+            print(f"Note: We've seen {seen_before} before. Processing new data only.")
             keys_to_process -= seen_before
 
         to_process = {k: v for k, v in data.items() if k in keys_to_process}
@@ -281,6 +281,7 @@ class ObsSurface(BaseStore):
 
         # Record the Datasources we've created / appended to
         obs.add_datasources(uuids=datasource_uuids, metadata=metadata, metastore=metastore)
+        obs.store_hashes(hashes=hashes)
 
         metastore.close()
         obs.save()
@@ -315,6 +316,19 @@ class ObsSurface(BaseStore):
             )
 
         return lookup_results
+
+    def store_hashes(self, hashes: Dict) -> None:
+        """Store hashes of data retrieved from a remote data source such as
+        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
+        seen before and adds the new.
+
+        Args:
+            hashes: Dictionary of hashes provided by the hash_retrieved_data function
+        Returns:
+            None
+        """
+        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
+        self._retrieved_hashes.update(new)
 
     def add_datasources(self, uuids: Dict, metadata: Dict, metastore: TinyDB) -> None:
         """Add the passed list of Datasources to the current list

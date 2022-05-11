@@ -108,11 +108,9 @@ class Footprints(BaseStore):
 
         fp_time = fp_data.time
 
-        start_date, end_date, period_str \
-            = infer_date_range(fp_time,
-                               filepath=filepath,
-                               period=period,
-                               continuous=continuous)
+        start_date, end_date, period_str = infer_date_range(
+            fp_time, filepath=filepath, period=period, continuous=continuous
+        )
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)

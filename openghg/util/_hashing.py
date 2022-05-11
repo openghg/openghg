@@ -61,7 +61,13 @@ def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
     current_timestamp = str(timestamp_now())
     hashes: Dict[str, Dict] = {}
     for key, data in to_hash.items():
-        metadata = data["metadata"]
+        metadata = data["metadata"].copy()
+
+        try:
+            del metadata["file_created"]
+        except KeyError:
+            pass
+
         metadata_hash = sha1(dumps(metadata, sort_keys=True).encode("utf8")).hexdigest()
 
         ds = data["data"]

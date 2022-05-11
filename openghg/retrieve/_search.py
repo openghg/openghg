@@ -69,7 +69,7 @@ def search(**kwargs):  # type: ignore
         If None an end datetime of the current datetime is set
         skip_ranking: If True skip ranking system, defaults to False
     Returns:
-        dict: List of keys of Datasources matching the search parameters
+        SearchResults or None: SearchResults object is results found, otherwise None
     """
     from addict import Dict as aDict
     from copy import deepcopy
@@ -150,7 +150,7 @@ def search(**kwargs):  # type: ignore
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
     # Assume we want timeseries data
-    obj: Union[ObsSurface, Footprints, Emissions, EulerianModel] = ObsSurface.load()
+    obj: Union[ObsSurface, Footprints, Emissions, BoundaryConditions, EulerianModel] = ObsSurface.load()
 
     if data_type == "footprints":
         obj = Footprints.load()

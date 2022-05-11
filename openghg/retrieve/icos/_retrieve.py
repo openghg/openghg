@@ -26,7 +26,12 @@ def retrieve(
         start_date: Start date
         end_date: End date
         force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
-        data_level: ICOS data level, see https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        data_level: ICOS data level (1, 2)
+        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
+        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
+                        to be distributed through the Carbon Portal.
+                        This level is the ICOS-data product and free available for users.
+        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -34,6 +39,9 @@ def retrieve(
     from openghg.store import ObsSurface
     from openghg.dataobjects import ObsData
     from openghg.util import to_lowercase
+
+    if not 1 <= data_level <= 2:
+        print("Error: data level must be 1 or 2.")
 
     # NOTE - we skip ranking here, will we be ranking ICOS data?
     results = search(
@@ -44,6 +52,7 @@ def retrieve(
         data_source="icoscp",
         start_date=start_date,
         end_date=end_date,
+        icos_data_level=data_level,
         skip_ranking=True,
     )
 
@@ -62,7 +71,9 @@ def retrieve(
         obs_data = []
         for data in standardised_data.values():
             measurement_data = data["data"]
-            metadata = to_lowercase(data["metadata"])
+            # These contain URLs that are case sensitive so skip lowercasing these
+            skip_keys = ["citation_string", "instrument_data", "dobj_pid"]
+            metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
     if isinstance(obs_data, list) and len(obs_data) == 1:
@@ -83,8 +94,14 @@ def _retrieve_remote(
     Args:
         site: ICOS site code, for site codes see
         https://www.icos-cp.eu/observations/atmosphere/stations
+        data_level: ICOS data level (1, 2)
+        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
+        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
+                        to be distributed through the Carbon Portal.
+                        This level is the ICOS-data product and free available for users.
+        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        species: Species name
         sampling_height: Sampling height in metres
-        data_level: ICOS data level, see https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
     Returns:
         dict or None: Dictionary of processed data and metadata if found
     """
@@ -201,6 +218,7 @@ def _retrieve_remote(
         metadata["network"] = "ICOS"
         metadata["data_type"] = "timeseries"
         metadata["data_source"] = "icoscp"
+        metadata["icos_data_level"] = str(data_level)
 
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
@@ -216,7 +234,16 @@ def _retrieve_remote(
             "nbpoints": spec + " number_of_observations",
         }
 
-        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp").astype({"flag": str})
+        # Try and conver the flag / userflag column to str
+        possible_flag_cols = ("flag", "userflag")
+        flag_col = [x for x in dataframe.columns if x in possible_flag_cols]
+
+        if flag_col:
+            flag_str = flag_col[0]
+            dataframe = dataframe.astype({flag_str: str})
+
+        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
+
         dataframe.index.name = "time"
         dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
 
@@ -261,7 +288,7 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
 
     metadata = {}
 
-    metadata["dobj_pid"] = _get_value(df=spec_data, col="dobj", index=0)
+    metadata["dobj_pid"] = _get_value(df=spec_data, col="dobj", index=0, lower=False)
     metadata["species"] = _get_value(df=measurement_data, col="colName", index=4)
 
     metadata["meas_type"] = _get_value(df=measurement_data, col="valueType", index=4)
@@ -274,9 +301,9 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     metadata["station_long_name"] = _get_value(df=site_data, col="stationName", index=0)
     # ICOS have sampling height as a float, we usually work with ints and an m on the end
     # should we have a separate sampling_height_units record
-    metadata["sampling_height"] = f"{str(int(sampling_height))}m"
+    metadata["sampling_height"] = f"{int(float(sampling_height))}m"
     metadata["sampling_height_units"] = "metres"
-    metadata["inlet"] = f"{str(int(sampling_height))}m"
+    metadata["inlet"] = f"{int(float(sampling_height))}m"
     metadata["station_latitude"] = _get_value(df=site_data, col="latitude", index=0)
     metadata["station_longitude"] = _get_value(df=site_data, col="longitude", index=0)
     metadata["elevation"] = _get_value(df=site_data, col="elevation", index=0)
@@ -284,12 +311,12 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     site_specific = site_metadata[site.upper()]
     metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
     metadata["data_owner_email"] = site_specific["email"]
-    metadata["station_height_masl"] = site_specific["eas"]
+    metadata["station_height_masl"] = f"{int(float(site_specific['eas']))}m"
 
     return metadata
 
 
-def _get_value(df: DataFrame, col: str, index: int) -> str:
+def _get_value(df: DataFrame, col: str, index: int, lower: bool = True) -> str:
     """Wrap the retrieval of data from the metadata DataFrame in a try/except
 
     Args:
@@ -300,6 +327,8 @@ def _get_value(df: DataFrame, col: str, index: int) -> str:
         str: Metadata value
     """
     try:
-        return str(df[col][index]).lower()
+        val = str(df[col][index])
     except (KeyError, TypeError):
         return "NA"
+    else:
+        return val.lower() if lower else val
