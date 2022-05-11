@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.plotting._timeseries &#8212; OpenGHG 0+untagged.1.gcfc6f5c.dirty documentation</title>
+    <title>openghg.plotting._timeseries &#8212; OpenGHG 0+untagged.1.g6a57b2a.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -191,7 +191,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        go.Figure: Plotly Graph Object Figure</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
 
@@ -220,7 +219,7 @@
     <span class="c1"># Create a single figure</span>
     <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">to_plot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">to_plot</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
         <span class="n">metadata</span> <span class="o">=</span> <span class="n">to_plot</span><span class="o">.</span><span class="n">metadata</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">to_plot</span><span class="o">.</span><span class="n">data</span>
 
@@ -242,25 +241,6 @@
                 <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">species</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-
-            <span class="n">data_attrs</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">attrs</span>
-            <span class="n">data_units</span> <span class="o">=</span> <span class="n">data_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
-                    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
-                    <span class="n">unit_interpret</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_interpret&quot;</span><span class="p">]</span>
-                    <span class="n">unit_value</span> <span class="o">=</span> <span class="n">unit_interpret</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">unit_value</span> <span class="o">=</span> <span class="n">data_units</span>
-
-            <span class="n">unit_conversion</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_units</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">unit_value</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">unit_conversion</span> <span class="o">=</span> <span class="mi">1</span>
-
-        <span class="n">y_data</span> <span class="o">*=</span> <span class="n">unit_conversion</span>
 
         <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">legend</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_data</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">))</span>
 
