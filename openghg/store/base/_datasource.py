@@ -1,6 +1,7 @@
 from pandas import DataFrame, Timestamp
 from typing import DefaultDict, Dict, List, Optional, Tuple, Union, TypeVar, Type
 from xarray import Dataset
+import numpy as np
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
@@ -117,10 +118,9 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.util import daterange_overlap, create_daterange_str, relative_time_offset
+        from openghg.util import daterange_overlap
         from xarray import concat as xr_concat
         from numpy import unique as np_unique
-        from pandas import Timedelta
 
         # Group by year
         year_group = data.groupby("time.year")
@@ -129,51 +129,11 @@ class Datasource:
         new_data = {}
 
         # Extract period associated with data from metadata
-        # This will be the "sampling_period" for obs and "time_period" for other
-        metadata = self._metadata
-        time_period_attrs = ["sampling_period", "time_period"]
-        for attr in time_period_attrs:
-            value = metadata.get(attr)
-            if value is not None:
-                # For sampling period data, expect this to be in seconds
-                if attr == "sampling_period":
-                    if value.endswith("s"):  # Check if str includes "s"
-                        period = value
-                    else:
-                        try:
-                            value_num = int(value)
-                        except ValueError:
-                            try:
-                                value_num = int(float(value))
-                            except ValueError:
-                                value_num = None
-                                continue
-                        period = f"{value_num}s"
-                else:
-                    # Expect period data to include value and time unit
-                    period = value
-
-                break
-        else:
-            period = None
+        # TODO: May want to add period as a potential data variable so would need to extract from there if needed
+        period = self.get_period()
 
         for _, data in year_group:
-            # Extract start and end dates from grouped data
-            start_date, end_date = self.get_dataset_daterange(data)
-
-            # If period is defined add this to the end date
-            # This ensure start-end range includes time period covered by data
-            if period is not None:
-                period_td = relative_time_offset(period=period)
-                end_date = (
-                    end_date + period_td - Timedelta(seconds=1)
-                )  # Subtract 1 second to make this exclusive end.
-
-            # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
-            if start_date == end_date:
-                end_date += Timedelta(seconds=1)
-
-            daterange_str = create_daterange_str(start=start_date, end=end_date)
+            daterange_str = self.get_representative_daterange_str(data, period=period)
             new_data[daterange_str] = data
 
         if self._data:
@@ -197,7 +157,29 @@ class Datasource:
 
                     print("NOTE: Combining overlapping data dateranges")
                     # Concatenate datasets along time dimension
-                    combined = xr_concat((ex, new), dim="time")
+                    try:
+                        combined = xr_concat((ex, new), dim="time")
+                    except (ValueError, KeyError):
+                        # If data variables in the two datasets are not identical,
+                        # xr_concat will raise an error
+                        dv_ex = set(ex.data_vars.keys())
+                        dv_new = set(new.data_vars.keys())
+
+                        # Check difference between datasets and fill any
+                        # missing variables with NaN values.
+                        dv_not_in_new = dv_ex - dv_new
+                        for dv in dv_not_in_new:
+                            fill_values = np.zeros(len(new["time"])) * np.nan
+                            new = new.assign({dv: ("time", fill_values)})
+
+                        dv_not_in_ex = dv_new - dv_ex
+                        for dv in dv_not_in_ex:
+                            fill_values = np.zeros(len(ex["time"])) * np.nan
+                            ex = ex.assign({dv: ("time", fill_values)})
+
+                        # Should now be able to concatenate successfully
+                        combined = xr_concat((ex, new), dim="time")
+
                     combined = combined.sortby("time")
 
                     unique, index, count = np_unique(combined.time, return_counts=True, return_index=True)
@@ -207,7 +189,9 @@ class Datasource:
                         print("NOTE: Dropping measurements at duplicate timestamps")
                         combined = combined.isel(time=index)
 
-                    combined_daterange = self.get_dataset_daterange_str(dataset=combined)
+                    # TODO: May need to find a way to find period for *last point* rather than *current point*
+                    # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
+                    combined_daterange = self.get_representative_daterange_str(dataset=combined, period=period)
                     combined_datasets[combined_daterange] = combined
 
                 self._data.update(combined_datasets)
@@ -282,6 +266,89 @@ class Datasource:
         daterange_str: str = start + "_" + end
 
         return daterange_str
+
+    def get_representative_daterange_str(self, dataset: Dataset, period: Optional[str] = None) -> str:
+        """
+        Get representative daterange which incorporates any period the data covers.
+
+        A representative daterange covers the start - end time + any additional period that is covered
+        by each time point. The start and end times can be extracted from the input dataset and
+        any supplied period used to extend the end of the date range to cover the representative period.
+
+        If there is only one time point (i.e. start and end datetimes are the same) and no period is
+        supplied 1 additional second will be added to ensure these values are not identical.
+
+        Args:
+            dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.
+            period: Value representing a time period e.g. "12H", "1AS" "3MS". Should be suitable for
+                creation of a pandas Timedelta or DataOffset object.
+
+        Returns:
+            str : Date string covering representative date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
+        """
+        from openghg.util import create_daterange_str, relative_time_offset
+        from pandas import Timedelta
+
+        # Extract start and end dates from grouped data
+        start_date, end_date = self.get_dataset_daterange(dataset)
+
+        # If period is defined add this to the end date
+        # This ensure start-end range includes time period covered by data
+        if period is not None:
+            period_td = relative_time_offset(period=period)
+            end_date = (
+                end_date + period_td - Timedelta(seconds=1)
+            )  # Subtract 1 second to make this exclusive end.
+
+        # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
+        if start_date == end_date:
+            end_date += Timedelta(seconds=1)
+
+        daterange_str = create_daterange_str(start=start_date, end=end_date)
+
+        return daterange_str
+
+    def get_period(self) -> Optional[str]:
+        """
+        Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
+        "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
+
+        This is a suitable format to use to create a pandas Timedelta or DataOffset object.
+
+        Returns:
+            str : time period in the form of number and time unit e.g. "12s"
+        """
+        # Extract period associated with data from metadata
+        # This will be the "sampling_period" for obs and "time_period" for other
+        metadata = self._metadata
+
+        time_period_attrs = ["sampling_period", "time_period"]
+        for attr in time_period_attrs:
+            value = metadata.get(attr)
+            if value is not None:
+                # For sampling period data, expect this to be in seconds
+                if attr == "sampling_period":
+                    if value.endswith("s"):  # Check if str includes "s"
+                        period: Optional[str] = value
+                    else:
+                        try:
+                            value_num: Optional[int] = int(value)
+                        except ValueError:
+                            try:
+                                value_num = int(float(value))
+                            except ValueError:
+                                value_num = None
+                                continue
+                        period = f"{value_num}s"
+                else:
+                    # Expect period data to include value and time unit
+                    period = value
+
+                break
+        else:
+            period = None
+
+        return period
 
     @staticmethod
     def exists(datasource_id: str, bucket: Optional[str] = None) -> bool:
