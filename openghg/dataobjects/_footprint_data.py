@@ -20,15 +20,7 @@ class FootprintData(_BaseData):
         units: Measurements units
     """
 
-    flux: Dict
-    bc: Dict
-    species: str
-    scales: str
-    units: str
-
     def __str__(self) -> str:
         return (
             f"Data: {self.data}\nMetadata : {self.metadata}"
-            f"\nFlux : {self.flux}\nBC: {self.bc}"
-            f"\nSpecies : {self.species}\nScales: {self.scales}\nUnits: {self.units}"
         )
