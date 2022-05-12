@@ -29,6 +29,15 @@ class DataSchema:
     def _check_data_vars(self, data: Dataset) -> None:
         """
         Check data variables and their dimensions of data against the schema.
+
+        Args:
+            data : xarray Dataset to be checked
+        Returns:
+            None
+
+            Raises a ValueError with details if expected data variable is
+            not present or expected dimensions are not present for a data variable
+            based on the DataSchema object.
         """
         expected_data_vars = self.data_vars
         if expected_data_vars is None:
@@ -52,6 +61,14 @@ class DataSchema:
     def _check_dims(self, data: Dataset) -> None:
         """
         Check dimensions of data against the the schema.
+
+        Args:
+            data : xarray Dataset to be checked
+        Returns:
+            None
+
+            Raises a ValueError with details if expected dimensions
+            are not present in data based on the DataSchema object.
         """
         expected_dims = self.dims
         if expected_dims is None:
@@ -67,6 +84,14 @@ class DataSchema:
     def _check_dtypes(self, data: Dataset) -> None:
         """
         Check dtypes of variables and coordinates of data against the schema.
+
+        Args:
+            data : xarray Dataset to be checked
+        Returns:
+            None
+
+            Raises a ValueError with details if data variables and coordinates
+            are not of expected data types based on the DataSchema object.
         """
         expected_data_types = self.dtypes
         if expected_data_types is None:
@@ -84,6 +109,19 @@ class DataSchema:
                       ) -> None:
         """
         Validate input data based on schema.
+
+        Currently check can include:
+         - data variables are present with expected dimensions.
+         - general dimensions are present
+         - data types of data variables and coordinates match to expected values
+
+        Args:
+            data : xarray Dataset to be validated
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the defined DataSchema.
         """
 
         if self.data_vars is not None:
