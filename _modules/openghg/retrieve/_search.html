@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.gde85aae.dirty documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.gece36a3.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -106,12 +106,6 @@
 <li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../../api/index_devapi.html">
   Developer API
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../whatsnew/index.html">
-  What’s new
  </a>
 </li>
 
@@ -352,9 +346,6 @@
 
     <span class="c1"># Find the Datasources that contain matching metadata</span>
     <span class="n">matching_sources</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="o">.</span><span class="n">uuid</span><span class="p">():</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasources</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="o">**</span><span class="n">search_kwargs</span><span class="p">)}</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_sources</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SearchResults</span><span class="p">()</span>
 
     <span class="c1"># TODO - Update this as it only uses the ACRG repo JSON at the moment</span>
     <span class="c1"># Check if this site only has one inlet, if so skip ranking</span>

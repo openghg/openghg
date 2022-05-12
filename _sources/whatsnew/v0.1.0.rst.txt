@@ -2,15 +2,12 @@
 What's new - v0.1.0
 ===================
 
-We're happy to announce the first release of OpenGHG to both PyPI and conda.
-
 Features
---------
+========
 
-- Standardise measuremnts taken from many different sources - :ref:`Tutorial 1 - Adding observation data<Tutorial 1 - Adding observation data>`
-- Rank observations to ensure use of the best measurements - :ref:`Tutorial 2 - Ranking observations<Tutorial 2 - Ranking observations>`
-- Compare observations with emissions - :ref:`Tutorial 3 - Comparing observations to emissions<Tutorial 3 - Comparing observations to emissions>`
-- Create workflows using high time resolution CO2 data - :ref:`Tutorial 4 - Working with high time resolution CO2<Tutorial 4 - Working with high time resolution CO2>`
-- Retrieve and explore NOAA ObsPack data - :ref:`Tutorial 5 - Exploring the NOAA ObsPack data<Tutorial 5 - Exploring the NOAA ObsPack data>`
-- Search for data in the OpenGHG data store and create plots to compare measurements - :ref:`Tutorial 6 - Searching and plotting<Tutorial 6 - Searching and plotting>`
-- Pull data from the ICOS Carbon Portal and the CEDA archive - :ref:`Tutorial 7 - Retrieving data from ICOS and CEDA<Tutorial 7 - Retrieving data from ICOS and CEDA>`
+- Ability to pull atmospheric measurements from ICOS using the ``openghg.client.retrieve_icos``
+command. See the documentation at [ADD DOCS] and tutorial [ADD TUTORIAL] for further information.
+
+Fixes
+=====
+
