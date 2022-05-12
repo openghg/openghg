@@ -7,7 +7,6 @@ from helpers import get_retrieval_data_file, metadata_checker_obssurface
 
 from icoscp.station.station import Station
 from icoscp.cpb.dobj import Dobj  # type: ignore
-from openghg.store import ObsSurface
 
 example_metadata = {
     "0": '{"dobj":{"0":"https:\\/\\/meta.icos-cp.eu\\/objects\\/zYxCcjFqcV0gmfMiO4NTUrAg"},"objSpec":{"0":"http:\\/\\/meta.icos-cp.eu\\/resources\\/cpmeta\\/atcCo2L2DataObject"},"nRows":{"0":"27468"},"fileName":{"0":"ICOS_ATC_L2_L2-2021.1_TOH_10.0_CTS_CO2.zip"},"specLabel":{"0":"ICOS ATC CO2 Release"},"columnNames":{"0":null}}',
@@ -16,8 +15,23 @@ example_metadata = {
 }
 
 
+def test_icos_retrieve_invalid_site(mocker, capfd):
+    s = Station()
+    s._valid = False
+
+    mocker.patch("icoscp.station.station.get", return_value=s)
+
+    no_data = retrieve(site="ABC123")
+
+    assert no_data is None
+
+    out, _ = capfd.readouterr()
+
+    assert out.rstrip() == "Please check you have passed a valid ICOS site."
+
+
 def test_icos_retrieve_and_store(mocker, capfd):
-    pid_csv = get_icos_test_file(filename="test_pids_icos.csv.gz")
+    pid_csv = get_retrieval_data_file(filename="test_pids_icos.csv.gz")
     pid_df = pd.read_csv(pid_csv)
 
     valid_station = Station()
@@ -54,8 +68,8 @@ def test_icos_retrieve_and_store(mocker, capfd):
 
     retrieved_data_first = retrieve(site="TOH")
 
-    metadata = retrieved_data_first.metadata
     data = retrieved_data_first.data
+    metadata = retrieved_data_first.metadata
 
     assert metadata_checker_obssurface(metadata=metadata, species="co2")
 
@@ -99,59 +113,6 @@ def test_icos_retrieve_and_store(mocker, capfd):
     }
 
     assert expected_metadata.items() <= metadata.items()
-
-def test_icos_retrieve_invalid_site(mocker, capfd):
-    s = Station()
-    s._valid = False
-
-    mocker.patch("icoscp.station.station.get", return_value=s)
-
-    no_data = retrieve(site="ABC123")
-
-    assert no_data is None
-
-    out, _ = capfd.readouterr()
-
-    assert out.rstrip() == "Please check you have passed a valid ICOS site."
-
-
-def test_icos_retrieve_and_store(mocker):
-    pid_csv = get_retrieval_data_file(filename="test_pids_icos.csv.gz")
-    pid_df = pd.read_csv(pid_csv)
-
-    valid_station = Station()
-    valid_station._valid = True
-
-    mocker.patch("icoscp.station.station.get", return_value=valid_station)
-    mocker.patch.object(Station, "data", return_value=pid_df)
-
-    mock_dobj_file = get_retrieval_data_file(filename="sample_icos_site.csv.gz")
-    sample_icos_data = pd.read_csv(mock_dobj_file)
-
-    metadata = []
-    for _, df_data in sorted(example_metadata.items()):
-        df = pd.read_json(df_data)
-        metadata.append(df)
-
-    # Mock the info property on the Dobj class
-    mocker.patch("icoscp.cpb.dobj.Dobj.info", return_value=metadata, new_callable=mocker.PropertyMock)
-
-    mock_Dobj = Dobj()
-
-    dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", return_value=mock_Dobj)
-    get_mock = mocker.patch.object(Dobj, "get", return_value=sample_icos_data)
-
-    toh_metadata_path = get_retrieval_data_file(filename="toh_metadata.json")
-    toh_metadata = toh_metadata_path.read_bytes()
-
-    mocker.patch("openghg.util.download_data", return_value=toh_metadata)
-    # We patch this here so we can make sure we're getting the result from retrieve_all and not from
-    # search
-    retrieve_all = mocker.patch.object(
-        SearchResults, "retrieve_all", side_effect=SearchResults.retrieve_all, autospec=True
-    )
-
-    retrieved_data_first = retrieve(site="TOH")
 
     data.time[0] == pd.Timestamp("2017-12-13T00:00:00")
     data["co2"][0] == pytest.approx(420.37399)

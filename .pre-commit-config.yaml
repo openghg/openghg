@@ -26,7 +26,7 @@ repos:
     hooks:
       - id: mypy
         # Copied from setup.cfg
-        exclude: "doc/"
+        exclude: "tests/"
         additional_dependencies: [
             # Type stubs
             types-paramiko,
