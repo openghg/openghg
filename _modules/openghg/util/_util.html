@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._util &#8212; OpenGHG 0+untagged.1.g3718948.dirty documentation</title>
+    <title>openghg.util._util &#8212; OpenGHG 0+untagged.1.g3572e2e.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -109,6 +109,12 @@
  </a>
 </li>
 
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../whatsnew/index.html">
+  What’s new
+ </a>
+</li>
+
     
 </ul>
       </div>
@@ -167,17 +173,8 @@
 <span></span><span class="sd">&quot;&quot;&quot; Utility functions that are used by multiple modules</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Iterator</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Iterator</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
-
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;unanimous&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;verify_site&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;pairwise&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;multiple_inlets&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;running_in_cloud&quot;</span><span class="p">,</span>
-<span class="p">]</span>
 
 
 <div class="viewcode-block" id="running_in_cloud"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.running_in_cloud">[docs]</a><span class="k">def</span> <span class="nf">running_in_cloud</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -231,6 +228,33 @@
     <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span></div>
 
 
+<span class="k">def</span> <span class="nf">site_code_finder</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Find the site code for a given site name.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        site_name: Site long name</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str or None: Three letter site code if found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">rapidfuzz</span> <span class="kn">import</span> <span class="n">process</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
+
+    <span class="n">sites</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_lookup.json&quot;</span><span class="p">)</span>
+
+    <span class="n">inverted</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;short_name&quot;</span><span class="p">]:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sites</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">site_name</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">inverted</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">highest_score</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">highest_score</span> <span class="o">&lt;</span> <span class="mi">90</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">matched_site</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">site_code</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">inverted</span><span class="p">[</span><span class="n">matched_site</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">site_code</span>
+
+
 <span class="k">def</span> <span class="nf">find_matching_site</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_sites</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Try and find a similar name to site_name in site_list and return a suggestion or</span>
 <span class="sd">    error string.</span>
@@ -256,7 +280,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;No suggestion for </span><span class="si">{</span><span class="n">site_name</span><span class="si">}</span><span class="s2">.&quot;</span>
     <span class="k">elif</span> <span class="n">scores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">cutoff_score</span> <span class="ow">and</span> <span class="n">scores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">scores</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">best_match</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Did you mean </span><span class="si">{</span><span class="n">best_match</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="si">}</span><span class="s2">, code: </span><span class="si">{</span><span class="n">possible_sites</span><span class="p">[</span><span class="n">best_match</span><span class="p">]</span><span class="si">}</span><span class="s2"> ?&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Did you mean </span><span class="si">{</span><span class="n">best_match</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">, code: </span><span class="si">{</span><span class="n">possible_sites</span><span class="p">[</span><span class="n">best_match</span><span class="p">]</span><span class="si">}</span><span class="s2"> ?&quot;</span>
     <span class="k">elif</span> <span class="n">scores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">scores</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">suggestions</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">match</span><span class="o">.</span><span class="n">title</span><span class="p">()</span><span class="si">}</span><span class="s2">, code: </span><span class="si">{</span><span class="n">possible_sites</span><span class="p">[</span><span class="n">match</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">match</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]</span>
         <span class="n">nl_char</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>

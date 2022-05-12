@@ -3,11 +3,12 @@ What's new - v0.1.0
 ===================
 
 Features
-========
+--------
 
-- Ability to pull atmospheric measurements from ICOS using the ``openghg.client.retrieve_icos``
-command. See the documentation at [ADD DOCS] and tutorial [ADD TUTORIAL] for further information.
+- Ability to pull atmospheric measurements from the ICOS Carbon Portal using ``openghg.client.retrieve_icos``. See the documentation at [ADD DOCS] and tutorial :ref:`Tutorial 7 - Retrieving data from ICOS and CEDA<Tutorial 7 - Retrieving data from ICOS and CEDA>` for further information.
+- Functionality to pull and store surface observations data from the CEDA archives using ``openghg.client.retrieve_ceda``, see :ref:`Tutorial 7 - Retrieving data from ICOS and CEDA<Tutorial 7 - Retrieving data from ICOS and CEDA>`.
+
 
 Fixes
-=====
+-----
 
