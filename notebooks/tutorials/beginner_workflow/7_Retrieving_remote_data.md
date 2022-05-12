@@ -32,15 +32,11 @@ It's easy to retrieve atmospheric gas measurements from the [ICOS Carbon Portal]
 
 +++
 
-You can find the stations available in ICOS using [their map interface](https://data.icos-cp.eu/portal/#%7B%22filterCategories%22%3A%7B%22project%22%3A%5B%22icos%22%5D%2C%22level%22%3A%5B1%2C2%5D%2C%22stationclass%22%3A%5B%22ICOS%22%5D%2C%22theme%22%3A%5B%22atmosphere%22%5D%7D%2C%22tabs%22%3A%7B%22resultTab%22%3A2%7D%7D). Click on a site to see it's information, then use it's three letter site code to retrieve data.
+You can find the stations available in ICOS using [their map interface](https://data.icos-cp.eu/portal/#%7B%22filterCategories%22%3A%7B%22project%22%3A%5B%22icos%22%5D%2C%22level%22%3A%5B1%2C2%5D%2C%22stationclass%22%3A%5B%22ICOS%22%5D%2C%22theme%22%3A%5B%22atmosphere%22%5D%7D%2C%22tabs%22%3A%7B%22resultTab%22%3A2%7D%7D). Click on a site to see it's information, then use it's three letter site code to retrieve data. You can also use the [search page](https://data.icos-cp.eu/portal/#%7B%22filterCategories%22:%7B%22project%22:%5B%22icos%22%5D,%22level%22:%5B1,2%5D,%22stationclass%22:%5B%22ICOS%22%5D%7D%7D) to find available data at a given site.
 
 +++
 
 !["Zoomed in screenshot of ICOS site map"](images/icos_map.jpg "ICOS site map")
-
-+++
-
-You can also use the [search page](https://data.icos-cp.eu/portal/#%7B%22filterCategories%22:%7B%22project%22:%5B%22icos%22%5D,%22level%22:%5B1,2%5D,%22stationclass%22:%5B%22ICOS%22%5D%7D%7D) to find available data at a given site.
 
 +++
 
