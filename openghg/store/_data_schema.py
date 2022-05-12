@@ -10,6 +10,9 @@ __all__ = ["DataSchema"]
 @dataclass
 class DataSchema:
     """
+    Create schema for a data type based on inputs for components of the data.
+    Expected format is based against an xarray Dataset.
+
     Example inputs:
         DataSchema(
             data_vars = {"fp": ("time", "lat", "lon"), ...},
@@ -25,7 +28,7 @@ class DataSchema:
 
     def _check_data_vars(self, data: Dataset) -> None:
         """
-        Check data variables and their dimensions of data against the schema. 
+        Check data variables and their dimensions of data against the schema.
         """
         expected_data_vars = self.data_vars
         if expected_data_vars is None:
@@ -76,8 +79,8 @@ class DataSchema:
                 if not np.issubdtype(dtype, edata_type):
                     raise ValueError(f"Expected data type of variable {variable} to be: {edata_type}. Current {dtype}")
 
-    def validate_data(self, 
-                      data: Dataset, 
+    def validate_data(self,
+                      data: Dataset,
                       ) -> None:
         """
         Validate input data based on schema.
@@ -91,3 +94,5 @@ class DataSchema:
 
         if self.dtypes is not None:
             self._check_dtypes(data)
+
+    # TODO: Add string method for pretty printing

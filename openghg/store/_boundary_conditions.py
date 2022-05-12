@@ -176,8 +176,18 @@ class BoundaryConditions(BaseStore):
     def schema() -> DataSchema:
         """
         Define schema for boundary conditions Dataset.
+
+        Includes volume mole fractions for each time and ordinal, vertical boundary at the edge of the defined domain:
+            - "vmr_n", "vmr_s"
+                - expected dimensions: ("time", "height", "lon")
+            - "vmr_e", "vmr_w"
+                - expected dimensions: ("time", "height", "lat")
+
+        Expected data types for all variables and coordinates also included.
+
+        Returns:
+            DataSchema : Contains schema for BoundaryConditions.
         """
-        dims = ["lat", "lon", "time", "height"]
         data_vars: Dict[str, Tuple[str, ...]] \
             = {"vmr_n": ("time", "height", "lon"),
                "vmr_e": ("time", "height", "lat"),
@@ -193,14 +203,25 @@ class BoundaryConditions(BaseStore):
                   "vmr_w": np.floating}
 
         data_format = DataSchema(data_vars=data_vars,
-                                 dtypes=dtypes,
-                                 dims=dims)
+                                 dtypes=dtypes)
 
         return data_format
 
     @staticmethod
     def validate_data(data: Dataset) -> None:
-        """Validate data against schema"""
+        """
+        Validate input data against BoundaryConditions schema - definition from
+        BoundaryConditions.schema() method.
+
+        Args:
+            data : xarray Dataset in expected format
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the BoundaryConditions schema.
+        """
         data_schema = BoundaryConditions.schema()
         data_schema.validate_data(data)
 

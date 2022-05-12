@@ -165,9 +165,17 @@ class Emissions(BaseStore):
     @staticmethod
     def schema() -> DataSchema:
         """
-        Define format for emissions Dataset.
+        Define schema for emissions Dataset.
+
+        Includes flux/emissions for each time and position:
+            - "flux"
+                - expected dimensions: ("time", "lat", "lon")
+
+        Expected data types for all variables and coordinates also included.
+
+        Returns:
+            DataSchema : Contains schema for Emissions.
         """
-        dims = ["time", "lat", "lon"]
         data_vars: Dict[str, Tuple[str, ...]] \
             = {"flux": ("time", "lat", "lon")}
         dtypes = {"lat": np.floating,
@@ -176,16 +184,27 @@ class Emissions(BaseStore):
                   "flux": np.floating}
 
         data_format = DataSchema(data_vars=data_vars,
-                                 dtypes=dtypes,
-                                 dims=dims)
+                                 dtypes=dtypes)
 
         return data_format
 
     @staticmethod
     def validate_data(data: Dataset) -> None:
-        """Validate data against schema"""
+        """
+        Validate input data against Emissions schema - definition from
+        Emissions.schema() method.
+
+        Args:
+            data : xarray Dataset in expected format
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the Emissions schema.
+        """
         data_schema = Emissions.schema()
-        data_schema.validate_data(data)    
+        data_schema.validate_data(data)
 
     def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
         """Perform a lookup for the UUID of a Datasource

@@ -107,7 +107,7 @@ class Footprints(BaseStore):
                 print("Updating short_lifetime to True since species has an associated lifetime")
                 short_lifetime = True
 
-        # Checking against expected format for footprints 
+        # Checking against expected format for footprints
         # Based on configuration (some user defined, some inferred)
         Footprints.validate_data(fp_data,
                                  high_spatial_res=high_spatial_res,
@@ -160,7 +160,7 @@ class Footprints(BaseStore):
             except KeyError:
                 raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
         else:
-            metadata["spatial_resolution"] = "standard_spatial_resolution"  
+            metadata["spatial_resolution"] = "standard_spatial_resolution"
 
         if high_time_res:
             metadata["time_resolution"] = "high_time_resolution"
@@ -216,7 +216,7 @@ class Footprints(BaseStore):
                short_lifetime: bool = False,
                ) -> DataSchema:
         """
-        Define format for footprint Dataset.
+        Define schema for footprint Dataset.
 
         The returned schema depends on what the footprint represents,
         indicated using the keywords.
@@ -226,7 +226,7 @@ class Footprints(BaseStore):
         Args:
             particle_locations: Include 4-directional particle location variables:
                 - "particle_location_[nesw]"
-                and include associated additional dimensions ("height") 
+                and include associated additional dimensions ("height")
             high_spatial_res : Set footprint variables include high and low resolution options:
                 - "fp_low"
                 - "fp_high"
@@ -244,8 +244,6 @@ class Footprints(BaseStore):
         dtypes = {"lat": np.floating,  # Covers np.float16, np.float32, np.float64 types
                   "lon": np.floating,
                   "time": np.datetime64}
-        # Summary of dimensions (as a list)
-        dims = ["time", "lat", "lon"]
 
         if not high_time_res and not high_spatial_res:
             # Includes standard footprint variable
@@ -262,15 +260,12 @@ class Footprints(BaseStore):
             dtypes["fp_low"] = np.floating
             dtypes["fp_high"] = np.floating
 
-            dims.extend(["lat_high", "lon_high"])
-
         if high_time_res:
             # Include options for high time resolution footprint (usually co2)
             # This includes a footprint data with an additional hourly back dimension
             data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
             dtypes["fp_HiTRes"] = np.floating
             dtypes["H_back"] = np.integer
-            dims.append("H_back")
 
         # Includes particle location directions - one for each regional boundary
         if particle_locations:
@@ -284,8 +279,6 @@ class Footprints(BaseStore):
             dtypes["particle_locations_e"] = np.floating
             dtypes["particle_locations_s"] = np.floating
             dtypes["particle_locations_w"] = np.floating
-
-            dims.append("height")
 
         # TODO: Could also add check for meteorological + other data
         # "pressure", "wind_speed", "wind_direction", "PBLH"
@@ -304,22 +297,32 @@ class Footprints(BaseStore):
             dtypes["mean_age_particles_s"] = np.floating
             dtypes["mean_age_particles_w"] = np.floating
 
-            if "height" not in dims:
-                dims.append("height")
-
         data_format = DataSchema(data_vars=data_vars,
-                                 dtypes=dtypes,
-                                 dims=dims)
+                                 dtypes=dtypes)
 
         return data_format
 
     @staticmethod
-    def validate_data(data: Dataset, 
+    def validate_data(data: Dataset,
                       particle_locations: bool = True,
                       high_spatial_res: bool = False,
                       high_time_res: bool = False,
                       short_lifetime: bool = False) -> None:
-        """Validate data against schema - see Footprints.schema() method for details"""
+        """
+        Validate data against Footprint schema - definition from
+        Footprints.schema(...) method.
+
+        Args:
+            data : xarray Dataset in expected format
+
+            See Footprints.schema() method for details on optional inputs.
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the Footprints schema.
+        """
         data_schema = Footprints.schema(particle_locations=particle_locations,
                                         high_spatial_res=high_spatial_res,
                                         high_time_res=high_time_res,
