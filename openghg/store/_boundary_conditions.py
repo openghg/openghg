@@ -1,9 +1,10 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union, Any
+from typing import DefaultDict, Dict, Optional, Union, Tuple
 from xarray import Dataset
 from tinydb import TinyDB
 import numpy as np
 
+from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 
 __all__ = ["BoundaryConditions"]
@@ -61,13 +62,12 @@ class BoundaryConditions(BaseStore):
         """
         from collections import defaultdict
         from xarray import open_dataset
-        from openghg.store import assign_data
+        from openghg.store import assign_data, infer_date_range, load_metastore
         from openghg.util import (
             clean_string,
             hash_file,
             timestamp_now,
         )
-        from openghg.store import infer_date_range, load_metastore
 
         species = clean_string(species)
         bc_input = clean_string(bc_input)
@@ -112,9 +112,11 @@ class BoundaryConditions(BaseStore):
         # Currently ACRG boundary conditions are split by month or year
         bc_time = bc_data.time
 
-        start_date, end_date, period_str = infer_date_range(
-            bc_time, filepath=filepath, period=period, continuous=continuous
-        )
+        start_date, end_date, period_str \
+            = infer_date_range(bc_time,
+                               filepath=filepath,
+                               period=period,
+                               continuous=continuous)
 
         if "year" in period_str:
             date = f"{start_date.year}"
@@ -123,10 +125,8 @@ class BoundaryConditions(BaseStore):
         else:
             date = start_date.astype("datetime64[s]").astype(str)
 
-        # TODO: Add checking against expected format for boundary conditions
-        # Will probably want to do this for Emissions, Footprints as well
-        # - develop and use check_format() method
-        # expected_data_format = BoundaryConditions.format()
+        # Checking against expected format for boundary conditions
+        BoundaryConditions.validate_data(bc_data)
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)
@@ -173,37 +173,57 @@ class BoundaryConditions(BaseStore):
         return datasource_uuids
 
     @staticmethod
-    def format() -> Dict[str, Any]:
+    def schema() -> DataSchema:
         """
-        Define format for boundary conditions Dataset.
-        TODO: Implement this!
-        """
-        dims = ["lat", "lon", "time", "height"]
-        data_vars = {
-            "vmr_n": ("time", "height", "lon"),
-            "vmr_e": ("time", "height", "lat"),
-            "vmr_s": ("time", "height", "lon"),
-            "vmr_w": ("time", "height", "lat"),
-        }
-        data_types = {
-            "lat": np.float32,
-            "lon": np.float32,
-            "height": np.float32,
-            "time": np.datetime64,
-            "vmr_n": np.float64,
-            "vmr_e": np.float64,
-            "vmr_s": np.float64,
-            "vmr_w": np.float64,
-        }
+        Define schema for boundary conditions Dataset.
 
-        data_format = {"dims": dims, "data_vars": data_vars, "data_types": data_types}
+        Includes volume mole fractions for each time and ordinal, vertical boundary at the edge of the defined domain:
+            - "vmr_n", "vmr_s"
+                - expected dimensions: ("time", "height", "lon")
+            - "vmr_e", "vmr_w"
+                - expected dimensions: ("time", "height", "lat")
+
+        Expected data types for all variables and coordinates also included.
+
+        Returns:
+            DataSchema : Contains schema for BoundaryConditions.
+        """
+        data_vars: Dict[str, Tuple[str, ...]] \
+            = {"vmr_n": ("time", "height", "lon"),
+               "vmr_e": ("time", "height", "lat"),
+               "vmr_s": ("time", "height", "lon"),
+               "vmr_w": ("time", "height", "lat")}
+        dtypes = {"lat": np.floating,
+                  "lon": np.floating,
+                  "height": np.floating,
+                  "time": np.datetime64,
+                  "vmr_n": np.floating,
+                  "vmr_e": np.floating,
+                  "vmr_s": np.floating,
+                  "vmr_w": np.floating}
+
+        data_format = DataSchema(data_vars=data_vars,
+                                 dtypes=dtypes)
 
         return data_format
 
-    def check_format(self) -> None:
-        # TODO: Create check_format() function to define and align format to
-        # expected values within database
-        pass
+    @staticmethod
+    def validate_data(data: Dataset) -> None:
+        """
+        Validate input data against BoundaryConditions schema - definition from
+        BoundaryConditions.schema() method.
+
+        Args:
+            data : xarray Dataset in expected format
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the BoundaryConditions schema.
+        """
+        data_schema = BoundaryConditions.schema()
+        data_schema.validate_data(data)
 
     def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to

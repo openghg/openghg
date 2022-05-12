@@ -83,5 +83,5 @@ def data_read():
     model = "test_model"
 
     Footprints.read_file(
-        filepath=datapath, site=site, model=model, network=network, height=height, domain=domain
+        filepath=datapath, site=site, model=model, network=network, height=height, domain=domain, high_spatial_res=True,
     )

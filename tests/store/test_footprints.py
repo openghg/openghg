@@ -6,6 +6,63 @@ from openghg.objectstore import get_local_bucket
 from helpers import get_footprint_datapath
 
 
+def test_read_footprint_standard():
+    get_local_bucket()
+
+    datapath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
+
+    site = "TAC"
+    height = "100m"
+    domain = "EUROPE"
+    model = "NAME"
+
+    Footprints.read_file(
+        filepath=datapath,
+        site=site,
+        model=model,
+        height=height,
+        domain=domain,
+    )
+
+    # Get the footprints data
+    footprint_results = search(site=site, domain=domain, data_type="footprints")
+
+    fp_site_key = list(footprint_results.keys())[0]
+
+    footprint_keys = footprint_results[fp_site_key]["keys"]
+    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+
+    footprint_coords = list(footprint_data.coords.keys())
+
+    # Sorting to allow comparison - coords / dims can be stored in different orders
+    # depending on how the Dataset has been manipulated
+    footprint_coords.sort()
+    assert footprint_coords == ["height", "lat", "lev", "lon", "time"]
+
+    assert "fp" in footprint_data.data_vars
+
+    expected_attrs = {
+        "author": "OpenGHG Cloud",
+        "data_type": "footprints",
+        "site": "tac",
+        "height": "100m",
+        "model": "NAME",
+        "domain": "europe",
+        "start_date": "2012-08-01 00:00:00+00:00",
+        "end_date": "2012-08-31 23:59:59+00:00",
+        "max_longitude": 39.38,
+        "min_longitude": -97.9,
+        "max_latitude": 79.057,
+        "min_latitude": 10.729,
+        "spatial_resolution" : "standard_spatial_resolution",
+        "time_resolution": "standard_time_resolution",
+        "time_period": "2 hours",
+    }
+
+    for key in expected_attrs:
+        assert footprint_data.attrs[key] == expected_attrs[key]
+
+
 def test_read_footprint_high_spatial_res():
     get_local_bucket()
 
@@ -201,26 +258,33 @@ def test_read_footprint_co2():
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_read_footprint_standard():
+def test_read_footprint_short_lived():
     get_local_bucket()
 
-    datapath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
+    datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
 
-    site = "TAC"
-    height = "100m"
-    domain = "EUROPE"
+    site = "WAO"
+    height = "20m"
+    domain = "TEST"
     model = "NAME"
+    metmodel = "UKV"
+    species = "Rn"
+
+    # Expect rn data to be short lived
+    # - could include short_lifetime=True but shouldn't need to as this will be set automatically
 
     Footprints.read_file(
         filepath=datapath,
         site=site,
         model=model,
+        metmodel=metmodel,
         height=height,
+        species=species,
         domain=domain,
     )
 
     # Get the footprints data
-    footprint_results = search(site=site, domain=domain, data_type="footprints")
+    footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
 
     fp_site_key = list(footprint_results.keys())[0]
 
@@ -235,23 +299,29 @@ def test_read_footprint_standard():
     assert footprint_coords == ["height", "lat", "lev", "lon", "time"]
 
     assert "fp" in footprint_data.data_vars
+    assert "mean_age_particles_n" in footprint_data.data_vars
+    assert "mean_age_particles_e" in footprint_data.data_vars
+    assert "mean_age_particles_s" in footprint_data.data_vars
+    assert "mean_age_particles_w" in footprint_data.data_vars
 
     expected_attrs = {
         "author": "OpenGHG Cloud",
         "data_type": "footprints",
-        "site": "tac",
-        "height": "100m",
+        "site": "wao",
+        "height": "20m",
         "model": "NAME",
-        "domain": "europe",
-        "start_date": "2012-08-01 00:00:00+00:00",
-        "end_date": "2012-08-31 23:59:59+00:00",
-        "max_longitude": 39.38,
-        "min_longitude": -97.9,
-        "max_latitude": 79.057,
-        "min_latitude": 10.729,
+        "species": "rn",  # TODO: May want to see if we can keep this capitalised?
+        "metmodel": "ukv",
+        "domain": "test",
+        "start_date": "2018-01-01 00:00:00+00:00",
+        "end_date": "2018-01-02 23:59:59+00:00",
+        "max_longitude": 3.476,
+        "min_longitude": -0.396,
+        "max_latitude": 53.785,
+        "min_latitude": 51.211,
         "spatial_resolution" : "standard_spatial_resolution",
         "time_resolution": "standard_time_resolution",
-        "time_period": "2 hours",
+        "time_period": "1 hour",
     }
 
     for key in expected_attrs:
@@ -282,3 +352,86 @@ def test_datasource_add_lookup():
         lookup = f.datasource_lookup(metadata=fake_metadata, metastore=metastore)
 
         assert lookup["tmb_lghg_10m_europe"] == fake_datasource["tmb_lghg_10m_europe"]["uuid"]
+
+
+def test_footprint_schema():
+    """Check expected data variables are being included for default Footprint schema"""
+    data_schema = Footprints.schema()
+
+    data_vars = data_schema.data_vars
+    assert "fp" in data_vars
+    assert "particle_locations_n" in data_vars
+    assert "particle_locations_e" in data_vars
+    assert "particle_locations_s" in data_vars
+    assert "particle_locations_w" in data_vars
+
+    # TODO: Could also add checks for dims and dtypes?
+
+
+def test_footprint_schema_spatial():
+    """
+    Check expected data variables and extra dimensions
+    are being included for high_spatial_res Footprint schema
+    """
+
+    data_schema = Footprints.schema(high_spatial_res=True)
+
+    data_vars = data_schema.data_vars
+    assert "fp" not in data_vars  # "fp" not required (but can be present in file)
+    assert "fp_low" in data_vars
+    assert "fp_high" in data_vars
+
+    assert "particle_locations_n" in data_vars
+    assert "particle_locations_e" in data_vars
+    assert "particle_locations_s" in data_vars
+    assert "particle_locations_w" in data_vars
+
+    fp_low_dims = data_vars["fp_low"]
+    assert "lat" in fp_low_dims
+    assert "lon" in fp_low_dims
+
+    fp_high_dims = data_vars["fp_high"]
+    assert "lat_high" in fp_high_dims
+    assert "lon_high" in fp_high_dims
+    
+
+def test_footprint_schema_temporal():
+    """
+    Check expected data variables and extra dimensions
+    are being included for high_time_res Footprint schema
+    """
+
+    data_schema = Footprints.schema(high_time_res=True)
+
+    data_vars = data_schema.data_vars
+    assert "fp" not in data_vars  # "fp" not required (but can be present in file)
+    assert "fp_HiTRes" in data_vars
+
+    assert "particle_locations_n" in data_vars
+    assert "particle_locations_e" in data_vars
+    assert "particle_locations_s" in data_vars
+    assert "particle_locations_w" in data_vars
+
+    assert "H_back" in data_vars["fp_HiTRes"]
+
+
+def test_footprint_schema_lifetime():
+    """
+    Check expected data variables
+    are being included for short_lifetime Footprint schema
+    """
+
+    data_schema = Footprints.schema(short_lifetime=True)
+
+    data_vars = data_schema.data_vars
+    assert "fp" in data_vars
+
+    assert "particle_locations_n" in data_vars
+    assert "particle_locations_e" in data_vars
+    assert "particle_locations_s" in data_vars
+    assert "particle_locations_w" in data_vars
+
+    assert "mean_age_particles_n" in data_vars
+    assert "mean_age_particles_e" in data_vars
+    assert "mean_age_particles_s" in data_vars
+    assert "mean_age_particles_w" in data_vars

@@ -1295,7 +1295,7 @@ class ModelScenario:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
-        from openghg.util import load_json, time_offset
+        from openghg.util import time_offset, species_lifetime, check_lifetime_monthly
 
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)
@@ -1313,27 +1313,15 @@ class ModelScenario:
 
         bc_data = bc_data.reindex_like(scenario, "ffill")
 
-        species_info = load_json(filename="acrg_species_info.json")
-        species = self.species
+        lifetime_value = species_lifetime(self.species)
+        check_monthly = check_lifetime_monthly(lifetime_value)
 
-        try:
-            species_data = species_info[species]
-        except KeyError:
-            species_upper = species.upper()
-            species_data = species_info[species_upper]
-
-        # Check for lifetime details
-        lifetime: Optional[str] = species_data.get("lifetime", None)
-        lifetime_monthly: Optional[list] = species_data.get("lifetime_monthly", None)
-
-        if isinstance(lifetime, list) and len(lifetime) == 12:
-            if len(lifetime) == 12:
-                lifetime_monthly = lifetime
-                lifetime = None
-            else:
-                raise ValueError(
-                    f"Did not recognise input for lifetime for {species_upper} from 'acrg_species_info.json'"
-                )
+        if check_monthly:
+            lifetime_monthly = cast(Optional[List[str]], lifetime_value)
+            lifetime: Optional[str] = None
+        else:
+            lifetime_monthly = None
+            lifetime = cast(Optional[str], lifetime_value)
 
         if lifetime is not None:
             short_lifetime = True
@@ -1365,7 +1353,7 @@ class ModelScenario:
             for var in expected_vars:
                 if var not in scenario.data_vars:
                     raise ValueError(
-                        f"Unable to calculate baseline for short-lived species {species} without species specific footprint."
+                        f"Unable to calculate baseline for short-lived species {self.species} without species specific footprint."
                     )
 
             # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
