@@ -159,7 +159,7 @@
       "CO": "WMO-CO-X2014"
     },
     "instrument": "Picarro G2401",
-    "inlet": "5 m",
+    "inlet": "5m",
     "global_attributes": {
       "data_owner": "Valerio Ferracci",
       "data_owner_email": "V.Ferracci@cranfield.ac.uk",
