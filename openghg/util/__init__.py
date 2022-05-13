@@ -37,4 +37,4 @@ from ._time import (
 )
 from ._tutorial import bilsdale_datapaths, retrieve_example_data
 from ._util import multiple_inlets, pairwise, running_in_cloud, unanimous, verify_site
-from ._species import species_lifetime, check_lifetime_monthly
+from ._species import synonyms, species_lifetime, check_lifetime_monthly
