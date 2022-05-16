@@ -151,9 +151,7 @@ class EulerianModel(BaseStore):
         model_data[key]["data"] = em_data
         model_data[key]["metadata"] = metadata
 
-        keyed_metadata = {key: metadata}
-
-        lookup_results = em_store.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
+        lookup_results = em_store.datasource_lookup(data=model_data, metastore=metastore)
 
         data_type = "eulerian_model"
         datasource_uuids = assign_data(
@@ -163,13 +161,12 @@ class EulerianModel(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
+        em_store.add_datasources(uuids=datasource_uuids, data=model_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
 
         em_store.save()
-
         metastore.close()
 
         return datasource_uuids

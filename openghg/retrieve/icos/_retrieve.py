@@ -308,7 +308,8 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     metadata["inlet"] = f"{int(float(sampling_height))}m"
     metadata["station_latitude"] = _get_value(df=site_data, col="latitude", index=0)
     metadata["station_longitude"] = _get_value(df=site_data, col="longitude", index=0)
-    metadata["elevation"] = _get_value(df=site_data, col="elevation", index=0)
+    elevation = _get_value(df=site_data, col="elevation", index=0)
+    metadata["elevation"] = f"{int(float(elevation))}m"
 
     site_specific = site_metadata[site.upper()]
     metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"

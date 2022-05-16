@@ -165,7 +165,7 @@ class BaseStore:
         """
         del self._datasource_uuids[uuid]
 
-    def add_datasources(self, uuids: Dict, metadata: Dict, metastore: TinyDB) -> None:
+    def add_datasources(self, uuids: Dict, data: Dict, metastore: TinyDB) -> None:
         """Add the passed list of Datasources to the current list
 
         Args:
@@ -174,16 +174,13 @@ class BaseStore:
         Returns:
             None
         """
-        for key, data in uuids.items():
-            new = data["new"]
-
-            # Should we do a UUID lookup here to check we're assigning to
-            # the correct UUID? Would that just be covered by the duplicate check?
+        for key, uuid_data in uuids.items():
+            new = uuid_data["new"]
             # Only add if this is a new Datasource
             if new:
-                meta_copy = metadata[key].copy()
-                uid = data["uuid"]
-                meta_copy["uuid"] = data["uuid"]
+                meta_copy = data[key]["metadata"].copy()
+                uid = uuid_data["uuid"]
+                meta_copy["uuid"] = uuid_data["uuid"]
 
                 metastore.insert(meta_copy)
                 self._datasource_uuids[uid] = key

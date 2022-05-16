@@ -3,7 +3,7 @@
 
 """
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 from tinydb.database import TinyDB
 
 __all__ = ["search"]
@@ -17,7 +17,44 @@ def _find_or(x: Any, y: Any) -> Any:
     return x | y
 
 
-def metadata_lookup(database: TinyDB, **kwargs: Dict) -> Union[bool, str]:
+def metadata_lookup(
+    metadata: Dict, database: TinyDB, additional_metadata: Optional[Dict] = None
+) -> Union[bool, str]:
+    """Searches the passed database for the given metadata
+
+    Args:
+        metadata: Keys we are required to find
+        database: The tinydb database for the storage object
+        additional: Keys we'd like to find (currently unused)
+    Returns:
+        str or bool: UUID string if matching Datasource found, otherwise False
+    """
+    from tinydb import Query
+    from functools import reduce
+    from openghg.types import DatasourceLookupError
+
+    q = Query()
+
+    search_attrs = [getattr(q, k) == v for k, v in metadata.items()]
+    required_result = database.search(reduce(_find_and, search_attrs))
+
+    if not required_result:
+        return False
+
+    if len(required_result) > 1:
+        raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
+
+    # q = Query()
+
+    # search_attrs = [getattr(q, k) == v for k, v in additional_metadata.items()]
+    # required_results = database.search(reduce(_find_or, search_attrs))
+
+    uuid: str = required_result[0]["uuid"]
+
+    return uuid
+
+
+def metadata_lookup_old(database: TinyDB, **kwargs: Dict) -> Union[bool, str]:
     """Searches the passed database for the given metadata
 
     Args:

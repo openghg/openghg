@@ -134,9 +134,7 @@ class Emissions(BaseStore):
         emissions_data[key]["data"] = em_data
         emissions_data[key]["metadata"] = metadata
 
-        keyed_metadata = {key: metadata}
-
-        lookup_results = em_store.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
+        lookup_results = em_store.datasource_lookup(data=emissions_data, metastore=metastore)
 
         data_type = "emissions"
         datasource_uuids = assign_data(
@@ -146,47 +144,17 @@ class Emissions(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
+        em_store.add_datasources(uuids=datasource_uuids, data=emissions_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
 
         em_store.save()
-
         metastore.close()
 
         return datasource_uuids
 
-    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
-
-        Args:
-            species: Site code
-            domain: Domain
-            model: Model name
-            height: Height
-        Returns:
-            str or dict: UUID or False if no entry
-        """
-        uuid = self._datasource_table[species][source][domain][date]
-
-        return uuid if uuid else False
-
-    def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
-        """Record a UUID of a Datasource in the datasource table
-
-        Args:
-            site: Site code
-            domain: Domain
-            model: Model name
-            height: Height
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[species][source][domain][date] = uuid
-
-    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
+    def datasource_lookup(self, data: Dict, metastore: TinyDB) -> Dict:
         """Find the Datasource we should assign the data to
 
         Args:
@@ -196,18 +164,18 @@ class Emissions(BaseStore):
         """
         from openghg.retrieve import metadata_lookup
 
-        lookup_results = {}
+        required = {"species", "source", "domain", "date"}
 
-        for key, data in metadata.items():
-            species = data["species"]
-            source = data["source"]
-            domain = data["domain"]
-            date = data["date"]
+        results = {}
+        for key, _data in data.items():
+            metadata = _data["metadata"]
+            required_metadata = {k: v for k, v in metadata.items() if k in required}
 
-            result = metadata_lookup(
-                database=metastore, species=species, source=source, domain=domain, date=date
-            )
+            if len(required_metadata) < 4:
+                raise ValueError(
+                    f"The given metadata doesn't contain enough information, we need: {required}"
+                )
 
-            lookup_results[key] = result
+            results[key] = metadata_lookup(metadata=required_metadata, database=metastore)
 
-        return lookup_results
+        return results
