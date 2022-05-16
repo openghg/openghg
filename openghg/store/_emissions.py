@@ -47,7 +47,7 @@ class Emissions(BaseStore):
         """
         from collections import defaultdict
         from xarray import open_dataset
-        from openghg.store import assign_data, load_metastore
+        from openghg.store import assign_data, load_metastore, datasource_lookup
         from openghg.util import (
             clean_string,
             hash_file,
@@ -134,7 +134,8 @@ class Emissions(BaseStore):
         emissions_data[key]["data"] = em_data
         emissions_data[key]["metadata"] = metadata
 
-        lookup_results = em_store.datasource_lookup(data=emissions_data, metastore=metastore)
+        required = {"species", "source", "domain", "date"}
+        lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
 
         data_type = "emissions"
         datasource_uuids = assign_data(
@@ -153,29 +154,3 @@ class Emissions(BaseStore):
         metastore.close()
 
         return datasource_uuids
-
-    def datasource_lookup(self, data: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.retrieve import metadata_lookup
-
-        required = {"species", "source", "domain", "date"}
-
-        results = {}
-        for key, _data in data.items():
-            metadata = _data["metadata"]
-            required_metadata = {k: v for k, v in metadata.items() if k in required}
-
-            if len(required_metadata) < 4:
-                raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required}"
-                )
-
-            results[key] = metadata_lookup(metadata=required_metadata, database=metastore)
-
-        return results

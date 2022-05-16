@@ -182,7 +182,7 @@ class Footprints(BaseStore):
             data_type=data_type,
         )
 
-        fp.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
+        fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         fp._file_hashes[file_hash] = filepath.name
@@ -192,30 +192,6 @@ class Footprints(BaseStore):
         metastore.close()
 
         return datasource_uuids
-
-    def datasource_lookup(self, data: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            data: Combined data dictionary
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.store import datasource_lookup
-
-        results = {}
-        for key, _data in data.items():
-            metadata = _data["metadata"]
-            required_metadata = {k: v for k, v in metadata.items() if k in required}
-
-            if len(required_metadata) < 4:
-                raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required}"
-                )
-
-            results[key] = metadata_lookup(metadata=required_metadata, database=metastore)
-
-        return results
 
     def search(
         self,

@@ -53,7 +53,7 @@ class EulerianModel(BaseStore):
             timestamp_now,
             timestamp_tzaware,
         )
-        from openghg.store import assign_data, load_metastore
+        from openghg.store import assign_data, load_metastore, datasource_lookup
         from xarray import open_dataset
         from pandas import Timestamp as pd_Timestamp
 
@@ -151,7 +151,8 @@ class EulerianModel(BaseStore):
         model_data[key]["data"] = em_data
         model_data[key]["metadata"] = metadata
 
-        lookup_results = em_store.datasource_lookup(data=model_data, metastore=metastore)
+        required = {"model", "species", "date"}
+        lookup_results = datasource_lookup(metastore=metastore, data=model_data, required_keys=required)
 
         data_type = "eulerian_model"
         datasource_uuids = assign_data(
@@ -170,53 +171,3 @@ class EulerianModel(BaseStore):
         metastore.close()
 
         return datasource_uuids
-
-    def lookup_uuid(self, model: str, species: str, date: str) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
-
-        Args:
-            model: Eulerian model name
-            species: Species name
-            date: Start date associated with model run
-        Returns:
-            str or bool: UUID or False if no entry
-        """
-        uuid = self._datasource_table[model][species][date]
-
-        return uuid if uuid else False
-
-    def set_uuid(self, model: str, species: str, date: str, uuid: str) -> None:
-        """Record a UUID of a Datasource in the datasource table
-
-        Args:
-            model: Eulerian model name
-            species: Species name
-            date: Start date associated with model run
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[model][species][date] = uuid
-
-    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.retrieve import metadata_lookup
-
-        lookup_results = {}
-
-        for key, data in metadata.items():
-            model = data["model"]
-            species = data["species"]
-            date = data["date"]
-
-            result = metadata_lookup(database=metastore, model=model, species=species, date=date)
-
-            lookup_results[key] = result
-
-        return lookup_results

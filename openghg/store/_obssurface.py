@@ -1,3 +1,4 @@
+from curses import meta
 from tinydb import TinyDB
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
@@ -259,18 +260,23 @@ class ObsSurface(BaseStore):
         return results
 
     @staticmethod
-    def store_data(data: Dict, overwrite: bool = False) -> Optional[Dict]:
+    def store_data(
+        data: Dict, overwrite: bool = False, required_metakeys: Optional[Dict] = None
+    ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
         Args:
-            standardised_data: Dictionary of data in standard format
-            # TODO - add link to docs here
-            See the data spec under Development -> Data specifications
-            in the documentation
+            data: Dictionary of data in standard format, see the data spec under
+            Development -> Data specifications in the documentation
+            overwrite: If True overwrite currently stored data
+            required_metakeys: Keys in the metadata we should use to store this metadata in the object store
+            if None it defaults to:
+            {"species", "site", "station_long_name", "inlet", "instrument",
+            "network", "data_type", "data_source", "icos_data_level"}
         Returns:
             Dict or None:
         """
-        from openghg.store import assign_data, load_metastore
+        from openghg.store import assign_data, load_metastore, datasource_lookup
         from openghg.util import hash_retrieved_data
 
         obs = ObsSurface.load()
@@ -293,7 +299,25 @@ class ObsSurface(BaseStore):
 
         to_process = {k: v for k, v in data.items() if k in keys_to_process}
 
-        lookup_results = obs.datasource_lookup(data=to_process, metastore=metastore)
+        if required_metakeys is None:
+            required_metakeys = {
+                "species",
+                "site",
+                "station_long_name",
+                "inlet",
+                "instrument",
+                "network",
+                "data_type",
+                "data_source",
+                "icos_data_level",
+            }
+            min_keys = 5
+        else:
+            min_keys = len(required_metakeys)
+
+        lookup_results = datasource_lookup(
+            metastore=metastore, data=to_process, required_keys=required_metakeys, min_keys=min_keys
+        )
 
         # Create Datasources, save them to the object store and get their UUIDs
         datasource_uuids = assign_data(
@@ -308,44 +332,6 @@ class ObsSurface(BaseStore):
         obs.save()
 
         return datasource_uuids
-
-    def datasource_lookup(self, data: Dict, metastore: TinyDB) -> Dict:
-        """Lookup Datasource using provided metadata
-
-        Args:
-            metadata: Metadata dictionary
-            metastore: TinyDB based metadata store
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.retrieve import metadata_lookup
-
-        # We need at minimum these keys all to be found
-        required = {
-            "species",
-            "site",
-            "station_long_name",
-            "inlet",
-            "instrument",
-            "network",
-            "data_type",
-            "data_source",
-            "icos_data_level",
-        }
-
-        results = {}
-        for key, _data in data.items():
-            metadata = _data["metadata"]
-            required_metadata = {k: v for k, v in metadata.items() if k in required}
-
-            if len(required_metadata) < 6:
-                raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required}"
-                )
-
-            results[key] = metadata_lookup(metadata=required_metadata, database=metastore)
-
-        return results
 
     def store_hashes(self, hashes: Dict) -> None:
         """Store hashes of data retrieved from a remote data source such as
