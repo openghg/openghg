@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
 from xarray import Dataset
-from tinydb import TinyDB
 
 from openghg.store.base import BaseStore
 
@@ -47,7 +46,7 @@ class Emissions(BaseStore):
         """
         from collections import defaultdict
         from xarray import open_dataset
-        from openghg.store import assign_data, load_metastore
+        from openghg.store import assign_data, load_metastore, datasource_lookup
         from openghg.util import (
             clean_string,
             hash_file,
@@ -134,9 +133,8 @@ class Emissions(BaseStore):
         emissions_data[key]["data"] = em_data
         emissions_data[key]["metadata"] = metadata
 
-        keyed_metadata = {key: metadata}
-
-        lookup_results = em_store.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
+        required = ("species", "source", "domain", "date")
+        lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
 
         data_type = "emissions"
         datasource_uuids = assign_data(
@@ -146,68 +144,12 @@ class Emissions(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
+        em_store.add_datasources(uuids=datasource_uuids, data=emissions_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
 
         em_store.save()
-
         metastore.close()
 
         return datasource_uuids
-
-    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
-
-        Args:
-            species: Site code
-            domain: Domain
-            model: Model name
-            height: Height
-        Returns:
-            str or dict: UUID or False if no entry
-        """
-        uuid = self._datasource_table[species][source][domain][date]
-
-        return uuid if uuid else False
-
-    def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
-        """Record a UUID of a Datasource in the datasource table
-
-        Args:
-            site: Site code
-            domain: Domain
-            model: Model name
-            height: Height
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[species][source][domain][date] = uuid
-
-    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.retrieve import metadata_lookup
-
-        lookup_results = {}
-
-        for key, data in metadata.items():
-            species = data["species"]
-            source = data["source"]
-            domain = data["domain"]
-            date = data["date"]
-
-            result = metadata_lookup(
-                database=metastore, species=species, source=source, domain=domain, date=date
-            )
-
-            lookup_results[key] = result
-
-        return lookup_results

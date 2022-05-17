@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union, Any
 from xarray import Dataset
-from tinydb import TinyDB
 import numpy as np
 
 from openghg.store.base import BaseStore
@@ -61,7 +60,7 @@ class BoundaryConditions(BaseStore):
         """
         from collections import defaultdict
         from xarray import open_dataset
-        from openghg.store import assign_data
+        from openghg.store import assign_data, datasource_lookup
         from openghg.util import (
             clean_string,
             hash_file,
@@ -149,9 +148,10 @@ class BoundaryConditions(BaseStore):
         boundary_conditions_data[key]["data"] = bc_data
         boundary_conditions_data[key]["metadata"] = metadata
 
-        keyed_metadata = {key: metadata}
-
-        lookup_results = bc_store.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
+        required_keys = ("species", "bc_input", "domain", "date")
+        lookup_results = datasource_lookup(
+            metastore=metastore, data=boundary_conditions_data, required_keys=required_keys
+        )
 
         data_type = "boundary_conditions"
         datasource_uuids = assign_data(
@@ -161,7 +161,7 @@ class BoundaryConditions(BaseStore):
             data_type=data_type,
         )
 
-        bc_store.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
+        bc_store.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         bc_store._file_hashes[file_hash] = filepath.name
@@ -204,29 +204,3 @@ class BoundaryConditions(BaseStore):
         # TODO: Create check_format() function to define and align format to
         # expected values within database
         pass
-
-    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.retrieve import metadata_lookup
-
-        lookup_results = {}
-
-        for key, data in metadata.items():
-            species = data["species"]
-            bc_input = data["bc_input"]
-            domain = data["domain"]
-            date = data["date"]
-
-            result = metadata_lookup(
-                database=metastore, species=species, bc_input=bc_input, domain=domain, date=date
-            )
-
-            lookup_results[key] = result
-
-        return lookup_results

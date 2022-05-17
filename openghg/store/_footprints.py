@@ -1,4 +1,3 @@
-from tinydb import TinyDB
 from typing import DefaultDict, Dict, List, Optional, Union, NoReturn
 from pathlib import Path
 from pandas import Timestamp
@@ -65,7 +64,7 @@ class Footprints(BaseStore):
             timestamp_now,
             clean_string,
         )
-        from openghg.store import assign_data, infer_date_range, load_metastore
+        from openghg.store import assign_data, infer_date_range, load_metastore, datasource_lookup
 
         filepath = Path(filepath)
 
@@ -168,10 +167,11 @@ class Footprints(BaseStore):
         footprint_data[key]["data"] = fp_data
         footprint_data[key]["metadata"] = metadata
 
-        # This will be removed when we process multiple files
-        keyed_metadata = {key: metadata}
-
-        lookup_results = fp.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
+        # These are the keys we will take from the metadata to search the
+        # metadata store for a Datasource, they should provide as much detail as possible
+        # to uniquely identify a Datasource
+        required = ("site", "model", "height", "domain")
+        lookup_results = datasource_lookup(metastore=metastore, data=footprint_data, required_keys=required)
 
         data_type = "footprints"
         datasource_uuids: Dict[str, Dict] = assign_data(
@@ -181,7 +181,7 @@ class Footprints(BaseStore):
             data_type=data_type,
         )
 
-        fp.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
+        fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         fp._file_hashes[file_hash] = filepath.name
@@ -191,30 +191,6 @@ class Footprints(BaseStore):
         metastore.close()
 
         return datasource_uuids
-
-    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.retrieve import metadata_lookup
-
-        lookup_results = {}
-
-        for key, data in metadata.items():
-            site = data["site"]
-            model = data["model"]
-            height = data["height"]
-            domain = data["domain"]
-
-            result = metadata_lookup(database=metastore, site=site, domain=domain, model=model, height=height)
-
-            lookup_results[key] = result
-
-        return lookup_results
 
     def search(
         self,

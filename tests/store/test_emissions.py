@@ -1,10 +1,6 @@
-from curses import meta
-import pytest
-
 from openghg.store import Emissions
 from openghg.retrieve import search
-from openghg.store import recombine_datasets, metastore_manager
-from openghg.objectstore import get_local_bucket
+from openghg.store import recombine_datasets, metastore_manager, datasource_lookup
 from xarray import open_dataset
 from helpers import get_emissions_datapath
 
@@ -72,43 +68,28 @@ def test_read_file():
     assert metadata == expected_metadata
 
 
-def test_set_lookup_uuids():
-    e = Emissions()
-
-    fake_uuid = "123456789"
-
-    species = "test_species"
-    source = "test_source"
-    domain = "test_domain"
-    date = "test_date"
-
-    e.set_uuid(species=species, source=source, domain=domain, date=date, uuid=fake_uuid)
-
-    found_uid = e.lookup_uuid(species=species, source=source, domain=domain, date=date)
-
-    assert e._datasource_table[species][source][domain][date] == found_uid == fake_uuid
-
-
 def test_datasource_add_lookup():
     e = Emissions()
 
     fake_datasource = {"co2_gppcardamom_europe_2012": {"uuid": "mock-uuid-123456", "new": True}}
 
-    fake_metadata = {
+    mock_data = {
         "co2_gppcardamom_europe_2012": {
-            "species": "co2",
-            "domain": "europe",
-            "source": "gppcardamom",
-            "date": "2012",
+            "metadata": {
+                "species": "co2",
+                "domain": "europe",
+                "source": "gppcardamom",
+                "date": "2012",
+            }
         }
     }
 
     with metastore_manager(key="test-key-123") as metastore:
-        e.add_datasources(uuids=fake_datasource, metadata=fake_metadata, metastore=metastore)
+        e.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
         assert e.datasources() == ["mock-uuid-123456"]
 
-        lookup = e.datasource_lookup(fake_metadata, metastore=metastore)
+        required = ["species", "domain", "source", "date"]
+        lookup = datasource_lookup(metastore=metastore, data=mock_data, required_keys=required)
 
         assert lookup["co2_gppcardamom_europe_2012"] == fake_datasource["co2_gppcardamom_europe_2012"]["uuid"]
-

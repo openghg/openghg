@@ -2,6 +2,8 @@ addict
 cdsapi
 dask
 folium
+h5py
+h5netcdf
 icoscp
 lazy_import
 matplotlib

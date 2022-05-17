@@ -22,7 +22,7 @@ Data Specifications
 
 The specifications for data accepted by storage functions in OpenGHG
 
-.. toctre::
+.. toctree::
    :maxdepth: 1
 
    specifications/data_spec
