@@ -1,7 +1,6 @@
 from openghg.store.base import BaseStore
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
-from tinydb import TinyDB
 from xarray import Dataset
 
 __all__ = ["EulerianModel"]
@@ -151,7 +150,7 @@ class EulerianModel(BaseStore):
         model_data[key]["data"] = em_data
         model_data[key]["metadata"] = metadata
 
-        required = {"model", "species", "date"}
+        required = ("model", "species", "date")
         lookup_results = datasource_lookup(metastore=metastore, data=model_data, required_keys=required)
 
         data_type = "eulerian_model"

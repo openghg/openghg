@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
 from xarray import Dataset
-from tinydb import TinyDB
 
 from openghg.store.base import BaseStore
 
@@ -134,7 +133,7 @@ class Emissions(BaseStore):
         emissions_data[key]["data"] = em_data
         emissions_data[key]["metadata"] = metadata
 
-        required = {"species", "source", "domain", "date"}
+        required = ("species", "source", "domain", "date")
         lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
 
         data_type = "emissions"

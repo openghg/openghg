@@ -1,5 +1,4 @@
-from tinydb import TinyDB
-from typing import DefaultDict, Dict, Iterable, List, Optional, Union, NoReturn
+from typing import DefaultDict, Dict, List, Optional, Union, NoReturn
 from pathlib import Path
 from pandas import Timestamp
 from xarray import Dataset
@@ -171,7 +170,7 @@ class Footprints(BaseStore):
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
-        required = {"site", "model", "height", "domain"}
+        required = ("site", "model", "height", "domain")
         lookup_results = datasource_lookup(metastore=metastore, data=footprint_data, required_keys=required)
 
         data_type = "footprints"

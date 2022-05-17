@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union, Any
 from xarray import Dataset
-from tinydb import TinyDB
 import numpy as np
 
 from openghg.store.base import BaseStore
@@ -149,7 +148,7 @@ class BoundaryConditions(BaseStore):
         boundary_conditions_data[key]["data"] = bc_data
         boundary_conditions_data[key]["metadata"] = metadata
 
-        required_keys = {"species", "bc_input", "domain", "date"}
+        required_keys = ("species", "bc_input", "domain", "date")
         lookup_results = datasource_lookup(
             metastore=metastore, data=boundary_conditions_data, required_keys=required_keys
         )

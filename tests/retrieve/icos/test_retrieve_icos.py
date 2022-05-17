@@ -84,7 +84,7 @@ def test_icos_retrieve_and_store(mocker, capfd):
         "inlet": "10m",
         "station_latitude": "51.8088",
         "station_longitude": "10.535",
-        "elevation": "801",
+        "elevation": "801m",
         "data_owner": "dagmar kubistin",
         "data_owner_email": "dagmar.kubistin@dwd.de",
         "station_height_masl": "801m",
@@ -140,9 +140,9 @@ def test_icos_retrieve_and_store(mocker, capfd):
     assert "There is no new data to process." in out.strip()
 
 
-def test_retrieve_twice():
-    wao_one = retrieve(site="WAO", species="ch4")
+# def test_retrieve_twice():
+#     wao_one = retrieve(site="WAO", species="ch4")
 
-    wao_data = retrieve(site="WAO", species="CH4", data_level=1)
+#     wao_data = retrieve(site="WAO", species="CH4", data_level=1)
 
-    wao_data2 = retrieve(site="WAO", species="CH4", data_level=1)
+#     wao_data2 = retrieve(site="WAO", species="CH4", data_level=1)

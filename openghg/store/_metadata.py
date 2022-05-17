@@ -1,6 +1,6 @@
 import contextlib
 import json
-from typing import Dict, Iterator, Iterable, Optional
+from typing import Dict, Iterator, Optional, Sequence
 
 from openghg.objectstore import exists, get_local_bucket, get_object, set_object_from_json
 from tinydb import Storage, TinyDB
@@ -66,7 +66,7 @@ class ObjectStorage(Storage):
 
 
 def datasource_lookup(
-    metastore: TinyDB, data: Dict, required_keys: Iterable[str], min_keys: Optional[int] = None
+    metastore: TinyDB, data: Dict, required_keys: Sequence[str], min_keys: Optional[int] = None
 ) -> Dict:
     """Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys
     to be present and will require at leas min_keys of these to be present when searching.

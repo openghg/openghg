@@ -1,9 +1,7 @@
-from curses import meta
-from tinydb import TinyDB
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Sequence, Union
 
 
 __all__ = ["ObsSurface"]
@@ -129,7 +127,7 @@ class ObsSurface(BaseStore):
                         measurement_type=measurement_type,
                     )
 
-                required_keys = {
+                required_keys = (
                     "species",
                     "site",
                     "station_long_name",
@@ -139,7 +137,7 @@ class ObsSurface(BaseStore):
                     "data_type",
                     "data_source",
                     "icos_data_level",
-                }
+                )
 
                 lookup_results = datasource_lookup(
                     metastore=metastore, data=data, required_keys=required_keys, min_keys=5
@@ -218,7 +216,7 @@ class ObsSurface(BaseStore):
 
             combined = {site: {"data": measurement_data, "metadata": metadata}}
 
-            required_keys = {
+            required_keys = (
                 "site",
                 "species",
                 "inlet",
@@ -226,7 +224,7 @@ class ObsSurface(BaseStore):
                 "instrument",
                 "sampling_period",
                 "measurement_type",
-            }
+            )
 
             lookup_results = datasource_lookup(
                 metastore=metastore, data=combined, required_keys=required_keys, min_keys=5
@@ -261,7 +259,7 @@ class ObsSurface(BaseStore):
 
     @staticmethod
     def store_data(
-        data: Dict, overwrite: bool = False, required_metakeys: Optional[Dict] = None
+        data: Dict, overwrite: bool = False, required_metakeys: Optional[Sequence] = None
     ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
@@ -300,7 +298,7 @@ class ObsSurface(BaseStore):
         to_process = {k: v for k, v in data.items() if k in keys_to_process}
 
         if required_metakeys is None:
-            required_metakeys = {
+            required_metakeys = (
                 "species",
                 "site",
                 "station_long_name",
@@ -310,7 +308,7 @@ class ObsSurface(BaseStore):
                 "data_type",
                 "data_source",
                 "icos_data_level",
-            }
+            )
             min_keys = 5
         else:
             min_keys = len(required_metakeys)
