@@ -174,3 +174,11 @@ The second time we (or another use) retrieves the data it will be pulled from th
 ```{code-cell} ipython3
 hfd_data2 = retrieve_ceda(site="hfd", species="co2")
 ```
+
+```{code-cell} ipython3
+hfd_data2
+```
+
+```{code-cell} ipython3
+
+```

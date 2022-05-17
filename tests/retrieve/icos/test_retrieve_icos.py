@@ -138,11 +138,3 @@ def test_icos_retrieve_and_store(mocker, capfd):
     out, _ = capfd.readouterr()
 
     assert "There is no new data to process." in out.strip()
-
-
-# def test_retrieve_twice():
-#     wao_one = retrieve(site="WAO", species="ch4")
-
-#     wao_data = retrieve(site="WAO", species="CH4", data_level=1)
-
-#     wao_data2 = retrieve(site="WAO", species="CH4", data_level=1)
