@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.g55d1785.dirty documentation</title>
+    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.g38e07a0.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -107,6 +107,12 @@
 <li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="index_devapi.html">
   Developer API
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../whatsnew/index.html">
+  What’s new
  </a>
 </li>
 
@@ -281,7 +287,7 @@
 by the <code class="docutils literal notranslate"><span class="pre">search</span></code> function.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">SearchResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">SearchResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_data=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud=False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults" title="Permalink to this definition">#</a></dt>
 <dd><p>This class is used to return data from the search function. It
 has member functions to retrieve data from the object store.</p>
 <dl class="field-list simple">
@@ -306,7 +312,7 @@ has member functions to retrieve data from the object store.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.SearchResults.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ranked_data=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.SearchResults.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -569,13 +575,18 @@ containing a Dataset for each site code.</p>
 <p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is used to return observations data from the get_flux function</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">FluxData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_flux_data.html#FluxData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FluxData" title="Permalink to this definition">#</a></dt>
-<dd><p>This class is used to return flux/emissions data from the get_flux function</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">FluxData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_flux_data.html#FluxData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FluxData" title="Permalink to this definition">#</a></dt>
+<dd><p>This class is used to return observations data from the get_flux function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>) – xarray Dataframe</p></li>
 <li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Dictionary of metadata including model run parameters</p></li>
+<li><p><strong>flux</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Dictionary of flux data</p></li>
+<li><p><strong>bc</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Boundary conditions dictionary</p></li>
+<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
+<li><p><strong>scales</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Measurements scale</p></li>
+<li><p><strong>units</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Measurements units</p></li>
 </ul>
 </dd>
 </dl>
@@ -599,7 +610,7 @@ containing a Dataset for each site code.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FluxData.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FluxData.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -633,18 +644,18 @@ containing a Dataset for each site code.</p>
 <p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is used to return observations data from the get_footprint function</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">FootprintData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_footprint_data.html#FootprintData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FootprintData" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">FootprintData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_footprint_data.html#FootprintData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.FootprintData" title="Permalink to this definition">#</a></dt>
 <dd><p>This class is used to return observations data from the get_footprint function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>) – xarray Dataframe</p></li>
 <li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Dictionary of metadata including model run parameters</p></li>
-<li><p><strong>flux</strong> – Dictionary of flux data</p></li>
-<li><p><strong>bc</strong> – Boundary conditions dictionary</p></li>
-<li><p><strong>species</strong> – Species name</p></li>
-<li><p><strong>scales</strong> – Measurements scale</p></li>
-<li><p><strong>units</strong> – Measurements units</p></li>
+<li><p><strong>flux</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Dictionary of flux data</p></li>
+<li><p><strong>bc</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Boundary conditions dictionary</p></li>
+<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
+<li><p><strong>scales</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Measurements scale</p></li>
+<li><p><strong>units</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Measurements units</p></li>
 </ul>
 </dd>
 </dl>
@@ -668,7 +679,7 @@ containing a Dataset for each site code.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.FootprintData.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__init__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.FootprintData.__init__" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g55d1785.dirty documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g38e07a0.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -109,6 +109,12 @@
  </a>
 </li>
 
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../whatsnew/index.html">
+  What’s new
+ </a>
+</li>
+
     
 </ul>
       </div>
@@ -169,7 +175,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">tinydb.database</span> <span class="kn">import</span> <span class="n">TinyDB</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;search&quot;</span><span class="p">]</span>
@@ -183,7 +189,44 @@
     <span class="k">return</span> <span class="n">x</span> <span class="o">|</span> <span class="n">y</span>
 
 
-<span class="k">def</span> <span class="nf">metadata_lookup</span><span class="p">(</span><span class="n">database</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">metadata_lookup</span><span class="p">(</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Searches the passed database for the given metadata</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        metadata: Keys we are required to find</span>
+<span class="sd">        database: The tinydb database for the storage object</span>
+<span class="sd">        additional: Keys we&#39;d like to find (currently unused)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str or bool: UUID string if matching Datasource found, otherwise False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">Query</span>
+    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+    <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">DatasourceLookupError</span>
+
+    <span class="n">q</span> <span class="o">=</span> <span class="n">Query</span><span class="p">()</span>
+
+    <span class="n">search_attrs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="n">required_result</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">_find_and</span><span class="p">,</span> <span class="n">search_attrs</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">required_result</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DatasourceLookupError</span><span class="p">(</span><span class="s2">&quot;More than once Datasource found for metadata, refine lookup.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># q = Query()</span>
+
+    <span class="c1"># search_attrs = [getattr(q, k) == v for k, v in additional_metadata.items()]</span>
+    <span class="c1"># required_results = database.search(reduce(_find_or, search_attrs))</span>
+
+    <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">required_result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">uuid</span>
+
+
+<span class="k">def</span> <span class="nf">metadata_lookup_old</span><span class="p">(</span><span class="n">database</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Searches the passed database for the given metadata</span>
 
 <span class="sd">    Args:</span>
@@ -346,6 +389,9 @@
 
     <span class="c1"># Find the Datasources that contain matching metadata</span>
     <span class="n">matching_sources</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="o">.</span><span class="n">uuid</span><span class="p">():</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasources</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">search_metadata</span><span class="p">(</span><span class="o">**</span><span class="n">search_kwargs</span><span class="p">)}</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_sources</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SearchResults</span><span class="p">()</span>
 
     <span class="c1"># TODO - Update this as it only uses the ACRG repo JSON at the moment</span>
     <span class="c1"># Check if this site only has one inlet, if so skip ranking</span>

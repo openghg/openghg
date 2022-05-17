@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._emissions &#8212; OpenGHG 0+untagged.1.g55d1785.dirty documentation</title>
+    <title>openghg.store._emissions &#8212; OpenGHG 0+untagged.1.g38e07a0.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -109,6 +109,12 @@
  </a>
 </li>
 
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../whatsnew/index.html">
+  What’s new
+ </a>
+</li>
+
     
 </ul>
       </div>
@@ -167,7 +173,6 @@
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
-<span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">TinyDB</span>
 
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 
@@ -213,7 +218,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
         <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">open_dataset</span>
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span>
+        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span><span class="p">,</span> <span class="n">datasource_lookup</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
             <span class="n">clean_string</span><span class="p">,</span>
             <span class="n">hash_file</span><span class="p">,</span>
@@ -300,9 +305,8 @@
         <span class="n">emissions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">em_data</span>
         <span class="n">emissions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
 
-        <span class="n">keyed_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}</span>
-
-        <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">em_store</span><span class="o">.</span><span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">keyed_metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">,</span> <span class="s2">&quot;date&quot;</span><span class="p">)</span>
+        <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
 
         <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;emissions&quot;</span>
         <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
@@ -312,71 +316,15 @@
             <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">em_store</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">keyed_metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+        <span class="n">em_store</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
 
         <span class="c1"># Record the file hash in case we see this file again</span>
         <span class="n">em_store</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
 
         <span class="n">em_store</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-
         <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">datasource_uuids</span></div>
-
-<div class="viewcode-block" id="Emissions.lookup_uuid"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Emissions.lookup_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">lookup_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Perform a lookup for the UUID of a Datasource</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            species: Site code</span>
-<span class="sd">            domain: Domain</span>
-<span class="sd">            model: Model name</span>
-<span class="sd">            height: Height</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            str or dict: UUID or False if no entry</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="n">source</span><span class="p">][</span><span class="n">domain</span><span class="p">][</span><span class="n">date</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">uuid</span> <span class="k">if</span> <span class="n">uuid</span> <span class="k">else</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="Emissions.set_uuid"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Emissions.set_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">set_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Record a UUID of a Datasource in the datasource table</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            site: Site code</span>
-<span class="sd">            domain: Domain</span>
-<span class="sd">            model: Model name</span>
-<span class="sd">            height: Height</span>
-<span class="sd">            uuid: UUID of Datasource</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_table</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="n">source</span><span class="p">][</span><span class="n">domain</span><span class="p">][</span><span class="n">date</span><span class="p">]</span> <span class="o">=</span> <span class="n">uuid</span></div>
-
-<div class="viewcode-block" id="Emissions.datasource_lookup"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Emissions.datasource_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">datasource_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metastore</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Find the Datasource we should assign the data to</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            metadata: Dictionary of metadata</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary of datasource information</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">metadata_lookup</span>
-
-        <span class="n">lookup_results</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
-            <span class="n">source</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span>
-            <span class="n">domain</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span>
-            <span class="n">date</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span>
-
-            <span class="n">result</span> <span class="o">=</span> <span class="n">metadata_lookup</span><span class="p">(</span>
-                <span class="n">database</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date</span>
-            <span class="p">)</span>
-
-            <span class="n">lookup_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
-
-        <span class="k">return</span> <span class="n">lookup_results</span></div></div>
+        <span class="k">return</span> <span class="n">datasource_uuids</span></div></div>
 </pre></div>
 
               </div>

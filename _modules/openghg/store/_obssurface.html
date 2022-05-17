@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g55d1785.dirty documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g38e07a0.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -109,6 +109,12 @@
  </a>
 </li>
 
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../whatsnew/index.html">
+  What’s new
+ </a>
+</li>
+
     
 </ul>
       </div>
@@ -164,11 +170,10 @@
               <div>
                 
   <h1>Source code for openghg.store._obssurface</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">TinyDB</span>
-<span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
+<span></span><span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">resultsType</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ObsSurface&quot;</span><span class="p">]</span>
@@ -218,7 +223,7 @@
         <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_surface_parser</span><span class="p">,</span> <span class="n">hash_file</span><span class="p">,</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">verify_site</span>
         <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">SurfaceTypes</span>
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span>
+        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span><span class="p">,</span> <span class="n">datasource_lookup</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">filepath</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
@@ -264,7 +269,6 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
 
-                <span class="c1"># try:</span>
                 <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span>
@@ -295,10 +299,21 @@
                         <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
                     <span class="p">)</span>
 
-                <span class="c1"># Extract the metadata for each set of measurements to perform a Datasource lookup</span>
-                <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;species&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;site&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;station_long_name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;network&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;data_source&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;icos_data_level&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
 
-                <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+                <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span>
+                    <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span><span class="p">,</span> <span class="n">min_keys</span><span class="o">=</span><span class="mi">5</span>
+                <span class="p">)</span>
 
                 <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
                 <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
@@ -308,7 +323,7 @@
                 <span class="n">results</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">][</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
 
                 <span class="c1"># Record the Datasources we&#39;ve created / appended to</span>
-                <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+                <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
 
                 <span class="c1"># Store the hash as the key for easy searching, store the filename as well for</span>
                 <span class="c1"># ease of checking by user</span>
@@ -344,7 +359,7 @@
 <span class="sd">        This data is different in that it contains multiple sites in the same file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.standardise.surface</span> <span class="kn">import</span> <span class="n">parse_aqmesh</span>
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span>
+        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span><span class="p">,</span> <span class="n">datasource_lookup</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">hash_file</span>
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
         <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
@@ -371,15 +386,27 @@
                     <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
 
-            <span class="n">site_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">site</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}</span>
-            <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">site_metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+            <span class="n">combined</span> <span class="o">=</span> <span class="p">{</span><span class="n">site</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">measurement_data</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}}</span>
+
+            <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;site&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;species&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;network&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sampling_period&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;measurement_type&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span>
+                <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">combined</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span><span class="p">,</span> <span class="n">min_keys</span><span class="o">=</span><span class="mi">5</span>
+            <span class="p">)</span>
 
             <span class="n">uuid</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">site</span><span class="p">]</span>
 
             <span class="c1"># Jump through these hoops until we can rework the data assignment functionality to split it out</span>
             <span class="c1"># into more sensible functions</span>
             <span class="c1"># TODO - fix the assign data function to avoid this kind of hoop jumping</span>
-            <span class="n">combined</span> <span class="o">=</span> <span class="p">{</span><span class="n">site</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">measurement_data</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}}</span>
             <span class="n">lookup_result</span> <span class="o">=</span> <span class="p">{</span><span class="n">site</span><span class="p">:</span> <span class="n">uuid</span><span class="p">}</span>
 
             <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
@@ -390,7 +417,7 @@
             <span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
 
             <span class="c1"># Record the Datasources we&#39;ve created / appended to</span>
-            <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">site_metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+            <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">combined</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
 
             <span class="c1"># Store the hash as the key for easy searching, store the filename as well for</span>
             <span class="c1"># ease of checking by user</span>
@@ -403,18 +430,23 @@
         <span class="k">return</span> <span class="n">results</span></div>
 
 <div class="viewcode-block" id="ObsSurface.store_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.store_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">required_metakeys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;This expects already standardised data such as ICOS / CEDA</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            standardised_data: Dictionary of data in standard format</span>
-<span class="sd">            # TODO - add link to docs here</span>
-<span class="sd">            See the data spec under Development -&gt; Data specifications</span>
-<span class="sd">            in the documentation</span>
+<span class="sd">            data: Dictionary of data in standard format, see the data spec under</span>
+<span class="sd">            Development -&gt; Data specifications in the documentation</span>
+<span class="sd">            overwrite: If True overwrite currently stored data</span>
+<span class="sd">            required_metakeys: Keys in the metadata we should use to store this metadata in the object store</span>
+<span class="sd">            if None it defaults to:</span>
+<span class="sd">            {&quot;species&quot;, &quot;site&quot;, &quot;station_long_name&quot;, &quot;inlet&quot;, &quot;instrument&quot;,</span>
+<span class="sd">            &quot;network&quot;, &quot;data_type&quot;, &quot;data_source&quot;, &quot;icos_data_level&quot;}</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict or None:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span>
+        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">load_metastore</span><span class="p">,</span> <span class="n">datasource_lookup</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">hash_retrieved_data</span>
 
         <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
@@ -436,9 +468,26 @@
             <span class="n">keys_to_process</span> <span class="o">-=</span> <span class="n">seen_before</span>
 
         <span class="n">to_process</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys_to_process</span><span class="p">}</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">_data</span> <span class="ow">in</span> <span class="n">to_process</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
-        <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">required_metakeys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">required_metakeys</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;species&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;site&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;station_long_name&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;network&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data_source&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;icos_data_level&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">min_keys</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">min_keys</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_metakeys</span><span class="p">)</span>
+
+        <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span>
+            <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">to_process</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required_metakeys</span><span class="p">,</span> <span class="n">min_keys</span><span class="o">=</span><span class="n">min_keys</span>
+        <span class="p">)</span>
 
         <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
         <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
@@ -446,42 +495,13 @@
         <span class="p">)</span>
 
         <span class="c1"># Record the Datasources we&#39;ve created / appended to</span>
-        <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+        <span class="n">obs</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">to_process</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
         <span class="n">obs</span><span class="o">.</span><span class="n">store_hashes</span><span class="p">(</span><span class="n">hashes</span><span class="o">=</span><span class="n">hashes</span><span class="p">)</span>
 
         <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">obs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
-
-<div class="viewcode-block" id="ObsSurface.datasource_lookup"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.datasource_lookup">[docs]</a>    <span class="k">def</span> <span class="nf">datasource_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metastore</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Find the Datasource we should assign the data to</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            metadata: Dictionary of metadata returned from the data_obj.read_file function</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary of datasource information</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">metadata_lookup</span>
-
-        <span class="n">lookup_results</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">site</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
-            <span class="n">network</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span>
-            <span class="n">inlet</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
-            <span class="n">sampling_period</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]</span>
-            <span class="n">species</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
-
-            <span class="n">lookup_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata_lookup</span><span class="p">(</span>
-                <span class="n">database</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span>
-                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-                <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
-                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-                <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">lookup_results</span></div>
 
 <div class="viewcode-block" id="ObsSurface.store_hashes"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.store_hashes">[docs]</a>    <span class="k">def</span> <span class="nf">store_hashes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hashes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Store hashes of data retrieved from a remote data source such as</span>
@@ -495,26 +515,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="ObsSurface.add_datasources"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.add_datasources">[docs]</a>    <span class="k">def</span> <span class="nf">add_datasources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metastore</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add the passed list of Datasources to the current list</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            datasource_uuids: Datasource UUIDs</span>
-<span class="sd">            metadata: Metadata for each species</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">uuids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">new</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]</span>
-            <span class="c1"># Only add if this is a new Datasource</span>
-            <span class="k">if</span> <span class="n">new</span><span class="p">:</span>
-                <span class="n">meta_copy</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">uid</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
-                <span class="n">meta_copy</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
-
-                <span class="n">metastore</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">meta_copy</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span></div>
 
 <div class="viewcode-block" id="ObsSurface.delete"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Delete a Datasource with the given UUID</span>

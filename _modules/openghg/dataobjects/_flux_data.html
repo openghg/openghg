@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._flux_data &#8212; OpenGHG 0+untagged.1.g55d1785.dirty documentation</title>
+    <title>openghg.dataobjects._flux_data &#8212; OpenGHG 0+untagged.1.g38e07a0.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -109,6 +109,12 @@
  </a>
 </li>
 
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../whatsnew/index.html">
+  What’s new
+ </a>
+</li>
+
     
 </ul>
       </div>
@@ -165,6 +171,7 @@
                 
   <h1>Source code for openghg.dataobjects._flux_data</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
 <span class="kn">from</span> <span class="nn">._basedata</span> <span class="kn">import</span> <span class="n">_BaseData</span>
 
@@ -173,16 +180,29 @@
 
 <div class="viewcode-block" id="FluxData"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.FluxData">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">FluxData</span><span class="p">(</span><span class="n">_BaseData</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;This class is used to return flux/emissions data from the get_flux function</span>
+    <span class="sd">&quot;&quot;&quot;This class is used to return observations data from the get_flux function</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: xarray Dataframe</span>
 <span class="sd">        metadata: Dictionary of metadata including model run parameters</span>
+<span class="sd">        flux: Dictionary of flux data</span>
+<span class="sd">        bc: Boundary conditions dictionary</span>
+<span class="sd">        species: Species name</span>
+<span class="sd">        scales: Measurements scale</span>
+<span class="sd">        units: Measurements units</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">flux</span><span class="p">:</span> <span class="n">Dict</span>
+    <span class="n">bc</span><span class="p">:</span> <span class="n">Dict</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">scales</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">units</span><span class="p">:</span> <span class="nb">str</span>
 
 <div class="viewcode-block" id="FluxData.__str__"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.FluxData.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="se">\n</span><span class="s2">Metadata : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Flux : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="si">}</span><span class="se">\n</span><span class="s2">BC: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Species : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="si">}</span><span class="se">\n</span><span class="s2">Scales: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scales</span><span class="si">}</span><span class="se">\n</span><span class="s2">Units: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span></div></div>
 </pre></div>
 

@@ -22,6 +22,12 @@ Classes within the client module are used to interact with OpenGHG, whether it b
 :func:`~openghg.client.get_obs_surface`
     Retrieve data from the object store in a format expected by the ACRG
 
+:func:`~openghg.client.retrieve_ceda`
+    Retrieve data from the CEDA Archive
+
+:func:`~openghg.client.retrieve_icos`
+    Retrieve data from the ICOS Carbon Portal
+
 
 plotting
 ========
@@ -30,3 +36,6 @@ These functions are a work in progress, we hope to soon allow users to easily cr
 
 :func:`~openghg.plotting.plot_footprint`
     Take a footprint dataset and return a 2D plot
+
+:func:`~openghg.plotting.plot_timeseries`
+    Plot timeseries data by passing in an ObsData or a list of ObsData objects

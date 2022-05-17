@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>User API &#8212; OpenGHG 0+untagged.1.g55d1785.dirty documentation</title>
+    <title>User API &#8212; OpenGHG 0+untagged.1.g38e07a0.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -112,6 +112,12 @@
  </a>
 </li>
 
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../whatsnew/index.html">
+  What’s new
+ </a>
+</li>
+
     
 </ul>
       </div>
@@ -211,6 +217,10 @@ OpenGHG hub. For developers documentation of the internal workings of the librar
 </dd>
 <dt><a class="reference internal" href="api_client.html#openghg.client.get_obs_surface" title="openghg.client.get_obs_surface"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_obs_surface()</span></code></a></dt><dd><p>Retrieve data from the object store in a format expected by the ACRG</p>
 </dd>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">retrieve_ceda()</span></code></dt><dd><p>Retrieve data from the CEDA Archive</p>
+</dd>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">retrieve_icos()</span></code></dt><dd><p>Retrieve data from the ICOS Carbon Portal</p>
+</dd>
 </dl>
 </section>
 <section id="plotting">
@@ -218,6 +228,8 @@ OpenGHG hub. For developers documentation of the internal workings of the librar
 <p>These functions are a work in progress, we hope to soon allow users to easily create timeseries and 2D plots using Plotly.</p>
 <dl class="simple">
 <dt><a class="reference internal" href="api_plotting.html#openghg.plotting.plot_footprint" title="openghg.plotting.plot_footprint"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_footprint()</span></code></a></dt><dd><p>Take a footprint dataset and return a 2D plot</p>
+</dd>
+<dt><a class="reference internal" href="api_plotting.html#openghg.plotting.plot_timeseries" title="openghg.plotting.plot_timeseries"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_timeseries()</span></code></a></dt><dd><p>Plot timeseries data by passing in an ObsData or a list of ObsData objects</p>
 </dd>
 </dl>
 </section>
