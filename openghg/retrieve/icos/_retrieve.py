@@ -1,5 +1,3 @@
-# I'm creating this submodule as I'm not quite sure where else to put this for now
-# we can always move it in the future
 from pandas import DataFrame
 from typing import Dict, List, Optional, Union
 
@@ -105,8 +103,15 @@ def _retrieve_remote(
     Returns:
         dict or None: Dictionary of processed data and metadata if found
     """
-    from icoscp.station import station  # type: ignore
-    from icoscp.cpb.dobj import Dobj  # type: ignore
+    # icoscp isn't available to conda so we've got to resort to this for now
+    try:
+        from icoscp.station import station  # type: ignore
+        from icoscp.cpb.dobj import Dobj  # type: ignore
+    except ImportError:
+        raise ImportError(
+            "Cannot import icoscp, if you've installed OpenGHG using conda please run: pip install icoscp"
+        )
+
     from openghg.standardise.meta import assign_attributes
     from openghg.util import load_json, download_data
     from pandas import to_datetime
