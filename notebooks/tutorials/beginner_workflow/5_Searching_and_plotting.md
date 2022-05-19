@@ -12,7 +12,7 @@ kernelspec:
   name: python3
 ---
 
-# Searching and plotting
+# Workflow 5: Searching and plotting
 
 In this short tutorial we'll show how to retrieve some data and create a simple plot using one of our plotting functions.
 

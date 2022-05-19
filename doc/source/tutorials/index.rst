@@ -4,7 +4,7 @@ Tutorials
 
 These tutorials will get you up and running with OpenGHG so you can process, analyse and query data.
 The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
-repository under ``notebooks/beginner_workflow``.
+repository under ``notebooks/tutorials/beginner_workflow``.
 
 
 Tutorial 1 - Adding observation data
@@ -48,8 +48,8 @@ Tutorial 4 - Working with high time resolution CO2
 
    beginner_workflow/4_Working_with_co2
 
-Tutorial 5 - Exploring the NOAA ObsPack data
---------------------------------------------
+Tutorial 5 - Searching and plotting
+-----------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -57,8 +57,8 @@ Tutorial 5 - Exploring the NOAA ObsPack data
    beginner_workflow/5_Searching_and_plotting
 
 
-Tutorial 6 - Searching and plotting
------------------------------------
+Tutorial 6 - Exploring the NOAA ObsPack data
+--------------------------------------------
 
 .. toctree::
    :maxdepth: 1
