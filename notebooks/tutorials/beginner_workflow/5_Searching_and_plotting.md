@@ -33,7 +33,15 @@ from openghg.util import retrieve_example_data
 from openghg.client import process_obs
 
 tac_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
+bsd_data = retrieve_example_data(path="timeseries/bsd_example.tar.gz")
+```
+
+```{code-cell} ipython3
 process_obs(files=tac_data, data_type="CRDS", site="TAC", network="DECC")
+```
+
+```{code-cell} ipython3
+process_obs(files=bsd_data, data_type="CRDS", site="BSD", network="DECC")
 ```
 
 ## Searching
@@ -83,4 +91,42 @@ Then we can use the `plot_timeseries` function from the `plotting` submodule to 
 from openghg.plotting import plot_timeseries
 
 plot_timeseries(data=all_ch4_tac, units="ppb")
+```
+
+## Compare different sites
+
++++
+
+We can easily compare data from different sites by doing a quick search to see what's available
+
+```{code-cell} ipython3
+ch4_data = search(species="ch4")
+```
+
+```{code-cell} ipython3
+ch4_data
+```
+
+Then we refine our search to only retrieve the inlets we want
+
+```{code-cell} ipython3
+lower_inlets = search(species="ch4", inlet=["42m", "54m"])
+```
+
+```{code-cell} ipython3
+lower_inlets
+```
+
+Then we can retrieve all the data and make a plot.
+
+```{code-cell} ipython3
+lower_inlet_data = lower_inlets.retrieve_all()
+```
+
+```{code-cell} ipython3
+plot_timeseries(data=lower_inlet_data, title="Comparing CH4 measurements at Tacolneston and Bilsdale")
+```
+
+```{code-cell} ipython3
+tmp_dir.cleanup()
 ```
