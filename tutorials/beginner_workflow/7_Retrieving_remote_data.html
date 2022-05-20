@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 7: Retrieving data from remote archives &#8212; OpenGHG 0+untagged.1.gf9c0ce8.dirty documentation</title>
+    <title>Workflow 7: Retrieving data from remote archives &#8212; OpenGHG 0+untagged.1.g4d5f84b.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -266,6 +266,11 @@
      Retrieving a second time
     </a>
    </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#cleanup-the-temporary-object-store">
+     Cleanup the temporary object store
+    </a>
+   </li>
   </ul>
  </li>
 </ul>
@@ -292,6 +297,17 @@
   <section id="workflow-7-retrieving-data-from-remote-archives">
 <h1>Workflow 7: Retrieving data from remote archives<a class="headerlink" href="#workflow-7-retrieving-data-from-remote-archives" title="Permalink to this headline">#</a></h1>
 <p>This tutorial covers the retrieval of data from the ICOS Carbon Portal and the CEDA archives.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_dir</span><span class="o">.</span><span class="n">name</span>   <span class="c1"># temporary directory</span>
+</pre></div>
+</div>
+</div>
+</div>
 <section id="icos">
 <h2>ICOS<a class="headerlink" href="#icos" title="Permalink to this headline">#</a></h2>
 <p>It’s easy to retrieve atmospheric gas measurements from the <a class="reference external" href="https://www.icos-cp.eu/observations/carbon-portal">ICOS Carbon Portal</a> using OpenGHG. To do so we’ll use the <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.client</span></code>.</p>
@@ -399,7 +415,7 @@
 </div></blockquote>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;TOH - Level 1 data&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;WAO - Level 1 data&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -450,6 +466,13 @@
 </div>
 </div>
 <p>Now we’ve got the data, we can use it as any other <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object, using <code class="docutils literal notranslate"><span class="pre">data</span></code> and <code class="docutils literal notranslate"><span class="pre">metadata</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
 <section id="retrieving-a-second-time">
 <h3>Retrieving a second time<a class="headerlink" href="#retrieving-a-second-time" title="Permalink to this headline">#</a></h3>
 <p>The second time we (or another use) retrieves the data it will be pulled from the object store, this should be faster than retrieving from CEDA. To get the same data again use the <code class="docutils literal notranslate"><span class="pre">site</span></code>, <code class="docutils literal notranslate"><span class="pre">species</span></code> and <code class="docutils literal notranslate"><span class="pre">inlet</span></code> arguments.</p>
@@ -463,6 +486,16 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data2</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="cleanup-the-temporary-object-store">
+<h3>Cleanup the temporary object store<a class="headerlink" href="#cleanup-the-temporary-object-store" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tmp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>

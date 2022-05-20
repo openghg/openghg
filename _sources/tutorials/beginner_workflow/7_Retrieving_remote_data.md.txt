@@ -18,7 +18,13 @@ kernelspec:
 
 This tutorial covers the retrieval of data from the ICOS Carbon Portal and the CEDA archives.
 
-+++
+```{code-cell} ipython3
+import os
+import tempfile
+
+tmp_dir = tempfile.TemporaryDirectory()
+os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
+```
 
 ## ICOS
 
@@ -118,7 +124,7 @@ You can see that we've now got data from 2021-07-01 - 2022-04-24. The ability to
 > **_NOTE:_**  level 1 data may not have been quality checked.
 
 ```{code-cell} ipython3
-wao_data_level1.plot_timeseries(title="TOH - Level 1 data")
+wao_data_level1.plot_timeseries(title="WAO - Level 1 data")
 ```
 
 ### Forcing retrieval
@@ -163,7 +169,9 @@ hfd_data = retrieve_ceda(url=url)
 
 Now we've got the data, we can use it as any other `ObsData` object, using `data` and `metadata`.
 
-+++
+```{code-cell} ipython3
+hfd_data.plot_timeseries()
+```
 
 ### Retrieving a second time
 
@@ -179,6 +187,8 @@ hfd_data2 = retrieve_ceda(site="hfd", species="co2")
 hfd_data2
 ```
 
-```{code-cell} ipython3
+### Cleanup the temporary object store
 
+```{code-cell} ipython3
+tmp_dir.cleanup()
 ```

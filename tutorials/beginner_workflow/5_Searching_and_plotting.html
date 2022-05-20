@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 5: Searching and plotting &#8212; OpenGHG 0+untagged.1.gf9c0ce8.dirty documentation</title>
+    <title>Workflow 5: Searching and plotting &#8212; OpenGHG 0+untagged.1.g4d5f84b.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -229,6 +229,11 @@
    Plot all the data
   </a>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#compare-different-sites">
+   Compare different sites
+  </a>
+ </li>
 </ul>
 
 </nav>
@@ -271,7 +276,21 @@
 <span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">process_obs</span>
 
 <span class="n">tac_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;timeseries/tac_example.tar.gz&quot;</span><span class="p">)</span>
-<span class="n">process_obs</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+<span class="n">bsd_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;timeseries/bsd_example.tar.gz&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">process_obs</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">process_obs</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">bsd_data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;BSD&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -332,6 +351,61 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.plotting</span> <span class="kn">import</span> <span class="n">plot_timeseries</span>
 
 <span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">all_ch4_tac</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppb&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="compare-different-sites">
+<h2>Compare different sites<a class="headerlink" href="#compare-different-sites" title="Permalink to this headline">#</a></h2>
+<p>We can easily compare data from different sites by doing a quick search to see what’s available</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then we refine our search to only retrieve the inlets we want</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlets</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;42m&quot;</span><span class="p">,</span> <span class="s2">&quot;54m&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlets</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then we can retrieve all the data and make a plot.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlet_data</span> <span class="o">=</span> <span class="n">lower_inlets</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">lower_inlet_data</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Comparing CH4 measurements at Tacolneston and Bilsdale&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tmp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
