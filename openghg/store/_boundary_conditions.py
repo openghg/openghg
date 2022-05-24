@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union, Tuple
 from xarray import Dataset
 import numpy as np
-from tinydb import TinyDB
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -225,29 +224,3 @@ class BoundaryConditions(BaseStore):
         """
         data_schema = BoundaryConditions.schema()
         data_schema.validate_data(data)
-
-    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.retrieve import metadata_lookup
-
-        lookup_results = {}
-
-        for key, data in metadata.items():
-            species = data["species"]
-            bc_input = data["bc_input"]
-            domain = data["domain"]
-            date = data["date"]
-
-            result = metadata_lookup(
-                database=metastore, species=species, bc_input=bc_input, domain=domain, date=date
-            )
-
-            lookup_results[key] = result
-
-        return lookup_results

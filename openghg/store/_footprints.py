@@ -1,4 +1,3 @@
-from tinydb import TinyDB
 from typing import DefaultDict, Dict, List, Optional, Union, NoReturn, Tuple
 from pathlib import Path
 from pandas import Timestamp
@@ -329,30 +328,6 @@ class Footprints(BaseStore):
                                         high_time_res=high_time_res,
                                         short_lifetime=short_lifetime)
         data_schema.validate_data(data)
-
-    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.retrieve import metadata_lookup
-
-        lookup_results = {}
-
-        for key, data in metadata.items():
-            site = data["site"]
-            model = data["model"]
-            height = data["height"]
-            domain = data["domain"]
-
-            result = metadata_lookup(database=metastore, site=site, domain=domain, model=model, height=height)
-
-            lookup_results[key] = result
-
-        return lookup_results
 
     def search(
         self,
