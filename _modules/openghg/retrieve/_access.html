@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g83d35ac.dirty documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g68d57b5.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -475,15 +475,7 @@
     <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">FluxData</span><span class="p">(</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">em_ds</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
-        <span class="n">flux</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">bc</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-        <span class="n">scales</span><span class="o">=</span><span class="s2">&quot;FIXME&quot;</span><span class="p">,</span>
-        <span class="n">units</span><span class="o">=</span><span class="s2">&quot;FIXME&quot;</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">FluxData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">em_ds</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">get_bc</span><span class="p">(</span>
@@ -625,18 +617,11 @@
     <span class="c1"># fp_ds = recombine_datasets(keys=keys, sort=False) # Why did this have sort=False before?</span>
     <span class="n">fp_ds</span> <span class="o">=</span> <span class="n">recombine_datasets</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span>
+    <span class="c1"># TODO: Could incorporate this somewhere? Setting species to INERT?</span>
+    <span class="c1"># if species is None:</span>
+    <span class="c1">#     species = metadata.get(&quot;species&quot;, &quot;INERT&quot;)</span>
 
-    <span class="k">return</span> <span class="n">FootprintData</span><span class="p">(</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">fp_ds</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
-        <span class="n">flux</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">bc</span><span class="o">=</span><span class="p">{},</span>
-        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-        <span class="n">scales</span><span class="o">=</span><span class="s2">&quot;FIXME&quot;</span><span class="p">,</span>
-        <span class="n">units</span><span class="o">=</span><span class="s2">&quot;FIXME&quot;</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">FootprintData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">fp_ds</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
