@@ -300,7 +300,6 @@ def test_no_ranked_data_raises():
     assert res
 
 
-@pytest.mark.skip(reason="Needs update for new ranking search")
 def test_search_nonsense_terms():
     species = ["spam", "eggs", "terry"]
     locations = ["capegrim"]
@@ -322,11 +321,11 @@ def test_metadata_lookup():
 
         metastore.insert(metadata)
 
-        result = metadata_lookup(database=metastore, species="parrot", site="shop")
+        result = metadata_lookup(database=metastore, metadata=metadata)
 
         assert result == "uuid-888"
 
-        result = metadata_lookup(database=metastore, species="turtle")
+        result = metadata_lookup(database=metastore, metadata={"species": "turtle"})
 
         assert result is False
 
@@ -340,5 +339,7 @@ def test_metadata_lookup():
 
         metastore.insert(metadata)
 
+        to_find = {"species": "parrot", "site": "shop"}
+
         with pytest.raises(DatasourceLookupError):
-            metadata_lookup(database=metastore, species="parrot", site="shop")
+            metadata_lookup(database=metastore, metadata=to_find)

@@ -1,6 +1,6 @@
 import pytest
 
-from openghg.store import Footprints, recombine_datasets, metastore_manager
+from openghg.store import Footprints, recombine_datasets, metastore_manager, datasource_lookup
 from openghg.retrieve import search
 from openghg.objectstore import get_local_bucket
 from helpers import get_footprint_datapath
@@ -249,7 +249,7 @@ def test_read_footprint_co2():
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "spatial_resolution" : "standard_spatial_resolution",
+        "spatial_resolution": "standard_spatial_resolution",
         "time_resolution": "high_time_resolution",
         "time_period": "1 hour",
     }
@@ -333,23 +333,25 @@ def test_datasource_add_lookup():
 
     fake_datasource = {"tmb_lghg_10m_europe": {"uuid": "mock-uuid-123456", "new": True}}
 
-    fake_metadata = {
+    mock_data = {
         "tmb_lghg_10m_europe": {
-            "data_type": "footprints",
-            "site": "tmb",
-            "height": "10m",
-            "domain": "europe",
-            "model": "test_model",
-            "network": "lghg",
+            "metadata": {
+                "data_type": "footprints",
+                "site": "tmb",
+                "height": "10m",
+                "domain": "europe",
+                "model": "test_model",
+                "network": "lghg",
+            }
         }
     }
 
     with metastore_manager(key="test-metastore-123") as metastore:
-        f.add_datasources(uuids=fake_datasource, metadata=fake_metadata, metastore=metastore)
+        f.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
         assert f.datasources() == ["mock-uuid-123456"]
-
-        lookup = f.datasource_lookup(metadata=fake_metadata, metastore=metastore)
+        required = ["site", "height", "domain", "model"]
+        lookup = datasource_lookup(data=mock_data, metastore=metastore, required_keys=required)
 
         assert lookup["tmb_lghg_10m_europe"] == fake_datasource["tmb_lghg_10m_europe"]["uuid"]
 
