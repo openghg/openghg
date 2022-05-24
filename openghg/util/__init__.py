@@ -2,9 +2,10 @@
     Utility functions for OpenGHG
 """
 
+from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import get_datapath, load_json, load_surface_parser, read_header
-from ._hashing import hash_file, hash_string
+from ._hashing import hash_file, hash_string, hash_retrieved_data
 from ._strings import clean_string, remove_punctuation, to_lowercase, is_number
 from ._time import (
     check_date,
@@ -35,5 +36,13 @@ from ._time import (
     time_offset,
 )
 from ._tutorial import bilsdale_datapaths, retrieve_example_data
-from ._util import multiple_inlets, pairwise, running_in_cloud, unanimous, verify_site
+from ._util import (
+    multiple_inlets,
+    pairwise,
+    running_in_cloud,
+    unanimous,
+    verify_site,
+    find_matching_site,
+    site_code_finder,
+)
 from ._species import species_lifetime, check_lifetime_monthly

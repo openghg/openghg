@@ -25,6 +25,7 @@ def plot_timeseries(
     Returns:
         go.Figure: Plotly Graph Object Figure
     """
+    from openghg.util import load_json
     if not isinstance(data, list):
         data = [data]
 
@@ -53,7 +54,7 @@ def plot_timeseries(
     # Create a single figure
     fig = go.Figure(layout=layout)
 
-    for to_plot in data:
+    for i, to_plot in enumerate(data):
         metadata = to_plot.metadata
         dataset = to_plot.data
 
@@ -75,6 +76,25 @@ def plot_timeseries(
                 y_data = dataset[species]
             except KeyError:
                 y_data = dataset["mf"]
+
+        if units is not None or len(data) > 1:
+
+            data_attrs = y_data.attrs
+            data_units = data_attrs.get("units", "1")
+
+            if i == 0:
+                if units:
+                    attributes_data = load_json("attributes.json")
+                    unit_interpret = attributes_data["unit_interpret"]
+                    unit_value = unit_interpret.get(units, "1")
+                else:
+                    unit_value = data_units
+
+            unit_conversion = float(data_units) / float(unit_value)
+        else:
+            unit_conversion = 1
+
+        y_data *= unit_conversion
 
         fig.add_trace(go.Scatter(name=legend, x=x_data, y=y_data, mode="lines"))
 

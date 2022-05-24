@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union, Tuple
 from xarray import Dataset
-from tinydb import TinyDB
 import numpy as np
+from tinydb import TinyDB
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -62,7 +62,7 @@ class BoundaryConditions(BaseStore):
         """
         from collections import defaultdict
         from xarray import open_dataset
-        from openghg.store import assign_data, infer_date_range, load_metastore
+        from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
         from openghg.util import (
             clean_string,
             hash_file,
@@ -149,9 +149,10 @@ class BoundaryConditions(BaseStore):
         boundary_conditions_data[key]["data"] = bc_data
         boundary_conditions_data[key]["metadata"] = metadata
 
-        keyed_metadata = {key: metadata}
-
-        lookup_results = bc_store.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
+        required_keys = ("species", "bc_input", "domain", "date")
+        lookup_results = datasource_lookup(
+            metastore=metastore, data=boundary_conditions_data, required_keys=required_keys
+        )
 
         data_type = "boundary_conditions"
         datasource_uuids = assign_data(
@@ -161,7 +162,7 @@ class BoundaryConditions(BaseStore):
             data_type=data_type,
         )
 
-        bc_store.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
+        bc_store.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         bc_store._file_hashes[file_hash] = filepath.name

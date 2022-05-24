@@ -1,8 +1,9 @@
+# type: ignore
 import setuptools
 import sys
 
 sys.path.insert(0, ".")  # noqa
-import versioneer
+import versioneer  # noqa
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -13,7 +14,7 @@ with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 setuptools.setup(
-    version="1.0.0",
+    version=versioneer.get_version(),
     install_requires=requirements,
     name="openghg",
     author="Gareth Jones",

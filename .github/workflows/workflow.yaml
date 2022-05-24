@@ -79,7 +79,7 @@ jobs:
           pip install -r requirements-doc.txt
       - name: Ensure notebooks can be executed correctly
         run: |
-          jupytext --sync --execute notebooks/tutorials/beginner_workflow/{1,2,3}_*.ipynb
+          jupytext --sync --execute notebooks/tutorials/beginner_workflow/{1,2}_*.ipynb
       - name: Build documentation
         run: |
           cd doc
@@ -105,17 +105,17 @@ jobs:
         run: |
           pip install --upgrade build
       - name: Build a binary wheel and a source tarball
-        run: | 
+        run: |
           python -m build --sdist --wheel --outdir dist/
       - name: Publish distribution 📦 to Test PyPI
-        uses: pypa/gh-action-pypi-publish@1.5.0
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
       - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@1.5.0
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}      
+          password: ${{ secrets.PYPI_API_TOKEN }}
   release_conda:
     name: Build and publish conda package
     runs-on: ubuntu-latest
@@ -138,15 +138,5 @@ jobs:
       - name: Upload to conda
         run: |
           bash recipes/build_upload.sh
-        env: 
+        env:
           ACCESS_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-      
-      
-
-
-
-      
-        
-
-
-    

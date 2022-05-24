@@ -27,7 +27,7 @@ If the version number is ``2.x`` then you must use the ``python3`` command, if t
 
 and see if you have a Python 3 that has a version number >= 3.7. If so, please use ``python3`` instead of ``python``.
 
-If you don't have Python >=3.7 installed, then you can install Python either via your package manager if using Linux or 
+If you don't have Python >=3.7 installed, then you can install Python either via your package manager if using Linux or
 `Homebrew on MacOS <https://docs.brew.sh/Homebrew-and-Python>`__. An alternative for both platforms is `anaconda <https://anaconda.org>`__.
 
 Installation
@@ -51,7 +51,7 @@ Here change ``/path/to/env`` with your own path.
 
 Next install OpenGHG
 
-.. cocde-block:: bash
+.. code-block:: bash
 
     pip install openghg
 

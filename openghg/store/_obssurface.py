@@ -1,8 +1,7 @@
-from tinydb import TinyDB
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Sequence, Union
 
 
 __all__ = ["ObsSurface"]
@@ -52,7 +51,7 @@ class ObsSurface(BaseStore):
         from tqdm import tqdm
         from openghg.util import load_surface_parser, hash_file, clean_string, verify_site
         from openghg.types import SurfaceTypes
-        from openghg.store import assign_data, load_metastore
+        from openghg.store import assign_data, load_metastore, datasource_lookup
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -98,7 +97,6 @@ class ObsSurface(BaseStore):
                 else:
                     data_filepath = Path(fp)
 
-                # try:
                 file_hash = hash_file(filepath=data_filepath)
                 if file_hash in obs._file_hashes and overwrite is False:
                     print(
@@ -129,10 +127,21 @@ class ObsSurface(BaseStore):
                         measurement_type=measurement_type,
                     )
 
-                # Extract the metadata for each set of measurements to perform a Datasource lookup
-                metadata = {key: data["metadata"] for key, data in data.items()}
+                required_keys = (
+                    "species",
+                    "site",
+                    "station_long_name",
+                    "inlet",
+                    "instrument",
+                    "network",
+                    "data_type",
+                    "data_source",
+                    "icos_data_level",
+                )
 
-                lookup_results = obs.datasource_lookup(metadata=metadata, metastore=metastore)
+                lookup_results = datasource_lookup(
+                    metastore=metastore, data=data, required_keys=required_keys, min_keys=5
+                )
 
                 # Create Datasources, save them to the object store and get their UUIDs
                 datasource_uuids = assign_data(
@@ -142,7 +151,7 @@ class ObsSurface(BaseStore):
                 results["processed"][data_filepath.name] = datasource_uuids
 
                 # Record the Datasources we've created / appended to
-                obs.add_datasources(uuids=datasource_uuids, metadata=metadata, metastore=metastore)
+                obs.add_datasources(uuids=datasource_uuids, data=data, metastore=metastore)
 
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
@@ -178,7 +187,7 @@ class ObsSurface(BaseStore):
         This data is different in that it contains multiple sites in the same file.
         """
         from openghg.standardise.surface import parse_aqmesh
-        from openghg.store import assign_data, load_metastore
+        from openghg.store import assign_data, load_metastore, datasource_lookup
         from openghg.util import hash_file
         from collections import defaultdict
         from tqdm import tqdm
@@ -205,15 +214,27 @@ class ObsSurface(BaseStore):
                     f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
                 )
 
-            site_metadata = {site: metadata}
-            lookup_results = obs.datasource_lookup(metadata=site_metadata, metastore=metastore)
+            combined = {site: {"data": measurement_data, "metadata": metadata}}
+
+            required_keys = (
+                "site",
+                "species",
+                "inlet",
+                "network",
+                "instrument",
+                "sampling_period",
+                "measurement_type",
+            )
+
+            lookup_results = datasource_lookup(
+                metastore=metastore, data=combined, required_keys=required_keys, min_keys=5
+            )
 
             uuid = lookup_results[site]
 
             # Jump through these hoops until we can rework the data assignment functionality to split it out
             # into more sensible functions
             # TODO - fix the assign data function to avoid this kind of hoop jumping
-            combined = {site: {"data": measurement_data, "metadata": metadata}}
             lookup_result = {site: uuid}
 
             # Create Datasources, save them to the object store and get their UUIDs
@@ -224,7 +245,7 @@ class ObsSurface(BaseStore):
             results[site] = datasource_uuids
 
             # Record the Datasources we've created / appended to
-            obs.add_datasources(uuids=datasource_uuids, metadata=site_metadata, metastore=metastore)
+            obs.add_datasources(uuids=datasource_uuids, data=combined, metastore=metastore)
 
             # Store the hash as the key for easy searching, store the filename as well for
             # ease of checking by user
@@ -236,54 +257,92 @@ class ObsSurface(BaseStore):
 
         return results
 
-    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
+    @staticmethod
+    def store_data(
+        data: Dict, overwrite: bool = False, required_metakeys: Optional[Sequence] = None
+    ) -> Optional[Dict]:
+        """This expects already standardised data such as ICOS / CEDA
 
         Args:
-            metadata: Dictionary of metadata returned from the data_obj.read_file function
+            data: Dictionary of data in standard format, see the data spec under
+            Development -> Data specifications in the documentation
+            overwrite: If True overwrite currently stored data
+            required_metakeys: Keys in the metadata we should use to store this metadata in the object store
+            if None it defaults to:
+            {"species", "site", "station_long_name", "inlet", "instrument",
+            "network", "data_type", "data_source", "icos_data_level"}
         Returns:
-            dict: Dictionary of datasource information
+            Dict or None:
         """
-        from openghg.retrieve import metadata_lookup
+        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.util import hash_retrieved_data
 
-        lookup_results = {}
-        for key, data in metadata.items():
-            site = data["site"]
-            network = data["network"]
-            inlet = data["inlet"]
-            sampling_period = data["sampling_period"]
-            species = data["species"]
+        obs = ObsSurface.load()
+        metastore = load_metastore(key=obs._metakey)
 
-            lookup_results[key] = metadata_lookup(
-                database=metastore,
-                site=site,
-                species=species,
-                network=network,
-                inlet=inlet,
-                sampling_period=sampling_period,
+        # Very rudimentary hash of the data and associated metadata
+        hashes = hash_retrieved_data(to_hash=data)
+        # Find the keys in data we've seen before
+        seen_before = {next(iter(v)) for k, v in hashes.items() if k in obs._retrieved_hashes}
+
+        if len(seen_before) == len(data):
+            print("Note: There is no new data to process.")
+            return None
+
+        keys_to_process = set(data.keys())
+        if seen_before:
+            # TODO - add this to log
+            print(f"Note: We've seen {seen_before} before. Processing new data only.")
+            keys_to_process -= seen_before
+
+        to_process = {k: v for k, v in data.items() if k in keys_to_process}
+
+        if required_metakeys is None:
+            required_metakeys = (
+                "species",
+                "site",
+                "station_long_name",
+                "inlet",
+                "instrument",
+                "network",
+                "data_type",
+                "data_source",
+                "icos_data_level",
             )
+            min_keys = 5
+        else:
+            min_keys = len(required_metakeys)
 
-        return lookup_results
+        lookup_results = datasource_lookup(
+            metastore=metastore, data=to_process, required_keys=required_metakeys, min_keys=min_keys
+        )
 
-    def add_datasources(self, uuids: Dict, metadata: Dict, metastore: TinyDB) -> None:
-        """Add the passed list of Datasources to the current list
+        # Create Datasources, save them to the object store and get their UUIDs
+        datasource_uuids = assign_data(
+            data_dict=to_process, lookup_results=lookup_results, overwrite=overwrite
+        )
+
+        # Record the Datasources we've created / appended to
+        obs.add_datasources(uuids=datasource_uuids, data=to_process, metastore=metastore)
+        obs.store_hashes(hashes=hashes)
+
+        metastore.close()
+        obs.save()
+
+        return datasource_uuids
+
+    def store_hashes(self, hashes: Dict) -> None:
+        """Store hashes of data retrieved from a remote data source such as
+        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
+        seen before and adds the new.
 
         Args:
-            datasource_uuids: Datasource UUIDs
-            metadata: Metadata for each species
+            hashes: Dictionary of hashes provided by the hash_retrieved_data function
         Returns:
             None
         """
-        for key, data in uuids.items():
-            new = data["new"]
-            # Only add if this is a new Datasource
-            if new:
-                meta_copy = metadata[key].copy()
-                uid = data["uuid"]
-                meta_copy["uuid"] = data["uuid"]
-
-                metastore.insert(meta_copy)
-                self._datasource_uuids[uid] = key
+        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
+        self._retrieved_hashes.update(new)
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID

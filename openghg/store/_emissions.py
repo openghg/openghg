@@ -49,7 +49,7 @@ class Emissions(BaseStore):
         """
         from collections import defaultdict
         from xarray import open_dataset
-        from openghg.store import assign_data, load_metastore
+        from openghg.store import assign_data, load_metastore, datasource_lookup
         from openghg.util import (
             clean_string,
             hash_file,
@@ -139,9 +139,8 @@ class Emissions(BaseStore):
         emissions_data[key]["data"] = em_data
         emissions_data[key]["metadata"] = metadata
 
-        keyed_metadata = {key: metadata}
-
-        lookup_results = em_store.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
+        required = ("species", "source", "domain", "date")
+        lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
 
         data_type = "emissions"
         datasource_uuids = assign_data(
@@ -151,13 +150,12 @@ class Emissions(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore)
+        em_store.add_datasources(uuids=datasource_uuids, data=emissions_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
 
         em_store.save()
-
         metastore.close()
 
         return datasource_uuids

@@ -2,14 +2,9 @@
 Tutorials
 =========
 
-These tutorials will get you up and running with OpenGHG so you can process, analyse and query data from the cloud
-or a local object store. The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
-repository.
-
-Running the tutorials locally
------------------------------
-
-If you'd like to try out the tutorials locally accessing the notebooks is covered on the Local Tutorials page :ref:`Local Tutorials`.
+These tutorials will get you up and running with OpenGHG so you can process, analyse and query data.
+The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
+repository under ``notebooks/tutorials/beginner_workflow``.
 
 
 Tutorial 1 - Adding observation data
@@ -53,18 +48,28 @@ Tutorial 4 - Working with high time resolution CO2
 
    beginner_workflow/4_Working_with_co2
 
-Tutorial 5 - Exploring the NOAA ObsPack data
+Tutorial 5 - Searching and plotting
+-----------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   beginner_workflow/5_Searching_and_plotting
+
+
+Tutorial 6 - Exploring the NOAA ObsPack data
 --------------------------------------------
 
 .. toctree::
    :maxdepth: 1
 
-   beginner_workflow/5_Explore_NOAA_ObsPack
+   beginner_workflow/6_Explore_NOAA_ObsPack
 
-Tutorial 6 - Using the plotting submodule
------------------------------------------
+
+Tutorial 7 - Retrieving data from ICOS and CEDA
+-----------------------------------------------
 
 .. toctree::
    :maxdepth: 1
 
-   beginner_workflow/6_Searching_and_plotting
+   beginner_workflow/7_Retrieving_remote_data

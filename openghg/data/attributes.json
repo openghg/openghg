@@ -25,6 +25,12 @@
     "ppb": "1e-9",
     "ppt": "1e-12",
     "ppq": "1e-15",
+    "mol mol-1": "1",
+    "millimol mol-1": "1e-3",
+    "micromol mol-1": "1e-6",
+    "nmol mol-1": "1e-9", 
+    "nanomol mol-1": "1e-9",
+    "pmol mol-1": "1e-12",
     "else": "unknown"
   },
   "species_translation": {
