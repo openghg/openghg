@@ -153,3 +153,16 @@ def test_datasource_add_lookup():
         lookup = datasource_lookup(metastore=metastore, data=mock_data, required_keys=required)
 
         assert lookup["ch4_mozart_europe_201208"] == fake_datasource["ch4_mozart_europe_201208"]["uuid"]
+
+
+def test_bc_schema():
+    """Check expected data variables are being included for default BoundaryConditions schema"""
+    data_schema = BoundaryConditions.schema()
+
+    data_vars = data_schema.data_vars
+    assert "vmr_n" in data_vars
+    assert "vmr_e" in data_vars
+    assert "vmr_s" in data_vars
+    assert "vmr_w" in data_vars
+
+    # TODO: Could also add checks for dims and dtypes?

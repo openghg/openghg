@@ -1,3 +1,4 @@
+from ._data_schema import DataSchema
 from ._emissions import Emissions
 from ._boundary_conditions import BoundaryConditions
 from ._eulerian_model import EulerianModel

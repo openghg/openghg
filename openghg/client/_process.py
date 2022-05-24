@@ -106,6 +106,7 @@ def process_footprint(
     retrieve_met: bool = False,
     high_spatial_res: bool = False,
     high_time_res: bool = False,
+    short_lifetime: bool = False,
     overwrite: bool = False,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
@@ -122,6 +123,8 @@ def process_footprint(
         high_spatial_res : Indicate footprints include both a low and high spatial resolution.
         high_time_res: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically for Carbon Dioxide data.
+        short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
+                        Note this will be set to True if species has an associated lifetime.
         overwrite: Overwrite any currently stored data
     Returns:
         dict: UUIDs of Datasources data has been assigned to
@@ -145,6 +148,7 @@ def process_footprint(
             retrieve_met=retrieve_met,
             high_spatial_res=high_spatial_res,
             high_time_res=high_time_res,
+            short_lifetime=short_lifetime,
             overwrite=overwrite,
         )
 
@@ -259,6 +263,7 @@ def _process_footprint_local(
     retrieve_met: bool = False,
     high_spatial_res: bool = False,
     high_time_res: bool = False,
+    short_lifetime: bool = False,
     overwrite: bool = False,
 ) -> Dict:
     """Reads footprints data files and returns the UUIDs of the Datasources
@@ -275,6 +280,8 @@ def _process_footprint_local(
         high_spatial_res : Indicate footprints include both a low and high spatial resolution.
         high_time_res: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically for Carbon Dioxide data.
+        short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
+                        Note this will be set to True if species has an associated lifetime.        
         overwrite: Overwrite any currently stored data
     Returns:
         dict: Dictionary of Datasource UUIDs data assigned to
@@ -293,6 +300,7 @@ def _process_footprint_local(
         retrieve_met=retrieve_met,
         high_spatial_res=high_spatial_res,
         high_time_res=high_time_res,
+        short_lifetime=short_lifetime,
         overwrite=overwrite,
     )
 

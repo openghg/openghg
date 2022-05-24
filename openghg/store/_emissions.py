@@ -1,7 +1,9 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+from typing import DefaultDict, Dict, Optional, Union, Tuple
 from xarray import Dataset
+import numpy as np
 
+from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 
 __all__ = ["Emissions"]
@@ -107,6 +109,9 @@ class Emissions(BaseStore):
             em_time, filepath=filepath, period=period, continuous=continuous
         )
 
+        # Checking against expected format for Emissions
+        Emissions.validate_data(em_data)
+
         if date is None:
             # Check for how granular we should make the date label
             if "year" in period_str:
@@ -153,3 +158,76 @@ class Emissions(BaseStore):
         metastore.close()
 
         return datasource_uuids
+
+    @staticmethod
+    def schema() -> DataSchema:
+        """
+        Define schema for emissions Dataset.
+
+        Includes flux/emissions for each time and position:
+            - "flux"
+                - expected dimensions: ("time", "lat", "lon")
+
+        Expected data types for all variables and coordinates also included.
+
+        Returns:
+            DataSchema : Contains schema for Emissions.
+        """
+        data_vars: Dict[str, Tuple[str, ...]] \
+            = {"flux": ("time", "lat", "lon")}
+        dtypes = {"lat": np.floating,
+                  "lon": np.floating,
+                  "time": np.datetime64,
+                  "flux": np.floating}
+
+        data_format = DataSchema(data_vars=data_vars,
+                                 dtypes=dtypes)
+
+        return data_format
+
+    @staticmethod
+    def validate_data(data: Dataset) -> None:
+        """
+        Validate input data against Emissions schema - definition from
+        Emissions.schema() method.
+
+        Args:
+            data : xarray Dataset in expected format
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the Emissions schema.
+        """
+        data_schema = Emissions.schema()
+        data_schema.validate_data(data)
+
+    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
+        """Perform a lookup for the UUID of a Datasource
+
+        Args:
+            species: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+        Returns:
+            str or dict: UUID or False if no entry
+        """
+        uuid = self._datasource_table[species][source][domain][date]
+
+        return uuid if uuid else False
+
+    def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
+        """Record a UUID of a Datasource in the datasource table
+
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        self._datasource_table[species][source][domain][date] = uuid
