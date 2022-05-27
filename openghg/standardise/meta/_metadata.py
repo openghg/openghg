@@ -62,7 +62,9 @@ def surface_standardise(
                     )
             else:
                 if str(value).lower() != str(attr_value).lower():
-                    raise ValueError(f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}")
+                    raise ValueError(
+                        f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}"
+                    )
         except KeyError:
             # Key wasn't in attributes for comparison
             pass

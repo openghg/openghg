@@ -254,6 +254,31 @@ def test_read_beaco2n():
     assert co2_data["co2_qc"][0] == 2
 
 
+def test_read_openghg_format():
+    """
+    Test that files already in OpenGHG format can be read. This file includes:
+     - appropriate variable names and types
+     - necessary attributes
+       - match to site and network supplied
+       - additional attributes needed for OpenGHG format
+    """
+    datafile = get_datapath(filename="tac_co2_openghg.nc", data_type="OPENGHG")
+
+    results = ObsSurface.read_file(filepath=datafile,
+                                   data_type="OPENGHG",
+                                   site="TAC",
+                                   network="DECC")
+
+    uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
+
+    co2_data = Datasource.load(uuid=uuid, shallow=False).data()
+    co2_data = co2_data['2012-07-30-17:03:08+00:00_2012-08-03-22:43:07+00:00']
+
+    assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
+    assert co2_data["co2"][0] == 385.25
+    assert co2_data["co2_variability"][0] == 0.843
+
+
 def test_read_noaa_raw():
     get_local_bucket(empty=True)
 
@@ -627,3 +652,6 @@ def test_store_icos_carbonportal_data(mocker):
     second_result = ObsSurface.store_data(data=data)
 
     assert second_result is None
+
+
+

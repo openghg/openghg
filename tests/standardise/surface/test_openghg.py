@@ -12,6 +12,10 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_read_file():
+    """
+    Test file in OpenGHG format (variables and attributes) can be 
+    correctly parsed.
+    """
     filepath = get_datapath(filename="tac_co2_openghg.nc", data_type="OPENGHG")
     data = parse_openghg(filepath)
 
@@ -31,7 +35,7 @@ def test_read_file():
     co2_variability = data_co2["co2_variability"]
     assert np.isclose(co2_variability[0], 0.843)
     assert np.isclose(co2_variability[-1], 0.682)
-    
+
     attributes = data_co2.attrs
 
     metadata_keys = metadata_default_keys()
@@ -40,16 +44,53 @@ def test_read_file():
     metadata = output_co2["metadata"]
     assert metadata.items() >= expected_metadata.items()
 
-# TODO: Add tests
-# - Check this can read in a file if outlined keywords specified manually
-#   - for this create file that doesn't contain any attributes
-#   - should read from inputs and from site info etc. files
-# - Check this can read in a file if *all* keywords specified manually
+
+def test_read_file_no_attr():
+    """
+    Test file in correct OpenGHG format but without attributes can be parsed
+    as long as the missing and necessary attribute values are provided.
+    Note: this will extract station details from values pre-defined within
+    the acrg_site_info.json file.
+    """
+    filepath = get_datapath(filename="tac_co2_no_attr_openghg.nc", data_type="OPENGHG")
+
+    param = {}
+
+    # Needed variables to store the data
+    param["site"] = "tac"
+    param["species"] = "co2"
+    param["network"] = "DECC"
+    param["inlet"] = "54m"
+    param["instrument"] = "crds"
+    param["sampling_period"] = "60s"
+    param["calibration_scale"] = "wmo2000"
+    param["data_owner"] = "Simon O'Doherty"
+    param["data_owner_email"] = "s.odoherty@bristol.ac.uk"
+
+    # TODO: May need to update this if we decide to update this list.
+    # Note: other necessary attributes inferred from pre-existing site info details
+
+    data = parse_openghg(filepath, **param)
+
+    output_co2 = data["co2"]
+    data_co2 = output_co2["data"]
+    attributes = data_co2.attrs
+
+    assert attributes != {}
+    assert attributes["site"] == param["site"]
+    assert attributes["species"] == param["species"]
+
+    metadata_keys = metadata_default_keys()
+    expected_metadata = {param: value for param, value in attributes.items() if param in metadata_keys}
+
+    metadata = output_co2["metadata"]
+    assert metadata.items() >= expected_metadata.items()
+
+
+# TODO: Add tests for new site (i.e. no current data stored) 
+# - when/if possible!
+# - [] Check this can read in a file if *all* keywords specified manually
 #   - for this create file for *new* site and with no attributes
-# - Check ObsSurface.read_file() can successfully run this
-#   - may need to add to a different test file
-# - Check process_obs() can also successfully run this
-#   - may need to add to a different test file
 
 
 #%% Compliance checks for processed data for this standardisation method
