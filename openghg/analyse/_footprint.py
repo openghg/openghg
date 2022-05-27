@@ -245,12 +245,7 @@ def footprints_data_merge(
 
     return FootprintData(
         data=combined_dataset,
-        metadata={},
-        flux=flux_dict,
-        bc={},
-        species=species,
-        scales="scale",
-        units="units",
+        metadata={}
     )
 
 

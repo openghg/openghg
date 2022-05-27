@@ -5,18 +5,18 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.13.6
+    jupytext_version: 1.13.7
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
 
-# Workflow 5: Explore NOAA ObsPack
+# Workflow 6: Explore NOAA ObsPack
 
 +++
 
-The NOAA ObsPack products are collections of observation data from many sites which have been collated and standardised. ObsPack data products are prepared by NOAA in consultation with data providers. Available ObsPack products can be accessed and downlaoded from the [ObsPack download](https://gml.noaa.gov/ccgg/obspack/data.php) page. 
+The NOAA ObsPack products are collections of observation data from many sites which have been collated and standardised. ObsPack data products are prepared by NOAA in consultation with data providers. Available ObsPack products can be accessed and downlaoded from the [ObsPack download](https://gml.noaa.gov/ccgg/obspack/data.php) page.
 
 In this tutorial, we will demonstrate how the NOAA ObsPack can be loaded into the object store, explored and plotted.
 
@@ -52,7 +52,7 @@ For convenience we have included a copy of the "obspack_ch4_1_GLOBALVIEWplus_v2.
 from openghg.util import retrieve_example_data
 from openghg.store import add_noaa_obspack
 
-noaa_obspack_directory = retrieve_example_data(path="obspack/obspack_ch4_example.tar.gz", 
+noaa_obspack_directory = retrieve_example_data(path="obspack/obspack_ch4_example.tar.gz",
                                                 download_dir=tmp_dir.name)
 ```
 

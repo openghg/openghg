@@ -21,24 +21,27 @@ requirements:
     - addict
     - cdsapi
     - dask
+    - folium
+    - h5py
+    - h5netcdf
     - lazy_import
     - matplotlib
-    - nc-time-axis
     - netcdf4
     - numexpr
     - numpy
+    - nc-time-axis
     - pandas
     - paramiko
     - plotly
-    - python
     - pyvis
-    - python
     - rapidfuzz
     - requests >=2.25
     - scipy
+    - tinydb
     - tqdm
-    - urllib3 >=1.26.3
     - xarray >=0.18.2
+    - urllib3 >=1.26.3
+
 
 test:
   imports:

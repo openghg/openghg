@@ -57,7 +57,7 @@ def get_datapath_base(data_type: str, filename: str) -> Path:
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/{data_type}/{filename}")
 
 
-def get_icos_test_file(filename: str):
+def get_retrieval_data_file(filename: str):
     return Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/retrieve/{filename}")
 
 

@@ -1,5 +1,3 @@
-# I'm creating this submodule as I'm not quite sure where else to put this for now
-# we can always move it in the future
 from pandas import DataFrame
 from typing import Dict, List, Optional, Union
 
@@ -105,8 +103,15 @@ def _retrieve_remote(
     Returns:
         dict or None: Dictionary of processed data and metadata if found
     """
-    from icoscp.station import station  # type: ignore
-    from icoscp.cpb.dobj import Dobj  # type: ignore
+    # icoscp isn't available to conda so we've got to resort to this for now
+    try:
+        from icoscp.station import station  # type: ignore
+        from icoscp.cpb.dobj import Dobj  # type: ignore
+    except ImportError:
+        raise ImportError(
+            "Cannot import icoscp, if you've installed OpenGHG using conda please run: pip install icoscp"
+        )
+
     from openghg.standardise.meta import assign_attributes
     from openghg.util import load_json, download_data
     from pandas import to_datetime
@@ -234,13 +239,15 @@ def _retrieve_remote(
             "nbpoints": spec + " number_of_observations",
         }
 
+        # TODO - add this back in once we've merged the fixes in
         # Try and conver the flag / userflag column to str
-        possible_flag_cols = ("flag", "userflag")
-        flag_col = [x for x in dataframe.columns if x in possible_flag_cols]
+        # possible_flag_cols = ("flag", "userflag")
+        # flag_col = [x for x in dataframe.columns if x in possible_flag_cols]
 
-        if flag_col:
-            flag_str = flag_col[0]
-            dataframe = dataframe.astype({flag_str: str})
+        # PR328
+        # if flag_col:
+        #     flag_str = flag_col[0]
+        #     dataframe = dataframe.astype({flag_str: str})
 
         dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
 
@@ -306,7 +313,8 @@ def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
     metadata["inlet"] = f"{int(float(sampling_height))}m"
     metadata["station_latitude"] = _get_value(df=site_data, col="latitude", index=0)
     metadata["station_longitude"] = _get_value(df=site_data, col="longitude", index=0)
-    metadata["elevation"] = _get_value(df=site_data, col="elevation", index=0)
+    elevation = _get_value(df=site_data, col="elevation", index=0)
+    metadata["elevation"] = f"{int(float(elevation))}m"
 
     site_specific = site_metadata[site.upper()]
     metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"

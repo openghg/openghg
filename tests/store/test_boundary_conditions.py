@@ -1,5 +1,3 @@
-import pytest
-
 from openghg.store import BoundaryConditions
 from openghg.retrieve import search
 from openghg.store import recombine_datasets, metastore_manager
@@ -36,7 +34,7 @@ def test_read_file_monthly():
     assert orig_data.lat.equals(bc_data.lat)
     assert orig_data.lon.equals(bc_data.lon)
     assert orig_data.time.equals(bc_data.time)
-    
+
     data_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
     for dv in data_vars:
         assert orig_data[dv].equals(bc_data[dv])
@@ -114,37 +112,45 @@ def test_read_file_yearly():
         "min_latitude": 10.729,
         "data_type": "boundary_conditions",
         "time_period": "1 year",
-        'time period': 'climatology from 200901-201407 mozart output',
-        'copied from': '2000',
+        "time period": "climatology from 200901-201407 mozart output",
+        "copied from": "2000",
     }
 
     for key in expected_metadata.keys():
         assert metadata[key] == expected_metadata[key]
 
+
 # TODO: Add test for co2 data - need to create TEST region to match other data for this
 # TODO: Add test for multiple values within a file - continuous (maybe monthly)
 # TODO: Add test around non-continuous data and key word?
 
+
 def test_datasource_add_lookup():
+    from openghg.store import datasource_lookup
+
     bc = BoundaryConditions()
 
     fake_datasource = {"ch4_mozart_europe_201208": {"uuid": "mock-uuid-123456", "new": True}}
 
-    fake_metadata = {
+    mock_data = {
         "ch4_mozart_europe_201208": {
-            "species": "ch4",
-            "domain": "europe",
-            "bc_input": "mozart",
-            "date": "201208",
+            "metadata": {
+                "species": "ch4",
+                "domain": "europe",
+                "bc_input": "mozart",
+                "date": "201208",
+            }
         }
     }
 
     with metastore_manager(key="test-key-123") as metastore:
-        bc.add_datasources(uuids=fake_datasource, metadata=fake_metadata, metastore=metastore)
+        bc.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
         assert bc.datasources() == ["mock-uuid-123456"]
 
-        lookup = bc.datasource_lookup(fake_metadata, metastore=metastore)
+        required = ["species", "domain", "bc_input", "date"]
+
+        lookup = datasource_lookup(metastore=metastore, data=mock_data, required_keys=required)
 
         assert lookup["ch4_mozart_europe_201208"] == fake_datasource["ch4_mozart_europe_201208"]["uuid"]
 

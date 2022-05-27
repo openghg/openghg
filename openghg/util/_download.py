@@ -1,10 +1,26 @@
 from pathlib import Path
-import requests
 from typing import Optional, Union
 
 
-def download_data(url: str, filepath: Optional[Union[str, Path]] = None, timeout: int = 5) -> Optional[bytes]:
-    """Download data from a remote URL and returns it as bytes if retrieved correctly.
+def parse_url_filename(url: str) -> str:
+    """Get the filename from a (messy) URL.
+
+    Args:
+        url: URL of file
+    Returns:
+        str: Filename
+    """
+    from urllib.parse import urlparse
+
+    return Path(urlparse(url).path).name
+
+
+def download_data(
+    url: str, filepath: Optional[Union[str, Path]] = None, timeout: int = 10
+) -> Optional[bytes]:
+    """Download data file, with progress bar.
+
+    Based on https://stackoverflow.com/a/63831344/1303032
 
     Args:
         url: URL of content to download
@@ -13,6 +29,12 @@ def download_data(url: str, filepath: Optional[Union[str, Path]] = None, timeout
     Returns:
         bytes / None: Bytes if no filepath given
     """
+    import functools
+    import shutil
+    import requests
+    import io
+    from tqdm.auto import tqdm  # type: ignore
+    from urllib.parse import urlparse
     from requests.adapters import HTTPAdapter
     from urllib3.util.retry import Retry
 
@@ -39,14 +61,28 @@ def download_data(url: str, filepath: Optional[Union[str, Path]] = None, timeout
     http.mount("http://", adapter)
 
     try:
-        content = http.get(url, timeout=timeout).content
+        r = http.get(url=url, stream=True, allow_redirects=True, timeout=timeout)
     except (requests.exceptions.RequestException, requests.exceptions.ConnectionError) as e:
         print(f"Unable to retrieve data from {url}, error: {str(e)}")
         return None
 
-    if filepath is None:
-        return content
-    else:
-        filepath = Path(filepath)
-        filepath.write_bytes(content)
+    filename = Path(urlparse(url).path).name
+
+    if r.status_code != 200:
+        print(f"Unable to download {url}, please check URL.")
         return None
+
+    file_size = int(r.headers.get("Content-Length", 0))
+
+    desc = f"Downloading {filename}"
+    r.raw.read = functools.partial(r.raw.read, decode_content=True)
+
+    with tqdm.wrapattr(r.raw, "read", total=file_size, desc=desc) as r_raw:
+        with io.BytesIO() as buf:
+            shutil.copyfileobj(r_raw, buf)
+
+            if filepath is None:
+                return buf.getvalue()
+            else:
+                Path(filepath).write_bytes(buf.getvalue())
+                return None

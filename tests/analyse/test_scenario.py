@@ -537,15 +537,7 @@ def footprint_dummy():
     # - data_type="footprints"
     metadata = {"site": "TESTSITE", "height": "10m", "domain": "TESTDOMAIN", "data_type": "footprints"}
 
-    footprintdata = FootprintData(
-        data=data,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species="INERT",
-        scales="",
-        units="",
-    )
+    footprintdata = FootprintData(data=data, metadata=metadata)
 
     return footprintdata
 
@@ -582,15 +574,7 @@ def flux_ch4_dummy():
     species = "ch4"
     metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
 
-    fluxdata = FluxData(
-        data=flux,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="",
-        units="",
-    )
+    fluxdata = FluxData(data=flux, metadata=metadata)
 
     return fluxdata
 
@@ -866,15 +850,7 @@ def footprint_co2_dummy():
         "species": species,
     }
 
-    footprintdata = FootprintData(
-        data=data,
-        metadata=metadata,
-        species=species,
-        flux={},
-        bc={},
-        scales="",
-        units="",
-    )
+    footprintdata = FootprintData(data=data, metadata=metadata)
 
     return footprintdata
 
@@ -913,15 +889,7 @@ def flux_co2_dummy():
     species = "co2"
     metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
 
-    fluxdata = FluxData(
-        data=flux,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="",
-        units="",
-    )
+    fluxdata = FluxData(data=flux, metadata=metadata)
 
     return fluxdata
 
@@ -1073,15 +1041,7 @@ def footprint_radon_dummy(footprint_dummy):
 
     footprint_ds = footprint_ds.assign(data_vars)
 
-    footprintdata = FootprintData(
-        data=footprint_ds,
-        metadata=footprint_metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="",
-        units="",
-    )
+    footprintdata = FootprintData(data=footprint_ds, metadata=footprint_metadata)
 
     return footprintdata
 

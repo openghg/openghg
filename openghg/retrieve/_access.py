@@ -303,15 +303,7 @@ def get_flux(
     if species is None:
         species = metadata.get("species", "NA")
 
-    return FluxData(
-        data=em_ds,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="FIXME",
-        units="FIXME",
-    )
+    return FluxData(data=em_ds, metadata=metadata)
 
 
 def get_bc(
@@ -453,18 +445,11 @@ def get_footprint(
     # fp_ds = recombine_datasets(keys=keys, sort=False) # Why did this have sort=False before?
     fp_ds = recombine_datasets(keys=keys, sort=True)
 
-    if species is None:
-        species = metadata.get("species", "NA")
+    # TODO: Could incorporate this somewhere? Setting species to INERT?
+    # if species is None:
+    #     species = metadata.get("species", "INERT")
 
-    return FootprintData(
-        data=fp_ds,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="FIXME",
-        units="FIXME",
-    )
+    return FootprintData(data=fp_ds, metadata=metadata)
 
 
 def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:

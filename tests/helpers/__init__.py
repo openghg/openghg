@@ -5,7 +5,7 @@ from .helpers import (
     get_bc_datapath,
     get_footprint_datapath,
     get_mobile_datapath,
-    get_icos_test_file,
+    get_retrieval_data_file,
 )
 from .meta import (
     metadata_checker_obssurface,
