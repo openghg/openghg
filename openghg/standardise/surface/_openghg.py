@@ -104,7 +104,7 @@ def parse_openghg(
 
     for network_value in network_case_options:
         if network_value in site_info_all:
-            site_info = site_info_all[network]
+            site_info = site_info_all[network_value]
             break
     else:
         print(
