@@ -11,8 +11,11 @@ def parse_openghg(
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
+    calibration_scale: Optional[str] = None,
+    data_owner: Optional[str] = None,
+    data_owner_email: Optional[str] = None,
     **kwargs: str,
-    ) -> Dict:
+) -> Dict:
     """
     Parse and extract data from pre-formatted netcdf file which already matches expected
     OpenGHG format.
@@ -32,18 +35,25 @@ def parse_openghg(
     attributes = data.attrs
 
     # Define metadata based on input arguments.
-    metadata = {"site": site,
-                "species": species,
-                "network": network,
-                "inlet": inlet,
-                "instrument": instrument,
-                "sampling_period": sampling_period}
+    metadata_initial = {
+        "site": site,
+        "species": species,
+        "network": network,
+        "inlet": inlet,
+        "instrument": instrument,
+        "sampling_period": sampling_period,
+        "calibration_scale": calibration_scale,
+        "data_owner": data_owner,
+        "data_owner_email": data_owner_email,
+    }
+
+    # TODO: Decide if to allow any of these to be missed.
 
     # Populate metadata with values from attributes if inputs have not been passed
-    for key, value in metadata.items():
+    for key, value in metadata_initial.items():
         if value is None:
             try:
-                metadata[key] = attributes[key]
+                metadata_initial[key] = attributes[key]
             except KeyError:
                 raise ValueError(f"Input '{key}' must be specified if not included in data attributes.")
         else:
@@ -52,7 +62,11 @@ def parse_openghg(
                 attributes_value = attributes[key]
                 if value != attributes_value:
                     # If inputs do not match attribute values, raise a ValueError
-                    raise ValueError(f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}")
+                    raise ValueError(
+                        f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
+                    )
+
+    metadata = cast(Dict[str, str], metadata_initial)
 
     metadata["inlet_height_magl"] = metadata["inlet"]
 
@@ -61,49 +75,69 @@ def parse_openghg(
     metadata_needed = [param for param in metadata_needed if param not in metadata]
 
     metadata["site"] = clean_string(metadata["site"])
-    metadata["species"] = synonyms(metadata["species"]).lower()  # May want to remove the .lower() here and centralise this
+    metadata["species"] = synonyms(
+        metadata["species"]
+    ).lower()
+    # May want to remove the .lower() here and centralise this
 
     # Update attributes to match metadata after cleaning
     attributes["site"] = metadata["site"]
     attributes["species"] = metadata["species"]
-    
+
     site = metadata["site"]
     network = metadata["network"]
     species = metadata["species"]
 
-    site_upper = site.upper()
-    network_upper = network.upper()
+    # Allow site and network data to be treated in a case insensitive way
+    site_case_options = [site, site.upper(), site.lower()]
+    network_case_options = [network, network.upper(), network.lower()]
 
     # Extract centralised data for site (if present)
     site_data = load_json(filename="acrg_site_info.json")
-    try:
-        site_info_all = site_data[site_upper]
-    except KeyError:
-        print("Unknown site. Will attempt to extract metadata from dataset attributes or input keywords")
-        site_info = {}
+    for site_value in site_case_options:
+        if site_value in site_data:
+            site_info_all = site_data[site_value]
+            break
     else:
-        if network in site_info_all:
+        print("Unknown site. Will attempt to extract metadata from dataset attributes or input keywords")
+        site_info_all = {}
+
+    for network_value in network_case_options:
+        if network_value in site_info_all:
             site_info = site_info_all[network]
-        elif network_upper in site_info_all:
-            site_info = site_info_all[network_upper]
-        else:
-            site_info = {}
-        
+            break
+    else:
+        print(
+            "Network {network} does not match with site {site}. Will attempt to extract metadata from dataset attributes or input keywords"
+        )
+        site_info = {}
+
+    if site_info:
         # Ensure keywords match to metadata names for station values
         # e.g. "station_longitude" derived from "longitude"
         for key in metadata_needed:
             prefix = "station_"
             if key.startswith(prefix):
-                short_key = '_'.join(key.split('_')[1:])
-                if short_key in site_info:
-                    site_info[key] = site_info[short_key]
+                split_key = key.split("_")[1:]
+                short_key_option1 = "_".join(split_key)
+
+                split_key.insert(1, "station")  # to catch "height_station_masl"
+                short_key_option2 = "_".join(split_key)
+
+                short_key_options = [short_key_option1, short_key_option2]
+                for short_key in short_key_options:
+                    if short_key in site_info:
+                        site_info[key] = site_info[short_key]
+                        break
 
     # Load attributes data for network if present
-    try:
-        param_data = load_json(filename="attributes.json")
-        network_params = param_data[network_upper]
-        site_attributes = network_params["global_attributes"]
-    except KeyError:
+    param_data = load_json(filename="attributes.json")
+    for network_value in network_case_options:
+        if network_value in param_data:
+            network_params = param_data[network_value]
+            site_attributes = network_params["global_attributes"]
+            break
+    else:
         site_attributes = {}
 
     # Define sources of attributes to use when defining metadata
@@ -118,11 +152,11 @@ def parse_openghg(
                 metadata[param] = source[param]
                 break
         else:
-            raise ValueError(f"Cannot extract or infer '{param}' parameter needed for metadata from stored data, attributes or keywords")
+            raise ValueError(
+                f"Cannot extract or infer '{param}' parameter needed for metadata from stored data, attributes or keywords"
+            )
 
-    gas_data = {species: {"metadata": metadata,
-                          "data": data,
-                          "attributes": attributes}}
+    gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
     gas_data = assign_attributes(data=gas_data, site=site, network=network)
 

@@ -12,6 +12,7 @@ def metadata_default_keys() -> List:
         "site",
         "species",
         "inlet",
+        "inlet_height_magl",
         "network",
         "instrument",
         "sampling_period",
@@ -22,7 +23,6 @@ def metadata_default_keys() -> List:
         "station_latitude",
         "station_long_name",
         "station_height_masl",
-        "inlet_height_magl",
     ]
 
     return default_keys
