@@ -5,7 +5,7 @@ from openghg.util import species_lifetime, check_lifetime_monthly
                          [("ch4", None),
                           ("CO2", None),
                           ("Rn", "5.5157D"),
-                          ("HFO-1234yf", ["35.6D", "24.3D", "14.1D", "7.8D", "4.8D", "3.6D","3.7D", "4.7D", "7.9D","14.9D","30.8D","41.8D"]),
+                          ("HFO1234yf", ["35.6D", "24.3D", "14.1D", "7.8D", "4.8D", "3.6D","3.7D", "4.7D", "7.9D","14.9D","30.8D","41.8D"]),
                           ]
                         )
 def test_species_lifetime(species, expected_lifetime):
