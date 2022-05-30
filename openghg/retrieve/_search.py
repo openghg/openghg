@@ -124,7 +124,6 @@ def search(**kwargs):  # type: ignore
         find_daterange_gaps,
         split_daterange_str,
         synonyms,
-        load_json,
     )
     from openghg.dataobjects import SearchResults
 

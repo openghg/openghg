@@ -335,6 +335,7 @@ def define_species_label(species: str) -> Tuple[str, str]:
 
     return species_label_lower, species_label
 
+
 def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     """Reads site attributes from JSON
 
