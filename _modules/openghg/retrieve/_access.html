@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g01d211c.dirty documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g67d9f80.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -213,7 +213,7 @@
     <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">concat</span> <span class="k">as</span> <span class="n">xr_concat</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">timestamp_tzaware</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">timestamp_tzaware</span><span class="p">,</span> <span class="n">synonyms</span>
 
     <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span>
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -222,7 +222,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No site called </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, please enter a valid site name.&quot;</span><span class="p">)</span>
 
     <span class="c1"># Find the correct synonym for the passed species</span>
-    <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">_synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
 
     <span class="c1"># Get the observation data</span>
     <span class="n">obs_results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
@@ -432,10 +432,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span><span class="p">,</span> <span class="n">synonyms</span>
 
     <span class="c1"># Find the correct synonym for the passed species</span>
-    <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">_synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="p">()</span>
@@ -501,10 +501,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span><span class="p">,</span> <span class="n">synonyms</span>
 
     <span class="c1"># Find the correct synonym for the passed species</span>
-    <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">_synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="p">()</span>
@@ -574,11 +574,11 @@
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
     <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">FootprintData</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">synonyms</span>
 
     <span class="c1"># Find the correct synonym for the passed species</span>
     <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">_synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
 
     <span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
@@ -622,46 +622,6 @@
     <span class="c1">#     species = metadata.get(&quot;species&quot;, &quot;INERT&quot;)</span>
 
     <span class="k">return</span> <span class="n">FootprintData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">fp_ds</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span></div>
-
-
-<span class="k">def</span> <span class="nf">_synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check to see if there are other names that we should be using for</span>
-<span class="sd">    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc-11,</span>
-<span class="sd">    as this is used in species_info.json</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        species (str): Input string that you&#39;re trying to match</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        str: Matched species string</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
-
-    <span class="c1"># Load in the species data</span>
-    <span class="n">species_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_species_info.json&quot;</span><span class="p">)</span>
-
-    <span class="c1"># First test whether site matches keys (case insensitive)</span>
-    <span class="n">matched_strings</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">species_data</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
-
-    <span class="c1"># Used to access the alternative names in species_data</span>
-    <span class="n">alt_label</span> <span class="o">=</span> <span class="s2">&quot;alt&quot;</span>
-
-    <span class="c1"># If not found, search synonyms</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">matched_strings</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">species_data</span><span class="p">:</span>
-            <span class="c1"># Iterate over the alternative labels and check for a match</span>
-            <span class="n">matched_strings</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">alt_label</span><span class="p">]</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
-
-            <span class="k">if</span> <span class="n">matched_strings</span><span class="p">:</span>
-                <span class="n">matched_strings</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span>
-                <span class="k">break</span>
-
-    <span class="k">if</span> <span class="n">matched_strings</span><span class="p">:</span>
-        <span class="n">updated_species</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">updated_species</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find synonym for species </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_scale_convert</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">to_scale</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
