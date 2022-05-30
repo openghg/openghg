@@ -395,11 +395,7 @@ def _split_species(
     """
     from addict import Dict as aDict
     from fnmatch import fnmatch
-    from openghg.util import load_json, clean_string
-
-    # Load species translator so we can keep species names consistent
-    attributes_data = load_json("attributes.json")
-    species_translator = attributes_data["species_translation"]
+    from openghg.standardise.meta import define_species_label
 
     # Read inlets from the parameters
     expected_inlets = _get_inlets(site_code=site, gc_params=gc_params)
@@ -495,10 +491,7 @@ def _split_species(
             spec_data = spec_data.to_xarray()
 
             # Create a standardised / cleaned species label
-            try:
-                comp_species = species_translator[spec.upper()]["chem"]
-            except KeyError:
-                comp_species = clean_string(spec.lower())
+            comp_species = define_species_label(spec)[0]            
 
             # Add the cleaned species name to the metadata and alternative name if present
             spec_metadata["species"] = comp_species

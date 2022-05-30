@@ -5,16 +5,26 @@ from openghg.util._file import load_json
 __all__ = ["synonyms", "species_lifetime", "check_lifetime_monthly"]
 
 
-def synonyms(species: str) -> str:
+def synonyms(species: str,
+             lower: bool = True,
+             allow_new_species: bool = True) -> str:
     """
     Check to see if there are other names that we should be using for
-    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc-11,
+    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11,
     as this is used in species_info.json
 
     Args:
-        species (str): Input string that you're trying to match
+        species : Input string that you're trying to match
+        lower : Return all lower case
+        allow_new_species : Return original value (may be lower case)
+            if this (or a synonym) is not found in the database.
+            If False, raise a ValueError.
     Returns:
         str: Matched species string
+
+    TODO: Decide if we need to make this lower case or not.
+    Included this here so this occurs in one place which can be linked to
+    and changed if needed.
     """
 
     from openghg.util import load_json
@@ -40,9 +50,15 @@ def synonyms(species: str) -> str:
 
     if matched_strings:
         updated_species = str(matched_strings[0])
+        if lower:
+            updated_species = updated_species.lower()
         return updated_species
     else:
-        raise ValueError(f"Unable to find synonym for species {species}")
+        if not allow_new_species:
+            raise ValueError(f"Unable to find species (or synonym) in database {species}")
+        if lower:
+            species = species.lower()
+        return species
 
 
 LifetimeType = Optional[Union[str, List[str]]]
