@@ -76,7 +76,7 @@ def get_attributes(
 
     Attributes of the xarray DataSet are modified, and variable names are changed
 
-    Variable naming related to species name will be defined using 
+    Variable naming related to species name will be defined using
     define_species_label() function.
 
     Args:
@@ -182,11 +182,11 @@ def get_attributes(
         name = species_attrs[species_key]["name"]
     except KeyError:
         name = species_label
-    
+
     # Extract units if not defined
     if units is None:
-        try:    
-            units = species_attrs[species_key]["units"] 
+        try:
+            units = species_attrs[species_key]["units"]
         except KeyError:
             units = ""
 
@@ -291,9 +291,9 @@ def get_attributes(
 def define_species_label(species: str) -> Tuple[str, str]:
     """
     Define standardised label to use for observation datasets.
-    This is defined using the 'acrg_site_info.json' details with 
+    This is defined using the 'acrg_site_info.json' details with
     alternative names ('alt') defined within.
-    
+
     Formatting:
      - species label will be all lower case
      - any spaces will be replaced with underscores

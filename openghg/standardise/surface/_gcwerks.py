@@ -491,7 +491,7 @@ def _split_species(
             spec_data = spec_data.to_xarray()
 
             # Create a standardised / cleaned species label
-            comp_species = define_species_label(spec)[0]            
+            comp_species = define_species_label(spec)[0]
 
             # Add the cleaned species name to the metadata and alternative name if present
             spec_metadata["species"] = comp_species

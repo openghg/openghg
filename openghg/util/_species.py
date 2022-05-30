@@ -1,5 +1,5 @@
 from typing import Optional, Union, List
-from openghg.util._file import load_json
+from openghg.util import load_json
 
 
 __all__ = ["synonyms", "species_lifetime", "check_lifetime_monthly"]
@@ -26,9 +26,6 @@ def synonyms(species: str,
     Included this here so this occurs in one place which can be linked to
     and changed if needed.
     """
-
-    from openghg.util import load_json
-
     # Load in the species data
     species_data = load_json(filename="acrg_species_info.json")
 

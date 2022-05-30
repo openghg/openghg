@@ -1,12 +1,13 @@
 import logging
-import os
-from pathlib import Path
+# import os
+# from pathlib import Path
 import pytest
 
 from openghg.standardise.surface import parse_crds
 from openghg.objectstore import get_local_bucket
 from openghg.standardise.meta import assign_attributes, get_attributes
-from helpers import get_datapath, metadata_checker_obssurface, attributes_checker_obssurface
+# from helpers import get_datapath, metadata_checker_obssurface, attributes_checker_obssurface
+from helpers import get_datapath
 
 # import tempfile
 # from cfchecker import CFChecker
@@ -149,9 +150,9 @@ def make_dummy_dataset(species_name: str):
     import xarray as xr
     import numpy as np
 
-    ds = xr.Dataset({species_name: ("time", np.arange(0, 2, 1))}, 
+    ds = xr.Dataset({species_name: ("time", np.arange(0, 2, 1))},
                     coords={"time": np.array(["2020-01-01", "2020-02-01"], dtype="datetime64[ns]")})
-    
+
     return ds
 
 @pytest.mark.parametrize("species,name,long_name,units",
@@ -173,7 +174,7 @@ def test_species_attributes(species, name, long_name, units):
     """
 
     site = "mhd"
-    ds = make_dummy_dataset(species)    
+    ds = make_dummy_dataset(species)
     ds_updated = get_attributes(ds, species, site)
 
     assert name in ds_updated
@@ -194,7 +195,7 @@ def test_species_attributes_isotopologue():
 
     species = "CH4C13"
     site = "mhd"
-    ds = make_dummy_dataset(species)    
+    ds = make_dummy_dataset(species)
     ds_updated = get_attributes(ds, species, site)
 
     name = "dch4c13"
