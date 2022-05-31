@@ -7,7 +7,7 @@ from openghg.types import multiPathType
 
 
 def standardise_surface(filepaths: multiPathType, data_type: str, metadata: Dict) -> Dict:
-    """ Standardise data 
+    """Standardise data
 
     Args:
         filepaths: Path of file(s) to process
@@ -16,11 +16,40 @@ def standardise_surface(filepaths: multiPathType, data_type: str, metadata: Dict
     Returns:
         dict: Details confirmation of process
     """
+    from gzip import compress
     # pass
     # If under specific size just post to standardisation function
     # else get PAR and upload and then get it to standardise that data?
+    if not isinstance(filepaths, list):
+        filepaths = [filepaths]
 
-    
+    # To convert bytes to megabytes
+    MB = 1e6
+    # The largest file we'll just directly POST to the standardisation
+    # function will be this big (megabytes)
+    post_limit = 20
+
+    to_post = []
+    to_par = []
+
+    for fpath in filepaths:
+        filepath = Path(fpath)
+
+        file_size = Path("somefile.txt").stat().st_size / MB
+
+        if file_size < post_limit:
+            # Read the file, compress it and send the data
+            file_data = filepath.read_bytes()
+            compressed_data = compress(data=file_data)
+        else:
+            # If we want chunked uploading what do we do?
+            raise NotImplementedError
+            # tmp_dir = tempfile.TemporaryDirectory()
+            # compressed_filepath = Path(tmp_dir.name).joinpath(f"{filepath.name}.tar.gz")
+            # # Compress in place and then upload
+            # with tarfile.open(compressed_filepath, mode="w:gz") as tar:
+            #     tar.add(filepath)
+            # compressed_data = compressed_filepath.read_bytes()
 
 
 def _put(url: str, data: bytes, headers: Optional[Dict] = None, auth_key: Optional[str] = None) -> Response:
