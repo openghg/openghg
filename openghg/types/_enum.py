@@ -41,3 +41,9 @@ class ObsTypes(Enum):
     SATELLITE = "ObsSatellite"
     FLASK = "ObsFlask"
     MOBILE = "ObsMobile"
+
+
+class EmissionsTypes(Enum):
+    """For standardising emissions/flux inputs"""
+
+    OPENGHG = "OPENGHG"
