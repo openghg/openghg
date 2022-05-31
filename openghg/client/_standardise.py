@@ -1,8 +1,9 @@
 from pathlib import Path
+from subprocess import call
 import tarfile
 from typing import Union, Optional, Dict
 from requests import Response
-
+from openghg.cloud import call_function
 from openghg.types import multiPathType
 
 
@@ -17,6 +18,7 @@ def standardise_surface(filepaths: multiPathType, data_type: str, metadata: Dict
         dict: Details confirmation of process
     """
     from gzip import compress
+
     # pass
     # If under specific size just post to standardisation function
     # else get PAR and upload and then get it to standardise that data?
@@ -51,49 +53,9 @@ def standardise_surface(filepaths: multiPathType, data_type: str, metadata: Dict
             #     tar.add(filepath)
             # compressed_data = compressed_filepath.read_bytes()
 
+    response = call_function(fn_name="standardise", data=compressed_data)
 
-def _put(url: str, data: bytes, headers: Optional[Dict] = None, auth_key: Optional[str] = None) -> Response:
-    """PUT some data to the URL
-
-    Args:
-        url: URL
-        data: Data as bytes
-        headers: Optional headers dictionary
-        auth_key: Authorisation key if required
-    Returns:
-        requests.Response
-    """
-    from requests import put
-
-    if headers is None:
-        headers = {}
-
-    headers["Content-Type"] = "application/octet-stream"
-
-    if auth_key is not None:
-        headers["authentication"] = auth_key
-
-    return put(url=url, data=data, headers=headers)
-
-
-def _post(url: str, data: Optional[Dict] = None, auth_key: Optional[str] = None) -> Response:
-    """POST to a URL
-
-    Args:
-        url: URL
-        data: Dictionary of data to POST
-    Returns:
-        requests.Response
-    """
-    from requests import post
-
-    if data is None:
-        data = {}
-
-    if auth_key is not None:
-        data["authorisation"] = auth_key
-
-    return post(url=url, data=data)
+    print(response)
 
 
 def upload(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:
