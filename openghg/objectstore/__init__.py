@@ -4,21 +4,21 @@ from ._local_store import (
     delete_object,
     exists,
     get_all_object_names,
-    # get_bucket,
-    # get_local_bucket,
+    get_bucket,
+    get_local_bucket,
     get_object,
-    # get_object_from_json,
+    get_object_from_json,
     # get_object_names,
     # get_openghg_local_path,
     # query_store,
-    # set_object,
-    # set_object_from_file,
+    set_object,
+    set_object_from_file,
     set_object_from_json,
     visualise_store,
 )
 
 from ._encoding import get_datetime_now, datetime_to_datetime
-from ._my_oci import get_bucket, create_bucket, upload, create_par
+from ._my_oci import create_bucket, upload, create_par
 from ._par import PAR
 
 # from ._cloud import OCI_ObjectStore

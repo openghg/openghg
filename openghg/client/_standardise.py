@@ -58,54 +58,54 @@ def standardise_surface(filepaths: multiPathType, data_type: str, metadata: Dict
     print(response)
 
 
-def upload(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:
-    """Upload a file to the object store
+# def upload(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:
+#     """Upload a file to the object store
 
-    Args:
-        filepath: Path of file to upload
-    Returns:
-        None
-    """
-    from gzip import compress
-    import tempfile
-    from openghg.objectstore import PAR
-    from openghg.client import get_function_url, get_auth_key
+#     Args:
+#         filepath: Path of file to upload
+#     Returns:
+#         None
+#     """
+#     from gzip import compress
+#     import tempfile
+#     from openghg.objectstore import PAR
+#     from openghg.client import get_function_url, get_auth_key
 
-    auth_key = get_auth_key()
-    fn_url = get_function_url(fn_name="get_par")
-    # First we need to get a PAR to write the data
+#     auth_key = get_auth_key()
+#     fn_url = get_function_url(fn_name="get_par")
+#     # First we need to get a PAR to write the data
 
-    response = _post(url=fn_url, auth_key=auth_key)
-    par_json = response.content
+#     response = _post(url=fn_url, auth_key=auth_key)
+#     par_json = response.content
 
-    par = PAR.from_json(json_str=par_json)
-    # Get the URL to upload data to
-    par_url = par.uri
+#     par = PAR.from_json(json_str=par_json)
+#     # Get the URL to upload data to
+#     par_url = par.uri
 
-    if filepath is not None and data is None:
-        filepath = Path(filepath)
-        MB = 1e6
-        file_size = Path("somefile.txt").stat().st_size / MB
+#     if filepath is not None and data is None:
+#         filepath = Path(filepath)
+#         MB = 1e6
+#         file_size = Path("somefile.txt").stat().st_size / MB
 
-        mem_limit = 50  # MiB
-        if file_size < mem_limit:
-            # Read the file, compress it and send the data
-            file_data = filepath.read_bytes()
-            compressed_data = compress(data=file_data)
-        else:
-            tmp_dir = tempfile.TemporaryDirectory()
-            compressed_filepath = Path(tmp_dir.name).joinpath(f"{filepath.name}.tar.gz")
-            # Compress in place and then upload
-            with tarfile.open(compressed_filepath, mode="w:gz") as tar:
-                tar.add(filepath)
+#         mem_limit = 50  # MiB
+#         if file_size < mem_limit:
+#             # Read the file, compress it and send the data
+#             file_data = filepath.read_bytes()
+#             compressed_data = compress(data=file_data)
+#         else:
+#             tmp_dir = tempfile.TemporaryDirectory()
+#             compressed_filepath = Path(tmp_dir.name).joinpath(f"{filepath.name}.tar.gz")
+#             # Compress in place and then upload
+#             with tarfile.open(compressed_filepath, mode="w:gz") as tar:
+#                 tar.add(filepath)
 
-            compressed_data = compressed_filepath.read_bytes()
-    elif data is not None and filepath is None:
-        compressed_data = gzip.compress(data)
-    else:
-        raise ValueError("Either filepath or data must be passed.")
+#             compressed_data = compressed_filepath.read_bytes()
+#     elif data is not None and filepath is None:
+#         compressed_data = gzip.compress(data)
+#     else:
+#         raise ValueError("Either filepath or data must be passed.")
 
-    # Write the data to the object store
-    put_response = _put(url=par_url, data=compressed_data, auth_key=auth_key)
+#     # Write the data to the object store
+#     put_response = _put(url=par_url, data=compressed_data, auth_key=auth_key)
 
-    print(str(put_response))
+#     print(str(put_response))

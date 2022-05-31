@@ -49,8 +49,8 @@ for creation of your own functions. If we look inside this directory we'll see t
 
 .. code-block:: bash
 
-    [user@computer folder]$ cd openghg_fn/
-    [user@computer openghg_fn]$ ls
+    $ cd openghg_fn/
+    $ ls
     func.py  func.yaml  requirements.txt
 
 Here ``func.py`` is the function we're going to call, ``func.yaml`` tells Fn how to setup and run the function and ``requirements.txt``

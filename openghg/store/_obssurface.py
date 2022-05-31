@@ -15,6 +15,54 @@ class ObsSurface(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
+    def read_binary(data: Dict) -> Dict:
+        """Reads binary data passed in by serverless function.
+        The data dictionary should contain sub-dictionaries that contain
+        data and metadata keys.
+
+        This is clunky and the ObsSurface.read_file function could
+        be tidied up quite a lot to be more flexible.
+
+        Args:
+            data
+        Returns:
+            dict: Dictionary of result
+        """
+        from tempfile import TemporaryDirectory
+
+        possible_kwargs = {
+            "data_type",
+            "network",
+            "site",
+            "inlet",
+            "instrument",
+            "sampling_period",
+            "measurement_type",
+            "overwrite",
+        }
+
+        results = {}
+        # We've got a lot of functions that expect a file and read
+        # metadata from its filename. As Acquire handled all of this behind the scenes
+        # we'll create a temporary directory for now
+        with TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+            # Here we could maybe chunk this out
+            for key, subdict in data.items():
+                binary_data = subdict["data"]
+                metadata = subdict["metadata"]
+                filename = metadata["filename"]
+
+                filepath = tmpdir_path.joinpath(filename)
+                filepath.write_bytes(binary_data)
+
+                meta_kwargs = {k: v for k, v in metadata.items() if k in possible_kwargs}
+
+                results[key] = ObsSurface.read_file(filepath=filepath, **meta_kwargs)
+
+        return results
+
+    @staticmethod
     def read_file(
         filepath: multiPathType,
         data_type: str,
@@ -167,7 +215,7 @@ class ObsSurface(BaseStore):
         # Save this object back to the object store
         obs.save()
 
-        return results
+        return dict(results)
 
     @staticmethod
     def read_multisite_aqmesh(

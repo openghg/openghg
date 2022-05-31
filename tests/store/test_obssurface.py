@@ -1,3 +1,4 @@
+from re import S
 import pytest
 from pandas import Timestamp
 import xarray as xr
@@ -8,6 +9,28 @@ from openghg.store import ObsSurface
 from openghg.objectstore import get_local_bucket, exists
 from openghg.util import create_daterange_str
 from helpers import get_datapath, attributes_checker_obssurface
+
+
+def test_read_binary():
+    # Get some bytes
+    filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    binary_bsd = filepath.read_bytes()
+
+    metadata = {
+        "data_type": "CRDS",
+        "site": "bsd",
+        "network": "DECC",
+        "filename": "bsd.picarro.1minute.248m.min.dat",
+    }
+
+    datas = {}
+    datas["test_key"] = {"data": binary_bsd, "metadata": metadata}
+
+    result = ObsSurface.read_binary(data=datas)
+
+    print(result)
+
+    assert False
 
 
 def test_read_CRDS():
@@ -622,7 +645,7 @@ def test_store_icos_carbonportal_data(mocker):
 
     first_result = ObsSurface.store_data(data=data)
 
-    assert first_result == {'co2': {'uuid': 'test-uuid-1', 'new': True}}
+    assert first_result == {"co2": {"uuid": "test-uuid-1", "new": True}}
 
     second_result = ObsSurface.store_data(data=data)
 
