@@ -307,7 +307,7 @@ def define_species_label(species: str) -> Tuple[str, str]:
         species : Species name.
 
     Returns:
-        str, str: Both the labelled to be used exactly and the original attribute
+        str, str: Both the species label to be used exactly and the original attribute
                   key needed to extract additional data from the 'acrg_site_info.json'
                   attributes file.
 
@@ -326,8 +326,8 @@ def define_species_label(species: str) -> Tuple[str, str]:
 
     # Extract species label using synonyms function
     try:
-        species_label = synonyms(species, lower=False)
-    except KeyError:
+        species_label = synonyms(species, lower=False, allow_new_species=False)
+    except ValueError:
         species_underscore = species.replace(" ", "_")
         species_label = clean_string(species_underscore)
 
