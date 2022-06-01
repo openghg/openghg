@@ -5,6 +5,7 @@ import requests
 from typing import Dict, Optional, Union
 import json
 import os
+import msgpack
 from openghg.types import FunctionError
 
 
@@ -21,12 +22,20 @@ def call_function(fn_name: str, data: Union[Dict, bytes]) -> Dict:
     fn_url = _get_function_url(fn_name=fn_name)
     auth_key = _get_auth_key()
 
-    response = _post(url=fn_url, data=data, auth_key=auth_key)
+    headers = {}
+    headers["Content-Type"] = "application/octet-stream"
+    headers["authentication"] = auth_key
 
-    d = {}
+    packed_data = msgpack.packb(data)
+
+    response = requests.post(url=fn_url, data=packed_data, headers=headers)
+
+    response_content = msgpack.unpackb(response.content)
+
+    d: Dict[str, Union[int, str, Dict, bytes]] = {}
     d["status"] = response.status_code
-    d["headers"] = response.headers
-    d["content"] = response.content
+    d["headers"] = dict(response.headers)
+    d["content"] = response_content
 
     return d
 
@@ -40,12 +49,12 @@ def _get_function_url(fn_name: str) -> str:
         str: Service / function URL
     """
     try:
-        urls = json.loads(os.environ["FN_URLS"])
+        urls: Dict[str, str] = json.loads(os.environ["FN_URLS"])
     except KeyError:
         raise FunctionError("No FN_URLS environment variable set for function URLs")
 
     try:
-        return urls[fn_name.upper()]
+        return urls[fn_name.lower()]
     except KeyError:
         raise FunctionError(f"Unable to find URL for {fn_name}")
 

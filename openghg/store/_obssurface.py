@@ -49,7 +49,7 @@ class ObsSurface(BaseStore):
             tmpdir_path = Path(tmpdir)
             # Here we could maybe chunk this out
             for key, subdict in data.items():
-                binary_data = subdict["data"]
+                binary_data = subdict["binary_data"]
                 metadata = subdict["metadata"]
                 filename = metadata["filename"]
 

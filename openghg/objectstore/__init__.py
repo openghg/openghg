@@ -1,5 +1,12 @@
-# cloud_env = os.environ.get("OPENGHG_CLOUD", False)
+import os
 
+cloud_env = os.environ.get("OPENGHG_CLOUD", False)
+
+# if cloud_env:
+from ._my_oci import create_bucket, upload, create_par
+from ._par import PAR
+
+# else:
 from ._local_store import (
     delete_object,
     exists,
@@ -8,9 +15,9 @@ from ._local_store import (
     get_local_bucket,
     get_object,
     get_object_from_json,
-    # get_object_names,
-    # get_openghg_local_path,
-    # query_store,
+    get_object_names,
+    get_openghg_local_path,
+    query_store,
     set_object,
     set_object_from_file,
     set_object_from_json,
@@ -18,8 +25,7 @@ from ._local_store import (
 )
 
 from ._encoding import get_datetime_now, datetime_to_datetime
-from ._my_oci import create_bucket, upload, create_par
-from ._par import PAR
+
 
 # from ._cloud import OCI_ObjectStore
 

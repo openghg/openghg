@@ -1,4 +1,3 @@
-from re import S
 import pytest
 from pandas import Timestamp
 import xarray as xr
@@ -11,7 +10,10 @@ from openghg.util import create_daterange_str
 from helpers import get_datapath, attributes_checker_obssurface
 
 
-def test_read_binary():
+def test_read_binary(mocker):
+    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+
     # Get some bytes
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
     binary_bsd = filepath.read_bytes()
@@ -28,9 +30,19 @@ def test_read_binary():
 
     result = ObsSurface.read_binary(data=datas)
 
-    print(result)
+    expected = {
+        "test_key": {
+            "processed": {
+                "bsd.picarro.1minute.248m.min.dat": {
+                    "ch4": {"uuid": "test-uuid-1", "new": True},
+                    "co2": {"uuid": "test-uuid-2", "new": True},
+                    "co": {"uuid": "test-uuid-3", "new": True},
+                }
+            }
+        }
+    }
 
-    assert False
+    assert result == expected
 
 
 def test_read_CRDS():

@@ -1,23 +1,21 @@
+from typing import Dict, List, Union
 from pathlib import Path
-from subprocess import call
-import tarfile
-from typing import Union, Optional, Dict
-from requests import Response
-from openghg.cloud import call_function
-from openghg.types import multiPathType
 
 
-def standardise_surface(filepaths: multiPathType, data_type: str, metadata: Dict) -> Dict:
+def standardise_surface(filepaths: Union[str, Path, List[Union[str, Path]]], metadata: Dict) -> Dict:
     """Standardise data
 
     Args:
         filepaths: Path of file(s) to process
         data_type: Type of data i.e. GCWERKS, CRDS, ICOS
-        metadata: Dictionary of associated metadata
+        metadata: Dictionary of associated metadata, note that this metadata must apply to each of the files
+        given in filepaths.
     Returns:
         dict: Details confirmation of process
     """
-    from gzip import compress
+    import gzip
+    from openghg.cloud import call_function
+    from openghg.util import hash_bytes
 
     # pass
     # If under specific size just post to standardisation function
@@ -31,18 +29,20 @@ def standardise_surface(filepaths: multiPathType, data_type: str, metadata: Dict
     # function will be this big (megabytes)
     post_limit = 20
 
-    to_post = []
-    to_par = []
-
     for fpath in filepaths:
         filepath = Path(fpath)
-
-        file_size = Path("somefile.txt").stat().st_size / MB
+        # Get the file size in megabytes
+        file_size = filepath.stat().st_size / MB
 
         if file_size < post_limit:
             # Read the file, compress it and send the data
             file_data = filepath.read_bytes()
-            compressed_data = compress(data=file_data)
+            # Here we want the hash of the uncompressed data
+            sha1_hash = hash_bytes(data=file_data)
+            compressed_data = gzip.compress(data=file_data)
+
+            file_metadata = {"compressed": True, "sha1_hash": sha1_hash, "filename": filepath.name}
+            to_post = {"data": compressed_data, "metadata": metadata, "file_metadata": file_metadata}
         else:
             # If we want chunked uploading what do we do?
             raise NotImplementedError
@@ -53,9 +53,9 @@ def standardise_surface(filepaths: multiPathType, data_type: str, metadata: Dict
             #     tar.add(filepath)
             # compressed_data = compressed_filepath.read_bytes()
 
-    response = call_function(fn_name="standardise", data=compressed_data)
+    response = call_function(fn_name="standardise", data=to_post)
 
-    print(response)
+    return response
 
 
 # def upload(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:
