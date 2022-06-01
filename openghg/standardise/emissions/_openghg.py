@@ -23,6 +23,7 @@ def parse_openghg(filepath: Path,
     from collections import defaultdict
     from openghg.util import timestamp_now
     from openghg.store import infer_date_range
+    from openghg.standardise.meta import assign_flux_attributes
 
     em_data = open_dataset(filepath)
 
@@ -84,5 +85,7 @@ def parse_openghg(filepath: Path,
     emissions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
     emissions_data[key]["data"] = em_data
     emissions_data[key]["metadata"] = metadata
+
+    emissions_data = assign_flux_attributes(emissions_data)
 
     return emissions_data

@@ -353,3 +353,130 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
         # raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
 
     return attributes
+
+
+def assign_flux_attributes(data: Dict,
+                           species: Optional[str] = None,
+                           source: Optional[str] = None,
+                           domain: Optional[str] = None,
+                           units: str = "mol/m2/s",
+                           prior_info_dict: Optional[dict] = None):
+    """
+    TODO: Add comments
+    """
+
+    for _, flux_dict in data.items():
+        flux_attributes = flux_dict.get("attributes", {})
+
+        attribute_values = {"species": species,
+                            "source": source,
+                            "domain": domain}
+
+        metadata = flux_dict["metadata"]
+        for attr, value in attribute_values.items():
+            if value is None:
+                try:
+                    attribute_values[attr] = metadata[attr]
+                except KeyError:
+                    raise ValueError(f"Attribute {attr} must be specified.")
+
+        flux_dict["data"] = get_flux_attributes(
+            ds=flux_dict["data"],
+            units=units,
+            prior_info_dict=prior_info_dict,
+            global_attributes=flux_attributes,
+            **attribute_values
+        )
+
+    return data  
+
+
+def get_flux_attributes(ds: Dataset,
+                        species: str,
+                        source: str,
+                        domain: str,
+                        units: str = "mol/m2/s",
+                        prior_info_dict: Optional[dict] = None,
+                        global_attributes: Optional[dict] = None) -> Dataset:
+    """
+    TODO: Add comments
+    """
+    # Example flux attributes
+    # :title = "EDGAR 4.3.2 year 2004" ;
+    # :author = "ag12733" ;
+    # :date_created = "2018-07-16 13:10:57.346915" ;
+    # :number_of_prior_files_used = 1L ;
+    # :prior_file_1 = "EDGAR" ;
+    # :prior_file_1_version = "/data/shared/Gridded_fluxes/N2O/EDGAR_v4.3.2/v432_N2O_TOTALS_nc/v432_N2O_2004.0.1x0.1.nc" ;
+    # :prior_file_1_raw_resolution = "0.1 degree x 0.1 degree" ;
+    # :prior_file_1_reference = "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG" ;
+    # :regridder_used = "acrg_grid.regrid.regrid_3D" ; 
+
+    from openghg.util import timestamp_now
+
+    flux_attrs = {"source": source,
+                  "units": units,
+                  "species": species}
+
+    lat_attrs = {"long_name" : "latitude",
+                 "units" : "degrees_north",
+                 "notes" : "centre of cell"}
+
+    lon_attrs = {"long_name" : "longitude",
+                 "units" : "degrees_east",
+                 "notes" : "centre of cell"}
+
+    ds["flux"].attrs = flux_attrs
+    ds["lat"].attrs = lat_attrs
+    ds["lon"].attrs = lon_attrs
+
+    current_attributes = ds.attrs
+
+    global_attributes_default = {
+            "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+            "Conventions": "CF-1.8"}
+
+    if global_attributes is None:
+        global_attributes = global_attributes_default
+    else:
+        global_attributes.update(global_attributes_default)
+
+    if "title" in current_attributes and "title" not in global_attributes:
+        global_attributes["title"] = current_attributes["title"]
+    else:
+        global_attributes["title"] = f"{source} emissions/flux of {species} for {domain} domain"
+
+    if "file_created" not in global_attributes:
+        global_attributes["file_created"] = str(timestamp_now())
+    if "process_by" not in global_attributes:
+        global_attributes["processed_by"] = "OpenGHG_Cloud"
+
+    # TODO: Update when we have access to species label definition (from 'obs_data_type' branch)
+    # species_label = define_species_label(species)
+    species_label = species
+
+    global_attributes["species"] = species_label
+    global_attributes["source"] = source
+    global_attributes["domain"] = domain
+
+    if prior_info_dict is not None:
+        global_attributes["number_of_prior_files_used"] = len(prior_info_dict.keys())
+        for i, source_key in enumerate(prior_info_dict.keys()):
+
+            prior_number = i+1
+            label_start = f"prior_file_{prior_number}"
+            global_attributes[label_start] = source_key
+
+            for key, value in prior_info_dict[source_key].items():
+                attr_key = f"{label_start}_{key}"
+                global_attributes[attr_key] = value
+
+    updated_keys = ["Conventions", "title", "file_created", "processed_by"]
+    for key in updated_keys:
+        if key in current_attributes:
+            current_attributes.pop(key)
+
+    global_attributes.update(current_attributes)
+    ds.attrs = global_attributes
+
+    return ds
