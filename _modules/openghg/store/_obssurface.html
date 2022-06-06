@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.gac14335.dirty documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g43af753.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -173,11 +173,8 @@
 <span></span><span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">resultsType</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">DataSchema</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ObsSurface&quot;</span><span class="p">]</span>
 
@@ -220,6 +217,7 @@
 <span class="sd">            dict: Dictionary of Datasource UUIDs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+        <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
         <span class="kn">import</span> <span class="nn">sys</span>
         <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
@@ -300,25 +298,6 @@
                         <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period_seconds</span><span class="p">,</span>
                         <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
                     <span class="p">)</span>
-
-                <span class="c1"># Check against expected format for ObsSurface object</span>
-                <span class="c1"># TODO: At the moment this only stops certain species being</span>
-                <span class="c1"># written to the object store but may want to stop all species</span>
-                <span class="c1"># from files being written.</span>
-                <span class="n">to_remove</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">species</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">ObsSurface</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
-                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: standardised data for &#39;</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2">&#39; is not in expected OpenGHG format.&quot;</span><span class="p">)</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Check data for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not writing to object store.&quot;</span><span class="p">)</span>
-                        <span class="n">to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-
-                <span class="k">for</span> <span class="n">remove</span> <span class="ow">in</span> <span class="n">to_remove</span><span class="p">:</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">remove</span><span class="p">)</span>
 
                 <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="s2">&quot;species&quot;</span><span class="p">,</span>
@@ -449,55 +428,6 @@
         <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">results</span></div>
-
-<div class="viewcode-block" id="ObsSurface.schema"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.schema">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Define schema for surface observations Dataset.</span>
-
-<span class="sd">        Only includes mandatory variables</span>
-<span class="sd">            - standardised species name (e.g. &quot;ch4&quot;)</span>
-<span class="sd">            - expected dimensions: (&quot;time&quot;)</span>
-
-<span class="sd">        Expected data types for variables and coordinates also included.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            DataSchema : Contains basic schema for ObsSurface.</span>
-
-<span class="sd">        # TODO: Decide how to best incorporate optional variables</span>
-<span class="sd">        # e.g. &quot;ch4_variability&quot;, &quot;ch4_number_of_observations&quot;</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">define_species_label</span>
-
-        <span class="n">name</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="n">data_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,)}</span>
-        <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>
-                 <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">}</span>
-
-        <span class="n">data_format</span> <span class="o">=</span> <span class="n">DataSchema</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span>
-                                 <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">data_format</span></div>
-
-<div class="viewcode-block" id="ObsSurface.validate_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.validate_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validate input data against ObsSurface schema - definition from</span>
-<span class="sd">        ObsSurface.schema() method.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data : xarray Dataset in expected format</span>
-<span class="sd">            species: Species name</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-
-<span class="sd">            Raises a ValueError with details if the input data does not adhere</span>
-<span class="sd">            to the ObsSurface schema.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data_schema</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
-        <span class="n">data_schema</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObsSurface.store_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.store_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span>
