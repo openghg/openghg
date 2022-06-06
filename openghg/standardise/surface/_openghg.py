@@ -19,7 +19,7 @@ def parse_openghg(
     """
     Parse and extract data from pre-formatted netcdf file which already
     matches expected OpenGHG format.
-    
+
     At the moment this must also be for a site known to OpenGHG. See
     'acrg_site_info.json' file.
 
