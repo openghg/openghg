@@ -11,3 +11,4 @@ from ._icos import parse_icos
 from ._noaa import parse_noaa
 from ._npl import parse_npl
 from ._thamesbarrier import parse_tmb
+from ._openghg import parse_openghg
