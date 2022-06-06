@@ -293,7 +293,7 @@ class ModelScenario:
         """
         Add footprint data based on keywords or direct FootprintData object.
         """
-        from openghg.util import clean_string
+        from openghg.util import clean_string, species_lifetime
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs), model, metmodel
@@ -308,7 +308,7 @@ class ModelScenario:
                     "Unable to deal with multiple inlets yet:\n Please change date range or specify a specific inlet"
                 )
 
-            footprint_keywords_1 = {
+            footprint_keywords = {
                 "site": site,
                 "height": inlet,
                 "domain": domain,
@@ -316,13 +316,15 @@ class ModelScenario:
                 # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
                 "start_date": start_date,
                 "end_date": end_date,
-                "species": species,
             }
 
-            footprint_keywords_2 = footprint_keywords_1.copy()
-            footprint_keywords_2.pop("species")
-
-            footprint_keywords = [footprint_keywords_1, footprint_keywords_2]
+            # Check whether general inert footprint should be extracted (suitable for long-lived species)
+            # or species specific footprint
+            #  - needed for short-lived species (includes additional parameters for age of particles)
+            #  - needed for carbon dioxide (include high time resolution footprint)
+            species_lifetime_value = species_lifetime(species)
+            if species_lifetime_value is not None or species == "co2":
+                footprint_keywords["species"] = species
 
             footprint = self._get_data(footprint_keywords, input_type="footprint")
 
@@ -1566,8 +1568,6 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
     Returns:
         bool: True if indexes match, else False
     """
-    import numpy as np
-
     common_indices = (key for key in dataset_A.indexes.keys() if key in dataset_B.indexes.keys())
 
     for index in common_indices:
