@@ -17,9 +17,34 @@ def parse_openghg(
     **kwargs: str,
 ) -> Dict:
     """
-    Parse and extract data from pre-formatted netcdf file which already matches expected
-    OpenGHG format.
+    Parse and extract data from pre-formatted netcdf file which already
+    matches expected OpenGHG format.
+    
+    At the moment this must also be for a site known to OpenGHG. See
+    'acrg_site_info.json' file.
 
+    The arguments specified below are the metadata needed to store this 
+    surface observation file within the object store. If these keywords are
+    not included within the attributes of the netcdf file being passed then
+    these arguments must be specified.
+
+    Args:
+        site: Site code/name e.g. "TAC" (for Tacolneston)
+        species: Species name or synonym e.g. "ch4"
+        network: Network name. e.g. "DECC"
+        inlet: Height of inlet for observation. e.g. "10m"
+        instrument: Instrument name used for measurement e.g. "gcmd".
+            Can be set to "NA" if this is an unknown detail.
+        sampling_period: Sampling period in pandas style
+            (e.g. 2H for 2 hour period, 2m for 2 minute period).
+        calibration_scale: Calibration scale used for measurements
+            e.g. "WMOX2007"
+        data_owner: Name of data owner.
+        data_owner_email: Email address for data owner.
+        kwargs: Any additional attributes to be associated with the data.
+
+    Returns:
+        Dict : Dictionary of source_name : data, metadata, attributes
     """
     from openghg.util import clean_string, load_json, synonyms
     from openghg.standardise.meta import metadata_default_keys, assign_attributes
