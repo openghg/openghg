@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Standardisation functions &#8212; OpenGHG 0+untagged.1.g58cc123.dirty documentation</title>
+    <title>Standardisation functions &#8212; OpenGHG 0+untagged.1.g480ecb7.dirty documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -468,39 +468,8 @@ sample is taken. Only for time variable attribute</p></li>
 <dd><p>This function writes attributes to an xarray.Dataset so that they conform with
 the CF Convention v1.6</p>
 <p>Attributes of the xarray DataSet are modified, and variable names are changed</p>
-<dl class="simple">
-<dt>If the species is a standard mole fraction then either:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>species name will used in lower case in the file and variable names</dt><dd><p>but with any hyphens taken out</p>
-</dd>
-</dl>
-</li>
-<li><p>name will be changed according to the species_translator dictionary</p></li>
-</ul>
-</dd>
-<dt>If the species is isotopic data or a non-standard variable (e.g. APO):</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>Isotopes species names should begin with a “D”</dt><dd><dl class="simple">
-<dt>(Annoyingly, the code currently picks up “Desflurane” too. I’ve</dt><dd><p>fixed this for now, but if we get a lot of other “D” species, we
-should make this better)</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>I suggest naming for isotopologues should be d&lt;species&gt;&lt;isotope&gt;, e.g.</dt><dd><p>dCH4C13, or dCO2C14</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Any non-standard variables should be listed in the species_translator</dt><dd><p>dictionary</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
+<p>Variable naming related to species name will be defined using
+define_species_label() function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
