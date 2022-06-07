@@ -29,8 +29,9 @@ pytest-cov
 pytest-mock
 requests-mock
 # For mypy
-mypy==0.930
+mypy==0.961
 types-paramiko
 types-PyYAML
 types-requests
+msgpack-types
 pre-commit

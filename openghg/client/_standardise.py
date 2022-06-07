@@ -1,8 +1,10 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 from pathlib import Path
 
 
-def standardise_surface(filepaths: Union[str, Path, List[Union[str, Path]]], metadata: Dict) -> Dict:
+def standardise_surface(
+    filepaths: Union[str, Path, List[Union[str, Path]]], metadata: Dict
+) -> Optional[Dict]:
     """Standardise data
 
     Args:
@@ -28,6 +30,12 @@ def standardise_surface(filepaths: Union[str, Path, List[Union[str, Path]]], met
     # The largest file we'll just directly POST to the standardisation
     # function will be this big (megabytes)
     post_limit = 20
+
+    required_keys = {"data_type", "network", "site", "instrument"}
+
+    if not required_keys <= metadata.keys():
+        print(f"Error: we require the following metadata at a minimum: {required_keys}")
+        return None
 
     responses = {}
     for fpath in filepaths:

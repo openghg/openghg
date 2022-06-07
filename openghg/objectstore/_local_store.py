@@ -192,8 +192,7 @@ def set_object_from_file(bucket: str, key: str, filename: Union[str, Path]) -> N
 
 
 def get_object_from_json(bucket: str, key: str) -> Dict[str, Union[str, Dict]]:
-    """Removes the daterange from the passed key and uses the reduced
-    key to get an object from the object store.
+    """Return an object constructed from JSON stored at key.
 
     Args:
         bucket: Bucket containing data
