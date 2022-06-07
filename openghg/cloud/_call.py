@@ -3,13 +3,12 @@ Call OpenGHG serverless functions
 """
 import requests
 from typing import Dict, Optional, Union
-import json
 import os
 import msgpack
 from openghg.types import FunctionError
 
 
-def call_function(fn_name: str, data: Union[Dict, bytes]) -> Dict:
+def call_function(data: Union[Dict, bytes]) -> Dict:
     """Calls an OpenGHG serverless function and returns its response
 
     Args:
@@ -19,16 +18,19 @@ def call_function(fn_name: str, data: Union[Dict, bytes]) -> Dict:
         dict: Dictionary containing response result
     """
     # First lookup the function URL
-    fn_url = _get_function_url(fn_name=fn_name)
+    fn_url = _get_function_url()
     auth_key = _get_auth_key()
 
     headers = {}
     headers["Content-Type"] = "application/octet-stream"
-    headers["authentication"] = auth_key
+    headers["authorization"] = auth_key
 
     packed_data = msgpack.packb(data)
 
     response = requests.post(url=fn_url, data=packed_data, headers=headers)
+
+    if response.status_code != 200:
+        raise FunctionError(f"Function call error: {str(response.content)}")
 
     response_content = msgpack.unpackb(response.content)
 
@@ -40,7 +42,7 @@ def call_function(fn_name: str, data: Union[Dict, bytes]) -> Dict:
     return d
 
 
-def _get_function_url(fn_name: str) -> str:
+def _get_function_url() -> str:
     """Get the URl for the required service
 
     Args:
@@ -49,14 +51,9 @@ def _get_function_url(fn_name: str) -> str:
         str: Service / function URL
     """
     try:
-        urls: Dict[str, str] = json.loads(os.environ["FN_URLS"])
+        return os.environ["OPENGHG_FN_URL"]
     except KeyError:
-        raise FunctionError("No FN_URLS environment variable set for function URLs")
-
-    try:
-        return urls[fn_name.lower()]
-    except KeyError:
-        raise FunctionError(f"Unable to find URL for {fn_name}")
+        raise FunctionError("No OPENGHG_FN_URL environment variable set for function URLs")
 
 
 def _get_auth_key() -> str:

@@ -41,26 +41,25 @@ class ObsSurface(BaseStore):
             "overwrite",
         }
 
-        results = {}
         # We've got a lot of functions that expect a file and read
         # metadata from its filename. As Acquire handled all of this behind the scenes
         # we'll create a temporary directory for now
         with TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
             # Here we could maybe chunk this out
-            for key, subdict in data.items():
-                binary_data = subdict["binary_data"]
-                metadata = subdict["metadata"]
-                filename = metadata["filename"]
+            binary_data = data["data"]
+            metadata = data["metadata"]
+            file_metadata = data["file_metadata"]
+            filename = file_metadata["filename"]
 
-                filepath = tmpdir_path.joinpath(filename)
-                filepath.write_bytes(binary_data)
+            filepath = tmpdir_path.joinpath(filename)
+            filepath.write_bytes(binary_data)
 
-                meta_kwargs = {k: v for k, v in metadata.items() if k in possible_kwargs}
+            meta_kwargs = {k: v for k, v in metadata.items() if k in possible_kwargs}
 
-                results[key] = ObsSurface.read_file(filepath=filepath, **meta_kwargs)
+            result = ObsSurface.read_file(filepath=filepath, **meta_kwargs)
 
-        return results
+        return result
 
     @staticmethod
     def read_file(

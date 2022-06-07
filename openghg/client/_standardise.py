@@ -29,6 +29,7 @@ def standardise_surface(filepaths: Union[str, Path, List[Union[str, Path]]], met
     # function will be this big (megabytes)
     post_limit = 20
 
+    responses = {}
     for fpath in filepaths:
         filepath = Path(fpath)
         # Get the file size in megabytes
@@ -40,9 +41,21 @@ def standardise_surface(filepaths: Union[str, Path, List[Union[str, Path]]], met
             # Here we want the hash of the uncompressed data
             sha1_hash = hash_bytes(data=file_data)
             compressed_data = gzip.compress(data=file_data)
+            filename = filepath.name
 
-            file_metadata = {"compressed": True, "sha1_hash": sha1_hash, "filename": filepath.name}
-            to_post = {"data": compressed_data, "metadata": metadata, "file_metadata": file_metadata}
+            file_metadata = {
+                "compressed": True,
+                "sha1_hash": sha1_hash,
+                "filename": filename,
+                "obs_type": "surface",
+            }
+
+            to_post = {
+                "function": "standardise",
+                "data": compressed_data,
+                "metadata": metadata,
+                "file_metadata": file_metadata,
+            }
         else:
             # If we want chunked uploading what do we do?
             raise NotImplementedError
@@ -53,9 +66,9 @@ def standardise_surface(filepaths: Union[str, Path, List[Union[str, Path]]], met
             #     tar.add(filepath)
             # compressed_data = compressed_filepath.read_bytes()
 
-    response = call_function(fn_name="standardise", data=to_post)
+        responses[filename] = call_function(data=to_post)
 
-    return response
+    return responses
 
 
 # def upload(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:

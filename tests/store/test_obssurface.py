@@ -22,22 +22,22 @@ def test_read_binary(mocker):
         "data_type": "CRDS",
         "site": "bsd",
         "network": "DECC",
-        "filename": "bsd.picarro.1minute.248m.min.dat",
     }
 
-    datas = {}
-    datas["test_key"] = {"data": binary_bsd, "metadata": metadata}
+    datas = {
+        "data": binary_bsd,
+        "metadata": metadata,
+        "file_metadata": {"filename": "bsd.picarro.1minute.248m.min.dat"},
+    }
 
     result = ObsSurface.read_binary(data=datas)
 
     expected = {
-        "test_key": {
-            "processed": {
-                "bsd.picarro.1minute.248m.min.dat": {
-                    "ch4": {"uuid": "test-uuid-1", "new": True},
-                    "co2": {"uuid": "test-uuid-2", "new": True},
-                    "co": {"uuid": "test-uuid-3", "new": True},
-                }
+        "processed": {
+            "bsd.picarro.1minute.248m.min.dat": {
+                "ch4": {"uuid": "test-uuid-1", "new": True},
+                "co2": {"uuid": "test-uuid-2", "new": True},
+                "co": {"uuid": "test-uuid-3", "new": True},
             }
         }
     }
