@@ -45,5 +45,5 @@ from ._util import (
     find_matching_site,
     site_code_finder,
 )
-from ._species import species_lifetime, check_lifetime_monthly, molar_mass
+from ._species import synonyms, species_lifetime, check_lifetime_monthly, molar_mass
 from ._domain import find_domain

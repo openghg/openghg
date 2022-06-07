@@ -41,7 +41,7 @@ def get_obs_surface(
     from xarray import concat as xr_concat
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
-    from openghg.util import clean_string, load_json, timestamp_tzaware
+    from openghg.util import clean_string, load_json, timestamp_tzaware, synonyms
 
     site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
@@ -50,7 +50,7 @@ def get_obs_surface(
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     # Find the correct synonym for the passed species
-    species = clean_string(_synonyms(species))
+    species = clean_string(synonyms(species))
 
     # Get the observation data
     obs_results = search(
@@ -260,10 +260,10 @@ def get_flux(
     """
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
-    from openghg.util import clean_string, timestamp_epoch, timestamp_now
+    from openghg.util import clean_string, timestamp_epoch, timestamp_now, synonyms
 
     # Find the correct synonym for the passed species
-    species = clean_string(_synonyms(species))
+    species = clean_string(synonyms(species))
 
     if start_date is None:
         start_date = timestamp_epoch()
@@ -329,10 +329,10 @@ def get_bc(
     """
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
-    from openghg.util import clean_string, timestamp_epoch, timestamp_now
+    from openghg.util import clean_string, timestamp_epoch, timestamp_now, synonyms
 
     # Find the correct synonym for the passed species
-    species = clean_string(_synonyms(species))
+    species = clean_string(synonyms(species))
 
     if start_date is None:
         start_date = timestamp_epoch()
@@ -402,11 +402,11 @@ def get_footprint(
     from openghg.store import recombine_datasets
     from openghg.retrieve import search
     from openghg.dataobjects import FootprintData
-    from openghg.util import clean_string
+    from openghg.util import clean_string, synonyms
 
     # Find the correct synonym for the passed species
     if species is not None:
-        species = clean_string(_synonyms(species))
+        species = clean_string(synonyms(species))
 
     results = search(
         site=site,
@@ -450,46 +450,6 @@ def get_footprint(
     #     species = metadata.get("species", "INERT")
 
     return FootprintData(data=fp_ds, metadata=metadata)
-
-
-def _synonyms(species: str) -> str:
-    """
-    Check to see if there are other names that we should be using for
-    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc-11,
-    as this is used in species_info.json
-
-    Args:
-        species (str): Input string that you're trying to match
-    Returns:
-        str: Matched species string
-    """
-
-    from openghg.util import load_json
-
-    # Load in the species data
-    species_data = load_json(filename="acrg_species_info.json")
-
-    # First test whether site matches keys (case insensitive)
-    matched_strings = [k for k in species_data if k.upper() == species.upper()]
-
-    # Used to access the alternative names in species_data
-    alt_label = "alt"
-
-    # If not found, search synonyms
-    if not matched_strings:
-        for key in species_data:
-            # Iterate over the alternative labels and check for a match
-            matched_strings = [s for s in species_data[key][alt_label] if s.upper() == species.upper()]
-
-            if matched_strings:
-                matched_strings = [key]
-                break
-
-    if matched_strings:
-        updated_species = str(matched_strings[0])
-        return updated_species
-    else:
-        raise ValueError(f"Unable to find synonym for species {species}")
 
 
 def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:

@@ -2,13 +2,50 @@ from typing import Optional, Union, List
 from openghg.util._file import load_json
 
 
-__all__ = ["species_lifetime", "check_lifetime_monthly", "molar_mass"]
+__all__ = ["synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
+
+
+def synonyms(species: str) -> str:
+    """
+    Check to see if there are other names that we should be using for
+    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc-11,
+    as this is used in species_info.json
+
+    Args:
+        species (str): Input string that you're trying to match
+    Returns:
+        str: Matched species string
+    """
+
+    from openghg.util import load_json
+
+    # Load in the species data
+    species_data = load_json(filename="acrg_species_info.json")
+
+    # First test whether site matches keys (case insensitive)
+    matched_strings = [k for k in species_data if k.upper() == species.upper()]
+
+    # Used to access the alternative names in species_data
+    alt_label = "alt"
+
+    # If not found, search synonyms
+    if not matched_strings:
+        for key in species_data:
+            # Iterate over the alternative labels and check for a match
+            matched_strings = [s for s in species_data[key][alt_label] if s.upper() == species.upper()]
+
+            if matched_strings:
+                matched_strings = [key]
+                break
+
+    if matched_strings:
+        updated_species = str(matched_strings[0])
+        return updated_species
+    else:
+        raise ValueError(f"Unable to find synonym for species {species}")
 
 
 LifetimeType = Optional[Union[str, List[str]]]
-
-
-# TODO: Incorporate species synonyms?
 
 
 def species_lifetime(species: Union[str, None]) -> LifetimeType:

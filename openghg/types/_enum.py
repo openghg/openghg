@@ -17,6 +17,7 @@ class SurfaceTypes(Enum):
     AQMESH = "AQMESH"
     GLASGOW_PICARRO = "GLASGOW_PICARRO"
     GLASGOW_LICOR = "GLASGOW_LICOR"
+    OPENGHG = "OPENGHG"
 
 
 class DataTypes(Enum):
@@ -34,6 +35,7 @@ class DataTypes(Enum):
     AQMESH = "AQMESH"
     GLASGOW_PICARRO = "GLASGOW_PICARRO"
     GLASGOW_LICOR = "GLASGOW_LICOR"
+    OPENGHG = "OPENGHG"
 
 
 class ObsTypes(Enum):
