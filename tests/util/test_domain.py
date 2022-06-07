@@ -29,15 +29,15 @@ def test_create_coord():
     coord = "coordinate"
     domain = "TEST"
 
-    range = [-10, 10]
-    increment = 0.1
+    range = ["-10", "10"]
+    increment = "0.1"
     data = {"coordinate_range": range,
             "coordinate_increment": increment}
 
     coordinate = _get_coord_data(coord, data, domain)
 
-    assert np.isclose(coordinate[0], range[0])
-    assert np.isclose(coordinate[-1], range[-1])
+    assert np.isclose(coordinate[0], float(range[0]))
+    assert np.isclose(coordinate[-1], float(range[-1]))
 
     av_increment = (coordinate[1:] - coordinate[:-1]).mean()
-    assert np.isclose(av_increment, increment)
+    assert np.isclose(av_increment, float(increment))
