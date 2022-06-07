@@ -20,13 +20,22 @@ def parse_edgar(filepath: Path,
     """
     Read and parse input EDGAR data
 
+    TODO: Finalise inputs and add details
+
     Args:
         filepath: Path to data file
+        species
+        year
+        domain
+        lat_out
+        lon_out
+        period
+        edgar_version
+
     Returns:
         dict: Dictionary of data
     """
-    # from openghg.util import synonyms, molar_mass
-    from openghg.util import molar_mass, timestamp_now, find_domain
+    from openghg.util import synonyms, molar_mass, timestamp_now, find_domain
     from openghg.store import infer_date_range
     from openghg.standardise.meta import assign_flux_attributes
     from collections import defaultdict
@@ -39,9 +48,7 @@ def parse_edgar(filepath: Path,
     # - getedgarv5annualsectors
     # - getedgarv432annualsectors
 
-    # TODO: Add once functionality is available in devel
-    # species = synonyms(species, lower=False)
-    species_label = species.upper()
+    species_label = synonyms(species, lower=False)
 
     # TODO: Work out how to select frequency
     # - could try and relate to period e.g. "monthly" versus "yearly" etc. 
@@ -81,7 +88,6 @@ def parse_edgar(filepath: Path,
     if zipfile.is_zipfile(filepath):
         zipped = True
         zip_folder = zipfile.ZipFile(filepath)
-        # file = zip_folder.read("")
     else:
         zipped = False
 
@@ -115,14 +121,14 @@ def parse_edgar(filepath: Path,
             try:
                 readme_filepath = os.path.join(filepath, readme_filename)
                 readme_data = open(readme_filepath, "r").read()
-            except ValueError:
+            except FileNotFoundError:
                 readme_data = None            
 
         if readme_data is not None:
             try:
                 title_line = re.search("<title.*?>(.+?)</title>", readme_data).group()
                 edgar_version = re.search("v\d[.]+\d[.]?\d*", title_line).group()
-            except:
+            except ValueError:
                 pass
             else:
                 if edgar_version not in known_version:
@@ -130,7 +136,7 @@ def parse_edgar(filepath: Path,
 
     # Extract list of data files
     if zipped:
-        folder_filelist = list(zipped.namelist())
+        folder_filelist = list(zip_folder.namelist())
     else:
         folder_filelist = list(filepath.glob("*"))
 
@@ -259,7 +265,7 @@ def parse_edgar(filepath: Path,
     em_data.attrs["author"] = author_name
 
     date = year
-    source = f"edgar{edgar_version}-yearly"
+    source = f"anthro-edgar{edgar_version}-yearly"
 
     metadata = {}
     metadata.update(attrs)
@@ -289,10 +295,10 @@ def parse_edgar(filepath: Path,
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)
 
-    metadata["max_longitude"] = round(float(em_data["lon"].max()), 5)
     metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
+    metadata["max_longitude"] = round(float(em_data["lon"].max()), 5)
+    metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)    
     metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
-    metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
 
     metadata["time_resolution"] = "standard"
     metadata["time_period"] = period_str
@@ -304,7 +310,7 @@ def parse_edgar(filepath: Path,
     emissions_data[key]["metadata"] = metadata
     emissions_data[key]["attributes"] = attrs
 
-    emissions_data = assign_flux_attributes(emissions_data, prior_info_dict=prior_info_dict)
+    emissions_data = assign_flux_attributes(emissions_data, units=units, prior_info_dict=prior_info_dict)
 
     return emissions_data
 
