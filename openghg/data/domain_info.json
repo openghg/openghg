@@ -4,8 +4,8 @@
         "longitude_range": [-97.9, 39.38],
         "latitude_increment": 0.234,
         "longitude_increment": 0.352,
-        "latitude_file": "domain/EUROPE_latitude.csv",
-        "longitude_file": "domain/EUROPE_longitude.csv",
+        "latitude_file": "domain/EUROPE_latitude.dat",
+        "longitude_file": "domain/EUROPE_longitude.dat",
         "long_name": "NAME domain over Europe and the Atlantic (large)"
     },
     "": {

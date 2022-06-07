@@ -26,8 +26,7 @@ def parse_edgar(filepath: Path,
         dict: Dictionary of data
     """
     # from openghg.util import synonyms, molar_mass
-    from openghg.util import molar_mass, timestamp_now
-    from openghg.util._domain import find_domain
+    from openghg.util import molar_mass, timestamp_now, find_domain
     from openghg.store import infer_date_range
     from openghg.standardise.meta import assign_flux_attributes
     from collections import defaultdict

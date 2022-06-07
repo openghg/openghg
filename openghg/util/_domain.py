@@ -6,12 +6,22 @@ from openghg.util import get_datapath, load_json
 
 def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
     """
-    TODO: Add docstring
+    Finds the latitude and longitude values in degrees associated
+    with a given domain name.
+
+    Args:
+        domain: Pre-defined domain name (see 'domain_info.json')
+    
+    Returns:
+        array, array : Latitude and longitude values for the domain in degrees.
     """
     domain_info = load_json(filename="domain_info.json")
 
     # Look for domain in domain_info file
     if domain in domain_info:
+        domain_data = domain_info[domain]
+    elif domain.upper() in domain_info:
+        domain = domain.upper()
         domain_data = domain_info[domain]
     else:
         raise ValueError(f"Pre-defined domain '{domain}' not found")
@@ -25,7 +35,27 @@ def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
     
 def _get_coord_data(coord: str, data: dict, domain: str):
     """
-    TODO: Add docstring
+    Attempts to extract or derive coordinate (typically latitude/longitude)
+    values for a domain from provided data dictionary (typically
+    this can be derived from 'domain_info.json' file).
+
+    This looks for:
+     - File containing coordinate values (in degrees)
+         - Looks for "{coord}_file" attribute e.g. "latitude_file"
+         - OR for a file within "domain" subfolder called "{domain}_{coord}.dat"
+           e.g. "EUROPE_latitude.dat"
+     - "{coord}_range" and "{coord}_increment" attributes to use to construct
+       the coordinate values e.g. "latitude_range" to include the start and
+       end (inclusive) range and "latitude_increment" for the step in degrees.
+
+    Args:
+        coord: Name of coordinate (e.g. latitude, longitude)
+        data: Data dictionary containing details of domain
+              (e.g. derived from 'domain_info.json')
+        domain: Name of domain
+
+    Returns:
+        array: Extracted or derived coordinate values
     """
     # Look for explicit file keyword in data e.g. "latitude_file"
     # Extract data from file if found and return
@@ -39,7 +69,7 @@ def _get_coord_data(coord: str, data: dict, domain: str):
     # if data is present by looking for file of form "domain/{domain}_{coord}.csv"
     # e.g. "domain/EUROPE_latitude.csv" (within "openghg/openghg/data" folder)
     try:
-        full_filename = get_datapath(f"{domain}_{coord}.csv", "domain")
+        full_filename = get_datapath(f"{domain}_{coord}.dat", "domain")
         coord_data = np.loadtxt(full_filename)
     except OSError:
         pass
