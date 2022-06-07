@@ -3,20 +3,9 @@ from io import BytesIO
 from pathlib import Path
 from oci.object_storage import ObjectStorageClient
 from oci.response import Response
+from functools import lru_cache
 from openghg.types import ObjectStoreError
 import json
-
-# from functools import lru_cache
-
-# def _progress_callback(bytes_uploaded):
-#     print("{} additional bytes uploaded".format(bytes_uploaded))
-
-# Cache this?
-# @lru_cache()
-# def _get_objectstore_client():
-#     oci_config = _load_config()
-#     object_storage = ObjectStorageClient(config=oci_config)
-#     return object_storage
 
 
 def _clean_key(key: str) -> str:
@@ -42,6 +31,7 @@ def _clean_key(key: str) -> str:
     return key
 
 
+@lru_cache()
 def _load_config() -> Dict:
     """Loads the OCI Config for accessing the object store from memory
 
@@ -50,13 +40,34 @@ def _load_config() -> Dict:
     """
     from json import loads
     import os
+    from cryptography.fernet import Fernet
+    from base64 import b64decode
+    from pathlib import Path
+    from oci.config import validate_config
 
     try:
-        return loads(os.environ["OCI_CONFIG"])
+        encrypted_config = os.environ["SECRET_CONFIG"]
     except KeyError:
         raise ValueError(
-            "Please ensure the oci config file is stored as a secret in JSON format for this Fn app."
+            "Cannot read SECRET_CONFIG environment variable. Please setup the correct function secrets."
         )
+
+    decoded = b64decode(encrypted_config)
+    fernet_key = Path("fernet_key").read_bytes()
+    decrypted = Fernet(fernet_key).decrypt(decoded)
+
+    config = loads(decrypted)
+
+    key_path = Path("/tmp/key.pem")
+    key_path.write_bytes(b64decode(config["key_data"]))
+
+    tenancy_data = config["tenancy"]
+    tenancy_data["key_file"] = str(key_path)
+    tenancy_data["pass_phrase"] = config["passphrase"]
+
+    tenancy_data = validate_config(config=tenancy_data)
+
+    return tenancy_data
 
 
 def _create_full_uri(uri: str, region: str):
