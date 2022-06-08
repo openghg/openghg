@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from openghg.standardise.surface import parse_crds
-from openghg.objectstore import get_local_bucket
+from openghg.objectstore import get_bucket
 from openghg.standardise.meta import assign_attributes
 from helpers import get_datapath, metadata_checker_obssurface, attributes_checker_obssurface
 
@@ -17,7 +17,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_crds_attributes():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     filepath = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
 

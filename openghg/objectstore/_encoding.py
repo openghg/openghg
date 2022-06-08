@@ -1,4 +1,5 @@
 import datetime
+import base64
 
 
 def datetime_to_datetime(d: datetime.datetime) -> datetime.datetime:
@@ -29,3 +30,36 @@ def get_datetime_now():
          datetime: Current datetime
     """
     return datetime.datetime.now(tz=datetime.timezone.utc)
+
+
+def string_to_bytes(s: str) -> bytes:
+    """Return the passed base64 utf-8 encoded binary data
+    back converted from a string back to bytes. Note that
+    this can only convert strings that were encoded using
+    bytes_to_string - you cannot use this to convert
+    arbitrary strings to bytes
+
+    Args:
+        s: base64 byte object to decode
+    Returns:
+        bytes: bytes
+    """
+    if s is None:
+        return None
+    else:
+        return base64.b64decode(s.encode("utf-8"))
+
+
+def bytes_to_string(b: bytes) -> str:
+    """Return the passed binary bytes safely encoded to
+    a base64 utf-8 string
+
+    Args:
+        b: binary bytes to encode
+    Returns:
+        str: UTF-8 encoded string
+    """
+    if b is None:
+        return None
+    else:
+        return base64.b64encode(b).decode("utf-8")

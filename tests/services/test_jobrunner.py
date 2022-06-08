@@ -10,7 +10,7 @@
 # import uuid
 
 # from openghg.client import Process
-# from openghg.objectstore import get_local_bucket
+# from openghg.objectstore import get_bucket
 # from Acquire.Client import ACLRule, User, Drive, Service, StorageCreds, PAR, Authorisation, Location
 # from Acquire.ObjectStore import ObjectStore
 # from openghg.client import JobRunner
@@ -23,7 +23,7 @@
 
 # @pytest.fixture(autouse=True)
 # def run_before_tests():
-#     _ = get_local_bucket(empty=True)
+#     _ = get_bucket(empty=True)
 
 
 # @pytest.yield_fixture()

@@ -9,11 +9,14 @@ else:
 
 if cloud_env:
     from ._oci_store import (
+        exists,
+        get_all_object_names,
         get_object,
         get_object_from_json,
         set_object,
         set_object_from_file,
         set_object_from_json,
+        get_bucket,
         delete_object,
         create_bucket,
         upload,
@@ -28,7 +31,6 @@ else:
         exists,
         get_all_object_names,
         get_bucket,
-        get_local_bucket,
         get_object,
         get_object_from_json,
         get_object_names,
@@ -40,24 +42,4 @@ else:
         visualise_store,
     )
 
-from ._encoding import get_datetime_now, datetime_to_datetime
-
-
-# from ._cloud import OCI_ObjectStore
-
-# if cloud_env:
-#     from ._openghg_objstore import (
-#         delete_object,
-#         exists,
-#         get_abs_filepaths,
-#         get_bucket,
-#         get_local_bucket,
-#         get_md5,
-#         get_md5_bytes,
-#         get_object,
-#         get_object_from_json,
-#         hash_files,
-#         set_object_from_file,
-#         set_object_from_json,
-#     )
-# else:
+from ._encoding import get_datetime_now, datetime_to_datetime, string_to_bytes, bytes_to_string

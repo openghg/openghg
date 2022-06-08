@@ -5,7 +5,7 @@ import json
 
 from openghg.store.base import Datasource
 from openghg.store import ObsSurface
-from openghg.objectstore import get_local_bucket, exists
+from openghg.objectstore import get_bucket, exists
 from openghg.util import create_daterange_str
 from helpers import get_datapath, attributes_checker_obssurface
 
@@ -46,7 +46,7 @@ def test_read_binary(mocker):
 
 
 def test_read_CRDS():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
@@ -117,7 +117,7 @@ def test_read_CRDS():
 
 
 def test_read_GC():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
@@ -244,7 +244,7 @@ def test_read_GC():
 
 
 def test_read_cranfield():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
 
@@ -290,7 +290,7 @@ def test_read_beaco2n():
 
 
 def test_read_noaa_raw():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
@@ -356,7 +356,7 @@ def test_read_noaa_obspack():
 
 
 def test_read_thames_barrier():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
@@ -386,7 +386,7 @@ def test_read_thames_barrier():
 
 
 def test_delete_Datasource():
-    bucket = get_local_bucket(empty=True)
+    bucket = get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
@@ -416,7 +416,7 @@ def test_delete_Datasource():
 
 
 def test_add_new_data_correct_datasource():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="capegrim-medusa.05.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.05.precisions.C", data_type="GC")

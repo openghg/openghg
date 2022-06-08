@@ -2,7 +2,7 @@ import logging
 
 from openghg.standardise.surface import parse_crds, parse_gcwerks
 from openghg.store import ObsSurface
-from openghg.objectstore import get_local_bucket
+from openghg.objectstore import get_bucket
 from openghg.store import recombine_datasets
 from openghg.retrieve import search
 from helpers import get_datapath

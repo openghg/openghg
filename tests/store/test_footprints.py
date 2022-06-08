@@ -2,12 +2,12 @@ import pytest
 
 from openghg.store import Footprints, recombine_datasets, metastore_manager, datasource_lookup
 from openghg.retrieve import search
-from openghg.objectstore import get_local_bucket
+from openghg.objectstore import get_bucket
 from helpers import get_footprint_datapath
 
 
 def test_read_footprint_high_spatial_res():
-    get_local_bucket()
+    get_bucket()
 
     datapath = get_footprint_datapath("footprint_test.nc")
     # model_params = {"simulation_params": "123"}
@@ -135,7 +135,7 @@ def test_read_footprint_high_spatial_res():
 
 
 def test_read_footprint_co2():
-    get_local_bucket()
+    get_bucket()
 
     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
 
@@ -202,7 +202,7 @@ def test_read_footprint_co2():
 
 
 def test_read_footprint_standard():
-    get_local_bucket()
+    get_bucket()
 
     datapath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
 

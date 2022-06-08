@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 from io import BytesIO
 from pathlib import Path
 from oci.object_storage import ObjectStorageClient
@@ -31,6 +31,8 @@ def _clean_key(key: str) -> str:
     return key
 
 
+# The results of the functions below won't change during a function invocation so
+# we'll cache the results
 @lru_cache()
 def _load_config() -> Dict:
     """Loads the OCI Config for accessing the object store from memory
@@ -41,9 +43,9 @@ def _load_config() -> Dict:
     from json import loads
     import os
     from cryptography.fernet import Fernet
-    from base64 import b64decode
     from pathlib import Path
     from oci.config import validate_config
+    from openghg.objectstore import string_to_bytes
 
     try:
         encrypted_config = os.environ["SECRET_CONFIG"]
@@ -52,14 +54,15 @@ def _load_config() -> Dict:
             "Cannot read SECRET_CONFIG environment variable. Please setup the correct function secrets."
         )
 
-    decoded = b64decode(encrypted_config)
+    decoded = string_to_bytes(encrypted_config)
     fernet_key = Path("fernet_key").read_bytes()
     decrypted = Fernet(fernet_key).decrypt(decoded)
 
     config = loads(decrypted)
 
     key_path = Path("/tmp/key.pem")
-    key_path.write_bytes(b64decode(config["key_data"]))
+    key_data = string_to_bytes(config["key_data"])
+    key_path.write_bytes(key_data)
 
     tenancy_data = config["tenancy"]
     tenancy_data["key_file"] = str(key_path)
@@ -68,6 +71,28 @@ def _load_config() -> Dict:
     tenancy_data = validate_config(config=tenancy_data)
 
     return tenancy_data
+
+
+@lru_cache
+def _load_client() -> ObjectStorageClient:
+    """Creates an ObjectStorageClient object using the in memory
+    configuration data
+
+    Returns:
+        ObjectStorageClient: Object storage client
+    """
+    oci_config = _load_config()
+    return ObjectStorageClient(config=oci_config)
+
+
+@lru_cache
+def _get_namespace() -> str:
+    """Get the Object Store client's namespace
+
+    Returns:
+        str: Object store namespace
+    """
+    return _load_client().get_namespace().data
 
 
 def _create_full_uri(uri: str, region: str):
@@ -90,7 +115,22 @@ def _create_full_uri(uri: str, region: str):
     return f"{server}/{uri}"
 
 
-def get_bucket(bucket: str) -> Dict:
+def get_bucket() -> str:
+    """Get the default bucket to use for OpenGHG storage.
+    If an OPENGHG_BUCKET environment variable isn't set
+    it defaults to openghg_storage.
+
+    Args:
+        bucket: Name of bucket
+    Returns:
+        str: Bucket name
+    """
+    from os import getenv
+
+    return getenv(key="OPENGHG_BUCKET", default="openghg_storage")
+
+
+def _get_oci_bucket(bucket_name: str) -> Dict:
     """Get a bucket within the tenancy
 
     Args:
@@ -102,14 +142,11 @@ def get_bucket(bucket: str) -> Dict:
     """
     from openghg.types import ObjectStoreError
 
-    oci_config = _load_config()
-
-    object_storage = ObjectStorageClient(config=oci_config)
-
-    namespace = object_storage.get_namespace().data
+    object_storage = _load_client()
+    namespace = _get_namespace()
 
     try:
-        bucket = object_storage.get_bucket(namespace_name=namespace, bucket=bucket)
+        bucket = object_storage.get_bucket(namespace_name=namespace, bucket_name=bucket_name)
     except Exception as e:
         raise ObjectStoreError(f"Error retrieving bucket {bucket}: {str(e)}")
 
@@ -121,8 +158,8 @@ def create_bucket(bucket: str) -> Dict:
     from oci.object_storage.models import CreateBucketDetails
 
     oci_config = _load_config()
-    object_storage = ObjectStorageClient(config=oci_config)
-    namespace = object_storage.get_namespace().data
+    object_storage = _load_client()
+    namespace = _get_namespace()
 
     try:
         compartment_id = oci_config["tenancy"]
@@ -138,6 +175,68 @@ def create_bucket(bucket: str) -> Dict:
     return bucket
 
 
+def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_prefix: bool = False) -> List:
+    """Returns the names of all objects in the passed bucket
+
+    Args:
+         bucket (dict): Bucket containing data
+         prefix (str): Prefix for data
+    Returns:
+         list: List of all objects in bucket
+
+    """
+    if prefix is not None:
+        prefix = _clean_key(prefix)
+
+    object_storage = _load_client()
+    namespace = _get_namespace()
+
+    objects = object_storage.list_objects(namespace_name=namespace, bucket_name=bucket, prefix=prefix)
+
+    names = []
+
+    if without_prefix:
+        prefix_len = len(prefix)
+
+    for obj in objects.objects:
+        if prefix:
+            if obj.name.startswith(prefix):
+                name = obj.name
+        else:
+            name = obj.name
+
+        while name.endswith("/"):
+            name = name[0:-1]
+
+        while name.startswith("/"):
+            name = name[1:]
+
+        if without_prefix:
+            name = name[prefix_len:]
+
+            while name.startswith("/"):
+                name = name[1:]
+
+        if len(name) > 0:
+            names.append(name)
+
+    return names
+
+
+def exists(bucket: str, key: str) -> bool:
+    """Checks if there is an object in the object store with the given key
+
+    Args:
+        bucket: Bucket containing data
+        key: Prefix for key in object store
+    Returns:
+        bool: True if key exists in store
+    """
+    names = get_all_object_names(bucket=bucket, prefix=key)
+
+    return len(names) > 0
+
+
 def upload(
     bucket: str, key: str, data: Optional[bytes] = None, filepath: Optional[Union[str, Path]] = None
 ) -> Response:
@@ -150,27 +249,24 @@ def upload(
     Returns:
         oci.response.Response: Response from OCIs
     """
-    from oci.object_storage import ObjectStorageClient
     from oci.object_storage import UploadManager
     from oci.object_storage.transfer.constants import MEBIBYTE
 
     # See
     # https://github.com/oracle/oci-python-sdk/blob/master/examples/multipart_object_upload.py
 
-    oci_config = _load_config()
-    object_storage = ObjectStorageClient(config=oci_config)
+    object_storage = _load_client()
+    namespace = _get_namespace()
 
     upload_manager = UploadManager(
         object_storage_client=object_storage, allow_parallel_uploads=True, parallel_process_count=3
     )
 
-    namespace = object_storage.get_namespace().data
-
     if data is not None and filepath is None:
         byte_stream = BytesIO(data)
 
         response = upload_manager.upload_stream(
-            namespace_name=namespace, bucket=bucket, object_name=key, stream_ref=byte_stream
+            namespace_name=namespace, bucket_name=bucket, object_name=key, stream_ref=byte_stream
         )
     elif filepath is not None and data is None:
         # We'll upload in 10 MiB chunks
@@ -217,7 +313,8 @@ def create_par(
     from openghg.objectstore import get_datetime_now, PAR
 
     oci_config = _load_config()
-    object_storage = ObjectStorageClient(config=oci_config)
+    object_storage = _load_client()
+    namespace = _get_namespace()
 
     #  We'll need the region to create the URL for data upload later
     region = oci_config["region"]
@@ -240,8 +337,6 @@ def create_par(
     # Give the PAR an ID that we can later use to delete it
     # How should we store this? Check how PARRegistry worked in Acquire
     request.name = f"client-par-{str(uuid4())}"
-    # Get the namespace
-    namespace = object_storage.get_namespace().data
 
     if not is_bucket:
         request.object_name = key
@@ -279,10 +374,8 @@ def delete_par(par_id: str, bucket: str) -> None:
     Returns:
         None
     """
-    oci_config = _load_config()
-    object_storage = ObjectStorageClient(config=oci_config)
-
-    namespace = object_storage.get_namespace().data
+    object_storage = _load_client()
+    namespace = _get_namespace()
 
     response = object_storage.delete_preauthenticated_request(
         namespace_name=namespace, bucket=bucket, par_id=par_id
@@ -303,9 +396,8 @@ def delete_object(bucket: str, key: str) -> None:
     """
     key = _clean_key(key=key)
 
-    oci_config = _load_config()
-    object_storage = ObjectStorageClient(config=oci_config)
-    namespace = object_storage.get_namespace().data
+    object_storage = _load_client()
+    namespace = _get_namespace()
 
     try:
         object_storage.delete_object(namespace_name=namespace, bucket=bucket, object_name=key)
@@ -324,9 +416,8 @@ def get_object(bucket: str, key: str) -> bytes:
     """
     key = _clean_key(key=key)
 
-    oci_config = _load_config()
-    object_storage = ObjectStorageClient(config=oci_config)
-    namespace = object_storage.get_namespace().data
+    object_storage = _load_client()
+    namespace = _get_namespace()
 
     try:
         data = object_storage.get_object(namespace_name=namespace, bucket=bucket, object_name=key)
@@ -365,9 +456,8 @@ def set_object(bucket: str, key: str, data: bytes) -> None:
 
     key = _clean_key(key=key)
 
-    oci_config = _load_config()
-    object_storage = ObjectStorageClient(config=oci_config)
-    namespace = object_storage.get_namespace().data
+    object_storage = _load_client()
+    namespace = _get_namespace()
 
     data_buf = BytesIO(data)
 
