@@ -3,13 +3,15 @@ import numpy as np
 from openghg.standardise.emissions import parse_edgar
 from helpers import get_emissions_datapath
 
-@pytest.mark.parametrize("version,mean_raw_flux",
-                         [("v50", 2.261304e-11),
-                          ("v6.0", 2.0385315e-11),
-                         ])
-def test_parse_edgar_raw(version, mean_raw_flux):
 
-    filepath = get_emissions_datapath(f"EDGAR/yearly/{version}")
+@pytest.mark.parametrize("folder,version,mean_raw_flux",
+                         [("v50", "v50", 2.261304e-11),
+                          ("v6.0", "v6.0", 2.0385315e-11),
+                          ("TOTALS_nc.zip", "v6.0", 2.0385315e-11),
+                         ])
+def test_parse_edgar_raw(folder, version, mean_raw_flux):
+
+    filepath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
 
     species = "ch4"
     year = "2015"

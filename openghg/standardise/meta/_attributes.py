@@ -360,14 +360,34 @@ def assign_flux_attributes(data: Dict,
                            source: Optional[str] = None,
                            domain: Optional[str] = None,
                            units: str = "mol/m2/s",
-                           prior_info_dict: Optional[dict] = None):
+                           prior_info_dict: Optional[dict] = None) -> Dict:
     """
-    TODO: Add comments
+    Assign attributes for the input flux dataset within dictionary based on
+    metadata and passed arguments.
+
+    Args:
+        data: Dictionary containing data, metadata and attributes
+        species: Species name
+        source: Source name
+        domain: Domain name
+        units: Unit values for the "flux" variable.  Default = "mol/m2/s"
+        prior_info_dict: Dictionary of additional 'prior' information about
+            for the emissions sources. Expect this to be of the form e.g.
+                {"EDGAR": {"version": "v4.3.2",
+                           "raw_resolution": "0.1 degree x 0.1 degree",
+                           "reference": "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG"
+                           ...},
+                ...}
+
+    Returns:
+        Dict : Same format as inputted but with updated "data" component (Dataset)
     """
 
     for _, flux_dict in data.items():
         flux_attributes = flux_dict.get("attributes", {})
 
+        # Ensure values for these attributes have been specified either manually
+        # or within metadata.
         attribute_values = {"species": species,
                             "source": source,
                             "domain": domain}
@@ -399,9 +419,28 @@ def get_flux_attributes(ds: Dataset,
                         prior_info_dict: Optional[dict] = None,
                         global_attributes: Optional[dict] = None) -> Dataset:
     """
-    TODO: Add comments
+    Assign additional attributes for the flux dataset.
+
+    Args:
+        ds: Should contain "flux" variable
+        species: Species name
+        source: Source name
+        domain: Domain name
+        units: Unit values for the "flux" variable. Default = "mol/m2/s"
+        prior_info_dict: Dictionary of additional 'prior' information about
+            for the emissions sources. Expect this to be of the form e.g.
+                {"EDGAR": {"version": "v4.3.2",
+                           "raw_resolution": "0.1 degree x 0.1 degree",
+                           "reference": "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG"
+                           ...},
+                ...}
+        global_attributes: Additional global attributes to write to dataset.
+
+    Returns:
+        Dataset: Input dataset with updated variable/coordinate and global attributes
     """
-    # Example flux attributes
+
+    # Example flux attributes (from files)
     # :title = "EDGAR 4.3.2 year 2004" ;
     # :author = "ag12733" ;
     # :date_created = "2018-07-16 13:10:57.346915" ;
@@ -414,6 +453,7 @@ def get_flux_attributes(ds: Dataset,
 
     from openghg.util import timestamp_now
 
+    # Define species variable/coordinate attributes and assign
     flux_attrs = {"source": source,
                   "units": units,
                   "species": species}
@@ -430,8 +470,7 @@ def get_flux_attributes(ds: Dataset,
     ds["lat"].attrs = lat_attrs
     ds["lon"].attrs = lon_attrs
 
-    current_attributes = ds.attrs
-
+    # Define default values for global attributes
     global_attributes_default = {
             "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
             "Conventions": "CF-1.8"}
@@ -441,6 +480,10 @@ def get_flux_attributes(ds: Dataset,
     else:
         global_attributes.update(global_attributes_default)
 
+    # Extract any current attributes from the Dataset
+    current_attributes = ds.attrs
+
+    # Extract "title" from current attributes or define this.
     if "title" in current_attributes and "title" not in global_attributes:
         global_attributes["title"] = current_attributes["title"]
     else:
@@ -459,7 +502,9 @@ def get_flux_attributes(ds: Dataset,
     global_attributes["source"] = source
     global_attributes["domain"] = domain
 
+    # Add any 'prior' information for emissions databases.
     if prior_info_dict is not None:
+        # For composite emissions files this may contain > 1 prior input
         global_attributes["number_of_prior_files_used"] = len(prior_info_dict.keys())
         for i, source_key in enumerate(prior_info_dict.keys()):
 
@@ -471,6 +516,8 @@ def get_flux_attributes(ds: Dataset,
                 attr_key = f"{label_start}_{key}"
                 global_attributes[attr_key] = value
 
+    # Ensure keys which have been updated by OpenGHG are not overwritten
+    # by current attributes.
     updated_keys = ["Conventions", "title", "file_created", "processed_by"]
     for key in updated_keys:
         if key in current_attributes:

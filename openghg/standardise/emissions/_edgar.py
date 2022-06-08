@@ -1,9 +1,13 @@
+import os
+import re
 import numpy as np
 from numpy import ndarray
 import xarray as xr
 from xarray import DataArray, Dataset
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+import zipfile
+from zipfile import ZipFile
+from typing import DefaultDict, Dict, Tuple, Optional, Union, cast
 
 
 ArrayType = Optional[Union[ndarray, DataArray]]
@@ -39,16 +43,15 @@ def parse_edgar(filepath: Path,
     from openghg.store import infer_date_range
     from openghg.standardise.meta import assign_flux_attributes
     from collections import defaultdict
-    import zipfile
-    import re
-    import os
 
     # Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
     # Additional edgar functions which could be incorporated.
     # - getedgarv5annualsectors
     # - getedgarv432annualsectors
+    # - (monthly sectors?)
 
-    species_label = synonyms(species, lower=False)
+    # species_label = synonyms(species, lower=False)
+    species_label = synonyms(species)
 
     # TODO: Work out how to select frequency
     # - could try and relate to period e.g. "monthly" versus "yearly" etc. 
@@ -57,106 +60,59 @@ def parse_edgar(filepath: Path,
 
     raw_edgar_domain = "GLOBAL-01x01"
 
-    if lat_out is not None or lon_out is not None:
-        if domain is None:
-            raise ValueError("Please specify new 'domain' name if selecting new latitude, longitude values")
+    lat_out, lon_out = _extract_lat_lon(domain, lat_out, lon_out)
 
-    if domain is not None:
-        try:
-            lat_domain, lon_domain = find_domain(domain)
-        except ValueError:
-            if lat_out is None or lon_out is None:
-                raise ValueError("To create new domain please input 'lat_out' and 'lon_out' values.")
-        else:
-            if lat_out is not None:
-                if not np.array_equals(lat_domain, lat_out):
-                    raise ValueError(f"Latitude values should not be specified when using pre-defined domain {domain} (values don't match).")
-            else:
-                lat_out = lat_domain
-
-            if lon_out is not None:
-                if not np.array_equals(lon_domain, lon_out):
-                    raise ValueError(f"Longitude values should not be specified when using pre-defined domain {domain} (values don't match).")
-            else:
-                lon_out = lon_domain
-    else:
+    if domain is None:
         domain = raw_edgar_domain
 
     # TODO: Add check for period? Only monthly or yearly (or equivalent inputs)
 
-    # Check if zip file and read.
+    # Check if input is a zip file
     if zipfile.is_zipfile(filepath):
         zipped = True
         zip_folder = zipfile.ZipFile(filepath)
     else:
         zipped = False
 
-    # Work out version if possible
-    # "v6.0"
-    #  - "TOTALS_nc.zip" is what is downloaded from website
-    #  - contains "_readme.html" file
-    #    - top line is "Release: EDGAR v6.0_GHG of May 2021"
-    # "v5.0"
-    #  - "v50_CH4_1970_2015.zip" can be downloaded (within "CH4" folder)
-    #  - all sectors - otherwise sector folders are separate
-    #  - contains "_readme.html" file
-    #    - top line is "Release: EDGAR v5.0 of November 2019"
-    # "v4.3.2"
-    #  - "v432_CH4_1970_2012.zip" can be downloaded (within "CH4" folder)
-    #  - no readme file this time, just the .xls file
+    known_version = _edgar_known_versions()
 
-    # TODO: Decide if we actually just want to allow v6.0 for now.
-
-    known_version = ["v432", "v50", "v6.0"]
-
-    # Check for readme html file and, if present, extract version 
-    if edgar_version is None:
-        readme_filename = "_readme.html"
-        if zipped:
-            try:
-                readme_data: Optional[str] = zip_folder.read(readme_filename)
-            except ValueError:
-                readme_data = None
-        else:
-            try:
-                readme_filepath = os.path.join(filepath, readme_filename)
-                readme_data = open(readme_filepath, "r").read()
-            except FileNotFoundError:
-                readme_data = None            
-
-        if readme_data is not None:
-            try:
-                title_line = re.search("<title.*?>(.+?)</title>", readme_data).group()
-                edgar_version = re.search("v\d[.]+\d[.]?\d*", title_line).group()
-            except ValueError:
-                pass
-            else:
-                if edgar_version not in known_version:
-                    edgar_version = edgar_version.replace('.', '')
+    # Check readme file for edgar version (if not specified)
+    if zipped and edgar_version is None:
+        edgar_version = _check_readme_version(zippath=zip_folder)
+    elif edgar_version is None:
+        edgar_version = _check_readme_version(filepath=filepath)
 
     # Extract list of data files
     if zipped:
-        folder_filelist = list(zip_folder.namelist())
+        zip_filelist = zip_folder.infolist()
+        # folder_filelist = list(zip_folder.namelist())
+        folder_filelist = [Path(filename.filename) for filename in zip_filelist]
     else:
         folder_filelist = list(filepath.glob("*"))
 
-    # Extract netcdf files (for now)
-    data_files = [file for file in folder_filelist if file.suffix == ".nc"]
+    # Extract netcdf files (only, for now) - ".txt" is also an option
+    suffix = ".nc"
+    data_files = [file for file in folder_filelist if file.suffix == suffix]
 
     if not data_files:
-        raise ValueError(f"No suitable EDGAR files ('.nc') found within filepath: {filepath}")
+        raise ValueError(f"Expect EDGAR '.nc' files. No suitable files found within filepath: {filepath}")
 
     # If version not yet found, extract version from file naming scheme
     if edgar_version is None:
         for file in data_files:
-            file = os.path.split(file)[-1]
-            possible_version = file.split('_')[0]
+            filename = file.name
+            possible_version = filename.split('_')[0]
             if possible_version in known_version:
                 edgar_version = possible_version
                 break
 
     if edgar_version not in known_version:
         raise ValueError(f"Unable to infer EDGAR version ({edgar_version}). Please pass as an argument")
+
+    # TODO: Split out into a separate function, so we can use this for
+    # - yearly
+    # - sectoral
+    # - monthly
 
     if isinstance(year, int):
         year = str(year)
@@ -168,8 +124,9 @@ def parse_edgar(filepath: Path,
     for file in data_files:
         try:
             name = file.name
-            start = re.search(start_search_str, name).group()
-            year_from_file = re.search(year_search, start).group()
+            # Ignoring types as issues caught by try-except statement
+            start = re.search(start_search_str, name).group()  # type: ignore
+            year_from_file = re.search(year_search, start).group()  # type: ignore
         except:
             continue
 
@@ -188,6 +145,18 @@ def parse_edgar(filepath: Path,
             print(f"Using last available year from EDGAR {edgar_version} range: {start_year}-{end_year}.")
             edgar_file = files_by_year[end_year]
 
+    # For a zipped archive need to unzip the netcdf file and place in a
+    # temporary directory.
+    if zipped:
+        temp_extract_folder = filepath.parent / "temp"
+
+        for zipinfo in zip_filelist:
+            if zipinfo.filename == edgar_file.name:
+                os.makedirs(temp_extract_folder)
+                zip_folder.extract(zipinfo, path=temp_extract_folder)
+                edgar_file = temp_extract_folder / edgar_file
+                break
+
     # Dimension - (lat, lon) - no time dimension
     # time is not included in the file just in the filename *sigh*!
 
@@ -199,20 +168,37 @@ def parse_edgar(filepath: Path,
     # v50_CO2_org_short-cycle_C_1978.0.1x0.1.nc (or .zip)
     # v50_N2O_1978.0.1x0.1.zip (or .zip)
 
-    # e.g. "emis_ch4", "emi_co2"
+    with xr.open_dataset(edgar_file) as temp:
+        edgar_ds = temp
 
-    edgar_ds = xr.open_dataset(edgar_file)
+    # Expected name e.g. "emi_ch4", "emi_co2"
     name = f'emi_{species.lower()}'
+
+    # For reference, from "_readme.html" from v6.0 data:
+    # 'Yearly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / year
+    #  for the .txt files with longitude and latitude coordinates referring to
+    #  the low-left corner of each grid-cell.'
+    # 'Monthly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / month
+    #  for the .txt files with longitude and latitude coordinates referring to
+    #  the low-left corner of each grid-cell.'
+    # 'Emissions gridmaps in kg substance /m2 /s for the .nc files with longitude 
+    # and latitude coordinates referring to the cell center of each grid-cell.'
 
     # Convert from kg/m2/s to mol/m2/s
     species_molar_mass = molar_mass(species)
     kg_to_g = 1e3
 
-    flux_values = edgar_ds[name].values * kg_to_g / species_molar_mass
+    flux_da = edgar_ds[name]
+    flux_values = flux_da.values * kg_to_g / species_molar_mass
     units = "mol/m2/s"
 
-    lat_in = edgar_ds.lat.values
-    lon_in = edgar_ds.lon.values
+    lat_name = "lat"
+    lon_name = "lon"
+    try:
+        lat_in = edgar_ds[lat_name].values
+        lon_in = edgar_ds[lon_name].values
+    except KeyError:
+        raise ValueError("Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n Please check this is a 2D grid map.")
 
     # TODO: Implement regridding below when xesmf / iris can be installed
     # using some combination of pip and conda (or otherwise) for C libraries.
@@ -243,8 +229,22 @@ def parse_edgar(filepath: Path,
 
     edgar_attrs = edgar_ds.attrs
 
-    time = np.array([f"{year}-01-01"], dtype="datetime64[ns]")
-    flux = flux_values[np.newaxis, ...]
+    # After the data has been extracted and used from the unzipped netcdf
+    # file clean up and remove temporary directory and file.
+    if zipped:
+        os.remove(edgar_file)  # Empty folder first
+        os.rmdir(temp_extract_folder)  # Then delete the folder
+
+    # Check for "time" dimension and add if missing.
+    flux_ndim = flux_values.ndim
+    time_name = "time"
+    if time_name in flux_da:
+        time = flux_da[time_name].values
+    elif time_name not in flux_da and flux_ndim == 2:
+        time = np.array([f"{year}-01-01"], dtype="datetime64[ns]")
+        flux = flux_values[np.newaxis, ...]
+    elif flux_ndim != 3:
+        raise ValueError(f"Expected '{name}' to contain 2 or 3 dimensions. Actually: {flux_ndim}")
 
     dims = ("time", "lat", "lon")
 
@@ -315,8 +315,141 @@ def parse_edgar(filepath: Path,
     return emissions_data
 
 
-# def _find_edgar_version(filepath: Path):
-# TODO: Decide how/if this functionality could be split into this separate function.
+def _extract_lat_lon(domain: Optional[str] = None,
+                     lat_out: ArrayType = None,
+                     lon_out: ArrayType = None) -> Tuple[Optional[ndarray], Optional[ndarray]]:
+    """
+    
+    The domain can be used in one of two ways:
+        1. To specify a pre-exisiting lat, lon extent which can be extracted
+        2. To supply a name for a new lat, lon extent which must be specified
+    
+    For case 1, only domain needs to be specified (lat_out and lon_out can
+    be specified but they must already exactly match the domain definition).
+    The details will be extracted from 'domain_info.json'.
+
+    For case 2, the domain, lat_out and lon_out must all be specified.
+
+    If none of these values are specified, (None, None) will be returned. This
+    is valid behaviour.
+
+    Args:
+        domain: Domain name for a pre-existing domain or a new domain
+        lat_out: Latitude values (only needed if domain is new)
+        lon_out: Longitude values (only needed if domain is new)
+
+    Returns:
+        ndarray, ndarray: Latitude and longitude arrays
+        None, None: if all inputs are None, a tuple of Nones will be returned.    """
+    from openghg.util import find_domain
+
+    if lat_out is not None or lon_out is not None:
+        if domain is None:
+            raise ValueError("Please specify new 'domain' name if selecting new latitude, longitude values")
+
+    if isinstance(lat_out, DataArray):
+        lat_out = cast(ndarray, lat_out.values)
+
+    if isinstance(lon_out, DataArray):
+        lon_out = cast(ndarray, lon_out.values)
+
+    if domain is not None:
+        # If domain is specified, attempt to extract lat/lon values from
+        # pre-defined definitions.
+        try:
+            lat_domain, lon_domain = find_domain(domain)
+        except ValueError:
+            # If domain cannot be found and lat, lon values have not been
+            # defined raise an error.
+            if lat_out is None or lon_out is None:
+                raise ValueError("To create new domain please input 'lat_out' and 'lon_out' values.")
+        else:
+            # Check domain latitude and longitude values against any
+            # lat_out and lon_out values specified to check they match.
+            if lat_out is not None:
+                if not np.array_equal(lat_domain, lat_out):
+                    raise ValueError(f"Latitude values should not be specified when using pre-defined domain {domain} (values don't match).")
+            else:
+                lat_out = lat_domain
+
+            if lon_out is not None:
+                if not np.array_equal(lon_domain, lon_out):
+                    raise ValueError(f"Longitude values should not be specified when using pre-defined domain {domain} (values don't match).")
+            else:
+                lon_out = lon_domain
+
+    return lat_out, lon_out
+
+
+def _edgar_known_versions() -> list:
+    """Define list of known versions for the EDGAR database"""
+    known_version = ["v432", "v50", "v6.0"]
+    return known_version
+
+
+def _check_readme_version(filepath: Optional[Path] = None,
+                          zippath: Optional[ZipFile] = None) -> Optional[str]:
+    """
+    Attempts to extract the edgar version from the associated "_readme.html"
+    file, if present.
+
+    Args:
+        filepath : Path to the folder containing the downloaded EDGAR files
+        zippath: Path to zipped archive file (direct from EDGAR)
+
+    Returns:
+        str : edgar version if found (None otherwise)
+    """
+
+    # Work out version if possible from readme
+    # All database versions so far may contain "_readme.html" file
+    # "v6.0"
+    #  - "TOTALS_nc.zip" is what is downloaded from website
+    #  - "_readme.html" title line: "<title>EDGAR v6.0_GHG (2021)</title>"
+    # "v5.0"
+    #  - "v50_CH4_1970_2015.zip" can be downloaded
+    #  - "_readme.html" title line: "<title>EDGAR v5.0 (2019)</title>"
+    # "v4.3.2"
+    #  - "v432_CH4_1970_2012.zip" can be downloaded
+    #  - "_readme.html" title line: "<title>EDGAR v4.3.2 (2017)</title>"
+
+    # Check for readme html file and, if present, extract version
+    readme_filename = "_readme.html"
+    if zippath is not None:
+        try:
+            # Cast extracted bytes to a str object
+            readme_data: Optional[str] = str(zippath.read(readme_filename))
+        except ValueError:
+            readme_data = None
+    elif filepath is not None:
+        try:
+            readme_filepath = os.path.join(filepath, readme_filename)
+            readme_data = open(readme_filepath, "r").read()
+        except FileNotFoundError:
+            readme_data = None
+    else:
+        raise ValueError("One of filepath or zippath must be specified.")
+
+    if readme_data is not None:
+        try:
+            # Ignoring types as issues caught by try-except statement
+            # Find and extract title line from html file
+            title_line = re.search("<title.*?>(.+?)</title>", readme_data).group()  # type: ignore
+            # Extract version e.g. "v6.0" or "v4.3.2"
+            edgar_version = re.search("v\d[.]\d[.]?\d*", title_line).group()  # type: ignore
+        except ValueError:
+            pass
+        else:
+            # Check against known versions and remove '.' if these don't match.
+            known_version = _edgar_known_versions()
+            if edgar_version not in known_version:
+                edgar_version = edgar_version.replace('.', '')
+    else:
+        edgar_version = None
+
+    return edgar_version
+
+
 
 # def getedgarv5annualsectors(year, lon_out, lat_out, edgar_sectors, species='CH4'):
 #     """
