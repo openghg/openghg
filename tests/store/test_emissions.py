@@ -68,6 +68,64 @@ def test_read_file():
     assert metadata == expected_metadata
 
 
+def test_add_edgar_database():
+    folder = "v6.0"
+    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+
+    species = "ch4"
+    version = "v6.0"
+    date = "2015"
+    database = "EDGAR"
+
+    proc_results = Emissions.transform_data(
+        datapath=test_datapath,
+        database=database,
+        species=species,
+        date=date,
+    )
+
+    default_source = "anthro"
+    default_domain = "globaledgar"
+
+    # output_key = f"{species}_{default_source}_{default_domain}_{date}"
+    # assert output_key in proc_results
+
+    search_results = search(
+        species=species,
+        date=date,
+        database=database,  # would searching for lowercase not work?
+        database_version=version,
+        data_type="emissions",
+    )
+
+    key = list(search_results.keys())[0]
+
+    # TODO: Add tests for data as well?
+    # data_keys = search_results[key]["keys"]
+
+    metadata = search_results[key]["metadata"]
+
+    expected_metadata = {
+        "species": species,
+        "domain": default_domain,
+        "source": default_source,
+        "database": database.lower(),
+        "database_version": version.replace('.',''),
+        "date": "2015",
+        "author": "OpenGHG Cloud".lower(),
+        "start_date": "2015-01-01 00:00:00+00:00",
+        "end_date": "2015-12-31 23:59:59+00:00",
+        "min_longitude": 0.05,
+        "max_longitude": 359.95001,
+        "min_latitude": -89.95,
+        "max_latitude": 89.95,
+        "time_resolution": "standard",
+        "time_period": "1 year",
+    }
+
+    assert metadata.items() >= expected_metadata.items()
+
+
 def test_datasource_add_lookup():
     e = Emissions()
 

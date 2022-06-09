@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from openghg.standardise.emissions import parse_edgar
+from openghg.transform.emissions import parse_edgar
 from helpers import get_emissions_datapath
 
 
@@ -32,12 +32,14 @@ def test_parse_edgar_raw(folder, version, mean_raw_flux):
 
     # attrs = data.attrs
 
-    default_domain = "GLOBAL-01x01"
+    default_domain = "globaledgar"
 
     expected_metadata = {
         "species": species,
         "domain": default_domain,
-        "source": f"anthro-edgar{version}-yearly",
+        "source": f"anthro",
+        "database": "EDGAR",
+        "database_version": version.replace('.',''),
         "date": "2015",
         "author": "OpenGHG Cloud",
         "start_date": "2015-01-01 00:00:00+00:00",

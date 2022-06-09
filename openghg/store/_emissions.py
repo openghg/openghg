@@ -1,13 +1,16 @@
 from pathlib import Path
 from typing import Dict, Optional, Union, Tuple
-from xarray import Dataset
+from xarray import Dataset, DataArray
 import numpy as np
+from numpy import ndarray
 
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 
 __all__ = ["Emissions"]
 
+
+ArrayType = Optional[Union[ndarray, DataArray]]
 
 class Emissions(BaseStore):
     """This class is used to process emissions / flux data"""
@@ -37,7 +40,7 @@ class Emissions(BaseStore):
             domain: Emissions domain
             source: Emissions source
             date : Date associated with emissions as a string
-            data_type : Type of data being input e.g. openghg (internal format), EDGAR
+            data_type : Type of data being input e.g. openghg (internal format)
             high_time_resolution: If this is a high resolution file
             period: Period of measurements. Only needed if this can not be inferred from the time coords
                     If specified, should be one of:
@@ -116,6 +119,94 @@ class Emissions(BaseStore):
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
+
+        em_store.save()
+        metastore.close()
+
+        return datasource_uuids
+
+    @staticmethod
+    def transform_data(
+        datapath: Union[str, Path],
+        database: str,
+        **kwargs,
+        # species: str, 
+        # date: str,
+        # domain: Optional[str] = None,
+        # lat_out: ArrayType = None,
+        # lon_out: ArrayType = None,
+        # # sector: Optional[str] = None,
+        # period: Optional[Union[str, tuple]] = None,
+        # edgar_version: Optional[str] = None,
+        # # overwrite: bool = False,
+    ) -> Dict:
+        """Read and transform emissions file
+        TODO: Add docstring
+        TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
+        """
+        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.types import EmissionsDatabases
+        from openghg.util import (
+            clean_string,
+            hash_file,
+            load_emissions_database_parser,
+        )
+
+        # species = clean_string(species)
+        # domain = clean_string(domain)
+        # date = clean_string(date)
+
+        datapath = Path(datapath)
+
+        try:
+            data_type = EmissionsDatabases[database.upper()].value
+        except KeyError:
+            raise ValueError(f"Unable to transform '{database}' selected.")
+
+        # Load the data retrieve object
+        parser_fn = load_emissions_database_parser(database=database)
+
+        em_store = Emissions.load()
+
+        # Load in the metadata store
+        metastore = load_metastore(key=em_store._metakey)
+
+        # file_hash = hash_file(filepath=datapath)
+        # if file_hash in em_store._file_hashes and not overwrite:
+        #     print(
+        #         f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
+        #     )
+
+        # Find all parameters that can be accepted by parse function
+        all_param = parser_fn.__code__.co_varnames[:parser_fn.__code__.co_argcount]
+
+        # Define parameters to pass to the parser function from kwargs
+        param = {key:value for key, value in kwargs.items() if key in all_param}
+        param["filepath"] = datapath  # Add filepath explicitly (for now)
+
+        emissions_data = parser_fn(**param)
+
+        # Checking against expected format for Emissions
+        for split_data in emissions_data.values():
+            em_data = split_data["data"]
+            Emissions.validate_data(em_data)
+
+        required = ("species", "source", "domain", "date")
+        lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
+
+        data_type = "emissions"
+        overwrite = False
+        datasource_uuids = assign_data(
+            data_dict=emissions_data,
+            lookup_results=lookup_results,
+            overwrite=overwrite,
+            data_type=data_type,
+        )
+
+        em_store.add_datasources(uuids=datasource_uuids, data=emissions_data, metastore=metastore)
+
+        # Record the file hash
+        # em_store._file_hashes[file_hash] = datapath.name
 
         em_store.save()
         metastore.close()

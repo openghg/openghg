@@ -79,6 +79,25 @@ def load_emissions_parser(data_type: str) -> Callable:
     return fn
 
 
+def load_emissions_database_parser(database: str) -> Callable:
+    """Load a parsing object of type class_name
+
+    Args:
+        data_type: Name of data type such as EDGAR
+    Returns:
+        callable: class_name object
+    """
+    from importlib import import_module
+
+    module_name = "openghg.transform.emissions"
+    emissions_module = import_module(name=module_name)
+
+    function_name = f"parse_{database.lower()}"
+    fn: Callable = getattr(emissions_module, function_name)
+
+    return fn
+
+
 def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
     """Returns the correct path to JSON files used for assigning attributes
 

@@ -15,21 +15,23 @@ ArrayType = Optional[Union[ndarray, DataArray]]
 
 def parse_edgar(filepath: Path, 
                 species: str, 
-                year: Union[str, int],
+                date: str,
                 domain: Optional[str] = None,
                 lat_out: ArrayType = None,
                 lon_out: ArrayType = None,
+                # sector: Optional[str] = None,
                 period: Optional[Union[str, tuple]] = None,
                 edgar_version: Optional[str] = None) -> Dict:
     """
-    Read and parse input EDGAR data
+    Read and parse input EDGAR data.
+    Notes: Only accepts annual 2D grid maps in netcdf (.nc) format for now.
 
     TODO: Finalise inputs and add details
 
     Args:
-        filepath: Path to data file
+        filepath: Path to data folder
         species
-        year
+        date : Expect a string of the form "YYYY" (or "YYYMM" e.g. "201506")
         domain
         lat_out
         lon_out
@@ -39,7 +41,7 @@ def parse_edgar(filepath: Path,
     Returns:
         dict: Dictionary of data
     """
-    from openghg.util import synonyms, molar_mass, timestamp_now, find_domain
+    from openghg.util import synonyms, molar_mass, timestamp_now, clean_string
     from openghg.store import infer_date_range
     from openghg.standardise.meta import assign_flux_attributes
     from collections import defaultdict
@@ -58,9 +60,9 @@ def parse_edgar(filepath: Path,
     # TODO: What about sectoral emissions? Could just start with total for now
     # and move up to sectoral perhaps. Again, something in the readme?
 
-    raw_edgar_domain = "GLOBAL-01x01"
+    raw_edgar_domain = "globaledgar"
 
-    lat_out, lon_out = _extract_lat_lon(domain, lat_out, lon_out)
+    lat_out, lon_out = _check_lat_lon(domain, lat_out, lon_out)
 
     if domain is None:
         domain = raw_edgar_domain
@@ -110,12 +112,14 @@ def parse_edgar(filepath: Path,
         raise ValueError(f"Unable to infer EDGAR version ({edgar_version}). Please pass as an argument")
 
     # TODO: Split out into a separate function, so we can use this for
-    # - yearly
-    # - sectoral
-    # - monthly
+    # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
+    # - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
+    # - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
 
-    if isinstance(year, int):
-        year = str(year)
+    if len(date) == 4:
+        year = date
+    else:
+        raise ValueError(f"Do no accept date which does not represent a year yet: {date}")
 
     year_search = "\d{4}"
     start_search_str = f"{edgar_version}_{species_label}_{year_search}"
@@ -265,7 +269,9 @@ def parse_edgar(filepath: Path,
     em_data.attrs["author"] = author_name
 
     date = year
-    source = f"anthro-edgar{edgar_version}-yearly"
+    source = "anthro"
+    database = "EDGAR"
+    database_version = clean_string(edgar_version)
 
     metadata = {}
     metadata.update(attrs)
@@ -274,6 +280,8 @@ def parse_edgar(filepath: Path,
     metadata["domain"] = domain
     metadata["source"] = source
     metadata["date"] = date
+    metadata["database"] = database
+    metadata["database_version"] = database_version
     metadata["author"] = author_name
     metadata["processed"] = str(timestamp_now())
 
@@ -315,11 +323,12 @@ def parse_edgar(filepath: Path,
     return emissions_data
 
 
-def _extract_lat_lon(domain: Optional[str] = None,
-                     lat_out: ArrayType = None,
-                     lon_out: ArrayType = None) -> Tuple[Optional[ndarray], Optional[ndarray]]:
+def _check_lat_lon(domain: Optional[str] = None,
+                   lat_out: ArrayType = None,
+                   lon_out: ArrayType = None) -> Tuple[Optional[ndarray], Optional[ndarray]]:
     """
-    
+    Define and check latitude and longitude values for a domain.
+
     The domain can be used in one of two ways:
         1. To specify a pre-exisiting lat, lon extent which can be extracted
         2. To supply a name for a new lat, lon extent which must be specified
@@ -340,7 +349,8 @@ def _extract_lat_lon(domain: Optional[str] = None,
 
     Returns:
         ndarray, ndarray: Latitude and longitude arrays
-        None, None: if all inputs are None, a tuple of Nones will be returned.    """
+        None, None: if all inputs are None, a tuple of Nones will be returned.
+    """
     from openghg.util import find_domain
 
     if lat_out is not None or lon_out is not None:
