@@ -2,10 +2,13 @@ import os
 
 cloud_env_var = os.environ.get("OPENGHG_CLOUD", False)
 
+print(cloud_env_var)
 if cloud_env_var:
     cloud_env = bool(int(cloud_env_var))
 else:
     cloud_env = False
+
+print(cloud_env)
 
 if cloud_env:
     from ._oci_store import (

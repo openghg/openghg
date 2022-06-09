@@ -40,6 +40,10 @@ def _load_config() -> Dict:
     Returns:
         dict: Config as dictionary
     """
+    from oci.config import from_file
+
+    return from_file()
+
     from json import loads
     import os
     from cryptography.fernet import Fernet
@@ -170,7 +174,7 @@ def create_bucket(bucket: str) -> Dict:
     request.compartment_id = compartment_id
     request.name = bucket
 
-    bucket = object_storage.create_bucket(namespace, request)
+    bucket = object_storage.create_bucket(namespace_name=namespace, create_bucket_details=request)
 
     return bucket
 
@@ -192,14 +196,14 @@ def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_pref
     namespace = _get_namespace()
 
     objects = object_storage.list_objects(namespace_name=namespace, bucket_name=bucket, prefix=prefix)
-
-    names = []
+    bucket_objects = objects.data.objects
 
     if without_prefix:
         prefix_len = len(prefix)
 
-    for obj in objects.objects:
-        if prefix:
+    names = []
+    for obj in bucket_objects:
+        if prefix is not None:
             if obj.name.startswith(prefix):
                 name = obj.name
         else:
@@ -274,7 +278,7 @@ def upload(
 
         response = upload_manager.upload_file(
             namespace_name=namespace,
-            bucket=bucket,
+            bucket_name=bucket,
             object_name=key,
             file_path=filepath,
             part_size=part_size,
@@ -342,7 +346,7 @@ def create_par(
         request.object_name = key
 
     response = object_storage.create_preauthenticated_request(
-        namespace_name=namespace, bucket=bucket, create_preauthenticated_request_details=request
+        namespace_name=namespace, bucket_name=bucket, create_preauthenticated_request_details=request
     )
 
     if response.status != 200:
@@ -378,7 +382,7 @@ def delete_par(par_id: str, bucket: str) -> None:
     namespace = _get_namespace()
 
     response = object_storage.delete_preauthenticated_request(
-        namespace_name=namespace, bucket=bucket, par_id=par_id
+        namespace_name=namespace, bucket_name=bucket, par_id=par_id
     )
 
     if response.status != 200:
@@ -400,7 +404,7 @@ def delete_object(bucket: str, key: str) -> None:
     namespace = _get_namespace()
 
     try:
-        object_storage.delete_object(namespace_name=namespace, bucket=bucket, object_name=key)
+        object_storage.delete_object(namespace_name=namespace, bucket_name=bucket, object_name=key)
     except Exception:
         raise ObjectStoreError(f"Unable to get object at {key} in bucket {bucket}")
 
@@ -420,7 +424,7 @@ def get_object(bucket: str, key: str) -> bytes:
     namespace = _get_namespace()
 
     try:
-        data = object_storage.get_object(namespace_name=namespace, bucket=bucket, object_name=key)
+        data = object_storage.get_object(namespace_name=namespace, bucket_name=bucket, object_name=key)
     except Exception:
         raise ObjectStoreError(f"Unable to get object at {key} in bucket {bucket}")
 
@@ -463,7 +467,7 @@ def set_object(bucket: str, key: str, data: bytes) -> None:
 
     try:
         object_storage.put_object(
-            namespace_name=namespace, bucket=bucket, object_name=key, put_object_body=data_buf
+            namespace_name=namespace, bucket_name=bucket, object_name=key, put_object_body=data_buf
         )
     except Exception:
         raise ObjectStoreError(f"Unable to store object at {key} in bucket {bucket}")
@@ -493,6 +497,5 @@ def set_object_from_file(bucket: str, key: str, filename: Union[str, Path]) -> N
     Returns:
         None
     """
-    filepath = Path(filename)
-    data = filepath.read_bytes()
+    data = Path(filename).read_bytes()
     set_object(bucket=bucket, key=key, data=data)
