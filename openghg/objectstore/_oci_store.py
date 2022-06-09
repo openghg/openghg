@@ -68,7 +68,7 @@ def _load_config() -> Dict:
     tenancy_data["key_file"] = str(key_path)
     tenancy_data["pass_phrase"] = config["passphrase"]
 
-    tenancy_data = validate_config(config=tenancy_data)
+    validate_config(config=tenancy_data)
 
     return tenancy_data
 
