@@ -40,10 +40,6 @@ def _load_config() -> Dict:
     Returns:
         dict: Config as dictionary
     """
-    from oci.config import from_file
-
-    return from_file()
-
     from json import loads
     import os
     from cryptography.fernet import Fernet
