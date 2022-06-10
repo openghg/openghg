@@ -72,23 +72,22 @@ def test_add_edgar_database():
     folder = "v6.0"
     test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
 
-    species = "ch4"
-    version = "v6.0"
-    date = "2015"
     database = "EDGAR"
+    date = "2015"
 
     proc_results = Emissions.transform_data(
         datapath=test_datapath,
         database=database,
-        species=species,
         date=date,
     )
 
+    version = "v6.0"
+    species = "ch4"
     default_source = "anthro"
     default_domain = "globaledgar"
 
-    # output_key = f"{species}_{default_source}_{default_domain}_{date}"
-    # assert output_key in proc_results
+    output_key = f"{species}_{default_source}_{default_domain}_{date}"
+    assert output_key in proc_results
 
     search_results = search(
         species=species,

@@ -82,7 +82,8 @@ def parse_openghg(filepath: Path,
 
     key = "_".join((species, source, domain, date))
 
-    emissions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+    emissions_data: Dict[str, dict] = {}
+    emissions_data[key] = {}
     emissions_data[key]["data"] = em_data
     emissions_data[key]["metadata"] = metadata
 

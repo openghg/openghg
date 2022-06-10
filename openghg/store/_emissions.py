@@ -129,19 +129,26 @@ class Emissions(BaseStore):
     def transform_data(
         datapath: Union[str, Path],
         database: str,
+        overwrite: bool = False,
         **kwargs,
-        # species: str, 
-        # date: str,
-        # domain: Optional[str] = None,
-        # lat_out: ArrayType = None,
-        # lon_out: ArrayType = None,
-        # # sector: Optional[str] = None,
-        # period: Optional[Union[str, tuple]] = None,
-        # edgar_version: Optional[str] = None,
-        # # overwrite: bool = False,
     ) -> Dict:
-        """Read and transform emissions file
-        TODO: Add docstring
+        """
+        Read and transform an emissions database. This will find the appropriate
+        parser function to use for the database specified. The necessary inputs
+        are determined by which database ie being used.
+
+        The underlying parser functions will be of the form:
+            - openghg.transform.parse_{database.lower()}
+                - e.g. openghg.transform.parse_edgar()
+
+        Args:
+            datapath: Path to local copy of database archive (for now)
+            database: Name of database
+            overwrite: Should this data overwrite currently stored data
+                which matches.
+            **kwargs: Inputs for underlying parser function for the database.
+                Necessary inputs will depend on the database being parsed.
+
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         from openghg.store import assign_data, load_metastore, datasource_lookup
@@ -182,7 +189,7 @@ class Emissions(BaseStore):
 
         # Define parameters to pass to the parser function from kwargs
         param = {key:value for key, value in kwargs.items() if key in all_param}
-        param["filepath"] = datapath  # Add filepath explicitly (for now)
+        param["datapath"] = datapath  # Add datapath explicitly (for now)
 
         emissions_data = parser_fn(**param)
 
