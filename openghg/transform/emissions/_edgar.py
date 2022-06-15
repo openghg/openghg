@@ -13,9 +13,9 @@ from typing import DefaultDict, Dict, Tuple, Optional, Union, cast
 ArrayType = Optional[Union[ndarray, DataArray]]
 
 
-def parse_edgar(datapath: Path, 
+def parse_edgar(datapath: Path,
                 date: str,
-                species: Optional[str] = None, 
+                species: Optional[str] = None,
                 domain: Optional[str] = None,
                 lat_out: ArrayType = None,
                 lon_out: ArrayType = None,
@@ -59,10 +59,9 @@ def parse_edgar(datapath: Path,
 
     TODO: Add sector, monthly parsing options.
     """
-    from openghg.util import synonyms, molar_mass, timestamp_now, clean_string
+    from openghg.util import synonyms, molar_mass, timestamp_now, clean_string, convert_longitude
     from openghg.store import infer_date_range
     from openghg.standardise.meta import assign_flux_attributes
-    from collections import defaultdict
 
     # Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
     # Additional edgar functions which could be incorporated.
@@ -71,10 +70,8 @@ def parse_edgar(datapath: Path,
     # - (monthly sectors?)
 
     # TODO: Work out how to select frequency
-    # - could try and relate to period e.g. "monthly" versus "yearly" etc. 
+    # - could try and relate to period e.g. "monthly" versus "yearly" etc.
     period = None
-    # TODO: What about sectoral emissions? Could just start with total for now
-    # and move up to sectoral perhaps. Again, something in the readme?
 
     raw_edgar_domain = "globaledgar"
 
@@ -113,7 +110,8 @@ def parse_edgar(datapath: Path,
     data_files = [file for file in folder_filelist if file.suffix == suffix]
 
     if not data_files:
-        raise ValueError(f"Expect EDGAR '.nc' files. No suitable files found within datapath: {datapath}")
+        raise ValueError(f"Expect EDGAR '.nc' files."\
+                          "No suitable files found within datapath: {datapath}")
 
     for file in data_files:
         try:
@@ -136,19 +134,22 @@ def parse_edgar(datapath: Path,
         # species_label = species_label(species)
         species_label = synonyms(species).lower()
     else:
-        raise ValueError("Unable to retrieve species from database filenames. Please specify")
+        raise ValueError("Unable to retrieve species from database filenames."\
+                         " Please specify")
 
     if species_from_file is not None and species_label != synonyms(species_from_file):
-        print("WARNING: Input species does not match species extracted from database filenames. Please check.")
+        print("WARNING: Input species does not match species extracted from"/
+              " database filenames. Please check.")
 
     # If version not yet found, extract version from file naming scheme
     if edgar_version is None:
-            possible_version = db_info["version"]
-            if possible_version in known_version:
-                edgar_version = possible_version
+        possible_version = db_info["version"]
+        if possible_version in known_version:
+            edgar_version = possible_version
 
     if edgar_version not in known_version:
-        raise ValueError(f"Unable to infer EDGAR version ({edgar_version}). Please pass as an argument")
+        raise ValueError(f"Unable to infer EDGAR version ({edgar_version})."\
+                          " Please pass as an argument")
 
     # TODO: Split out into a separate function, so we can use this for
     # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
@@ -160,23 +161,12 @@ def parse_edgar(datapath: Path,
     else:
         raise ValueError(f"Do no accept date which does not represent a year yet: {date}")
 
-    year_search = "\d{4}"
-    start_search_str = f"{edgar_version}_{species_label}_{year_search}"
-
     files_by_year = {}
     for file in data_files:
         try:
-            # name = file.name
-            # # Ignoring types as issues caught by try-except statement
-            # start = re.search(start_search_str, name).group()  # type: ignore
-            # year_from_file = re.search(year_search, start).group()  # type: ignore
             file_info = _extract_file_info(file)
         except ValueError:
             continue
-
-        # start_search_monthly_str = start_search_str + "_1"
-        # if re.search(start_search_monthly_str, name) is not None:
-        #     raise NotImplementedError("Unable to parse monthly EDGAR data at present.")
 
         # Check if data is actually monthly "...2015_1" etc. - can't parse yet
         if "month" in file_info:
@@ -195,9 +185,11 @@ def parse_edgar(datapath: Path,
         all_years.sort()
         start_year, end_year = all_years[0], all_years[-1]
         if year < start_year:
-            raise ValueError(f"EDGAR {edgar_version} range: {start_year}-{end_year}. {year} is before this period.")
+            raise ValueError(f"EDGAR {edgar_version} range: {start_year}-{end_year}."\
+                             f" {year} is before this period.")
         elif year > end_year:
-            print(f"Using last available year from EDGAR {edgar_version} range: {start_year}-{end_year}.")
+            print(f"Using last available year from EDGAR {edgar_version} range:"\
+                  f"{start_year}-{end_year}.")
             edgar_file = files_by_year[end_year]
             edgar_file_info = _extract_file_info(edgar_file)
 
@@ -237,7 +229,7 @@ def parse_edgar(datapath: Path,
     # 'Monthly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / month
     #  for the .txt files with longitude and latitude coordinates referring to
     #  the low-left corner of each grid-cell.'
-    # 'Emissions gridmaps in kg substance /m2 /s for the .nc files with longitude 
+    # 'Emissions gridmaps in kg substance /m2 /s for the .nc files with longitude
     # and latitude coordinates referring to the cell center of each grid-cell.'
 
     # Convert from kg/m2/s to mol/m2/s
@@ -254,31 +246,22 @@ def parse_edgar(datapath: Path,
         lat_in = edgar_ds[lat_name].values
         lon_in = edgar_ds[lon_name].values
     except KeyError:
-        raise ValueError("Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n Please check this is a 2D grid map.")
+        raise ValueError(f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"\
+                          " Please check this is a 2D grid map.")
 
-    # TODO: Implement regridding below when xesmf / iris can be installed
-    # using some combination of pip and conda (or otherwise) for C libraries.
-    if domain != raw_edgar_domain:
-        # REMOVE WHEN READY
-        print(f"Regridding not implemented yet. Saving native EDGAR domain {raw_edgar_domain}")
+    # Check range of longitude values and convert to -180 - +180
+    lon_in, ordinds = convert_longitude(lon_in, return_index=True)
+    flux_values = flux_values[:, ordinds]
 
     if lat_out is not None and lon_out is not None:
-        pass
-        # # Check range of longitude values and convert to -180 - +180
-        # mtohe = lon_in > 180
-        # lon_in[mtohe] = lon_in[mtohe] - 360 
-        # ordinds = np.argsort(lon_in)
-        # lon_in = lon_in[ordinds]
-        # flux_values = flux_values[:, ordinds] 
-        
-        # nlat = len(lat_out)
-        # nlon = len(lon_out) 
-        
-        # narr = np.zeros((nlat, nlon))    
+        # Will produce import error if xesmf has not been installed.
+        from openghg.transform import regrid_uniform_cc
 
-        # # TODO: Sort out which regridding algorithm to use
-        # flux_values, reg = regrid2d(flux_values, lat_in, lon_in,
-        #                         lat_out, lon_out)
+        # regrid2d() used within acrg code for equivalent regrid function
+        # but switched to using xesmf (rather than iris) here instead.
+        flux_values = regrid_uniform_cc(flux_values,
+                                        lat_out, lon_out,
+                                        lat_in, lon_in)
     else:
         lat_out = lat_in
         lon_out = lon_in
@@ -321,7 +304,7 @@ def parse_edgar(datapath: Path,
     em_data.attrs["author"] = author_name
 
     source_from_file = edgar_file_info["source"]
-    if source_from_file == "TOTALS" or source_from_file == "":
+    if source_from_file in ("TOTALS", ""):
         source = "anthro"
     else:
         source = source_from_file
@@ -347,7 +330,7 @@ def parse_edgar(datapath: Path,
     em_time = em_data.time
     start_date, end_date, period_str = infer_date_range(
         em_time, filepath=edgar_file.name, period=period
-    )    
+    )
 
     prior_info_dict = {"EDGAR": {"version": f"EDGAR {edgar_version}",
                                  "filename": edgar_file.name,
@@ -360,7 +343,7 @@ def parse_edgar(datapath: Path,
 
     metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
     metadata["max_longitude"] = round(float(em_data["lon"].max()), 5)
-    metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)    
+    metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
     metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
 
     metadata["time_resolution"] = "standard"
@@ -374,7 +357,9 @@ def parse_edgar(datapath: Path,
     emissions_data[key]["metadata"] = metadata
     emissions_data[key]["attributes"] = attrs
 
-    emissions_data = assign_flux_attributes(emissions_data, units=units, prior_info_dict=prior_info_dict)
+    emissions_data = assign_flux_attributes(emissions_data,
+                                            units=units,
+                                            prior_info_dict=prior_info_dict)
 
     return emissions_data
 
@@ -388,7 +373,7 @@ def _check_lat_lon(domain: Optional[str] = None,
     The domain can be used in one of two ways:
         1. To specify a pre-exisiting lat, lon extent which can be extracted
         2. To supply a name for a new lat, lon extent which must be specified
-    
+
     For case 1, only domain needs to be specified (lat_out and lon_out can
     be specified but they must already exactly match the domain definition).
     The details will be extracted from 'domain_info.json'.
@@ -407,11 +392,12 @@ def _check_lat_lon(domain: Optional[str] = None,
         ndarray, ndarray: Latitude and longitude arrays
         None, None: if all inputs are None, a tuple of Nones will be returned.
     """
-    from openghg.util import find_domain
+    from openghg.util import find_domain, convert_longitude
 
     if lat_out is not None or lon_out is not None:
         if domain is None:
-            raise ValueError("Please specify new 'domain' name if selecting new latitude, longitude values")
+            raise ValueError("Please specify new 'domain' name if selecting new"\
+                             " latitude, longitude values")
 
     if isinstance(lat_out, DataArray):
         lat_out = cast(ndarray, lat_out.values)
@@ -428,21 +414,36 @@ def _check_lat_lon(domain: Optional[str] = None,
             # If domain cannot be found and lat, lon values have not been
             # defined raise an error.
             if lat_out is None or lon_out is None:
-                raise ValueError("To create new domain please input 'lat_out' and 'lon_out' values.")
+                raise ValueError("To create new domain please input"\
+                                 " 'lat_out' and 'lon_out' values.")
         else:
             # Check domain latitude and longitude values against any
             # lat_out and lon_out values specified to check they match.
             if lat_out is not None:
                 if not np.array_equal(lat_domain, lat_out):
-                    raise ValueError(f"Latitude values should not be specified when using pre-defined domain {domain} (values don't match).")
+                    raise ValueError("Latitude values should not be specified"\
+                                    f" when using pre-defined domain {domain}"\
+                                     " (values don't match).")
             else:
                 lat_out = lat_domain
 
             if lon_out is not None:
                 if not np.array_equal(lon_domain, lon_out):
-                    raise ValueError(f"Longitude values should not be specified when using pre-defined domain {domain} (values don't match).")
+                    raise ValueError("Longitude values should not be specified"\
+                                    f" when using pre-defined domain {domain}"\
+                                     " (values don't match).")
             else:
                 lon_out = lon_domain
+
+            if lon_out.max() > 180 or lon_out.min() < -180:
+                raise ValueError("Invalid domain definition."
+                                 " Expected longitude in range: -180 - 180."\
+                                f"Current longitude: {lon_out.min()} - {lon_out.max()}")
+
+    if lon_out is not None and (lon_out.max() > 180 or lon_out.min() < -180):
+        print("Converting longitude to stay within -180 - 180 bounds")
+        lon_converted = convert_longitude(lon_out)
+        lon_out = cast(Optional[ndarray], lon_converted)
 
     return lat_out, lon_out
 
@@ -519,7 +520,7 @@ def _check_readme_version(datapath: Optional[Path] = None,
 def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     """
     Extract details from EDGAR filename.
-    
+
     Expected filenames roughly of the form:
         - {version}_{species}_{year}.{resolution}.nc
         - {version}_{species}_{year}_{source}.{resolution}.nc
@@ -541,7 +542,7 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
             {"version": "v432", "species": "CH4", "year": 2010, "month": 9,
             "source": "IPCC-6A-6D", "resolution": "0.1x0.1"}
     """
-    # Can extract details about files form the filename itself.
+    # Can extract details about files from the filename itself.
     # e.g. "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
 
     # Extract filename stem (name without extension) and split
@@ -554,7 +555,6 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     try:
         version = filename_split[0]
         species = filename_split[1]
-        year_str = filename_split[2]
     except IndexError:
         raise ValueError(f"Did not recognise input file format: {filename}")
     else:
@@ -562,6 +562,7 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 
     # Check if year can be cast to integer to check this is a valid value
     try:
+        year_str = filename_split[2]
         year = int(year_str)
     except IndexError:
         raise ValueError(f"Unable to cast year extracted from file format to an integer: {year_str}")
@@ -588,7 +589,7 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     # Attempt to extract source(s) and resolution from filename stem
     # e.g. "v6.0_CH4_2015_TOTALS.0.1x0.1.nc" --> "TOTALS.0.1x0.1"
     # e.g. "v50_CH4_2015.0.1x0.1.nc" --> "2015.0.1x0.1" (note no source in filename)
-    # e.g. "v432_CH4_2010_9_IPCC_6A_6D.0.1x0.1.nc" --> "IPCC-6A-6D.0.1x0.1"
+    # e.g. "v432_CH4_2010_9_IPCC_6A_6D.0.1x0.1.nc" --> "IPCC_6A_6D.0.1x0.1"
     try:
         source_resolution =  '-'.join(filename_split[index_remaining:])
     except (IndexError, ValueError):
@@ -596,7 +597,7 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     else:
         # e.g. "TOTALS.0.1x0.1" --> "TOTALS", "0.1x0.1"
         # e.g. "2015.0.1x0.1" --> "2015", "0.1x0.1" --> "", "0.1x0.1"
-        # e.g. "IPCC-6A-6D.0.1x0.1" --> "IPCC-6A-6D", "0.1x0.1"
+        # e.g. "IPCC_6A_6D.0.1x0.1" --> "IPCC-6A-6D", "0.1x0.1"
         source = source_resolution.split('.')[0]
         resolution = source_resolution.lstrip(source).lstrip('.')
         # Check source was actually contained in filename and not just the year
@@ -609,10 +610,10 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
                  "year": year,
                  "source": source,
                  "resolution": resolution}
-    
+
     if month is not None:
         file_info["month"] = month
-    
+
     return file_info
 
 
@@ -621,13 +622,13 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #     Get annual emission totals for species of interest from EDGAR v5.0 data
 #     for sector or sectors.
 #     Regrids to the desired lats and lons.
-    
+
 #     CURRENTLY ONLY 2012 AND 2015 ANNUAL SECTORS IN SHARED DIRECTORY. OTHER YEARS NEED DOWNLOADING.
-    
+
 #     Args:
-#         year (int): 
+#         year (int):
 #             Year of interest
-#         lon_out (array): 
+#         lon_out (array):
 #             Longitudes to output the data on
 #         lat_out (array):
 #             Latitudes to output the data on
@@ -635,22 +636,22 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #             EDGAR sectors to include. If list of values, the sum of these will be used.
 #             See below for list of possible sectors and full names.
 #         species (str):
-#             Which species you want to look at. 
+#             Which species you want to look at.
 #             e.g. species = 'CH4'
 #             Default = 'CH4'
 #             Currently only works for CH4.
-            
-#     Returns: 
-#         narr (array): 
+
+#     Returns:
+#         narr (array):
 #             Array of regridded emissions in mol/m2/s.
 #             Dimensions are [lat, lon]
-            
-#     If there is no data for the species you are looking at you may have to 
-#     download it from: 
+
+#     If there is no data for the species you are looking at you may have to
+#     download it from:
 #     https://edgar.jrc.ec.europa.eu/overview.php?v=50_GHG
 #     and place in:
-#     /data/shared/Gridded_fluxes/<species>/EDGAR_v5.0/yearly_sectoral/ 
-    
+#     /data/shared/Gridded_fluxes/<species>/EDGAR_v5.0/yearly_sectoral/
+
 #     Note:
 #         EDGAR sector names:
 #         "AGS" = Agricultural soils
@@ -672,33 +673,33 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #         "SWD_LDF" = Solid waste disposal - landfill
 #         "TNR_Aviation_CDS" = Aviation - climbing and descent
 #         "TNR_Aviation_CRS" = Aviation - cruise
-#         "TNR_Aviation_LTO" = Aviation - landing and takeoff 
+#         "TNR_Aviation_LTO" = Aviation - landing and takeoff
 #         "TNR_Other" = Railways, pipelines and off-road transport
 #         "TNR_Ship" = Shipping
 #         "TRO" = Road transportation
 #         "WWT" = Waste water treatment
-        
+
 #     """
-    
+
 #     edgarfp = os.path.join(data_path,"Gridded_fluxes",species.upper(),"EDGAR_v5.0/yearly_sectoral")
-    
+
 #     EDGARsectorlist = ["AGS","AWB","CHE","ENE","ENF","FFF","IND","IRO","MNM",
 #                        "PRO_COAL","PRO_GAS","PRO_OIL","PRO","RCO","REF_TRF","SWD_INC",
 #                        "SWD_LDF","TNR_Aviation_CDS","TNR_Aviation_CRS",
 #                        "TNR_Aviation_LTO","TNR_Other","TNR_Ship","TRO","WWT"]
-    
+
 #     if edgar_sectors is not None:
 #         print('Including EDGAR sectors.')
-    
+
 #         for EDGARsector in edgar_sectors:
 #             if EDGARsector not in EDGARsectorlist:
 #                 print('EDGAR sector {0} not one of: \n {1}'.format(EDGARsector,EDGARsectorlist))
 #                 print('Returning None')
 #                 return None
-            
+
 #         #edgar flux in kg/m2/s
 #         for i,sector in enumerate(edgar_sectors):
-        
+
 #             edgarfn = "v50_" + species.upper() + "_" + str(year) + "_" + sector + ".0.1x0.1.nc"
 
 #             with xr.open_dataset(os.path.join(edgarfp,edgarfn)) as edgar_file:
@@ -710,31 +711,31 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #                 edgar_total = edgar_flux
 #             else:
 #                 edgar_total = np.add(edgar_total,edgar_flux)
-            
+
 #         edgar_regrid_kg,arr = regrid2d(edgar_total,edgar_lat,edgar_lon,lat_out,lon_out)
-    
+
 #         #edgar flux in mol/m2/s
 #         speciesmm = molar_mass(species)
 #         edgar_regrid = (edgar_regrid_kg.data*1e3) / speciesmm
-        
+
 #     return(edgar_regrid)
-            
+
 # def getedgarv432annualsectors(year, lon_out, lat_out, edgar_sectors, species='CH4'):
 #     """
 #     Get annual emission totals for species of interest from EDGAR v4.3.2 data
 #     for sector or sectors.
 #     Regrids to the desired lats and lons.
-    
-#     If there is no data for the species you are looking at you may have to 
-#     download it from: 
+
+#     If there is no data for the species you are looking at you may have to
+#     download it from:
 #     http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG&SECURE=123
-#     and placed in: 
-#     /data/shared/Gridded_fluxes/<species>/EDGAR_v4.3.2/<species>_sector_yearly/ 
-    
+#     and placed in:
+#     /data/shared/Gridded_fluxes/<species>/EDGAR_v4.3.2/<species>_sector_yearly/
+
 #     Args:
-#         year (int): 
+#         year (int):
 #             Year of interest
-#         lon_out (array): 
+#         lon_out (array):
 #             Longitudes to output the data on
 #         lat_out (array):
 #             Latitudes to output the data on
@@ -743,53 +744,53 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #             These will be combined to make one array.
 #             See 'Notes' for names of sectors
 #         species (str):
-#             Which species you want to look at. 
+#             Which species you want to look at.
 #             e.g. species = 'CH4'
 #             Default = 'CH4'
-    
+
 #     Returns:
-#         narr (array): 
+#         narr (array):
 #             Array of regridded emissions in mol/m2/s.
 #             Dimensions are [lat, lon]
-        
+
 #     Notes:
 #         Names of EDGAR sectors:
-#            'powerindustry'; 
-#            'oilrefineriesandtransformationindustry'; 
-#            'combustionformanufacturing'; 
-#            'aviationclimbinganddescent';  
-#            'aviationcruise'; 
-#            'aviationlandingandtakeoff';  
-#            'aviationsupersonic'; 
-#            'roadtransport'; 
-#            'railwayspipelinesandoffroadtransport'; 
-#            'shipping';  
-#            'energyforbuildings';  
-#            'fuelexploitation'; 
-#            'nonmetallicmineralsproduction';  
+#            'powerindustry';
+#            'oilrefineriesandtransformationindustry';
+#            'combustionformanufacturing';
+#            'aviationclimbinganddescent';
+#            'aviationcruise';
+#            'aviationlandingandtakeoff';
+#            'aviationsupersonic';
+#            'roadtransport';
+#            'railwayspipelinesandoffroadtransport';
+#            'shipping';
+#            'energyforbuildings';
+#            'fuelexploitation';
+#            'nonmetallicmineralsproduction';
 #            'chemicalprocesses';
-#            'ironandsteelproduction'; 
-#            'nonferrousmetalsproduction'; 
-#            'nonenergyuseoffuels'; 
-#            'solventsandproductsuse'; 
-#            'entericfermentation'; 
-#            'manuremanagement';  
-#            'agriculturalsoils';  
-#            'indirectN2Oemissionsfromagriculture'; 
-#            'agriculturalwasteburning';  
-#            'solidwastelandfills';  
-#            'wastewaterhandling';  
-#            'Solid waste incineration';  
-#            'fossilfuelfires'; 
-#            'indirectemissionsfromNOxandNH3';  
+#            'ironandsteelproduction';
+#            'nonferrousmetalsproduction';
+#            'nonenergyuseoffuels';
+#            'solventsandproductsuse';
+#            'entericfermentation';
+#            'manuremanagement';
+#            'agriculturalsoils';
+#            'indirectN2Oemissionsfromagriculture';
+#            'agriculturalwasteburning';
+#            'solidwastelandfills';
+#            'wastewaterhandling';
+#            'Solid waste incineration';
+#            'fossilfuelfires';
+#            'indirectemissionsfromNOxandNH3';
 #     """
 #     species = species.upper() #Make sure species is uppercase
-        
+
 # #Path to EDGAR files
 #     edpath = os.path.join(data_path,'Gridded_fluxes/'+species+'/EDGAR_v4.3.2/'+species+'_sector_yearly/')
 
 #     #Dictionary of codes for sectors
-#     secdict = {'powerindustry' : '1A1a', 
+#     secdict = {'powerindustry' : '1A1a',
 #                'oilrefineriesandtransformationindustry' : '1A1b_1A1c_1A5b1_1B1b_1B2a5_1B2a6_1B2b5_2C1b',
 #                'combustionformanufacturing' : '1A2',
 #                'aviationclimbinganddescent' : '1A3a_CDS',
@@ -816,10 +817,10 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #                'wastewaterhandling' : '6B',
 #                'Solid waste incineration' : '6C',
 #                'fossilfuelfires' : '7A',
-#                'indirectemissionsfromNOxandNH3' : '7B_7C'           
-#     } 
+#                'indirectemissionsfromNOxandNH3' : '7B_7C'
+#     }
 
-#     #Check to see range of years. If desired year falls outside of this range 
+#     #Check to see range of years. If desired year falls outside of this range
 #     #then take closest year
 #     possyears = np.empty(shape=[0,0],dtype=int)
 #     for f in glob.glob(edpath+'v432_'+species+'_*'):
@@ -834,8 +835,8 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #         print("%s is earlier than min year in EDGAR database" % str(year))
 #         print("Using %s as the closest year" % str(min((possyears))))
 #         year = min(possyears)
-    
-        
+
+
 #     #Species molar mass
 #     speciesmm = molar_mass(species)
 # #    if species == 'CH4':
@@ -848,14 +849,14 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 # #        print "Please add this and rerun the script"
 # #        print "Returning None"
 # #        return(None)
-    
-    
+
+
 #     #Read in EDGAR data of annual mean CH4 emissions for each sector
 #     #These are summed together
 #     #units are in kg/m2/s
 #     tot = None
 #     for sec in edgar_sectors:
-#         edgar = edpath+'v432_'+species+'_'+str(year)+'_IPCC_'+secdict[sec]+'.0.1x0.1.nc'    
+#         edgar = edpath+'v432_'+species+'_'+str(year)+'_IPCC_'+secdict[sec]+'.0.1x0.1.nc'
 #         if os.path.isfile(edgar):
 #             ds = xr.open_dataset(edgar)
 #             soiname = 'emi_'+species.lower()
@@ -865,18 +866,18 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #                 tot += ds[soiname].values*1e3 / speciesmm
 #         else:
 #             print('No annual file for sector %s and %s' % (sec, species))
-        
+
 #     lat_in = ds.lat.values
 #     lon_in = ds.lon.values
-    
+
 #     nlat = len(lat_out)
-#     nlon = len(lon_out) 
-    
-#     narr = np.zeros((nlat, nlon))    
+#     nlon = len(lon_out)
+
+#     narr = np.zeros((nlat, nlon))
 #     narr, reg = regrid2d(tot, lat_in, lon_in,
 #                              lat_out, lon_out)
-    
-#     return(narr)   
+
+#     return(narr)
 
 # def getedgarmonthlysectors(lon_out, lat_out, edgar_sectors, months=[1,2,3,4,5,6,7,8,9,10,11,12],
 #                            species='CH4'):
@@ -884,14 +885,14 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #     Get 2010 monthly emissions for species of interest from EDGAR v4.3.2 data
 #     for sector or sectors.
 #     Regrids to the desired lats and lons.
-#     If there is no data for the species you are looking at you may have to 
-#     download it from: 
+#     If there is no data for the species you are looking at you may have to
+#     download it from:
 #     http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG&SECURE=123
-#     and place it in: 
+#     and place it in:
 #     /data/shared/Gridded_fluxes/<species>/EDGAR_v4.3.2/<species>_sector_monthly/
-    
+
 #     Args:
-#         lon_out (array): 
+#         lon_out (array):
 #             Longitudes to output the data on
 #         lat_out (array):
 #             Latitudes to output the data on
@@ -899,55 +900,55 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #             List of strings of EDGAR sectors to get emissions for.
 #             These will be combined to make one array.
 #             See 'Notes' for names of sectors
-#         months (list of int; optional): 
+#         months (list of int; optional):
 #             Desired months.
 #         species (str, optional):
-#             Which species you want to look at. 
+#             Which species you want to look at.
 #             e.g. species = 'CH4'
 #             Default = 'CH4'
-    
+
 #     Returns:
-#         narr (array): 
+#         narr (array):
 #             Array of regridded emissions in mol/m2/s.
 #             Dimensions are [no of months, lat, lon]
-        
+
 #     Notes:
 #         Names of EDGAR sectors:
-#            'powerindustry'; 
-#            'oilrefineriesandtransformationindustry'; 
-#            'combustionformanufacturing'; 
-#            'aviationclimbinganddescent';  
-#            'aviationcruise'; 
-#            'aviationlandingandtakeoff';  
-#            'aviationsupersonic'; 
-#            'roadtransport'; 
-#            'railwayspipelinesandoffroadtransport'; 
-#            'shipping';  
-#            'energyforbuildings';  
-#            'fuelexploitation'; 
-#            'nonmetallicmineralsproduction';  
+#            'powerindustry';
+#            'oilrefineriesandtransformationindustry';
+#            'combustionformanufacturing';
+#            'aviationclimbinganddescent';
+#            'aviationcruise';
+#            'aviationlandingandtakeoff';
+#            'aviationsupersonic';
+#            'roadtransport';
+#            'railwayspipelinesandoffroadtransport';
+#            'shipping';
+#            'energyforbuildings';
+#            'fuelexploitation';
+#            'nonmetallicmineralsproduction';
 #            'chemicalprocesses';
-#            'ironandsteelproduction'; 
-#            'nonferrousmetalsproduction'; 
-#            'nonenergyuseoffuels'; 
-#            'solventsandproductsuse'; 
-#            'entericfermentation'; 
-#            'manuremanagement';  
-#            'agriculturalsoils';  
-#            'indirectN2Oemissionsfromagriculture'; 
-#            'agriculturalwasteburning';  
-#            'solidwastelandfills';  
-#            'wastewaterhandling';  
-#            'Solid waste incineration';  
-#            'fossilfuelfires'; 
-#            'indirectemissionsfromNOxandNH3';  
+#            'ironandsteelproduction';
+#            'nonferrousmetalsproduction';
+#            'nonenergyuseoffuels';
+#            'solventsandproductsuse';
+#            'entericfermentation';
+#            'manuremanagement';
+#            'agriculturalsoils';
+#            'indirectN2Oemissionsfromagriculture';
+#            'agriculturalwasteburning';
+#            'solidwastelandfills';
+#            'wastewaterhandling';
+#            'Solid waste incineration';
+#            'fossilfuelfires';
+#            'indirectemissionsfromNOxandNH3';
 #     """
 #     species = species.upper() #Make sure species is uppercase
 #     #Path to EDGAR files
 #     edpath = os.path.join(data_path,'Gridded_fluxes/'+species+'/EDGAR_v4.3.2/'+species+'_sector_monthly/')
-    
+
 #     #Dictionary of codes for sectors
-#     secdict = {'powerindustry' : '1A1a', 
+#     secdict = {'powerindustry' : '1A1a',
 #                'oilrefineriesandtransformationindustry' : '1A1b_1A1c_1A5b1_1B1b_1B2a5_1B2a6_1B2b5_2C1b',
 #                'combustionformanufacturing' : '1A2',
 #                'aviationclimbinganddescent' : '1A3a_CDS',
@@ -974,11 +975,11 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #                'wastewaterhandling' : '6B',
 #                'Solid waste incineration' : '6C',
 #                'fossilfuelfires' : '7A',
-#                'indirectemissionsfromNOxandNH3' : '7B_7C'           
+#                'indirectemissionsfromNOxandNH3' : '7B_7C'
 #     }
-    
+
 #     print('Note that the only year for monthly emissions is 2010 so using that.')
-        
+
 #     #Species molar mass
 #     speciesmm = molar_mass(species)
 # #    if species == 'CH4':
@@ -990,8 +991,8 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 # #        print "Please add this and rerun the script"
 # #        print "Returning None"
 # #        return(None)
-    
-    
+
+
 #     #Read in EDGAR data of annual mean CH4 emissions for each sector
 #     #These are summed together
 #     #units are in kg/m2/s
@@ -1000,7 +1001,7 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #     for month in months:
 #         tot = np.array(None)
 #         for sec in edgar_sectors:
-#             edgar = edpath+'v432_'+species+'_2010_'+str(month)+'_IPCC_'+secdict[sec]+'.0.1x0.1.nc'    
+#             edgar = edpath+'v432_'+species+'_2010_'+str(month)+'_IPCC_'+secdict[sec]+'.0.1x0.1.nc'
 #             if os.path.isfile(edgar):
 #                 ds = xr.open_dataset(edgar)
 #                 soiname = 'emi_'+species.lower()
@@ -1011,25 +1012,25 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
 #             else:
 #                 warnings.append('No monthly file for sector %s' % sec)
 #                 #print 'No monthly file for sector %s' % sec
-        
+
 #             if first == 0:
 #                 emissions = np.zeros((len(months), tot.shape[0], tot.shape[1]))
 #                 emissions[0,:,:] = tot
 #             else:
 #                 first += 1
 #                 emissions[first,:,:] = tot
-            
+
 #     for warning in np.unique(warnings):
 #         print(warning)
-                           
+
 #     lat_in = ds.lat.values
 #     lon_in = ds.lon.values
-    
+
 #     nlat = len(lat_out)
-#     nlon = len(lon_out) 
-    
+#     nlon = len(lon_out)
+
 #     narr = np.zeros((nlat, nlon, len(months)))
-       
+
 #     for i in range(len(months)):
 #        narr[:,:,i], reg = regrid2d(emissions[i,:,:], lat_in, lon_in,
 #                              lat_out, lon_out)

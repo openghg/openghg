@@ -1,3 +1,4 @@
+import pytest
 from openghg.store import Emissions
 from openghg.retrieve import search
 from openghg.store import recombine_datasets, metastore_manager, datasource_lookup
@@ -69,6 +70,7 @@ def test_read_file():
 
 
 def test_add_edgar_database():
+    """Test edgar can be added to object store (default domain)"""
     folder = "v6.0"
     test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
 
@@ -81,10 +83,11 @@ def test_add_edgar_database():
         date=date,
     )
 
+    default_domain = "globaledgar"
+
     version = "v6.0"
     species = "ch4"
     default_source = "anthro"
-    default_domain = "globaledgar"
 
     output_key = f"{species}_{default_source}_{default_domain}_{date}"
     assert output_key in proc_results
@@ -114,10 +117,74 @@ def test_add_edgar_database():
         "author": "OpenGHG Cloud".lower(),
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
-        "min_longitude": 0.05,
-        "max_longitude": 359.95001,
+        "min_longitude": -174.85857,
+        "max_longitude": 180.0,
         "min_latitude": -89.95,
         "max_latitude": 89.95,
+        "time_resolution": "standard",
+        "time_period": "1 year",
+    }
+
+    assert metadata.items() >= expected_metadata.items()
+
+
+def test_transform_and_add_edgar_database():
+    """
+    Test EDGAR database can be transformed (regridded) and added to the object store.
+    """
+    xesmf = pytest.importorskip("xesmf")
+
+    folder = "v6.0"
+    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "2015"
+    domain = "EUROPE"
+
+    proc_results = Emissions.transform_data(
+        datapath=test_datapath,
+        database=database,
+        date=date,
+        domain=domain,
+    )
+
+    version = "v6.0"
+    species = "ch4"
+    default_source = "anthro"
+
+    output_key = f"{species}_{default_source}_{domain}_{date}"
+    assert output_key in proc_results
+
+    search_results = search(
+        species=species,
+        date=date,
+        domain=domain,
+        database=database,  # would searching for lowercase not work?
+        database_version=version,
+        data_type="emissions",
+    )
+
+    key = list(search_results.keys())[0]
+
+    # TODO: Add tests for data as well?
+    # data_keys = search_results[key]["keys"]
+
+    metadata = search_results[key]["metadata"]
+
+    expected_metadata = {
+        "species": species,
+        "domain": domain.lower(),
+        "source": "anthro",
+        "database": "edgar",
+        "database_version": version.replace('.',''),
+        "date": "2015",
+        "author": "openghg cloud",
+        "start_date": "2015-01-01 00:00:00+00:00",
+        "end_date": "2015-12-31 23:59:59+00:00",
+        "min_longitude": -97.9,
+        "max_longitude": 39.38,
+        "min_latitude": 10.729,
+        "max_latitude": 79.057,
         "time_resolution": "standard",
         "time_period": "1 year",
     }
