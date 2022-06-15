@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from openghg.util import find_domain
+from openghg.util import find_domain, convert_longitude
 from openghg.util._domain import _get_coord_data
 
 
@@ -29,15 +29,27 @@ def test_create_coord():
     coord = "coordinate"
     domain = "TEST"
 
-    range = ["-10", "10"]
+    coord_range = ["-10", "10"]
     increment = "0.1"
-    data = {"coordinate_range": range,
+    data = {"coordinate_range": coord_range,
             "coordinate_increment": increment}
 
     coordinate = _get_coord_data(coord, data, domain)
 
-    assert np.isclose(coordinate[0], float(range[0]))
-    assert np.isclose(coordinate[-1], float(range[-1]))
+    assert np.isclose(coordinate[0], float(coord_range[0]))
+    assert np.isclose(coordinate[-1], float(coord_range[-1]))
 
     av_increment = (coordinate[1:] - coordinate[:-1]).mean()
     assert np.isclose(av_increment, float(increment))
+
+
+@pytest.mark.parametrize("lon_in,expected_lon_out",
+                         [(np.array([360.0]), np.array([0.0])),
+                          (np.array([181.0]), np.array([-179.0])),
+                          (np.array([-180.0, 0.0, 180.0]), np.array([-180.0, 0.0, 180.0])),
+                          (np.arange(1,361,1), np.arange(-179,181,1))
+                         ])
+def test_convert_longitude(lon_in, expected_lon_out):
+    """Test expected longitude conversion for individual values and range."""
+    lon_out = convert_longitude(lon_in)
+    np.testing.assert_allclose(lon_out, expected_lon_out)

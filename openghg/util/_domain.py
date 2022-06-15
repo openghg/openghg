@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import ndarray
-from typing import Tuple
+from typing import Tuple, Union
 from openghg.util import get_datapath, load_json
 
 
@@ -11,7 +11,7 @@ def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
 
     Args:
         domain: Pre-defined domain name (see 'domain_info.json')
-    
+
     Returns:
         array, array : Latitude and longitude values for the domain in degrees.
     """
@@ -32,8 +32,8 @@ def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
 
     return latitude, longitude
 
-    
-def _get_coord_data(coord: str, data: dict, domain: str):
+
+def _get_coord_data(coord: str, data: dict, domain: str) -> ndarray:
     """
     Attempts to extract or derive coordinate (typically latitude/longitude)
     values for a domain from provided data dictionary (typically
@@ -79,15 +79,39 @@ def _get_coord_data(coord: str, data: dict, domain: str):
     # If no data files can be found, look for coordinate range and increment values
     # If present, create the coordinate data. If not raise a ValueError.
     try:
-        range = data[f"{coord}_range"]
+        coord_range = data[f"{coord}_range"]
         increment = data[f"{coord}_increment"]
     except KeyError:
         raise ValueError(f"Unable to get {coord} coordinate data for domain: {domain}")
 
-    coord_min = float(range[0])
-    coord_max = float(range[-1])
+    coord_min = float(coord_range[0])
+    coord_max = float(coord_range[-1])
     increment = float(increment)
 
     coord_data = np.arange(coord_min, coord_max+increment, increment)
 
     return coord_data
+
+
+def convert_longitude(longitude: ndarray,
+                      return_index: bool = False) -> Union[ndarray, Tuple[ndarray, ndarray]]:
+    """
+    Convert longitude extent to -180 - 180 and reorder.
+
+    Args:
+        longitude: Array of valid longitude values in degrees.
+        return_index: Return re-ordering index as well as updated longitude
+
+    Returns:
+        ndarray(, ndarray) : Updated longitude values and new indices if requested.
+    """
+    # Check range of longitude values and convert to -180 - +180
+    mtohe = longitude > 180
+    longitude[mtohe] = longitude[mtohe] - 360
+    ordinds = np.argsort(longitude)
+    longitude = longitude[ordinds]
+
+    if return_index:
+        return longitude, ordinds
+    else:
+        return longitude
