@@ -102,8 +102,7 @@ def recombine_datasets(
     # This is modified from https://stackoverflow.com/a/51077784/1303032
     unique, index, count = np.unique(combined.time, return_counts=True, return_index=True)
     n_dupes = unique[count > 1].size
-
-    dupes = unique[count > 1]
+    # dupes = unique[count > 1]
 
     if n_dupes > 5:
         raise ValueError("Large number of duplicate timestamps, check data overlap.")

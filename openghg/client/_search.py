@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Dict, Optional, Union, Any
+from typing import Dict, Optional, Union, Any
 from openghg.retrieve import search as _local_search
 from openghg.util import running_in_cloud
 from gzip import decompress
@@ -56,27 +56,27 @@ def search_surface(
     return results
 
 
-def search_emissions():
-    raise NotImplementedError
+# def search_emissions():
+#     raise NotImplementedError
 
 
-def search_footprints():
-    raise NotImplementedError
+# def search_footprints():
+#     raise NotImplementedError
 
 
-def search_met():
-    raise NotImplementedError
+# def search_met():
+#     raise NotImplementedError
 
 
-def search_eulerian():
-    raise NotImplementedError
+# def search_eulerian():
+#     raise NotImplementedError
 
 
-def search_bc():
-    raise NotImplementedError
+# def search_bc():
+#     raise NotImplementedError
 
 
-def search(**kwargs) -> SearchResults:
+def search(**kwargs: Any) -> SearchResults:
     """This function accepts any keyword arguments and passes them directly to the internal search function
     Unless you know exactly which terms to use we suggest using one of the search helper functions.
 
@@ -90,7 +90,7 @@ def search(**kwargs) -> SearchResults:
     cloud = running_in_cloud()
 
     if cloud:
-        post_data = {}
+        post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "search"
         post_data["data"] = kwargs
 
@@ -99,10 +99,10 @@ def search(**kwargs) -> SearchResults:
         content = result["content"]
 
         found = content["found"]
-        result = content["result"]
+        compressed_response = content["result"]
 
         if found:
-            data_str = decompress(result)
+            data_str = decompress(compressed_response)
             sr = SearchResults.from_json(data=data_str)
         else:
             sr = SearchResults()

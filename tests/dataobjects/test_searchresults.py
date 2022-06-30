@@ -306,7 +306,7 @@ def test_inlet_gets_data_with_ranking():
 
 
 def test_retrieve_empty_object():
-    empty = SearchResults(results={}, ranked_data=False, cloud=False)
+    empty = SearchResults(results={}, ranked_data=False)
 
     result = empty.retrieve(site="test", species="hawk", inlet="888m")
 
@@ -316,7 +316,7 @@ def test_retrieve_empty_object():
 
     assert result is None
 
-    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+    empty = SearchResults(results={}, ranked_data=True)
 
     result_ranked = empty.retrieve(site="test", species="hawk")
 
@@ -337,7 +337,7 @@ def test_retrieve_cloud_raises():
 
 
 def test_create_obsdata_no_data_raises():
-    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+    empty = SearchResults(results={}, ranked_data=True)
 
     with pytest.raises(ValueError):
         _ = empty._create_obsdata(site="rome", inlet="-85m", species="ptarmigan")

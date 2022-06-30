@@ -87,7 +87,7 @@ class SearchResults:
         return json.dumps(self.to_data())
 
     @classmethod
-    def from_json(cls: Type[T], data: str) -> T:
+    def from_json(cls: Type[T], data: Union[bytes, str]) -> T:
         """Create a SearchResults object from a dictionary
 
         Args:
