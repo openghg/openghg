@@ -115,8 +115,6 @@ class BaseStore:
         if bucket is None:
             bucket = get_bucket()
 
-        print(bucket)
-
         key = f"{cls._root}/uuid/{cls._uuid}"
         data = get_object_from_json(bucket=bucket, key=key)
 

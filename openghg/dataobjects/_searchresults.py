@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field
+# from dataclasses import dataclass, field
 from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
 
 from addict import Dict as aDict
+import json
 
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
@@ -11,12 +12,15 @@ from openghg.util import (
     find_daterange_gaps,
     first_last_dates,
     split_daterange_str,
+    running_in_cloud,
 )
+
 
 __all__ = ["SearchResults"]
 
+T = TypeVar("T", bound="SearchResults")
 
-@dataclass
+
 class SearchResults:
     """This class is used to return data from the search function. It
     has member functions to retrieve data from the object store.
@@ -27,12 +31,10 @@ class SearchResults:
         cloud: True if running in cloud
     """
 
-    T = TypeVar("T", bound="SearchResults")
-
-    results: Dict = field(default_factory=dict)
-    ranked_data: bool = False
-    # Local or cloud service to be used
-    cloud: bool = False
+    def __init__(self, results: Optional[Dict] = None, ranked_data: bool = False):
+        self.results = results if results is not None else {}
+        self.ranked_data = ranked_data
+        self.cloud = running_in_cloud()
 
     def __str__(self) -> str:
         if not self.results:
@@ -76,20 +78,26 @@ class SearchResults:
             "cloud": self.cloud,
         }
 
+    def to_json(self) -> str:
+        """Serialises the object to JSON
+
+        Returns:
+            str: JSON str
+        """
+        return json.dumps(self.to_data())
+
     @classmethod
-    def from_data(cls: Type[T], data: Dict) -> T:
+    def from_json(cls: Type[T], data: str) -> T:
         """Create a SearchResults object from a dictionary
 
         Args:
-            data: Dictionary created by SearchResults.to_data
+            data: Serialised object
         Returns:
             SearchResults: SearchResults object
         """
-        return cls(
-            results=data["results"],
-            ranked_data=data["ranked_data"],
-            cloud=data["cloud"],
-        )
+        loaded = json.loads(data)
+
+        return cls(results=loaded["results"], ranked_data=loaded["ranked_data"])
 
     def rankings(self) -> Dict:
         if not self.ranked_data:

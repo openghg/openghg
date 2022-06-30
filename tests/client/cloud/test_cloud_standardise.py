@@ -20,17 +20,6 @@ def test_standardise(set_envs, mocker, tmpdir, capfd):
         "network": "decc",
     }
 
-    # expected = {
-    #     "data": packed,
-    #     "metadata": metadata,
-    #     "file_metadata": {
-    #         "compressed": True,
-    #         "sha1_hash": "56ba5dd8ea2fd49024b91792e173c70e08a4ddd1",
-    #         "filename": "test_file.txt",
-    #     },
-    #     "function": "standardise",
-    # }
-
     expected = {
         "function": "standardise",
         "data": packed,

@@ -106,8 +106,6 @@ def recombine_datasets(
     dupes = unique[count > 1]
 
     if n_dupes > 5:
-        print(keys)
-        print("\n\n\n", dupes)
         raise ValueError("Large number of duplicate timestamps, check data overlap.")
 
     combined = combined.isel(time=index)
