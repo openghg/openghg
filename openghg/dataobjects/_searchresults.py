@@ -1,11 +1,15 @@
 # from dataclasses import dataclass, field
+
 from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
+from xarray import Dataset, open_dataset
+from io import BytesIO
 
 from addict import Dict as aDict
 import json
 
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
+from openghg.cloud import call_function
 from openghg.util import (
     clean_string,
     create_daterange_str,
@@ -295,27 +299,10 @@ class SearchResults:
         # If cloud use the Retrieve object
         if self.cloud:
             raise NotImplementedError
-            # from Acquire.Client import Wallet
-            # from xarray import open_dataset
-
-            # wallet = Wallet()
-            # self._service_url = "https://fn.openghg.org/t"
-            # self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
-
-            # key = f"{site}_{species}"
-            # keys_to_retrieve = {key: data_keys}
-
-            # args = {"keys": keys_to_retrieve}
-
-            # response: Dict = self._service.call_function(function="retrieve.retrieve", args=args)
-
-            # response_data = response["results"]
-
-            # data = open_dataset(response_data[key])
         else:
             if not self.ranked_data:
                 keys = data_keys["unranked"]
-                final_dataset = recombine_datasets(keys, sort=True)
+                final_dataset = self._retrieve_dataset(keys, sort=True)
             else:
                 dataset_slices = []
 
@@ -329,7 +316,7 @@ class SearchResults:
                 inlets = set()
 
                 for daterange, keys in ranked_keys.items():
-                    data_slice = recombine_datasets(keys=keys, sort=True, elevate_inlet=True)
+                    data_slice = self._retrieve_dataset(keys=keys, sort=True, elevate_inlet=True)
 
                     slice_start, slice_end = split_daterange_str(daterange_str=daterange, date_only=True)
 
@@ -340,9 +327,7 @@ class SearchResults:
                     ranked_slice = data_slice.sel(time=slice(str(slice_start), str(slice_end)))
 
                     if ranked_slice.time.size > 0:
-                        inlet = inlet_ranges[daterange]
-                        inlets.add(inlet)
-
+                        inlets.add(inlet_ranges[daterange])
                         ranked_slices.append(ranked_slice)
 
                     ranked_metadata = specific_source["rank_metadata"]
@@ -353,7 +338,7 @@ class SearchResults:
                 unranked_keys = data_keys["unranked"]
 
                 if unranked_keys:
-                    unranked_data = recombine_datasets(keys=unranked_keys, sort=True, elevate_inlet=True)
+                    unranked_data = self._retrieve_dataset(keys=unranked_keys, sort=True, elevate_inlet=True)
 
                     first_date, last_date = first_last_dates(keys=unranked_keys)
 
@@ -401,3 +386,34 @@ class SearchResults:
         metadata = specific_source["metadata"]
 
         return ObsData(data=final_dataset, metadata=metadata)
+
+    def _retrieve_dataset(
+        self, keys: List, sort: bool, elevate_inlet: bool = True, attrs_to_check: Optional[Dict] = None
+    ) -> Dataset:
+        """Retrieves datasets from either cloud or local object store
+
+        Args:
+            keys: List of object store keys
+            sort: Sort data on recombination
+            elevate_inlet: Elevate inlet from attribute to variable
+        Returns:
+            Dataset:
+        """
+        if self.cloud:
+            to_post: Dict[str, Union[Dict, List, bool, str]] = {}
+            to_post["keys"] = keys
+            to_post["sort"] = sort
+            to_post["elevate_inlet"] = elevate_inlet
+
+            if attrs_to_check is not None:
+                to_post["attrs_to_check"] = attrs_to_check
+
+            result = call_function(data=to_post)
+            binary_netcdf = result["content"]
+            buf = BytesIO(binary_netcdf)
+
+            return open_dataset(buf)
+        else:
+            return recombine_datasets(
+                keys=keys, sort=sort, elevate_inlet=elevate_inlet, attrs_to_check=attrs_to_check
+            )
