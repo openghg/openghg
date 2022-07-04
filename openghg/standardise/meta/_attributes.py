@@ -1,4 +1,4 @@
-from typing import cast, Any, Dict, Optional, List
+from typing import cast, Any, Dict, Optional, List, Union
 from xarray import Dataset
 
 
@@ -6,7 +6,7 @@ def assign_attributes(
     data: Dict,
     site: Optional[str] = None,
     network: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    sampling_period: Optional[Union[str, float, int]] = None,
 ) -> Dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
     are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
@@ -67,7 +67,7 @@ def get_attributes(
     global_attributes: Dict[str, str] = None,
     units: str = None,
     scale: str = None,
-    sampling_period: str = None,
+    sampling_period: Optional[Union[str, float, int]] = None,
     date_range: List[str] = None,
 ) -> Dataset:
     """
@@ -181,7 +181,7 @@ def get_attributes(
     if sampling_period is None:
         global_attributes["sampling_period"] = "NOT_SET"
     else:
-        global_attributes["sampling_period"] = sampling_period
+        global_attributes["sampling_period"] = str(sampling_period)
         global_attributes["sampling_period_unit"] = "s"
 
     # Update the Dataset attributes
@@ -294,7 +294,7 @@ def get_attributes(
     )
 
     if sampling_period is not None:
-        time_attributes["sampling_period_seconds"] = sampling_period
+        time_attributes["sampling_period_seconds"] = str(sampling_period)
 
     ds.time.attrs.update(time_attributes)
 

@@ -10,7 +10,7 @@ def parse_crds(
     network: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    sampling_period: Optional[Union[str, float, int]] = None,
     measurement_type: Optional[str] = None,
 ) -> Dict:
     """Parses a CRDS data file and creates a dictionary of xarray Datasets
@@ -22,7 +22,7 @@ def parse_crds(
         network: Network name
         inlet: Inlet height
         instrument: Instrument name
-        sampling_period: Sampling period e.g. 2 hour: 2H, 2 minute: 2m
+        sampling_period: Sampling period in seconds
         measurement_type: Measurement type e.g. insitu, flask
     Returns:
         dict: Dictionary of gas data
@@ -57,7 +57,7 @@ def _read_data(
     network: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    sampling_period: Optional[Union[str, float, int]] = None,
     measurement_type: Optional[str] = None,
 ) -> Dict:
     """Read the datafile passed in and extract the data we require.
@@ -68,7 +68,7 @@ def _read_data(
         network: Network name
         inlet: Inlet height
         instrument: Instrument name
-        sampling_period: Sampling period including the unit (using pandas frequency aliases like '1H' or '1min')
+        sampling_period: Sampling period in seconds
         measurement_type: Measurement type e.g. insitu, flask
     Returns:
         dict: Dictionary of gas data
@@ -133,8 +133,9 @@ def _read_data(
         metadata["network"] = network
 
     if sampling_period is not None:
+        sampling_period = float(sampling_period)
         # Compare against value extracted from the file name
-        file_sampling_period = Timedelta(seconds=metadata["sampling_period"])
+        file_sampling_period = Timedelta(seconds=float(metadata["sampling_period"]))
 
         comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
         tolerance_seconds = 1
