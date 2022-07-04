@@ -136,8 +136,9 @@ def _read_data(
         sampling_period = float(sampling_period)
         # Compare against value extracted from the file name
         file_sampling_period = Timedelta(seconds=float(metadata["sampling_period"]))
+        given_sampling_period = Timedelta(seconds=sampling_period)
 
-        comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
+        comparison_seconds = abs(given_sampling_period - file_sampling_period).total_seconds()
         tolerance_seconds = 1
 
         if comparison_seconds > tolerance_seconds:
