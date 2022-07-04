@@ -1,4 +1,6 @@
+import pandas as pd
 import numpy as np
+from pathlib import Path
 import pytest
 from helpers import get_datapath
 
@@ -341,3 +343,17 @@ def test_create_obsdata_no_data_raises():
 
     with pytest.raises(ValueError):
         _ = empty._create_obsdata(site="rome", inlet="-85m", species="ptarmigan")
+
+
+def test_search_result_retrieve_cloud(monkeypatch, mocker, tmpdir):
+    monkeypatch.setenv("OPENGHG_CLOUD", "1")
+
+    df = pd.DataFrame({"A": range(0, 64), "B": range(0, 64)}, columns=list("AB"))
+    ds = df.to_xarray()
+
+    p = Path(tmpdir).joinpath("test.nc")
+    ds.to_netcdf(p)
+
+    ds_bytes = Path(str(tmpdir)).joinpath()
+
+    mocker.patch("openghg.cloud.call_function")
