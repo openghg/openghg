@@ -329,15 +329,6 @@ def test_retrieve_empty_object():
     assert result_ranked is None
 
 
-def test_retrieve_cloud_raises():
-    results = search(site="bsd")
-
-    results.cloud = True
-
-    with pytest.raises(NotImplementedError):
-        _ = results.retrieve_all()
-
-
 def test_create_obsdata_no_data_raises():
     empty = SearchResults(results={}, ranked_data=True)
 
@@ -354,6 +345,21 @@ def test_search_result_retrieve_cloud(monkeypatch, mocker, tmpdir):
     p = Path(tmpdir).joinpath("test.nc")
     ds.to_netcdf(p)
 
-    ds_bytes = Path(str(tmpdir)).joinpath()
+    ds_bytes = Path(str(tmpdir)).joinpath("test.nc").read_bytes()
 
-    mocker.patch("openghg.cloud.call_function")
+    function_reply = {}
+    function_reply["content"] = {"data": ds_bytes}
+    function_reply["status"] = 200
+
+    mocker.patch("openghg.cloud.call_function", return_value=function_reply)
+
+    s = SearchResults(
+        results={
+            "site": {"species": {"inlet": {"keys": {"unranked": "other"}, "metadata": {"some": "metadata"}}}}
+        },
+        ranked_data=False,
+    )
+
+    retrieved = s.retrieve_all()
+
+    assert retrieved.data.equals(ds)
