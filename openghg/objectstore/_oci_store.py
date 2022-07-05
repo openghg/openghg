@@ -420,11 +420,13 @@ def get_object(bucket: str, key: str) -> bytes:
     namespace = _get_namespace()
 
     try:
-        data = object_storage.get_object(namespace_name=namespace, bucket_name=bucket, object_name=key)
+        response = object_storage.get_object(namespace_name=namespace, bucket_name=bucket, object_name=key)
     except Exception:
         raise ObjectStoreError(f"Unable to get object at {key} in bucket {bucket}")
 
-    return data
+    binary_data = response.data.content
+
+    return binary_data
 
 
 def get_object_from_json(bucket: str, key: str) -> Dict[str, Union[str, Dict]]:
