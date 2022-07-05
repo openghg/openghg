@@ -3,7 +3,14 @@ from pathlib import Path
 
 
 def standardise_surface(
-    filepaths: Union[str, Path, List[Union[str, Path]]], metadata: Dict
+    filepaths: Union[str, Path, List[Union[str, Path]]],
+    data_type: str,
+    site: str,
+    network: str,
+    inlet: Optional[str] = None,
+    instrument: Optional[str] = None,
+    sampling_period: Optional[str] = None,
+    overwrite: bool = False,
 ) -> Optional[Dict]:
     """Standardise data
 
@@ -15,13 +22,9 @@ def standardise_surface(
     Returns:
         dict: Details confirmation of process
     """
-    import gzip
     from openghg.cloud import call_function
-    from openghg.util import hash_bytes
+    from openghg.util import hash_bytes, compress, running_in_cloud
 
-    # pass
-    # If under specific size just post to standardisation function
-    # else get PAR and upload and then get it to standardise that data?
     if not isinstance(filepaths, list):
         filepaths = [filepaths]
 
@@ -29,26 +32,57 @@ def standardise_surface(
     MB = 1e6
     # The largest file we'll just directly POST to the standardisation
     # function will be this big (megabytes)
-    post_limit = 20
+    post_limit = 40
+    in_mem_limit = 300
 
-    required_keys = {"data_type", "network", "site", "instrument"}
+    cloud = running_in_cloud()
 
-    if not required_keys <= metadata.keys():
-        print(f"Error: we require the following metadata at a minimum: {required_keys}")
-        return None
+    if cloud:
+        metadata = {}
+        metadata["site"] = site
+        metadata["data_type"] = data_type
+        metadata["network"] = network
 
-    responses = {}
-    for fpath in filepaths:
-        filepath = Path(fpath)
-        # Get the file size in megabytes
-        file_size = filepath.stat().st_size / MB
+        if inlet is not None:
+            metadata["inlet"] = inlet
+        if instrument is not None:
+            metadata["instrument"] = instrument
+        if sampling_period is not None:
+            metadata["sampling_period"] = sampling_period
 
-        if file_size < post_limit:
+        responses = {}
+        for fpath in filepaths:
+            gcwerks = False
+            if data_type.lower() in ("GC", "GCWERKS"):
+                data_type = "gcwerks"
+                if not isinstance(fpath, tuple):
+                    raise TypeError("We require both data and precision files for GCWERKS data.")
+                gcwerks = True
+
+            if gcwerks:
+                filepath = Path(fpath[0])
+            else:
+                filepath = Path(fpath)
+
+            # Get the file size in megabytes
+            file_size = filepath.stat().st_size / MB
+
+            if file_size > in_mem_limit:
+                raise NotImplementedError("We can't handle this size of file yet.")
+
+            # Let's compress the file and then measure it
             # Read the file, compress it and send the data
             file_data = filepath.read_bytes()
+            compressed_data = compress(data=file_data)
+
+            compressed_size = len(compressed_data) / MB
+
+            if compressed_size > post_limit:
+                raise NotImplementedError("Compressed size over 40 MB, not currently supported.")
+
             # Here we want the hash of the uncompressed data
             sha1_hash = hash_bytes(data=file_data)
-            compressed_data = gzip.compress(data=file_data)
+
             filename = filepath.name
 
             file_metadata = {
@@ -64,9 +98,22 @@ def standardise_surface(
                 "metadata": metadata,
                 "file_metadata": file_metadata,
             }
-        else:
+
+            if gcwerks:
+                precision_filepath = Path(fpath[1])
+                precision_data = precision_filepath.read_bytes()
+                compressed_prec = compress(precision_data)
+
+                to_post["precision_data"] = compressed_prec
+                to_post["precision_file_metadata"] = {
+                    "compressed": True,
+                    "filename": precision_filepath.name,
+                    "sha1_hash": hash_bytes(precision_data),
+                }
+
+            # else:
             # If we want chunked uploading what do we do?
-            raise NotImplementedError
+            # raise NotImplementedError
             # tmp_dir = tempfile.TemporaryDirectory()
             # compressed_filepath = Path(tmp_dir.name).joinpath(f"{filepath.name}.tar.gz")
             # # Compress in place and then upload
@@ -74,9 +121,24 @@ def standardise_surface(
             #     tar.add(filepath)
             # compressed_data = compressed_filepath.read_bytes()
 
-        responses[filename] = call_function(data=to_post)
+            responses[filename] = call_function(data=to_post)
 
-    return responses
+        return responses
+    else:
+        from openghg.store import ObsSurface
+
+        results = ObsSurface.read_file(
+            filepath=filepaths,
+            data_type=data_type,
+            site=site,
+            network=network,
+            instrument=instrument,
+            sampling_period=sampling_period,
+            inlet=inlet,
+            overwrite=overwrite,
+        )
+
+        return results
 
 
 # def upload(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:

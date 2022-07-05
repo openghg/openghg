@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any, Dict, List, Union, Optional, Callable
+import gzip
 
 # import urllib.request
 # from tqdm import tqdm
@@ -119,3 +120,25 @@ def read_header(filepath: Union[str, Path], comment_char: str = "#") -> List:
                 break
 
     return header
+
+
+def compress(data: bytes) -> bytes:
+    """Compress the given data
+
+    Args:
+        data: Binary data
+    Returns:
+        bytes: Compressed data
+    """
+    return gzip.compress(data=data)
+
+
+def decompress(data: bytes) -> bytes:
+    """Decompress the given data
+
+    Args:
+        data: Compressed data
+    Returns:
+        bytes: Decompressed data
+    """
+    return gzip.decompress(data=data)

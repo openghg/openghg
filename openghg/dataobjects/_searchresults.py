@@ -400,6 +400,7 @@ class SearchResults:
             to_post["keys"] = keys
             to_post["sort"] = sort
             to_post["elevate_inlet"] = elevate_inlet
+            to_post["function"] = "retrieve"
 
             if attrs_to_check is not None:
                 to_post["attrs_to_check"] = attrs_to_check

@@ -15,7 +15,9 @@ class ObsSurface(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
-    def read_binary(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Dict:
+    def read_binary(
+        binary_data: bytes, metadata: Dict, file_metadata: Dict, precision_data: Optional[bytes] = None
+    ) -> Dict:
         """Reads binary data passed in by serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
@@ -24,7 +26,10 @@ class ObsSurface(BaseStore):
         be tidied up quite a lot to be more flexible.
 
         Args:
-            data
+            binary_data: Binary measurement data
+            metadata: Metadata
+            file_metadata: File metadata such as original filename
+            precision_data: GCWERKS precision data
         Returns:
             dict: Dictionary of result
         """
@@ -44,6 +49,7 @@ class ObsSurface(BaseStore):
         # We've got a lot of functions that expect a file and read
         # metadata from its filename. As Acquire handled all of this behind the scenes
         # we'll create a temporary directory for now
+        # TODO - add in just passing a filename to prevent all this read / write
         with TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
 
@@ -54,6 +60,14 @@ class ObsSurface(BaseStore):
 
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
+
+            if precision_data is not None:
+                # We'll assume that if we have precision data it's GCWERKS
+                # We don't read anything from the precision filepath so it's name doesn't matter
+                precision_filepath = tmpdir_path.joinpath("precision_data.C")
+                precision_filepath.write_bytes(precision_data)
+                # Create the expected GCWERKS tuple
+                filepath = (filepath, precision_filepath)
 
             meta_kwargs = {k: v for k, v in metadata.items() if k in possible_kwargs}
 
