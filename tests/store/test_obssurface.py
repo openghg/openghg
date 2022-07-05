@@ -24,13 +24,9 @@ def test_read_binary(mocker):
         "network": "DECC",
     }
 
-    datas = {
-        "data": binary_bsd,
-        "metadata": metadata,
-        "file_metadata": {"filename": "bsd.picarro.1minute.248m.min.dat"},
-    }
+    file_metadata = {"filename": "bsd.picarro.1minute.248m.min.dat"}
 
-    result = ObsSurface.read_binary(data=datas)
+    result = ObsSurface.read_binary(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
     expected = {
         "processed": {
@@ -43,6 +39,13 @@ def test_read_binary(mocker):
     }
 
     assert result == expected
+
+    with pytest.raises(ValueError):
+        metadata = {}
+        _ = ObsSurface.read_binary(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+
+        file_metadata = {}
+        _ = ObsSurface.read_binary(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
 
 def test_read_CRDS():

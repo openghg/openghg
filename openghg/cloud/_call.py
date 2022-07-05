@@ -12,8 +12,7 @@ def call_function(data: Union[Dict, bytes]) -> Dict:
     """Calls an OpenGHG serverless function and returns its response
 
     Args:
-        fn_name: Function name, for list of function names see the documentation
-        NOTE: * ADD DOCS *
+        data: Data to POST. Must be a dictionary containing the function name and ...
     Returns:
         dict: Dictionary containing response result
     """

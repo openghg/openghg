@@ -15,7 +15,7 @@ class ObsSurface(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
-    def read_binary(data: Dict) -> Dict:
+    def read_binary(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Dict:
         """Reads binary data passed in by serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
@@ -46,16 +46,19 @@ class ObsSurface(BaseStore):
         # we'll create a temporary directory for now
         with TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
-            # Here we could maybe chunk this out
-            binary_data = data["data"]
-            metadata = data["metadata"]
-            file_metadata = data["file_metadata"]
-            filename = file_metadata["filename"]
+
+            try:
+                filename = file_metadata["filename"]
+            except KeyError:
+                raise KeyError("We require a filename key for metadata read.")
 
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
             meta_kwargs = {k: v for k, v in metadata.items() if k in possible_kwargs}
+
+            if not meta_kwargs:
+                raise ValueError("No valid metadata arguments passed, please check documentation.")
 
             result = ObsSurface.read_file(filepath=filepath, **meta_kwargs)
 
