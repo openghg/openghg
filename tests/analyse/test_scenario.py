@@ -1099,9 +1099,9 @@ def obs_short_life_dummy(obs_ch4_dummy):
     Create example ObsData object with dummy data
      - Values match to obs_ch4_dummy
      - Species is HFO-1234zee
-    Same values as obs_ch4_dummy fixture but updated species to be "HFO-1234zee"
+    Same values as obs_ch4_dummy fixture but updated species to be "HFO1234zee"
     """
-    species = "HFO-1234zee"
+    species = "HFO1234zee"
     return replace_species(obs_ch4_dummy, species)
 
 
@@ -1110,10 +1110,10 @@ def footprint_short_life_dummy(footprint_radon_dummy):
     """
     Create example FootprintData object with dummy data
      - Values match to footprint_radon_dummy
-     - Species is HFO-1234zee
-    Same values as footprint_radon_dummy fixture but updated species to be "HFO-1234zee"
+     - Species is HFO1234zee
+    Same values as footprint_radon_dummy fixture but updated species to be "HFO1234zee"
     """
-    species = "HFO-1234zee"
+    species = "HFO1234zee"
     return replace_species(footprint_radon_dummy, species)
 
 
@@ -1122,11 +1122,11 @@ def bc_short_life_dummy(bc_ch4_dummy):
     """
     Create example BoundaryConditionsData object with dummy data
      - Values match to bc_ch4_dummy
-     - Species is HFO-1234zee
+     - Species is HFO1234zee
     Same values as bc_ch4_dummy fixture but updated species to be "HFO-1234zee"
 
     """
-    species = "HFO-1234zee"
+    species = "HFO1234zee"
     return replace_species(bc_ch4_dummy, species)
 
 

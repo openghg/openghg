@@ -1,8 +1,11 @@
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Sequence, Union
+from typing import DefaultDict, Dict, Optional, Sequence, Union, Tuple
+from xarray import Dataset
+import numpy as np
 
+from openghg.store import DataSchema
 
 __all__ = ["ObsSurface"]
 
@@ -45,7 +48,6 @@ class ObsSurface(BaseStore):
             dict: Dictionary of Datasource UUIDs
         """
         from collections import defaultdict
-        from pathlib import Path
         from pandas import Timedelta
         import sys
         from tqdm import tqdm
@@ -126,6 +128,39 @@ class ObsSurface(BaseStore):
                         sampling_period=sampling_period_seconds,
                         measurement_type=measurement_type,
                     )
+
+                # Current workflow: if any species fails, whole filepath fails
+                for key, value in data.items():
+                    species = key.split('_')[0]
+                    try:
+                        ObsSurface.validate_data(value["data"], species=species)
+                    except ValueError:
+                        print(f"ERROR: Unable to validate and store data from file: {data_filepath.name}.",
+                              f" Problem with species: {species}\n")
+                        validated = False
+                        break
+                else:
+                    validated = True
+
+                if not validated:
+                    continue
+
+                # Alternative workflow: Would only stops certain species within a
+                # file being written to the object store.
+                # to_remove = []
+                # for key, value in data.items():
+                #     species = key.split('_')[0]
+                #     try:
+                #         ObsSurface.validate_data(value["data"], species=species)
+                #     except ValueError:
+                #         print(f"WARNING: standardised data for '{data_type}' is not in expected OpenGHG format.")
+                #         print(f"Check data for {species}")
+                #         print(value["data"])
+                #         print("Not writing to object store.")
+                #         to_remove.append(key)
+                #
+                # for remove in to_remove:
+                #     data.pop(remove)
 
                 required_keys = (
                     "species",
@@ -256,6 +291,55 @@ class ObsSurface(BaseStore):
         metastore.close()
 
         return results
+
+    @staticmethod
+    def schema(species: str) -> DataSchema:
+        """
+        Define schema for surface observations Dataset.
+
+        Only includes mandatory variables
+            - standardised species name (e.g. "ch4")
+            - expected dimensions: ("time")
+
+        Expected data types for variables and coordinates also included.
+
+        Returns:
+            DataSchema : Contains basic schema for ObsSurface.
+
+        # TODO: Decide how to best incorporate optional variables
+        # e.g. "ch4_variability", "ch4_number_of_observations"
+        """
+        from openghg.standardise.meta import define_species_label
+
+        name = define_species_label(species)[0]
+
+        data_vars: Dict[str, Tuple[str, ...]] = {name: ("time",)}
+        dtypes = {name: np.floating,
+                 "time": np.datetime64}
+
+        data_format = DataSchema(data_vars=data_vars,
+                                 dtypes=dtypes)
+
+        return data_format
+
+    @staticmethod
+    def validate_data(data: Dataset, species: str) -> None:
+        """
+        Validate input data against ObsSurface schema - definition from
+        ObsSurface.schema() method.
+
+        Args:
+            data : xarray Dataset in expected format
+            species: Species name
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the ObsSurface schema.
+        """
+        data_schema = ObsSurface.schema(species)
+        data_schema.validate_data(data)
 
     @staticmethod
     def store_data(
