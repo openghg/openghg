@@ -156,8 +156,10 @@ class ObsSurface(BaseStore):
                     try:
                         data_filepath = Path(fp[0])
                         precision_filepath = Path(fp[1])
-                    except ValueError:
-                        raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
+                    except (ValueError, TypeError):
+                        raise TypeError(
+                            "For GCWERKS data both data and precision filepaths must be given as a tuple."
+                        )
                 else:
                     data_filepath = Path(fp)
 
