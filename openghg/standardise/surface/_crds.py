@@ -140,13 +140,11 @@ def _read_data(
         metadata["network"] = network
 
     if sampling_period is not None:
-        print(sampling_period, "\n\n\n")
         sampling_period = float(sampling_period)
         # Compare against value extracted from the file name
         file_sampling_period = Timedelta(seconds=float(metadata["sampling_period"]))
         given_sampling_period = Timedelta(seconds=sampling_period)
 
-        print(sampling_period)
         comparison_seconds = abs(given_sampling_period - file_sampling_period).total_seconds()
         tolerance_seconds = 1
 

@@ -411,7 +411,7 @@ def test_delete_Datasource():
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
     ObsSurface.read_file(
-        filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60
+        filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period="1m"
     )
 
     obs = ObsSurface.load()

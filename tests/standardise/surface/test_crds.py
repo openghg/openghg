@@ -20,11 +20,14 @@ def crds_data():
     return gas_data
 
 
-def test_file_with_dupes_raises():
+def test_file_with_dupes_doesnt_raise():
     dupe_file = get_datapath(filename="bsd.picarro.1minute.42m.dupes.dat", data_type="CRDS")
 
     with pytest.raises(ValueError):
-        parse_crds(data_filepath=dupe_file, site="bsd", inlet="42m", network="DECC")
+        parse_crds(data_filepath=dupe_file, site="bsd", inlet="42m", network="DECC", drop_duplicates=False)
+
+    parse_crds(data_filepath=dupe_file, site="bsd", inlet="42m", network="DECC", drop_duplicates=True)
+
 
 
 def test_read_file_wrong_sampling_period_raises():
