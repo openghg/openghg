@@ -135,7 +135,7 @@ class ObsSurface(BaseStore):
                     try:
                         ObsSurface.validate_data(value["data"], species=species)
                     except ValueError:
-                        print(f"ERROR: Unable to validate and store data from file: {data_filepath.name}." \
+                        print(f"ERROR: Unable to validate and store data from file: {data_filepath.name}.",
                               f" Problem with species: {species}\n")
                         validated = False
                         break
