@@ -1,4 +1,4 @@
-from typing import cast, Any, Dict, Optional, List, Tuple
+from typing import cast, Any, Dict, Optional, List, Tuple, Hashable
 from xarray import Dataset
 
 
@@ -431,12 +431,14 @@ def assign_flux_attributes(data: Dict,
                 except KeyError:
                     raise ValueError(f"Attribute {attr} must be specified.")
 
+        input_attributes = cast(Dict[str, str], attribute_values)
+
         flux_dict["data"] = get_flux_attributes(
             ds=flux_dict["data"],
             units=units,
             prior_info_dict=prior_info_dict,
             global_attributes=flux_attributes,
-            **attribute_values
+            **input_attributes
         )
 
     return data  
@@ -448,7 +450,7 @@ def get_flux_attributes(ds: Dataset,
                         domain: str,
                         units: str = "mol/m2/s",
                         prior_info_dict: Optional[dict] = None,
-                        global_attributes: Optional[dict] = None) -> Dataset:
+                        global_attributes: Optional[Dict[Hashable, Any]] = None) -> Dataset:
     """
     Assign additional attributes for the flux dataset.
 
@@ -502,7 +504,7 @@ def get_flux_attributes(ds: Dataset,
     ds["lon"].attrs = lon_attrs
 
     # Define default values for global attributes
-    global_attributes_default = {
+    global_attributes_default: Dict[Hashable, Any] = {
             "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
             "Conventions": "CF-1.8"}
 

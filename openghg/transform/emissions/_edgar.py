@@ -7,7 +7,7 @@ from xarray import DataArray, Dataset
 from pathlib import Path
 import zipfile
 from zipfile import ZipFile
-from typing import DefaultDict, Dict, Tuple, Optional, Union, cast
+from typing import Dict, Tuple, Optional, Union, cast
 
 
 ArrayType = Optional[Union[ndarray, DataArray]]
@@ -138,7 +138,7 @@ def parse_edgar(datapath: Path,
                          " Please specify")
 
     if species_from_file is not None and species_label != synonyms(species_from_file):
-        print("WARNING: Input species does not match species extracted from"/
+        print("WARNING: Input species does not match species extracted from",
               " database filenames. Please check.")
 
     # If version not yet found, extract version from file naming scheme

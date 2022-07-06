@@ -36,7 +36,7 @@ def download_data(
     from tqdm.auto import tqdm  # type: ignore
     from urllib.parse import urlparse
     from requests.adapters import HTTPAdapter
-    from urllib3.util.retry import Retry
+    from urllib3.util.retry import Retry  # type: ignore
 
     retriable_status_codes = [
         requests.codes.internal_server_error,

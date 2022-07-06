@@ -62,7 +62,7 @@ def _get_coord_data(coord: str, data: dict, domain: str) -> ndarray:
     filename_str = f"{coord}_file"
     if filename_str in data:
         full_filename = get_datapath(data[filename_str])
-        coord_data = np.loadtxt(full_filename)
+        coord_data: ndarray = np.loadtxt(full_filename)
         return coord_data
 
     # If no explicit file name defined, look within known location to see
