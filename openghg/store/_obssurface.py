@@ -129,24 +129,38 @@ class ObsSurface(BaseStore):
                         measurement_type=measurement_type,
                     )
 
-                # Check against expected format for ObsSurface object
-                # TODO: At the moment this only stops certain species being
-                # written to the object store but may want to stop all species
-                # from files being written.
-                to_remove = []
+                # Current workflow: if any species fails, whole filepath fails
                 for key, value in data.items():
                     species = key.split('_')[0]
                     try:
                         ObsSurface.validate_data(value["data"], species=species)
                     except ValueError:
-                        print(f"WARNING: standardised data for '{data_type}' is not in expected OpenGHG format.")
-                        print(f"Check data for {species}")
-                        print(value["data"])
-                        print("Not writing to object store.")
-                        to_remove.append(key)
+                        print(f"ERROR: Unable to validate and store data from file: {data_filepath.name}." \
+                              f" Problem with species: {species}\n")
+                        validated = False
+                        break
+                else:
+                    validated = True
 
-                for remove in to_remove:
-                    data.pop(remove)
+                if not validated:
+                    continue
+
+                # Alternative workflow: Would only stops certain species within a
+                # file being written to the object store.
+                # to_remove = []
+                # for key, value in data.items():
+                #     species = key.split('_')[0]
+                #     try:
+                #         ObsSurface.validate_data(value["data"], species=species)
+                #     except ValueError:
+                #         print(f"WARNING: standardised data for '{data_type}' is not in expected OpenGHG format.")
+                #         print(f"Check data for {species}")
+                #         print(value["data"])
+                #         print("Not writing to object store.")
+                #         to_remove.append(key)
+                #
+                # for remove in to_remove:
+                #     data.pop(remove)
 
                 required_keys = (
                     "species",
