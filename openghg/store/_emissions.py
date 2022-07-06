@@ -153,10 +153,7 @@ class Emissions(BaseStore):
         """
         from openghg.store import assign_data, load_metastore, datasource_lookup
         from openghg.types import EmissionsDatabases
-        from openghg.util import (
-            hash_file,
-            load_emissions_database_parser,
-        )
+        from openghg.util import load_emissions_database_parser
 
         datapath = Path(datapath)
 
@@ -172,8 +169,6 @@ class Emissions(BaseStore):
 
         # Load in the metadata store
         metastore = load_metastore(key=em_store._metakey)
-
-        file_hash = hash_file(filepath=datapath)
 
         # Find all parameters that can be accepted by parse function
         all_param = parser_fn.__code__.co_varnames[:parser_fn.__code__.co_argcount]
@@ -202,9 +197,6 @@ class Emissions(BaseStore):
         )
 
         em_store.add_datasources(uuids=datasource_uuids, data=emissions_data, metastore=metastore)
-
-        # Record the file hash
-        em_store._file_hashes[file_hash] = datapath.name
 
         em_store.save()
         metastore.close()

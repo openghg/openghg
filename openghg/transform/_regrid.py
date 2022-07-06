@@ -6,7 +6,7 @@ from numpy import ndarray
 import xarray as xr
 from xarray import DataArray, Dataset
 from typing import Union, Optional, Tuple, cast
-
+from pathlib import Path
 
 xesmf_error_message = \
     "Unable to import xesmf for use with regridding algorithms" \
@@ -51,6 +51,38 @@ def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -> Dataset:
                        'lat_b': (['x_b', 'y_b'], LAT_b)})
 
     return grid
+
+
+def tidy_weight_files(method: str, path: Union[str, Path, None] = None) -> None:
+    """
+    Weight files will get created during the regridding. These are not tidied
+    up by the xesmf module as they may be reused. This function removes any
+    remaining files after the process has finished.
+
+    Files of the format:
+        "method"_nxm_oxp.nc e.g. "conservative_2x4_10x15.nc"
+
+    Args:
+        method : Name of method used for regridding.
+        path : Path to weight files created. By default this will be set to the
+            path of the openghg module
+
+    Returns:
+        None
+
+        Removes (unlinks) all matching files found.
+    """
+    import openghg
+
+    if path is None:
+        package_path = Path(openghg.__path__[0])
+        path = package_path.parent
+    
+    path = Path(path)
+    weight_files = path.glob(f"{method}_*x*_*x*.nc")
+
+    for file in weight_files:
+        file.unlink()
 
 
 def convert_to_ndarray(array: Union[ndarray, DataArray]) -> ndarray:
@@ -178,7 +210,7 @@ def regrid_uniform_cc(data: Union[ndarray, DataArray],
         # regridded = regridded.assign_coords(**{"x":output_lat,"y":output_lon})
         # regridded = regridded.rename({"x":"lat","y":"lon"})
 
-    # TODO: Add tidy up steps for created weight files.
+    tidy_weight_files(method=method)
 
     return regridded
 
