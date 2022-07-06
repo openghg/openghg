@@ -1,7 +1,7 @@
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Sequence, Union
+from typing import DefaultDict, Dict, Optional, Sequence, Union, Tuple
 
 
 __all__ = ["ObsSurface"]
@@ -132,12 +132,17 @@ class ObsSurface(BaseStore):
         network = clean_string(network)
         inlet = clean_string(inlet)
         instrument = clean_string(instrument)
-        sampling_period = clean_string(sampling_period)
+        # sampling_period = clean_string(sampling_period)
 
         sampling_period_seconds: Union[str, None] = None
         # If we have a sampling period passed we want the number of seconds
         if sampling_period is not None:
             sampling_period_seconds = str(float(Timedelta(sampling_period).total_seconds()))
+
+            if sampling_period_seconds == "0.0":
+                raise ValueError("Invalid sampling period result, please pass a valid pandas time such as 1m for 1 minute.")
+
+        print(sampling_period, sampling_period_seconds)
 
         # Load the data retrieve object
         parser_fn = load_surface_parser(data_type=data_type)

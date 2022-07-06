@@ -48,6 +48,23 @@ def test_read_binary(mocker):
         _ = ObsSurface.read_binary(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
 
+def test_read_CRDS_incorrent_sampling_period_raises():
+    get_bucket(empty=True)
+
+    filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+
+    with pytest.raises(ValueError):
+        ObsSurface.read_file(
+            filepath=filepath, data_type="CRDS", site="bsd", network="DECC", sampling_period="60"
+        )
+        ObsSurface.read_file(
+            filepath=filepath, data_type="CRDS", site="bsd", network="DECC", sampling_period=60
+        )
+        ObsSurface.read_file(
+            filepath=filepath, data_type="CRDS", site="bsd", network="DECC", sampling_period="twelve-thousand"
+        )
+
+
 def test_read_CRDS():
     get_bucket(empty=True)
 

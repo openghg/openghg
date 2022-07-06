@@ -12,6 +12,7 @@ def parse_crds(
     instrument: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
     measurement_type: Optional[str] = None,
+    drop_duplicates: bool = True,
 ) -> Dict:
     """Parses a CRDS data file and creates a dictionary of xarray Datasets
     ready for storage in the object store.
@@ -24,6 +25,7 @@ def parse_crds(
         instrument: Instrument name
         sampling_period: Sampling period in seconds
         measurement_type: Measurement type e.g. insitu, flask
+        drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
     Returns:
         dict: Dictionary of gas data
     """
@@ -43,6 +45,7 @@ def parse_crds(
         instrument=instrument,
         sampling_period=sampling_period,
         measurement_type=measurement_type,
+        drop_duplicates=drop_duplicates,
     )
 
     # Ensure the data is CF compliant
@@ -59,6 +62,7 @@ def _read_data(
     instrument: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
     measurement_type: Optional[str] = None,
+    drop_duplicates: bool = True,
 ) -> Dict:
     """Read the datafile passed in and extract the data we require.
 
@@ -70,6 +74,7 @@ def _read_data(
         instrument: Instrument name
         sampling_period: Sampling period in seconds
         measurement_type: Measurement type e.g. insitu, flask
+        drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
     Returns:
         dict: Dictionary of gas data
     """
@@ -118,8 +123,10 @@ def _read_data(
 
     dupes = find_duplicate_timestamps(data=data)
 
-    if dupes:
+    if dupes and not drop_duplicates:
         raise ValueError(f"Duplicate dates detected: {dupes}")
+
+    data = data.loc[~data.index.duplicated(keep="first")]
 
     # Get the number of gases in dataframe and number of columns of data present for each gas
     n_gases, n_cols = _gas_info(data=data)
@@ -133,11 +140,13 @@ def _read_data(
         metadata["network"] = network
 
     if sampling_period is not None:
+        print(sampling_period, "\n\n\n")
         sampling_period = float(sampling_period)
         # Compare against value extracted from the file name
         file_sampling_period = Timedelta(seconds=float(metadata["sampling_period"]))
         given_sampling_period = Timedelta(seconds=sampling_period)
 
+        print(sampling_period)
         comparison_seconds = abs(given_sampling_period - file_sampling_period).total_seconds()
         tolerance_seconds = 1
 
