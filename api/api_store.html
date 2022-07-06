@@ -6,13 +6,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>store API detail &#8212; OpenGHG 0+untagged.1.g480ecb7.dirty documentation</title>
-    
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <title>store API detail &#8212; OpenGHG 0+untagged.1.g995f9a6.dirty documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
 
-    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
   <link rel="stylesheet"
     href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
   <link rel="preload" as="font" type="font/woff2" crossorigin
@@ -24,13 +28,14 @@
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
-    
+
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -40,32 +45,40 @@
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en">
-    
-
-    <!-- Google Analytics -->
-    
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
-    
-    <div class="container-fluid" id="banner"></div>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
 
     
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
 
   <div id="navbar-start">
     
     
-<a class="navbar-brand" href="../index.html">
-<p class="title">OpenGHG</p>
-</a>
+  
 
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">OpenGHG 0+untagged.1.g995f9a6.dirty documentation</p>
+  
+</a>
     
   </div>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <span class="fas fa-bars"></span>
   </button>
 
   
@@ -125,6 +138,14 @@
     <div id="navbar-end">
       
       <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
       </ul>
       </div>
@@ -135,13 +156,13 @@
     </nav>
     
 
-    <div class="container-xl">
-      <div class="row">
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
           
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
   <i class="icon fas fa-search"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
@@ -149,19 +170,20 @@
     
   </div>
 </nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
-          
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
 
           
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-              
-              <div class="toc-item">
-                
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
 <div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
@@ -206,28 +228,26 @@
 </ul>
 
 </nav>
-              </div>
-              
-              <div class="toc-item">
-                
-              </div>
-              
-            
-          </div>
-          
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
 
           
           
-            
-          
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+          <div class="bd-content col-12 col-md-9 col-xl-7">
               
-              <div>
+              <article class="bd-article" role="main">
                 
   <section id="store-api-detail">
-<h1>store API detail<a class="headerlink" href="#store-api-detail" title="Permalink to this headline">#</a></h1>
+<h1>store API detail<a class="headerlink" href="#store-api-detail" title="Permalink to this heading">#</a></h1>
 <section id="openghg-store-emissions">
-<h2>openghg.store.Emissions<a class="headerlink" href="#openghg-store-emissions" title="Permalink to this headline">#</a></h2>
+<h2>openghg.store.Emissions<a class="headerlink" href="#openghg-store-emissions" title="Permalink to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Emissions</span></code> class is used to process emissions / flux data files.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.Emissions">
@@ -367,7 +387,7 @@ to the Emissions schema.</p>
 </div>
 </section>
 <section id="openghg-store-eulerianmodel">
-<h2>openghg.store.EulerianModel<a class="headerlink" href="#openghg-store-eulerianmodel" title="Permalink to this headline">#</a></h2>
+<h2>openghg.store.EulerianModel<a class="headerlink" href="#openghg-store-eulerianmodel" title="Permalink to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">EulerianModel</span></code> class is used to process Eulerian model data.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.EulerianModel">
@@ -401,7 +421,7 @@ to the Emissions schema.</p>
 </div>
 </section>
 <section id="openghg-store-footprints">
-<h2>openghg.store.Footprints<a class="headerlink" href="#openghg-store-footprints" title="Permalink to this headline">#</a></h2>
+<h2>openghg.store.Footprints<a class="headerlink" href="#openghg-store-footprints" title="Permalink to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Footprints</span></code> class is used to store and retrieve meteorological data from the ECMWF data store.
 Some data may be cached locally for quicker access.</p>
 <dl class="py class">
@@ -528,7 +548,7 @@ to the Footprints schema.</p>
 </div>
 </section>
 <section id="openghg-store-metstore">
-<h2>openghg.store.METStore<a class="headerlink" href="#openghg-store-metstore" title="Permalink to this headline">#</a></h2>
+<h2>openghg.store.METStore<a class="headerlink" href="#openghg-store-metstore" title="Permalink to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">METStore</span></code> class is used to find and retrieve meteorological data from the ECMWF data store.
 Some data may be cached locally for quicker access.</p>
 <dl class="py class">
@@ -624,7 +644,7 @@ remote store if we don’t have it locally</p>
 </div>
 </section>
 <section id="openghg-store-obssurface">
-<h2>openghg.store.ObsSurface<a class="headerlink" href="#openghg-store-obssurface" title="Permalink to this headline">#</a></h2>
+<h2>openghg.store.ObsSurface<a class="headerlink" href="#openghg-store-obssurface" title="Permalink to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class is used to process surface observation data.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.ObsSurface">
@@ -799,7 +819,7 @@ to the ObsSurface schema.</p>
 </div>
 </section>
 <section id="recombination-functions">
-<h2>Recombination functions<a class="headerlink" href="#recombination-functions" title="Permalink to this headline">#</a></h2>
+<h2>Recombination functions<a class="headerlink" href="#recombination-functions" title="Permalink to this heading">#</a></h2>
 <p>These handle the recombination of data retrieved from the object store.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.store.recombine_datasets">
@@ -849,7 +869,7 @@ If a list/string is passed, the attribute(s) will be removed.</p></li>
 
 </section>
 <section id="segmentation-functions">
-<h2>Segmentation functions<a class="headerlink" href="#segmentation-functions" title="Permalink to this headline">#</a></h2>
+<h2>Segmentation functions<a class="headerlink" href="#segmentation-functions" title="Permalink to this heading">#</a></h2>
 <p>These handle the segmentation of data ready for storage in the object store.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.store.assign_data">
@@ -877,37 +897,41 @@ overwrite: If True overwrite current data stored</p>
 </section>
 
 
-              </div>
+              </article>
               
+
               
-              <!-- Previous / next buttons -->
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
 <div class='prev-next-area'>
 </div>
+              </footer>
               
-          </main>
+          </div>
           
-
       </div>
     </div>
+
+  
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-<footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
     &copy; Copyright 2022 OpenGHG development team.<br>
 </p>
-    </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
-</p>
-    </div>
-    
   </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+</p>
+  </div>
+  
+</div>
 </footer>
   </body>
 </html>

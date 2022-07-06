@@ -6,13 +6,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 7: Retrieving data from remote archives &#8212; OpenGHG 0+untagged.1.g480ecb7.dirty documentation</title>
-    
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <title>Workflow 7: Retrieving data from remote archives &#8212; OpenGHG 0+untagged.1.g995f9a6.dirty documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
 
-    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
   <link rel="stylesheet"
     href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
   <link rel="preload" as="font" type="font/woff2" crossorigin
@@ -24,13 +28,14 @@
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
-    
+
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
 
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
@@ -42,32 +47,40 @@
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Development" href="../../development/index_devel.html" />
     <link rel="prev" title="Workflow 6: Explore NOAA ObsPack" href="6_Explore_NOAA_ObsPack.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en">
-    
-
-    <!-- Google Analytics -->
-    
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
-    
-    <div class="container-fluid" id="banner"></div>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
 
     
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
 
   <div id="navbar-start">
     
     
-<a class="navbar-brand" href="../../index.html">
-<p class="title">OpenGHG</p>
-</a>
+  
 
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">OpenGHG 0+untagged.1.g995f9a6.dirty documentation</p>
+  
+</a>
     
   </div>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <span class="fas fa-bars"></span>
   </button>
 
   
@@ -127,6 +140,14 @@
     <div id="navbar-end">
       
       <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
       </ul>
       </div>
@@ -137,13 +158,13 @@
     </nav>
     
 
-    <div class="container-xl">
-      <div class="row">
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
           
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
   <i class="icon fas fa-search"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
@@ -200,19 +221,20 @@
 
   </div>
 </nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
-          
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
 
           
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-              
-              <div class="toc-item">
-                
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
 <div class="tocsection onthispage mt-5 pt-1 pb-3">
     <i class="fas fa-list"></i> On this page
 </div>
@@ -276,26 +298,24 @@
 </ul>
 
 </nav>
-              </div>
-              
-              <div class="toc-item">
-                
-              </div>
-              
-            
-          </div>
-          
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
 
           
           
-            
-          
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+          <div class="bd-content col-12 col-md-9 col-xl-7">
               
-              <div>
+              <article class="bd-article" role="main">
                 
   <section id="workflow-7-retrieving-data-from-remote-archives">
-<h1>Workflow 7: Retrieving data from remote archives<a class="headerlink" href="#workflow-7-retrieving-data-from-remote-archives" title="Permalink to this headline">#</a></h1>
+<h1>Workflow 7: Retrieving data from remote archives<a class="headerlink" href="#workflow-7-retrieving-data-from-remote-archives" title="Permalink to this heading">#</a></h1>
 <p>This tutorial covers the retrieval of data from the ICOS Carbon Portal and the CEDA archives.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -309,15 +329,15 @@
 </div>
 </div>
 <section id="icos">
-<h2>ICOS<a class="headerlink" href="#icos" title="Permalink to this headline">#</a></h2>
+<h2>ICOS<a class="headerlink" href="#icos" title="Permalink to this heading">#</a></h2>
 <p>It’s easy to retrieve atmospheric gas measurements from the <a class="reference external" href="https://www.icos-cp.eu/observations/carbon-portal">ICOS Carbon Portal</a> using OpenGHG. To do so we’ll use the <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.client</span></code>.</p>
 <section id="checking-available-data">
-<h3>Checking available data<a class="headerlink" href="#checking-available-data" title="Permalink to this headline">#</a></h3>
+<h3>Checking available data<a class="headerlink" href="#checking-available-data" title="Permalink to this heading">#</a></h3>
 <p>You can find the stations available in ICOS using <a class="reference external" href="https://data.icos-cp.eu/portal/#%7B%22filterCategories%22%3A%7B%22project%22%3A%5B%22icos%22%5D%2C%22level%22%3A%5B1%2C2%5D%2C%22stationclass%22%3A%5B%22ICOS%22%5D%2C%22theme%22%3A%5B%22atmosphere%22%5D%7D%2C%22tabs%22%3A%7B%22resultTab%22%3A2%7D%7D">their map interface</a>. Click on a site to see it’s information, then use it’s three letter site code to retrieve data. You can also use the <a class="reference external" href="https://data.icos-cp.eu/portal/#%7B%22filterCategories%22:%7B%22project%22:%5B%22icos%22%5D,%22level%22:%5B1,2%5D,%22stationclass%22:%5B%22ICOS%22%5D%7D%7D">search page</a> to find available data at a given site.</p>
 <p><img alt="&quot;Zoomed in screenshot of ICOS site map&quot;" src="tutorials/beginner_workflow/images/icos_map.jpg" /></p>
 </section>
 <section id="using-retrieve-icos">
-<h3>Using <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code><a class="headerlink" href="#using-retrieve-icos" title="Permalink to this headline">#</a></h3>
+<h3>Using <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code><a class="headerlink" href="#using-retrieve-icos" title="Permalink to this heading">#</a></h3>
 <p>First we’ll import <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> from the <code class="docutils literal notranslate"><span class="pre">client</span></code> submodule, then we’ll retrieve some data from Weybourne (<strong>WAO</strong>). The function will first check for any data from <strong>WAO</strong> already stored in the object store, if any is found it is returned, otherwise it’ll retrieve the data from the ICOS Carbon Portal, this may take a bit longer.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -370,7 +390,7 @@
 </div>
 </section>
 <section id="viewing-the-data">
-<h3>Viewing the data<a class="headerlink" href="#viewing-the-data" title="Permalink to this headline">#</a></h3>
+<h3>Viewing the data<a class="headerlink" href="#viewing-the-data" title="Permalink to this heading">#</a></h3>
 <p>As with any <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object we can quickly plot it to have a look.</p>
 <blockquote>
 <div><p><strong><em>NOTE:</em></strong>  the plot created below may not show up on the online documentation version of this notebook.</p>
@@ -384,7 +404,7 @@
 </div>
 </section>
 <section id="data-levels">
-<h3>Data levels<a class="headerlink" href="#data-levels" title="Permalink to this headline">#</a></h3>
+<h3>Data levels<a class="headerlink" href="#data-levels" title="Permalink to this heading">#</a></h3>
 <p>Data available on the ICOS Carbon Portal is made available under three different levels (<a class="reference external" href="https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone">see docs</a>).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">Data</span> <span class="n">level</span> <span class="mi">1</span><span class="p">:</span> <span class="n">Near</span> <span class="n">Real</span> <span class="n">Time</span> <span class="n">Data</span> <span class="p">(</span><span class="n">NRT</span><span class="p">)</span> <span class="ow">or</span> <span class="n">Internal</span> <span class="n">Work</span> <span class="n">data</span> <span class="p">(</span><span class="n">IW</span><span class="p">)</span><span class="o">.</span>
 <span class="o">-</span> <span class="n">Data</span> <span class="n">level</span> <span class="mi">2</span><span class="p">:</span> <span class="n">The</span> <span class="n">final</span> <span class="n">quality</span> <span class="n">checked</span> <span class="n">ICOS</span> <span class="n">RI</span> <span class="n">data</span> <span class="nb">set</span><span class="p">,</span> <span class="n">published</span> <span class="n">by</span> <span class="n">the</span> <span class="n">CFs</span><span class="p">,</span>
@@ -422,7 +442,7 @@
 </div>
 </section>
 <section id="forcing-retrieval">
-<h3>Forcing retrieval<a class="headerlink" href="#forcing-retrieval" title="Permalink to this headline">#</a></h3>
+<h3>Forcing retrieval<a class="headerlink" href="#forcing-retrieval" title="Permalink to this heading">#</a></h3>
 <p>As ICOS data is cached by OpenGHG you may sometimes need to force a retrieval from the ICOS Carbon Portal.</p>
 <p>If you retrieve data using <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> and notice that it does not return the most up to date data (compare the dates with those on the portal) you can force a retrieval using <code class="docutils literal notranslate"><span class="pre">force_retrieval</span></code>.</p>
 <div class="cell docutils container">
@@ -436,7 +456,7 @@
 </section>
 </section>
 <section id="ceda">
-<h2>CEDA<a class="headerlink" href="#ceda" title="Permalink to this headline">#</a></h2>
+<h2>CEDA<a class="headerlink" href="#ceda" title="Permalink to this heading">#</a></h2>
 <p>To retrieve data from CEDA you can use the <code class="docutils literal notranslate"><span class="pre">retrieve_ceda</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.client</span></code>. This lets you pull down data from CEDA, process it and store it in the object store. Once the data has been stored successive calls will retrieve the data from the object store.</p>
 <blockquote>
 <div><p><strong><em>NOTE:</em></strong>  For the moment only surface observations can be retrieved and it is expected that these are already in a NetCDF file. If you find a file that can’t be processed by the function please <a class="reference external" href="https://github.com/openghg/openghg/issues/new/choose">open an issue on GitHub</a> and we’ll do our best to add support that file type.</p>
@@ -474,7 +494,7 @@
 </div>
 </div>
 <section id="retrieving-a-second-time">
-<h3>Retrieving a second time<a class="headerlink" href="#retrieving-a-second-time" title="Permalink to this headline">#</a></h3>
+<h3>Retrieving a second time<a class="headerlink" href="#retrieving-a-second-time" title="Permalink to this heading">#</a></h3>
 <p>The second time we (or another use) retrieves the data it will be pulled from the object store, this should be faster than retrieving from CEDA. To get the same data again use the <code class="docutils literal notranslate"><span class="pre">site</span></code>, <code class="docutils literal notranslate"><span class="pre">species</span></code> and <code class="docutils literal notranslate"><span class="pre">inlet</span></code> arguments.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -492,7 +512,7 @@
 </div>
 </section>
 <section id="cleanup-the-temporary-object-store">
-<h3>Cleanup the temporary object store<a class="headerlink" href="#cleanup-the-temporary-object-store" title="Permalink to this headline">#</a></h3>
+<h3>Cleanup the temporary object store<a class="headerlink" href="#cleanup-the-temporary-object-store" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tmp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
@@ -505,51 +525,55 @@
 </section>
 
 
-              </div>
+              </article>
               
-              
-              <!-- Previous / next buttons -->
-<div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="6_Explore_NOAA_ObsPack.html" title="previous page">
-        <i class="fas fa-angle-left"></i>
-        <div class="prev-next-info">
-            <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Workflow 6: Explore NOAA ObsPack</p>
-        </div>
-    </a>
-    <a class='right-next' id="next-link" href="../../development/index_devel.html" title="next page">
-    <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Development</p>
-    </div>
-    <i class="fas fa-angle-right"></i>
-    </a>
-</div>
-              
-          </main>
-          
 
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="6_Explore_NOAA_ObsPack.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Workflow 6: Explore NOAA ObsPack</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="../../development/index_devel.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Development</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
       </div>
     </div>
+
+  
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-<footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
     &copy; Copyright 2022 OpenGHG development team.<br>
 </p>
-    </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
-</p>
-    </div>
-    
   </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+</p>
+  </div>
+  
+</div>
 </footer>
   </body>
 </html>
