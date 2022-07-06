@@ -74,7 +74,7 @@ def _format_inlet(inlet: Union[str, float, int]) -> str:
     """
     if isinstance(inlet, str):
         try:
-            inlet_value = float(inlet)
+            inlet_value: Union[float, np.floating] = float(inlet)
         except ValueError:
             inlet_values_str = inlet.split("-")
             try:

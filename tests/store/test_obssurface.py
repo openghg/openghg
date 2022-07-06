@@ -654,4 +654,31 @@ def test_store_icos_carbonportal_data(mocker):
     assert second_result is None
 
 
+@pytest.mark.parametrize("species,obs_variable",
+    [("carbon dioxide", "co2"),  # Known species (convert using synonyms)
+     ("radon", "rn"),  # Previous issues (added check)
+     ("c2f6", "c2f6"),  # Previous issues (added check)
+     ("CFC-11", "cfc11"),  # Known CFC (convert using synonyms)
+     ("CFC-999", "cfc999"),  # Unknown CFC (remove '-' during cleaning)
+     ("SF5CF3", "sf5cf3"),  # Unknown species (convert to lower case)
+    ]
+)
+def test_obs_schema(species,obs_variable):
+    """
+    Check expected expected data variables (based on species) are being
+    included for default ObsSurface schema.
 
+    Conversion to variable name from species is based on
+    'acrg_species_info.json' data.
+
+    Note: at the moment this doesn't include any optional variables but
+    this may be incorporated in future.
+    """
+    data_schema = ObsSurface.schema(species=species)
+
+    data_vars = data_schema.data_vars
+    assert obs_variable in data_vars
+
+    assert "time" in data_vars[obs_variable]
+
+    # TODO: Could also add checks for dims and dtypes?

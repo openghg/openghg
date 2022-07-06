@@ -45,6 +45,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from openghg.dataobjects import FluxData, BoundaryConditionsData, FootprintData, ObsData
 from openghg.retrieve import get_flux, get_footprint, get_bc, get_obs_surface, search
+from openghg.util import synonyms
 import numpy as np
 from pandas import Timestamp
 from xarray import DataArray, Dataset
@@ -129,7 +130,8 @@ class ModelScenario:
         self.fluxes: Optional[Dict[str, FluxData]] = None
         self.bc: Optional[BoundaryConditionsData] = None
 
-        # TODO: Add synonym checking for species?
+        if species is not None:
+            species = synonyms(species)
 
         # Add observation data (directly or through keywords)
         self.add_obs(

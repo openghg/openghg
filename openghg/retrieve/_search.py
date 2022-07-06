@@ -123,7 +123,7 @@ def search(**kwargs):  # type: ignore
         clean_string,
         find_daterange_gaps,
         split_daterange_str,
-        load_json,
+        synonyms,
     )
     from openghg.dataobjects import SearchResults
 
@@ -164,20 +164,7 @@ def search(**kwargs):  # type: ignore
         if not isinstance(species, list):
             species = [species]
 
-        translator = load_json("species_translator.json")
-
-        updated_species = []
-
-        for s in species:
-            updated_species.append(s)
-
-            try:
-                translated = translator[s]
-            except KeyError:
-                pass
-            else:
-                updated_species.extend(translated)
-
+        updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
 
     data_type = search_kwargs.get("data_type", "timeseries")
