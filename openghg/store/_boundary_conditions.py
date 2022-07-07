@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union, Any
 from xarray import Dataset
 import numpy as np
+from tempfile import TemporaryDirectory
 
 from openghg.store.base import BaseStore
 
@@ -28,6 +29,30 @@ class BoundaryConditions(BaseStore):
 
         self._stored = True
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
+
+    @staticmethod
+    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Dict:
+        """Ready a footprint from binary data
+
+        Args:
+            binary_data: Footprint data
+            metadata: Dictionary of metadata
+            file_metadat: File metadata
+        Returns:
+            dict: UUIDs of Datasources data has been assigned to
+        """
+        with TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+
+            try:
+                filename = file_metadata["filename"]
+            except KeyError:
+                raise KeyError("We require a filename key for metadata read.")
+
+            filepath = tmpdir_path.joinpath(filename)
+            filepath.write_bytes(binary_data)
+
+            return BoundaryConditions.read_file(filepath=filepath, **metadata)
 
     @staticmethod
     def read_file(

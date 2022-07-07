@@ -10,7 +10,7 @@ from openghg.util import create_daterange_str
 from helpers import get_datapath, attributes_checker_obssurface
 
 
-def test_read_binary(mocker):
+def test_read_data(mocker):
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
@@ -42,10 +42,10 @@ def test_read_binary(mocker):
 
     with pytest.raises(ValueError):
         metadata = {}
-        _ = ObsSurface.read_binary(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+        _ = ObsSurface.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
         file_metadata = {}
-        _ = ObsSurface.read_binary(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+        _ = ObsSurface.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
 
 def test_read_CRDS_incorrent_sampling_period_raises():

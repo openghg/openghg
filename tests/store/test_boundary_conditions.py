@@ -3,6 +3,34 @@ from openghg.retrieve import search
 from openghg.store import recombine_datasets, metastore_manager
 from xarray import open_dataset
 from helpers import get_bc_datapath
+from openghg.util import hash_bytes
+
+
+def test_read_data_monthly(mocker):
+    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+
+    test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
+
+    binary_data = test_datapath.read_bytes()
+    sha1_hash = hash_bytes(data=binary_data)
+
+    metadata = {
+        "species": "ch4",
+        "bc_input": "MOZART",
+        "domain": "EUROPE",
+        "period": "monthly",
+    }
+
+    filename = test_datapath.name
+
+    file_metadata = {"sha1_hash": sha1_hash, "filename": filename, "compressed": False}
+
+    proc_results = BoundaryConditions.read_data(
+        binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
+    )
+
+    assert proc_results == {"ch4_mozart_europe_201208": {"uuid": "test-uuid-1", "new": True}}
 
 
 def test_read_file_monthly():
@@ -14,6 +42,7 @@ def test_read_file_monthly():
         bc_input="MOZART",
         domain="EUROPE",
         period="monthly",
+        overwrite=True,
     )
 
     assert "ch4_mozart_europe_201208" in proc_results

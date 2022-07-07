@@ -4,6 +4,37 @@ from openghg.store import Footprints, recombine_datasets, metastore_manager, dat
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
 from helpers import get_footprint_datapath
+from openghg.util import hash_bytes
+
+
+def test_read_footprint_co2_from_data(mocker):
+    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+
+    metadata = {
+        "site": "TAC",
+        "height": "100m",
+        "domain": "TEST",
+        "model": "NAME",
+        "metmodel": "UKV",
+        "species": "co2",
+        "high_time_res": True,
+    }
+
+    binary_data = datapath.read_bytes()
+    sha1_hash = hash_bytes(data=binary_data)
+    filename = datapath.name
+
+    file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": True}
+
+    # Expect co2 data to be high time resolution
+    # - could include high_time_res=True but don't need to as this will be set automatically
+
+    result = Footprints.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+
+    assert result == {"tac_test_NAME_100m": {"uuid": "test-uuid-1", "new": True}}
 
 
 def test_read_footprint_high_spatial_res():

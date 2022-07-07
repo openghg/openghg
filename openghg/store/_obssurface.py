@@ -1,7 +1,7 @@
 from openghg.store.base import BaseStore
 from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Sequence, Union, Tuple
+from typing import DefaultDict, Dict, Optional, Sequence, Union
 
 
 __all__ = ["ObsSurface"]
@@ -15,7 +15,7 @@ class ObsSurface(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
-    def read_binary(
+    def read_data(
         binary_data: bytes, metadata: Dict, file_metadata: Dict, precision_data: Optional[bytes] = None
     ) -> Dict:
         """Reads binary data passed in by serverless function.
