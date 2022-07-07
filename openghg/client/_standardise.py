@@ -161,7 +161,6 @@ def standardise_bc(
             "domain": domain,
             "continuous": continuous,
             "overwrite": overwrite,
-            "data_type": "boundary_conditions",
         }
 
         if period is not None:
@@ -186,7 +185,7 @@ def standardise_bc(
         )
 
 
-def process_footprint(
+def standardise_footprint(
     filepath: Union[str, Path],
     site: str,
     height: str,
@@ -227,7 +226,7 @@ def process_footprint(
     filepath = Path(filepath)
 
     if cloud:
-        compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprint")
+        compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
 
         metadata = {
             "site": site,
@@ -239,7 +238,6 @@ def process_footprint(
             "high_spatial_res": high_spatial_res,
             "high_time_res": high_time_res,
             "overwrite": overwrite,
-            "data_type": "footprints",
         }
 
         if metmodel is not None:
@@ -280,7 +278,7 @@ def process_footprint(
         )
 
 
-def process_flux(
+def standardise_flux(
     filepath: Union[str, Path],
     species: str,
     source: str,
@@ -320,7 +318,6 @@ def process_flux(
             "high_time_resolution": high_time_resolution,
             "continuous": continuous,
             "overwrite": overwrite,
-            "data_type": "emissions",
         }
 
         if date is None:
