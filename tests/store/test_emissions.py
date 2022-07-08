@@ -71,7 +71,7 @@ def test_read_file():
 
 def test_add_edgar_database():
     """Test edgar can be added to object store (default domain)"""
-    folder = "v6.0"
+    folder = "v6.0_CH4"
     test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
 
     database = "EDGAR"
@@ -132,9 +132,11 @@ def test_transform_and_add_edgar_database():
     """
     Test EDGAR database can be transformed (regridded) and added to the object store.
     """
+    # Regridding to a new domain will use the xesmf importer - so skip this test
+    # if module is not present.
     xesmf = pytest.importorskip("xesmf")
 
-    folder = "v6.0"
+    folder = "v6.0_CH4"
     test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
 
     database = "EDGAR"

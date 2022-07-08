@@ -25,7 +25,7 @@ def parse_edgar(datapath: Path,
     """
     Read and parse input EDGAR data.
     Notes: Only accepts annual 2D grid maps in netcdf (.nc) format for now.
-           Does not accept monthly or sector data yet.
+           Does not accept monthly data yet.
 
     EDGAR data is global on a 0.1 x 0.1 grid. This function allows products
     to be created for a given year which cover specific regions (and matches
@@ -57,11 +57,16 @@ def parse_edgar(datapath: Path,
     Returns:
         dict: Dictionary of data
 
-    TODO: Add sector, monthly parsing options.
+    TODO: Add monthly parsing and sector stacking options
     """
-    from openghg.util import synonyms, molar_mass, timestamp_now, clean_string, convert_longitude
+    from openghg.util import (
+        synonyms,
+        molar_mass,
+        timestamp_now,
+        clean_string,
+        convert_longitude)
     from openghg.store import infer_date_range
-    from openghg.standardise.meta import assign_flux_attributes
+    from openghg.standardise.meta import define_species_label, assign_flux_attributes
 
     # Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
     # Additional edgar functions which could be incorporated.
@@ -110,8 +115,8 @@ def parse_edgar(datapath: Path,
     data_files = [file for file in folder_filelist if file.suffix == suffix]
 
     if not data_files:
-        raise ValueError(f"Expect EDGAR '.nc' files."\
-                          "No suitable files found within datapath: {datapath}")
+        raise ValueError("Expect EDGAR '.nc' files."\
+                         f"No suitable files found within datapath: {datapath}")
 
     for file in data_files:
         try:
@@ -131,8 +136,8 @@ def parse_edgar(datapath: Path,
 
     # Check synonyms and compare against filename value
     if species is not None:
-        # species_label = species_label(species)
-        species_label = synonyms(species).lower()
+        species_label = define_species_label(species)[0]
+        # species_label = synonyms(species).lower()
     else:
         raise ValueError("Unable to retrieve species from database filenames."\
                          " Please specify")
@@ -151,7 +156,7 @@ def parse_edgar(datapath: Path,
         raise ValueError(f"Unable to infer EDGAR version ({edgar_version})."\
                           " Please pass as an argument")
 
-    # TODO: Split out into a separate function, so we can use this for
+    # TODO: May want to split out into a separate function, so we can use this for
     # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
     # - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
     # - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
@@ -200,7 +205,8 @@ def parse_edgar(datapath: Path,
 
         for zipinfo in zip_filelist:
             if zipinfo.filename == edgar_file.name:
-                os.makedirs(temp_extract_folder)
+                if not os.path.exists(temp_extract_folder):
+                    os.makedirs(temp_extract_folder)
                 zip_folder.extract(zipinfo, path=temp_extract_folder)
                 edgar_file = temp_extract_folder / edgar_file
                 break
@@ -306,8 +312,11 @@ def parse_edgar(datapath: Path,
     source_from_file = edgar_file_info["source"]
     if source_from_file in ("TOTALS", ""):
         source = "anthro"
+    elif species_label == "co2" and "TOTALS" in source_from_file:
+        co2_source = "_".join(source_from_file.split('_')[:-1])
+        source = clean_string(f"{co2_source}_anthro")
     else:
-        source = source_from_file
+        source = clean_string(source_from_file)
     database = "EDGAR"
     database_version = clean_string(edgar_version)
 
@@ -560,9 +569,28 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     else:
         index_remaining = 2
 
+    # CO2 input has 2 options e.g.
+    # - "v6.0_CO2_excl_short-cycle_org_C_2015_TOTALS.0.1x0.1.nc"
+    # - "v6.0_CO2_org_short-cycle_C_1970_TOTALS.0.1x0.1.nc"
+    if species.lower() == "co2":
+        co2_options = ["excl_short-cycle_org_C", "org_short-cycle_C"]
+        for option in co2_options:
+            if option in filename:
+                option_split = option.split("_")
+                extra_sections = len(option_split)
+                index_remaining += extra_sections
+
+                source = "_".join(option_split[0:2]) + "_"
+                break
+        else:
+            source = ""
+    else:
+        source = ""
+            
+
     # Check if year can be cast to integer to check this is a valid value
     try:
-        year_str = filename_split[2]
+        year_str = filename_split[index_remaining]
         year = int(year_str)
     except IndexError:
         raise ValueError(f"Unable to cast year extracted from file format to an integer: {year_str}")
@@ -598,12 +626,14 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
         # e.g. "TOTALS.0.1x0.1" --> "TOTALS", "0.1x0.1"
         # e.g. "2015.0.1x0.1" --> "2015", "0.1x0.1" --> "", "0.1x0.1"
         # e.g. "IPCC_6A_6D.0.1x0.1" --> "IPCC-6A-6D", "0.1x0.1"
-        source = source_resolution.split('.')[0]
-        resolution = source_resolution.lstrip(source).lstrip('.')
+        em_source = source_resolution.split('.')[0]
+        resolution = source_resolution.lstrip(em_source).lstrip('.')
         # Check source was actually contained in filename and not just the year
         # If so, set source to contain empty string
-        if source == str(year):
-            source = ""
+        if em_source == str(year):
+            source += ""
+        else:
+            source += em_source
 
     file_info = {"version": version,
                  "species": species,
