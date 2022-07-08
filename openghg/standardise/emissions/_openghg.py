@@ -1,6 +1,5 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
-from xarray import Dataset
+from typing import Dict, Optional, Union
 
 
 def parse_openghg(filepath: Path,
@@ -20,7 +19,6 @@ def parse_openghg(filepath: Path,
         dict: Dictionary of data
     """
     from xarray import open_dataset
-    from collections import defaultdict
     from openghg.util import timestamp_now
     from openghg.store import infer_date_range
     from openghg.standardise.meta import assign_flux_attributes

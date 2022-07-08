@@ -12,6 +12,7 @@ __all__ = ["Emissions"]
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
+
 class Emissions(BaseStore):
     """This class is used to process emissions / flux data"""
 
@@ -174,7 +175,7 @@ class Emissions(BaseStore):
         all_param = parser_fn.__code__.co_varnames[:parser_fn.__code__.co_argcount]
 
         # Define parameters to pass to the parser function from kwargs
-        param: Dict[Any, Any] = {key:value for key, value in kwargs.items() if key in all_param}
+        param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
         param["datapath"] = datapath  # Add datapath explicitly (for now)
 
         emissions_data = parser_fn(**param)

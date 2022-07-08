@@ -12,7 +12,7 @@ xesmf_error_message = \
     "Unable to import xesmf for use with regridding algorithms" \
     "To use transform modules please follow instructions" \
     "for installing non-python dependencies (requires conda" \
-    "to be installed even if using pip to install other packages)" \
+    "to be installed even if using pip to install other packages)"
 # TODO: Add explicit link to instruction page once created
 
 
@@ -27,8 +27,8 @@ def _getGridCC(lat: ndarray, lon: ndarray) -> Tuple[ndarray, ndarray]:
     dy = np.mean(lat[1:] - lat[:-1])
     lon = np.append(lon, lon[-1] + dx)
     lat = np.append(lat, lat[-1] + dy)
-    lon -= dx/2.
-    lat -= dy/2.
+    lon -= dx / 2.
+    lat -= dy / 2.
     LON, LAT = np.meshgrid(lon, lat)
     return LON, LAT
 
@@ -43,7 +43,6 @@ def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -> Dataset:
     """
     LON, LAT = np.meshgrid(lon, lat)
     LON_b, LAT_b = _getGridCC(lat, lon)
-
 
     grid = xr.Dataset({'lon': (['x', 'y'], LON),
                        'lat': (['x', 'y'], LAT),
@@ -77,7 +76,7 @@ def tidy_weight_files(method: str, path: Union[str, Path, None] = None) -> None:
     if path is None:
         package_path = Path(openghg.__path__[0])
         path = package_path.parent
-    
+
     path = Path(path)
     weight_files = path.glob(f"{method}_*x*_*x*.nc")
 
@@ -143,12 +142,12 @@ def regrid_uniform_cc(data: Union[ndarray, DataArray],
 
         if lat_in is not None:
             if not np.isclose(lat_in, lat_in_extracted):
-                raise ValueError("Input for 'lat_in' should not be supplied if 'data' is a DataArray object.\n"\
+                raise ValueError("Input for 'lat_in' should not be supplied if 'data' is a DataArray object.\n"
                                  "Please check 'lat_out' have been supplied correctly as well.")
 
         if lon_in is not None:
             if not np.isclose(lon_in, lon_in_extracted):
-                raise ValueError("Input for 'lon_in' should not be supplied if 'data' is a DataArray object.\n"\
+                raise ValueError("Input for 'lon_in' should not be supplied if 'data' is a DataArray object.\n"
                                  "Please check 'lon_out' has been supplied correctly as well.")
 
         lat_in = lat_in_extracted
@@ -158,7 +157,7 @@ def regrid_uniform_cc(data: Union[ndarray, DataArray],
     lon_in = cast(Union[ndarray, DataArray], lon_in)
 
     if data.shape != (lat_in.size, lon_in.size):
-        raise ValueError(f"Shape of input 'data' {data.shape}"\
+        raise ValueError(f"Shape of input 'data' {data.shape}"
                          f"does not match 'lat_in' and 'lon_in' lengths: {len(lat_in)}, {len(lon_in)}")
 
     lat_in = convert_to_ndarray(lat_in)

@@ -504,9 +504,8 @@ def get_flux_attributes(ds: Dataset,
     ds["lon"].attrs = lon_attrs
 
     # Define default values for global attributes
-    global_attributes_default: Dict[Hashable, Any] = {
-            "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
-            "Conventions": "CF-1.8"}
+    global_attributes_default: Dict[Hashable, Any] = {"conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+                                                      "Conventions": "CF-1.8"}
 
     if global_attributes is None:
         global_attributes = global_attributes_default
@@ -541,7 +540,7 @@ def get_flux_attributes(ds: Dataset,
         global_attributes["number_of_prior_files_used"] = len(prior_info_dict.keys())
         for i, source_key in enumerate(prior_info_dict.keys()):
 
-            prior_number = i+1
+            prior_number = i + 1
             label_start = f"prior_file_{prior_number}"
             global_attributes[label_start] = source_key
 

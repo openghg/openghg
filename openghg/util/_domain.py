@@ -88,7 +88,7 @@ def _get_coord_data(coord: str, data: dict, domain: str) -> ndarray:
     coord_max = float(coord_range[-1])
     increment = float(increment)
 
-    coord_data = np.arange(coord_min, coord_max+increment, increment)
+    coord_data = np.arange(coord_min, coord_max + increment, increment)
 
     return coord_data
 

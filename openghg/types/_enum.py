@@ -53,5 +53,5 @@ class EmissionsTypes(Enum):
 
 class EmissionsDatabases(Enum):
     """For extracting and transforming emissions/flux databases"""
-    
+
     EDGAR = "EDGAR"

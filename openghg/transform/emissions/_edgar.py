@@ -115,7 +115,7 @@ def parse_edgar(datapath: Path,
     data_files = [file for file in folder_filelist if file.suffix == suffix]
 
     if not data_files:
-        raise ValueError("Expect EDGAR '.nc' files."\
+        raise ValueError("Expect EDGAR '.nc' files."
                          f"No suitable files found within datapath: {datapath}")
 
     for file in data_files:
@@ -139,7 +139,7 @@ def parse_edgar(datapath: Path,
         species_label = define_species_label(species)[0]
         # species_label = synonyms(species).lower()
     else:
-        raise ValueError("Unable to retrieve species from database filenames."\
+        raise ValueError("Unable to retrieve species from database filenames."
                          " Please specify")
 
     if species_from_file is not None and species_label != synonyms(species_from_file):
@@ -153,7 +153,7 @@ def parse_edgar(datapath: Path,
             edgar_version = possible_version
 
     if edgar_version not in known_version:
-        raise ValueError(f"Unable to infer EDGAR version ({edgar_version})."\
+        raise ValueError(f"Unable to infer EDGAR version ({edgar_version})."
                           " Please pass as an argument")
 
     # TODO: May want to split out into a separate function, so we can use this for
@@ -190,10 +190,10 @@ def parse_edgar(datapath: Path,
         all_years.sort()
         start_year, end_year = all_years[0], all_years[-1]
         if year < start_year:
-            raise ValueError(f"EDGAR {edgar_version} range: {start_year}-{end_year}."\
+            raise ValueError(f"EDGAR {edgar_version} range: {start_year}-{end_year}."
                              f" {year} is before this period.")
         elif year > end_year:
-            print(f"Using last available year from EDGAR {edgar_version} range:"\
+            print(f"Using last available year from EDGAR {edgar_version} range:"
                   f"{start_year}-{end_year}.")
             edgar_file = files_by_year[end_year]
             edgar_file_info = _extract_file_info(edgar_file)
@@ -252,7 +252,7 @@ def parse_edgar(datapath: Path,
         lat_in = edgar_ds[lat_name].values
         lon_in = edgar_ds[lon_name].values
     except KeyError:
-        raise ValueError(f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"\
+        raise ValueError(f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
                           " Please check this is a 2D grid map.")
 
     # Check range of longitude values and convert to -180 - +180
@@ -405,7 +405,7 @@ def _check_lat_lon(domain: Optional[str] = None,
 
     if lat_out is not None or lon_out is not None:
         if domain is None:
-            raise ValueError("Please specify new 'domain' name if selecting new"\
+            raise ValueError("Please specify new 'domain' name if selecting new"
                              " latitude, longitude values")
 
     if isinstance(lat_out, DataArray):
@@ -423,30 +423,30 @@ def _check_lat_lon(domain: Optional[str] = None,
             # If domain cannot be found and lat, lon values have not been
             # defined raise an error.
             if lat_out is None or lon_out is None:
-                raise ValueError("To create new domain please input"\
+                raise ValueError("To create new domain please input"
                                  " 'lat_out' and 'lon_out' values.")
         else:
             # Check domain latitude and longitude values against any
             # lat_out and lon_out values specified to check they match.
             if lat_out is not None:
                 if not np.array_equal(lat_domain, lat_out):
-                    raise ValueError("Latitude values should not be specified"\
-                                    f" when using pre-defined domain {domain}"\
+                    raise ValueError("Latitude values should not be specified"
+                                    f" when using pre-defined domain {domain}"
                                      " (values don't match).")
             else:
                 lat_out = lat_domain
 
             if lon_out is not None:
                 if not np.array_equal(lon_domain, lon_out):
-                    raise ValueError("Longitude values should not be specified"\
-                                    f" when using pre-defined domain {domain}"\
+                    raise ValueError("Longitude values should not be specified"
+                                    f" when using pre-defined domain {domain}"
                                      " (values don't match).")
             else:
                 lon_out = lon_domain
 
             if lon_out.max() > 180 or lon_out.min() < -180:
                 raise ValueError("Invalid domain definition."
-                                 " Expected longitude in range: -180 - 180."\
+                                 " Expected longitude in range: -180 - 180."
                                 f"Current longitude: {lon_out.min()} - {lon_out.max()}")
 
     if lon_out is not None and (lon_out.max() > 180 or lon_out.min() < -180):
@@ -512,7 +512,7 @@ def _check_readme_version(datapath: Optional[Path] = None,
             # Find and extract title line from html file
             title_line = re.search("<title.*?>(.+?)</title>", readme_data).group()  # type: ignore
             # Extract version e.g. "v6.0" or "v4.3.2"
-            edgar_version = re.search("v\d[.]\d[.]?\d*", title_line).group()  # type: ignore
+            edgar_version = re.search(r"v\d[.]\d[.]?\d*", title_line).group()  # type: ignore
         except ValueError:
             pass
         else:
@@ -586,7 +586,6 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
             source = ""
     else:
         source = ""
-            
 
     # Check if year can be cast to integer to check this is a valid value
     try:
@@ -619,7 +618,7 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     # e.g. "v50_CH4_2015.0.1x0.1.nc" --> "2015.0.1x0.1" (note no source in filename)
     # e.g. "v432_CH4_2010_9_IPCC_6A_6D.0.1x0.1.nc" --> "IPCC_6A_6D.0.1x0.1"
     try:
-        source_resolution =  '-'.join(filename_split[index_remaining:])
+        source_resolution = '-'.join(filename_split[index_remaining:])
     except (IndexError, ValueError):
         raise ValueError(f"Unable to extract source: {filename}")
     else:
