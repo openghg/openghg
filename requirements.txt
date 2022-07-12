@@ -12,6 +12,7 @@ netcdf4
 numexpr
 numpy
 nc-time-axis
+oci
 pandas
 paramiko
 plotly
