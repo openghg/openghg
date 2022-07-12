@@ -6,7 +6,6 @@ from numpy import ndarray
 import xarray as xr
 from xarray import DataArray, Dataset
 from typing import Union, Optional, Tuple, cast
-from pathlib import Path
 
 xesmf_error_message = \
     "Unable to import xesmf for use with regridding algorithms" \
