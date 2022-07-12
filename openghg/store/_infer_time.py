@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from typing import Optional, Union, Tuple
 from pathlib import Path
 import re
@@ -38,10 +39,8 @@ def infer_date_range(
                     - suitable pandas Offset Alias
                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
         continuous: Whether time stamps have to be continuous.
-
     Returns:
-        Timestamp, Timestamp, str:
-            Derived start date, end date and period (containing the value and unit).
+        Timestamp, Timestamp, str: Derived start date, end date and period (containing the value and unit).
     """
 
     if filepath is not None:
@@ -53,10 +52,21 @@ def infer_date_range(
     else:
         freq = None
 
-    n_dates = len(time)
-    if n_dates == 1:
+    # Changed this from len(time) as a length of a single value
+    # DataArray was throwing an len() of unsized object error
+    n_dates = time.size
 
-        start_date = timestamp_tzaware(time.values[0])
+    if n_dates == 1:
+        try:
+            start_date = timestamp_tzaware(timestamp=time.values[0])
+        except IndexError:
+            raise NotImplementedError(
+                "This type of BC file is not currently supported. Please see issue #349"
+            )
+            # try:
+            #     start_date = timestamp_tzaware(timestamp=time.values)
+            # except ValueError:
+            #     raise ValueError("Can't read date from dataset.")
 
         if filepath is not None:
             filename = filepath.stem  # Filename without the extension

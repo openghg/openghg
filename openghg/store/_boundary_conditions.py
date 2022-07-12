@@ -137,7 +137,7 @@ class BoundaryConditions(BaseStore):
         bc_time = bc_data.time
 
         start_date, end_date, period_str = infer_date_range(
-            bc_time, filepath=filepath, period=period, continuous=continuous
+            time=bc_time, filepath=filepath, period=period, continuous=continuous
         )
 
         if "year" in period_str:
