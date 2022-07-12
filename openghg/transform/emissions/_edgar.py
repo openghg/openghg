@@ -59,6 +59,7 @@ def parse_edgar(datapath: Path,
 
     TODO: Add monthly parsing and sector stacking options
     """
+    import tempfile
     from openghg.util import (
         synonyms,
         molar_mass,
@@ -201,14 +202,12 @@ def parse_edgar(datapath: Path,
     # For a zipped archive need to unzip the netcdf file and place in a
     # temporary directory.
     if zipped:
-        temp_extract_folder = datapath.parent / "temp"
+        temp_extract_folder = tempfile.TemporaryDirectory()
 
         for zipinfo in zip_filelist:
             if zipinfo.filename == edgar_file.name:
-                if not os.path.exists(temp_extract_folder):
-                    os.makedirs(temp_extract_folder)
-                zip_folder.extract(zipinfo, path=temp_extract_folder)
-                edgar_file = temp_extract_folder / edgar_file
+                zip_folder.extract(zipinfo, path=temp_extract_folder.name)
+                edgar_file = temp_extract_folder.name / edgar_file
                 break
 
     # Dimension - (lat, lon) - no time dimension
@@ -277,8 +276,7 @@ def parse_edgar(datapath: Path,
     # After the data has been extracted and used from the unzipped netcdf
     # file clean up and remove temporary directory and file.
     if zipped:
-        os.remove(edgar_file)  # Empty folder first
-        os.rmdir(temp_extract_folder)  # Then delete the folder
+        temp_extract_folder.cleanup()
 
     # Check for "time" dimension and add if missing.
     flux_ndim = flux_values.ndim
@@ -498,10 +496,10 @@ def _check_readme_version(datapath: Optional[Path] = None,
         except ValueError:
             readme_data = None
     elif datapath is not None:
-        try:
-            readme_filepath = os.path.join(datapath, readme_filename)
-            readme_data = open(readme_filepath, "r").read()
-        except FileNotFoundError:
+        readme_filepath = datapath.joinpath(readme_filename)
+        if readme_filepath.exists():
+            readme_data = readme_filepath.read_text()
+        else:
             readme_data = None
     else:
         raise ValueError("One of datapath or zippath must be specified.")

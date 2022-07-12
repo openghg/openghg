@@ -152,6 +152,7 @@ class Emissions(BaseStore):
 
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
+        import inspect
         from openghg.store import assign_data, load_metastore, datasource_lookup
         from openghg.types import EmissionsDatabases
         from openghg.util import load_emissions_database_parser
@@ -172,7 +173,7 @@ class Emissions(BaseStore):
         metastore = load_metastore(key=em_store._metakey)
 
         # Find all parameters that can be accepted by parse function
-        all_param = parser_fn.__code__.co_varnames[:parser_fn.__code__.co_argcount]
+        all_param = list(inspect.signature(parser_fn).parameters.keys())
 
         # Define parameters to pass to the parser function from kwargs
         param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}

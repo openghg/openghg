@@ -414,7 +414,7 @@ def assign_flux_attributes(data: Dict,
         Dict : Same format as inputted but with updated "data" component (Dataset)
     """
 
-    for _, flux_dict in data.items():
+    for flux_dict in data.values():
         flux_attributes = flux_dict.get("attributes", {})
 
         # Ensure values for these attributes have been specified either manually

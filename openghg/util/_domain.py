@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import ndarray
-from typing import Tuple, Union
+from typing import Tuple, Union, Dict, Any
 from openghg.util import get_datapath, load_json
 
 
@@ -33,7 +33,7 @@ def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
     return latitude, longitude
 
 
-def _get_coord_data(coord: str, data: dict, domain: str) -> ndarray:
+def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     """
     Attempts to extract or derive coordinate (typically latitude/longitude)
     values for a domain from provided data dictionary (typically

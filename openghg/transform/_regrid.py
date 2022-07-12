@@ -52,38 +52,6 @@ def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -> Dataset:
     return grid
 
 
-def tidy_weight_files(method: str, path: Union[str, Path, None] = None) -> None:
-    """
-    Weight files will get created during the regridding. These are not tidied
-    up by the xesmf module as they may be reused. This function removes any
-    remaining files after the process has finished.
-
-    Files of the format:
-        "method"_nxm_oxp.nc e.g. "conservative_2x4_10x15.nc"
-
-    Args:
-        method : Name of method used for regridding.
-        path : Path to weight files created. By default this will be set to the
-            path of the openghg module
-
-    Returns:
-        None
-
-        Removes (unlinks) all matching files found.
-    """
-    import openghg
-
-    if path is None:
-        package_path = Path(openghg.__path__[0])
-        path = package_path.parent
-
-    path = Path(path)
-    weight_files = path.glob(f"{method}_*x*_*x*.nc")
-
-    for file in weight_files:
-        file.unlink()
-
-
 def convert_to_ndarray(array: Union[ndarray, DataArray]) -> ndarray:
     """Check and extract underlying numpy array from DataArray as necessary"""
 
@@ -107,6 +75,8 @@ def regrid_uniform_cc(data: Union[ndarray, DataArray],
     All coordinates (lat_out, lon_out, lat_in, lon_in) should be for the centre
     of the representative cell and in degrees.
 
+    Adapted from code written by @DTHoare
+
     Args:
         data: Data to be regridded.
             Data must have dimensions (lat, lon) if 2D or (time, lat, lon) if 3D.
@@ -125,8 +95,6 @@ def regrid_uniform_cc(data: Union[ndarray, DataArray],
 
     Returns:
         ndarray / DataArray : Regridded data using specified method
-
-    Adapted from code written by @DTHoare
     """
     try:
         import xesmf  # type:ignore
@@ -209,7 +177,7 @@ def regrid_uniform_cc(data: Union[ndarray, DataArray],
         # regridded = regridded.assign_coords(**{"x":output_lat,"y":output_lon})
         # regridded = regridded.rename({"x":"lat","y":"lon"})
 
-    tidy_weight_files(method=method)
+    regridder.clean_weight_file()
 
     return regridded
 
