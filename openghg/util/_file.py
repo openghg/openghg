@@ -41,59 +41,109 @@ from typing import Any, Dict, List, Union, Optional, Callable
 #     return download_path
 
 
+def load_parser(data_name:str, module_name: str) -> Callable:
+    """
+    Load parse function from within module.
+    
+    This expects a function of the form to be :
+        - parse_{data_name}()
+    and for this to have been imported with an appropriate __init__.py module.
+
+    Args:
+        data_name: Name of data type / database / data source for the
+            parse function.
+        module_name: Full module name to be imported e.g.
+            "openghg.standardise.surface"
+    
+    Returns:
+        Callable : parse function
+    """
+    from importlib import import_module
+
+    module = import_module(name=module_name)
+
+    function_name = f"parse_{data_name.lower()}"
+    fn: Callable = getattr(module, function_name)
+
+    return fn
+
+
 def load_surface_parser(data_type: str) -> Callable:
-    """Load a parsing object of type class_name
+    """
+    Load parsing object for the obssurface data type.
+    Used with `openghg.standardise.surface` sub-module
 
     Args:
         data_type: Name of data type such as CRDS
     Returns:
         callable: class_name object
     """
-    from importlib import import_module
+    surface_module_name = "openghg.standardise.surface"
+    fn = load_parser(data_type, surface_module_name)
 
-    module_name = "openghg.standardise.surface"
-    surface_module = import_module(name=module_name)
+    return fn
 
-    function_name = f"parse_{data_type.lower()}"
-    fn: Callable = getattr(surface_module, function_name)
+
+def load_column_parser(data_type) -> Callable:
+    """
+    Load a parsing object for the obscolumn data type.
+    Used with `openghg.standardise.column` sub-module
+
+    Args:
+        data_type: Name of data type e.g. OPENGHG
+    Returns:
+        callable: parser function
+    """
+    column_st_module = "openghg.standardise.column"
+    fn = load_parser(data_type, column_st_module)
+
+    return fn
+
+
+def load_column_source_parser(data_source) -> Callable:
+    """
+    Load a parsing object for the source of column data.
+    Used with `openghg.transform.column` sub-module
+
+    Args:
+        data_type: Name of data source e.g. GOSAT
+    Returns:
+        callable: parser function
+    """
+    column_tr_module = "openghg.transform.column"
+    fn = load_parser(data_source, column_tr_module)
 
     return fn
 
 
 def load_emissions_parser(data_type: str) -> Callable:
-    """Load a parsing object of type class_name
+    """
+    Load a parsing object for the emissions data type.
+    Used with `openghg.standardise.emissions` sub-module
 
     Args:
-        data_type: Name of data type such as EDGAR
+        data_type: Name of data type e.g. OPENGHG
     Returns:
-        callable: class_name object
+        callable: parser function
     """
-    from importlib import import_module
-
-    module_name = "openghg.standardise.emissions"
-    surface_module = import_module(name=module_name)
-
-    function_name = f"parse_{data_type.lower()}"
-    fn: Callable = getattr(surface_module, function_name)
+    emissions_st_module_name = "openghg.standardise.emissions"
+    fn = load_parser(data_type, emissions_st_module_name)
 
     return fn
 
 
 def load_emissions_database_parser(database: str) -> Callable:
-    """Load a parsing object of type class_name
+    """
+    Load a parsing object for the source of column data.
+    Used with `openghg.transform.emissions` sub-module
 
     Args:
-        data_type: Name of data type such as EDGAR
+        data_type: Name of data source e.g. EDGAR
     Returns:
-        callable: class_name object
+        callable: parser function
     """
-    from importlib import import_module
-
-    module_name = "openghg.transform.emissions"
-    emissions_module = import_module(name=module_name)
-
-    function_name = f"parse_{database.lower()}"
-    fn: Callable = getattr(emissions_module, function_name)
+    emissions_tr_module_name = "openghg.transform.emissions"
+    fn = load_parser(database, emissions_tr_module_name)
 
     return fn
 

@@ -46,8 +46,12 @@ def parse_openghg(
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, load_json, synonyms
-    from openghg.standardise.meta import metadata_default_keys, assign_attributes
+    from openghg.util import clean_string, load_json
+    from openghg.standardise.meta import (
+        metadata_default_keys,
+        define_species_label,
+        assign_attributes
+    )
 
     data_filepath = Path(data_filepath)
 
@@ -100,10 +104,11 @@ def parse_openghg(
     metadata_needed = [param for param in metadata_needed if param not in metadata]
 
     metadata["site"] = clean_string(metadata["site"])
-    metadata["species"] = synonyms(
-        metadata["species"]
-    ).lower()
-    # May want to remove the .lower() here and centralise this
+    # metadata["species"] = synonyms(
+    #     metadata["species"]
+    # ).lower()
+    # # May want to remove the .lower() here and centralise this
+    metadata["species"] = define_species_label(metadata["species"])[0]
 
     # Update attributes to match metadata after cleaning
     attributes["site"] = metadata["site"]

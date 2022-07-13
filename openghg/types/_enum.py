@@ -20,22 +20,16 @@ class SurfaceTypes(Enum):
     OPENGHG = "OPENGHG"
 
 
-class DataTypes(Enum):
-    CRDS = "CRDS"
-    GCWERKS = "GCWERKS"
-    NOAA = "NOAA"
-    EUROCOM = "EUROCOM"
-    ICOS = "ICOS"
-    THAMESBARRIER = "TMB"
-    CRANFIELD = "CRANFIELD"
-    BEACO2N = "BEACO2N"
-    Footprints = "Footprints"
-    NPL = "NPL"
-    BTT = "BTT"
-    AQMESH = "AQMESH"
-    GLASGOW_PICARRO = "GLASGOW_PICARRO"
-    GLASGOW_LICOR = "GLASGOW_LICOR"
+class ColumnTypes(Enum):
+    """Types of column data files that can be standardised"""
+
     OPENGHG = "OPENGHG"
+
+
+class ColumnSources(Enum):
+    """Sources of column data that can be transformed"""
+
+    GOSAT = "GOSAT"
 
 
 class ObsTypes(Enum):
@@ -55,3 +49,21 @@ class EmissionsDatabases(Enum):
     """For extracting and transforming emissions/flux databases"""
 
     EDGAR = "EDGAR"
+
+
+class DataTypes(Enum):
+    CRDS = "CRDS"
+    GCWERKS = "GCWERKS"
+    NOAA = "NOAA"
+    EUROCOM = "EUROCOM"
+    ICOS = "ICOS"
+    THAMESBARRIER = "TMB"
+    CRANFIELD = "CRANFIELD"
+    BEACO2N = "BEACO2N"
+    Footprints = "Footprints"
+    NPL = "NPL"
+    BTT = "BTT"
+    AQMESH = "AQMESH"
+    GLASGOW_PICARRO = "GLASGOW_PICARRO"
+    GLASGOW_LICOR = "GLASGOW_LICOR"
+    OPENGHG = "OPENGHG"

@@ -4,6 +4,7 @@ from ._boundary_conditions import BoundaryConditions
 from ._eulerian_model import EulerianModel
 from ._footprints import Footprints
 from ._obsmobile import ObsMobile
+from ._obscolumn import ObsColumn
 from ._obssurface import ObsSurface
 from ._metadata import ObjectStorage, metastore_manager, load_metastore, datasource_lookup
 from ._metstore import METStore
