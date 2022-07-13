@@ -8,15 +8,13 @@ from openghg.transform.emissions._edgar import _extract_file_info
 # TODO: Add tests
 # - single sector EDGAR data can be read and intepreted correctly for v6.0
 #   - only monthly grid maps available?
-# - co2
-#   - add "org_shortcycle" test when able to get data
-
 
 @pytest.mark.parametrize("folder,version,species,mean_raw_flux",
                          [("v50", "v50", "ch4", 2.261304e-11),
                           ("v6.0_CH4", "v6.0", "ch4", 2.0385315e-11),
                           ("v6.0_N2O", "v6.0", "n2o", 3.8895116e-13),
                           ("v6.0_CO2_excl_shortcycle", "v6.0", "co2", 1.1799942e-09),
+                          ("v6.0_CO2_org_shortcycle", "v6.0", "co2", 2.4354319e-10),
                           ("TOTALS_nc.zip", "v6.0", "ch4", 2.0385315e-11),
                          ])
 def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
@@ -51,9 +49,10 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
     default_domain = "globaledgar"
     # Data used here is cut down so when org domain longitude from 0.05 - 359.95001
     # is shifted onto -180 - +180 grid, this ends up as -174.85857 - +180.0
-    # Note: this is not the same range as if the full data was used
+    # Note: this is *not* the same range as if the full data was used
 
     if species == "co2":
+        # May decide to change this to split into multiple keys
         source_start = '_'.join(folder.split('_')[-2:])
         source = f"{source_start}_anthro"
     else:
