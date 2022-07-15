@@ -1,11 +1,11 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 from pathlib import Path
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.util import running_in_cloud
 
 
 def standardise_surface(
-    filepaths: Union[str, Path, List[Union[str, Path]]],
+    filepaths: Union[str, Path, List, Tuple],
     data_type: str,
     site: str,
     network: str,
@@ -59,7 +59,8 @@ def standardise_surface(
         for fpath in filepaths:
             gcwerks = False
             if data_type.lower() in ("gc", "gcwerks"):
-                data_type = "gcwerks"
+                metadata["data_type"] = "gcwerks"
+
                 try:
                     filepath = Path(fpath[0])
                 except TypeError:

@@ -61,20 +61,20 @@ class ObsSurface(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            if precision_data is not None:
-                # We'll assume that if we have precision data it's GCWERKS
-                # We don't read anything from the precision filepath so it's name doesn't matter
-                precision_filepath = tmpdir_path.joinpath("precision_data.C")
-                precision_filepath.write_bytes(precision_data)
-                # Create the expected GCWERKS tuple
-                filepath = (filepath, precision_filepath)
-
             meta_kwargs = {k: v for k, v in metadata.items() if k in possible_kwargs}
 
             if not meta_kwargs:
                 raise ValueError("No valid metadata arguments passed, please check documentation.")
 
-            result = ObsSurface.read_file(filepath=filepath, **meta_kwargs)
+            if precision_data is None:
+                result = ObsSurface.read_file(filepath=filepath, **meta_kwargs)
+            else:
+                # We'll assume that if we have precision data it's GCWERKS
+                # We don't read anything from the precision filepath so it's name doesn't matter
+                precision_filepath = tmpdir_path.joinpath("precision_data.C")
+                precision_filepath.write_bytes(precision_data)
+                # Create the expected GCWERKS tuple
+                result = ObsSurface.read_file(filepath=(filepath, precision_filepath), **meta_kwargs)
 
         return result
 
@@ -140,9 +140,9 @@ class ObsSurface(BaseStore):
             sampling_period_seconds = str(float(Timedelta(sampling_period).total_seconds()))
 
             if sampling_period_seconds == "0.0":
-                raise ValueError("Invalid sampling period result, please pass a valid pandas time such as 1m for 1 minute.")
-
-        print(sampling_period, sampling_period_seconds)
+                raise ValueError(
+                    "Invalid sampling period result, please pass a valid pandas time such as 1m for 1 minute."
+                )
 
         # Load the data retrieve object
         parser_fn = load_surface_parser(data_type=data_type)

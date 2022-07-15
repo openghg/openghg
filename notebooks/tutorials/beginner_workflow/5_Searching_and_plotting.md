@@ -30,18 +30,18 @@ os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
 
 ```{code-cell} ipython3
 from openghg.util import retrieve_example_data
-from openghg.client import process_obs
+from openghg.client import standardise_surface
 
 tac_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
 bsd_data = retrieve_example_data(path="timeseries/bsd_example.tar.gz")
 ```
 
 ```{code-cell} ipython3
-process_obs(files=tac_data, data_type="CRDS", site="TAC", network="DECC")
+standardise_surface(filepaths=tac_data, data_type="CRDS", site="TAC", network="DECC")
 ```
 
 ```{code-cell} ipython3
-process_obs(files=bsd_data, data_type="CRDS", site="BSD", network="DECC")
+standardise_surface(filepaths=bsd_data, data_type="CRDS", site="BSD", network="DECC")
 ```
 
 ## Searching

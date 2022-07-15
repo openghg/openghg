@@ -26,7 +26,7 @@ def test_read_data(mocker):
 
     file_metadata = {"filename": "bsd.picarro.1minute.248m.min.dat"}
 
-    result = ObsSurface.read_binary(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+    result = ObsSurface.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
     expected = {
         "processed": {
@@ -66,8 +66,6 @@ def test_read_CRDS_incorrent_sampling_period_raises():
 
 
 def test_read_CRDS():
-    get_bucket(empty=True)
-
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
 
