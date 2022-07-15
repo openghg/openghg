@@ -32,13 +32,6 @@ class ColumnSources(Enum):
     GOSAT = "GOSAT"
 
 
-class ObsTypes(Enum):
-    SURFACE = "ObsSurface"
-    SATELLITE = "ObsSatellite"
-    FLASK = "ObsFlask"
-    MOBILE = "ObsMobile"
-
-
 class EmissionsTypes(Enum):
     """For standardising emissions/flux inputs"""
 
@@ -49,6 +42,15 @@ class EmissionsDatabases(Enum):
     """For extracting and transforming emissions/flux databases"""
 
     EDGAR = "EDGAR"
+
+
+class ObsTypes(Enum):
+    """
+    """
+
+    SURFACE = "ObsSurface"
+    COLUMN = "ObsColumn"
+    MOBILE = "ObsMobile"
 
 
 class DataTypes(Enum):
