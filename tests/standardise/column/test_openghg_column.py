@@ -18,13 +18,14 @@ def test_read_file():
     """
     filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
 
-    # TODO: Update inputs when this has been decided
+    satellite = "GOSAT"
+    domain = "BRAZIL"
+    species = "methane"
+
     data = parse_openghg(filepath,
-                         instrument="tanso-fts",
-                         species="ch4",
-                         domain="BRAZIL",
-                         network="GOSAT",
-                         site="GOSAT-BRAZIL"
+                         satellite=satellite,
+                         domain=domain,
+                         species=species,
     )
 
     assert "ch4" in data
@@ -40,17 +41,22 @@ def test_read_file():
     assert np.isclose(xch4[0], 1844.2019)
     assert np.isclose(xch4[-1], 1762.8855)
 
-    # co2_variability = data_co2["co2_variability"]
-    # assert np.isclose(co2_variability[0], 0.843)
-    # assert np.isclose(co2_variability[-1], 0.682)
+    expected_metadata = {
+        "satellite": "GOSAT",
+        "species": "ch4",
+        "domain": domain,
+        "selection": domain,
+        "instrument": "TANSO-FTS",
+        "data_owner": 'University of Leicester, Rob Parker',
+        "data_owner_email" : 'rjp23@leicester.ac.uk',
+    }
 
-    # attributes = data_co2.attrs
+    metadata = output_ch4["metadata"]
+    assert metadata.items() >= expected_metadata.items()
 
-    # metadata_keys = metadata_default_keys()
-    # expected_metadata = {param: value for param, value in attributes.items() if param in metadata_keys}
+    attributes = data_ch4.attrs
+    assert attributes.items() >= expected_metadata.items()
 
-    # metadata = output_co2["metadata"]
-    # assert metadata.items() >= expected_metadata.items()
 
 
 # def test_read_file_no_attr():

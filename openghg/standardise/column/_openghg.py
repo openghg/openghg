@@ -5,32 +5,46 @@ import xarray as xr
 
 def parse_openghg(
     data_filepath: Union[str, Path],
-    instrument: Optional[str] = None,
-    species: Optional[str] = None,
+    satellite: Optional[str] = None,
     domain: Optional[str] = None,
-    network: Optional[str] = None,
+    selection: Optional[str] = None,
     site: Optional[str] = None,
-    # **kwargs: str,
+    species: Optional[str] = None,
+    network: Optional[str] = None,
+    instrument: Optional[str] = None,
+    platform: str = "satellite",
+    **kwargs: str,
 ) -> Dict:
     """
     Parse and extract data from pre-formatted netcdf file which already
     matches expected OpenGHG format.
-
-    At the moment this must also be for a site known to OpenGHG. See
-    'acrg_site_info.json' file.
 
     The arguments specified below are the metadata needed to store this 
     surface observation file within the object store. If these keywords are
     not included within the attributes of the netcdf file being passed then
     these arguments must be specified.
 
+    For column data this can either be a satellite (e.g. satellite="GOSAT") or a
+    site (site="RUN", network="TCCON"). Either can be specified or this function
+    will attempt to extract this from the data file.
+
     Args:
         data_filepath: 
-        instrument: Satellite/Column instrument used
+        satellite: Name of satellite
+        domain: For satellite only. If data has been selected on an area include the
+            identifier name for domain covered. This can map to previously defined domains
+            (see domain_info.json) or a newly defined domain.
+        selection: For satellite only, identifier for any data selection which has been
+            performed on satellite data. This can be based on any form of filtering, binning etc.
+            but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
+            If not specified, domain will be used.
+        site : Site code/name. Can include satellite OR site.
         species: Species name or synonym e.g. "ch4"
-        domain: 
-        network: Name of network or satellite e.g. "GOSAT", "TCCON"
-        site: Site code/name e.g. "TAC" (for Tacolneston)
+        instrument: Instrument name e.g. "TANSO-FTS"
+        network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
+        platform: Type of platform. Should be one of:
+            - "satellite"
+            - "site"
         kwargs: Any additional attributes to be associated with the data.
 
     Returns:
@@ -51,47 +65,115 @@ def parse_openghg(
     # Extract current attributes from input data
     attributes = data.attrs
 
+    if satellite is not None or platform == "satellite":
+        metadata_required = metadata_default_satellite_column()
+        metadata_required.remove("selection")
+        platform = "satellite"
+    elif site is not None or platform == "site":
+        metadata_required = metadata_default_site_column()
+        platform = "site"
+
+    if platform == "satellite":
+        if domain is None:
+            raise ValueError("For satellite data, please specify selected domain."
+             "This can be 'global' if no selection has been made.")
+
     # Define metadata based on input arguments.
     metadata_initial = {
+        "site": site,
+        "satellite": satellite,
         "instrument": instrument,
         "species": species,
         "domain": domain,
         "network": network,
-        "site": site,
+        "platform": platform,
     }
 
-    # TODO: Decide if to allow any of these to be missed.
+    # TODO: Tidy this up a bit (maybe split some into a separate function?)
+    # and incorporate kwargs
 
+    metadata = {}
+    key_translation = satellite_attribute_translation()
     # Populate metadata with values from attributes if inputs have not been passed
     for key, value in metadata_initial.items():
-        if value is None:
+        if key in metadata_required:
+            # Extract equivalent key from passed file if present using translation
             try:
-                metadata_initial[key] = attributes[key]
+                attr_keys = key_translation[key]
             except KeyError:
+                attr_keys = key
+
+            # Make sure this is a list for cases with multiple options
+            if isinstance(attr_keys, str):
+                attr_keys = [attr_keys]
+
+            if value is None:
+                # Extract value from attributes if this has not been specified
+                for attr_key in attr_keys:
+                    try:
+                        metadata[key] = attributes[attr_key]
+                    except KeyError:
+                        continue
+                    else:
+                        break
+                else:
+                    raise ValueError(f"Input '{key}' must be specified if not included in data attributes.")
+            else:
+                # If attributes are present, check these match to inputs passed
+                for attr_key in attr_keys:
+                    if attr_key in key_translation and attr_key in attributes:
+                        attributes_value = attributes[attr_key]
+                        if value != attributes_value:
+                            # If inputs do not match attribute values, raise a ValueError
+                            raise ValueError(
+                                f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
+                            )
+                metadata[key] = value
+
+    # metadata = cast(Dict[str, str], metadata_initial)
+
+    if selection is not None:
+        metadata["selection"] = selection
+    elif platform == "satellite":
+        metadata["selection"] = domain
+
+    # TODO: Add loose domain checking? If known domain is specified, make sure points
+    # are within this for example.
+
+    species = define_species_label(metadata["species"])[0]
+    metadata["species"] = species
+
+    if "site" in metadata:
+        metadata["site"] = clean_string(metadata["site"])    
+
+    # Define remaining keys needed for metadata
+    metadata_needed = [param for param in metadata_required if param not in metadata]
+
+    for key in metadata_needed:
+        try:
+            attr_keys = key_translation[key]
+        except KeyError:
+            attr_keys = key
+
+        if isinstance(attr_keys, str):
+            attr_keys = [attr_keys]
+
+        for attr_key in attr_keys:
+            for attr_key in attr_keys:
+                try:
+                    metadata[key] = attributes[attr_key]
+                except KeyError:
+                    continue
+                else:
+                    break
+            else:
                 raise ValueError(f"Input '{key}' must be specified if not included in data attributes.")
-        else:
-            # If attributes are present, check these match to inputs passed
-            if key in attributes:
-                attributes_value = attributes[key]
-                if value != attributes_value:
-                    # If inputs do not match attribute values, raise a ValueError
-                    raise ValueError(
-                        f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
-                    )
 
-    metadata = cast(Dict[str, str], metadata_initial)
-
-    # # Define remaining keys needed for metadata
-    # metadata_needed = metadata_default_keys()
-    # metadata_needed = [param for param in metadata_needed if param not in metadata]
-
-
-    metadata["site"] = clean_string(metadata["site"])
-    metadata["species"] = define_species_label(metadata["species"])[0]
-
-    # Update attributes to match metadata after cleaning
-    attributes["site"] = metadata["site"]
-    attributes["species"] = metadata["species"]
+    # In GOSAT UoL files (and copied into our files)
+    #  - platform = "GOSAT"; sensor = "TANSO-FTS"
+    # In TROPOMI S5P_OFFL_...nc files
+    #  - platform = 'S5P'; sensor = "TROPOMI"
+    # Could "platform" --> "satellite" perhaps?
 
     # site = metadata["site"]
     # network = metadata["network"]
@@ -165,8 +247,62 @@ def parse_openghg(
     #             f"Cannot extract or infer '{param}' parameter needed for metadata from stored data, attributes or keywords"
     #         )
 
+    # Update attributes to match metadata after cleaning
+    attributes.update(metadata)
+
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
     # gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
     return gas_data
+
+
+def metadata_default_satellite_column():
+    """
+    Define default keys for satellite column data
+    """
+    default_keys = [
+        "satellite",
+        "species",
+        "network",
+        "instrument",
+        "platform",
+        "domain",
+        "selection",
+        "data_owner",
+        "data_owner_email",
+    ]
+
+    return default_keys
+
+
+def metadata_default_site_column():
+    """
+    Define default keys for site column data
+    """
+    default_keys = [
+        "site",
+        "species",
+        "network",
+        "instrument",
+        "platform",
+        "data_owner",
+        "data_owner_email",
+    ]
+
+    return default_keys
+
+
+def satellite_attribute_translation():
+    """
+    """
+    # Current values within (at least) GOSAT, TROPOMI files
+    # - values can contain lists as well as single string values
+    keywords = {"instrument": "sensor",
+                "satellite": "platform",
+                "network": "platform",
+                "data_owner": "creator_name",
+                "data_owner_email": "creator_email",
+    }
+
+    return keywords

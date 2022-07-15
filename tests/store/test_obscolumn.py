@@ -15,13 +15,16 @@ def test_read_openghg_format():
     filename = "gosat-fts_gosat_20170318_ch4-column.nc"
     datafile = get_column_datapath(filename=filename)
 
+    satellite = "GOSAT"
+    domain = "BRAZIL"
+    species = "methane"
+
     results = ObsColumn.read_file(filepath=datafile,
                                   data_type="OPENGHG",
-                                  instrument="tanso-fts",
-                                  species="ch4",
-                                  domain="BRAZIL",
-                                  network="GOSAT",
-                                  site="GOSAT-BRAZIL")
+                                  satellite=satellite,
+                                  domain=domain,
+                                  species=species,
+                                  )
 
     # Output style from ObsSurface - may want to use for ObsColumn as well
     # uuid = results["processed"][filename]["ch4"]["uuid"]

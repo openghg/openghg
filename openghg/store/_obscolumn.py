@@ -24,13 +24,15 @@ class ObsColumn(BaseStore):
     @staticmethod
     def read_file(
         filepath: Union[str, Path],
-        instrument: Optional[str],
-        species: Optional[str],
-        domain: Optional[str],
-        network: Optional[str],
-        site: Optional[str],
+        satellite: Optional[str] = None,
+        domain: Optional[str] = None,
+        selection: Optional[str] = None,
+        site: Optional[str] = None,
+        species: Optional[str] = None,
+        network: Optional[str] = None,
+        instrument: Optional[str] = None,
+        platform: str = "satellite",
         data_type: str = "openghg",
-        measurement_type: Optional[str] = None,
         overwrite: bool = False,
     ) -> Dict:
         """Read column observation file
@@ -56,11 +58,14 @@ class ObsColumn(BaseStore):
             load_column_parser,
         )
 
-        instrument = clean_string(instrument)
+        # TODO: Evaluate which inputs need cleaning (if any)
+        satellite = clean_string(satellite)
+        site = clean_string(site)
         species = clean_string(species)
         domain = clean_string(domain)
         network = clean_string(network)
-        site = clean_string(site)
+        instrument = clean_string(instrument)
+        platform = clean_string(platform)
 
         filepath = Path(filepath)
 
@@ -85,21 +90,30 @@ class ObsColumn(BaseStore):
 
         # Define parameters to pass to the parser function
         param = {"data_filepath": filepath,
-                 "instrument": instrument,
-                 "species": species,
+                 "satellite": satellite,
                  "domain": domain,
+                 "selection": selection,
+                 "site": site,
+                 "species": species,
                  "network": network,
-                 "site": site}
+                 "instrument": instrument,
+                 "platform": platform
+        }
 
         obs_data = parser_fn(**param)
 
+        # TODO: Add in schema and checks for ObsColumn
         # # Checking against expected format for ObsColumn
         # for split_data in obs_data.values():
         #     col_data = split_data["data"]
         #     ObsColumn.validate_data(col_data)
 
-        required = ("instrument", "species", "domain")
-        lookup_results = datasource_lookup(metastore=metastore, data=obs_data, required_keys=required)
+        # TODO: Do we need to do include a split here of some kind, since
+        # this could be "site" or "satellite" keys.
+        # platform = list(obs_data.keys())[0]["metadata"]["platform"]
+
+        required = ("satellite", "selection", "domain", "site", "species", "network")
+        lookup_results = datasource_lookup(metastore=metastore, data=obs_data, required_keys=required, min_keys=3)
 
         data_type = "timeseries"
         datasource_uuids = assign_data(
@@ -199,13 +213,13 @@ class ObsColumn(BaseStore):
     #     return datasource_uuids
 
     # @staticmethod
-    # def schema() -> DataSchema:
+    # def schema(species: str, platform: str = "satellite") -> DataSchema:
     #     """
     #     Define schema for emissions Dataset.
 
-    #     Includes flux/emissions for each time and position:
-    #         - "flux"
-    #             - expected dimensions: ("time", "lat", "lon")
+    #     Includes column data for each time point:
+    #         - standardised species and column name (e.g. "xch4")
+    #         - expected dimensions: ("time")
 
     #     Expected data types for all variables and coordinates also included.
 
@@ -241,32 +255,3 @@ class ObsColumn(BaseStore):
     #     """
     #     data_schema = Emissions.schema()
     #     data_schema.validate_data(data)
-
-    # def lookup_uuid(self, instrument: str, species: str, domain: str, network: str) -> Union[str, bool]:
-    #     """Perform a lookup for the UUID of a Datasource
-
-    #     Args:
-    #         species: Site code
-    #         domain: Domain
-    #         model: Model name
-    #         height: Height
-    #     Returns:
-    #         str or dict: UUID or False if no entry
-    #     """
-    #     uuid = self._datasource_table[species][source][domain][date]
-
-    #     return uuid if uuid else False
-
-    # def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
-    #     """Record a UUID of a Datasource in the datasource table
-
-    #     Args:
-    #         site: Site code
-    #         domain: Domain
-    #         model: Model name
-    #         height: Height
-    #         uuid: UUID of Datasource
-    #     Returns:
-    #         None
-    #     """
-    #     self._datasource_table[species][source][domain][date] = uuid
