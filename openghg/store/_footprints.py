@@ -328,23 +328,3 @@ class Footprints(BaseStore):
                                         high_time_res=high_time_res,
                                         short_lifetime=short_lifetime)
         data_schema.validate_data(data)
-
-    def search(
-        self,
-        site: str,
-        network: str,
-        start_date: Optional[Union[str, Timestamp]],
-        end_date: Optional[Union[str, Timestamp]],
-    ) -> NoReturn:
-        """Search for a footprints from a specific site and network, return a dictionary of data
-        so the user can choose
-        """
-        raise NotImplementedError()
-
-    def retrieve(self, uuid: str, dates: str) -> NoReturn:
-        """"""
-        raise NotImplementedError()
-
-    def _get_metdata(self) -> NoReturn:
-        """This retrieves the metadata for this footprints"""
-        raise NotImplementedError()
