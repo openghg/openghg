@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.g46332bf.dirty documentation</title>
+    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.gd0241bc.dirty documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g46332bf.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gd0241bc.dirty documentation</p>
   
 </a>
     
@@ -208,7 +208,7 @@
     <span class="s2">&quot;get_all_object_names&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_object_names&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_bucket&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_local_bucket&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_bucket&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_object&quot;</span><span class="p">,</span>
     <span class="s2">&quot;set_object&quot;</span><span class="p">,</span>
     <span class="s2">&quot;set_object_from_json&quot;</span><span class="p">,</span>
@@ -384,8 +384,7 @@
 
 
 <div class="viewcode-block" id="get_object_from_json"><a class="viewcode-back" href="../../../api/api_objectstore.html#openghg.objectstore.get_object_from_json">[docs]</a><span class="k">def</span> <span class="nf">get_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;Removes the daterange from the passed key and uses the reduced</span>
-<span class="sd">    key to get an object from the object store.</span>
+    <span class="sd">&quot;&quot;&quot;Return an object constructed from JSON stored at key.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket containing data</span>
@@ -413,31 +412,22 @@
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/api_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/api_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">(</span><span class="n">empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Find and return a new bucket in the object store called</span>
 <span class="sd">    &#39;bucket_name&#39;. If &#39;create_if_needed&#39; is True</span>
 <span class="sd">    then the bucket will be created if it doesn&#39;t exist. Otherwise,</span>
 <span class="sd">    if the bucket does not exist then an exception will be raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">bucket_path</span> <span class="o">=</span> <span class="n">get_openghg_local_path</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">bucket_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="n">bucket_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">bucket_path</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="get_local_bucket"><a class="viewcode-back" href="../../../api/api_objectstore.html#openghg.objectstore.get_local_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_local_bucket</span><span class="p">(</span><span class="n">empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Creates and returns a local bucket</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        empty: If True return an empty bucket</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        str: Path to local bucket</span>
-<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">shutil</span>
 
-    <span class="n">local_buckets_dir</span> <span class="o">=</span> <span class="n">get_openghg_local_path</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">local_buckets_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;No environment variable OPENGHG_PATH found, please set to use the local object store&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">local_buckets_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">local_buckets_dir</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">local_buckets_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>

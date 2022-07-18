@@ -35,10 +35,10 @@ Often, when retrieving data for comparison there will be preferences between the
 To demonstrate this we will start by loading data from the Bilsdale ("BSD") site within the DECC network with measurements of the same species at multiple inlet heights.
 
 ```{code-cell} ipython3
-from openghg.client import process_obs
+from openghg.client import standardise_surface
 
 bsd_filepaths = ["../data/DECC/bsd.picarro.1minute.42m.min.dat", "../data/DECC/bsd.picarro.1minute.108m.min.dat", "../data/DECC/bsd.picarro.1minute.248m.min.dat"]
-decc_results = process_obs(files=bsd_filepaths, data_type="CRDS", site="bsd", network="DECC")
+decc_results = standardise_surface(filepaths=bsd_filepaths, data_type="CRDS", site="bsd", network="DECC")
 ```
 
 ```{code-cell} ipython3
@@ -54,7 +54,7 @@ from openghg.retrieve import get_obs_surface
 
 obs_data_42m = get_obs_surface(site="bsd", species="co", inlet="42m")
 obs_data_108m = get_obs_surface(site="bsd", species="co", inlet="108m")
-obs_data_248m = get_obs_surface(site="bsd", species="co", inlet="108m")
+obs_data_248m = get_obs_surface(site="bsd", species="co", inlet="248m")
 
 ## Uncomment the cell below to see what happens if we don't include the inlet details.
 # obs_data = get_obs_surface(site="bsd", species="co")

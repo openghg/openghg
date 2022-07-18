@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.g46332bf.dirty documentation</title>
+    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.gd0241bc.dirty documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g46332bf.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gd0241bc.dirty documentation</p>
   
 </a>
     
@@ -202,8 +202,9 @@
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Parses a CRDS data file and creates a dictionary of xarray Datasets</span>
 <span class="sd">    ready for storage in the object store.</span>
@@ -214,8 +215,9 @@
 <span class="sd">        network: Network name</span>
 <span class="sd">        inlet: Inlet height</span>
 <span class="sd">        instrument: Instrument name</span>
-<span class="sd">        sampling_period: Sampling period e.g. 2 hour: 2H, 2 minute: 2m</span>
+<span class="sd">        sampling_period: Sampling period in seconds</span>
 <span class="sd">        measurement_type: Measurement type e.g. insitu, flask</span>
+<span class="sd">        drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of gas data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -235,6 +237,7 @@
         <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
         <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
         <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
+        <span class="n">drop_duplicates</span><span class="o">=</span><span class="n">drop_duplicates</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># Ensure the data is CF compliant</span>
@@ -249,8 +252,9 @@
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Read the datafile passed in and extract the data we require.</span>
 
@@ -260,8 +264,9 @@
 <span class="sd">        network: Network name</span>
 <span class="sd">        inlet: Inlet height</span>
 <span class="sd">        instrument: Instrument name</span>
-<span class="sd">        sampling_period: Sampling period including the unit (using pandas frequency aliases like &#39;1H&#39; or &#39;1min&#39;)</span>
+<span class="sd">        sampling_period: Sampling period in seconds</span>
 <span class="sd">        measurement_type: Measurement type e.g. insitu, flask</span>
+<span class="sd">        drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of gas data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -310,8 +315,10 @@
 
     <span class="n">dupes</span> <span class="o">=</span> <span class="n">find_duplicate_timestamps</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dupes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dupes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">drop_duplicates</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Duplicate dates detected: </span><span class="si">{</span><span class="n">dupes</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)]</span>
 
     <span class="c1"># Get the number of gases in dataframe and number of columns of data present for each gas</span>
     <span class="n">n_gases</span><span class="p">,</span> <span class="n">n_cols</span> <span class="o">=</span> <span class="n">_gas_info</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
@@ -325,10 +332,12 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
 
     <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sampling_period</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
         <span class="c1"># Compare against value extracted from the file name</span>
-        <span class="n">file_sampling_period</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">])</span>
+        <span class="n">file_sampling_period</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">]))</span>
+        <span class="n">given_sampling_period</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">)</span>
 
-        <span class="n">comparison_seconds</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sampling_period</span> <span class="o">-</span> <span class="n">file_sampling_period</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">comparison_seconds</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">given_sampling_period</span> <span class="o">-</span> <span class="n">file_sampling_period</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
         <span class="n">tolerance_seconds</span> <span class="o">=</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="n">comparison_seconds</span> <span class="o">&gt;</span> <span class="n">tolerance_seconds</span><span class="p">:</span>

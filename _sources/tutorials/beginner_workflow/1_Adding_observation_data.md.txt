@@ -120,9 +120,9 @@ As this data is measured in-situ, this is classed as a surface site and we need 
 This is shown below:
 
 ```{code-cell} ipython3
-from openghg.client import process_obs
+from openghg.client import standardise_surface
 
-decc_results = process_obs(files=tac_data, data_type="CRDS", site="TAC", network="DECC")
+decc_results = standardise_surface(filepaths=tac_data, data_type="CRDS", site="TAC", network="DECC")
 ```
 
 ```{code-cell} ipython3
@@ -172,7 +172,7 @@ We can add these files to the object store in the same way as the DECC data by i
  - network - `"AGAGE"`
 
 ```{code-cell} ipython3
-agage_results = process_obs(files=capegrim_tuple, data_type="GCWERKS", site="CGO",
+agage_results = standardise_surface(filepaths=capegrim_tuple, data_type="GCWERKS", site="CGO",
                               network="AGAGE", instrument="medusa")
 ```
 
@@ -315,5 +315,5 @@ You can also pass any of `title`, `xlabel`, `ylabel` and `units` to the `plot_ti
 If you used the `tmp_dir` as a location for your object store at the start of the tutorial you can run the cell below to remove any files that were created to make sure any persistant data is refreshed when the notebook is re-run.
 
 ```{code-cell} ipython3
-# tmp_dir.cleanup()
+tmp_dir.cleanup()
 ```

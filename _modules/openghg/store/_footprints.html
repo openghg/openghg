@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.g46332bf.dirty documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.gd0241bc.dirty documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g46332bf.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gd0241bc.dirty documentation</p>
   
 </a>
     
@@ -198,6 +198,8 @@
 
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Footprints&quot;</span><span class="p">]</span>
 
@@ -208,6 +210,166 @@
     <span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;Footprints&quot;</span>
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;62db5bdf-c88d-4e56-97f4-40336d37f18c&quot;</span>
     <span class="n">_metakey</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">/metastore&quot;</span>
+
+<div class="viewcode-block" id="Footprints.read_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.read_data">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Ready a footprint from binary data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            binary_data: Footprint data</span>
+<span class="sd">            metadata: Dictionary of metadata</span>
+<span class="sd">            file_metadat: File metadata</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: UUIDs of Datasources data has been assigned to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpdir</span><span class="p">:</span>
+            <span class="n">tmpdir_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">file_metadata</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;We require a filename key for metadata read.&quot;</span><span class="p">)</span>
+
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">tmpdir_path</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="n">filepath</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">binary_data</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span></div>
+
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -&gt; Dict:</span>
+    <span class="c1">#     &quot;&quot;&quot;Ready a footprint from binary data</span>
+
+    <span class="c1">#     Args:</span>
+    <span class="c1">#         binary_data: Footprint data</span>
+    <span class="c1">#         metadata: Dictionary of metadata</span>
+    <span class="c1">#         file_metadat: File metadata</span>
+    <span class="c1">#     Returns:</span>
+    <span class="c1">#         dict: UUIDs of Datasources data has been assigned to</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     from openghg.store import assign_data, infer_date_range, load_metastore, datasource_lookup</span>
+
+    <span class="c1">#     fp = Footprints.load()</span>
+
+    <span class="c1">#     # Load in the metadata store</span>
+    <span class="c1">#     metastore = load_metastore(key=fp._metakey)</span>
+
+    <span class="c1">#     sha1_hash = file_metadata[&quot;sha1_hash&quot;]</span>
+    <span class="c1">#     overwrite = metadata.get(&quot;overwrite&quot;, False)</span>
+
+    <span class="c1">#     if sha1_hash in fp._file_hashes and not overwrite:</span>
+    <span class="c1">#         print(</span>
+    <span class="c1">#             f&quot;This file has been uploaded previously with the filename : {fp._file_hashes[sha1_hash]} - skipping.&quot;</span>
+    <span class="c1">#         )</span>
+
+    <span class="c1">#     data_buf = BytesIO(binary_data)</span>
+    <span class="c1">#     fp_data = open_dataset(data_buf)</span>
+
+    <span class="c1">#     fp_time = fp_data.time</span>
+    <span class="c1">#     period = metadata.get(&quot;period&quot;)</span>
+    <span class="c1">#     continuous = metadata[&quot;continous&quot;]</span>
+    <span class="c1">#     high_spatial_res = metadata[&quot;high_spatial_res&quot;]</span>
+    <span class="c1">#     species = metadata[&quot;species&quot;]</span>
+    <span class="c1">#     filename = file_metadata[&quot;filename&quot;]</span>
+
+    <span class="c1">#     site = metadata[&quot;site&quot;]</span>
+    <span class="c1">#     domain = metadata[&quot;domain&quot;]</span>
+    <span class="c1">#     model = metadata[&quot;model&quot;]</span>
+    <span class="c1">#     height = metadata[&quot;height&quot;]</span>
+
+    <span class="c1">#     start_date, end_date, period_str = infer_date_range(</span>
+    <span class="c1">#         fp_time, filepath=filename, period=period, continuous=continuous</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1">#     metadata[&quot;start_date&quot;] = str(start_date)</span>
+    <span class="c1">#     metadata[&quot;end_date&quot;] = str(end_date)</span>
+    <span class="c1">#     metadata[&quot;time_period&quot;] = period_str</span>
+
+    <span class="c1">#     metadata[&quot;max_longitude&quot;] = round(float(fp_data[&quot;lon&quot;].max()), 5)</span>
+    <span class="c1">#     metadata[&quot;min_longitude&quot;] = round(float(fp_data[&quot;lon&quot;].min()), 5)</span>
+    <span class="c1">#     metadata[&quot;max_latitude&quot;] = round(float(fp_data[&quot;lat&quot;].max()), 5)</span>
+    <span class="c1">#     metadata[&quot;min_latitude&quot;] = round(float(fp_data[&quot;lat&quot;].min()), 5)</span>
+
+    <span class="c1">#     # TODO: Pull out links to underlying data format into a separate format function</span>
+    <span class="c1">#     #  - high_spatial_res - data vars - &quot;fp_low&quot;, &quot;fp_high&quot;, coords - &quot;lat_high&quot;, &quot;lon_high&quot;</span>
+    <span class="c1">#     #  - high_time_res - data vars - &quot;fp_HiTRes&quot;, coords - &quot;H_back&quot;</span>
+
+    <span class="c1">#     metadata[&quot;spatial_resolution&quot;] = &quot;standard_spatial_resolution&quot;</span>
+
+    <span class="c1">#     if high_spatial_res:</span>
+    <span class="c1">#         try:</span>
+    <span class="c1">#             metadata[&quot;max_longitude_high&quot;] = round(float(fp_data[&quot;lon_high&quot;].max()), 5)</span>
+    <span class="c1">#             metadata[&quot;min_longitude_high&quot;] = round(float(fp_data[&quot;lon_high&quot;].min()), 5)</span>
+    <span class="c1">#             metadata[&quot;max_latitude_high&quot;] = round(float(fp_data[&quot;lat_high&quot;].max()), 5)</span>
+    <span class="c1">#             metadata[&quot;min_latitude_high&quot;] = round(float(fp_data[&quot;lat_high&quot;].min()), 5)</span>
+
+    <span class="c1">#             metadata[&quot;spatial_resolution&quot;] = &quot;high_spatial_resolution&quot;</span>
+    <span class="c1">#         except KeyError:</span>
+    <span class="c1">#             raise KeyError(&quot;Expected high spatial resolution. Unable to find lat_high or lon_high data.&quot;)</span>
+
+    <span class="c1">#     if species == &quot;co2&quot;:</span>
+    <span class="c1">#         # Expect co2 data to have high time resolution</span>
+    <span class="c1">#         high_time_res = True</span>
+
+    <span class="c1">#     metadata[&quot;time_resolution&quot;] = &quot;standard_time_resolution&quot;</span>
+
+    <span class="c1">#     if high_time_res:</span>
+    <span class="c1">#         if &quot;fp_HiTRes&quot; in fp_data:</span>
+    <span class="c1">#             metadata[&quot;time_resolution&quot;] = &quot;high_time_resolution&quot;</span>
+    <span class="c1">#         else:</span>
+    <span class="c1">#             raise KeyError(&quot;Expected high time resolution. Unable to find fp_HiTRes data.&quot;)</span>
+
+    <span class="c1">#     metadata[&quot;heights&quot;] = [float(h) for h in fp_data.height.values]</span>
+    <span class="c1">#     # Do we also need to save all the variables we have available in this footprints?</span>
+    <span class="c1">#     metadata[&quot;variables&quot;] = list(fp_data.keys())</span>
+
+    <span class="c1">#     # if model_params is not None:</span>
+    <span class="c1">#     #     metadata[&quot;model_parameters&quot;] = model_params</span>
+
+    <span class="c1">#     # Set the attributes of this Dataset</span>
+    <span class="c1">#     fp_data.attrs = {&quot;author&quot;: &quot;OpenGHG Cloud&quot;, &quot;processed&quot;: str(timestamp_now())}</span>
+
+    <span class="c1">#     # This might seem longwinded now but will help when we want to read</span>
+    <span class="c1">#     # more than one footprints at a time</span>
+    <span class="c1">#     key = &quot;_&quot;.join((site, domain, model, height))</span>
+
+    <span class="c1">#     footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)</span>
+    <span class="c1">#     footprint_data[key][&quot;data&quot;] = fp_data</span>
+    <span class="c1">#     footprint_data[key][&quot;metadata&quot;] = metadata</span>
+
+    <span class="c1">#     # These are the keys we will take from the metadata to search the</span>
+    <span class="c1">#     # metadata store for a Datasource, they should provide as much detail as possible</span>
+    <span class="c1">#     # to uniquely identify a Datasource</span>
+    <span class="c1">#     required = (&quot;site&quot;, &quot;model&quot;, &quot;height&quot;, &quot;domain&quot;)</span>
+    <span class="c1">#     lookup_results = datasource_lookup(metastore=metastore, data=footprint_data, required_keys=required)</span>
+
+    <span class="c1">#     data_type = &quot;footprints&quot;</span>
+    <span class="c1">#     datasource_uuids: Dict[str, Dict] = assign_data(</span>
+    <span class="c1">#         data_dict=footprint_data,</span>
+    <span class="c1">#         lookup_results=lookup_results,</span>
+    <span class="c1">#         overwrite=overwrite,</span>
+    <span class="c1">#         data_type=data_type,</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1">#     fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)</span>
+
+    <span class="c1">#     # Record the file hash in case we see this file again</span>
+    <span class="c1">#     fp._file_hashes[sha1_hash] = filename</span>
+
+    <span class="c1">#     fp.save()</span>
+
+    <span class="c1">#     metastore.close()</span>
+
+    <span class="c1">#     return datasource_uuids</span>
+
+    <span class="c1"># def _store_data(data: Dataset, metadata: Dict):</span>
+    <span class="c1">#     &quot;&quot;&quot; Takes an xarray Dataset</span>
+
+    <span class="c1">#     Args:</span>
+    <span class="c1">#         data: xarray Dataset</span>
+    <span class="c1">#         metadata: Metadata dict</span>
+    <span class="c1">#     Returns:</span>
+
+    <span class="c1">#     &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Footprints.read_file"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.read_file">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
@@ -253,7 +415,6 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: UUIDs of Datasources data has been assigned to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
         <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">open_dataset</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
             <span class="n">hash_file</span><span class="p">,</span>
@@ -290,7 +451,9 @@
                 <span class="n">high_time_res</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">if</span> <span class="n">short_lifetime</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">species</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;When indicating footprint is for short lived species, &#39;species&#39; input must be included&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;When indicating footprint is for short lived species, &#39;species&#39; input must be included&quot;</span>
+            <span class="p">)</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">short_lifetime</span> <span class="ow">and</span> <span class="n">species</span><span class="p">:</span>
             <span class="n">lifetime</span> <span class="o">=</span> <span class="n">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">lifetime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -300,11 +463,12 @@
 
         <span class="c1"># Checking against expected format for footprints</span>
         <span class="c1"># Based on configuration (some user defined, some inferred)</span>
-        <span class="n">Footprints</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">fp_data</span><span class="p">,</span>
-                                 <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
-                                 <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
-                                 <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
-                                 <span class="p">)</span>
+        <span class="n">Footprints</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span>
+            <span class="n">fp_data</span><span class="p">,</span>
+            <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
+            <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
+            <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Need to read the metadata from the footprints and then store it</span>
         <span class="c1"># Do we need to chunk the footprints / will a Datasource store it correctly?</span>
@@ -402,11 +566,12 @@
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 
 <div class="viewcode-block" id="Footprints.schema"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.schema">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span><span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-               <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-               <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-               <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-               <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span>
+        <span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define schema for footprint Dataset.</span>
 
@@ -433,9 +598,11 @@
         <span class="c1"># Names of data variables and associated dimensions (as a tuple)</span>
         <span class="n">data_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># Internal data types of data variables and coordinates</span>
-        <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>  <span class="c1"># Covers np.float16, np.float32, np.float64 types</span>
-                  <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>
-                  <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">}</span>
+        <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>  <span class="c1"># Covers np.float16, np.float32, np.float64 types</span>
+            <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span>
+            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">,</span>
+        <span class="p">}</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">high_time_res</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">high_spatial_res</span><span class="p">:</span>
             <span class="c1"># Includes standard footprint variable</span>
@@ -489,17 +656,18 @@
             <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
             <span class="n">dtypes</span><span class="p">[</span><span class="s2">&quot;mean_age_particles_w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span>
 
-        <span class="n">data_format</span> <span class="o">=</span> <span class="n">DataSchema</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span>
-                                 <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">)</span>
+        <span class="n">data_format</span> <span class="o">=</span> <span class="n">DataSchema</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span> <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data_format</span></div>
 
 <div class="viewcode-block" id="Footprints.validate_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.validate_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
-                      <span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                      <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                      <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                      <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">validate_data</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
+        <span class="n">particle_locations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate data against Footprint schema - definition from</span>
 <span class="sd">        Footprints.schema(...) method.</span>
@@ -515,10 +683,12 @@
 <span class="sd">            Raises a ValueError with details if the input data does not adhere</span>
 <span class="sd">            to the Footprints schema.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data_schema</span> <span class="o">=</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">particle_locations</span><span class="o">=</span><span class="n">particle_locations</span><span class="p">,</span>
-                                        <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
-                                        <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
-                                        <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">)</span>
+        <span class="n">data_schema</span> <span class="o">=</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span>
+            <span class="n">particle_locations</span><span class="o">=</span><span class="n">particle_locations</span><span class="p">,</span>
+            <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
+            <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
+            <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">data_schema</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Footprints.search"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.Footprints.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span>

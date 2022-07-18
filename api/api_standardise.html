@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Standardisation functions &#8212; OpenGHG 0+untagged.1.g46332bf.dirty documentation</title>
+    <title>Standardisation functions &#8212; OpenGHG 0+untagged.1.gd0241bc.dirty documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -71,7 +71,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g46332bf.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gd0241bc.dirty documentation</p>
   
 </a>
     
@@ -316,7 +316,7 @@ the processed data has been assigned to</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.surface.parse_crds">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_crds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_crds.html#parse_crds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_crds" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_crds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_duplicates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_crds.html#parse_crds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_crds" title="Permalink to this definition">#</a></dt>
 <dd><p>Parses a CRDS data file and creates a dictionary of xarray Datasets
 ready for storage in the object store.</p>
 <dl class="field-list simple">
@@ -327,8 +327,9 @@ ready for storage in the object store.</p>
 <li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
 <li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet height</p></li>
 <li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Sampling period e.g. 2 hour: 2H, 2 minute: 2m</p></li>
+<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Sampling period in seconds</p></li>
 <li><p><strong>measurement_type</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Measurement type e.g. insitu, flask</p></li>
+<li><p><strong>drop_duplicates</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Drop measurements at duplicate timestamps, keeping the first.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -468,7 +469,7 @@ to the Datasource allowing more detailed searching of data.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Dictionary containing data, metadata and attributes</p></li>
 <li><p><strong>site</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Site code</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Number of seconds for which air
+<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Number of seconds for which air
 sample is taken. Only for time variable attribute</p></li>
 <li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Network name</p></li>
 </ul>
@@ -503,7 +504,7 @@ add to the file header (e.g. {“Contact”: “Contact_Name”})</p></li>
 <li><p><strong>units</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – This routine will try to guess the units
 unless this is specified. Options are in units_interpret</p></li>
 <li><p><strong>scale</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Calibration scale for species.</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Number of seconds for which air
+<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Number of seconds for which air
 sample is taken. Only for time variable attribute</p></li>
 <li><p><strong>date_range</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – Start and end date for output
 If you only want an end date, just put a very early start date

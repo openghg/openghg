@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 4: Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.g46332bf.dirty documentation</title>
+    <title>Workflow 4: Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.gd0241bc.dirty documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -73,7 +73,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g46332bf.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gd0241bc.dirty documentation</p>
   
 </a>
     
@@ -300,11 +300,10 @@
 <section id="loading-data-sources-into-the-object-store">
 <h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Permalink to this heading">#</a></h2>
 <p>For this tutorial we will again set up a temporary object store to store our data. See <a class="reference internal" href="1_Adding_observation_data.html"><span class="doc std std-doc">1_Adding_observation_data.ipynb</span></a> for more details around this.</p>
+<p>First we define some input variables.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Defining inputs</span>
-
-<span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;TAC&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;TAC&quot;</span>
 <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;DECC&quot;</span>
 <span class="n">height</span> <span class="o">=</span> <span class="s2">&quot;100m&quot;</span>
 
@@ -316,8 +315,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Observations</span>
-<span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">process_obs</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">obs_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;timeseries/tac_example.tar.gz&quot;</span><span class="p">)</span>
@@ -326,15 +324,15 @@
 <span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;co2&quot;</span>
 <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;DECC&quot;</span>
 
-<span class="n">decc_results</span> <span class="o">=</span> <span class="n">process_obs</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
+<span class="n">decc_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
+<p>Add some flux data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Emissions</span>
-<span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">process_flux</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">standardise_flux</span>
 
 <span class="n">flux_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;flux/co2-flux_EUROPE_2017.tar.gz&quot;</span><span class="p">)</span>
 
@@ -348,16 +346,16 @@
 <span class="n">flux_file_natural</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">flux_data</span> <span class="k">if</span> <span class="n">source_natural</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">flux_file_ff</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">flux_data</span> <span class="k">if</span> <span class="n">source_fossil</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="n">process_flux</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">flux_file_natural</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source_natural</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">high_time_resolution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">process_flux</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">flux_file_ff</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source_fossil</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
+<span class="n">standardise_flux</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">flux_file_natural</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source_natural</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">high_time_resolution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">standardise_flux</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">flux_file_ff</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source_fossil</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
+<p>Add some footprint data</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Footprints</span>
-<span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">process_footprint</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.client</span> <span class="kn">import</span> <span class="n">standardise_footprint</span>
 
 <span class="n">footprint_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;footprint/tac_footprint_co2_201707.tar.gz&quot;</span><span class="p">)</span>
 
@@ -368,7 +366,7 @@
 <span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;NAME&quot;</span>
 <span class="n">metmodel</span> <span class="o">=</span> <span class="s2">&quot;UKV&quot;</span>
 
-<span class="n">process_footprint</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+<span class="n">standardise_footprint</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -384,11 +382,11 @@
 <span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;2017-07-01&quot;</span>
 <span class="n">end_date</span> <span class="o">=</span> <span class="s2">&quot;2017-07-07&quot;</span>
 
-<span class="n">scenario</span> <span class="o">=</span> <span class="n">ModelScenario</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> 
-                         <span class="n">inlet</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> 
-                         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> 
-                         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> 
-                         <span class="n">source</span><span class="o">=</span><span class="n">source_natural</span><span class="p">,</span> 
+<span class="n">scenario</span> <span class="o">=</span> <span class="n">ModelScenario</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                         <span class="n">inlet</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+                         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+                         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                         <span class="n">source</span><span class="o">=</span><span class="n">source_natural</span><span class="p">,</span>
                          <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
                          <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
 </pre></div>
@@ -427,7 +425,7 @@
 <p>As in the previous tutorial, multiple fluxes can be linked to your <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object if required. This can include additional high frequency (&lt;24 hourly) or low frequency flux data. In this case we have added monthly “fossil fuel” emissions:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> 
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
                   <span class="n">source</span><span class="o">=</span><span class="n">source_fossil</span><span class="p">,</span>
                   <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
 </pre></div>
@@ -445,7 +443,7 @@
 <p>If we plot the modelled measurement comparison, this will stack the natural and fossil fuel flux sources and combine with the footprint data in an appropriate way:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_comparison</span><span class="p">(</span><span class="n">baseline</span><span class="o">=</span><span class="s2">&quot;percentile&quot;</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># scenario.plot_comparison(baseline=&quot;percentile&quot;, recalculate=True)</span>
 </pre></div>
 </div>
 </div>

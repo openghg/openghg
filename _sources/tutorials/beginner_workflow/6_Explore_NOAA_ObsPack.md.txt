@@ -59,7 +59,7 @@ noaa_obspack_directory = retrieve_example_data(path="obspack/obspack_ch4_example
 ### Process and store the data
 
 ```{code-cell} ipython3
-add_noaa_obspack(noaa_obspack_directory)
+res = add_noaa_obspack(noaa_obspack_directory)
 ```
 
 ### Visualise the data within the object store

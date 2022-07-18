@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; OpenGHG 0+untagged.1.g46332bf.dirty documentation</title>
+    <title>Index &#8212; OpenGHG 0+untagged.1.gd0241bc.dirty documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g46332bf.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gd0241bc.dirty documentation</p>
   
 </a>
     
@@ -240,12 +240,8 @@
 </li>
         <li><a href="api/api_dataobjects.html#openghg.dataobjects.ObsData.__eq__">(openghg.dataobjects.ObsData method)</a>
 </li>
-        <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.__eq__">(openghg.dataobjects.SearchResults method)</a>
-</li>
       </ul></li>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects.ObsData.__getitem__">__getitem__() (openghg.dataobjects.ObsData method)</a>
-</li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.__hash__">__hash__ (openghg.dataobjects.SearchResults attribute)</a>
 </li>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects._BaseData.__hash__">__hash__() (openghg.dataobjects._BaseData method)</a>
 
@@ -409,7 +405,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_store.html#openghg.store.Footprints">Footprints (class in openghg.store)</a>
 </li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.from_data">from_data() (openghg.dataobjects.SearchResults class method)</a>
+      <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.from_json">from_json() (openghg.dataobjects.SearchResults class method)</a>
 </li>
       <li><a href="api/api_types.html#openghg.types.FunctionError">FunctionError (class in openghg.types)</a>
 </li>
@@ -428,8 +424,6 @@
       <li><a href="api/api_retrieve.html#openghg.retrieve.get_flux">get_flux() (in module openghg.retrieve)</a>
 </li>
       <li><a href="api/api_retrieve.html#openghg.retrieve.get_footprint">get_footprint() (in module openghg.retrieve)</a>
-</li>
-      <li><a href="api/api_objectstore.html#openghg.objectstore.get_local_bucket">get_local_bucket() (in module openghg.objectstore)</a>
 </li>
       <li><a href="api/api_objectstore.html#openghg.objectstore.get_object">get_object() (in module openghg.objectstore)</a>
 </li>
@@ -562,12 +556,12 @@
 </li>
       <li><a href="api/api_standardise.html#openghg.standardise.surface.parse_eurocom">parse_eurocom() (in module openghg.standardise.surface)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_standardise.html#openghg.standardise.surface.parse_gcwerks">parse_gcwerks() (in module openghg.standardise.surface)</a>
 </li>
       <li><a href="api/api_standardise.html#openghg.standardise.surface.parse_noaa">parse_noaa() (in module openghg.standardise.surface)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_standardise.html#openghg.standardise.surface.parse_npl">parse_npl() (in module openghg.standardise.surface)</a>
 </li>
       <li><a href="api/api_standardise.html#openghg.standardise.surface.parse_tmb">parse_tmb() (in module openghg.standardise.surface)</a>
@@ -582,12 +576,6 @@
         <li><a href="api/api_dataobjects.html#openghg.dataobjects.ObsData.plot_timeseries">(openghg.dataobjects.ObsData method)</a>
 </li>
       </ul></li>
-      <li><a href="api/api_client.html#openghg.client.process_flux">process_flux() (in module openghg.client)</a>
-</li>
-      <li><a href="api/api_client.html#openghg.client.process_footprint">process_footprint() (in module openghg.client)</a>
-</li>
-      <li><a href="api/api_client.html#openghg.client.process_obs">process_obs() (in module openghg.client)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -602,6 +590,14 @@
 
       <ul>
         <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.raw">(openghg.dataobjects.SearchResults method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/api_store.html#openghg.store.Emissions.read_data">read_data() (openghg.store.Emissions static method)</a>
+
+      <ul>
+        <li><a href="api/api_store.html#openghg.store.Footprints.read_data">(openghg.store.Footprints static method)</a>
+</li>
+        <li><a href="api/api_store.html#openghg.store.ObsSurface.read_data">(openghg.store.ObsSurface static method)</a>
 </li>
       </ul></li>
       <li><a href="api/api_store.html#openghg.store.Emissions.read_file">read_file() (openghg.store.Emissions static method)</a>
@@ -702,11 +698,13 @@
 </li>
       <li><a href="api/api_util.html#openghg.util.to_dashboard">to_dashboard() (in module openghg.util)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_util.html#openghg.util.to_dashboard_mobile">to_dashboard_mobile() (in module openghg.util)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.to_data">to_data() (openghg.dataobjects.SearchResults method)</a>
+</li>
+      <li><a href="api/api_dataobjects.html#openghg.dataobjects.SearchResults.to_json">to_json() (openghg.dataobjects.SearchResults method)</a>
 </li>
       <li><a href="api/api_util.html#openghg.util.to_lowercase">to_lowercase() (in module openghg.util)</a>
 </li>

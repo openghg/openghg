@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._searchresults &#8212; OpenGHG 0+untagged.1.g46332bf.dirty documentation</title>
+    <title>openghg.dataobjects._searchresults &#8212; OpenGHG 0+untagged.1.gd0241bc.dirty documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g46332bf.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gd0241bc.dirty documentation</p>
   
 </a>
     
@@ -190,26 +190,32 @@
               <article class="bd-article" role="main">
                 
   <h1>Source code for openghg.dataobjects._searchresults</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">open_dataset</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
 
 <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
+<span class="kn">import</span> <span class="nn">json</span>
 
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
+
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">clean_string</span><span class="p">,</span>
     <span class="n">create_daterange_str</span><span class="p">,</span>
     <span class="n">find_daterange_gaps</span><span class="p">,</span>
     <span class="n">first_last_dates</span><span class="p">,</span>
     <span class="n">split_daterange_str</span><span class="p">,</span>
+    <span class="n">running_in_cloud</span><span class="p">,</span>
 <span class="p">)</span>
+
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;SearchResults&quot;</span><span class="p">]</span>
 
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s2">&quot;SearchResults&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SearchResults"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">SearchResults</span><span class="p">:</span>
+
+<div class="viewcode-block" id="SearchResults"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults">[docs]</a><span class="k">class</span> <span class="nc">SearchResults</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;This class is used to return data from the search function. It</span>
 <span class="sd">    has member functions to retrieve data from the object store.</span>
 
@@ -219,12 +225,10 @@
 <span class="sd">        cloud: True if running in cloud</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s2">&quot;SearchResults&quot;</span><span class="p">)</span>
-
-    <span class="n">results</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-    <span class="n">ranked_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="c1"># Local or cloud service to be used</span>
-    <span class="n">cloud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<div class="viewcode-block" id="SearchResults.__init__"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ranked_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">results</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ranked_data</span> <span class="o">=</span> <span class="n">ranked_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="o">=</span> <span class="n">running_in_cloud</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="SearchResults.__str__"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
@@ -268,20 +272,26 @@
             <span class="s2">&quot;cloud&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">,</span>
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="SearchResults.from_data"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.from_data">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<div class="viewcode-block" id="SearchResults.to_json"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Serialises the object to JSON</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: JSON str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_data</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="SearchResults.from_json"><a class="viewcode-back" href="../../../api/api_dataobjects.html#openghg.dataobjects.SearchResults.from_json">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Create a SearchResults object from a dictionary</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data: Dictionary created by SearchResults.to_data</span>
+<span class="sd">            data: Serialised object</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            SearchResults: SearchResults object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
-            <span class="n">results</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">],</span>
-            <span class="n">ranked_data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ranked_data&quot;</span><span class="p">],</span>
-            <span class="n">cloud</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;cloud&quot;</span><span class="p">],</span>
-        <span class="p">)</span></div>
+        <span class="n">loaded</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">results</span><span class="o">=</span><span class="n">loaded</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">],</span> <span class="n">ranked_data</span><span class="o">=</span><span class="n">loaded</span><span class="p">[</span><span class="s2">&quot;ranked_data&quot;</span><span class="p">])</span></div>
 
     <span class="k">def</span> <span class="nf">rankings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranked_data</span><span class="p">:</span>
@@ -476,115 +486,126 @@
         <span class="n">data_keys</span> <span class="o">=</span> <span class="n">specific_source</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
         <span class="n">metadata</span> <span class="o">=</span> <span class="n">specific_source</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
 
-        <span class="c1"># If cloud use the Retrieve object</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
-            <span class="c1"># from Acquire.Client import Wallet</span>
-            <span class="c1"># from xarray import open_dataset</span>
-
-            <span class="c1"># wallet = Wallet()</span>
-            <span class="c1"># self._service_url = &quot;https://fn.openghg.org/t&quot;</span>
-            <span class="c1"># self._service = wallet.get_service(service_url=f&quot;{self._service_url}/openghg&quot;)</span>
-
-            <span class="c1"># key = f&quot;{site}_{species}&quot;</span>
-            <span class="c1"># keys_to_retrieve = {key: data_keys}</span>
-
-            <span class="c1"># args = {&quot;keys&quot;: keys_to_retrieve}</span>
-
-            <span class="c1"># response: Dict = self._service.call_function(function=&quot;retrieve.retrieve&quot;, args=args)</span>
-
-            <span class="c1"># response_data = response[&quot;results&quot;]</span>
-
-            <span class="c1"># data = open_dataset(response_data[key])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranked_data</span><span class="p">:</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="s2">&quot;unranked&quot;</span><span class="p">]</span>
+            <span class="n">final_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_dataset</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ranked_data</span><span class="p">:</span>
-                <span class="n">keys</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="s2">&quot;unranked&quot;</span><span class="p">]</span>
-                <span class="n">final_dataset</span> <span class="o">=</span> <span class="n">recombine_datasets</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">dataset_slices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">dataset_slices</span> <span class="o">=</span> <span class="p">[]</span>
 
-                <span class="n">inlet_ranges</span> <span class="o">=</span> <span class="n">specific_source</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span>
+            <span class="n">inlet_ranges</span> <span class="o">=</span> <span class="n">specific_source</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span>
 
-                <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-                <span class="n">ranked_keys</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="s2">&quot;ranked&quot;</span><span class="p">]</span>
-                <span class="n">ranked_slices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">ranked_keys</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="s2">&quot;ranked&quot;</span><span class="p">]</span>
+            <span class="n">ranked_slices</span> <span class="o">=</span> <span class="p">[]</span>
 
-                <span class="n">inlets</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">inlets</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-                <span class="k">for</span> <span class="n">daterange</span><span class="p">,</span> <span class="n">keys</span> <span class="ow">in</span> <span class="n">ranked_keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">data_slice</span> <span class="o">=</span> <span class="n">recombine_datasets</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">daterange</span><span class="p">,</span> <span class="n">keys</span> <span class="ow">in</span> <span class="n">ranked_keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">data_slice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_dataset</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-                    <span class="n">slice_start</span><span class="p">,</span> <span class="n">slice_end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">daterange</span><span class="p">,</span> <span class="n">date_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">slice_start</span><span class="p">,</span> <span class="n">slice_end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">daterange</span><span class="p">,</span> <span class="n">date_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-                    <span class="c1"># We convert to str here as xarray has some weird behaviour that means</span>
-                    <span class="c1"># &quot;2018-01-01&quot; - &quot;2018-06-01&quot;</span>
-                    <span class="c1"># gets treated differently to</span>
-                    <span class="c1"># datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)</span>
-                    <span class="n">ranked_slice</span> <span class="o">=</span> <span class="n">data_slice</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">slice_start</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slice_end</span><span class="p">)))</span>
+                <span class="c1"># We convert to str here as xarray has some weird behaviour that means</span>
+                <span class="c1"># &quot;2018-01-01&quot; - &quot;2018-06-01&quot;</span>
+                <span class="c1"># gets treated differently to</span>
+                <span class="c1"># datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)</span>
+                <span class="n">ranked_slice</span> <span class="o">=</span> <span class="n">data_slice</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">slice_start</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slice_end</span><span class="p">)))</span>
 
-                    <span class="k">if</span> <span class="n">ranked_slice</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet_ranges</span><span class="p">[</span><span class="n">daterange</span><span class="p">]</span>
-                        <span class="n">inlets</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ranked_slice</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">inlets</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inlet_ranges</span><span class="p">[</span><span class="n">daterange</span><span class="p">])</span>
+                    <span class="n">ranked_slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ranked_slice</span><span class="p">)</span>
 
-                        <span class="n">ranked_slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ranked_slice</span><span class="p">)</span>
+                <span class="n">ranked_metadata</span> <span class="o">=</span> <span class="n">specific_source</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span>
+                <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">][</span><span class="s2">&quot;ranked&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ranked_metadata</span>
 
-                    <span class="n">ranked_metadata</span> <span class="o">=</span> <span class="n">specific_source</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">]</span>
-                    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">][</span><span class="s2">&quot;ranked&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ranked_metadata</span>
+            <span class="n">dataset_slices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ranked_slices</span><span class="p">)</span>
 
-                <span class="n">dataset_slices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ranked_slices</span><span class="p">)</span>
+            <span class="n">unranked_keys</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="s2">&quot;unranked&quot;</span><span class="p">]</span>
 
-                <span class="n">unranked_keys</span> <span class="o">=</span> <span class="n">data_keys</span><span class="p">[</span><span class="s2">&quot;unranked&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">unranked_keys</span><span class="p">:</span>
+                <span class="n">unranked_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_dataset</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">unranked_keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">unranked_keys</span><span class="p">:</span>
-                    <span class="n">unranked_data</span> <span class="o">=</span> <span class="n">recombine_datasets</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">unranked_keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">first_date</span><span class="p">,</span> <span class="n">last_date</span> <span class="o">=</span> <span class="n">first_last_dates</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">unranked_keys</span><span class="p">)</span>
 
-                    <span class="n">first_date</span><span class="p">,</span> <span class="n">last_date</span> <span class="o">=</span> <span class="n">first_last_dates</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">unranked_keys</span><span class="p">)</span>
+                <span class="n">ranked_dateranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ranked_keys</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="n">unranked_dateranges</span> <span class="o">=</span> <span class="n">find_daterange_gaps</span><span class="p">(</span>
+                    <span class="n">start_search</span><span class="o">=</span><span class="n">first_date</span><span class="p">,</span>
+                    <span class="n">end_search</span><span class="o">=</span><span class="n">last_date</span><span class="p">,</span>
+                    <span class="n">dateranges</span><span class="o">=</span><span class="n">ranked_dateranges</span><span class="p">,</span>
+                <span class="p">)</span>
 
-                    <span class="n">ranked_dateranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ranked_keys</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-                    <span class="n">unranked_dateranges</span> <span class="o">=</span> <span class="n">find_daterange_gaps</span><span class="p">(</span>
-                        <span class="n">start_search</span><span class="o">=</span><span class="n">first_date</span><span class="p">,</span>
-                        <span class="n">end_search</span><span class="o">=</span><span class="n">last_date</span><span class="p">,</span>
-                        <span class="n">dateranges</span><span class="o">=</span><span class="n">ranked_dateranges</span><span class="p">,</span>
-                    <span class="p">)</span>
+                <span class="n">unranked_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">if</span> <span class="n">unranked_dateranges</span><span class="p">:</span>
+                    <span class="n">unranked_slices</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">dr</span> <span class="ow">in</span> <span class="n">unranked_dateranges</span><span class="p">:</span>
+                        <span class="n">slice_start</span><span class="p">,</span> <span class="n">slice_end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">dr</span><span class="p">,</span> <span class="n">date_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">unranked_slice</span> <span class="o">=</span> <span class="n">unranked_data</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">slice_start</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slice_end</span><span class="p">)))</span>
 
-                    <span class="n">unranked_metadata</span> <span class="o">=</span> <span class="p">{}</span>
-                    <span class="k">if</span> <span class="n">unranked_dateranges</span><span class="p">:</span>
-                        <span class="n">unranked_slices</span> <span class="o">=</span> <span class="p">[]</span>
-                        <span class="k">for</span> <span class="n">dr</span> <span class="ow">in</span> <span class="n">unranked_dateranges</span><span class="p">:</span>
-                            <span class="n">slice_start</span><span class="p">,</span> <span class="n">slice_end</span> <span class="o">=</span> <span class="n">split_daterange_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="o">=</span><span class="n">dr</span><span class="p">,</span> <span class="n">date_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                            <span class="n">unranked_slice</span> <span class="o">=</span> <span class="n">unranked_data</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">slice_start</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slice_end</span><span class="p">)))</span>
+                        <span class="k">if</span> <span class="n">unranked_slice</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">inlet</span> <span class="o">=</span> <span class="n">unranked_slice</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="n">inlets</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+                            <span class="n">unranked_metadata</span><span class="p">[</span><span class="n">dr</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+                            <span class="n">unranked_slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unranked_slice</span><span class="p">)</span>
 
-                            <span class="k">if</span> <span class="n">unranked_slice</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                                <span class="n">inlet</span> <span class="o">=</span> <span class="n">unranked_slice</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                                <span class="n">inlets</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
-                                <span class="n">unranked_metadata</span><span class="p">[</span><span class="n">dr</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
-                                <span class="n">unranked_slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unranked_slice</span><span class="p">)</span>
-
-                        <span class="n">dataset_slices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">unranked_slices</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">daterange_str</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">first_date</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">last_date</span><span class="p">)</span>
-                        <span class="n">inlet</span> <span class="o">=</span> <span class="n">unranked_data</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="n">inlets</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
-                        <span class="n">unranked_metadata</span><span class="p">[</span><span class="n">daterange_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
-
-                        <span class="n">dataset_slices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">unranked_data</span><span class="p">)</span>
-
-                    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">][</span><span class="s2">&quot;unranked&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unranked_metadata</span>
-
-                <span class="n">final_dataset</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="n">objs</span><span class="o">=</span><span class="n">dataset_slices</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inlets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">inlet_tag</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">inlets</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+                    <span class="n">dataset_slices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">unranked_slices</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">inlet_tag</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+                    <span class="n">daterange_str</span> <span class="o">=</span> <span class="n">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">first_date</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">last_date</span><span class="p">)</span>
+                    <span class="n">inlet</span> <span class="o">=</span> <span class="n">unranked_data</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">inlets</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+                    <span class="n">unranked_metadata</span><span class="p">[</span><span class="n">daterange_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
 
-                <span class="c1"># Update the attributes for single / multiple inlet heights</span>
-                <span class="n">final_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_tag</span>
+                    <span class="n">dataset_slices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">unranked_data</span><span class="p">)</span>
+
+                <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;rank_metadata&quot;</span><span class="p">][</span><span class="s2">&quot;unranked&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unranked_metadata</span>
+
+            <span class="n">final_dataset</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="n">objs</span><span class="o">=</span><span class="n">dataset_slices</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inlets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">inlet_tag</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">inlets</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inlet_tag</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
+
+            <span class="c1"># Update the attributes for single / multiple inlet heights</span>
+            <span class="n">final_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_tag</span>
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="n">specific_source</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">ObsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">final_dataset</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">ObsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">final_dataset</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_retrieve_dataset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">attrs_to_check</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Retrieves datasets from either cloud or local object store</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            keys: List of object store keys</span>
+<span class="sd">            sort: Sort data on recombination</span>
+<span class="sd">            elevate_inlet: Elevate inlet from attribute to variable</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Dataset:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">call_function</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">:</span>
+            <span class="n">to_post</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">to_post</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
+            <span class="n">to_post</span><span class="p">[</span><span class="s2">&quot;sort&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sort</span>
+            <span class="n">to_post</span><span class="p">[</span><span class="s2">&quot;elevate_inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">elevate_inlet</span>
+            <span class="n">to_post</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;retrieve&quot;</span>
+
+            <span class="k">if</span> <span class="n">attrs_to_check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">to_post</span><span class="p">[</span><span class="s2">&quot;attrs_to_check&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrs_to_check</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">call_function</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">to_post</span><span class="p">)</span>
+            <span class="n">binary_netcdf</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">binary_netcdf</span><span class="p">)</span>
+            <span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">ds</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">recombine_datasets</span><span class="p">(</span>
+                <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="n">elevate_inlet</span><span class="p">,</span> <span class="n">attrs_to_check</span><span class="o">=</span><span class="n">attrs_to_check</span>
+            <span class="p">)</span></div>
 </pre></div>
 
               </article>
