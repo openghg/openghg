@@ -8,22 +8,25 @@ functions, if it is absent the call will the routed to a local function.
 
 .. module:: openghg.client
 
-Processing and standardisation
-==============================
+Standardisation
+===============
 
 These functions handle the processing, standardisation and storage of data in the object store. Currently functions for
 observations, footprint and flux / emissions data are available.
 
-.. autofunction:: openghg.client.process_obs
+.. autofunction:: standardise_surface
 
-.. autofunction:: openghg.client.process_footprint
+.. autofunction:: standardise_bc
 
-.. autofunction:: openghg.client.process_flux
+.. autofunction:: standardise_flux
+
+.. autofunction:: standardise_footprint
+
 
 search (client)
 ===============
 
-The ``search`` function is used to search for and retrieve data from the object store. The :ref:`SearchResults<SearchResults>` object that 
+The ``search`` function is used to search for and retrieve data from the object store. The :ref:`SearchResults<SearchResults>` object that
 it returns can then be used to retrieve data from the object store.
 
 
@@ -32,7 +35,7 @@ it returns can then be used to retrieve data from the object store.
 get_obs_surface
 ===============
 
-A helper function for those familiar with the Bristol ACRG repository. This attempts to provide the same interface as the 
+A helper function for those familiar with the Bristol ACRG repository. This attempts to provide the same interface as the
 equivalnet to the ``get_obs_surface`` as available in that repository. This returns a list of :ref:`ObsData<ObsData>` objects
 
 .. autofunction:: openghg.client.get_obs_surface
@@ -40,12 +43,10 @@ equivalnet to the ``get_obs_surface`` as available in that repository. This retu
 rank_sources
 ============
 
-The ``rank_sources`` is used to rank sources of data. Provided with a site and a species the ``rank_sources`` function will search for the given 
+The ``rank_sources`` is used to rank sources of data. Provided with a site and a species the ``rank_sources`` function will search for the given
 site and species and return a :ref:`RankSources<RankSources>` object
 
-Setting a high rank for a Datasource across a specific daterange means 
+Setting a high rank for a Datasource across a specific daterange means
 that data from that Datasource will be preferred when a user searches for data.
 
 .. autofunction:: openghg.client.rank_sources
-
-
