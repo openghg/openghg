@@ -29,8 +29,8 @@ def parse_openghg(
     will attempt to extract this from the data file.
 
     Args:
-        data_filepath: 
-        satellite: Name of satellite
+        data_filepath: Path of observation file
+        satellite: Name of satellite (if relevant)
         domain: For satellite only. If data has been selected on an area include the
             identifier name for domain covered. This can map to previously defined domains
             (see domain_info.json) or a newly defined domain.
@@ -38,7 +38,7 @@ def parse_openghg(
             performed on satellite data. This can be based on any form of filtering, binning etc.
             but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
             If not specified, domain will be used.
-        site : Site code/name. Can include satellite OR site.
+        site : Site code/name (if relevant). Can include satellite OR site.
         species: Species name or synonym e.g. "ch4"
         instrument: Instrument name e.g. "TANSO-FTS"
         network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"

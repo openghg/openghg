@@ -46,6 +46,9 @@ class ObsSurface(BaseStore):
             overwrite: Overwrite previously uploaded data
         Returns:
             dict: Dictionary of Datasource UUIDs
+        
+        TODO: Should "measurement_type" be changed to "platform" to align
+        with ModelScenario and ObsColumn?
         """
         from collections import defaultdict
         from pandas import Timedelta

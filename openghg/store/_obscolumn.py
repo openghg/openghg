@@ -39,13 +39,22 @@ class ObsColumn(BaseStore):
 
         Args:
             filepath: Path of observation file
-            instrument: ***
-            species: Species name
-            network: ***
-            domain: Domain (name of area) covered by column emissions
-            site: ***
+            satellite: Name of satellite (if relevant)
+            domain: For satellite only. If data has been selected on an area include the
+                identifier name for domain covered. This can map to previously defined domains
+                (see domain_info.json) or a newly defined domain.
+            selection: For satellite only, identifier for any data selection which has been
+                performed on satellite data. This can be based on any form of filtering, binning etc.
+                but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
+                If not specified, domain will be used.
+            site : Site code/name (if relevant). Can include satellite OR site.
+            species: Species name or synonym e.g. "ch4"
+            instrument: Instrument name e.g. "TANSO-FTS"
+            network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
+            platform: Type of platform. Should be one of:
+                - "satellite"
+                - "site"
             data_type : Type of data being input e.g. openghg (internal format)
-            measurement_type : Type of measurement e.g. satellite, surface
             overwrite: Should this data overwrite currently stored data.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
