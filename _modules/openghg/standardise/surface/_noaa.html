@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.gd7360fc.dirty documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.g624051f.dirty documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gd7360fc.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g624051f.dirty documentation</p>
   
 </a>
     
@@ -192,7 +192,7 @@
   <h1>Source code for openghg.standardise.surface._noaa</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
@@ -286,7 +286,7 @@
     <span class="k">return</span> <span class="n">inlet_str</span>
 
 
-<span class="k">def</span> <span class="nf">_standarise_variables</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_standarise_variables</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts data from NOAA ObsPack dataset into our standardised variables to be stored within the object store.</span>
 <span class="sd">    The species is also needed so this name can be used to label the variables in the new dataset.</span>
@@ -365,7 +365,7 @@
     <span class="k">return</span> <span class="n">processed_ds</span>
 
 
-<span class="k">def</span> <span class="nf">_split_inlets</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_split_inlets</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.</span>
 
@@ -502,7 +502,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of results</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
     <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
 
@@ -511,8 +510,9 @@
     <span class="k">if</span> <span class="n">measurement_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_types</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;measurement_type must be one of </span><span class="si">{</span><span class="n">valid_types</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">obspack_ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
-    <span class="n">orig_attrs</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span>
+    <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp</span><span class="p">:</span>
+        <span class="n">obspack_ds</span> <span class="o">=</span> <span class="n">temp</span>
+        <span class="n">orig_attrs</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">attrs</span>
 
     <span class="c1"># Want to find and drop any duplicate time values for the original dataset</span>
     <span class="c1"># Using xarray directly we have to do in a slightly convoluted way as this is not well built</span>
@@ -812,7 +812,7 @@
     <span class="k">return</span> <span class="n">combined_data</span>
 
 
-<span class="k">def</span> <span class="nf">_estimate_sampling_period</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">min_estimate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_estimate_sampling_period</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">min_estimate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Estimate the sampling period for the NOAA data using either the &quot;data_selection_tag&quot;</span>
 <span class="sd">    attribute (this sometimes contains useful information such as &quot;HourlyData&quot;) or by using</span>
