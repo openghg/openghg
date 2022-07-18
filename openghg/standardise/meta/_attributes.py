@@ -1,4 +1,4 @@
-from typing import cast, Any, Dict, Optional, List, Tuple
+from typing import cast, Any, Dict, Optional, List, Tuple, Hashable
 from xarray import Dataset
 
 
@@ -384,3 +384,178 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
         # raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
 
     return attributes
+
+
+def assign_flux_attributes(data: Dict,
+                           species: Optional[str] = None,
+                           source: Optional[str] = None,
+                           domain: Optional[str] = None,
+                           units: str = "mol/m2/s",
+                           prior_info_dict: Optional[dict] = None) -> Dict:
+    """
+    Assign attributes for the input flux dataset within dictionary based on
+    metadata and passed arguments.
+
+    Args:
+        data: Dictionary containing data, metadata and attributes
+        species: Species name
+        source: Source name
+        domain: Domain name
+        units: Unit values for the "flux" variable.  Default = "mol/m2/s"
+        prior_info_dict: Dictionary of additional 'prior' information about
+            for the emissions sources. Expect this to be of the form e.g.
+                {"EDGAR": {"version": "v4.3.2",
+                           "raw_resolution": "0.1 degree x 0.1 degree",
+                           "reference": "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG"
+                           ...},
+                ...}
+
+    Returns:
+        Dict : Same format as inputted but with updated "data" component (Dataset)
+    """
+
+    for flux_dict in data.values():
+        flux_attributes = flux_dict.get("attributes", {})
+
+        # Ensure values for these attributes have been specified either manually
+        # or within metadata.
+        attribute_values = {"species": species,
+                            "source": source,
+                            "domain": domain}
+
+        metadata = flux_dict["metadata"]
+        for attr, value in attribute_values.items():
+            if value is None:
+                try:
+                    attribute_values[attr] = metadata[attr]
+                except KeyError:
+                    raise ValueError(f"Attribute {attr} must be specified.")
+
+        input_attributes = cast(Dict[str, str], attribute_values)
+
+        flux_dict["data"] = get_flux_attributes(
+            ds=flux_dict["data"],
+            units=units,
+            prior_info_dict=prior_info_dict,
+            global_attributes=flux_attributes,
+            **input_attributes
+        )
+
+    return data  
+
+
+def get_flux_attributes(ds: Dataset,
+                        species: str,
+                        source: str,
+                        domain: str,
+                        units: str = "mol/m2/s",
+                        prior_info_dict: Optional[dict] = None,
+                        global_attributes: Optional[Dict[Hashable, Any]] = None) -> Dataset:
+    """
+    Assign additional attributes for the flux dataset.
+
+    Args:
+        ds: Should contain "flux" variable
+        species: Species name
+        source: Source name
+        domain: Domain name
+        units: Unit values for the "flux" variable. Default = "mol/m2/s"
+        prior_info_dict: Dictionary of additional 'prior' information about
+            for the emissions sources. Expect this to be of the form e.g.
+                {"EDGAR": {"version": "v4.3.2",
+                           "raw_resolution": "0.1 degree x 0.1 degree",
+                           "reference": "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG"
+                           ...},
+                ...}
+        global_attributes: Additional global attributes to write to dataset.
+
+    Returns:
+        Dataset: Input dataset with updated variable/coordinate and global attributes
+    """
+
+    # Example flux attributes (from files)
+    # :title = "EDGAR 4.3.2 year 2004" ;
+    # :author = "ag12733" ;
+    # :date_created = "2018-07-16 13:10:57.346915" ;
+    # :number_of_prior_files_used = 1L ;
+    # :prior_file_1 = "EDGAR" ;
+    # :prior_file_1_version = "/data/shared/Gridded_fluxes/N2O/EDGAR_v4.3.2/v432_N2O_TOTALS_nc/v432_N2O_2004.0.1x0.1.nc" ;
+    # :prior_file_1_raw_resolution = "0.1 degree x 0.1 degree" ;
+    # :prior_file_1_reference = "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG" ;
+    # :regridder_used = "acrg_grid.regrid.regrid_3D" ; 
+
+    from openghg.util import timestamp_now
+
+    # Define species variable/coordinate attributes and assign
+    flux_attrs = {"source": source,
+                  "units": units,
+                  "species": species}
+
+    lat_attrs = {"long_name" : "latitude",
+                 "units" : "degrees_north",
+                 "notes" : "centre of cell"}
+
+    lon_attrs = {"long_name" : "longitude",
+                 "units" : "degrees_east",
+                 "notes" : "centre of cell"}
+
+    ds["flux"].attrs = flux_attrs
+    ds["lat"].attrs = lat_attrs
+    ds["lon"].attrs = lon_attrs
+
+    # Define default values for global attributes
+    global_attributes_default: Dict[Hashable, Any] = {"conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+                                                      "Conventions": "CF-1.8"}
+
+    if global_attributes is None:
+        global_attributes = global_attributes_default
+    else:
+        global_attributes.update(global_attributes_default)
+
+    # Extract any current attributes from the Dataset
+    current_attributes = ds.attrs
+
+    # Extract "title" from current attributes or define this.
+    if "title" in current_attributes and "title" not in global_attributes:
+        global_attributes["title"] = current_attributes["title"]
+    else:
+        global_attributes["title"] = f"{source} emissions/flux of {species} for {domain} domain"
+
+    if "file_created" not in global_attributes:
+        global_attributes["file_created"] = str(timestamp_now())
+    if "process_by" not in global_attributes:
+        global_attributes["processed_by"] = "OpenGHG_Cloud"
+
+    # TODO: Update when we have access to species label definition (from 'obs_data_type' branch)
+    # species_label = define_species_label(species)
+    species_label = species
+
+    global_attributes["species"] = species_label
+    global_attributes["source"] = source
+    global_attributes["domain"] = domain
+
+    # Add any 'prior' information for emissions databases.
+    if prior_info_dict is not None:
+        # For composite emissions files this may contain > 1 prior input
+        global_attributes["number_of_prior_files_used"] = len(prior_info_dict.keys())
+        for i, source_key in enumerate(prior_info_dict.keys()):
+
+            prior_number = i + 1
+            label_start = f"prior_file_{prior_number}"
+            global_attributes[label_start] = source_key
+
+            for key, value in prior_info_dict[source_key].items():
+                attr_key = f"{label_start}_{key}"
+                global_attributes[attr_key] = value
+
+    # Ensure keys which have been updated by OpenGHG are not overwritten
+    # by current attributes.
+    updated_keys = ["Conventions", "title", "file_created", "processed_by"]
+    for key in updated_keys:
+        if key in current_attributes:
+            current_attributes.pop(key)
+
+    global_attributes.update(current_attributes)
+    ds.attrs = global_attributes
+
+    return ds

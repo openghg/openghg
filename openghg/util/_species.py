@@ -2,7 +2,7 @@ from typing import Optional, Union, List
 from openghg.util import load_json
 
 
-__all__ = ["synonyms", "species_lifetime", "check_lifetime_monthly"]
+__all__ = ["synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
 
 
 def synonyms(species: str,
@@ -120,3 +120,25 @@ def check_lifetime_monthly(lifetime: LifetimeType) -> bool:
             raise ValueError(f"Invalid input for lifetime: {lifetime}")
     else:
         return False
+
+
+def molar_mass(species: str) -> float:
+    '''
+    This function extracts the molar mass of a species from the
+    'acrg_species_info.json' data file.
+
+    Args:
+        species : 
+
+    Returns:
+        float : Molar mass of species
+    '''
+    species_info = load_json(filename="acrg_species_info.json")
+
+    # TODO: Add when this functionality has made it into develop
+    # species_label = synonyms(species, lower=False, allow_new_species=False)
+    # molmass = float(species_info[species_label]['mol_mass'])
+    species = species.upper()
+
+    molmass = float(species_info[species]['mol_mass'])
+    return molmass

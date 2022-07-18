@@ -3,7 +3,6 @@
 
 """
 from typing import Dict, List, Optional, Union
-from xarray import Dataset, DataArray
 from xarray.core.coordinates import DatasetCoordinates
 import numpy as np
 import xarray as xr
@@ -32,7 +31,7 @@ def recombine_datasets(
     sort: Optional[bool] = True,
     attrs_to_check: Dict[str, str] = None,
     elevate_inlet: bool = False,
-) -> Dataset:
+) -> xr.Dataset:
     """Combines datasets stored separately in the object store
     into a single dataset
 
@@ -119,7 +118,7 @@ def create_array_from_value(
     value: str,
     coords: Union[DatasetCoordinates, Dict[str, DatasetCoordinates]],  # type: ignore
     name: Union[str, None] = None,
-) -> DataArray:
+) -> xr.DataArray:
     """
     Create a new xarray.DataArray object containing a single value repeated
     for each coordinate.
@@ -146,8 +145,8 @@ def create_array_from_value(
 
 
 def elevate_duplicate_attrs(
-    ds_list: List[Dataset], attributes: Union[str, List[str]], elevate_inlet: bool
-) -> List[Dataset]:
+    ds_list: List[xr.Dataset], attributes: Union[str, List[str]], elevate_inlet: bool
+) -> List[xr.Dataset]:
     """
     For a list of Datasets, if the specified attributes are being repeated
     these will be added as new data variables to each Dataset.
@@ -181,7 +180,7 @@ def elevate_duplicate_attrs(
     return ds_list
 
 
-def check_inlets(data: List[Dataset], elevate_inlet: bool) -> Dict:
+def check_inlets(data: List[xr.Dataset], elevate_inlet: bool) -> Dict:
     """Check the inlets of the data to be processed
 
     Args:
