@@ -2,14 +2,13 @@ import re
 import numpy as np
 from numpy import ndarray
 import xarray as xr
-from xarray import DataArray, Dataset
 from pathlib import Path
 import zipfile
 from zipfile import ZipFile
 from typing import Dict, Tuple, Optional, Union, cast
 
 
-ArrayType = Optional[Union[ndarray, DataArray]]
+ArrayType = Optional[Union[ndarray, xr.DataArray]]
 
 
 def parse_edgar(datapath: Path,
@@ -290,7 +289,7 @@ def parse_edgar(datapath: Path,
 
     dims = ("time", "lat", "lon")
 
-    em_data = Dataset({"flux": (dims, flux)},
+    em_data = xr.Dataset({"flux": (dims, flux)},
                       coords={"time": time, "lat": lat_out, "lon": lon_out},
                       attrs=edgar_attrs)
 
@@ -405,10 +404,10 @@ def _check_lat_lon(domain: Optional[str] = None,
             raise ValueError("Please specify new 'domain' name if selecting new"
                              " latitude, longitude values")
 
-    if isinstance(lat_out, DataArray):
+    if isinstance(lat_out, xr.DataArray):
         lat_out = cast(ndarray, lat_out.values)
 
-    if isinstance(lon_out, DataArray):
+    if isinstance(lon_out, xr.DataArray):
         lon_out = cast(ndarray, lon_out.values)
 
     if domain is not None:

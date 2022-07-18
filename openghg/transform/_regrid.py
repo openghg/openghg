@@ -4,7 +4,6 @@
 import numpy as np
 from numpy import ndarray
 import xarray as xr
-from xarray import DataArray, Dataset
 from typing import Union, Optional, Tuple, cast
 
 xesmf_error_message = \
@@ -32,7 +31,7 @@ def _getGridCC(lat: ndarray, lon: ndarray) -> Tuple[ndarray, ndarray]:
     return LON, LAT
 
 
-def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -> Dataset:
+def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -> xr.Dataset:
     """
     Creates a Dataset ready to be used by the xesmf regridder from 1D arrays
     of latitude and longitude values.
@@ -51,10 +50,10 @@ def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -> Dataset:
     return grid
 
 
-def convert_to_ndarray(array: Union[ndarray, DataArray]) -> ndarray:
+def convert_to_ndarray(array: Union[ndarray, xr.DataArray]) -> ndarray:
     """Check and extract underlying numpy array from DataArray as necessary"""
 
-    if isinstance(array, DataArray):
+    if isinstance(array, xr.DataArray):
         values = array.values
     else:
         values = array
@@ -62,13 +61,13 @@ def convert_to_ndarray(array: Union[ndarray, DataArray]) -> ndarray:
     return values
 
 
-def regrid_uniform_cc(data: Union[ndarray, DataArray],
-                      lat_out: Union[ndarray, DataArray],
-                      lon_out: Union[ndarray, DataArray],
-                      lat_in: Optional[Union[ndarray, DataArray]] = None,
-                      lon_in: Optional[Union[ndarray, DataArray]] = None,
+def regrid_uniform_cc(data: Union[ndarray, xr.DataArray],
+                      lat_out: Union[ndarray, xr.DataArray],
+                      lon_out: Union[ndarray, xr.DataArray],
+                      lat_in: Optional[Union[ndarray, xr.DataArray]] = None,
+                      lon_in: Optional[Union[ndarray, xr.DataArray]] = None,
                       latlon: Optional[list] = None,
-                      method: str = "conservative") -> Union[ndarray, DataArray]:
+                      method: str = "conservative") -> Union[ndarray, xr.DataArray]:
     """
     Regrid data between two uniform, cell centered grids.
     All coordinates (lat_out, lon_out, lat_in, lon_in) should be for the centre
@@ -103,7 +102,7 @@ def regrid_uniform_cc(data: Union[ndarray, DataArray],
     if latlon is None:
         latlon = ["lat", "lon"]
 
-    if isinstance(data, DataArray):
+    if isinstance(data, xr.DataArray):
         lat_in_extracted = data[latlon[0]].values
         lon_in_extracted = data[latlon[1]].values
 
@@ -120,8 +119,8 @@ def regrid_uniform_cc(data: Union[ndarray, DataArray],
         lat_in = lat_in_extracted
         lon_in = lon_in_extracted
 
-    lat_in = cast(Union[ndarray, DataArray], lat_in)
-    lon_in = cast(Union[ndarray, DataArray], lon_in)
+    lat_in = cast(Union[ndarray, xr.DataArray], lat_in)
+    lon_in = cast(Union[ndarray, xr.DataArray], lon_in)
 
     if data.shape != (lat_in.size, lon_in.size):
         raise ValueError(f"Shape of input 'data' {data.shape}"
@@ -136,9 +135,9 @@ def regrid_uniform_cc(data: Union[ndarray, DataArray],
     output_grid = _create_xesmf_grid_uniform_cc(lat_out, lon_out)
 
     regridder = xesmf.Regridder(input_grid, output_grid, method)
-    regridded: Union[ndarray, DataArray] = regridder(data)
+    regridded: Union[ndarray, xr.DataArray] = regridder(data)
 
-    if isinstance(regridded, DataArray):
+    if isinstance(regridded, xr.DataArray):
         from scipy.sparse import coo_matrix  # type:ignore
 
         # Checking dimensions and mapping back lat_out and lon_out
