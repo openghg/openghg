@@ -180,5 +180,5 @@ For further documentation and tutorials please visit [our documentation](https:/
 
 ## Community
 
-If you'd like further help or would like to talk to one of the developers of this projet, please join
+If you'd like further help or would like to talk to one of the developers of this project, please join
 our Gitter at gitter.im/openghg/lobby.
