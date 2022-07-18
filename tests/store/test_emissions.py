@@ -5,9 +5,11 @@ from openghg.store import recombine_datasets, metastore_manager, datasource_look
 from xarray import open_dataset
 from helpers import get_emissions_datapath
 from openghg.util import hash_bytes
+from openghg.objectstore import get_bucket
 
 
 def test_read_binary_data(mocker):
+    get_bucket(empty=True)
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 

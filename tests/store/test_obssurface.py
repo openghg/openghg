@@ -11,6 +11,7 @@ from helpers import get_datapath, attributes_checker_obssurface
 
 
 def test_read_data(mocker):
+    get_bucket(empty=True)
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
