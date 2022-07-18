@@ -1,11 +1,16 @@
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
-from xarray import Dataset
+from typing import Dict, Optional, Union, Tuple, Any
+from xarray import Dataset, DataArray
+import numpy as np
+from numpy import ndarray
 from tempfile import TemporaryDirectory
-
+from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 
 __all__ = ["Emissions"]
+
+
+ArrayType = Optional[Union[ndarray, DataArray]]
 
 
 class Emissions(BaseStore):
@@ -45,6 +50,7 @@ class Emissions(BaseStore):
         species: str,
         source: str,
         domain: str,
+        data_type: str = "openghg",
         date: Optional[str] = None,
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
@@ -58,6 +64,8 @@ class Emissions(BaseStore):
             species: Species name
             domain: Emissions domain
             source: Emissions source
+            date : Date associated with emissions as a string
+            data_type : Type of data being input e.g. openghg (internal format)
             high_time_resolution: If this is a high resolution file
             period: Period of measurements. Only needed if this can not be inferred from the time coords
                     If specified, should be one of:
@@ -69,15 +77,13 @@ class Emissions(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from collections import defaultdict
-        from xarray import open_dataset
         from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.types import EmissionsTypes
         from openghg.util import (
             clean_string,
             hash_file,
-            timestamp_now,
+            load_emissions_parser,
         )
-        from openghg.store import infer_date_range
 
         species = clean_string(species)
         source = clean_string(source)
@@ -85,6 +91,14 @@ class Emissions(BaseStore):
         date = clean_string(date)
 
         filepath = Path(filepath)
+
+        try:
+            data_type = EmissionsTypes[data_type.upper()].value
+        except KeyError:
+            raise ValueError(f"Unknown data type {data_type} selected.")
+
+        # Load the data retrieve object
+        parser_fn = load_emissions_parser(data_type=data_type)
 
         em_store = Emissions.load()
 
@@ -97,66 +111,25 @@ class Emissions(BaseStore):
                 f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
             )
 
-        em_data = open_dataset(filepath)
+        # Define parameters to pass to the parser function
+        # TODO: Update this to match against inputs for parser function.
+        param = {
+            "filepath": filepath,
+            "species": species,
+            "domain": domain,
+            "source": source,
+            "date": date,
+            "high_time_resolution": high_time_resolution,
+            "period": period,
+            "continuous": continuous,
+        }
 
-        # Some attributes are numpy types we can't serialise to JSON so convert them
-        # to their native types here
-        attrs = {}
-        for key, value in em_data.attrs.items():
-            try:
-                attrs[key] = value.item()
-            except AttributeError:
-                attrs[key] = value
+        emissions_data = parser_fn(**param)
 
-        author_name = "OpenGHG Cloud"
-        em_data.attrs["author"] = author_name
-
-        metadata = {}
-        metadata.update(attrs)
-
-        metadata["species"] = species
-        metadata["domain"] = domain
-        metadata["source"] = source
-        metadata["date"] = date
-        metadata["author"] = author_name
-        metadata["processed"] = str(timestamp_now())
-
-        # As emissions files handle things slightly differently we need to check the time values
-        # more carefully.
-        # e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but
-        # contain 12 time points labelled as 2012-01-01, 2012-02-01, etc.
-
-        em_time = em_data.time
-
-        start_date, end_date, period_str = infer_date_range(
-            em_time, filepath=filepath, period=period, continuous=continuous
-        )
-
-        if date is None:
-            # Check for how granular we should make the date label
-            if "year" in period_str:
-                date = f"{start_date.year}"
-            elif "month" in period_str:
-                date = f"{start_date.year}{start_date.month:02}"
-            else:
-                date = start_date.astype("datetime64[s]").astype(str)
-
-        metadata["start_date"] = str(start_date)
-        metadata["end_date"] = str(end_date)
-
-        metadata["max_longitude"] = round(float(em_data["lon"].max()), 5)
-        metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
-        metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
-        metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
-
-        metadata["time_resolution"] = "high" if high_time_resolution else "standard"
-        metadata["time_period"] = period_str
-
-        key = "_".join((species, source, domain, date))
-
-        emissions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-        emissions_data[key]["data"] = em_data
-        emissions_data[key]["metadata"] = metadata
+        # Checking against expected format for Emissions
+        for split_data in emissions_data.values():
+            em_data = split_data["data"]
+            Emissions.validate_data(em_data)
 
         required = ("species", "source", "domain", "date")
         lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
@@ -178,3 +151,150 @@ class Emissions(BaseStore):
         metastore.close()
 
         return datasource_uuids
+
+    @staticmethod
+    def transform_data(
+        datapath: Union[str, Path],
+        database: str,
+        overwrite: bool = False,
+        **kwargs: Dict,
+    ) -> Dict:
+        """
+        Read and transform an emissions database. This will find the appropriate
+        parser function to use for the database specified. The necessary inputs
+        are determined by which database ie being used.
+
+        The underlying parser functions will be of the form:
+            - openghg.transform.emissions.parse_{database.lower()}
+                - e.g. openghg.transform.emissions.parse_edgar()
+
+        Args:
+            datapath: Path to local copy of database archive (for now)
+            database: Name of database
+            overwrite: Should this data overwrite currently stored data
+                which matches.
+            **kwargs: Inputs for underlying parser function for the database.
+                Necessary inputs will depend on the database being parsed.
+
+        TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
+        """
+        import inspect
+        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.types import EmissionsDatabases
+        from openghg.util import load_emissions_database_parser
+
+        datapath = Path(datapath)
+
+        try:
+            data_type = EmissionsDatabases[database.upper()].value
+        except KeyError:
+            raise ValueError(f"Unable to transform '{database}' selected.")
+
+        # Load the data retrieve object
+        parser_fn = load_emissions_database_parser(database=database)
+
+        em_store = Emissions.load()
+
+        # Load in the metadata store
+        metastore = load_metastore(key=em_store._metakey)
+
+        # Find all parameters that can be accepted by parse function
+        all_param = list(inspect.signature(parser_fn).parameters.keys())
+
+        # Define parameters to pass to the parser function from kwargs
+        param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
+        param["datapath"] = datapath  # Add datapath explicitly (for now)
+
+        emissions_data = parser_fn(**param)
+
+        # Checking against expected format for Emissions
+        for split_data in emissions_data.values():
+            em_data = split_data["data"]
+            Emissions.validate_data(em_data)
+
+        required = ("species", "source", "domain", "date")
+        lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
+
+        data_type = "emissions"
+        overwrite = False
+        datasource_uuids = assign_data(
+            data_dict=emissions_data,
+            lookup_results=lookup_results,
+            overwrite=overwrite,
+            data_type=data_type,
+        )
+
+        em_store.add_datasources(uuids=datasource_uuids, data=emissions_data, metastore=metastore)
+
+        em_store.save()
+        metastore.close()
+
+        return datasource_uuids
+
+    @staticmethod
+    def schema() -> DataSchema:
+        """
+        Define schema for emissions Dataset.
+
+        Includes flux/emissions for each time and position:
+            - "flux"
+                - expected dimensions: ("time", "lat", "lon")
+
+        Expected data types for all variables and coordinates also included.
+
+        Returns:
+            DataSchema : Contains schema for Emissions.
+        """
+        data_vars: Dict[str, Tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
+        dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64, "flux": np.floating}
+
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+
+        return data_format
+
+    @staticmethod
+    def validate_data(data: Dataset) -> None:
+        """
+        Validate input data against Emissions schema - definition from
+        Emissions.schema() method.
+
+        Args:
+            data : xarray Dataset in expected format
+
+        Returns:
+            None
+
+            Raises a ValueError with details if the input data does not adhere
+            to the Emissions schema.
+        """
+        data_schema = Emissions.schema()
+        data_schema.validate_data(data)
+
+    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
+        """Perform a lookup for the UUID of a Datasource
+
+        Args:
+            species: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+        Returns:
+            str or dict: UUID or False if no entry
+        """
+        uuid = self._datasource_table[species][source][domain][date]
+
+        return uuid if uuid else False
+
+    def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
+        """Record a UUID of a Datasource in the datasource table
+
+        Args:
+            site: Site code
+            domain: Domain
+            model: Model name
+            height: Height
+            uuid: UUID of Datasource
+        Returns:
+            None
+        """
+        self._datasource_table[species][source][domain][date] = uuid

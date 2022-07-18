@@ -1,0 +1,92 @@
+{
+  "ARCTIC": {
+    "latitude_file": "domain/ARCTIC_latitude.dat",
+    "longitude_file": "domain/ARCTIC_longitude.dat",
+    "latitude_range": [
+      "36.094",
+      "89.766"
+    ],
+    "longitude_range": [
+      "-97.900",
+      "261.748"
+    ],
+    "latitude_increment": "0.234",
+    "longitude_increment": "0.352",
+    "description": "NAME domain over Arctic region"
+  },
+  "EASTASIA": {
+    "latitude_file": "domain/EASTASIA_latitude.dat",
+    "longitude_file": "domain/EASTASIA_longitude.dat",
+    "latitude_range": [
+      "-5.183",
+      "74.143"
+    ],
+    "longitude_range": [
+      "54.516",
+      "191.796"
+    ],
+    "latitude_increment": "0.234",
+    "longitude_increment": "0.352",
+    "description": "NAME domain over East Asian region"
+  },
+  "EUROPE": {
+    "latitude_file": "domain/EUROPE_latitude.dat",
+    "longitude_file": "domain/EUROPE_longitude.dat",
+    "latitude_range": [
+      "10.729",
+      "79.057"
+    ],
+    "longitude_range": [
+      "-97.900",
+      "39.380"
+    ],
+    "latitude_increment": "0.234",
+    "longitude_increment": "0.352",
+    "description": "NAME domain over Europe and the Atlantic (large)"
+  },
+  "PACIFIC": {
+    "latitude_file": "domain/PACIFIC_latitude.dat",
+    "longitude_file": "domain/PACIFIC_longitude.dat",
+    "latitude_range": [
+      "-50.000",
+      "19.966"
+    ],
+    "longitude_range": [
+      "98.125",
+      "242.797"
+    ],
+    "latitude_increment": "0.234",
+    "longitude_increment": "0.352",
+    "description": "NAME domain over Pacific region"
+  },
+  "SOUTHAFRICA": {
+    "latitude_file": "domain/SOUTHAFRICA_latitude.dat",
+    "longitude_file": "domain/SOUTHAFRICA_longitude.dat",
+    "latitude_range": [
+      "-64.000",
+      "4.328"
+    ],
+    "longitude_range": [
+      "-50.000",
+      "87.280"
+    ],
+    "latitude_increment": "0.234",
+    "longitude_increment": "0.352",
+    "description": "NAME domain over South African region"
+  },
+  "USA": {
+    "latitude_file": "domain/USA_latitude.dat",
+    "longitude_file": "domain/USA_longitude.dat",
+    "latitude_range": [
+      "8.000",
+      "59.012"
+    ],
+    "longitude_range": [
+      "-140.000",
+      "-39.680"
+    ],
+    "latitude_increment": "0.234",
+    "longitude_increment": "0.352",
+    "description": "NAME domain over the United States of America"
+  }
+}

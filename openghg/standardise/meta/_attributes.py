@@ -1,4 +1,4 @@
-from typing import cast, Any, Dict, Optional, List, Union
+from typing import cast, Any, Dict, Optional, List, Tuple, Hashable, Union
 from xarray import Dataset
 
 
@@ -76,20 +76,8 @@ def get_attributes(
 
     Attributes of the xarray DataSet are modified, and variable names are changed
 
-    If the species is a standard mole fraction then either:
-        - species name will used in lower case in the file and variable names
-            but with any hyphens taken out
-        - name will be changed according to the species_translator dictionary
-
-    If the species is isotopic data or a non-standard variable (e.g. APO):
-        - Isotopes species names should begin with a "D"
-            (Annoyingly, the code currently picks up "Desflurane" too. I've
-             fixed this for now, but if we get a lot of other "D" species, we
-             should make this better)
-        - I suggest naming for isotopologues should be d<species><isotope>, e.g.
-            dCH4C13, or dCO2C14
-        - Any non-standard variables should be listed in the species_translator
-            dictionary
+    Variable naming related to species name will be defined using
+    define_species_label() function.
 
     Args:
         ds: Should contain variables such as "ch4", "ch4 repeatability".
@@ -109,9 +97,7 @@ def get_attributes(
             (e.g. ["1900-01-01", "2010-01-01"])
     """
     from pandas import Timestamp as pd_Timestamp
-    from openghg.util import clean_string, load_json, timestamp_now
-
-    # from numpy import unique as np_unique
+    from openghg.util import load_json, timestamp_now
 
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
@@ -127,32 +113,31 @@ def get_attributes(
     to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
     ds = ds.rename(to_underscores)  # type: ignore
 
-    species_attrs = load_json(filename="species_attributes.json")
-    attributes_data = load_json("attributes.json")
-
-    species_translator = attributes_data["species_translation"]
-    unit_species = attributes_data["unit_species"]
-    unit_species_long = attributes_data["unit_species_long"]
-    unit_interpret = attributes_data["unit_interpret"]
-
-    species_upper = species.upper()
     species_lower = species.lower()
+    species_search = species_lower.replace(" ", "_")  # Apply same formatting as above
 
     variable_names = cast(Dict[str, Any], ds.variables)
-    matched_keys = [var for var in variable_names if species_lower in var]
+    matched_keys = [var for var in variable_names if species_search in var]
 
     # If we don't have any variables to rename, raise an error
     if not matched_keys:
-        raise NameError(f"Cannot find species {species} in Dataset variables")
+        raise NameError(f"Cannot find species {species_search} in Dataset variables")
+
+    # Load attributes files
+    species_attrs = load_json(filename="acrg_species_info.json")
+    attributes_data = load_json("attributes.json")
+
+    unit_interpret = attributes_data["unit_interpret"]
+    unit_mol_fraction = attributes_data["unit_mol_fraction"]
+    unit_non_standard = attributes_data["unit_non_standard"]
+
+    # Extract both label to use for species and key for attributes
+    # Typically species_label will be the lower case version of species_key
+    species_label, species_key = define_species_label(species)
 
     species_rename = {}
     for var in matched_keys:
-        try:
-            species_label = species_translator[species_upper]["chem"]
-        except KeyError:
-            species_label = clean_string(species_lower)
-
-        species_rename[var] = var.replace(species_lower, species_label)
+        species_rename[var] = var.replace(species_search, species_label)
 
     ds = ds.rename(species_rename)  # type: ignore
 
@@ -192,21 +177,29 @@ def get_attributes(
     ds.attrs.update(site_attributes)
 
     # Species-specific attributes
-    # Long name
-    if species_upper.startswith("D") and species_upper != "DESFLURANE" or species_upper == "APD":
-        sp_long = species_translator[species_upper]["name"]
-    elif species_upper == "RN":
-        sp_long = "radioactivity_concentration_of_222Rn_in_air"
-    elif species_upper in species_translator:
-        name = species_translator[species_upper]["name"]
+    # Extract long name
+    try:
+        name = species_attrs[species_key]["name"]
+    except KeyError:
+        name = species_label
+
+    # Extract units if not defined
+    if units is None:
+        try:
+            units = species_attrs[species_key]["units"]
+        except KeyError:
+            units = ""
+
+    # Define label based on units
+    if units in unit_mol_fraction:
         sp_long = f"mole_fraction_of_{name}_in_air"
     else:
-        sp_long = f"mole_fraction_of_{species_label}_in_air"
+        sp_long = name
 
     ancillary_variables = []
 
     variable_names = cast(Dict[str, Any], ds.variables)
-    matched_keys = [var for var in variable_names if species_lower in var.lower()]
+    matched_keys = [var for var in variable_names if species_search in var.lower()]
 
     # Write units as attributes to variables containing any of these
     match_words = ["variability", "repeatability", "stdev", "count"]
@@ -214,31 +207,23 @@ def get_attributes(
     for key in variable_names:
         key = key.lower()
 
-        if species_label.lower() in key:
+        if species_label in key:
             # Standard name attribute
             # ds[key].attrs["standard_name"]=key.replace(species_label, sp_long)
             ds[key].attrs["long_name"] = key.replace(species_label, sp_long)
 
             # If units are required for variable, add attribute
             if key == species_label or any(word in key for word in match_words):
-                if units is not None:
-                    if units in unit_interpret:
-                        ds[key].attrs["units"] = unit_interpret[units]
-                    else:
-                        ds[key].attrs["units"] = unit_interpret["else"]
-                else:
-                    # TODO - merge these species attributes into a single simpler JSON
-                    try:
-                        ds[key].attrs["units"] = unit_species[species_upper]
-                    except KeyError:
-                        try:
-                            ds[key].attrs["units"] = species_attrs[species_label.upper()]["units"]
-                        except KeyError:
-                            ds[key].attrs["units"] = "NA"
 
-                # If units are non-standard, add explanation
-                if species_upper in unit_species_long:
-                    ds[key].attrs["units_description"] = unit_species_long[species_upper]
+                if units in unit_interpret:
+                    ds[key].attrs["units"] = unit_interpret[units]
+                    # If units are non-standard, add details
+                    if units in unit_non_standard:
+                        ds[key].attrs["units_description"] = units
+                elif units == "":
+                    ds[key].attrs["units"] = unit_interpret["else"]
+                else:
+                    ds[key].attrs["units"] = units
 
             # Add to list of ancilliary variables
             if key != species_label:
@@ -246,14 +231,12 @@ def get_attributes(
 
     # TODO - for the moment skip this step - check status of ancilliary variables in standard
     # Write ancilliary variable list
-    # ds[species_label].attrs["ancilliary_variables"] = ", ".join(ancillary_variables)
+    # ds[species_label_lower].attrs["ancilliary_variables"] = ", ".join(ancillary_variables)
 
     # Add quality flag attributes
     # NOTE - I've removed the whitespace before status_flag and integration_flag here
     variable_names = cast(Dict[str, Any], ds.variables)
     quality_flags = [key for key in variable_names if "status_flag" in key]
-
-    # Not getting long_name for c2f6
 
     for key in quality_flags:
         ds[key] = ds[key].astype(int)
@@ -305,6 +288,54 @@ def get_attributes(
     return ds
 
 
+def define_species_label(species: str) -> Tuple[str, str]:
+    """
+    Define standardised label to use for observation datasets.
+    This is defined using the 'acrg_site_info.json' details with
+    alternative names ('alt') defined within.
+
+    Formatting:
+     - species label will be all lower case
+     - any spaces will be replaced with underscores
+     - if species or synonym cannot be found, species name will used
+        but with any hyphens taken out (see also openghg.util.clean_string function)
+
+    Note: Suggested naming for isotopologues should be d<species><isotope>, e.g.
+    dCH4C13, or dCO2C14
+
+    Args:
+        species : Species name.
+
+    Returns:
+        str, str: Both the species label to be used exactly and the original attribute
+                  key needed to extract additional data from the 'acrg_site_info.json'
+                  attributes file.
+
+    Example:
+        >>> define_species_label("methane")
+            ("ch4", "CH4")
+        >>> define_species_label("radon")
+            ("rn", "Rn")
+        >>> define_species_label("cfc-11")
+            ("cfc11", "CFC11")
+        >>> define_species_label("CH4C13")
+            ("dch4c13", "DCH4C13")
+    """
+
+    from openghg.util import synonyms, clean_string
+
+    # Extract species label using synonyms function
+    try:
+        species_label = synonyms(species, lower=False, allow_new_species=False)
+    except ValueError:
+        species_underscore = species.replace(" ", "_")
+        species_label = clean_string(species_underscore)
+
+    species_label_lower = species_label.lower()
+
+    return species_label_lower, species_label
+
+
 def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     """Reads site attributes from JSON
 
@@ -353,3 +384,176 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
         # raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
 
     return attributes
+
+
+def assign_flux_attributes(
+    data: Dict,
+    species: Optional[str] = None,
+    source: Optional[str] = None,
+    domain: Optional[str] = None,
+    units: str = "mol/m2/s",
+    prior_info_dict: Optional[dict] = None,
+) -> Dict:
+    """
+    Assign attributes for the input flux dataset within dictionary based on
+    metadata and passed arguments.
+
+    Args:
+        data: Dictionary containing data, metadata and attributes
+        species: Species name
+        source: Source name
+        domain: Domain name
+        units: Unit values for the "flux" variable.  Default = "mol/m2/s"
+        prior_info_dict: Dictionary of additional 'prior' information about
+            for the emissions sources. Expect this to be of the form e.g.
+                {"EDGAR": {"version": "v4.3.2",
+                           "raw_resolution": "0.1 degree x 0.1 degree",
+                           "reference": "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG"
+                           ...},
+                ...}
+
+    Returns:
+        Dict : Same format as inputted but with updated "data" component (Dataset)
+    """
+
+    for flux_dict in data.values():
+        flux_attributes = flux_dict.get("attributes", {})
+
+        # Ensure values for these attributes have been specified either manually
+        # or within metadata.
+        attribute_values = {"species": species, "source": source, "domain": domain}
+
+        metadata = flux_dict["metadata"]
+        for attr, value in attribute_values.items():
+            if value is None:
+                try:
+                    attribute_values[attr] = metadata[attr]
+                except KeyError:
+                    raise ValueError(f"Attribute {attr} must be specified.")
+
+        input_attributes = cast(Dict[str, str], attribute_values)
+
+        flux_dict["data"] = get_flux_attributes(
+            ds=flux_dict["data"],
+            units=units,
+            prior_info_dict=prior_info_dict,
+            global_attributes=flux_attributes,
+            **input_attributes,
+        )
+
+    return data
+
+
+def get_flux_attributes(
+    ds: Dataset,
+    species: str,
+    source: str,
+    domain: str,
+    units: str = "mol/m2/s",
+    prior_info_dict: Optional[dict] = None,
+    global_attributes: Optional[Dict[Hashable, Any]] = None,
+) -> Dataset:
+    """
+    Assign additional attributes for the flux dataset.
+
+    Args:
+        ds: Should contain "flux" variable
+        species: Species name
+        source: Source name
+        domain: Domain name
+        units: Unit values for the "flux" variable. Default = "mol/m2/s"
+        prior_info_dict: Dictionary of additional 'prior' information about
+            for the emissions sources. Expect this to be of the form e.g.
+                {"EDGAR": {"version": "v4.3.2",
+                           "raw_resolution": "0.1 degree x 0.1 degree",
+                           "reference": "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG"
+                           ...},
+                ...}
+        global_attributes: Additional global attributes to write to dataset.
+
+    Returns:
+        Dataset: Input dataset with updated variable/coordinate and global attributes
+    """
+
+    # Example flux attributes (from files)
+    # :title = "EDGAR 4.3.2 year 2004" ;
+    # :author = "ag12733" ;
+    # :date_created = "2018-07-16 13:10:57.346915" ;
+    # :number_of_prior_files_used = 1L ;
+    # :prior_file_1 = "EDGAR" ;
+    # :prior_file_1_version = "/data/shared/Gridded_fluxes/N2O/EDGAR_v4.3.2/v432_N2O_TOTALS_nc/v432_N2O_2004.0.1x0.1.nc" ;
+    # :prior_file_1_raw_resolution = "0.1 degree x 0.1 degree" ;
+    # :prior_file_1_reference = "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG" ;
+    # :regridder_used = "acrg_grid.regrid.regrid_3D" ;
+
+    from openghg.util import timestamp_now
+
+    # Define species variable/coordinate attributes and assign
+    flux_attrs = {"source": source, "units": units, "species": species}
+
+    lat_attrs = {"long_name": "latitude", "units": "degrees_north", "notes": "centre of cell"}
+
+    lon_attrs = {"long_name": "longitude", "units": "degrees_east", "notes": "centre of cell"}
+
+    ds["flux"].attrs = flux_attrs
+    ds["lat"].attrs = lat_attrs
+    ds["lon"].attrs = lon_attrs
+
+    # Define default values for global attributes
+    global_attributes_default: Dict[Hashable, Any] = {
+        "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+        "Conventions": "CF-1.8",
+    }
+
+    if global_attributes is None:
+        global_attributes = global_attributes_default
+    else:
+        global_attributes.update(global_attributes_default)
+
+    # Extract any current attributes from the Dataset
+    current_attributes = ds.attrs
+
+    # Extract "title" from current attributes or define this.
+    if "title" in current_attributes and "title" not in global_attributes:
+        global_attributes["title"] = current_attributes["title"]
+    else:
+        global_attributes["title"] = f"{source} emissions/flux of {species} for {domain} domain"
+
+    if "file_created" not in global_attributes:
+        global_attributes["file_created"] = str(timestamp_now())
+    if "process_by" not in global_attributes:
+        global_attributes["processed_by"] = "OpenGHG_Cloud"
+
+    # TODO: Update when we have access to species label definition (from 'obs_data_type' branch)
+    # species_label = define_species_label(species)
+    species_label = species
+
+    global_attributes["species"] = species_label
+    global_attributes["source"] = source
+    global_attributes["domain"] = domain
+
+    # Add any 'prior' information for emissions databases.
+    if prior_info_dict is not None:
+        # For composite emissions files this may contain > 1 prior input
+        global_attributes["number_of_prior_files_used"] = len(prior_info_dict.keys())
+        for i, source_key in enumerate(prior_info_dict.keys()):
+
+            prior_number = i + 1
+            label_start = f"prior_file_{prior_number}"
+            global_attributes[label_start] = source_key
+
+            for key, value in prior_info_dict[source_key].items():
+                attr_key = f"{label_start}_{key}"
+                global_attributes[attr_key] = value
+
+    # Ensure keys which have been updated by OpenGHG are not overwritten
+    # by current attributes.
+    updated_keys = ["Conventions", "title", "file_created", "processed_by"]
+    for key in updated_keys:
+        if key in current_attributes:
+            current_attributes.pop(key)
+
+    global_attributes.update(current_attributes)
+    ds.attrs = global_attributes
+
+    return ds
