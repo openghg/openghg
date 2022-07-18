@@ -49,7 +49,7 @@ from openghg.client import process_obs
 
 obs_file = "../data/DECC/tac.picarro.1minute.100m.201208.dat"
 
-site="tac" 
+site="tac"
 network="DECC"
 height="100m"
 species="ch4"
@@ -62,7 +62,7 @@ from openghg.client import process_footprint
 
 fp_file_path = "../data/footprints/TAC-100magl_EUROPE_201208.nc"
 
-site="tac" 
+site="tac"
 height="100m"
 domain="EUROPE"
 model="NAME"
@@ -82,7 +82,7 @@ from openghg.client import process_flux
 
 flux_data = retrieve_example_data(path="flux/ch4-ukghg-all_EUROPE_2012.tar.gz")
 
-site="tac" 
+site="tac"
 domain="EUROPE"
 date = "2012"
 
@@ -112,11 +112,11 @@ from openghg.analyse import ModelScenario
 start_date = "2012-08-01"
 end_date = "2012-09-01"
 
-scenario = ModelScenario(site=site, 
-                         inlet=height, 
-                         domain=domain, 
-                         species=species, 
-                         source=source_waste, 
+scenario = ModelScenario(site=site,
+                         inlet=height,
+                         domain=domain,
+                         species=species,
+                         source=source_waste,
                          start_date=start_date,
                          end_date=end_date)
 ```
