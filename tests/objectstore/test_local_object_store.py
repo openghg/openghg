@@ -2,7 +2,7 @@ import pytest
 from pathlib import Path
 
 from openghg.store import ObsSurface
-from openghg.objectstore import get_local_bucket, query_store
+from openghg.objectstore import get_bucket, query_store
 
 
 def get_datapath(filename, data_type):
@@ -18,7 +18,7 @@ def hfd_filepath():
 # Add some stuff to the object store?
 @pytest.fixture(scope="session")
 def populate_store():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
     filepath = hfd_filepath()
     ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="hfd")
 

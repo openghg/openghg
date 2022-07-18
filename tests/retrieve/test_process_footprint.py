@@ -1,5 +1,5 @@
 from pathlib import Path
-from openghg.objectstore import get_local_bucket
+from openghg.objectstore import get_bucket
 from openghg.store import ObsSurface, Emissions, Footprints
 from openghg.analyse import footprints_data_merge
 

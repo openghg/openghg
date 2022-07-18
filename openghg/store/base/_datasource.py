@@ -191,7 +191,9 @@ class Datasource:
 
                     # TODO: May need to find a way to find period for *last point* rather than *current point*
                     # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
-                    combined_daterange = self.get_representative_daterange_str(dataset=combined, period=period)
+                    combined_daterange = self.get_representative_daterange_str(
+                        dataset=combined, period=period
+                    )
                     combined_datasets[combined_daterange] = combined
 
                 self._data.update(combined_datasets)

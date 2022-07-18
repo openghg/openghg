@@ -67,7 +67,9 @@ def get_obs_surface(
     if not obs_results:
         raise ValueError(f"Unable to find results for {species} at {site}")
 
-    retrieved_data: Union[ObsData, List[ObsData], None] = obs_results.retrieve(site=site, species=species, inlet=inlet)
+    retrieved_data: Union[ObsData, List[ObsData], None] = obs_results.retrieve(
+        site=site, species=species, inlet=inlet
+    )
 
     if retrieved_data is None:
         return None
@@ -508,9 +510,9 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
 multDataTypes = Union[List[ObsData], List[FootprintData], List[FluxData]]
 
 
-def metadata_difference(data: multDataTypes,
-                        params: Optional[list] = None,
-                        print_output: bool = True) -> list:
+def metadata_difference(
+    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+) -> list:
     """
     Check differences between metadata for returned data objects.
 
@@ -524,7 +526,7 @@ def metadata_difference(data: multDataTypes,
     """
     metadata = [d.metadata for d in data]
     if params is not None:
-        metadata = [{param:m[param] for param in params} for m in metadata]
+        metadata = [{param: m[param] for param in params} for m in metadata]
 
     metadata0 = metadata[0]
     difference = []

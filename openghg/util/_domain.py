@@ -93,8 +93,9 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     return coord_data
 
 
-def convert_longitude(longitude: ndarray,
-                      return_index: bool = False) -> Union[ndarray, Tuple[ndarray, ndarray]]:
+def convert_longitude(
+    longitude: ndarray, return_index: bool = False
+) -> Union[ndarray, Tuple[ndarray, ndarray]]:
     """
     Convert longitude extent to -180 - 180 and reorder.
 

@@ -1,22 +1,28 @@
-from dataclasses import dataclass, field
 from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
+from xarray import Dataset, open_dataset
+from io import BytesIO
 
 from addict import Dict as aDict
+import json
 
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
+
 from openghg.util import (
     clean_string,
     create_daterange_str,
     find_daterange_gaps,
     first_last_dates,
     split_daterange_str,
+    running_in_cloud,
 )
+
 
 __all__ = ["SearchResults"]
 
+T = TypeVar("T", bound="SearchResults")
 
-@dataclass
+
 class SearchResults:
     """This class is used to return data from the search function. It
     has member functions to retrieve data from the object store.
@@ -27,12 +33,10 @@ class SearchResults:
         cloud: True if running in cloud
     """
 
-    T = TypeVar("T", bound="SearchResults")
-
-    results: Dict = field(default_factory=dict)
-    ranked_data: bool = False
-    # Local or cloud service to be used
-    cloud: bool = False
+    def __init__(self, results: Optional[Dict] = None, ranked_data: bool = False):
+        self.results = results if results is not None else {}
+        self.ranked_data = ranked_data
+        self.cloud = running_in_cloud()
 
     def __str__(self) -> str:
         if not self.results:
@@ -76,20 +80,26 @@ class SearchResults:
             "cloud": self.cloud,
         }
 
+    def to_json(self) -> str:
+        """Serialises the object to JSON
+
+        Returns:
+            str: JSON str
+        """
+        return json.dumps(self.to_data())
+
     @classmethod
-    def from_data(cls: Type[T], data: Dict) -> T:
+    def from_json(cls: Type[T], data: Union[bytes, str]) -> T:
         """Create a SearchResults object from a dictionary
 
         Args:
-            data: Dictionary created by SearchResults.to_data
+            data: Serialised object
         Returns:
             SearchResults: SearchResults object
         """
-        return cls(
-            results=data["results"],
-            ranked_data=data["ranked_data"],
-            cloud=data["cloud"],
-        )
+        loaded = json.loads(data)
+
+        return cls(results=loaded["results"], ranked_data=loaded["ranked_data"])
 
     def rankings(self) -> Dict:
         if not self.ranked_data:
@@ -284,112 +294,123 @@ class SearchResults:
         data_keys = specific_source["keys"]
         metadata = specific_source["metadata"]
 
-        # If cloud use the Retrieve object
-        if self.cloud:
-            raise NotImplementedError
-            # from Acquire.Client import Wallet
-            # from xarray import open_dataset
-
-            # wallet = Wallet()
-            # self._service_url = "https://fn.openghg.org/t"
-            # self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
-
-            # key = f"{site}_{species}"
-            # keys_to_retrieve = {key: data_keys}
-
-            # args = {"keys": keys_to_retrieve}
-
-            # response: Dict = self._service.call_function(function="retrieve.retrieve", args=args)
-
-            # response_data = response["results"]
-
-            # data = open_dataset(response_data[key])
+        if not self.ranked_data:
+            keys = data_keys["unranked"]
+            final_dataset = self._retrieve_dataset(keys, sort=True, elevate_inlet=False)
         else:
-            if not self.ranked_data:
-                keys = data_keys["unranked"]
-                final_dataset = recombine_datasets(keys, sort=True)
-            else:
-                dataset_slices = []
+            dataset_slices = []
 
-                inlet_ranges = specific_source["rank_metadata"]
+            inlet_ranges = specific_source["rank_metadata"]
 
-                metadata["rank_metadata"] = {}
+            metadata["rank_metadata"] = {}
 
-                ranked_keys = data_keys["ranked"]
-                ranked_slices = []
+            ranked_keys = data_keys["ranked"]
+            ranked_slices = []
 
-                inlets = set()
+            inlets = set()
 
-                for daterange, keys in ranked_keys.items():
-                    data_slice = recombine_datasets(keys=keys, sort=True, elevate_inlet=True)
+            for daterange, keys in ranked_keys.items():
+                data_slice = self._retrieve_dataset(keys=keys, sort=True, elevate_inlet=True)
 
-                    slice_start, slice_end = split_daterange_str(daterange_str=daterange, date_only=True)
+                slice_start, slice_end = split_daterange_str(daterange_str=daterange, date_only=True)
 
-                    # We convert to str here as xarray has some weird behaviour that means
-                    # "2018-01-01" - "2018-06-01"
-                    # gets treated differently to
-                    # datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)
-                    ranked_slice = data_slice.sel(time=slice(str(slice_start), str(slice_end)))
+                # We convert to str here as xarray has some weird behaviour that means
+                # "2018-01-01" - "2018-06-01"
+                # gets treated differently to
+                # datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)
+                ranked_slice = data_slice.sel(time=slice(str(slice_start), str(slice_end)))
 
-                    if ranked_slice.time.size > 0:
-                        inlet = inlet_ranges[daterange]
-                        inlets.add(inlet)
+                if ranked_slice.time.size > 0:
+                    inlets.add(inlet_ranges[daterange])
+                    ranked_slices.append(ranked_slice)
 
-                        ranked_slices.append(ranked_slice)
+                ranked_metadata = specific_source["rank_metadata"]
+                metadata["rank_metadata"]["ranked"] = ranked_metadata
 
-                    ranked_metadata = specific_source["rank_metadata"]
-                    metadata["rank_metadata"]["ranked"] = ranked_metadata
+            dataset_slices.extend(ranked_slices)
 
-                dataset_slices.extend(ranked_slices)
+            unranked_keys = data_keys["unranked"]
 
-                unranked_keys = data_keys["unranked"]
+            if unranked_keys:
+                unranked_data = self._retrieve_dataset(keys=unranked_keys, sort=True, elevate_inlet=True)
 
-                if unranked_keys:
-                    unranked_data = recombine_datasets(keys=unranked_keys, sort=True, elevate_inlet=True)
+                first_date, last_date = first_last_dates(keys=unranked_keys)
 
-                    first_date, last_date = first_last_dates(keys=unranked_keys)
+                ranked_dateranges = list(ranked_keys.keys())
+                unranked_dateranges = find_daterange_gaps(
+                    start_search=first_date,
+                    end_search=last_date,
+                    dateranges=ranked_dateranges,
+                )
 
-                    ranked_dateranges = list(ranked_keys.keys())
-                    unranked_dateranges = find_daterange_gaps(
-                        start_search=first_date,
-                        end_search=last_date,
-                        dateranges=ranked_dateranges,
-                    )
+                unranked_metadata = {}
+                if unranked_dateranges:
+                    unranked_slices = []
+                    for dr in unranked_dateranges:
+                        slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
+                        unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
 
-                    unranked_metadata = {}
-                    if unranked_dateranges:
-                        unranked_slices = []
-                        for dr in unranked_dateranges:
-                            slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
-                            unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
+                        if unranked_slice.time.size > 0:
+                            inlet = unranked_slice["inlet"].values[0]
+                            inlets.add(inlet)
+                            unranked_metadata[dr] = inlet
+                            unranked_slices.append(unranked_slice)
 
-                            if unranked_slice.time.size > 0:
-                                inlet = unranked_slice["inlet"].values[0]
-                                inlets.add(inlet)
-                                unranked_metadata[dr] = inlet
-                                unranked_slices.append(unranked_slice)
-
-                        dataset_slices.extend(unranked_slices)
-                    else:
-                        daterange_str = create_daterange_str(start=first_date, end=last_date)
-                        inlet = unranked_data["inlet"].values[0]
-                        inlets.add(inlet)
-                        unranked_metadata[daterange_str] = inlet
-
-                        dataset_slices.extend(unranked_data)
-
-                    metadata["rank_metadata"]["unranked"] = unranked_metadata
-
-                final_dataset = concat(objs=dataset_slices, dim="time").sortby("time")
-
-                if len(inlets) == 1:
-                    inlet_tag = str(inlets.pop())
+                    dataset_slices.extend(unranked_slices)
                 else:
-                    inlet_tag = "multiple"
+                    daterange_str = create_daterange_str(start=first_date, end=last_date)
+                    inlet = unranked_data["inlet"].values[0]
+                    inlets.add(inlet)
+                    unranked_metadata[daterange_str] = inlet
 
-                # Update the attributes for single / multiple inlet heights
-                final_dataset.attrs["inlet"] = inlet_tag
+                    dataset_slices.extend(unranked_data)
+
+                metadata["rank_metadata"]["unranked"] = unranked_metadata
+
+            final_dataset = concat(objs=dataset_slices, dim="time").sortby("time")
+
+            if len(inlets) == 1:
+                inlet_tag = str(inlets.pop())
+            else:
+                inlet_tag = "multiple"
+
+            # Update the attributes for single / multiple inlet heights
+            final_dataset.attrs["inlet"] = inlet_tag
 
         metadata = specific_source["metadata"]
 
         return ObsData(data=final_dataset, metadata=metadata)
+
+    def _retrieve_dataset(
+        self, keys: List, sort: bool, elevate_inlet: bool = True, attrs_to_check: Optional[Dict] = None
+    ) -> Dataset:
+        """Retrieves datasets from either cloud or local object store
+
+        Args:
+            keys: List of object store keys
+            sort: Sort data on recombination
+            elevate_inlet: Elevate inlet from attribute to variable
+        Returns:
+            Dataset:
+        """
+        from openghg.cloud import call_function
+
+        if self.cloud:
+            to_post: Dict[str, Union[Dict, List, bool, str]] = {}
+            to_post["keys"] = keys
+            to_post["sort"] = sort
+            to_post["elevate_inlet"] = elevate_inlet
+            to_post["function"] = "retrieve"
+
+            if attrs_to_check is not None:
+                to_post["attrs_to_check"] = attrs_to_check
+
+            result = call_function(data=to_post)
+            binary_netcdf = result["content"]["data"]
+            buf = BytesIO(binary_netcdf)
+            ds: Dataset = open_dataset(buf).load()
+            return ds
+        else:
+            return recombine_datasets(
+                keys=keys, sort=sort, elevate_inlet=elevate_inlet, attrs_to_check=attrs_to_check
+            )

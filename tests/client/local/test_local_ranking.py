@@ -1,6 +1,5 @@
-import os
 import pytest
-from openghg.client import rank_sources, search
+from openghg.client import rank_sources
 
 
 def test_set_rank(process_crds):

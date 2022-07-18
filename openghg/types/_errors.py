@@ -16,3 +16,15 @@ class ObjectStoreError(Exception):
 
 class DatasourceLookupError(Exception):
     """Raised if Datasource lookup fails"""
+
+
+class EncodingError(ObjectStoreError):
+    pass
+
+
+class MutexTimeoutError(Exception):
+    pass
+
+
+class RequestBucketError(Exception):
+    pass

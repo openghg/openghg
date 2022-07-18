@@ -7,10 +7,12 @@ h5netcdf
 icoscp
 lazy_import
 matplotlib
+msgpack
 netcdf4
 numexpr
 numpy
 nc-time-axis
+oci
 pandas
 paramiko
 plotly
