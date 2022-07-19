@@ -18,13 +18,19 @@ def test_local_obs():
     mhd_path = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
 
     results = standardise_surface(
-        filepaths=mhd_path, site="mhd", inlet="15m", instrument="g2401", network="ICOS", data_type="ICOS", overwrite=True
+        filepaths=mhd_path,
+        site="mhd",
+        inlet="15m",
+        instrument="g2401",
+        network="ICOS",
+        data_type="ICOS",
+        overwrite=True,
     )
 
     assert "co" in results["processed"]["mhd.co.hourly.g2401.15m.dat"]
 
 
-def test_process_footprint():
+def test_standardise_footprint():
     datapath = get_footprint_datapath("footprint_test.nc")
 
     site = "TMB"
@@ -34,14 +40,20 @@ def test_process_footprint():
     model = "test_model"
 
     results = standardise_footprint(
-        filepath=datapath, site=site, model=model, network=network, height=height, domain=domain
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        high_spatial_res=True,
     )
 
     assert "error" not in results
     assert "tmb_europe_test_model_10m" in results
 
 
-def test_process_emissions():
+def test_standardise_emissions():
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(

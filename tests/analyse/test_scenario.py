@@ -537,15 +537,7 @@ def footprint_dummy():
     # - data_type="footprints"
     metadata = {"site": "TESTSITE", "height": "10m", "domain": "TESTDOMAIN", "data_type": "footprints"}
 
-    footprintdata = FootprintData(
-        data=data,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species="INERT",
-        scales="",
-        units="",
-    )
+    footprintdata = FootprintData(data=data, metadata=metadata)
 
     return footprintdata
 
@@ -582,15 +574,7 @@ def flux_ch4_dummy():
     species = "ch4"
     metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
 
-    fluxdata = FluxData(
-        data=flux,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="",
-        units="",
-    )
+    fluxdata = FluxData(data=flux, metadata=metadata)
 
     return fluxdata
 
@@ -866,15 +850,7 @@ def footprint_co2_dummy():
         "species": species,
     }
 
-    footprintdata = FootprintData(
-        data=data,
-        metadata=metadata,
-        species=species,
-        flux={},
-        bc={},
-        scales="",
-        units="",
-    )
+    footprintdata = FootprintData(data=data, metadata=metadata)
 
     return footprintdata
 
@@ -913,15 +889,7 @@ def flux_co2_dummy():
     species = "co2"
     metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
 
-    fluxdata = FluxData(
-        data=flux,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="",
-        units="",
-    )
+    fluxdata = FluxData(data=flux, metadata=metadata)
 
     return fluxdata
 
@@ -1073,15 +1041,7 @@ def footprint_radon_dummy(footprint_dummy):
 
     footprint_ds = footprint_ds.assign(data_vars)
 
-    footprintdata = FootprintData(
-        data=footprint_ds,
-        metadata=footprint_metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="",
-        units="",
-    )
+    footprintdata = FootprintData(data=footprint_ds, metadata=footprint_metadata)
 
     return footprintdata
 
@@ -1139,9 +1099,9 @@ def obs_short_life_dummy(obs_ch4_dummy):
     Create example ObsData object with dummy data
      - Values match to obs_ch4_dummy
      - Species is HFO-1234zee
-    Same values as obs_ch4_dummy fixture but updated species to be "HFO-1234zee"
+    Same values as obs_ch4_dummy fixture but updated species to be "HFO1234zee"
     """
-    species = "HFO-1234zee"
+    species = "HFO1234zee"
     return replace_species(obs_ch4_dummy, species)
 
 
@@ -1150,10 +1110,10 @@ def footprint_short_life_dummy(footprint_radon_dummy):
     """
     Create example FootprintData object with dummy data
      - Values match to footprint_radon_dummy
-     - Species is HFO-1234zee
-    Same values as footprint_radon_dummy fixture but updated species to be "HFO-1234zee"
+     - Species is HFO1234zee
+    Same values as footprint_radon_dummy fixture but updated species to be "HFO1234zee"
     """
-    species = "HFO-1234zee"
+    species = "HFO1234zee"
     return replace_species(footprint_radon_dummy, species)
 
 
@@ -1162,11 +1122,11 @@ def bc_short_life_dummy(bc_ch4_dummy):
     """
     Create example BoundaryConditionsData object with dummy data
      - Values match to bc_ch4_dummy
-     - Species is HFO-1234zee
+     - Species is HFO1234zee
     Same values as bc_ch4_dummy fixture but updated species to be "HFO-1234zee"
 
     """
-    species = "HFO-1234zee"
+    species = "HFO1234zee"
     return replace_species(bc_ch4_dummy, species)
 
 

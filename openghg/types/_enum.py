@@ -17,6 +17,7 @@ class SurfaceTypes(Enum):
     AQMESH = "AQMESH"
     GLASGOW_PICARRO = "GLASGOW_PICARRO"
     GLASGOW_LICOR = "GLASGOW_LICOR"
+    OPENGHG = "OPENGHG"
 
 
 class DataTypes(Enum):
@@ -34,6 +35,7 @@ class DataTypes(Enum):
     AQMESH = "AQMESH"
     GLASGOW_PICARRO = "GLASGOW_PICARRO"
     GLASGOW_LICOR = "GLASGOW_LICOR"
+    OPENGHG = "OPENGHG"
 
 
 class ObsTypes(Enum):
@@ -41,3 +43,15 @@ class ObsTypes(Enum):
     SATELLITE = "ObsSatellite"
     FLASK = "ObsFlask"
     MOBILE = "ObsMobile"
+
+
+class EmissionsTypes(Enum):
+    """For standardising emissions/flux inputs"""
+
+    OPENGHG = "OPENGHG"
+
+
+class EmissionsDatabases(Enum):
+    """For extracting and transforming emissions/flux databases"""
+
+    EDGAR = "EDGAR"

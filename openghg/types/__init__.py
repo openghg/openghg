@@ -1,4 +1,4 @@
-from ._enum import SurfaceTypes, DataTypes, ObsTypes
+from ._enum import SurfaceTypes, DataTypes, ObsTypes, EmissionsTypes, EmissionsDatabases
 from ._types import pathType, multiPathType, resultsType
 from ._errors import (
     InvalidSiteError,

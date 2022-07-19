@@ -1,12 +1,15 @@
+import pytest
 from openghg.store import Emissions
 from openghg.retrieve import search
 from openghg.store import recombine_datasets, metastore_manager, datasource_lookup
 from xarray import open_dataset
 from helpers import get_emissions_datapath
 from openghg.util import hash_bytes
+from openghg.objectstore import get_bucket
 
 
 def test_read_binary_data(mocker):
+    get_bucket(empty=True)
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
@@ -96,6 +99,131 @@ def test_read_file():
     assert metadata == expected_metadata
 
 
+def test_add_edgar_database():
+    """Test edgar can be added to object store (default domain)"""
+    folder = "v6.0_CH4"
+    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "2015"
+
+    proc_results = Emissions.transform_data(
+        datapath=test_datapath,
+        database=database,
+        date=date,
+    )
+
+    default_domain = "globaledgar"
+
+    version = "v6.0"
+    species = "ch4"
+    default_source = "anthro"
+
+    output_key = f"{species}_{default_source}_{default_domain}_{date}"
+    assert output_key in proc_results
+
+    search_results = search(
+        species=species,
+        date=date,
+        database=database,  # would searching for lowercase not work?
+        database_version=version,
+        data_type="emissions",
+    )
+
+    key = list(search_results.keys())[0]
+
+    # TODO: Add tests for data as well?
+    # data_keys = search_results[key]["keys"]
+
+    metadata = search_results[key]["metadata"]
+
+    expected_metadata = {
+        "species": species,
+        "domain": default_domain,
+        "source": default_source,
+        "database": database.lower(),
+        "database_version": version.replace('.',''),
+        "date": "2015",
+        "author": "OpenGHG Cloud".lower(),
+        "start_date": "2015-01-01 00:00:00+00:00",
+        "end_date": "2015-12-31 23:59:59+00:00",
+        "min_longitude": -174.85857,
+        "max_longitude": 180.0,
+        "min_latitude": -89.95,
+        "max_latitude": 89.95,
+        "time_resolution": "standard",
+        "time_period": "1 year",
+    }
+
+    assert metadata.items() >= expected_metadata.items()
+
+
+def test_transform_and_add_edgar_database():
+    """
+    Test EDGAR database can be transformed (regridded) and added to the object store.
+    """
+    # Regridding to a new domain will use the xesmf importer - so skip this test
+    # if module is not present.
+    xesmf = pytest.importorskip("xesmf")
+
+    folder = "v6.0_CH4"
+    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "2015"
+    domain = "EUROPE"
+
+    proc_results = Emissions.transform_data(
+        datapath=test_datapath,
+        database=database,
+        date=date,
+        domain=domain,
+    )
+
+    version = "v6.0"
+    species = "ch4"
+    default_source = "anthro"
+
+    output_key = f"{species}_{default_source}_{domain}_{date}"
+    assert output_key in proc_results
+
+    search_results = search(
+        species=species,
+        date=date,
+        domain=domain,
+        database=database,  # would searching for lowercase not work?
+        database_version=version,
+        data_type="emissions",
+    )
+
+    key = list(search_results.keys())[0]
+
+    # TODO: Add tests for data as well?
+    # data_keys = search_results[key]["keys"]
+
+    metadata = search_results[key]["metadata"]
+
+    expected_metadata = {
+        "species": species,
+        "domain": domain.lower(),
+        "source": "anthro",
+        "database": "edgar",
+        "database_version": version.replace('.',''),
+        "date": "2015",
+        "author": "openghg cloud",
+        "start_date": "2015-01-01 00:00:00+00:00",
+        "end_date": "2015-12-31 23:59:59+00:00",
+        "min_longitude": -97.9,
+        "max_longitude": 39.38,
+        "min_latitude": 10.729,
+        "max_latitude": 79.057,
+        "time_resolution": "standard",
+        "time_period": "1 year",
+    }
+
+    assert metadata.items() >= expected_metadata.items()
+
+
 def test_datasource_add_lookup():
     e = Emissions()
 
@@ -121,3 +249,17 @@ def test_datasource_add_lookup():
         lookup = datasource_lookup(metastore=metastore, data=mock_data, required_keys=required)
 
         assert lookup["co2_gppcardamom_europe_2012"] == fake_datasource["co2_gppcardamom_europe_2012"]["uuid"]
+
+
+def test_flux_schema():
+    """Check expected data variables are being included for default Emissions schema"""
+    data_schema = Emissions.schema()
+
+    data_vars = data_schema.data_vars
+    assert "flux" in data_vars
+
+    assert "time" in data_vars["flux"]
+    assert "lat" in data_vars["flux"]
+    assert "lon" in data_vars["flux"]
+
+    # TODO: Could also add checks for dims and dtypes?

@@ -67,7 +67,7 @@ def site_code_finder(site_name: str) -> Optional[str]:
     Returns:
         str or None: Three letter site code if found
     """
-    from rapidfuzz import process
+    from rapidfuzz import process  # type: ignore
     from openghg.util import load_json
 
     sites = load_json("site_lookup.json")

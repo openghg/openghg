@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
-from xarray import Dataset
+import xarray as xr
 import numpy as np
 
 
@@ -74,7 +74,7 @@ def _format_inlet(inlet: Union[str, float, int]) -> str:
     """
     if isinstance(inlet, str):
         try:
-            inlet_value = float(inlet)
+            inlet_value: Union[float, np.floating] = float(inlet)
         except ValueError:
             inlet_values_str = inlet.split("-")
             try:
@@ -94,7 +94,7 @@ def _format_inlet(inlet: Union[str, float, int]) -> str:
     return inlet_str
 
 
-def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
+def _standarise_variables(obspack_ds: xr.Dataset, species: str) -> xr.Dataset:
     """
     Converts data from NOAA ObsPack dataset into our standardised variables to be stored within the object store.
     The species is also needed so this name can be used to label the variables in the new dataset.
@@ -173,7 +173,9 @@ def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
     return processed_ds
 
 
-def _split_inlets(obspack_ds: Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None) -> Dict:
+def _split_inlets(
+    obspack_ds: xr.Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None
+) -> Dict:
     """
     Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.
 
@@ -310,7 +312,6 @@ def _read_obspack(
     Returns:
         dict: Dictionary of results
     """
-    import xarray as xr
     from openghg.util import clean_string
     from openghg.standardise.meta import assign_attributes
 
@@ -319,8 +320,9 @@ def _read_obspack(
     if measurement_type not in valid_types:
         raise ValueError(f"measurement_type must be one of {valid_types}")
 
-    obspack_ds = xr.open_dataset(data_filepath)
-    orig_attrs = obspack_ds.attrs
+    with xr.open_dataset(data_filepath) as temp:
+        obspack_ds = temp
+        orig_attrs = temp.attrs
 
     # Want to find and drop any duplicate time values for the original dataset
     # Using xarray directly we have to do in a slightly convoluted way as this is not well built
@@ -620,7 +622,7 @@ def _read_raw_data(
     return combined_data
 
 
-def _estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) -> float:
+def _estimate_sampling_period(obspack_ds: xr.Dataset, min_estimate: float = 10.0) -> float:
     """
     Estimate the sampling period for the NOAA data using either the "data_selection_tag"
     attribute (this sometimes contains useful information such as "HourlyData") or by using

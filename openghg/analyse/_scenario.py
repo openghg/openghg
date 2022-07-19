@@ -45,6 +45,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from openghg.dataobjects import FluxData, BoundaryConditionsData, FootprintData, ObsData
 from openghg.retrieve import get_flux, get_footprint, get_bc, get_obs_surface, search
+from openghg.util import synonyms
 import numpy as np
 from pandas import Timestamp
 from xarray import DataArray, Dataset
@@ -129,7 +130,8 @@ class ModelScenario:
         self.fluxes: Optional[Dict[str, FluxData]] = None
         self.bc: Optional[BoundaryConditionsData] = None
 
-        # TODO: Add synonym checking for species?
+        if species is not None:
+            species = synonyms(species)
 
         # Add observation data (directly or through keywords)
         self.add_obs(
@@ -291,7 +293,7 @@ class ModelScenario:
         """
         Add footprint data based on keywords or direct FootprintData object.
         """
-        from openghg.util import clean_string
+        from openghg.util import clean_string, species_lifetime
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs), model, metmodel
@@ -306,7 +308,7 @@ class ModelScenario:
                     "Unable to deal with multiple inlets yet:\n Please change date range or specify a specific inlet"
                 )
 
-            footprint_keywords_1 = {
+            footprint_keywords = {
                 "site": site,
                 "height": inlet,
                 "domain": domain,
@@ -314,13 +316,15 @@ class ModelScenario:
                 # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
                 "start_date": start_date,
                 "end_date": end_date,
-                "species": species,
             }
 
-            footprint_keywords_2 = footprint_keywords_1.copy()
-            footprint_keywords_2.pop("species")
-
-            footprint_keywords = [footprint_keywords_1, footprint_keywords_2]
+            # Check whether general inert footprint should be extracted (suitable for long-lived species)
+            # or species specific footprint
+            #  - needed for short-lived species (includes additional parameters for age of particles)
+            #  - needed for carbon dioxide (include high time resolution footprint)
+            species_lifetime_value = species_lifetime(species)
+            if species_lifetime_value is not None or species == "co2":
+                footprint_keywords["species"] = species
 
             footprint = self._get_data(footprint_keywords, input_type="footprint")
 
@@ -1295,7 +1299,7 @@ class ModelScenario:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
-        from openghg.util import load_json, time_offset
+        from openghg.util import time_offset, species_lifetime, check_lifetime_monthly
 
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)
@@ -1313,27 +1317,15 @@ class ModelScenario:
 
         bc_data = bc_data.reindex_like(scenario, "ffill")
 
-        species_info = load_json(filename="acrg_species_info.json")
-        species = self.species
+        lifetime_value = species_lifetime(self.species)
+        check_monthly = check_lifetime_monthly(lifetime_value)
 
-        try:
-            species_data = species_info[species]
-        except KeyError:
-            species_upper = species.upper()
-            species_data = species_info[species_upper]
-
-        # Check for lifetime details
-        lifetime: Optional[str] = species_data.get("lifetime", None)
-        lifetime_monthly: Optional[list] = species_data.get("lifetime_monthly", None)
-
-        if isinstance(lifetime, list) and len(lifetime) == 12:
-            if len(lifetime) == 12:
-                lifetime_monthly = lifetime
-                lifetime = None
-            else:
-                raise ValueError(
-                    f"Did not recognise input for lifetime for {species_upper} from 'acrg_species_info.json'"
-                )
+        if check_monthly:
+            lifetime_monthly = cast(Optional[List[str]], lifetime_value)
+            lifetime: Optional[str] = None
+        else:
+            lifetime_monthly = None
+            lifetime = cast(Optional[str], lifetime_value)
 
         if lifetime is not None:
             short_lifetime = True
@@ -1365,7 +1357,7 @@ class ModelScenario:
             for var in expected_vars:
                 if var not in scenario.data_vars:
                     raise ValueError(
-                        f"Unable to calculate baseline for short-lived species {species} without species specific footprint."
+                        f"Unable to calculate baseline for short-lived species {self.species} without species specific footprint."
                     )
 
             # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
@@ -1576,8 +1568,6 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
     Returns:
         bool: True if indexes match, else False
     """
-    import numpy as np
-
     common_indices = (key for key in dataset_A.indexes.keys() if key in dataset_B.indexes.keys())
 
     for index in common_indices:
