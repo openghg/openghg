@@ -18,7 +18,7 @@ def test_read_file():
         high_time_resolution=False,
     )
 
-    assert "co2_gppcardamom_europe_2012" in proc_results
+    assert "co2_gpp-cardamom_europe_2012" in proc_results
 
     search_results = search(
         species="co2", source="gpp-cardamom", date="2012", domain="europe", data_type="emissions"
@@ -50,7 +50,7 @@ def test_read_file():
         "comments": "fluxes copied from year 2013. december 2012 values copied from january 2013 values.",
         "species": "co2",
         "domain": "europe",
-        "source": "gppcardamom",
+        "source": "gpp-cardamom",
         "date": "2012",
         "start_date": "2012-01-01 00:00:00+00:00",
         "end_date": "2012-12-31 23:59:59+00:00",

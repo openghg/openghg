@@ -53,4 +53,4 @@ def test_process_emissions():
         high_time_resolution=False,
     )
 
-    assert "co2_gppcardamom_europe_2012" in proc_results
+    assert "co2_gpp-cardamom_europe_2012" in proc_results

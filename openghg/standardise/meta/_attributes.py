@@ -329,7 +329,8 @@ def define_species_label(species: str) -> Tuple[str, str]:
         species_label = synonyms(species, lower=False, allow_new_species=False)
     except ValueError:
         species_underscore = species.replace(" ", "_")
-        species_label = clean_string(species_underscore)
+        species_remove_dash = species_underscore.replace('-', '')
+        species_label = clean_string(species_remove_dash)
 
     species_label_lower = species_label.lower()
 

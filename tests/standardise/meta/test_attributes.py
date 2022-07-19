@@ -161,6 +161,7 @@ def make_dummy_dataset(species_name: str):
      ("Rn", "rn", "radioactivity_concentration_of_222Rn_in_air", "mBq m$^{-3}$"),
      ("c2f6", "c2f6", "mole_fraction_of_hexafluoroethane_in_air", "1e-12"),
      ("SF5CF3", "sf5cf3", "sf5cf3", "unknown"),
+     ("CFC-323", "cfc323", "cfc323", "unknown")
     ]
 )
 def test_species_attributes(species, name, long_name, units):
@@ -171,6 +172,7 @@ def test_species_attributes(species, name, long_name, units):
      - "Rn" - not all upper or lower case + check name/units correct
      - "c2f6" - note in code that long name was not being extracted, added check
      - "SF5CF3" - unknown but valid species name
+     - "CFC-323" - unknown CFC, '-' in name, should be replaced
     """
 
     site = "mhd"
