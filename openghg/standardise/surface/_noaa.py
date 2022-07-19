@@ -173,7 +173,9 @@ def _standarise_variables(obspack_ds: xr.Dataset, species: str) -> xr.Dataset:
     return processed_ds
 
 
-def _split_inlets(obspack_ds: xr.Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None) -> Dict:
+def _split_inlets(
+    obspack_ds: xr.Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None
+) -> Dict:
     """
     Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.
 

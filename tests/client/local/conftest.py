@@ -1,6 +1,6 @@
 import pytest
-from openghg.store import Emissions, ObsSurface
-from helpers import get_datapath, get_emissions_datapath
+from openghg.store import ObsSurface
+from helpers import get_datapath
 
 
 @pytest.fixture(scope="session")

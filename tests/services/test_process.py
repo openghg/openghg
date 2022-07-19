@@ -2,14 +2,14 @@
 # import os
 
 # from openghg.client import process_files
-# from openghg.objectstore import get_local_bucket
+# from openghg.objectstore import get_bucket
 
 # from helpers import get_datapath
 
 
 # # @pytest.fixture(autouse=True, scope="module")
 # # def run_before_tests(monkeypatch):
-# #     # get_local_bucket(empty=True)
+# #     # get_bucket(empty=True)
 # #     monkeypatch.setenv("OPENGHG_CLOUD", "TESTCLOUD")
 
 # @pytest.fixture()
@@ -19,7 +19,7 @@
 
 # @pytest.mark.skip("Marked for removal")
 # def test_process_CRDS_files(authenticated_user):
-#     get_local_bucket(empty=True)
+#     get_bucket(empty=True)
 
 #     service_url = "openghg"
 

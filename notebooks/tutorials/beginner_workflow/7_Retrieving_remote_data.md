@@ -55,7 +55,7 @@ from openghg.client import retrieve_icos
 ```
 
 ```{code-cell} ipython3
-wao_data = retrieve_icos(site="WAO")
+wao_data = retrieve_icos(site="WAO", species="ch4")
 ```
 
 Now we can inspect `wao_data`, an `ObsData` object to see what was retrieved.

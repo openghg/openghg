@@ -5,9 +5,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.13.6
+    jupytext_version: 1.13.7
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -37,9 +37,9 @@ os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
 
 For this tutorial we will again set up a temporary object store to store our data. See [1_Adding_observation_data.ipynb](1_Adding_observation_data.ipynb) for more details around this.
 
-```{code-cell} ipython3
-## Defining inputs
+First we define some input variables.
 
+```{code-cell} ipython3
 site = "TAC"
 network = "DECC"
 height = "100m"
@@ -49,8 +49,7 @@ species = "co2"
 ```
 
 ```{code-cell} ipython3
-## Observations
-from openghg.client import process_obs
+from openghg.client import standardise_surface
 from openghg.util import retrieve_example_data
 
 obs_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
@@ -59,12 +58,13 @@ site = "TAC"
 species = "co2"
 network = "DECC"
 
-decc_results = process_obs(files=obs_data, data_type="CRDS", site=site, network=network)
+decc_results = standardise_surface(filepaths=obs_data, data_type="CRDS", site=site, network=network)
 ```
 
+Add some flux data.
+
 ```{code-cell} ipython3
-## Emissions
-from openghg.client import process_flux
+from openghg.client import standardise_flux
 
 flux_data = retrieve_example_data(path="flux/co2-flux_EUROPE_2017.tar.gz")
 
@@ -78,13 +78,14 @@ source_fossil = "ff-edgar-bp"
 flux_file_natural = [filename for filename in flux_data if source_natural in str(filename)][0]
 flux_file_ff = [filename for filename in flux_data if source_fossil in str(filename)][0]
 
-process_flux(files=flux_file_natural, species=species, source=source_natural, domain=domain, date=date, high_time_resolution=True)
-process_flux(files=flux_file_ff, species=species, source=source_fossil, domain=domain, date=date)
+standardise_flux(filepath=flux_file_natural, species=species, source=source_natural, domain=domain, date=date, high_time_resolution=True)
+standardise_flux(filepath=flux_file_ff, species=species, source=source_fossil, domain=domain, date=date)
 ```
 
+Add some footprint data
+
 ```{code-cell} ipython3
-## Footprints
-from openghg.client import process_footprint
+from openghg.client import standardise_footprint
 
 footprint_data = retrieve_example_data(path="footprint/tac_footprint_co2_201707.tar.gz")
 
@@ -95,7 +96,7 @@ height = "185m"
 model = "NAME"
 metmodel = "UKV"
 
-process_footprint(files=footprint_data, site=site, height=height, domain=domain, model=model, metmodel=metmodel, species=species)
+standardise_footprint(filepath=footprint_data, site=site, height=height, domain=domain, model=model, metmodel=metmodel, species=species)
 ```
 
 ## 2. Creating a model scenario
@@ -108,11 +109,11 @@ from openghg.analyse import ModelScenario
 start_date = "2017-07-01"
 end_date = "2017-07-07"
 
-scenario = ModelScenario(site=site, 
-                         inlet=height, 
-                         domain=domain, 
-                         species=species, 
-                         source=source_natural, 
+scenario = ModelScenario(site=site,
+                         inlet=height,
+                         domain=domain,
+                         species=species,
+                         source=source_natural,
                          start_date=start_date,
                          end_date=end_date)
 ```
@@ -142,7 +143,7 @@ scenario.plot_comparison(baseline="percentile")
 As in the previous tutorial, multiple fluxes can be linked to your `ModelScenario` object if required. This can include additional high frequency (<24 hourly) or low frequency flux data. In this case we have added monthly "fossil fuel" emissions:
 
 ```{code-cell} ipython3
-scenario.add_flux(species=species, 
+scenario.add_flux(species=species,
                   source=source_fossil,
                   domain=domain)
 ```
@@ -155,5 +156,5 @@ fossil_flux
 If we plot the modelled measurement comparison, this will stack the natural and fossil fuel flux sources and combine with the footprint data in an appropriate way:
 
 ```{code-cell} ipython3
-scenario.plot_comparison(baseline="percentile", recalculate=True)
+# scenario.plot_comparison(baseline="percentile", recalculate=True)
 ```

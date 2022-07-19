@@ -15,9 +15,12 @@ def running_in_cloud() -> bool:
     """
     from os import environ
 
-    cloud_env = environ.get("OPENGHG_CLOUD")
+    cloud_env = environ.get("OPENGHG_CLOUD", False)
 
-    return cloud_env is not None
+    if cloud_env:
+        return bool(int(cloud_env))
+    else:
+        return False
 
 
 def unanimous(seq: Dict) -> bool:

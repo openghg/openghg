@@ -1,9 +1,7 @@
-from ast import Import
 import os
 import sys
 import tempfile
 import pytest
-from warnings import warn
 
 # Added for import of services modules in tests
 sys.path.insert(0, os.path.abspath("services"))
@@ -29,6 +27,7 @@ temporary_store_path = temporary_store.name
 def set_envs():
     os.environ["ACQUIRE_HOST"] = "localhost:8080"
     os.environ["OPENGHG_PATH"] = temporary_store_path
+    os.environ["OPENGHG_CLOUD"] = "0"
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -55,7 +54,7 @@ def pytest_collection_modifyitems(config, items):
     messge_str = "need --run-cfchecks option to run"
 
     try:
-        import cfchecker
+        import cfchecker  # noqa
 
         cfchecker_imported = True
     except (FileNotFoundError, ImportError) as e:

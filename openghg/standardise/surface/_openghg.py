@@ -23,7 +23,7 @@ def parse_openghg(
     At the moment this must also be for a site known to OpenGHG. See
     'acrg_site_info.json' file.
 
-    The arguments specified below are the metadata needed to store this 
+    The arguments specified below are the metadata needed to store this
     surface observation file within the object store. If these keywords are
     not included within the attributes of the netcdf file being passed then
     these arguments must be specified.
@@ -100,9 +100,7 @@ def parse_openghg(
     metadata_needed = [param for param in metadata_needed if param not in metadata]
 
     metadata["site"] = clean_string(metadata["site"])
-    metadata["species"] = synonyms(
-        metadata["species"]
-    ).lower()
+    metadata["species"] = synonyms(metadata["species"]).lower()
     # May want to remove the .lower() here and centralise this
 
     # Update attributes to match metadata after cleaning

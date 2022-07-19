@@ -61,4 +61,5 @@ def test_ceda_retrieve(mocker):
 
     assert retrieve_all.call_count == 1
     assert download_data.call_count == 1
+
     assert bsd_data.data.equals(second_bsd_data.data)

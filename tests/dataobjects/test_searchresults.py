@@ -1,4 +1,6 @@
+import pandas as pd
 import numpy as np
+from pathlib import Path
 import pytest
 from helpers import get_datapath
 
@@ -306,7 +308,7 @@ def test_inlet_gets_data_with_ranking():
 
 
 def test_retrieve_empty_object():
-    empty = SearchResults(results={}, ranked_data=False, cloud=False)
+    empty = SearchResults(results={}, ranked_data=False)
 
     result = empty.retrieve(site="test", species="hawk", inlet="888m")
 
@@ -316,7 +318,7 @@ def test_retrieve_empty_object():
 
     assert result is None
 
-    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+    empty = SearchResults(results={}, ranked_data=True)
 
     result_ranked = empty.retrieve(site="test", species="hawk")
 
@@ -327,17 +329,37 @@ def test_retrieve_empty_object():
     assert result_ranked is None
 
 
-def test_retrieve_cloud_raises():
-    results = search(site="bsd")
-
-    results.cloud = True
-
-    with pytest.raises(NotImplementedError):
-        _ = results.retrieve_all()
-
-
 def test_create_obsdata_no_data_raises():
-    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+    empty = SearchResults(results={}, ranked_data=True)
 
     with pytest.raises(ValueError):
         _ = empty._create_obsdata(site="rome", inlet="-85m", species="ptarmigan")
+
+
+def test_search_result_retrieve_cloud(monkeypatch, mocker, tmpdir):
+    monkeypatch.setenv("OPENGHG_CLOUD", "1")
+
+    df = pd.DataFrame({"A": range(0, 64), "B": range(0, 64)}, columns=list("AB"))
+    ds = df.to_xarray()
+
+    p = Path(tmpdir).joinpath("test.nc")
+    ds.to_netcdf(p)
+
+    ds_bytes = Path(str(tmpdir)).joinpath("test.nc").read_bytes()
+
+    function_reply = {}
+    function_reply["content"] = {"data": ds_bytes}
+    function_reply["status"] = 200
+
+    mocker.patch("openghg.cloud.call_function", return_value=function_reply)
+
+    s = SearchResults(
+        results={
+            "site": {"species": {"inlet": {"keys": {"unranked": "other"}, "metadata": {"some": "metadata"}}}}
+        },
+        ranked_data=False,
+    )
+
+    retrieved = s.retrieve_all()
+
+    assert retrieved.data.equals(ds)

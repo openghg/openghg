@@ -1,0 +1,30 @@
+===================
+What's new - v0.2.0
+===================
+
+With the 0.2.0 release of OpenGHG we can announce the public release of our OpenGHG Hub our JupyterHub instance
+for interacting with OpenGHG in the cloud.
+
+Features
+========
+
+- New ``openghg.client`` functions for our cloud platform. Standardisation, searching and retrieval of data
+is passed to either the local or cloud function call depending on platform setup.
+
+Fixes
+=====
+
+- Extra checks added to reading of emissions NetCDF datasets that have a single time value. Previously an
+error occurred due to performing a ``len`` on an unsized object.
+
+Deprecations
+============
+
+- Removal of the ``openghg.client.process`` functions. These have been replaced with ``openghg.client.standardise``
+functions.
+
+Documentation
+=============
+
+- A split in the tutorials for cloud and local platforms. We've updated all the tutorials to better cover
+the differences in running OpenGHG with different setups.

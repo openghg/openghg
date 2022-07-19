@@ -6,6 +6,7 @@ from .helpers import (
     get_footprint_datapath,
     get_mobile_datapath,
     get_retrieval_data_file,
+    call_function_packager,
 )
 from .meta import (
     metadata_checker_obssurface,
