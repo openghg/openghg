@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>What’s new - v0.2.0 &#8212; OpenGHG 0+untagged.1.gca194ec documentation</title>
+    <title>What’s new - v0.2.0 &#8212; OpenGHG 0+untagged.1.g35961d2 documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -45,6 +45,7 @@
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="What’s new - v0.1.0" href="v0.1.0.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="docsearch:language" content="en">
   </head>
@@ -71,7 +72,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gca194ec documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g35961d2 documentation</p>
   
 </a>
     
@@ -123,7 +124,7 @@
  </a>
 </li>
 
-<li class="toctree-l1 nav-item">
+<li class="toctree-l1 current active nav-item">
  <a class="reference internal nav-link" href="index.html">
   What’s new
  </a>
@@ -167,7 +168,21 @@
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
   <div class="bd-toc-item active">
-    
+    <ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="v0.1.0.html">
+   What’s new - v0.1.0
+  </a>
+ </li>
+</ul>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   What’s new - v0.2.0
+  </a>
+ </li>
+</ul>
+
   </div>
 </nav>
   </div>
@@ -231,35 +246,33 @@
                 
   <section id="what-s-new-v0-2-0">
 <h1>What’s new - v0.2.0<a class="headerlink" href="#what-s-new-v0-2-0" title="Permalink to this heading">#</a></h1>
-<p>With the 0.2.0 release of OpenGHG we can announce the public release of our OpenGHG Hub our JupyterHub instance
-for interacting with OpenGHG in the cloud.</p>
+<p><strong>Release date: 2022-07-19</strong></p>
+<p>With the 0.2.0 release of OpenGHG we can announce the public release of our <a class="reference external" href="https://hub.openghg.org">OpenGHG Hub</a>,
+our JupyterHub instance for interacting with OpenGHG in the cloud. Please <a class="reference external" href="https://www.open">contact us</a> if
+you’d like to use the service.</p>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h2>
 <ul class="simple">
-<li><p>New <code class="docutils literal notranslate"><span class="pre">openghg.client</span></code> functions for our cloud platform. Standardisation, searching and retrieval of data</p></li>
+<li><p>New <code class="docutils literal notranslate"><span class="pre">openghg.client</span></code> functions for our cloud platform. Standardisation, searching and retrieval of data is passed to either the local or cloud function call depending on platform setup.</p></li>
 </ul>
-<p>is passed to either the local or cloud function call depending on platform setup.</p>
 </section>
 <section id="fixes">
 <h2>Fixes<a class="headerlink" href="#fixes" title="Permalink to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Extra checks added to reading of emissions NetCDF datasets that have a single time value. Previously an</p></li>
+<li><p>Extra checks added to reading of emissions NetCDF datasets that have a single time value. Previously an error occurred due to performing a <code class="docutils literal notranslate"><span class="pre">len</span></code> on an unsized object.</p></li>
 </ul>
-<p>error occurred due to performing a <code class="docutils literal notranslate"><span class="pre">len</span></code> on an unsized object.</p>
 </section>
 <section id="deprecations">
 <h2>Deprecations<a class="headerlink" href="#deprecations" title="Permalink to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Removal of the <code class="docutils literal notranslate"><span class="pre">openghg.client.process</span></code> functions. These have been replaced with <code class="docutils literal notranslate"><span class="pre">openghg.client.standardise</span></code></p></li>
+<li><p>Removal of the <code class="docutils literal notranslate"><span class="pre">openghg.client.process</span></code> functions. These have been replaced with <code class="docutils literal notranslate"><span class="pre">openghg.client.standardise</span></code> functions.</p></li>
 </ul>
-<p>functions.</p>
 </section>
 <section id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">#</a></h2>
 <ul class="simple">
-<li><p>A split in the tutorials for cloud and local platforms. We’ve updated all the tutorials to better cover</p></li>
+<li><p>A split in the tutorials for cloud and local platforms. We’ve updated all the tutorials to better cover the differences in running OpenGHG with different setups.</p></li>
 </ul>
-<p>the differences in running OpenGHG with different setups.</p>
 </section>
 </section>
 
@@ -271,6 +284,13 @@ for interacting with OpenGHG in the cloud.</p>
               <footer class="bd-footer-article">
                   <!-- Previous / next buttons -->
 <div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="v0.1.0.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">What’s new - v0.1.0</p>
+      </div>
+  </a>
 </div>
               </footer>
               
