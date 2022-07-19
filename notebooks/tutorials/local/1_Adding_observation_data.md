@@ -33,7 +33,7 @@ Then import `openghg` and print the version string associated with the version y
 ```ipython
 In [1]: import openghg
 In [2]: openghg.__version__
-Out[2]: '0.0.1'
+Out[2]: '0.2.0'
 ```
 
 If you get an ``ImportError`` please go back to the [install section of the documentation](https://docs.openghg.org/install.html).
@@ -60,12 +60,9 @@ import tempfile
 
 tmp_dir = tempfile.TemporaryDirectory()
 os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
-
-%load_ext autoreload
-%autoreload 2
 ```
 
-When creating your own longer term object store we recommend a path such as ``~/openghg_store`` which will create the object store in your home directory in a directory called ``openghg_store``. If you want this to be a permanent location this can be added to your "~/.bashrc" or "~/.bash_profile" file depending on the system being used. e.g. as
+When creating your own longer term object store we recommend a path such as ``~/openghg_store`` which will create the object store in your home directory in a directory called ``openghg_store``. If you want this to be a permanent location this can be added to your shell profile. If you're using `bash` you could add it to `~/.bashrc` or `~/.bash_profile` file depending on the system being used. e.g. as
 
 ```bash
  export OPENGHG_PATH="$HOME/openghg_store"
