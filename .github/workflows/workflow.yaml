@@ -135,9 +135,9 @@ jobs:
       - name: Make build folder and build package
         run: |
           mkdir ${{ github.workspace }}/build
-          conda build -croot ${{ github.workspace }}/build -c conda-forge recipes
+          conda build --croot ${{ github.workspace }}/build recipes -c conda-forge
       - name: Upload to conda
         run: |
-          bash recipes/build_upload.sh
+          bash recipes/upload.sh
         env:
           ACCESS_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
