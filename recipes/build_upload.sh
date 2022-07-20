@@ -2,10 +2,10 @@
 set -xe
 
 # Get the filename to upload
-BUILD_DIR=${CONDA}/envs/openghg-build/conda-bld/noarch
+BUILD_DIR=${GITHUB_WORKSPACE}/build
 
 # For now we only have one build
-BUILD=$(find "$BUILD_DIR" -name *.tar.bz2)
+BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
 
 # Upload the file to anaconda
 anaconda \

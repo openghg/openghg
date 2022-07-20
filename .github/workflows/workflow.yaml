@@ -132,9 +132,10 @@ jobs:
       - name: Install build tools
         run: |
           conda install -y conda-build conda-verify anaconda-client
-      - name: Build package
+      - name: Make build folder and build package
         run: |
-          conda build recipes -c conda-forge
+          mkdir ${{ github.workspace }}/build
+          conda build -croot ${{ github.workspace }}/build -c conda-forge recipes
       - name: Upload to conda
         run: |
           bash recipes/build_upload.sh
