@@ -13,6 +13,7 @@ def parse_glasow_picarro(
     instrument: str = "picarro",
     sampling_period: Optional[str] = None,
     measurement_type: str = "timeseries",
+    **kwargs: Dict,
 ) -> Dict:
     """Read the Glasgow Science Tower Picarro data
 

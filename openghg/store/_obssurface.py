@@ -92,6 +92,7 @@ class ObsSurface(BaseStore):
         sampling_period: Optional[str] = None,
         measurement_type: str = "insitu",
         overwrite: bool = False,
+        verify_site_code: bool = True,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -108,6 +109,7 @@ class ObsSurface(BaseStore):
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             overwrite: Overwrite previously uploaded data
+            verify_site_code: Verify the site code
         Returns:
             dict: Dictionary of Datasource UUIDs
         """
@@ -130,7 +132,7 @@ class ObsSurface(BaseStore):
         # Test that the passed values are valid
         # Check validity of site, instrument, inlet etc in acrg_site_info.json
         # Clean the strings
-        site = verify_site(site=site)
+        site = verify_site(site=site) if verify_site_code else clean_string(site)
         network = clean_string(network)
         inlet = clean_string(inlet)
         instrument = clean_string(instrument)

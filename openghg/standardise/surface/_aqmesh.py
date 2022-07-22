@@ -9,6 +9,7 @@ def parse_aqmesh(
     data_filepath: pathType,
     metadata_filepath: pathType,
     sampling_period: Optional[str] = None,
+    **kwargs: Dict,
 ) -> Dict:
     """Read AQMesh data files
 
