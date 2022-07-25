@@ -241,6 +241,7 @@ class ObsSurface(BaseStore):
                 required_keys = (
                     "species",
                     "site",
+                    "sampling_period",
                     "station_long_name",
                     "inlet",
                     "instrument",
