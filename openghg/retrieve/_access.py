@@ -18,7 +18,7 @@ def get_obs_surface(
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
     skip_ranking: Optional[bool] = False,
-) -> Union[ObsData, None]:
+) -> Optional[ObsData]:
     """Get measurements from one site.
 
     Args:
@@ -102,7 +102,7 @@ def get_obs_surface(
     except AttributeError:
         raise AttributeError("This dataset does not have a time attribute, unable to read date range")
     except IndexError:
-        return ObsData(data=Dataset(), metadata={})
+        return None
 
     if average is not None:
         # GJ - 2021-03-09

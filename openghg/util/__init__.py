@@ -13,6 +13,8 @@ from ._file import (
     read_header,
     compress,
     decompress,
+    compress_str,
+    decompress_str,
 )
 from ._hashing import hash_file, hash_string, hash_retrieved_data, hash_bytes
 from ._strings import clean_string, remove_punctuation, to_lowercase, is_number

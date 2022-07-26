@@ -1,12 +1,12 @@
-import gzip
 from openghg.client import search_surface
 from openghg.dataobjects import SearchResults
+from openghg.util import compress
 from helpers import call_function_packager
 
 
 def test_cloud_search_with_results(mocker):
     sr = SearchResults(results={"bsd_co2": {"keys": {"1": "1", "2": "2", "3": "3"}}})
-    compressed_sr = gzip.compress(sr.to_json().encode("utf-8"))
+    compressed_sr = compress(sr.to_json().encode("utf-8"))
 
     content = {"found": True, "result": compressed_sr}
 

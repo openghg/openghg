@@ -19,7 +19,7 @@ def test_export_to_dashboard():
         index=date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D"),
     ).to_xarray()
 
-    site_A.attrs = {"station_longitude": 52.123, "station_latitude": 52.123}
+    site_A.attrs = {"longitude": 52.123, "latitude": 52.123}
 
     metadata = {
         "network": "BEACO2N",

@@ -1,0 +1,23 @@
+===================
+What's new - v0.2.1c
+===================
+
+**Release date: yyyy-mm-dd**
+
+With the x.x.x release of OpenGHG ...
+
+Features
+========
+
+
+Fixes
+=====
+
+- Fix to metadata storage for different sampling period formats
+
+Deprecations
+============
+
+
+Documentation
+=============
