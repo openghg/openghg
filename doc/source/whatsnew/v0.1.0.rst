@@ -2,6 +2,8 @@
 What's new - v0.1.0
 ===================
 
+**Release date: 2022-05-18**
+
 We're happy to announce the first release of OpenGHG to both PyPI and conda.
 
 Features
