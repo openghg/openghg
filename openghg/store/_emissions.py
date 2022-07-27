@@ -3,7 +3,7 @@ from typing import Dict, Optional, Union, Tuple, Any
 from xarray import Dataset, DataArray
 import numpy as np
 from numpy import ndarray
-
+from tempfile import TemporaryDirectory
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 
@@ -19,6 +19,30 @@ class Emissions(BaseStore):
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
+
+    @staticmethod
+    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Dict:
+        """Ready a footprint from binary data
+
+        Args:
+            binary_data: Footprint data
+            metadata: Dictionary of metadata
+            file_metadat: File metadata
+        Returns:
+            dict: UUIDs of Datasources data has been assigned to
+        """
+        with TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+
+            try:
+                filename = file_metadata["filename"]
+            except KeyError:
+                raise KeyError("We require a filename key for metadata read.")
+
+            filepath = tmpdir_path.joinpath(filename)
+            filepath.write_bytes(binary_data)
+
+            return Emissions.read_file(filepath=filepath, **metadata)
 
     @staticmethod
     def read_file(
@@ -89,14 +113,16 @@ class Emissions(BaseStore):
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
-        param = {"filepath": filepath,
-                 "species": species,
-                 "domain": domain,
-                 "source": source,
-                 "date": date,
-                 "high_time_resolution": high_time_resolution,
-                 "period": period,
-                 "continuous": continuous}
+        param = {
+            "filepath": filepath,
+            "species": species,
+            "domain": domain,
+            "source": source,
+            "date": date,
+            "high_time_resolution": high_time_resolution,
+            "period": period,
+            "continuous": continuous,
+        }
 
         emissions_data = parser_fn(**param)
 
@@ -219,15 +245,10 @@ class Emissions(BaseStore):
         Returns:
             DataSchema : Contains schema for Emissions.
         """
-        data_vars: Dict[str, Tuple[str, ...]] \
-            = {"flux": ("time", "lat", "lon")}
-        dtypes = {"lat": np.floating,
-                  "lon": np.floating,
-                  "time": np.datetime64,
-                  "flux": np.floating}
+        data_vars: Dict[str, Tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
+        dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64, "flux": np.floating}
 
-        data_format = DataSchema(data_vars=data_vars,
-                                 dtypes=dtypes)
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
         return data_format
 

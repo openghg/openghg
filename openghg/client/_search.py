@@ -1,20 +1,21 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, Any
-
-# from Acquire.Client import Wallet
+from typing import Dict, Optional, Union, Any
 from openghg.retrieve import search as _local_search
 from openghg.util import running_in_cloud
+from gzip import decompress
+from openghg.dataobjects import SearchResults
 
-if TYPE_CHECKING:
-    from openghg.dataobjects import SearchResults
+# if TYPE_CHECKING:
+#     from openghg.dataobjects import SearchResults
 
 
-def search(
+def search_surface(
     species: Optional[str] = None,
     site: Optional[str] = None,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    data_type: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     **kwargs: Any,
@@ -26,98 +27,86 @@ def search(
         site: Three letter site code
         inlet: Inlet height
         instrument: Instrument name
+        measurement_type: Measurement type
+        data_type: Data type e.g. CRDS, GCWERKS, ICOS
         start_date: Start date
         end_date: End date
+        kwargs: Any other search arguments to constrain the search further
     Returns:
         SearchResults:  SearchResults object
     """
+
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
+    results: Union[Dict, SearchResults] = search(
+        species=species,
+        site=site,
+        inlet=inlet,
+        instrument=instrument,
+        measurement_type=measurement_type,
+        data_type=data_type,
+        start_date=start_date,
+        end_date=end_date,
+        **kwargs,
+    )
+
+    return results
+
+
+# def search_emissions():
+#     raise NotImplementedError
+
+
+# def search_footprints():
+#     raise NotImplementedError
+
+
+# def search_met():
+#     raise NotImplementedError
+
+
+# def search_eulerian():
+#     raise NotImplementedError
+
+
+# def search_bc():
+#     raise NotImplementedError
+
+
+def search(**kwargs: Any) -> SearchResults:
+    """This function accepts any keyword arguments and passes them directly to the internal search function
+    Unless you know exactly which terms to use we suggest using one of the search helper functions.
+
+    Args:
+        kwargs: Any number of keyword arguments
+    Returns:
+        SearchResults: SearchResults object
+    """
+    from openghg.cloud import call_function
+
     cloud = running_in_cloud()
 
     if cloud:
-        raise NotImplementedError
-        # return _cloud_search(
-        #     species=species,
-        #     site=site,
-        #     inlet=inlet,
-        #     instrument=instrument,
-        #     start_date=start_date,
-        #     end_date=end_date,
-        # )
+        post_data: Dict[str, Union[str, Dict]] = {}
+        post_data["function"] = "search"
+        post_data["data"] = kwargs
+
+        result = call_function(data=post_data)
+
+        content = result["content"]
+
+        found = content["found"]
+        compressed_response = content["result"]
+
+        if found:
+            data_str = decompress(compressed_response)
+            sr = SearchResults.from_json(data=data_str)
+        else:
+            sr = SearchResults()
     else:
-        results: Union[Dict, SearchResults] = _local_search(
-            species=species,
-            site=site,
-            inlet=inlet,
-            instrument=instrument,
-            measurement_type=measurement_type,
-            start_date=start_date,
-            end_date=end_date,
-            **kwargs,
-        )
+        sr = _local_search(**kwargs)
 
-        return results
-
-
-def _cloud_search(
-    species: Union[str, List] = None,
-    site: Union[str, List] = None,
-    inlet: Union[str, List] = None,
-    instrument: Union[str, List] = None,
-    start_date: str = None,
-    end_date: str = None,
-    skip_ranking: bool = False,
-    data_type: str = "timeseries",
-    service_url: str = "https://fn.openghg.org/t",
-) -> Union[SearchResults, Dict]:
-    """Cloud object store search
-
-    Args:
-        species: Species
-        site: Three letter site code
-        inlet: Inlet height
-        instrument: Instrument name
-        start_date: Start date
-        end_date: End date
-    Returns:
-        SearchResults:  SearchResults object
-    """
-    raise NotImplementedError
-
-    # from openghg.dataobjects import SearchResults
-
-    # wallet = Wallet()
-    # cloud_service = wallet.get_service(service_url=f"{service_url}/openghg")
-
-    # if not any((species, site, inlet, instrument)):
-    #     raise ValueError("We must have at least one of  species, site, inlet or instrument")
-
-    # args = {}
-
-    # if species is not None:
-    #     args["species"] = species
-
-    # if site is not None:
-    #     args["site"] = site
-
-    # if inlet is not None:
-    #     args["inlet"] = inlet
-
-    # if instrument is not None:
-    #     args["instrument"] = instrument
-
-    # if start_date is not None:
-    #     args["start_date"] = start_date
-    # if end_date is not None:
-    #     args["end_date"] = end_date
-
-    # args["skip_ranking"] = str(skip_ranking)
-    # args["data_type"] = str(data_type)
-
-    # response: Dict = cloud_service.call_function(function="search.search", args=args)
-
-    # try:
-    #     results_data = response["results"]
-    #     search_results = SearchResults.from_data(results_data)
-    #     return search_results
-    # except KeyError:
-    #     return response
+    return sr

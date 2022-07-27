@@ -2,14 +2,16 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 
-def parse_openghg(filepath: Path,
-                  species: str,
-                  source: str,
-                  domain: str,
-                  date: Optional[str] = None,
-                  high_time_resolution: Optional[bool] = False,
-                  period: Optional[Union[str, tuple]] = None,
-                  continuous: bool = True) -> Dict:
+def parse_openghg(
+    filepath: Path,
+    species: str,
+    source: str,
+    domain: str,
+    date: Optional[str] = None,
+    high_time_resolution: Optional[bool] = False,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
+) -> Dict:
     """
     Read and parse input emissions data already in OpenGHG format.
 

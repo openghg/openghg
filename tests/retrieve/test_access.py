@@ -3,10 +3,10 @@ from pandas import Timestamp, Timedelta
 import numpy as np
 
 from openghg.retrieve import get_obs_surface, get_flux, get_footprint, search
-from openghg.objectstore import get_local_bucket
+from openghg.objectstore import get_bucket
 
 import pytest
-from openghg.objectstore import get_local_bucket
+from openghg.objectstore import get_bucket
 from openghg.store import ObsSurface, Emissions, Footprints
 from helpers import (
     get_datapath,

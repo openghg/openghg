@@ -5,9 +5,7 @@ from openghg.util import load_json
 __all__ = ["synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
 
 
-def synonyms(species: str,
-             lower: bool = True,
-             allow_new_species: bool = True) -> str:
+def synonyms(species: str, lower: bool = True, allow_new_species: bool = True) -> str:
     """
     Check to see if there are other names that we should be using for
     a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11,
@@ -123,16 +121,16 @@ def check_lifetime_monthly(lifetime: LifetimeType) -> bool:
 
 
 def molar_mass(species: str) -> float:
-    '''
+    """
     This function extracts the molar mass of a species from the
     'acrg_species_info.json' data file.
 
     Args:
-        species : 
+        species :
 
     Returns:
         float : Molar mass of species
-    '''
+    """
     species_info = load_json(filename="acrg_species_info.json")
 
     # TODO: Add when this functionality has made it into develop
@@ -140,5 +138,5 @@ def molar_mass(species: str) -> float:
     # molmass = float(species_info[species_label]['mol_mass'])
     species = species.upper()
 
-    molmass = float(species_info[species]['mol_mass'])
+    molmass = float(species_info[species]["mol_mass"])
     return molmass

@@ -26,6 +26,7 @@ def plot_timeseries(
         go.Figure: Plotly Graph Object Figure
     """
     from openghg.util import load_json
+
     if not isinstance(data, list):
         data = [data]
 

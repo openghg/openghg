@@ -243,10 +243,7 @@ def footprints_data_merge(
     if calc_timeseries:
         combined_dataset = add_timeseries(combined_dataset=combined_dataset, flux_dict=flux_dict)
 
-    return FootprintData(
-        data=combined_dataset,
-        metadata={}
-    )
+    return FootprintData(data=combined_dataset, metadata={})
 
 
 def combine_datasets(
