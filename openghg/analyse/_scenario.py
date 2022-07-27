@@ -41,7 +41,7 @@ If some input types needed for these operations are missing, the user will be al
 on which data types are missing.
 """
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, Literal, cast
 
 from openghg.dataobjects import FluxData, BoundaryConditionsData, FootprintData, ObsData
 from openghg.retrieve import get_flux, get_footprint, get_bc, get_obs_surface, search
@@ -61,6 +61,7 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # e.g. from_existing_data(), from_search(), empty() , ...
 
 ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
+methodType = Optional[Literal['nearest', 'pad', 'ffill', 'backfill', 'bfill']]
 
 
 class ModelScenario:
@@ -1596,7 +1597,7 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: str = "ffill", tolerance: Optional[float] = None
+    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: Optional[float] = None
 ) -> Dataset:
     """
     Merges two datasets and re-indexes to the first dataset.
@@ -1632,7 +1633,7 @@ def combine_datasets(
 def match_dataset_dims(
     datasets: Sequence[Dataset],
     dims: Union[str, Sequence] = [],
-    method: str = "nearest",
+    method: methodType = "nearest",
     tolerance: Union[float, Dict[str, float]] = 1e-5,
 ) -> List[Dataset]:
     """
@@ -1688,6 +1689,9 @@ def match_dataset_dims(
     return datasets_aligned
 
 
+ResType = Union[np.timedelta64, float, np.floating, np.integer]
+
+
 def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
     """
     Calculates the average frequency along a given dimension.
@@ -1703,7 +1707,7 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
         NaN : If unsuccessful for all other dtypes.
     """
     try:
-        resolution = dataset[dim].diff(dim=dim).mean().values
+        resolution: ResType = dataset[dim].diff(dim=dim).mean().item()
     except ValueError:
         if np.issubdtype(dataset[dim].dtype, np.datetime64):
             resolution = np.timedelta64("NaT")
@@ -1713,7 +1717,7 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
     return resolution
 
 
-def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: str = "ffill") -> Dataset:
+def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: methodType = "ffill") -> Dataset:
     """
     Stacks multiple datasets based on the input dimension. By default this is time
     and this will be aligned to the highest resolution / frequency

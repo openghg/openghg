@@ -332,7 +332,7 @@ class Footprints(BaseStore):
 
         metadata["heights"] = [float(h) for h in fp_data.height.values]
         # Do we also need to save all the variables we have available in this footprints?
-        metadata["variables"] = list(fp_data.keys())
+        # metadata["variables"] = list(fp_data.data_vars)
 
         # if model_params is not None:
         #     metadata["model_parameters"] = model_params

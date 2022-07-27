@@ -59,7 +59,11 @@ def retrieve_surface(
         return None
 
     with io.BytesIO(binary_data) as buf:
-        dataset = xr.open_dataset(buf).load()
+        # Type ignored as buf is file-like which should be accepted by xarray
+        # open_dataset - https://docs.xarray.dev/en/stable/generated/xarray.open_dataset.html
+        # 27/07/2022: file-like (including BytesIO) isn't included in the accepted types
+        #  - Union[str, PathLike[Any], AbstractDataStore]
+        dataset = xr.open_dataset(buf).load()  # type:ignore
 
     now = str(timestamp_now())
 
