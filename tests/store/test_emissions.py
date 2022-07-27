@@ -32,7 +32,7 @@ def test_read_binary_data(mocker):
 
     results = Emissions.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
 
-    assert results == {"co2_gppcardamom_europe_2012": {"uuid": "test-uuid-1", "new": True}}
+    assert results == {"co2_gpp-cardamom_europe_2012": {"uuid": "test-uuid-1", "new": True}}
 
 
 def test_read_file():
