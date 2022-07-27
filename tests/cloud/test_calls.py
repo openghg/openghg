@@ -9,6 +9,7 @@ from openghg.types import FunctionError
 @pytest.fixture(autouse=True)
 def set_env(monkeypatch):
     monkeypatch.setenv("OPENGHG_FN_URL", "https://localhost/t/openghg")
+    monkeypatch.setenv("AUTH_KEY", "test-key-123")
 
 
 def test_call_function_raises_both(monkeypatch):
