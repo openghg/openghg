@@ -1,16 +1,7 @@
 import logging
-# import os
-# from pathlib import Path
 import pytest
 
-from openghg.standardise.surface import parse_crds
-from openghg.objectstore import get_local_bucket
-from openghg.standardise.meta import assign_attributes, get_attributes
-# from helpers import get_datapath, metadata_checker_obssurface, attributes_checker_obssurface
-from helpers import get_datapath
-
-# import tempfile
-# from cfchecker import CFChecker
+from openghg.standardise.meta import get_attributes
 
 # flake8: noqa
 
