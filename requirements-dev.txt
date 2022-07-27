@@ -1,7 +1,7 @@
 # Required for testing
 cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
 flake8
-precommit
+pre-commit
 pytest >= 6.2.5
 pytest-tornasync
 pytest-cov
@@ -13,4 +13,3 @@ types-paramiko
 types-PyYAML
 types-requests
 msgpack-types
-pre-commit
