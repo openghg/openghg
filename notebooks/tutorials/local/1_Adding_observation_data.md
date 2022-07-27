@@ -126,6 +126,12 @@ decc_results = standardise_surface(filepaths=tac_data, data_type="CRDS", site="T
 print(decc_results)
 ```
 
+```{code-cell} ipython3
+from openghg.client import get_obs_surface
+
+r = get_obs_surface(site="tac", inlet="100m", species="ch4")
+```
+
 Here this extracts the data (and metadata) from the supplied files, standardises them and adds these to our created object store.
 
 The returned `decc_results` will give us a dictionary of how the data has been stored. The data itself may have been split into different entries, each one stored with a unique ID (UUID). Each entry is known as a *Datasource* (see below for a note on Datasources). The `decc_results` output includes details of the processed data and tells us that the data has been stored correctly. This will also tell us if any errors have been encountered when trying to access and standardise this data.

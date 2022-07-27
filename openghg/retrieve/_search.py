@@ -4,9 +4,10 @@
 """
 
 from typing import Any, Dict, Optional, Union
-from tinydb.database import TinyDB
 
-__all__ = ["search"]
+from openghg.dataobjects import SearchResults
+from openghg.util import decompress, running_locally
+from tinydb.database import TinyDB
 
 
 def _find_and(x: Any, y: Any) -> Any:
@@ -29,9 +30,10 @@ def metadata_lookup(
     Returns:
         str or bool: UUID string if matching Datasource found, otherwise False
     """
-    from tinydb import Query
     from functools import reduce
+
     from openghg.types import DatasourceLookupError
+    from tinydb import Query
 
     q = Query()
 
@@ -54,43 +56,60 @@ def metadata_lookup(
     return uuid
 
 
-def metadata_lookup_old(database: TinyDB, **kwargs: Dict) -> Union[bool, str]:
-    """Searches the passed database for the given metadata
+def search_surface(
+    species: Optional[str] = None,
+    site: Optional[str] = None,
+    inlet: Optional[str] = None,
+    instrument: Optional[str] = None,
+    measurement_type: Optional[str] = None,
+    data_type: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    **kwargs: Any,
+) -> Union[SearchResults, Dict]:
+    """Cloud object store search
 
     Args:
-        database: The tinydb database for the storage object
-        **kwargs: Terms to pass to the search of the metastore
-        e.g. site="tac", inlet="15m"
+        species: Species
+        site: Three letter site code
+        inlet: Inlet height
+        instrument: Instrument name
+        measurement_type: Measurement type
+        data_type: Data type e.g. CRDS, GCWERKS, ICOS
+        start_date: Start date
+        end_date: End date
+        kwargs: Any other search arguments to constrain the search further
     Returns:
-        str or bool: UUID string if matching Datasource found, otherwise False
+        SearchResults:  SearchResults object
     """
-    from tinydb import Query
-    from functools import reduce
-    from openghg.types import DatasourceLookupError
 
-    q = Query()
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
 
-    search_attrs = [getattr(q, k) == v for k, v in kwargs.items()]
-    result = database.search(reduce(_find_and, search_attrs))
+    results: Union[Dict, SearchResults] = search(
+        species=species,
+        site=site,
+        inlet=inlet,
+        instrument=instrument,
+        measurement_type=measurement_type,
+        data_type=data_type,
+        start_date=start_date,
+        end_date=end_date,
+        **kwargs,
+    )
 
-    if not result:
-        return False
-
-    if len(result) > 1:
-        raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
-
-    uuid: str = result[0]["uuid"]
-
-    return uuid
+    return results
 
 
-# TODO
-# GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
-# facing interfaces to a more general search function, this would also make it easier to enforce types
-def search(**kwargs):  # type: ignore
+def search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
+
+    This function detects the running environment and routes the call
+    to either the cloud or local search function.
 
     Example / commonly used arguments are given below.
 
@@ -108,24 +127,80 @@ def search(**kwargs):  # type: ignore
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
-    from addict import Dict as aDict
+    from openghg.cloud import call_function
+
+    if not running_locally():
+        post_data: Dict[str, Union[str, Dict]] = {}
+        post_data["function"] = "search"
+        post_data["data"] = kwargs
+
+        result = call_function(data=post_data)
+
+        content = result["content"]
+
+        found = content["found"]
+        compressed_response = content["result"]
+
+        if found:
+            data_str = decompress(compressed_response)
+            sr = SearchResults.from_json(data=data_str)
+        else:
+            sr = SearchResults()
+    else:
+        sr = local_search(**kwargs)
+
+    return sr
+
+
+# TODO
+# GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
+# facing interfaces to a more general search function, this would also make it easier to enforce types
+def local_search(**kwargs):  # type: ignore
+    """Search for observations data. Any keyword arguments may be passed to the
+    the function and these keywords will be used to search metadata.
+
+    This function will only perform a "local" search. It may be used either by a cloud function
+    or when using OpenGHG locally, it does no environment detection.
+    We suggest using the search function that takes care of everything for you.
+
+    Example / commonly used arguments are given below.
+
+    Args:
+        species: Terms to search for in Datasources
+        locations: Where to search for the terms in species
+        inlet: Inlet height such as 100m
+        instrument: Instrument name such as picarro
+        find_all: Require all search terms to be satisfied
+        start_date: Start datetime for search.
+        If None a start datetime of UNIX epoch (1970-01-01) is set
+        end_date: End datetime for search.
+        If None an end datetime of the current datetime is set
+        skip_ranking: If True skip ranking system, defaults to False
+    Returns:
+        SearchResults or None: SearchResults object is results found, otherwise None
+    """
     from copy import deepcopy
     from itertools import chain as iter_chain
-    from pandas import Timedelta as pd_Timedelta
 
-    from openghg.store import ObsSurface, Footprints, Emissions, BoundaryConditions, EulerianModel
+    from addict import Dict as aDict
+    from openghg.store import BoundaryConditions, Emissions, EulerianModel, Footprints, ObsSurface
     from openghg.store.base import Datasource
-
     from openghg.util import (
-        timestamp_now,
-        timestamp_epoch,
-        timestamp_tzaware,
         clean_string,
         find_daterange_gaps,
+        running_on_hub,
         split_daterange_str,
         synonyms,
+        timestamp_epoch,
+        timestamp_now,
+        timestamp_tzaware,
     )
-    from openghg.dataobjects import SearchResults
+    from pandas import Timedelta as pd_Timedelta
+
+    if running_on_hub():
+        raise ValueError(
+            "This function can't be used on the OpenGHG Hub, please use openghg.retrieve.search instead."
+        )
 
     # Get a copy of kwargs as we make some modifications below
     kwargs_copy = deepcopy(kwargs)
