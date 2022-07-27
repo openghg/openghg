@@ -1,11 +1,12 @@
-from pandas import Timestamp
+import json
+from io import BytesIO
+from typing import Dict, Optional, Union
+
 from openghg.dataobjects import ObsData
 from openghg.retrieve import get_obs_surface as local_get_obs_surface
-from openghg.util import running_in_cloud, decompress, decompress_str, hash_bytes
-from typing import Dict, Optional, Union
-from io import BytesIO
+from openghg.util import decompress, decompress_str, hash_bytes, running_locally
+from pandas import Timestamp
 from xarray import load_dataset
-import json
 
 
 def get_obs_surface(
@@ -42,12 +43,10 @@ def get_obs_surface(
     """
     from openghg.cloud import call_function
 
-    cloud = running_in_cloud()
-
-    if cloud:
+    if not running_locally():
         to_post: Dict[str, Union[str, Dict]] = {}
 
-        to_post["function"] = "get_obs"
+        to_post["function"] = "get_obs_surface"
 
         search_terms = {
             "site": site,
@@ -95,7 +94,6 @@ def get_obs_surface(
             return ObsData(data=dataset, metadata=metadata)
         else:
             return None
-
     else:
         return local_get_obs_surface(
             site=site,

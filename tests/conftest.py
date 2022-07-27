@@ -1,6 +1,7 @@
 import os
 import sys
 import tempfile
+
 import pytest
 
 # Added for import of services modules in tests
@@ -25,9 +26,7 @@ temporary_store_path = temporary_store.name
 
 @pytest.fixture(autouse=True, scope="session")
 def set_envs():
-    os.environ["ACQUIRE_HOST"] = "localhost:8080"
     os.environ["OPENGHG_PATH"] = temporary_store_path
-    os.environ["OPENGHG_CLOUD"] = "0"
 
 
 def pytest_sessionfinish(session, exitstatus):

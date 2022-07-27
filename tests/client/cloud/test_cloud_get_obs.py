@@ -1,15 +1,17 @@
-from helpers import call_function_packager
-import pandas as pd
 import datetime
 
+import pandas as pd
+from helpers import call_function_packager
+from openghg.client import get_obs_surface
 from openghg.dataobjects import ObsData
 from openghg.util import compress, compress_str, hash_bytes
-from openghg.client import get_obs_surface
 
 
 def test_get_obs_surface(mocker):
     n_days = 100
     epoch = datetime.datetime(1970, 1, 1, 1, 1)
+
+    mocker.patch("openghg.util.running_in_cloud", return_value=True)
 
     mock_dataset = pd.DataFrame(
         data={"A": range(0, n_days)},
@@ -34,6 +36,10 @@ def test_get_obs_surface(mocker):
     }
 
     to_return = call_function_packager(status=200, headers={}, content=to_return)
+
+    import os
+
+    print(os.environ["OPENGHG_CLOUD"])
 
     mocker.patch("openghg.cloud.call_function", return_value=to_return)
 
