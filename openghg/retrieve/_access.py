@@ -144,7 +144,7 @@ def get_obs_surface_local(
         ObsData or None: ObsData object if data found, else None
     """
     import numpy as np
-    from openghg.retrieve import search
+    from openghg.retrieve import search_surface
     from openghg.store import recombine_datasets
     from openghg.util import clean_string, load_json, synonyms, timestamp_tzaware
     from pandas import Timedelta, Timestamp
@@ -165,7 +165,7 @@ def get_obs_surface_local(
     species = clean_string(synonyms(species))
 
     # Get the observation data
-    obs_results = search(
+    obs_results = search_surface(
         site=site,
         species=species,
         inlet=inlet,
@@ -522,7 +522,7 @@ def get_footprint(
     if species is not None:
         species = clean_string(synonyms(species))
 
-    results = search(
+    results: Dict = search(
         site=site,
         domain=domain,
         height=height,

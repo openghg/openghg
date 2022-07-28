@@ -3,7 +3,7 @@
 
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 from openghg.dataobjects import SearchResults
 from openghg.util import decompress, running_locally
@@ -57,16 +57,16 @@ def metadata_lookup(
 
 
 def search_surface(
-    species: Optional[str] = None,
-    site: Optional[str] = None,
-    inlet: Optional[str] = None,
-    instrument: Optional[str] = None,
-    measurement_type: Optional[str] = None,
-    data_type: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    species: Union[str, List[str], None] = None,
+    site: Union[str, List[str], None] = None,
+    inlet: Union[str, List[str], None] = None,
+    instrument: Union[str, List[str], None] = None,
+    measurement_type: Union[str, List[str], None] = None,
+    data_type: Union[str, List[str], None] = None,
+    start_date: Union[str, List[str], None] = None,
+    end_date: Union[str, List[str], None] = None,
     **kwargs: Any,
-) -> Union[SearchResults, Dict]:
+) -> SearchResults:
     """Cloud object store search
 
     Args:
@@ -88,7 +88,7 @@ def search_surface(
     if end_date is not None:
         end_date = str(end_date)
 
-    results: Union[Dict, SearchResults] = search(
+    results = search(
         species=species,
         site=site,
         inlet=inlet,
@@ -100,10 +100,14 @@ def search_surface(
         **kwargs,
     )
 
+    # TODO - remove this cast once we've updated search to ensure return of SearchResults object
+    # for all measurement types.
+    results = cast(SearchResults, results)
+
     return results
 
 
-def search(**kwargs: Any) -> SearchResults:
+def search(**kwargs: Any) -> Union[SearchResults, Dict]:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
