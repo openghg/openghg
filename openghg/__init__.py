@@ -44,10 +44,11 @@ del v, get_versions
 
 # Start module level logging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 # Create file handler for log file - set to DEBUG (maximum detail)
 fileHandler = logging.FileHandler('openghg.log')  # May want to update this to user area
-fileFormatter = logging.Formatter("%(asctime)s:%(levelname):%(name)s:%(message)s")
+fileFormatter = logging.Formatter("%(asctime)s:%(levelname)s:%(name)s:%(message)s")
 fileHandler.setFormatter(fileFormatter)
 fileHandler.setLevel(logging.DEBUG)
 logger.addHandler(fileHandler)
