@@ -1703,7 +1703,7 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
     Returns:
         np.timedelta64 / np.float / np.int : Resolution with input dtype
 
-        NaT : If unsuccessful and input dtype is np.datetime64
+        NaT : If unsuccessful and input dtype is np.timedelta64
         NaN : If unsuccessful for all other dtypes.
     """
     try:
@@ -1713,6 +1713,11 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
             resolution = np.timedelta64("NaT")
         else:
             resolution = np.NaN
+    else:
+        if np.issubdtype(dataset[dim].dtype, np.datetime64):
+            # Extract units from original datetime string and use to recreate timedelta64
+            unit = dataset[dim].dtype.name.lstrip("timedelta64").lstrip("[").rstrip("]")
+            resolution = np.timedelta64(resolution, unit)
 
     return resolution
 
