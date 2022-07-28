@@ -5,7 +5,7 @@ import xarray as xr
 from pathlib import Path
 import zipfile
 from zipfile import ZipFile
-from typing import Dict, Tuple, Optional, Union, cast
+from typing import Dict, Tuple, Optional, Union, Any, cast
 
 
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
@@ -236,7 +236,7 @@ def parse_edgar(
     kg_to_g = 1e3
 
     flux_da = edgar_ds[name]
-    flux_values = flux_da.values * kg_to_g / species_molar_mass
+    flux_values: ndarray[Any, Any] = flux_da.values * kg_to_g / species_molar_mass
     units = "mol/m2/s"
 
     lat_name = "lat"
