@@ -3,7 +3,6 @@ import sys as _sys
 
 from . import (
     analyse,
-    client,
     cloud,
     dataobjects,
     objectstore,
@@ -18,7 +17,6 @@ from ._version import get_versions  # type: ignore
 
 __all__ = [
     "analyse",
-    "client",
     "cloud",
     "dataobjects",
     "objectstore",
