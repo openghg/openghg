@@ -61,7 +61,7 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # e.g. from_existing_data(), from_search(), empty() , ...
 
 ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
-methodType = Optional[Literal['nearest', 'pad', 'ffill', 'backfill', 'bfill']]
+methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
 class ModelScenario:
@@ -1689,7 +1689,7 @@ def match_dataset_dims(
     return datasets_aligned
 
 
-ResType = Union[np.timedelta64, float, np.floating, np.integer]
+# ResType = Union[np.timedelta64, float, np.floating, np.integer]
 
 
 def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
@@ -1707,7 +1707,7 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
         NaN : If unsuccessful for all other dtypes.
     """
     try:
-        resolution: ResType = dataset[dim].diff(dim=dim).mean().item()
+        resolution = dataset[dim].diff(dim=dim).mean().item()
     except ValueError:
         if np.issubdtype(dataset[dim].dtype, np.datetime64):
             resolution = np.timedelta64("NaT")
