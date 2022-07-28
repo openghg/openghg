@@ -349,19 +349,19 @@ class SearchResults:
                         unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
 
                         if unranked_slice.time.size > 0:
-                            inlet = unranked_slice["inlet"].values[0]
-                            inlets.add(inlet)
-                            unranked_metadata[dr] = inlet
+                            _inlet = unranked_slice["inlet"].values[0]
+                            inlets.add(_inlet)
+                            unranked_metadata[dr] = _inlet
                             unranked_slices.append(unranked_slice)
 
                     dataset_slices.extend(unranked_slices)
                 else:
                     daterange_str = create_daterange_str(start=first_date, end=last_date)
-                    inlet = unranked_data["inlet"].values[0]
+                    _inlet = unranked_data["inlet"].values[0]
                     inlets.add(inlet)
-                    unranked_metadata[daterange_str] = inlet
+                    unranked_metadata[daterange_str] = _inlet
 
-                    dataset_slices.extend(unranked_data)
+                    dataset_slices.append(unranked_data)
 
                 metadata["rank_metadata"]["unranked"] = unranked_metadata
 
@@ -406,7 +406,8 @@ class SearchResults:
             result = call_function(data=to_post)
             binary_netcdf = result["content"]["data"]
             buf = BytesIO(binary_netcdf)
-            ds: Dataset = open_dataset(buf).load()
+            # TODO - remove this ignore once xarray have updated their type hints
+            ds: Dataset = open_dataset(buf).load()  # type: ignore
             return ds
         else:
             return recombine_datasets(
