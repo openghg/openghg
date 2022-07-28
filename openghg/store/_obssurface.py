@@ -10,6 +10,9 @@ from openghg.store import DataSchema
 
 __all__ = ["ObsSurface"]
 
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
 
 class ObsSurface(BaseStore):
     """This class is used to process surface observation data"""
@@ -133,9 +136,6 @@ class ObsSurface(BaseStore):
         except KeyError:
             raise ValueError(f"Unknown data type {data_type} selected.")
 
-        # Start logging module and setup
-        logging.basicConfig(filename='example.log', level=logging.DEBUG)
-
         # Test that the passed values are valid
         # Check validity of site, instrument, inlet etc in acrg_site_info.json
         # Clean the strings
@@ -181,8 +181,8 @@ class ObsSurface(BaseStore):
 
                 file_hash = hash_file(filepath=data_filepath)
                 if file_hash in obs._file_hashes and overwrite is False:
-                    logging.info("This file has been uploaded previously with the filename : "
-                                 f"{obs._file_hashes[file_hash]} - skipping.")
+                    logger.warning("This file has been uploaded previously with the filename : "
+                                    f"{obs._file_hashes[file_hash]} - skipping.")
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
@@ -214,10 +214,8 @@ class ObsSurface(BaseStore):
                     try:
                         ObsSurface.validate_data(value["data"], species=species)
                     except ValueError:
-                        logging.error(f"ERROR: Unable to validate and store data from file: {data_filepath.name}.",
+                        logger.error(f"Unable to validate and store data from file: {data_filepath.name}.",
                                       f" Problem with species: {species}\n")
-                        # print(f"ERROR: Unable to validate and store data from file: {data_filepath.name}.",
-                        #       f" Problem with species: {species}\n")
                         validated = False
                         break
                 else:
@@ -277,8 +275,8 @@ class ObsSurface(BaseStore):
 
                 progress_bar.update(1)
 
-            logging.info(f"Completed processing: {data_filepath.name}.")
-            logging.info(f"- UUIDs: {datasource_uuids}")
+            logger.info(f"Completed processing: {data_filepath.name}.")
+            logger.info(f"\tUUIDs: {datasource_uuids}")
 
         # Ensure we explicitly close the metadata store
         # as we're using the cached storage method
@@ -452,13 +450,13 @@ class ObsSurface(BaseStore):
         seen_before = {next(iter(v)) for k, v in hashes.items() if k in obs._retrieved_hashes}
 
         if len(seen_before) == len(data):
-            print("Note: There is no new data to process.")
+            logger.warning("Note: There is no new data to process.")
             return None
 
         keys_to_process = set(data.keys())
         if seen_before:
             # TODO - add this to log
-            print(f"Note: We've seen {seen_before} before. Processing new data only.")
+            logger.warning(f"Note: We've seen {seen_before} before. Processing new data only.")
             keys_to_process -= seen_before
 
         to_process = {k: v for k, v in data.items() if k in keys_to_process}

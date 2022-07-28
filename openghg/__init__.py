@@ -12,6 +12,7 @@ from . import (
 )
 import sys as _sys
 from ._version import get_versions  # type: ignore
+import logging
 
 __all__ = [
     "analyse",
@@ -40,3 +41,20 @@ __repository__ = v.get("repository")
 __revisionid__ = v.get("full-revisionid")
 
 del v, get_versions
+
+# Start module level logging
+logger = logging.getLogger(__name__)
+
+# Create file handler for log file - set to DEBUG (maximum detail)
+fileHandler = logging.FileHandler('openghg.log')  # May want to update this to user area
+fileFormatter = logging.Formatter("%(asctime)s:%(levelname):%(name)s:%(message)s")
+fileHandler.setFormatter(fileFormatter)
+fileHandler.setLevel(logging.DEBUG)
+logger.addHandler(fileHandler)
+
+# Create console handler - set to WARNING (lower level)
+consoleHandler = logging.StreamHandler()
+consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
+consoleHandler.setFormatter(consoleFormatter)
+consoleHandler.setLevel(logging.WARNING)
+logger.addHandler(consoleHandler)
