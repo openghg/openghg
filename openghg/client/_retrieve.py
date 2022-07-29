@@ -3,7 +3,6 @@ from typing import Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
 from openghg.retrieve.icos import retrieve as icos_retrieve
 from openghg.retrieve.ceda import retrieve_surface
-from openghg.util import running_in_cloud
 
 
 def retrieve_ceda(
@@ -42,19 +41,14 @@ def retrieve_ceda(
 
         >>> data = retrieve_ceda(site="hfd", species="co2")
     """
-    cloud = running_in_cloud()
-
-    if cloud:
-        raise NotImplementedError
-    else:
-        return retrieve_surface(
-            site=site,
-            species=species,
-            inlet=inlet,
-            url=url,
-            force_retrieval=force_retrieval,
-            additional_metadata=additional_metadata,
-        )
+    return retrieve_surface(
+        site=site,
+        species=species,
+        inlet=inlet,
+        url=url,
+        force_retrieval=force_retrieval,
+        additional_metadata=additional_metadata,
+    )
 
 
 def retrieve_icos(
@@ -80,17 +74,12 @@ def retrieve_icos(
     Returns:
         ObsData, list[ObsData], None: ObsData or a list of ObsData objects if data found, else None
     """
-    cloud = running_in_cloud()
-
-    if cloud:
-        raise NotImplementedError
-    else:
-        return icos_retrieve(
-            site=site,
-            species=species,
-            sampling_height=sampling_height,
-            start_date=start_date,
-            end_date=end_date,
-            force_retrieval=force_retrieval,
-            data_level=data_level,
-        )
+    return icos_retrieve(
+        site=site,
+        species=species,
+        sampling_height=sampling_height,
+        start_date=start_date,
+        end_date=end_date,
+        force_retrieval=force_retrieval,
+        data_level=data_level,
+    )

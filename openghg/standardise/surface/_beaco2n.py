@@ -12,6 +12,7 @@ def parse_beaco2n(
     inlet: str,
     instrument: Optional[str] = "shinyei",
     sampling_period: Optional[str] = None,
+    **kwargs: Dict,
 ) -> Dict:
     """Read BEACO2N data files
 
@@ -102,6 +103,9 @@ def parse_beaco2n(
             "sampling_period": str(sampling_period),
             "instrument": instrument,
         }
+
+        # We'll put everything into metadata
+        species_metadata.update(site_metadata)
 
         gas_data[mt]["data"] = m_data
         gas_data[mt]["metadata"] = species_metadata

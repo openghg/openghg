@@ -1,11 +1,11 @@
-import pandas as pd
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+import pandas as pd
 import pytest
 from helpers import get_datapath
-
-from openghg.dataobjects import SearchResults
 from openghg.client import rank_sources
+from openghg.dataobjects import SearchResults
 from openghg.retrieve import search
 from openghg.store import ObsSurface
 from openghg.util import split_daterange_str
@@ -336,7 +336,7 @@ def test_create_obsdata_no_data_raises():
         _ = empty._create_obsdata(site="rome", inlet="-85m", species="ptarmigan")
 
 
-def test_search_result_retrieve_cloud(monkeypatch, mocker, tmpdir):
+def test_search_result_retrieve_cloud_and_hub(monkeypatch, mocker, tmpdir):
     monkeypatch.setenv("OPENGHG_CLOUD", "1")
 
     df = pd.DataFrame({"A": range(0, 64), "B": range(0, 64)}, columns=list("AB"))
@@ -351,7 +351,7 @@ def test_search_result_retrieve_cloud(monkeypatch, mocker, tmpdir):
     function_reply["content"] = {"data": ds_bytes}
     function_reply["status"] = 200
 
-    mocker.patch("openghg.cloud.call_function", return_value=function_reply)
+    mock_call = mocker.patch("openghg.cloud.call_function", return_value=function_reply)
 
     s = SearchResults(
         results={
@@ -363,3 +363,20 @@ def test_search_result_retrieve_cloud(monkeypatch, mocker, tmpdir):
     retrieved = s.retrieve_all()
 
     assert retrieved.data.equals(ds)
+    assert mock_call.call_count == 1
+
+    monkeypatch.delenv("OPENGHG_CLOUD")
+    monkeypatch.delenv("OPENGHG_PATH")
+    monkeypatch.setenv("OPENGHG_HUB", "1")
+
+    s = SearchResults(
+        results={
+            "site": {"species": {"inlet": {"keys": {"unranked": "other"}, "metadata": {"some": "metadata"}}}}
+        },
+        ranked_data=False,
+    )
+
+    retrieved = s.retrieve_all()
+
+    assert retrieved.data.equals(ds)
+    assert mock_call.call_count == 2

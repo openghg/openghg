@@ -10,6 +10,26 @@ from openghg.util import create_daterange_str
 from helpers import get_datapath, attributes_checker_obssurface
 
 
+def test_different_sampling_periods_diff_datasources():
+    one_min = get_datapath("tac.picarro.1minute.100m.test.dat", data_type="CRDS")
+
+    one_min_res = ObsSurface.read_file(filepath=one_min, site="tac", network="decc", data_type="CRDS")
+
+    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
+
+    for sp, data in min_uuids.items():
+        assert data["new"] is True
+
+    one_hour = get_datapath("tac.picarro.hourly.100m.test.dat", data_type="CRDS")
+
+    one_hour_res = ObsSurface.read_file(filepath=one_hour, site="tac", network="decc", data_type="CRDS")
+
+    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
+
+    for sp, data in hour_uuids.items():
+        assert data["new"] is True
+
+
 def test_read_data(mocker):
     get_bucket(empty=True)
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
@@ -318,15 +338,12 @@ def test_read_openghg_format():
     """
     datafile = get_datapath(filename="tac_co2_openghg.nc", data_type="OPENGHG")
 
-    results = ObsSurface.read_file(filepath=datafile,
-                                   data_type="OPENGHG",
-                                   site="TAC",
-                                   network="DECC")
+    results = ObsSurface.read_file(filepath=datafile, data_type="OPENGHG", site="TAC", network="DECC")
 
     uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
 
     co2_data = Datasource.load(uuid=uuid, shallow=False).data()
-    co2_data = co2_data['2012-07-30-17:03:08+00:00_2012-08-03-22:43:07+00:00']
+    co2_data = co2_data["2012-07-30-17:03:08+00:00_2012-08-03-22:43:07+00:00"]
 
     assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
     assert co2_data["co2"][0] == 385.25
@@ -708,16 +725,18 @@ def test_store_icos_carbonportal_data(mocker):
     assert second_result is None
 
 
-@pytest.mark.parametrize("species,obs_variable",
-    [("carbon dioxide", "co2"),  # Known species (convert using synonyms)
-     ("radon", "rn"),  # Previous issues (added check)
-     ("c2f6", "c2f6"),  # Previous issues (added check)
-     ("CFC-11", "cfc11"),  # Known CFC (convert using synonyms)
-     ("CFC-999", "cfc999"),  # Unknown CFC (remove '-' during cleaning)
-     ("SF5CF3", "sf5cf3"),  # Unknown species (convert to lower case)
-    ]
+@pytest.mark.parametrize(
+    "species,obs_variable",
+    [
+        ("carbon dioxide", "co2"),  # Known species (convert using synonyms)
+        ("radon", "rn"),  # Previous issues (added check)
+        ("c2f6", "c2f6"),  # Previous issues (added check)
+        ("CFC-11", "cfc11"),  # Known CFC (convert using synonyms)
+        ("CFC-999", "cfc999"),  # Unknown CFC (remove '-' during cleaning)
+        ("SF5CF3", "sf5cf3"),  # Unknown species (convert to lower case)
+    ],
 )
-def test_obs_schema(species,obs_variable):
+def test_obs_schema(species, obs_variable):
     """
     Check expected expected data variables (based on species) are being
     included for default ObsSurface schema.

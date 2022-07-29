@@ -1,22 +1,19 @@
-from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
-from xarray import Dataset, open_dataset
+import json
 from io import BytesIO
+from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
 
 from addict import Dict as aDict
-import json
-
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
-
 from openghg.util import (
     clean_string,
     create_daterange_str,
     find_daterange_gaps,
     first_last_dates,
+    running_locally,
     split_daterange_str,
-    running_in_cloud,
 )
-
+from xarray import Dataset, open_dataset
 
 __all__ = ["SearchResults"]
 
@@ -30,13 +27,12 @@ class SearchResults:
     Args:
         results: Search results
         ranked_data: True if results are ranked, else False
-        cloud: True if running in cloud
     """
 
     def __init__(self, results: Optional[Dict] = None, ranked_data: bool = False):
         self.results = results if results is not None else {}
         self.ranked_data = ranked_data
-        self.cloud = running_in_cloud()
+        self.cloud = not running_locally()
 
     def __str__(self) -> str:
         if not self.results:

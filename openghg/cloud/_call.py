@@ -1,13 +1,14 @@
 """
 Call OpenGHG serverless functions
 """
-import requests
-from typing import Dict, Optional, Union, Tuple
 import os
-import msgpack
-from openghg.types import FunctionError
 from pathlib import Path
-from openghg.util import hash_bytes, compress
+from typing import Dict, Optional, Tuple
+
+import msgpack
+import requests
+from openghg.types import FunctionError
+from openghg.util import compress, hash_bytes, running_in_cloud, running_on_hub
 
 
 def create_file_package(filepath: Path, obs_type: str) -> Tuple[bytes, Dict]:
@@ -18,7 +19,6 @@ def create_file_package(filepath: Path, obs_type: str) -> Tuple[bytes, Dict]:
         obs_type: Observation type
     Returns:
         tuple: Compressed data as bytes and dictionary of file metadata
-
     """
     in_mem_limit = 300  # MB
     # To convert bytes to megabytes
@@ -83,7 +83,7 @@ def create_post_dict(
     return to_post
 
 
-def call_function(data: Union[Dict, bytes]) -> Dict:
+def call_function(data: Dict) -> Dict:
     """Calls an OpenGHG serverless function and returns its response
 
     Args:
@@ -91,29 +91,51 @@ def call_function(data: Union[Dict, bytes]) -> Dict:
     Returns:
         dict: Dictionary containing response status, headers and content.
     """
-    # First lookup the function URL
-    fn_url = _get_function_url()
-    auth_key = _get_auth_key()
+    hub = running_on_hub()
+    cloud = running_in_cloud()
 
-    headers = {}
-    headers["Content-Type"] = "application/octet-stream"
-    headers["authorization"] = auth_key
+    if hub and cloud:
+        raise ValueError("We can't be running in the cloud and on the hub at the same time.")
 
-    packed_data = msgpack.packb(data)
+    # If we're running on the OpenGHG Hub we need to make a call to
+    # the serverless functions
+    if hub:
+        # First lookup the function URL
+        fn_url = _get_function_url()
+        auth_key = _get_auth_key()
 
-    response = requests.post(url=fn_url, data=packed_data, headers=headers)
+        headers = {}
+        headers["Content-Type"] = "application/octet-stream"
+        headers["authorization"] = auth_key
 
-    if response.status_code != 200:
-        raise FunctionError(f"Function call error: {str(response.content)}")
+        packed_data = msgpack.packb(data)
+        response = requests.post(url=fn_url, data=packed_data, headers=headers)
 
-    response_content = msgpack.unpackb(response.content)
+        if response.status_code != 200:
+            raise FunctionError(f"Function call error: {str(response.content)}")
 
-    d: Dict[str, Union[int, str, Dict, bytes]] = {}
-    d["status"] = response.status_code
-    d["headers"] = dict(response.headers)
-    d["content"] = response_content
+        return {
+            "status": response.status_code,
+            "headers": dict(headers),
+            "content": msgpack.unpackb(response.content),
+        }
 
-    return d
+    # Otherwise if one of the functions has made a call that's been passed here
+    # and we're running within a serverless function already we can just route that
+    # data to the function requested.
+    if cloud:
+        try:
+            # openghg/functions
+            from functions import route_local  # type: ignore
+
+            function_name = data["function"]
+            response = route_local(function_name=function_name, data=data)
+        except Exception as e:
+            raise FunctionError(f"Cannot pass to routing function - {e}")
+
+        return {"status": 200, "headers": {}, "content": response}
+    else:
+        raise ValueError("Neither hub nor cloud, check environment.")
 
 
 def _get_function_url() -> str:
@@ -143,45 +165,3 @@ def _get_auth_key() -> str:
         return os.environ["AUTH_KEY"]
     except KeyError:
         raise FunctionError("A valid AUTH_KEY secret must be set.")
-
-
-def _put(
-    url: str, data: bytes, headers: Optional[Dict] = None, auth_key: Optional[str] = None
-) -> requests.Response:
-    """PUT some data to the URL
-
-    Args:
-        url: URL
-        data: Data as bytes
-        headers: Optional headers dictionary
-        auth_key: Authorisation key if required
-    Returns:
-        requests.Response
-    """
-    if headers is None:
-        headers = {}
-
-    headers["Content-Type"] = "application/octet-stream"
-
-    if auth_key is not None:
-        headers["authentication"] = auth_key
-
-    return requests.put(url=url, data=data, headers=headers)
-
-
-def _post(url: str, data: Optional[Dict] = None, auth_key: Optional[str] = None) -> requests.Response:
-    """POST to a URL
-
-    Args:
-        url: URL
-        data: Dictionary of data to POST
-    Returns:
-        requests.Response
-    """
-    if data is None:
-        data = {}
-
-    if auth_key is not None:
-        data["authorisation"] = auth_key
-
-    return requests.post(url=url, data=data)

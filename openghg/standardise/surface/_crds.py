@@ -274,7 +274,22 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
     except KeyError:
         raise ValueError(f"Unable to read attributes for site: {site}")
 
+    # TODO - we need to combine the metadata
+    acrg_site_metadata = load_json(filename="acrg_site_info.json")
+
     attributes = global_attributes.copy()
+
+    try:
+        metadata = acrg_site_metadata[site.upper()]
+    except KeyError:
+        pass
+    else:
+        network_key = next(iter(metadata))
+        site_metadata = metadata[network_key]
+        attributes["station_latitude"] = str(site_metadata["latitude"])
+        attributes["station_longitude"] = str(site_metadata["longitude"])
+        attributes["station_long_name"] = site_metadata["long_name"]
+        attributes["station_height_masl"] = site_metadata["height_station_masl"]
 
     attributes["inlet_height_magl"] = inlet
     attributes["comment"] = crds_metadata["comment"]

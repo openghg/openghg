@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import Dict, Optional, Union, Any
-from openghg.retrieve import search as _local_search
-from openghg.util import running_in_cloud
-from gzip import decompress
+
+from typing import Any, Dict, Optional, Union
+
 from openghg.dataobjects import SearchResults
+from openghg.retrieve import search as _local_search
+from openghg.util import decompress, running_locally
 
 # if TYPE_CHECKING:
 #     from openghg.dataobjects import SearchResults
@@ -87,9 +88,7 @@ def search(**kwargs: Any) -> SearchResults:
     """
     from openghg.cloud import call_function
 
-    cloud = running_in_cloud()
-
-    if cloud:
+    if not running_locally():
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "search"
         post_data["data"] = kwargs
