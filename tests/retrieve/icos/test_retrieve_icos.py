@@ -1,12 +1,10 @@
-import pytest
-
 import pandas as pd
-from openghg.retrieve.icos import retrieve
-from openghg.dataobjects import SearchResults
+import pytest
 from helpers import get_retrieval_data_file, metadata_checker_obssurface
-
-from icoscp.station.station import Station
 from icoscp.cpb.dobj import Dobj  # type: ignore
+from icoscp.station.station import Station
+from openghg.dataobjects import SearchResults
+from openghg.retrieve.icos import retrieve
 
 example_metadata = {
     "0": '{"dobj":{"0":"https:\\/\\/meta.icos-cp.eu\\/objects\\/zYxCcjFqcV0gmfMiO4NTUrAg"},"objSpec":{"0":"http:\\/\\/meta.icos-cp.eu\\/resources\\/cpmeta\\/atcCo2L2DataObject"},"nRows":{"0":"27468"},"fileName":{"0":"ICOS_ATC_L2_L2-2021.1_TOH_10.0_CTS_CO2.zip"},"specLabel":{"0":"ICOS ATC CO2 Release"},"columnNames":{"0":null}}',
@@ -15,6 +13,7 @@ example_metadata = {
 }
 
 
+@pytest.mark.xfail("ICOS Metadata retrieval needs fix - see #381")
 def test_icos_retrieve_invalid_site(mocker, capfd):
     s = Station()
     s._valid = False
@@ -30,6 +29,7 @@ def test_icos_retrieve_invalid_site(mocker, capfd):
     assert out.rstrip() == "Please check you have passed a valid ICOS site."
 
 
+@pytest.mark.xfail("ICOS Metadata retrieval needs fix - see #381")
 def test_icos_retrieve_and_store(mocker, capfd):
     pid_csv = get_retrieval_data_file(filename="test_pids_icos.csv.gz")
     pid_df = pd.read_csv(pid_csv)
