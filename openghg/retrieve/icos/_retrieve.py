@@ -38,6 +38,8 @@ def retrieve(
     from openghg.store import ObsSurface
     from openghg.util import to_lowercase
 
+    raise NotImplementedError("Bug in metadata access with latest ICOSCP - fix")
+
     if not 1 <= data_level <= 2:
         print("Error: data level must be 1 or 2.")
 

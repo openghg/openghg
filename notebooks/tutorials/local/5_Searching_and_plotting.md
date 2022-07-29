@@ -30,7 +30,7 @@ os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
 
 ```{code-cell} ipython3
 from openghg.util import retrieve_example_data
-from openghg.client import standardise_surface
+from openghg.standardise import standardise_surface
 
 tac_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
 bsd_data = retrieve_example_data(path="timeseries/bsd_example.tar.gz")
@@ -51,9 +51,9 @@ standardise_surface(filepaths=bsd_data, data_type="CRDS", site="BSD", network="D
 Let's search for all the methane data from Tacolneston
 
 ```{code-cell} ipython3
-from openghg.client import search
+from openghg.retrieve import search_surface
 
-ch4_results = search(site="tac", species="ch4")
+ch4_results = search_surface(site="tac", species="ch4")
 ch4_results
 ```
 
@@ -100,7 +100,7 @@ plot_timeseries(data=all_ch4_tac, units="ppb")
 We can easily compare data from different sites by doing a quick search to see what's available
 
 ```{code-cell} ipython3
-ch4_data = search(species="ch4")
+ch4_data = search_surface(species="ch4")
 ```
 
 ```{code-cell} ipython3
@@ -110,7 +110,7 @@ ch4_data
 Then we refine our search to only retrieve the inlets we want
 
 ```{code-cell} ipython3
-lower_inlets = search(species="ch4", inlet=["42m", "54m"])
+lower_inlets = search_surface(species="ch4", inlet=["42m", "54m"])
 ```
 
 ```{code-cell} ipython3

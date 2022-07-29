@@ -49,7 +49,7 @@ species = "co2"
 ```
 
 ```{code-cell} ipython3
-from openghg.client import standardise_surface
+from openghg.standardise import standardise_surface
 from openghg.util import retrieve_example_data
 
 obs_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
@@ -64,7 +64,7 @@ decc_results = standardise_surface(filepaths=obs_data, data_type="CRDS", site=si
 Add some flux data.
 
 ```{code-cell} ipython3
-from openghg.client import standardise_flux
+from openghg.standardise import standardise_flux
 
 flux_data = retrieve_example_data(path="flux/co2-flux_EUROPE_2017.tar.gz")
 
@@ -85,7 +85,7 @@ standardise_flux(filepath=flux_file_ff, species=species, source=source_fossil, d
 Add some footprint data
 
 ```{code-cell} ipython3
-from openghg.client import standardise_footprint
+from openghg.standardise import standardise_footprint
 
 footprint_data = retrieve_example_data(path="footprint/tac_footprint_co2_201707.tar.gz")
 
