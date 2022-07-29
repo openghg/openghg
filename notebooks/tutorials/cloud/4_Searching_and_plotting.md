@@ -25,9 +25,9 @@ In this short tutorial we'll show how to retrieve some data and create a simple 
 Let's search for all the methane data from Tacolneston
 
 ```{code-cell} ipython3
-from openghg.client import search
+from openghg.retrieve import search_surface
 
-ch4_results = search(site="tac", species="ch4")
+ch4_results = search_surface(site="tac", species="ch4")
 ch4_results
 ```
 

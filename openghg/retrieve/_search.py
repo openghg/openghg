@@ -65,6 +65,7 @@ def search_surface(
     data_type: Union[str, List[str], None] = None,
     start_date: Union[str, List[str], None] = None,
     end_date: Union[str, List[str], None] = None,
+    data_source: Optional[str] = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Cloud object store search
@@ -78,11 +79,12 @@ def search_surface(
         data_type: Data type e.g. CRDS, GCWERKS, ICOS
         start_date: Start date
         end_date: End date
+        data_source: Source of data, e.g. noaa_obspack, icoscp, ceda_archive. This
+        argument only needs to be used to narrow the search to data solely from these sources.
         kwargs: Any other search arguments to constrain the search further
     Returns:
         SearchResults:  SearchResults object
     """
-
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
@@ -97,6 +99,7 @@ def search_surface(
         data_type=data_type,
         start_date=start_date,
         end_date=end_date,
+        data_source=data_source,
         **kwargs,
     )
 

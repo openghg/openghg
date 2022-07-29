@@ -81,7 +81,7 @@ Now we can query the object store and find all the flask data for example
 ```{code-cell} ipython3
 from openghg.retrieve import search_surface
 
-search_surface(species="ch4", measurement_type="flask")
+search_surface(species="ch4", measurement_type="flask", data_source="noaa_obspack")
 ```
 
 Or we can do an all in one search and retrieve using `get_obs_surface`. Here we find CH4 data from Estevan Point, British Columbia, retrieve it and plot it.
