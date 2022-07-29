@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import cast, Dict, Optional, Union, Any, Hashable
 import xarray as xr
 import numpy as np
 
@@ -393,7 +393,7 @@ def _read_obspack(
     metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", "NOT_SET")
 
     # Create attributes with copy of metadata values
-    attributes = metadata.copy()
+    attributes = cast(Dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
 
     # TODO: At the moment all attributes from the NOAA ObsPack are being copied
     # plus any variables we're adding - decide if we want to reduce this
