@@ -1,6 +1,5 @@
 from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
-
 import numpy as np
 import xarray as xr
 
