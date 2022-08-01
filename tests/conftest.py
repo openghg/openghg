@@ -24,8 +24,10 @@ temporary_store = tempfile.TemporaryDirectory()
 temporary_store_path = temporary_store.name
 
 
-@pytest.fixture(autouse=True, scope="session")
-def set_envs():
+def pytest_sessionstart(session):
+    """Set the required environment variables for OpenGHG
+    at the start of the test session.
+    """
     os.environ["OPENGHG_PATH"] = temporary_store_path
 
 

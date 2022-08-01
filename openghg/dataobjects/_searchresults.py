@@ -1,6 +1,6 @@
 import json
 from io import BytesIO
-from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
+from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union, cast
 
 from addict import Dict as aDict
 from openghg.dataobjects import ObsData
@@ -246,7 +246,9 @@ class SearchResults:
                 from openghg.retrieve import search
 
                 with_inlet = search(site=site, species=species, inlet=inlet)
-                inlet_data: ObsData = with_inlet.retrieve(site=site, species=species, inlet=inlet)
+                # TODO - remove this cast once we always return a SearchResults object from search
+                with_inlet = cast(SearchResults, with_inlet)
+                inlet_data = with_inlet.retrieve(site=site, species=species, inlet=inlet)
                 return inlet_data
 
             for _site, site_data in self.results.items():

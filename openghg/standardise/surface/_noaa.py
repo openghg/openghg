@@ -1,7 +1,7 @@
 from pathlib import Path
-from typing import cast, Dict, Optional, Union, Any, Hashable
-import xarray as xr
+from typing import Any, Dict, Hashable, Optional, Union, cast
 import numpy as np
+import xarray as xr
 
 
 def parse_noaa(
@@ -312,8 +312,8 @@ def _read_obspack(
     Returns:
         dict: Dictionary of results
     """
-    from openghg.util import clean_string
     from openghg.standardise.meta import assign_attributes
+    from openghg.util import clean_string
 
     valid_types = ("flask", "insitu", "pfp")
 
@@ -372,6 +372,7 @@ def _read_obspack(
     metadata["species"] = species
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
+    metadata["data_source"] = "noaa_obspack"
 
     # Add additional sampling_period_estimate if sampling_period is not set
     if sampling_period_estimate >= 0.0:
@@ -486,8 +487,8 @@ def _read_raw_data(
     Returns:
         dict: Dictionary containing attributes, data and metadata keys
     """
-    from openghg.util import clean_string, read_header, load_json
-    from pandas import read_csv, Timestamp
+    from openghg.util import clean_string, load_json, read_header
+    from pandas import Timestamp, read_csv
 
     header = read_header(filepath=data_filepath)
 

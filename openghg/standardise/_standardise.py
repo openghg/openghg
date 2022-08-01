@@ -34,13 +34,13 @@ def standardise_surface(
     if not isinstance(filepaths, list):
         filepaths = [filepaths]
 
-    # To convert bytes to megabytes
-    MB = 1e6
-    # The largest file we'll just directly POST to the standardisation
-    # function will be this big (megabytes)
-    post_limit = 40
-
     if not running_locally():
+        # To convert bytes to megabytes
+        MB = 1e6
+        # The largest file we'll just directly POST to the standardisation
+        # function will be this big (megabytes)
+        post_limit = 40  # MB
+
         metadata = {}
         metadata["site"] = site
         metadata["data_type"] = data_type

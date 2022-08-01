@@ -1,7 +1,13 @@
-from openghg.client import search_surface
-from openghg.dataobjects import SearchResults
-from openghg.util import compress
+import pytest
 from helpers import call_function_packager
+from openghg.dataobjects import SearchResults
+from openghg.retrieve import search_surface
+from openghg.util import compress
+
+
+@pytest.fixture(autouse=True)
+def set_env(monkeypatch):
+    monkeypatch.setenv("OPENGHG_HUB", "1")
 
 
 def test_cloud_search_with_results(mocker):

@@ -1,7 +1,7 @@
-from pandas import DataFrame
 from typing import Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
+from pandas import DataFrame
 
 
 def retrieve(
@@ -33,16 +33,18 @@ def retrieve(
     Returns:
         ObsData, list[ObsData] or None
     """
-    from openghg.retrieve import search
-    from openghg.store import ObsSurface
     from openghg.dataobjects import ObsData
+    from openghg.retrieve import search_surface
+    from openghg.store import ObsSurface
     from openghg.util import to_lowercase
+
+    raise NotImplementedError("Bug in metadata access with latest ICOSCP - fix")
 
     if not 1 <= data_level <= 2:
         print("Error: data level must be 1 or 2.")
 
     # NOTE - we skip ranking here, will we be ranking ICOS data?
-    results = search(
+    results = search_surface(
         site=site,
         species=species,
         sampling_height=sampling_height,
@@ -55,7 +57,7 @@ def retrieve(
     )
 
     if results and not force_retrieval:
-        obs_data: Union[ObsData, List[ObsData]] = results.retrieve_all()
+        obs_data = results.retrieve_all()
     else:
         # We'll also need to check we have current data
         standardised_data = _retrieve_remote(site=site, species=species, data_level=data_level)
@@ -105,18 +107,19 @@ def _retrieve_remote(
     """
     # icoscp isn't available to conda so we've got to resort to this for now
     try:
-        from icoscp.station import station  # type: ignore
         from icoscp.cpb.dobj import Dobj  # type: ignore
+        from icoscp.station import station  # type: ignore
     except ImportError:
         raise ImportError(
             "Cannot import icoscp, if you've installed OpenGHG using conda please run: pip install icoscp"
         )
 
-    from openghg.standardise.meta import assign_attributes
-    from openghg.util import load_json, download_data
-    from pandas import to_datetime
     import json
     import re
+
+    from openghg.standardise.meta import assign_attributes
+    from openghg.util import download_data, load_json
+    from pandas import to_datetime
 
     if species is None:
         species = ["CO", "CO2", "CH4"]

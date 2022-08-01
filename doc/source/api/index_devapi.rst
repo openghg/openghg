@@ -49,14 +49,14 @@ Ensuring the NetCDF created during standardisation has the correct attributes as
 
 :func:`~openghg.standardise.meta.assign_attributes`
     Assign attributes to a number of datasets.
-    
+
 :func:`~openghg.standardise.meta.get_attributes`
     Assign attributes to a single dataset, called by the above.
 
 Metadata sync
 *************
 
-:func:`~openghg.standardise.meta.surface_standardise`
+:func:`~openghg.standardise.meta.sync_surface_metadata`
     Ensure the required metadata is shared between the metadata and attributes.
 
 Storage
@@ -132,7 +132,7 @@ These dataclasses are used to facilitate the simple packaging and retrieval of d
     Stores footprint data.
 
 :class:`~openghg.dataobjects.METData`
-    Stores meteorological data retrieved from the ECMWF / our local cache. 
+    Stores meteorological data retrieved from the ECMWF / our local cache.
 
 :class:`~openghg.dataobjects.ObsData`
     Stores data returned by search functions.
@@ -154,7 +154,7 @@ Searching
 
 :func:`~openghg.retrieve.search`
     Search for data in the object store, accepts any pair of keyword - argument pairs
-    
+
     Example usage:
 
         search(site="bsd", inlet="50m", species="co2", interesting_metadata="special_units")
@@ -255,7 +255,7 @@ String manipulation
 String cleaning and formatting functions
 
 :func:`~openghg.util.clean_string`
-    Return a lowercase cleaned string 
+    Return a lowercase cleaned string
 
 :func:`~openghg.util.to_lowercase`
     Converts a string to lowercase
@@ -380,7 +380,7 @@ Customised errors for OpenGHG.
 
 :class:`~openghg.util.ObjectStoreError`
     Raised if an error accessing an object at a key in the object store occurs
-    
+
 
 Types
 ^^^^^
@@ -392,4 +392,3 @@ These are used in conjunction with ``mypy`` to make type hinting easier.
 :class:`~openghg.util.multiPathType`
 
 :class:`~openghg.util.resultsType`
-

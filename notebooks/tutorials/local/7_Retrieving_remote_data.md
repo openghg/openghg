@@ -51,11 +51,11 @@ You can find the stations available in ICOS using [their map interface](https://
 First we'll import `retrieve_icos` from the `client` submodule, then we'll retrieve some data from Weybourne (**WAO**). The function will first check for any data from **WAO** already stored in the object store, if any is found it is returned, otherwise it'll retrieve the data from the ICOS Carbon Portal, this may take a bit longer.
 
 ```{code-cell} ipython3
-from openghg.client import retrieve_icos
+from openghg.retrieve.icos import retrieve
 ```
 
 ```{code-cell} ipython3
-wao_data = retrieve_icos(site="WAO", species="ch4")
+wao_data = retrieve(site="WAO", species="ch4")
 ```
 
 Now we can inspect `wao_data`, an `ObsData` object to see what was retrieved.
@@ -156,7 +156,7 @@ We don't currently support downloading restricted data that requires a login to 
 Now we're ready to retrieve the data.
 
 ```{code-cell} ipython3
-from openghg.client import retrieve_ceda
+from openghg.retrieve.ceda import retrieve_surface
 ```
 
 ```{code-cell} ipython3
@@ -164,7 +164,7 @@ url = "https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-
 ```
 
 ```{code-cell} ipython3
-hfd_data = retrieve_ceda(url=url)
+hfd_data = retrieve_surface(url=url)
 ```
 
 Now we've got the data, we can use it as any other `ObsData` object, using `data` and `metadata`.
@@ -180,7 +180,7 @@ hfd_data.plot_timeseries()
 The second time we (or another use) retrieves the data it will be pulled from the object store, this should be faster than retrieving from CEDA. To get the same data again use the `site`, `species` and `inlet` arguments.
 
 ```{code-cell} ipython3
-hfd_data2 = retrieve_ceda(site="hfd", species="co2")
+hfd_data2 = retrieve_surface(site="hfd", species="co2")
 ```
 
 ```{code-cell} ipython3
