@@ -1,7 +1,8 @@
-from typing import Dict, List, Optional, Tuple, Union
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
+
 from openghg.cloud import create_file_package, create_post_dict
-from openghg.util import running_in_cloud
+from openghg.util import running_locally
 
 
 def standardise_surface(
@@ -33,15 +34,13 @@ def standardise_surface(
     if not isinstance(filepaths, list):
         filepaths = [filepaths]
 
-    # To convert bytes to megabytes
-    MB = 1e6
-    # The largest file we'll just directly POST to the standardisation
-    # function will be this big (megabytes)
-    post_limit = 40
+    if not running_locally():
+        # To convert bytes to megabytes
+        MB = 1e6
+        # The largest file we'll just directly POST to the standardisation
+        # function will be this big (megabytes)
+        post_limit = 40  # MB
 
-    cloud = running_in_cloud()
-
-    if cloud:
         metadata = {}
         metadata["site"] = site
         metadata["data_type"] = data_type
@@ -150,10 +149,9 @@ def standardise_bc(
     from openghg.cloud import call_function
     from openghg.store import BoundaryConditions
 
-    cloud = running_in_cloud()
     filepath = Path(filepath)
 
-    if cloud:
+    if not running_locally():
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="bc")
 
         metadata = {
@@ -223,10 +221,9 @@ def standardise_footprint(
     from openghg.cloud import call_function
     from openghg.store import Footprints
 
-    cloud = running_in_cloud()
     filepath = Path(filepath)
 
-    if cloud:
+    if not running_locally():
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
 
         metadata = {
@@ -306,10 +303,9 @@ def standardise_flux(
     from openghg.cloud import call_function
     from openghg.store import Emissions
 
-    cloud = running_in_cloud()
     filepath = Path(filepath)
 
-    if cloud:
+    if not running_locally():
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="flux")
 
         metadata = {

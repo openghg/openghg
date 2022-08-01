@@ -1,5 +1,11 @@
-from openghg.dataobjects import RankSources
-from openghg.util import running_in_cloud
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from openghg.util import running_locally
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import RankSources
 
 
 def rank_sources(site: str, species: str, service_url: str = None) -> RankSources:
@@ -12,8 +18,10 @@ def rank_sources(site: str, species: str, service_url: str = None) -> RankSource
     Returns:
         RankSources: A RankSources object
     """
-    cloud = running_in_cloud()
-    ranker = RankSources(cloud=cloud, service_url=service_url)
+    from openghg.dataobjects import RankSources
+
+    hub_or_cloud = not running_locally()
+    ranker = RankSources(cloud=hub_or_cloud, service_url=service_url)
     ranker.get_sources(site=site, species=species)
 
     return ranker

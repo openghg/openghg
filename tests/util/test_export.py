@@ -19,21 +19,25 @@ def test_export_to_dashboard():
         index=date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D"),
     ).to_xarray()
 
-    site_A.attrs = {"station_longitude": 52.123, "station_latitude": 52.123}
+    site_A.attrs = {"longitude": 52.123, "latitude": 52.123}
 
-    metadata = {"network": "BEACO2N", "site": "test_site", "instrument": "picarro", "inlet": "100m"}
+    metadata = {
+        "network": "BEACO2N",
+        "site": "test_site",
+        "instrument": "picarro",
+        "inlet": "100m",
+        "species": "co2",
+    }
 
     obs = ObsData(data=site_A, metadata=metadata)
 
-    data = {"site_a": {"species_a": {"inlet_a": obs}}}
-
-    for_export = to_dashboard(data=data, selected_vars=["A"])
+    for_export = to_dashboard(data=obs, selected_vars=["A"])
 
     expected_export = {
-        "species_a": {
+        "co2": {
             "BEACO2N": {
-                "site_a": {
-                    "inlet_a": {
+                "test_site": {
+                    "100m": {
                         "picarro": {
                             "data": {
                                 "a": {
@@ -80,6 +84,7 @@ def test_export_to_dashboard():
                                 "inlet": "100m",
                                 "latitude": 52.123,
                                 "longitude": 52.123,
+                                "species": "co2"
                             },
                         }
                     }
@@ -92,7 +97,7 @@ def test_export_to_dashboard():
 
     with TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir).joinpath("test_export.json")
-        to_dashboard(data=data, selected_vars=["A"], filename=tmp_path)
+        to_dashboard(data=obs, selected_vars=["A"], filename=tmp_path)
 
         assert tmp_path.exists()
         exported_data = json.loads(tmp_path.read_text())

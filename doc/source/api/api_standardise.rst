@@ -5,40 +5,35 @@ Standardisation functions
 Functions that accept data in specific formats, standardise it to a CF-compliant format and ensure it has the correct metadata attached. The
 data returned from these functions is then stored in the object store.
 
-Surface
-=======
+Measurement Standardisation
+===========================
 
-These functions take surface measurement data, they are called by the ``ObsSurface`` class.
+These functions cover the four types of measurement we currently support.
 
+Surface measurements
+^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: openghg.standardise.surface.parse_aqmesh
+.. autofunction:: openghg.standardise.standardise_surface
 
+Boundary Conditions
+^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: openghg.standardise.surface.parse_beaco2n
+.. autofunction:: openghg.standardise.standardise_bc
 
+Emissions / Flux
+^^^^^^^^^^^^^^^^
 
-.. autofunction:: openghg.standardise.surface.parse_btt
+.. autofunction:: openghg.standardise.standardise_flux
 
+Footprints
+^^^^^^^^^^
 
-.. autofunction:: openghg.standardise.surface.parse_cranfield
-
-
-.. autofunction:: openghg.standardise.surface.parse_crds
-
-
-.. autofunction:: openghg.standardise.surface.parse_eurocom
-
-
-.. autofunction:: openghg.standardise.surface.parse_gcwerks
-
-
-.. autofunction:: openghg.standardise.surface.parse_noaa
+.. autofunction:: openghg.standardise.standardise_footprint
 
 
-.. autofunction:: openghg.standardise.surface.parse_npl
+Behind the scence these functions use parsing functions that are written specifically for each data type.
+Please see the :ref:`Developer API <Developer API>` for these functions.
 
-
-.. autofunction:: openghg.standardise.surface.parse_tmb
 
 Metadata
 ========

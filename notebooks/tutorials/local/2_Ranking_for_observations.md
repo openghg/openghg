@@ -35,16 +35,16 @@ Often, when retrieving data for comparison there will be preferences between the
 To demonstrate this we will start by loading data from the Bilsdale ("BSD") site within the DECC network with measurements of the same species at multiple inlet heights.
 
 ```{code-cell} ipython3
-from openghg.client import standardise_surface
+from openghg.standardise import standardise_surface
 
 bsd_filepaths = ["../data/DECC/bsd.picarro.1minute.42m.min.dat", "../data/DECC/bsd.picarro.1minute.108m.min.dat", "../data/DECC/bsd.picarro.1minute.248m.min.dat"]
 decc_results = standardise_surface(filepaths=bsd_filepaths, data_type="CRDS", site="bsd", network="DECC")
 ```
 
 ```{code-cell} ipython3
-from openghg.retrieve import search
+from openghg.retrieve import search_surface
 
-search(site="bsd", species="co")
+search_surface(site="bsd", species="co")
 ```
 
 Before we set any ranking for this data, we can still retrieve this from the object store using the `get_obs_surface` function, as we did before, but because there are multiple inlets we must specify these details to be able to return unambiguous observation data:
@@ -69,7 +69,7 @@ We can get around this by setting up ranking details once, which will then persi
 We can access the ranking data and see any pre-existing details associated with our data by using the `RankSources` class and the `get_sources()` method. In this case we are looking at the Bilsdale site ("BSD") and the carbon monoxide ("co") species:
 
 ```{code-cell} ipython3
-from openghg.client import rank_sources
+from openghg.store import rank_sources
 
 ranker = rank_sources(site="BSD", species="co")
 ```

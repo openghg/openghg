@@ -1,21 +1,23 @@
+import os as _os
+import sys as _sys
+
 from . import (
     analyse,
+    cloud,
     dataobjects,
-    client,
     objectstore,
-    standardise,
     retrieve,
     service,
+    standardise,
     store,
-    util,
     types,
+    util,
 )
-import sys as _sys
 from ._version import get_versions  # type: ignore
 
 __all__ = [
     "analyse",
-    "client",
+    "cloud",
     "dataobjects",
     "objectstore",
     "retrieve",
@@ -31,6 +33,19 @@ if _sys.version_info.major < 3:
 
 if _sys.version_info.minor < 7:
     raise ImportError("openghg requires Python 3.7 minimum")
+
+# Let's do some quick checks for required environment variables
+_cloud = _os.environ.get("OPENGHG_CLOUD", False)
+_hub = _os.environ.get("OPENGHG", False)
+_openghg_path = _os.environ.get("OPENGHG_PATH", False)
+
+if not (_cloud or _hub):
+    if not _openghg_path:
+        raise ValueError(
+            "No environment variable OPENGHG_PATH found, please set to use the local object store"
+        )
+
+del _cloud, _hub, _openghg_path
 
 v = get_versions()
 

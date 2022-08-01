@@ -1,2 +1,7 @@
-from ._attributes import assign_attributes, get_attributes, define_species_label, assign_flux_attributes
-from ._metadata import metadata_default_keys, surface_standardise
+from ._attributes import (
+    assign_attributes,
+    assign_flux_attributes,
+    define_species_label,
+    get_attributes,
+)
+from ._metadata import metadata_default_keys, sync_surface_metadata

@@ -1,5 +1,6 @@
-from openghg.dataobjects import ObsData
 from typing import Dict, List, Optional, Union
+
+from openghg.dataobjects import ObsData
 
 
 def retrieve_surface(
@@ -30,20 +31,19 @@ def retrieve_surface(
         ObsData or None: ObsData if data found / retrieved successfully.
     """
     import io
+
     import xarray as xr
-    from openghg.util import download_data
+    from openghg.retrieve import search_surface
     from openghg.store import ObsSurface
-    from openghg.retrieve import search
-    from openghg.util import parse_url_filename, timestamp_now, site_code_finder
+    from openghg.util import download_data, parse_url_filename, site_code_finder, timestamp_now
 
     if additional_metadata is None:
         additional_metadata = {}
 
-    results = search(site=site, species=species, inlet=inlet, data_source="ceda_archive")
+    results = search_surface(site=site, species=species, inlet=inlet, data_source="ceda_archive")
 
     if results and not force_retrieval or url is None:
-        obs_data: Union[ObsData, List[ObsData]] = results.retrieve_all()
-        return obs_data
+        return results.retrieve_all()
 
     filename = parse_url_filename(url=url)
     extension = filename.split(".")[-1].lower()
