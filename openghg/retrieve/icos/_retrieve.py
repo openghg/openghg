@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 
 from openghg.dataobjects import ObsData
 
@@ -177,19 +177,19 @@ def _retrieve_remote(
                 if col["label"] == s.lower():
                     measurement_type = col["valueType"]["self"]["label"].lower()
                     units = col["valueType"]["unit"].lower()
-                    this_species = s
+                    this_species = str(s)
                     break
 
         metadata["species"] = this_species
         acq_data = specific_info["acquisition"]
         station_data = acq_data["station"]
 
-        inst_metadata = {}
+        to_store: Dict[str, Any] = {}
         try:
             instrument_metadata = acq_data["instrument"]
         except KeyError:
-            inst_metadata["instrument"] = "NA"
-            inst_metadata["instrument_data"] = "NA"
+            to_store["instrument"] = "NA"
+            to_store["instrument_data"] = "NA"
         else:
             # Do some tidying of the instrument metadata
             instruments = set()
@@ -210,10 +210,10 @@ def _retrieve_remote(
             else:
                 instrument = "multiple"
 
-            inst_metadata["instrument"] = instrument
-            inst_metadata["instrument_data"] = cleaned_instrument_metadata
+            to_store["instrument"] = instrument
+            to_store["instrument_data"] = cleaned_instrument_metadata
 
-        metadata.update(inst_metadata)
+        metadata.update(to_store)
 
         metadata["site"] = station_data["id"]
         metadata["measurement_type"] = measurement_type
