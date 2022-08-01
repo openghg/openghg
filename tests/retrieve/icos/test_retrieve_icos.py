@@ -64,7 +64,6 @@ def test_icos_retrieve_and_store(mocker, capfd):
     expected_metadata = {
         "species": "co2",
         "instrument": "ftir",
-        "instrument_uri": "http://meta.icos-cp.eu/resources/instruments/atc_505",
         "site": "wao",
         "measurement_type": "co2 mixing ratio (dry mole fraction)",
         "units": "µmol mol-1",
@@ -91,6 +90,7 @@ def test_icos_retrieve_and_store(mocker, capfd):
         "calibration_scale": "unknown",
         "sampling_period": "not_set",
         "sampling_period_unit": "s",
+        "instrument_data": ["FTIR", "http://meta.icos-cp.eu/resources/instruments/ATC_505"],
         "citation_string": "Forster, G., ICOS RI, 2022. ICOS ATC NRT CO2 growing time series, Weybourne (10.0 m), 2022-03-01–2022-07-26, https://hdl.handle.net/11676/XRijo66u4lkxVVk5osjM84Oo",
         "Conventions": "CF-1.8",
     }

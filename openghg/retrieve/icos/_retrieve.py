@@ -184,10 +184,37 @@ def _retrieve_remote(
         acq_data = specific_info["acquisition"]
         station_data = acq_data["station"]
 
-        instrument_data = acq_data["instrument"]
+        inst_metadata = {}
+        try:
+            instrument_metadata = acq_data["instrument"]
+        except KeyError:
+            inst_metadata["instrument"] = "NA"
+            inst_metadata["instrument_data"] = "NA"
+        else:
+            # Do some tidying of the instrument metadata
+            instruments = set()
+            cleaned_instrument_metadata = []
 
-        metadata["instrument"] = instrument_data["label"]
-        metadata["instrument_uri"] = instrument_data["uri"]
+            if not isinstance(instrument_metadata, list):
+                instrument_metadata = [instrument_metadata]
+
+            for inst in instrument_metadata:
+                instrument_name = inst["label"]
+                instruments.add(instrument_name)
+                uri = inst["uri"]
+
+                cleaned_instrument_metadata.extend([instrument_name, uri])
+
+            if len(instruments) == 1:
+                instrument = instruments.pop()
+            else:
+                instrument = "multiple"
+
+            inst_metadata["instrument"] = instrument
+            inst_metadata["instrument_data"] = cleaned_instrument_metadata
+
+        metadata.update(inst_metadata)
+
         metadata["site"] = station_data["id"]
         metadata["measurement_type"] = measurement_type
         metadata["units"] = units
