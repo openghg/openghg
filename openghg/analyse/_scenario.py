@@ -41,7 +41,8 @@ If some input types needed for these operations are missing, the user will be al
 on which data types are missing.
 """
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, Literal, cast
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
+from typing_extensions import Literal
 
 from openghg.dataobjects import FluxData, BoundaryConditionsData, FootprintData, ObsData
 from openghg.retrieve import get_flux, get_footprint, get_bc, get_obs_surface, search
