@@ -137,4 +137,5 @@ def test_icos_retrieve_and_store(mocker, capfd):
 
     out, _ = capfd.readouterr()
 
+    # TODO: This is now in the openghg.log file - how can we update this?
     assert "There is no new data to process." in out.strip()
