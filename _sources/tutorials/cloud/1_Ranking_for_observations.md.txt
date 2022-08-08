@@ -23,9 +23,9 @@ For some surface sites in the networks considered, there will be multiple indepe
 Often, when retrieving data for comparison there will be preferences between the streams of measurements, for example based on the inlet height. Within `openghg` it is possible to set a *ranking* for the different data sources so that the preferred data for a given species is always selected by default and without the need to know the exact details every time this data is accessed.
 
 ```{code-cell} ipython3
-from openghg.client import search
+from openghg.retrieve import search_surface
 
-search(site="bsd", species="co")
+search_surface(site="bsd", species="co")
 ```
 
 Before we set any ranking for this data, we can still retrieve this from the object store using the `get_obs_surface` function, as we did before, but because there are multiple inlets we must specify these details to be able to return unambiguous observation data:

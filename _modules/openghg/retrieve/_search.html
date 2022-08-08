@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g2045f07 documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g4e05b50 documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g2045f07 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g4e05b50 documentation</p>
   
 </a>
     
@@ -195,10 +195,11 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">tinydb.database</span> <span class="kn">import</span> <span class="n">TinyDB</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;search&quot;</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">decompress</span><span class="p">,</span> <span class="n">running_locally</span>
+<span class="kn">from</span> <span class="nn">tinydb.database</span> <span class="kn">import</span> <span class="n">TinyDB</span>
 
 
 <span class="k">def</span> <span class="nf">_find_and</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -221,9 +222,10 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str or bool: UUID string if matching Datasource found, otherwise False</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">Query</span>
     <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+
     <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">DatasourceLookupError</span>
+    <span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">Query</span>
 
     <span class="n">q</span> <span class="o">=</span> <span class="n">Query</span><span class="p">()</span>
 
@@ -246,43 +248,67 @@
     <span class="k">return</span> <span class="n">uuid</span>
 
 
-<span class="k">def</span> <span class="nf">metadata_lookup_old</span><span class="p">(</span><span class="n">database</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Searches the passed database for the given metadata</span>
+<div class="viewcode-block" id="search_surface"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.search_surface">[docs]</a><span class="k">def</span> <span class="nf">search_surface</span><span class="p">(</span>
+    <span class="n">species</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Cloud object store search</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        database: The tinydb database for the storage object</span>
-<span class="sd">        **kwargs: Terms to pass to the search of the metastore</span>
-<span class="sd">        e.g. site=&quot;tac&quot;, inlet=&quot;15m&quot;</span>
+<span class="sd">        species: Species</span>
+<span class="sd">        site: Three letter site code</span>
+<span class="sd">        inlet: Inlet height</span>
+<span class="sd">        instrument: Instrument name</span>
+<span class="sd">        measurement_type: Measurement type</span>
+<span class="sd">        data_type: Data type e.g. CRDS, GCWERKS, ICOS</span>
+<span class="sd">        start_date: Start date</span>
+<span class="sd">        end_date: End date</span>
+<span class="sd">        data_source: Source of data, e.g. noaa_obspack, icoscp, ceda_archive. This</span>
+<span class="sd">        argument only needs to be used to narrow the search to data solely from these sources.</span>
+<span class="sd">        kwargs: Any other search arguments to constrain the search further</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        str or bool: UUID string if matching Datasource found, otherwise False</span>
+<span class="sd">        SearchResults:  SearchResults object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">Query</span>
-    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
-    <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">DatasourceLookupError</span>
+    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
 
-    <span class="n">q</span> <span class="o">=</span> <span class="n">Query</span><span class="p">()</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
+        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+        <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+        <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">data_source</span><span class="o">=</span><span class="n">data_source</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
 
-    <span class="n">search_attrs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">_find_and</span><span class="p">,</span> <span class="n">search_attrs</span><span class="p">))</span>
+    <span class="c1"># TODO - remove this cast once we&#39;ve updated search to ensure return of SearchResults object</span>
+    <span class="c1"># for all measurement types.</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">SearchResults</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">DatasourceLookupError</span><span class="p">(</span><span class="s2">&quot;More than once Datasource found for metadata, refine lookup.&quot;</span><span class="p">)</span>
-
-    <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">uuid</span>
+    <span class="k">return</span> <span class="n">results</span></div>
 
 
-<span class="c1"># TODO</span>
-<span class="c1"># GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user</span>
-<span class="c1"># facing interfaces to a more general search function, this would also make it easier to enforce types</span>
-<div class="viewcode-block" id="search"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+<div class="viewcode-block" id="search"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">SearchResults</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Search for observations data. Any keyword arguments may be passed to the</span>
 <span class="sd">    the function and these keywords will be used to search the metadata associated</span>
 <span class="sd">    with each Datasource.</span>
+
+<span class="sd">    This function detects the running environment and routes the call</span>
+<span class="sd">    to either the cloud or local search function.</span>
 
 <span class="sd">    Example / commonly used arguments are given below.</span>
 
@@ -300,24 +326,80 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        SearchResults or None: SearchResults object is results found, otherwise None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
+    <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">call_function</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">running_locally</span><span class="p">():</span>
+        <span class="n">post_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">post_data</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;search&quot;</span>
+        <span class="n">post_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">call_function</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">post_data</span><span class="p">)</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+
+        <span class="n">found</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="s2">&quot;found&quot;</span><span class="p">]</span>
+        <span class="n">compressed_response</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+            <span class="n">data_str</span> <span class="o">=</span> <span class="n">decompress</span><span class="p">(</span><span class="n">compressed_response</span><span class="p">)</span>
+            <span class="n">sr</span> <span class="o">=</span> <span class="n">SearchResults</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_str</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sr</span> <span class="o">=</span> <span class="n">SearchResults</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sr</span> <span class="o">=</span> <span class="n">local_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sr</span></div>
+
+
+<span class="c1"># TODO</span>
+<span class="c1"># GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user</span>
+<span class="c1"># facing interfaces to a more general search function, this would also make it easier to enforce types</span>
+<span class="k">def</span> <span class="nf">local_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+    <span class="sd">&quot;&quot;&quot;Search for observations data. Any keyword arguments may be passed to the</span>
+<span class="sd">    the function and these keywords will be used to search metadata.</span>
+
+<span class="sd">    This function will only perform a &quot;local&quot; search. It may be used either by a cloud function</span>
+<span class="sd">    or when using OpenGHG locally, it does no environment detection.</span>
+<span class="sd">    We suggest using the search function that takes care of everything for you.</span>
+
+<span class="sd">    Example / commonly used arguments are given below.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        species: Terms to search for in Datasources</span>
+<span class="sd">        locations: Where to search for the terms in species</span>
+<span class="sd">        inlet: Inlet height such as 100m</span>
+<span class="sd">        instrument: Instrument name such as picarro</span>
+<span class="sd">        find_all: Require all search terms to be satisfied</span>
+<span class="sd">        start_date: Start datetime for search.</span>
+<span class="sd">        If None a start datetime of UNIX epoch (1970-01-01) is set</span>
+<span class="sd">        end_date: End datetime for search.</span>
+<span class="sd">        If None an end datetime of the current datetime is set</span>
+<span class="sd">        skip_ranking: If True skip ranking system, defaults to False</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        SearchResults or None: SearchResults object is results found, otherwise None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
     <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span> <span class="k">as</span> <span class="n">iter_chain</span>
-    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span> <span class="k">as</span> <span class="n">pd_Timedelta</span>
 
-    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span><span class="p">,</span> <span class="n">Footprints</span><span class="p">,</span> <span class="n">Emissions</span><span class="p">,</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">EulerianModel</span>
+    <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
+    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">BoundaryConditions</span><span class="p">,</span> <span class="n">Emissions</span><span class="p">,</span> <span class="n">EulerianModel</span><span class="p">,</span> <span class="n">Footprints</span><span class="p">,</span> <span class="n">ObsSurface</span>
     <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
-
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
-        <span class="n">timestamp_now</span><span class="p">,</span>
-        <span class="n">timestamp_epoch</span><span class="p">,</span>
-        <span class="n">timestamp_tzaware</span><span class="p">,</span>
         <span class="n">clean_string</span><span class="p">,</span>
         <span class="n">find_daterange_gaps</span><span class="p">,</span>
+        <span class="n">running_on_hub</span><span class="p">,</span>
         <span class="n">split_daterange_str</span><span class="p">,</span>
         <span class="n">synonyms</span><span class="p">,</span>
+        <span class="n">timestamp_epoch</span><span class="p">,</span>
+        <span class="n">timestamp_now</span><span class="p">,</span>
+        <span class="n">timestamp_tzaware</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span> <span class="k">as</span> <span class="n">pd_Timedelta</span>
+
+    <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;This function can&#39;t be used on the OpenGHG Hub, please use openghg.retrieve.search instead.&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># Get a copy of kwargs as we make some modifications below</span>
     <span class="n">kwargs_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
@@ -576,7 +658,7 @@
     <span class="c1"># TODO - create a stub for addict</span>
     <span class="n">dict_data_keys</span> <span class="o">=</span> <span class="n">data_keys</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
 
-    <span class="k">return</span> <span class="n">SearchResults</span><span class="p">(</span><span class="n">results</span><span class="o">=</span><span class="n">dict_data_keys</span><span class="p">,</span> <span class="n">ranked_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">SearchResults</span><span class="p">(</span><span class="n">results</span><span class="o">=</span><span class="n">dict_data_keys</span><span class="p">,</span> <span class="n">ranked_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
 <span class="c1"># def search_footprints(</span>
@@ -719,7 +801,7 @@
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
 </p>
   </div>
   

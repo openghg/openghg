@@ -33,7 +33,7 @@ Then import `openghg` and print the version string associated with the version y
 ```ipython
 In [1]: import openghg
 In [2]: openghg.__version__
-Out[2]: '0.2.0'
+Out[2]: '0.2.1'
 ```
 
 If you get an ``ImportError`` please go back to the [install section of the documentation](https://docs.openghg.org/install.html).
@@ -117,7 +117,7 @@ As this data is measured in-situ, this is classed as a surface site and we need 
 This is shown below:
 
 ```{code-cell} ipython3
-from openghg.client import standardise_surface
+from openghg.standardise import standardise_surface
 
 decc_results = standardise_surface(filepaths=tac_data, data_type="CRDS", site="TAC", network="DECC")
 ```
@@ -217,20 +217,20 @@ Now we know we have this data in the object store we can search it and retrieve 
 
 +++
 
-We can search the object store by property using the `search(...)` function.
+We can search the object store by property using the `search_surface(...)` function.
 
 For example we can find all sites which have measurements for carbon tetrafluoride ("cf4") using the `species` keyword:
 
 ```{code-cell} ipython3
-from openghg.client import search
+from openghg.retrieve import search_surface
 
-search(species="cfc11")
+search_surface(species="cfc11")
 ```
 
 We could also look for details of all the data measured at the Billsdale ("BSD") site using the `site` keyword:
 
 ```{code-cell} ipython3
-search(site="tac")
+search_surface(site="tac")
 ```
 
 For this site you can see this contains details of each of the species as well as the inlet heights these were measured at.
@@ -244,7 +244,7 @@ For this site you can see this contains details of each of the species as well a
 Say we want to retrieve all the `co2` data from Tacolneston, we can perform perform a search and expect a [`SearchResults`](https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult) object to be returned. If no results are found `None` is returned.
 
 ```{code-cell} ipython3
-results = search(site="tac", species="co2")
+results = search_surface(site="tac", species="co2")
 ```
 
 ```{code-cell} ipython3
@@ -279,7 +279,7 @@ To access the surface data we have added so far we can use the `get_obs_surface`
 In this case we want to extract the carbon dioxide ("co2") data from the Tacolneston data ("TAC") site measured at the "185m" inlet:
 
 ```{code-cell} ipython3
-from openghg.client import get_obs_surface
+from openghg.retrieve import get_obs_surface
 
 co2_data = get_obs_surface(site="tac", species="co2", inlet="185m")
 ```

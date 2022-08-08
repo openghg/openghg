@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._export &#8212; OpenGHG 0+untagged.1.g2045f07 documentation</title>
+    <title>openghg.util._export &#8212; OpenGHG 0+untagged.1.g4e05b50 documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g2045f07 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g4e05b50 documentation</p>
   
 </a>
     
@@ -201,7 +201,10 @@
 
 
 <div class="viewcode-block" id="to_dashboard"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.to_dashboard">[docs]</a><span class="k">def</span> <span class="nf">to_dashboard</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">selected_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">downsample_n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]],</span>
+    <span class="n">selected_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+    <span class="n">downsample_n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Takes a Dataset produced by OpenGHG and outputs it into a JSON</span>
 <span class="sd">    format readable by the OpenGHG dashboard or a related project.</span>
@@ -227,47 +230,60 @@
 
     <span class="n">selected_vars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">selected_vars</span><span class="p">]</span>
 
-    <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">species_data</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">species</span><span class="p">,</span> <span class="n">inlet_data</span> <span class="ow">in</span> <span class="n">species_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">measurement_data</span><span class="p">:</span> <span class="n">ObsData</span>
-            <span class="k">for</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">measurement_data</span> <span class="ow">in</span> <span class="n">inlet_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">dataset</span> <span class="o">=</span> <span class="n">measurement_data</span><span class="o">.</span><span class="n">data</span>
-                <span class="n">metadata</span> <span class="o">=</span> <span class="n">measurement_data</span><span class="o">.</span><span class="n">metadata</span>
-                <span class="n">attributes</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
 
-                <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">measurement_data</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">measurement_data</span><span class="o">.</span><span class="n">attrs</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">metadata</span>
 
-                <span class="n">rename_lower</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">}</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_lower</span><span class="p">)</span>
-                <span class="c1"># We just want the selected variables</span>
-                <span class="n">to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">selected_vars</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">measurement_data</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
 
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">to_extract</span><span class="p">:</span>
-                    <span class="k">continue</span>
+        <span class="n">rename_lower</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">}</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_lower</span><span class="p">)</span>
+        <span class="c1"># We just want the selected variables</span>
+        <span class="n">to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">selected_vars</span><span class="p">]</span>
 
-                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">to_extract</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">to_extract</span><span class="p">:</span>
+            <span class="k">continue</span>
 
-                <span class="c1"># Downsample the data</span>
-                <span class="k">if</span> <span class="n">downsample_n</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="n">downsample_n</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">to_extract</span><span class="p">]</span>
 
-                <span class="n">network</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span>
-                <span class="n">instrument</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+        <span class="c1"># Downsample the data</span>
+        <span class="k">if</span> <span class="n">downsample_n</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="n">downsample_n</span><span class="p">]</span>
 
-                <span class="c1"># TODO - remove this if we add site location to standard metadata</span>
-                <span class="n">location</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;station_longitude&quot;</span><span class="p">],</span>
-                <span class="p">}</span>
-                <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span>
+        <span class="n">instrument</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
 
-                <span class="n">json_data</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
-                <span class="n">metadata</span> <span class="o">=</span> <span class="n">measurement_data</span><span class="o">.</span><span class="n">metadata</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">latitude</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">latitude</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
 
-                <span class="n">to_export</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">site</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">instrument</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">json_data</span><span class="p">,</span>
-                    <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
-                <span class="p">}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">longitude</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">longitude</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+
+        <span class="c1"># TODO - remove this if we add site location to standard metadata</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="n">latitude</span><span class="p">,</span>
+            <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="n">longitude</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+
+        <span class="n">json_data</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+
+        <span class="n">species</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+        <span class="n">site</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+
+        <span class="n">to_export</span><span class="p">[</span><span class="n">species</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">site</span><span class="p">][</span><span class="n">inlet</span><span class="p">][</span><span class="n">instrument</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">json_data</span><span class="p">,</span>
+            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
+        <span class="p">}</span>
 
     <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -340,7 +356,7 @@
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
 </p>
   </div>
   

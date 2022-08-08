@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Standardisation functions &#8212; OpenGHG 0+untagged.1.g2045f07 documentation</title>
+    <title>Standardisation functions &#8212; OpenGHG 0+untagged.1.g4e05b50 documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -45,6 +45,8 @@
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Retrieval functions" href="api_retrieve.html" />
+    <link rel="prev" title="User API" href="index.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="docsearch:language" content="en">
   </head>
@@ -71,7 +73,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g2045f07 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g4e05b50 documentation</p>
   
 </a>
     
@@ -111,7 +113,7 @@
  </a>
 </li>
 
-<li class="toctree-l1 nav-item">
+<li class="toctree-l1 current active nav-item">
  <a class="reference internal nav-link" href="index.html">
   User API
  </a>
@@ -167,7 +169,28 @@
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
   <div class="bd-toc-item active">
-    
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Standardisation functions
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="api_retrieve.html">
+   Retrieval functions
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="api_plotting.html">
+   Plotting functions
+  </a>
+ </li>
+</ul>
+
   </div>
 </nav>
   </div>
@@ -191,9 +214,31 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#surface">
-   Surface
+  <a class="reference internal nav-link" href="#measurement-standardisation">
+   Measurement Standardisation
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#surface-measurements">
+     Surface measurements
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#boundary-conditions">
+     Boundary Conditions
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#emissions-flux">
+     Emissions / Flux
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#footprints">
+     Footprints
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#metadata">
@@ -223,189 +268,30 @@
 <h1>Standardisation functions<a class="headerlink" href="#standardisation-functions" title="Permalink to this heading">#</a></h1>
 <p>Functions that accept data in specific formats, standardise it to a CF-compliant format and ensure it has the correct metadata attached. The
 data returned from these functions is then stored in the object store.</p>
-<section id="surface">
-<h2>Surface<a class="headerlink" href="#surface" title="Permalink to this heading">#</a></h2>
-<p>These functions take surface measurement data, they are called by the <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class.</p>
+<section id="measurement-standardisation">
+<h2>Measurement Standardisation<a class="headerlink" href="#measurement-standardisation" title="Permalink to this heading">#</a></h2>
+<p>These functions cover the four types of measurement we currently support.</p>
+<section id="surface-measurements">
+<h3>Surface measurements<a class="headerlink" href="#surface-measurements" title="Permalink to this heading">#</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_aqmesh">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_aqmesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_aqmesh.html#parse_aqmesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_aqmesh" title="Permalink to this definition">#</a></dt>
-<dd><p>Read AQMesh data files</p>
+<dt class="sig sig-object py" id="openghg.standardise.standardise_surface">
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.</span></span><span class="sig-name descname"><span class="pre">standardise_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepaths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/_standardise.html#standardise_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.standardise_surface" title="Permalink to this definition">#</a></dt>
+<dd><p>Standardise surface measurements and store the data in the object store.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Data filepath</p></li>
-<li><p><strong>metadata_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Metadata filepath</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Measurement sampling period (str)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_beaco2n">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_beaco2n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shinyei'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_beaco2n.html#parse_beaco2n"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_beaco2n" title="Permalink to this definition">#</a></dt>
-<dd><p>Read BEACO2N data files</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Data filepath</p></li>
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site name</p></li>
-<li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
-<li><p><strong>inlet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Inlet height in metres</p></li>
-<li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Measurement sampling period</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_btt">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_btt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BTT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LGHG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_btt.html#parse_btt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_btt" title="Permalink to this definition">#</a></dt>
-<dd><p>Reads NPL data files and returns the UUIDS of the Datasources
-the processed data has been assigned to</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of file to load</p></li>
-<li><p><strong>site</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Site name</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of gas data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_cranfield">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_cranfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_cranfield.html#parse_cranfield"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_cranfield" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates a CRDS object holding data stored within Datasources</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> – Path of file to load</p></li>
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Filepath of data to be read</p></li>
-<li><p><strong>site</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Name of site</p></li>
-<li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Name of network</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of gas data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_crds">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_crds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_duplicates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_crds.html#parse_crds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_crds" title="Permalink to this definition">#</a></dt>
-<dd><p>Parses a CRDS data file and creates a dictionary of xarray Datasets
-ready for storage in the object store.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path to file</p></li>
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Three letter site code</p></li>
-<li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
-<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet height</p></li>
-<li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Sampling period in seconds</p></li>
-<li><p><strong>measurement_type</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Measurement type e.g. insitu, flask</p></li>
-<li><p><strong>drop_duplicates</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Drop measurements at duplicate timestamps, keeping the first.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of gas data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_eurocom">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_eurocom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_eurocom.html#parse_eurocom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_eurocom" title="Permalink to this definition">#</a></dt>
-<dd><p>Parses EUROCOM data files into a format expected by OpenGHG</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of file to read</p></li>
+<li><p><strong>filepaths</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>]) – Path of file(s) to process</p></li>
+<li><p><strong>data_type</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Type of data i.e. GCWERKS, CRDS, ICOS</p></li>
 <li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site code</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Sampling period in seconds</p></li>
-<li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Network name</p></li>
-<li><p><strong>Inlet</strong> – Inlet height in metres</p></li>
-<li><p><strong>Instrument</strong> – Instrument name</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of measurement data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_gcwerks">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_gcwerks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_gcwerks.html#parse_gcwerks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_gcwerks" title="Permalink to this definition">#</a></dt>
-<dd><p>Reads a GC data file by creating a GC object and associated datasources</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of data file</p></li>
-<li><p><strong>precision_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of precision file</p></li>
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Three letter code or name for site</p></li>
-<li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
 <li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of source_name : UUIDs</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_noaa">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_noaa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NOAA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_noaa.html#parse_noaa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_noaa" title="Permalink to this definition">#</a></dt>
-<dd><p>Read NOAA data from raw text file or ObsPack NetCDF</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Data filepath</p></li>
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Three letter site code</p></li>
-<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet height, if no height use measurement type e.g. flask</p></li>
-<li><p><strong>measurement_type</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – One of (“flask”, “insitu”, “pfp”)</p></li>
-<li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network, defaults to NOAA</p></li>
+<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet height in metres</p></li>
 <li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
-<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Sampling period</p></li>
+<li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour</p></li>
+<li><p><strong>overwrite</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Overwrite data currently present in the object store</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of data and metadata</p>
+<dd class="field-even"><p>Dictionary containing confirmation of standardisation process.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>dict</p>
@@ -413,48 +299,99 @@ ready for storage in the object store.</p>
 </dl>
 </dd></dl>
 
+</section>
+<section id="boundary-conditions">
+<h3>Boundary Conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading">#</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_npl">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_npl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NPL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LGHG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_npl.html#parse_npl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_npl" title="Permalink to this definition">#</a></dt>
-<dd><p>Reads NPL data files and returns the UUIDS of the Datasources
-the processed data has been assigned to</p>
+<dt class="sig sig-object py" id="openghg.standardise.standardise_bc">
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.</span></span><span class="sig-name descname"><span class="pre">standardise_bc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/_standardise.html#standardise_bc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.standardise_bc" title="Permalink to this definition">#</a></dt>
+<dd><p>Standardise boundary condition data and store it in the object store.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of file to load</p></li>
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site name</p></li>
+<li><p><strong>filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of boundary conditions file</p></li>
+<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
+<li><p><strong>bc_input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Input used to create boundary conditions. For example:
+- a model name such as “MOZART” or “CAMS”
+- a description such as “UniformAGAGE” (uniform values based on AGAGE average)</p></li>
+<li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Region for boundary conditions</p></li>
+<li><p><strong>period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Period of measurements, if not passed this is inferred from the time coords</p></li>
+<li><p><strong>overwrite</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Should this data overwrite currently stored data.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>UUIDs of Datasources data has been assigned to</p>
+<dd class="field-even"><p>Dictionary containing confirmation of standardisation process.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list</p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
 
+</section>
+<section id="emissions-flux">
+<h3>Emissions / Flux<a class="headerlink" href="#emissions-flux" title="Permalink to this heading">#</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.surface.parse_tmb">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_tmb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TMB'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LGHG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_thamesbarrier.html#parse_tmb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_tmb" title="Permalink to this definition">#</a></dt>
-<dd><p>Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
-the processed data has been assigned to</p>
+<dt class="sig sig-object py" id="openghg.standardise.standardise_flux">
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.</span></span><span class="sig-name descname"><span class="pre">standardise_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/_standardise.html#standardise_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.standardise_flux" title="Permalink to this definition">#</a></dt>
+<dd><p>Process flux data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of file to load</p></li>
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site name</p></li>
+<li><p><strong>filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of emissions file</p></li>
+<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
+<li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Emissions domain</p></li>
+<li><p><strong>source</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Emissions source</p></li>
+<li><p><strong>high_time_resolution</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – If this is a high resolution file</p></li>
+<li><p><strong>period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Period of measurements, if not passed this is inferred from the time coords</p></li>
+<li><p><strong>overwrite</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Should this data overwrite currently stored data.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>UUIDs of Datasources data has been assigned to</p>
+<dd class="field-even"><p>Dictionary of Datasource UUIDs data assigned to</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list</p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
 
+</section>
+<section id="footprints">
+<h3>Footprints<a class="headerlink" href="#footprints" title="Permalink to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.standardise.standardise_footprint">
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.</span></span><span class="sig-name descname"><span class="pre">standardise_footprint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metmodel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retrieve_met</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_spatial_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/_standardise.html#standardise_footprint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.standardise_footprint" title="Permalink to this definition">#</a></dt>
+<dd><p>Reads footprint data files and returns the UUIDs of the Datasources
+the processed data has been assigned to</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of file to load</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site name</p></li>
+<li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Network name</p></li>
+<li><p><strong>height</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Height above ground level in metres</p></li>
+<li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Domain of footprints</p></li>
+<li><p><strong>model_params</strong> – Model run parameters</p></li>
+<li><p><strong>retrieve_met</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to also download meterological data for this footprints area</p></li>
+<li><p><strong>high_spatial_res</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Indicate footprints include both a low and high spatial resolution.</p></li>
+<li><p><strong>high_time_res</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Indicate footprints are high time resolution (include H_back dimension)
+Note this will be set to True automatically for Carbon Dioxide data.</p></li>
+<li><p><strong>overwrite</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Overwrite any currently stored data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary containing confirmation of standardisation process.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Behind the scence these functions use parsing functions that are written specifically for each data type.
+Please see the <a class="reference internal" href="index_devapi.html#developer-api"><span class="std std-ref">Developer API</span></a> for these functions.</p>
+</section>
 </section>
 <section id="metadata">
 <h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this heading">#</a></h2>
@@ -517,30 +454,6 @@ If you only want an end date, just put a very early start date
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.standardise.meta.surface_standardise">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">surface_standardise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_to_add</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_metadata.html#surface_standardise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.surface_standardise" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes sure any duplicated keys between the metadata and attributes
-dictionaries match and that certain keys are present in the metadata.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Dictionary of metadata</p></li>
-<li><p><strong>attributes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Attributes</p></li>
-<li><p><strong>keys_to_add</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>]) – Add these keys to the metadata, if not present, based on</p></li>
-<li><p><strong>Note</strong> (<em>the attribute values.</em>) – this skips any keys which can’t be</p></li>
-<li><p><strong>values.</strong> (<em>copied from the attribute</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Copy of metadata updated with attributes</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 </section>
 
@@ -552,6 +465,20 @@ dictionaries match and that certain keys are present in the metadata.</p>
               <footer class="bd-footer-article">
                   <!-- Previous / next buttons -->
 <div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="index.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">User API</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="api_retrieve.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Retrieval functions</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
 </div>
               </footer>
               
@@ -575,7 +502,7 @@ dictionaries match and that certain keys are present in the metadata.</p>
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
 </p>
   </div>
   

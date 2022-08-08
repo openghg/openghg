@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g2045f07 documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g4e05b50 documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g2045f07 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g4e05b50 documentation</p>
   
 </a>
     
@@ -190,28 +190,32 @@
               <article class="bd-article" role="main">
                 
   <h1>Source code for openghg.retrieve._access</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
-<span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">,</span> <span class="n">BoundaryConditionsData</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_obs_surface&quot;</span><span class="p">,</span> <span class="s2">&quot;get_footprint&quot;</span><span class="p">,</span> <span class="s2">&quot;get_flux&quot;</span><span class="p">,</span> <span class="s2">&quot;get_bc&quot;</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">BoundaryConditionsData</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">,</span> <span class="n">ObsData</span>
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">decompress</span><span class="p">,</span> <span class="n">decompress_str</span><span class="p">,</span> <span class="n">hash_bytes</span><span class="p">,</span> <span class="n">running_locally</span><span class="p">,</span> <span class="n">running_on_hub</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">load_dataset</span>
 
 
 <div class="viewcode-block" id="get_obs_surface"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_obs_surface">[docs]</a><span class="k">def</span> <span class="nf">get_obs_surface</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">average</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">calibration_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">keep_missing</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">skip_ranking</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Get measurements from one site.</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">average</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">calibration_scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keep_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">skip_ranking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
+
+<span class="sd">    Usage and return values are the same whilst implementation may differ.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        site: Site of interest e.g. MHD for the Mace Head site.</span>
@@ -223,17 +227,125 @@
 <span class="sd">        the form e.g. &quot;2H&quot;, &quot;30min&quot; (should match pandas offset aliases format).</span>
 <span class="sd">        keep_missing: Keep missing data points or drop them.</span>
 <span class="sd">        network: Network for the site/instrument (must match number of sites).</span>
-<span class="sd">        instrument: Specific instrument for the site (must match number of sites).</span>
+<span class="sd">        instrument: Specific instrument for the sipte (must match number of sites).</span>
 <span class="sd">        calibration_scale: Convert to this calibration scale</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        ObsData: ObsData object</span>
+<span class="sd">        ObsData or None: ObsData object if data found, else None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timedelta</span>
+    <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">call_function</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">running_locally</span><span class="p">():</span>
+        <span class="n">to_post</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">to_post</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;get_obs_surface&quot;</span>
+
+        <span class="n">search_terms</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+            <span class="s2">&quot;keep_missing&quot;</span><span class="p">:</span> <span class="n">keep_missing</span><span class="p">,</span>
+            <span class="s2">&quot;skip_ranking&quot;</span><span class="p">:</span> <span class="n">skip_ranking</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">search_terms</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
+        <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">search_terms</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_date</span>
+        <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">search_terms</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_date</span>
+        <span class="k">if</span> <span class="n">average</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">search_terms</span><span class="p">[</span><span class="s2">&quot;average&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">average</span>
+        <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">search_terms</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+        <span class="k">if</span> <span class="n">instrument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">search_terms</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
+        <span class="k">if</span> <span class="n">calibration_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">search_terms</span><span class="p">[</span><span class="s2">&quot;calibration_scale&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calibration_scale</span>
+
+        <span class="n">to_post</span><span class="p">[</span><span class="s2">&quot;search_terms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">search_terms</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">call_function</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">to_post</span><span class="p">)</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="s2">&quot;found&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+            <span class="n">binary_data</span> <span class="o">=</span> <span class="n">decompress</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">content</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span>
+
+            <span class="n">file_metadata</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="s2">&quot;file_metadata&quot;</span><span class="p">]</span>
+            <span class="n">sha1_hash_data</span> <span class="o">=</span> <span class="n">file_metadata</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;sha1_hash&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">sha1_hash_data</span> <span class="o">!=</span> <span class="n">hash_bytes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">binary_data</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Hash mismatch between local SHA1 and remote SHA1.&quot;</span><span class="p">)</span>
+
+            <span class="n">buf</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">binary_data</span><span class="p">)</span>
+            <span class="n">json_str</span> <span class="o">=</span> <span class="n">decompress_str</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">content</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">])</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">ObsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">get_obs_surface_local</span><span class="p">(</span>
+            <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+            <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+            <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+            <span class="n">average</span><span class="o">=</span><span class="n">average</span><span class="p">,</span>
+            <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+            <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+            <span class="n">calibration_scale</span><span class="o">=</span><span class="n">calibration_scale</span><span class="p">,</span>
+            <span class="n">keep_missing</span><span class="o">=</span><span class="n">keep_missing</span><span class="p">,</span>
+            <span class="n">skip_ranking</span><span class="o">=</span><span class="n">skip_ranking</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_obs_surface_local</span><span class="p">(</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">average</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">calibration_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">keep_missing</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">skip_ranking</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
+
+<span class="sd">    Usage and return values are the same whilst implementation may differ.</span>
+
+<span class="sd">    This function should not be used on the OpenGHG Hub.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        site: Site of interest e.g. MHD for the Mace Head site.</span>
+<span class="sd">        species: Species identifier e.g. ch4 for methane.</span>
+<span class="sd">        start_date: Output start date in a format that Pandas can interpret</span>
+<span class="sd">        end_date: Output end date in a format that Pandas can interpret</span>
+<span class="sd">        inlet: Inlet label</span>
+<span class="sd">        average: Averaging period for each dataset. Each value should be a string of</span>
+<span class="sd">        the form e.g. &quot;2H&quot;, &quot;30min&quot; (should match pandas offset aliases format).</span>
+<span class="sd">        keep_missing: Keep missing data points or drop them.</span>
+<span class="sd">        network: Network for the site/instrument (must match number of sites).</span>
+<span class="sd">        instrument: Specific instrument for the sipte (must match number of sites).</span>
+<span class="sd">        calibration_scale: Convert to this calibration scale</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ObsData or None: ObsData object if data found, else None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-    <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">concat</span> <span class="k">as</span> <span class="n">xr_concat</span>
-    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">timestamp_tzaware</span><span class="p">,</span> <span class="n">synonyms</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">timestamp_tzaware</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span><span class="p">,</span> <span class="n">Timestamp</span>
+    <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">concat</span> <span class="k">as</span> <span class="n">xr_concat</span>
+
+    <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead.&quot;</span>
+        <span class="p">)</span>
 
     <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span>
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -245,7 +357,7 @@
     <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
 
     <span class="c1"># Get the observation data</span>
-    <span class="n">obs_results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
+    <span class="n">obs_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
@@ -294,7 +406,7 @@
     <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;This dataset does not have a time attribute, unable to read date range&quot;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">ObsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">Dataset</span><span class="p">(),</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{})</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="n">average</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># GJ - 2021-03-09</span>
@@ -426,7 +538,7 @@
     <span class="c1">#     )</span>
     <span class="c1">#     print(&quot;Suggestion: set calibration_scale to convert scales&quot;)</span>
 
-    <span class="k">return</span> <span class="n">obs_data</span></div>
+    <span class="k">return</span> <span class="n">obs_data</span>
 
 
 <div class="viewcode-block" id="get_flux"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_flux">[docs]</a><span class="k">def</span> <span class="nf">get_flux</span><span class="p">(</span>
@@ -454,7 +566,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span><span class="p">,</span> <span class="n">synonyms</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span>
 
     <span class="c1"># Find the correct synonym for the passed species</span>
     <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
@@ -500,7 +612,7 @@
     <span class="k">return</span> <span class="n">FluxData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">em_ds</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">get_bc</span><span class="p">(</span>
+<div class="viewcode-block" id="get_bc"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_bc">[docs]</a><span class="k">def</span> <span class="nf">get_bc</span><span class="p">(</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bc_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -523,7 +635,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span><span class="p">,</span> <span class="n">synonyms</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">timestamp_epoch</span><span class="p">,</span> <span class="n">timestamp_now</span>
 
     <span class="c1"># Find the correct synonym for the passed species</span>
     <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
@@ -561,7 +673,7 @@
     <span class="k">return</span> <span class="n">BoundaryConditionsData</span><span class="p">(</span>
         <span class="n">data</span><span class="o">=</span><span class="n">bc_ds</span><span class="p">,</span>
         <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_footprint"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_footprint">[docs]</a><span class="k">def</span> <span class="nf">get_footprint</span><span class="p">(</span>
@@ -593,16 +705,16 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        FootprintData: FootprintData dataclass</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
-    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
     <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">FootprintData</span>
+    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">synonyms</span>
 
     <span class="c1"># Find the correct synonym for the passed species</span>
     <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
+    <span class="n">results</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
@@ -656,9 +768,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        xarray.Dataset: Dataset with mole fraction data scaled</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span>
     <span class="kn">from</span> <span class="nn">numexpr</span> <span class="kn">import</span> <span class="n">evaluate</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_datapath</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span>
 
     <span class="c1"># If scale is already correct, return</span>
     <span class="n">ds_scale</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">]</span>
@@ -775,7 +887,7 @@
   
   <div class="footer-item">
     <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.0.2.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
 </p>
   </div>
   
