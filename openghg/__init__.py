@@ -29,10 +29,10 @@ __all__ = [
 ]
 
 if _sys.version_info.major < 3:
-    raise ImportError("openghg requires Python 3.7 minimum")
+    raise ImportError("openghg requires Python >= 3.8")
 
-if _sys.version_info.minor < 7:
-    raise ImportError("openghg requires Python 3.7 minimum")
+if _sys.version_info.minor < 8:
+    raise ImportError("openghg requires Python >= 3.8")
 
 # Let's do some quick checks for required environment variables
 _cloud = _os.environ.get("OPENGHG_CLOUD", False)
