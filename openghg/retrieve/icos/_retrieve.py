@@ -1,7 +1,6 @@
-from typing import Dict, List, Optional, Union, Any
+from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
-from pandas import DataFrame
 
 
 def retrieve(
@@ -37,8 +36,6 @@ def retrieve(
     from openghg.retrieve import search_surface
     from openghg.store import ObsSurface
     from openghg.util import to_lowercase
-
-    raise NotImplementedError("Bug in metadata access with latest ICOSCP - fix")
 
     if not 1 <= data_level <= 2:
         print("Error: data level must be 1 or 2.")
@@ -114,13 +111,10 @@ def _retrieve_remote(
             "Cannot import icoscp, if you've installed OpenGHG using conda please run: pip install icoscp"
         )
 
-    from openghg.standardise.meta import assign_attributes
-    from openghg.util import load_json
-    from pandas import to_datetime
     import re
 
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import download_data, load_json
+    from openghg.util import load_json
     from pandas import to_datetime
 
     if species is None:
@@ -228,6 +222,7 @@ def _retrieve_remote(
 
         _sampling_height = acq_data["samplingHeight"]
         metadata["sampling_height"] = f"{int(float(_sampling_height))}m"
+        metadata["inlet_height_magl"] = f"{int(float(_sampling_height))}m"
         metadata["sampling_height_units"] = "metres"
         metadata["inlet"] = f"{int(float(_sampling_height))}m"
 
@@ -299,3 +294,26 @@ def _retrieve_remote(
     standardised_data = assign_attributes(data=standardised_data)
 
     return standardised_data
+
+
+# def _read_site_metadata():
+#     """ Read site metadata from object store, if it doesn't exist we'll
+#     retrieve it from the ICOS CP and store it.
+
+#     Returns:
+#         dict: Dictionary of site data
+#     """
+#     from openghg.objectstore import get_bucket, get_object_from_json
+#     from openghg.types import ObjectStoreError
+#     from openghg.util import timestamp_now
+# raise NotImplementedError
+#     key = "metadata/icos_atmos_site_metadata"
+#     bucket = get_bucket()
+
+#     try:
+#         data = get_object_from_json(bucket=bucket, key=key)
+#     except ObjectStoreError:
+#         # Retrieve and store
+#         from icoscp import station
+#         station_data = station.getIdList()
+#         metadata = {d.id: dict(d) for _, d in df.iterrows()}

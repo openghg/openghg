@@ -1,14 +1,14 @@
-import pytest
+import json
 
 import pandas as pd
-from openghg.retrieve.icos import retrieve
-from openghg.dataobjects import SearchResults
+import pytest
 from helpers import get_retrieval_data_file, metadata_checker_obssurface
-import json
-from icoscp.station.station import Station
 from icoscp.cpb.dobj import Dobj  # type: ignore
+from icoscp.station.station import Station
+from openghg.dataobjects import SearchResults
+from openghg.retrieve.icos import retrieve
 
-@pytest.mark.xfail(reason="ICOS Metadata retrieval needs fix - see #381")
+
 def test_icos_retrieve_invalid_site(mocker, capfd):
     s = Station()
     s._valid = False
@@ -24,7 +24,6 @@ def test_icos_retrieve_invalid_site(mocker, capfd):
     assert out.rstrip() == "Please check you have passed a valid ICOS site."
 
 
-@pytest.mark.xfail(reason="ICOS Metadata retrieval needs fix - see #381")
 def test_icos_retrieve_and_store(mocker, capfd):
     pid_csv = get_retrieval_data_file(filename="test_pids_icos.csv.gz")
     pid_df = pd.read_csv(pid_csv)
