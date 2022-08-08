@@ -41,12 +41,15 @@ If some input types needed for these operations are missing, the user will be al
 on which data types are missing.
 """
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, Literal, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, Union, cast
 
-from openghg.dataobjects import FluxData, BoundaryConditionsData, FootprintData, ObsData
-from openghg.retrieve import get_flux, get_footprint, get_bc, get_obs_surface, search
-from openghg.util import synonyms
+if TYPE_CHECKING:
+    from typing_extensions import Literal
+
 import numpy as np
+from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
+from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface, search
+from openghg.util import synonyms
 from pandas import Timestamp
 from xarray import DataArray, Dataset
 
@@ -1300,7 +1303,7 @@ class ModelScenario:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
-        from openghg.util import time_offset, species_lifetime, check_lifetime_monthly
+        from openghg.util import check_lifetime_monthly, species_lifetime, time_offset
 
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)

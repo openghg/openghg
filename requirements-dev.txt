@@ -8,7 +8,7 @@ pytest-cov
 pytest-mock
 requests-mock
 # For mypy
-mypy==0.961
+mypy==0.971
 # For Python 3.7
 typing-extensions
 types-paramiko
