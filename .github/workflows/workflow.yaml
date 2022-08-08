@@ -62,6 +62,8 @@ jobs:
   docs:
     name: Run checks on tutorial notebooks and build docs
     runs-on: ubuntu-latest
+    env:
+      OPENGHG_PATH: "/tmp/openghg_store"
     needs: ["test"]
     steps:
       - uses: actions/checkout@v3
