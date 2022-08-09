@@ -1,9 +1,8 @@
-import pytest
 import numpy as np
+import pytest
 from helpers import get_emissions_datapath
 from openghg.transform.emissions import parse_edgar
 from openghg.transform.emissions._edgar import _extract_file_info
-
 
 # TODO: Add tests
 # - single sector EDGAR data can be read and intepreted correctly for v6.0

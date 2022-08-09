@@ -1,6 +1,7 @@
 from typing import List, Optional, Union
-from openghg.dataobjects import ObsData
+
 import plotly.graph_objects as go
+from openghg.dataobjects import ObsData
 
 
 def plot_timeseries(

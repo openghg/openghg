@@ -1,7 +1,8 @@
-from pandas import read_csv, to_datetime
 from pathlib import Path
 from typing import Dict, Optional
+
 from addict import Dict as aDict
+from pandas import read_csv, to_datetime
 
 
 def parse_glasow_licor(filepath: Path, sampling_period: Optional[str] = None, **kwargs: Dict) -> Dict:

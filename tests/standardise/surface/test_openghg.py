@@ -1,11 +1,11 @@
 import logging
-import numpy as np
-from pandas import Timestamp
-import pytest
 
-from openghg.standardise.surface import parse_openghg
+import numpy as np
+import pytest
+from helpers import check_cf_compliance, get_datapath, parsed_surface_metachecker
 from openghg.standardise.meta import metadata_default_keys
-from helpers import get_datapath, parsed_surface_metachecker, check_cf_compliance
+from openghg.standardise.surface import parse_openghg
+from pandas import Timestamp
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -13,7 +13,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 def test_read_file():
     """
-    Test file in OpenGHG format (variables and attributes) can be 
+    Test file in OpenGHG format (variables and attributes) can be
     correctly parsed.
     """
     filepath = get_datapath(filename="tac_co2_openghg.nc", data_type="OPENGHG")
@@ -87,7 +87,7 @@ def test_read_file_no_attr():
     assert metadata.items() >= expected_metadata.items()
 
 
-# TODO: Add tests for new site (i.e. no current data stored) 
+# TODO: Add tests for new site (i.e. no current data stored)
 # - when/if possible!
 # - [] Check this can read in a file if *all* keywords specified manually
 #   - for this create file for *new* site and with no attributes

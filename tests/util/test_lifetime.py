@@ -1,5 +1,6 @@
 import pytest
-from openghg.util import species_lifetime, check_lifetime_monthly
+from openghg.util import check_lifetime_monthly, species_lifetime
+
 
 @pytest.mark.parametrize("species,expected_lifetime",
                          [("ch4", None),

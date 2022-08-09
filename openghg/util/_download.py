@@ -30,12 +30,13 @@ def download_data(
         bytes / None: Bytes if no filepath given
     """
     import functools
-    import shutil
-    import requests
     import io
-    from tqdm.auto import tqdm  # type: ignore
+    import shutil
     from urllib.parse import urlparse
+
+    import requests
     from requests.adapters import HTTPAdapter
+    from tqdm.auto import tqdm  # type: ignore
     from urllib3.util.retry import Retry  # type: ignore
 
     retriable_status_codes = [

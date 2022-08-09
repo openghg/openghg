@@ -1,9 +1,9 @@
-from addict import Dict as aDict
-from typing import Dict, List, Union
-from json import loads, dump
+from json import dump, loads
 from pathlib import Path
-from openghg.dataobjects import ObsData
+from typing import Dict, List, Union
 
+from addict import Dict as aDict
+from openghg.dataobjects import ObsData
 
 __all__ = ["to_dashboard", "to_dashboard_mobile"]
 

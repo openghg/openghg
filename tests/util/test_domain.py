@@ -1,6 +1,6 @@
-import pytest
 import numpy as np
-from openghg.util import find_domain, convert_longitude
+import pytest
+from openghg.util import convert_longitude, find_domain
 from openghg.util._domain import _get_coord_data
 
 

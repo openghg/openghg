@@ -1,7 +1,7 @@
-from pandas import Timestamp
-from openghg.retrieve.ceda import retrieve_surface
-from openghg.dataobjects import SearchResults
 from helpers import get_retrieval_data_file
+from openghg.dataobjects import SearchResults
+from openghg.retrieve.ceda import retrieve_surface
+from pandas import Timestamp
 
 
 def test_ceda_retrieve(mocker):

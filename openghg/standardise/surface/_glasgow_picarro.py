@@ -1,7 +1,8 @@
-import pandas as pd
-from typing import Dict, Union, Optional
 from pathlib import Path
+from typing import Dict, Optional, Union
 from warnings import warn
+
+import pandas as pd
 from addict import Dict as aDict
 
 

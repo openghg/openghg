@@ -1,7 +1,7 @@
 import pytest
-
+from helpers import check_cf_compliance, get_datapath, parsed_surface_metachecker
 from openghg.standardise.surface import parse_cranfield
-from helpers import get_datapath, parsed_surface_metachecker, check_cf_compliance
+
 
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.xfail(reason="Bug: No attributes for Cranfield - see #201")

@@ -1,6 +1,5 @@
-from typing import Dict, Union, Optional
 from pathlib import Path
-
+from typing import Dict, Optional, Union
 
 pathType = Union[str, Path]
 
@@ -82,8 +81,8 @@ def _parse_metadata(filepath: pathType) -> Dict:
         dict: Dictionary of metadata
     """
     from addict import Dict as aDict
-    from pandas import read_csv
     from openghg.util import check_date
+    from pandas import read_csv
 
     filepath = Path(filepath)
     raw_metadata = read_csv(filepath)

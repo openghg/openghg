@@ -1,13 +1,13 @@
-from pandas import DataFrame, date_range
-from pathlib import Path
 import datetime
-from openghg.util import to_dashboard, to_dashboard_mobile
-from openghg.dataobjects import ObsData
-from openghg.standardise.surface import parse_glasow_licor
-from tempfile import TemporaryDirectory
 import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from helpers import get_mobile_datapath
+from openghg.dataobjects import ObsData
+from openghg.standardise.surface import parse_glasow_licor
+from openghg.util import to_dashboard, to_dashboard_mobile
+from pandas import DataFrame, date_range
 
 
 def test_export_to_dashboard():

@@ -1,5 +1,6 @@
-from typing import DefaultDict, Dict, Optional, Union
 from pathlib import Path
+from typing import DefaultDict, Dict, Optional, Union
+
 from pandas import DataFrame
 
 __all__ = ["parse_beaco2n"]
@@ -26,10 +27,10 @@ def parse_beaco2n(
     Returns:
         dict: Dictionary of data
     """
-    import pandas as pd
-    from openghg.util import load_json
     from collections import defaultdict
-    from openghg.util import clean_string
+
+    import pandas as pd
+    from openghg.util import clean_string, load_json
 
     if sampling_period is None:
         sampling_period = "NOT_SET"

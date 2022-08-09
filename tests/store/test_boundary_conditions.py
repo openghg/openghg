@@ -1,9 +1,8 @@
-from openghg.store import BoundaryConditions
-from openghg.retrieve import search
-from openghg.store import recombine_datasets, metastore_manager
-from xarray import open_dataset
 from helpers import get_bc_datapath
+from openghg.retrieve import search
+from openghg.store import BoundaryConditions, metastore_manager, recombine_datasets
 from openghg.util import hash_bytes
+from xarray import open_dataset
 
 
 def test_read_data_monthly(mocker):

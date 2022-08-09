@@ -1,6 +1,6 @@
-from typing import Optional, Union, List
-from openghg.util import load_json
+from typing import List, Optional, Union
 
+from openghg.util import load_json
 
 __all__ = ["synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
 

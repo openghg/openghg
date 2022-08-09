@@ -1,12 +1,13 @@
 import glob
 import json
 import os
-from pathlib import Path
 import threading
-from openghg.types import ObjectStoreError
-import pyvis
-from uuid import uuid4
+from pathlib import Path
 from typing import Dict, List, Optional, Union
+from uuid import uuid4
+
+import pyvis
+from openghg.types import ObjectStoreError
 
 rlock = threading.RLock()
 
@@ -253,8 +254,8 @@ def query_store() -> Dict:
     Returns:
         dict: Dictionary for data to be shown in force graph
     """
-    from openghg.store.base import Datasource
     from openghg.store import ObsSurface
+    from openghg.store.base import Datasource
 
     obs = ObsSurface.load()
 

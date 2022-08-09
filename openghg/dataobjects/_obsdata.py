@@ -1,10 +1,12 @@
-from dataclasses import dataclass
 from collections import abc
-from typing import Any, Dict, Iterator, Union
+from dataclasses import dataclass
 from json import dumps
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Any, Dict, Iterator, Union
+
 import plotly.graph_objects as go
+
 from ._basedata import _BaseData
 
 __all__ = ["ObsData"]

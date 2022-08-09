@@ -1,6 +1,6 @@
-from pathlib import Path
-from typing import Any, Dict, List, Union, Optional, Callable
 import gzip
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
 
 
 def load_surface_parser(data_type: str) -> Callable:

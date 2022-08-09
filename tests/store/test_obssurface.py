@@ -1,13 +1,13 @@
-import pytest
-from pandas import Timestamp
-import xarray as xr
 import json
 
-from openghg.store.base import Datasource
+import pytest
+import xarray as xr
+from helpers import attributes_checker_obssurface, get_datapath
+from openghg.objectstore import exists, get_bucket
 from openghg.store import ObsSurface
-from openghg.objectstore import get_bucket, exists
+from openghg.store.base import Datasource
 from openghg.util import create_daterange_str
-from helpers import get_datapath, attributes_checker_obssurface
+from pandas import Timestamp
 
 
 def test_different_sampling_periods_diff_datasources():
