@@ -41,10 +41,7 @@ If some input types needed for these operations are missing, the user will be al
 on which data types are missing.
 """
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple, Union, cast
-
-if TYPE_CHECKING:
-    from typing_extensions import Literal
+from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
