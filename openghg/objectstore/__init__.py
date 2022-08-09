@@ -1,6 +1,6 @@
-from openghg.util import running_in_cloud
+from openghg.util import running_locally
 
-cloud_env = running_in_cloud()
+cloud_env = not running_locally()
 
 if cloud_env:
     from ._oci_store import (
