@@ -36,14 +36,12 @@ jobs:
     - name: Run mypy
       run: |
         mypy --python-version ${{ matrix.python-version }} openghg/
-      if: matrix.python-version == 3.8 || matrix.python-version == 3.9
     - name: Create mock cdsapi config file
       run: |
         echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
     - name: Install udunits package for CF compliance checks
       run: |
         sudo apt-get install libudunits2-0
-      if: matrix.operating-system == 'ubuntu-latest'
     - name: Test with pytest
       run: |
         pip install --upgrade pytest
