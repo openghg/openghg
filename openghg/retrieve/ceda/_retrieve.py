@@ -10,7 +10,7 @@ def retrieve_surface(
     url: Optional[str] = None,
     force_retrieval: bool = False,
     additional_metadata: Optional[Dict] = None,
-) -> Union[ObsData, List[ObsData], None]:
+) -> ObsData:
     """Retrieve surface observations data from the CEDA archive. You can pass
     search terms and the object store will be searched. To retrieve data from th
     CEDA Archive please browse the website (https://data.ceda.ac.uk/badc) to find

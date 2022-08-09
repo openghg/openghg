@@ -1,9 +1,114 @@
 from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
+from openghg.util import running_locally
 
 
-def retrieve(
+def retrieve_atmospheric(
+    site: str,
+    species: Optional[Union[str, List]] = None,
+    sampling_height: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    force_retrieval: bool = False,
+    data_level: int = 2,
+):
+    """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
+    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
+    If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
+    if returned, if nothing then None.
+
+    Args:
+        site: Site code
+        species: Species name
+        start_date: Start date
+        end_date: End date
+        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
+        data_level: ICOS data level (1, 2)
+        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
+        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
+                        to be distributed through the Carbon Portal.
+                        This level is the ICOS-data product and free available for users.
+        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+    Returns:
+        ObsData, list[ObsData] or None
+    """
+    results = retrieve(
+        site=site,
+        species=species,
+        sampling_height=sampling_height,
+        start_date=start_date,
+        end_date=end_date,
+        force_retrieval=force_retrieval,
+        data_level=data_level,
+    )
+
+    return results
+
+
+def retrieve(**kwargs) -> Union[ObsData, List[ObsData], None]:
+    """Retrieve data from the ICOS Carbon Portal. If data is found in the local object store
+    it will be retrieved from there first.
+
+
+    This function detects the running environment and routes the call
+    to either the cloud or local search function.
+
+    Example / commonly used arguments are given below.
+
+    Args:
+        site: Site code
+        species: Species name
+        start_date: Start date
+        end_date: End date
+        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
+        data_level: ICOS data level (1, 2)
+        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
+        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
+                        to be distributed through the Carbon Portal.
+                        This level is the ICOS-data product and free available for users.
+        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+    Returns:
+        ObsData, list[ObsData] or None
+    """
+    from io import BytesIO
+
+    from openghg.cloud import call_function, unpackage
+    from xarray import open_dataset
+
+    if not running_locally():
+        post_data: Dict[str, Union[str, Dict]] = {}
+        post_data["function"] = "retrieve_icos"
+        post_data["search_terms"] = kwargs
+
+        call_result = call_function(data=post_data)
+
+        content = call_result["content"]
+        found = content["found"]
+
+        if not found:
+            return None
+
+        observations = content["data"]
+
+        obs_data = []
+        for package in observations.values():
+            binary_data, metadata = unpackage(data=package)
+            buf = BytesIO(binary_data)
+            ds = open_dataset(buf).load()
+            obs = ObsData(data=ds, metadata=metadata)
+
+            obs_data.append(obs)
+
+        if len(obs_data) == 1:
+            return obs_data[0]
+        else:
+            return obs_data
+    else:
+        return retrieve_local(**kwargs)
+
+
+def retrieve_local(
     site: str,
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,

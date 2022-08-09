@@ -3,6 +3,7 @@ from openghg.util import running_locally
 cloud_env = not running_locally()
 
 if cloud_env:
+    print("\n\n\nImporting cloud functions.")
     from ._oci_store import (
         create_bucket,
         create_par,

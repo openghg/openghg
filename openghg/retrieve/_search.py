@@ -139,7 +139,7 @@ def search(**kwargs: Any) -> Union[SearchResults, Dict]:
     if not running_locally():
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "search"
-        post_data["data"] = kwargs
+        post_data["search_terms"] = kwargs
 
         result = call_function(data=post_data)
 

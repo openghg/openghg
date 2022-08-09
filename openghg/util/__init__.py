@@ -7,8 +7,10 @@ from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import (
     compress,
+    compress_json,
     compress_str,
     decompress,
+    decompress_json,
     decompress_str,
     get_datapath,
     load_emissions_database_parser,
