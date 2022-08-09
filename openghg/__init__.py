@@ -39,7 +39,7 @@ _cloud = _os.environ.get("OPENGHG_CLOUD", False)
 _hub = _os.environ.get("OPENGHG", False)
 _openghg_path = _os.environ.get("OPENGHG_PATH", False)
 
-if not (_cloud or _hub):
+if not _cloud and not _hub:
     if not _openghg_path:
         raise ValueError(
             "No environment variable OPENGHG_PATH found, please set to use the local object store"

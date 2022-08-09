@@ -47,7 +47,7 @@ def running_locally() -> bool:
     Returns:
         bool: True if running locally
     """
-    return not (running_on_hub() or running_in_cloud())
+    return not running_on_hub() and not running_in_cloud()
 
 
 def unanimous(seq: Dict) -> bool:
