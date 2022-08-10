@@ -12,7 +12,7 @@ def retrieve_atmospheric(
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
     data_level: int = 2,
-):
+) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
     If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
@@ -46,7 +46,7 @@ def retrieve_atmospheric(
     return results
 
 
-def retrieve(**kwargs) -> Union[ObsData, List[ObsData], None]:
+def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
     """Retrieve data from the ICOS Carbon Portal. If data is found in the local object store
     it will be retrieved from there first.
 
@@ -74,7 +74,7 @@ def retrieve(**kwargs) -> Union[ObsData, List[ObsData], None]:
     from io import BytesIO
 
     from openghg.cloud import call_function, unpackage
-    from xarray import open_dataset
+    from xarray import load_dataset
 
     if not running_locally():
         post_data: Dict[str, Union[str, Dict]] = {}
@@ -93,10 +93,10 @@ def retrieve(**kwargs) -> Union[ObsData, List[ObsData], None]:
 
         obs_data = []
         for package in observations.values():
-            binary_data, metadata = unpackage(data=package)
-            buf = BytesIO(binary_data)
-            ds = open_dataset(buf).load()
-            obs = ObsData(data=ds, metadata=metadata)
+            unpackaged = unpackage(data=package)
+            buf = BytesIO(unpackaged["data"])
+            ds = load_dataset(buf)
+            obs = ObsData(data=ds, metadata=unpackaged["metadata"])
 
             obs_data.append(obs)
 
