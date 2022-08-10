@@ -33,7 +33,7 @@ def retrieve_atmospheric(
     Returns:
         ObsData, list[ObsData] or None
     """
-    results = retrieve(
+    return retrieve(
         site=site,
         species=species,
         sampling_height=sampling_height,
@@ -42,8 +42,6 @@ def retrieve_atmospheric(
         force_retrieval=force_retrieval,
         data_level=data_level,
     )
-
-    return results
 
 
 def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
@@ -105,10 +103,10 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
         else:
             return obs_data
     else:
-        return retrieve_local(**kwargs)
+        return local_retrieve(**kwargs)
 
 
-def retrieve_local(
+def local_retrieve(
     site: str,
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
@@ -116,6 +114,7 @@ def retrieve_local(
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
     data_level: int = 2,
+    **kwargs,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.

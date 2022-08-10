@@ -1,7 +1,46 @@
+import io
+
 from helpers import get_retrieval_data_file
+from openghg.cloud import package_from_function
 from openghg.dataobjects import SearchResults
 from openghg.retrieve.ceda import retrieve_surface
 from pandas import Timestamp
+from xarray import load_dataset
+
+
+def test_ceda_retrieve_cloud_no_results(monkeypatch, mocker):
+    monkeypatch.setenv("OPENGHG_HUB", "1")
+
+    return_val = {"content": {"found": False}}
+
+    mocker.patch("openghg.cloud.call_function", return_value=return_val)
+
+    res = retrieve_surface(site="hfd")
+
+    assert res is None
+
+
+def test_ceda_retrieve_cloud(monkeypatch, mocker):
+    monkeypatch.setenv("OPENGHG_HUB", "1")
+
+    sample_hfd = get_retrieval_data_file(filename="sample_of_bristol-crds_heathfield_20130101_co2-100m.nc")
+
+    mock_data = sample_hfd.read_bytes()
+    mock_metadata = {"site": "london", "species": "tiger"}
+
+    buf = io.BytesIO(mock_data)
+    ds = load_dataset(buf)
+
+    packed = package_from_function(data=mock_data, metadata=mock_metadata)
+
+    return_val = {"content": {"found": True, "data": {"1": packed}}}
+
+    mocker.patch("openghg.cloud.call_function", return_value=return_val)
+
+    res = retrieve_surface(site="hfd")
+
+    assert res.data.equals(ds)
+    assert res.metadata == mock_metadata
 
 
 def test_ceda_retrieve(mocker):
