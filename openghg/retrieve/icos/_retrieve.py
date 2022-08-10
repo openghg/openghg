@@ -114,7 +114,7 @@ def local_retrieve(
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
     data_level: int = 2,
-    **kwargs,
+    **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.

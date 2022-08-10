@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
 from openghg.util import running_locally
@@ -11,7 +11,7 @@ def retrieve_surface(
     url: Optional[str] = None,
     force_retrieval: bool = False,
     additional_metadata: Optional[Dict] = None,
-) -> ObsData:
+) -> Union[List[ObsData], ObsData, None]:
     """Retrieve surface measurements from the CEDA archive. This function will route the call
     to either local or cloud functions based on the environment.
 
@@ -46,7 +46,7 @@ def retrieve_surface(
     )
 
 
-def retrieve(**kwargs: Any) -> ObsData:
+def retrieve(**kwargs: Any) -> Union[List[ObsData], ObsData, None]:
     """Retrieve surface from the CEDA Archive. This function
     should not be used directly and is called by the retrieve_* functions,
     such as retrieve_surface, that retrieve specific data from the archive.
@@ -112,8 +112,8 @@ def local_retrieve_surface(
     url: Optional[str] = None,
     force_retrieval: bool = False,
     additional_metadata: Optional[Dict] = None,
-    **kwargs,
-) -> ObsData:
+    **kwargs: Any,
+) -> Union[List[ObsData], ObsData, None]:
     """Retrieve surface observations data from the CEDA archive. You can pass
     search terms and the object store will be searched. To retrieve data from the
     CEDA Archive please browse the website (https://data.ceda.ac.uk/badc) to find
