@@ -15,12 +15,9 @@ def running_in_cloud() -> bool:
     """
     from os import environ
 
-    cloud_env = environ.get("OPENGHG_CLOUD", False)
+    cloud_env = environ.get("OPENGHG_CLOUD", "0")
 
-    if cloud_env:
-        return bool(int(cloud_env))
-    else:
-        return False
+    return bool(int(cloud_env))
 
 
 def running_on_hub() -> bool:
@@ -33,12 +30,9 @@ def running_on_hub() -> bool:
     """
     from os import environ
 
-    hub_env = environ.get("OPENGHG_HUB", False)
+    hub_env = environ.get("OPENGHG_HUB", "0")
 
-    if hub_env:
-        return bool(int(hub_env))
-    else:
-        return False
+    return bool(int(hub_env))
 
 
 def running_locally() -> bool:

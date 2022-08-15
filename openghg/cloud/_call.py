@@ -2,6 +2,7 @@
 Call OpenGHG serverless functions
 """
 import os
+import traceback
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
@@ -119,19 +120,17 @@ def call_function(data: Dict) -> Dict:
             "headers": dict(headers),
             "content": msgpack.unpackb(response.content),
         }
-
     # Otherwise if one of the functions has made a call that's been passed here
     # and we're running within a serverless function already we can just route that
     # data to the function requested.
-    if cloud:
+    elif cloud:
         try:
             # openghg/functions
             from functions import route_local  # type: ignore
 
-            function_name = data["function"]
-            response = route_local(function_name=function_name, data=data)
-        except Exception as e:
-            raise FunctionError(f"Cannot pass to routing function - {e}")
+            response = route_local(data=data)
+        except Exception:
+            raise FunctionError(f"Cannot pass to routing function - {str(traceback.format_exc())}")
 
         return {"status": 200, "headers": {}, "content": response}
     else:
