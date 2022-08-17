@@ -2,14 +2,13 @@
 Call OpenGHG serverless functions
 """
 import os
-import traceback
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 import msgpack
 import requests
 from openghg.types import FunctionError
-from openghg.util import compress, hash_bytes, running_in_cloud, running_on_hub
+from openghg.util import compress, hash_bytes
 
 
 def create_file_package(filepath: Path, obs_type: str) -> Tuple[bytes, Dict]:
@@ -92,46 +91,24 @@ def call_function(data: Dict) -> Dict:
     Returns:
         dict: Dictionary containing response status, headers and content.
     """
-    on_hub = running_on_hub()
-    in_cloud = running_in_cloud()
+    fn_url = _get_function_url()
+    auth_key = _get_auth_key()
 
-    if on_hub and in_cloud:
-        raise ValueError("We can't be running in the cloud and on the hub at the same time.")
+    headers = {}
+    headers["Content-Type"] = "application/octet-stream"
+    headers["authorization"] = auth_key
 
-    # If we're running in the cloud we want to bypass the call
-    # and route it locally
-    if in_cloud:
-        try:
-            # openghg/functions
-            from functions import route_local  # type: ignore
+    packed_data = msgpack.packb(data)
+    response = requests.post(url=fn_url, data=packed_data, headers=headers)
 
-            response = route_local(data=data)
-        except Exception:
-            err_str = traceback.format_exc()
-            raise FunctionError(f"Error during locally routed call:\n{err_str}")
+    if response.status_code != 200:
+        raise FunctionError(f"Function call error: {str(response.content)}")
 
-        return {"status": 200, "headers": {}, "content": response}
-    elif on_hub:
-        fn_url = _get_function_url()
-        auth_key = _get_auth_key()
-
-        headers = {}
-        headers["Content-Type"] = "application/octet-stream"
-        headers["authorization"] = auth_key
-
-        packed_data = msgpack.packb(data)
-        response = requests.post(url=fn_url, data=packed_data, headers=headers)
-
-        if response.status_code != 200:
-            raise FunctionError(f"Function call error: {str(response.content)}")
-
-        return {
-            "status": response.status_code,
-            "headers": dict(headers),
-            "content": msgpack.unpackb(response.content),
-        }
-    else:
-        raise FunctionError("Neither hub nor cloud, check environment.")
+    return {
+        "status": response.status_code,
+        "headers": dict(headers),
+        "content": msgpack.unpackb(response.content),
+    }
 
 
 def _get_function_url() -> str:

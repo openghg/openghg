@@ -10,7 +10,7 @@ from openghg.util import (
     create_daterange_str,
     find_daterange_gaps,
     first_last_dates,
-    running_locally,
+    running_on_hub,
     split_daterange_str,
 )
 from xarray import Dataset, open_dataset
@@ -32,7 +32,7 @@ class SearchResults:
     def __init__(self, results: Optional[Dict] = None, ranked_data: bool = False):
         self.results = results if results is not None else {}
         self.ranked_data = ranked_data
-        self.cloud = not running_locally()
+        self.hub = running_on_hub()
 
     def __str__(self) -> str:
         if not self.results:
@@ -73,7 +73,7 @@ class SearchResults:
         return {
             "results": self.results,
             "ranked_data": self.ranked_data,
-            "cloud": self.cloud,
+            "cloud": self.hub,
         }
 
     def to_json(self) -> str:
@@ -393,7 +393,7 @@ class SearchResults:
         """
         from openghg.cloud import call_function
 
-        if self.cloud:
+        if self.hub:
             to_post: Dict[str, Union[Dict, List, bool, str]] = {}
             to_post["keys"] = keys
             to_post["sort"] = sort

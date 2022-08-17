@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
-from openghg.util import running_locally
+from openghg.util import running_on_hub
 
 
 def retrieve_atmospheric(
@@ -30,6 +30,8 @@ def retrieve_atmospheric(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
+        function call environment.
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -48,7 +50,6 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
     """Retrieve data from the ICOS Carbon Portal. If data is found in the local object store
     it will be retrieved from there first.
 
-
     This function detects the running environment and routes the call
     to either the cloud or local search function.
 
@@ -66,6 +67,8 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
+        function call environment.
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -74,7 +77,8 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
     from openghg.cloud import call_function, unpackage
     from xarray import load_dataset
 
-    if not running_locally():
+    # The hub is the only place we want to make remote calls
+    if running_on_hub():
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "retrieve_icos"
         post_data["search_terms"] = kwargs

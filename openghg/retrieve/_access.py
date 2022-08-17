@@ -3,7 +3,7 @@ from io import BytesIO
 from typing import Dict, List, Optional, Union
 
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
-from openghg.util import decompress, decompress_str, hash_bytes, running_locally, running_on_hub
+from openghg.util import decompress, decompress_str, hash_bytes, running_on_hub
 from pandas import Timestamp
 from xarray import Dataset, load_dataset
 
@@ -42,7 +42,7 @@ def get_obs_surface(
     """
     from openghg.cloud import call_function
 
-    if not running_locally():
+    if running_on_hub():
         to_post: Dict[str, Union[str, Dict]] = {}
 
         to_post["function"] = "get_obs_surface"

@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 from openghg.cloud import create_file_package, create_post_dict
-from openghg.util import running_locally
+from openghg.util import running_on_hub
 
 
 def standardise_surface(
@@ -34,7 +34,7 @@ def standardise_surface(
     if not isinstance(filepaths, list):
         filepaths = [filepaths]
 
-    if not running_locally():
+    if running_on_hub():
         # To convert bytes to megabytes
         MB = 1e6
         # The largest file we'll just directly POST to the standardisation
@@ -151,7 +151,7 @@ def standardise_bc(
 
     filepath = Path(filepath)
 
-    if not running_locally():
+    if running_on_hub():
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="bc")
 
         metadata = {
@@ -223,7 +223,7 @@ def standardise_footprint(
 
     filepath = Path(filepath)
 
-    if not running_locally():
+    if running_on_hub():
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
 
         metadata = {
@@ -305,7 +305,7 @@ def standardise_flux(
 
     filepath = Path(filepath)
 
-    if not running_locally():
+    if running_on_hub():
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="flux")
 
         metadata = {

@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
-from openghg.util import running_locally
+from openghg.util import running_on_hub
 
 
 def retrieve_surface(
@@ -73,7 +73,7 @@ def retrieve(**kwargs: Any) -> Union[List[ObsData], ObsData, None]:
     from openghg.cloud import call_function, unpackage
     from xarray import load_dataset
 
-    if not running_locally():
+    if running_on_hub():
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "retrieve_ceda"
         post_data["arguments"] = kwargs
