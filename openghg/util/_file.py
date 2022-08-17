@@ -1,6 +1,7 @@
+import bz2
+import json
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional, Callable
-import gzip
+from typing import Any, Callable, Dict, List, Optional, Union
 
 
 def load_surface_parser(data_type: str) -> Callable:
@@ -129,7 +130,7 @@ def compress(data: bytes) -> bytes:
     Returns:
         bytes: Compressed data
     """
-    return gzip.compress(data=data)
+    return bz2.compress(data=data)
 
 
 def decompress(data: bytes) -> bytes:
@@ -140,7 +141,7 @@ def decompress(data: bytes) -> bytes:
     Returns:
         bytes: Decompressed data
     """
-    return gzip.decompress(data=data)
+    return bz2.decompress(data=data)
 
 
 def compress_str(s: str) -> bytes:
@@ -163,3 +164,27 @@ def decompress_str(data: bytes) -> str:
         str: Decompressed str
     """
     return decompress(data=data).decode(encoding="utf-8")
+
+
+def decompress_json(data: bytes) -> Any:
+    """Decompress a string and load to JSON
+
+    Args:
+        data: Compressed binary data
+    Returns:
+        Object loaded from JSON
+    """
+    decompressed = decompress_str(data=data)
+    return json.loads(decompressed)
+
+
+def compress_json(data: Any) -> bytes:
+    """Convert object to JSON string and compress
+
+    Args:
+        data: Object to pass to json.dumps
+    Returns:
+        bytes: Compressed binary data
+    """
+    json_str = json.dumps(data)
+    return compress_str(json_str)

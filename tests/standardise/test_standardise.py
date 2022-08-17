@@ -73,13 +73,8 @@ def test_standardise_emissions():
     assert "co2_gppcardamom_europe_2012" in proc_results
 
 
-# Test cloud functions
-@pytest.fixture()
-def set_cloud(monkeypatch):
-    monkeypatch.setenv("OPENGHG_CLOUD", "1")
-
-
-def test_standardise(set_cloud, mocker, tmpdir):
+def test_standardise(monkeypatch, mocker, tmpdir):
+    monkeypatch.setenv("OPENGHG_HUB", "1")
     call_fn_mock = mocker.patch("openghg.cloud.call_function", autospec=True)
     test_string = "some_text"
     tmppath = Path(tmpdir).joinpath("test_file.txt")

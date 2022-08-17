@@ -1,13 +1,13 @@
 from typing import Optional
-import pytest
+
 import numpy as np
-import xarray as xr
 import pandas as pd
+import pytest
+import xarray as xr
+from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
+from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
+from pandas import Timedelta, Timestamp
 from xarray import Dataset
-from pandas import Timestamp, Timedelta
-from openghg.analyse import ModelScenario
-from openghg.analyse import match_dataset_dims, calc_dim_resolution, stack_datasets
-from openghg.retrieve import get_obs_surface, get_footprint, get_flux, get_bc
 
 #%% Test ModelScenario initialisation and update options
 

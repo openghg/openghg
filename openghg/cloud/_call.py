@@ -8,7 +8,7 @@ from typing import Dict, Optional, Tuple
 import msgpack
 import requests
 from openghg.types import FunctionError
-from openghg.util import compress, hash_bytes, running_in_cloud, running_on_hub
+from openghg.util import compress, hash_bytes
 
 
 def create_file_package(filepath: Path, obs_type: str) -> Tuple[bytes, Dict]:
@@ -91,51 +91,24 @@ def call_function(data: Dict) -> Dict:
     Returns:
         dict: Dictionary containing response status, headers and content.
     """
-    hub = running_on_hub()
-    cloud = running_in_cloud()
+    fn_url = _get_function_url()
+    auth_key = _get_auth_key()
 
-    if hub and cloud:
-        raise ValueError("We can't be running in the cloud and on the hub at the same time.")
+    headers = {}
+    headers["Content-Type"] = "application/octet-stream"
+    headers["authorization"] = auth_key
 
-    # If we're running on the OpenGHG Hub we need to make a call to
-    # the serverless functions
-    if hub:
-        # First lookup the function URL
-        fn_url = _get_function_url()
-        auth_key = _get_auth_key()
+    packed_data = msgpack.packb(data)
+    response = requests.post(url=fn_url, data=packed_data, headers=headers)
 
-        headers = {}
-        headers["Content-Type"] = "application/octet-stream"
-        headers["authorization"] = auth_key
+    if response.status_code != 200:
+        raise FunctionError(f"Function call error: {str(response.content)}")
 
-        packed_data = msgpack.packb(data)
-        response = requests.post(url=fn_url, data=packed_data, headers=headers)
-
-        if response.status_code != 200:
-            raise FunctionError(f"Function call error: {str(response.content)}")
-
-        return {
-            "status": response.status_code,
-            "headers": dict(headers),
-            "content": msgpack.unpackb(response.content),
-        }
-
-    # Otherwise if one of the functions has made a call that's been passed here
-    # and we're running within a serverless function already we can just route that
-    # data to the function requested.
-    if cloud:
-        try:
-            # openghg/functions
-            from functions import route_local  # type: ignore
-
-            function_name = data["function"]
-            response = route_local(function_name=function_name, data=data)
-        except Exception as e:
-            raise FunctionError(f"Cannot pass to routing function - {e}")
-
-        return {"status": 200, "headers": {}, "content": response}
-    else:
-        raise ValueError("Neither hub nor cloud, check environment.")
+    return {
+        "status": response.status_code,
+        "headers": dict(headers),
+        "content": msgpack.unpackb(response.content),
+    }
 
 
 def _get_function_url() -> str:

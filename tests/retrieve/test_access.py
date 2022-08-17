@@ -220,7 +220,7 @@ def test_timeslice_slices_correctly_exclusive():
 
 
 def test_get_obs_surface_cloud(mocker, monkeypatch):
-    monkeypatch.setenv("OPENGHG_CLOUD", "1")
+    monkeypatch.setenv("OPENGHG_HUB", "1")
 
     n_days = 100
     epoch = datetime.datetime(1970, 1, 1, 1, 1)

@@ -1,10 +1,11 @@
-from openghg.types import pathType
-from typing import Dict
-from pandas import read_csv, NaT
 from datetime import datetime
-from openghg.util import clean_string, load_json
-from openghg.standardise.meta import assign_attributes
 from pathlib import Path
+from typing import Dict
+
+from openghg.standardise.meta import assign_attributes
+from openghg.types import pathType
+from openghg.util import clean_string, load_json
+from pandas import NaT, read_csv
 
 
 def parse_npl(

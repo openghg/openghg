@@ -1,10 +1,9 @@
-import pytest
-from xarray import DataArray
-from pandas import Timedelta
 import numpy as np
-
+import pytest
 from openghg.store import infer_date_range
 from openghg.util import timestamp_tzaware
+from pandas import Timedelta
+from xarray import DataArray
 
 #%% Infer period when one time point present
 

@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 from openghg.analyse import footprints_data_merge
 
 

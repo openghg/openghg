@@ -3,9 +3,10 @@
 
 """
 from typing import Dict, List, Optional, Union
-from xarray.core.coordinates import DatasetCoordinates
+
 import numpy as np
 import xarray as xr
+from xarray.core.coordinates import DatasetCoordinates
 
 __all__ = ["recombine_multisite", "recombine_datasets"]
 
@@ -46,9 +47,9 @@ def recombine_datasets(
     Returns:
         xarray.Dataset: Combined Dataset
     """
-    from xarray import concat as xr_concat
-    from openghg.store.base import Datasource
     from openghg.objectstore import get_bucket
+    from openghg.store.base import Datasource
+    from xarray import concat as xr_concat
 
     if not keys:
         raise ValueError("No data keys passed.")

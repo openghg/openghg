@@ -1,7 +1,7 @@
 import logging
+
 import pytest
 from helpers import get_datapath
-
 from openghg.standardise.surface import parse_icos
 
 mpl_logger = logging.getLogger("matplotlib")

@@ -6,7 +6,7 @@
 from typing import Any, Dict, List, Optional, Union, cast
 
 from openghg.dataobjects import SearchResults
-from openghg.util import decompress, running_locally
+from openghg.util import decompress, running_on_hub
 from tinydb.database import TinyDB
 
 
@@ -136,10 +136,10 @@ def search(**kwargs: Any) -> Union[SearchResults, Dict]:
     """
     from openghg.cloud import call_function
 
-    if not running_locally():
+    if running_on_hub():
         post_data: Dict[str, Union[str, Dict]] = {}
         post_data["function"] = "search"
-        post_data["data"] = kwargs
+        post_data["search_terms"] = kwargs
 
         result = call_function(data=post_data)
 

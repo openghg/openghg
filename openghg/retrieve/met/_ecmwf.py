@@ -2,7 +2,7 @@ from __future__ import annotations
 
 # import cdsapi  # type: ignore
 # import numpy as np
-from typing import TYPE_CHECKING, List, Union, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
 
 # import requests
 # from xarray import open_dataset, Dataset

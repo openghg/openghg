@@ -33,7 +33,7 @@ def test_retrieve_unranked():
     results = search(species="ch4", skip_ranking=True)
 
     assert results.ranked_data is False
-    assert results.cloud is False
+    assert results.hub is False
 
     raw_results = results.raw()
     assert raw_results["tac"]["ch4"]["100m"]
@@ -336,7 +336,7 @@ def test_create_obsdata_no_data_raises():
 
 
 def test_search_result_retrieve_cloud_and_hub(monkeypatch, mocker, tmpdir):
-    monkeypatch.setenv("OPENGHG_CLOUD", "1")
+    monkeypatch.setenv("OPENGHG_HUB", "1")
 
     df = pd.DataFrame({"A": range(0, 64), "B": range(0, 64)}, columns=list("AB"))
     ds = df.to_xarray()
@@ -363,10 +363,6 @@ def test_search_result_retrieve_cloud_and_hub(monkeypatch, mocker, tmpdir):
 
     assert retrieved.data.equals(ds)
     assert mock_call.call_count == 1
-
-    monkeypatch.delenv("OPENGHG_CLOUD")
-    monkeypatch.delenv("OPENGHG_PATH")
-    monkeypatch.setenv("OPENGHG_HUB", "1")
 
     s = SearchResults(
         results={

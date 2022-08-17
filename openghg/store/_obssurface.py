@@ -1,11 +1,11 @@
-from openghg.store.base import BaseStore
-from openghg.types import pathType, multiPathType, resultsType
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Sequence, Union, Tuple
-from xarray import Dataset
-import numpy as np
+from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
 
+import numpy as np
 from openghg.store import DataSchema
+from openghg.store.base import BaseStore
+from openghg.types import multiPathType, pathType, resultsType
+from xarray import Dataset
 
 __all__ = ["ObsSurface"]
 
@@ -113,13 +113,14 @@ class ObsSurface(BaseStore):
         Returns:
             dict: Dictionary of Datasource UUIDs
         """
-        from collections import defaultdict
-        from pandas import Timedelta
         import sys
-        from tqdm import tqdm
-        from openghg.util import load_surface_parser, hash_file, clean_string, verify_site
+        from collections import defaultdict
+
+        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import SurfaceTypes
-        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.util import clean_string, hash_file, load_surface_parser, verify_site
+        from pandas import Timedelta
+        from tqdm import tqdm
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -298,10 +299,11 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
-        from openghg.standardise.surface import parse_aqmesh
-        from openghg.store import assign_data, load_metastore, datasource_lookup
-        from openghg.util import hash_file
         from collections import defaultdict
+
+        from openghg.standardise.surface import parse_aqmesh
+        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.util import hash_file
         from tqdm import tqdm
 
         data_filepath = Path(data_filepath)
@@ -433,7 +435,7 @@ class ObsSurface(BaseStore):
         Returns:
             Dict or None:
         """
-        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.util import hash_retrieved_data
 
         obs = ObsSurface.load()

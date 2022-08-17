@@ -1,12 +1,12 @@
 import re
-import numpy as np
-from numpy import ndarray
-import xarray as xr
-from pathlib import Path
 import zipfile
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
-from typing import Dict, Tuple, Optional, Union, Any, cast
 
+import numpy as np
+import xarray as xr
+from numpy import ndarray
 
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
 
@@ -60,16 +60,16 @@ def parse_edgar(
     TODO: Add monthly parsing and sector stacking options
     """
     import tempfile
-    from openghg.util import synonyms, molar_mass, timestamp_now, clean_string, convert_longitude
+
+    from openghg.standardise.meta import assign_flux_attributes, define_species_label
     from openghg.store import infer_date_range
-    from openghg.standardise.meta import define_species_label, assign_flux_attributes
+    from openghg.util import clean_string, convert_longitude, molar_mass, synonyms, timestamp_now
 
     # Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
     # Additional edgar functions which could be incorporated.
     # - getedgarv5annualsectors
     # - getedgarv432annualsectors
     # - (monthly sectors?)
-
     # TODO: Work out how to select frequency
     # - could try and relate to period e.g. "monthly" versus "yearly" etc.
     period = None
@@ -391,7 +391,7 @@ def _check_lat_lon(
         ndarray, ndarray: Latitude and longitude arrays
         None, None: if all inputs are None, a tuple of Nones will be returned.
     """
-    from openghg.util import find_domain, convert_longitude
+    from openghg.util import convert_longitude, find_domain
 
     if lat_out is not None or lon_out is not None:
         if domain is None:

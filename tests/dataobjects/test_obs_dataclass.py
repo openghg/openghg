@@ -1,6 +1,7 @@
-from openghg.dataobjects import ObsData
 from dataclasses import FrozenInstanceError
+
 import pytest
+from openghg.dataobjects import ObsData
 
 # Some of these tests are really just testing that Python does Python correctly but
 # I plan on extending the dataclass so I'll leave these to be filled out later

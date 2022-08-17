@@ -1,3 +1,4 @@
+import datetime
 import json
 
 import pandas as pd
@@ -5,8 +6,43 @@ import pytest
 from helpers import get_retrieval_data_file, metadata_checker_obssurface
 from icoscp.cpb.dobj import Dobj  # type: ignore
 from icoscp.station.station import Station
-from openghg.dataobjects import SearchResults
-from openghg.retrieve.icos import retrieve
+from openghg.cloud import package_from_function
+from openghg.dataobjects import ObsData, SearchResults
+from openghg.retrieve.icos import retrieve_atmospheric
+
+
+def test_retrieve_icos_cloud(monkeypatch, mocker):
+    monkeypatch.setenv("OPENGHG_HUB", "1")
+    mocker.patch("openghg.cloud.call_function", return_value={"content": {"found": False}})
+
+    res = retrieve_atmospheric(site="WAO")
+
+    assert res is None
+
+    n_days = 100
+    epoch = datetime.datetime(1970, 1, 1, 1, 1)
+
+    mock_metadata = {"site": "london", "species": "tiger"}
+    mock_dataset = pd.DataFrame(
+        data={"A": range(0, n_days)},
+        index=pd.date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D"),
+    ).to_xarray()
+
+    mock_obs = ObsData(data=mock_dataset, metadata=mock_metadata)
+
+    datafied = mock_obs.to_data()
+    binary_data = datafied["data"]
+    metadata = datafied["metadata"]
+
+    packed = package_from_function(data=binary_data, metadata=metadata)
+
+    return_val = {"content": {"found": True, "data": {"1": packed}}}
+
+    mocker.patch("openghg.cloud.call_function", return_value=return_val)
+
+    res = retrieve_atmospheric(site="WAO")
+
+    assert res == mock_obs
 
 
 def test_icos_retrieve_invalid_site(mocker, capfd):
@@ -15,7 +51,7 @@ def test_icos_retrieve_invalid_site(mocker, capfd):
 
     mocker.patch("icoscp.station.station.get", return_value=s)
 
-    no_data = retrieve(site="ABC123")
+    no_data = retrieve_atmospheric(site="ABC123")
 
     assert no_data is None
 
@@ -54,7 +90,7 @@ def test_icos_retrieve_and_store(mocker, capfd):
         SearchResults, "retrieve_all", side_effect=SearchResults.retrieve_all, autospec=True
     )
 
-    retrieved_data_first = retrieve(site="WAO")
+    retrieved_data_first = retrieve_atmospheric(site="WAO")
 
     data = retrieved_data_first.data
     metadata = retrieved_data_first.metadata
@@ -104,7 +140,7 @@ def test_icos_retrieve_and_store(mocker, capfd):
 
     assert retrieve_all.call_count == 0
 
-    retrieved_data_second = retrieve(site="WAO")
+    retrieved_data_second = retrieve_atmospheric(site="WAO")
 
     assert retrieve_all.call_count == 1
 
@@ -116,7 +152,7 @@ def test_icos_retrieve_and_store(mocker, capfd):
     assert retrieved_data_first.data.co2.equals(retrieved_data_second.data.co2)
 
     # Now we do a force retrieve and make sure we get the correct message printed
-    retrieve(site="WAO", force_retrieval=True)
+    retrieve_atmospheric(site="WAO", force_retrieval=True)
 
     out, _ = capfd.readouterr()
 

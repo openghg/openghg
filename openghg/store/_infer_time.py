@@ -1,15 +1,11 @@
-from typing import Optional, Union, Tuple
-from pathlib import Path
 import re
+from pathlib import Path
+from typing import Optional, Tuple, Union
+
 import pandas as pd
+from openghg.util import create_frequency_str, parse_period, relative_time_offset, timestamp_tzaware
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray
-from openghg.util import (
-    timestamp_tzaware,
-    parse_period,
-    create_frequency_str,
-    relative_time_offset,
-)
 
 TupleTimeType = Tuple[Union[int, float], str]
 

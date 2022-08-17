@@ -1,6 +1,6 @@
+from helpers import get_datapath
 from openghg.standardise.surface import parse_aqmesh
 from pandas import Timestamp
-from helpers import get_datapath
 
 
 def test_aqmesh_read():

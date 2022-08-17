@@ -1,9 +1,9 @@
-from ._enum import SurfaceTypes, DataTypes, ObsTypes, EmissionsTypes, EmissionsDatabases
-from ._types import pathType, multiPathType, resultsType
+from ._enum import DataTypes, EmissionsDatabases, EmissionsTypes, ObsTypes, SurfaceTypes
 from ._errors import (
-    InvalidSiteError,
-    UnknownDataError,
-    FunctionError,
-    ObjectStoreError,
     DatasourceLookupError,
+    FunctionError,
+    InvalidSiteError,
+    ObjectStoreError,
+    UnknownDataError,
 )
+from ._types import multiPathType, pathType, resultsType
