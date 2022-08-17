@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise._standardise &#8212; OpenGHG 0+untagged.1.g60f3fb1 documentation</title>
+    <title>openghg.standardise._standardise &#8212; OpenGHG 0+untagged.1.g70a98ff documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g60f3fb1 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g70a98ff documentation</p>
   
 </a>
     
@@ -194,7 +194,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">create_file_package</span><span class="p">,</span> <span class="n">create_post_dict</span>
-<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_locally</span>
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_on_hub</span>
 
 
 <div class="viewcode-block" id="standardise_surface"><a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_surface">[docs]</a><span class="k">def</span> <span class="nf">standardise_surface</span><span class="p">(</span>
@@ -226,7 +226,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepaths</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepaths</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">running_locally</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
         <span class="c1"># To convert bytes to megabytes</span>
         <span class="n">MB</span> <span class="o">=</span> <span class="mf">1e6</span>
         <span class="c1"># The largest file we&#39;ll just directly POST to the standardisation</span>
@@ -343,7 +343,7 @@
 
     <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">running_locally</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
         <span class="n">compressed_data</span><span class="p">,</span> <span class="n">file_metadata</span> <span class="o">=</span> <span class="n">create_file_package</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">obs_type</span><span class="o">=</span><span class="s2">&quot;bc&quot;</span><span class="p">)</span>
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
@@ -415,7 +415,7 @@
 
     <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">running_locally</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
         <span class="n">compressed_data</span><span class="p">,</span> <span class="n">file_metadata</span> <span class="o">=</span> <span class="n">create_file_package</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">obs_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">)</span>
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
@@ -497,7 +497,7 @@
 
     <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">running_locally</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
         <span class="n">compressed_data</span><span class="p">,</span> <span class="n">file_metadata</span> <span class="o">=</span> <span class="n">create_file_package</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">obs_type</span><span class="o">=</span><span class="s2">&quot;flux&quot;</span><span class="p">)</span>
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>

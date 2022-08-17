@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g60f3fb1 documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g70a98ff documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g60f3fb1 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g70a98ff documentation</p>
   
 </a>
     
@@ -195,7 +195,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">BoundaryConditionsData</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">,</span> <span class="n">ObsData</span>
-<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">decompress</span><span class="p">,</span> <span class="n">decompress_str</span><span class="p">,</span> <span class="n">hash_bytes</span><span class="p">,</span> <span class="n">running_locally</span><span class="p">,</span> <span class="n">running_on_hub</span>
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">decompress</span><span class="p">,</span> <span class="n">decompress_str</span><span class="p">,</span> <span class="n">hash_bytes</span><span class="p">,</span> <span class="n">running_on_hub</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">load_dataset</span>
 
@@ -234,7 +234,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">call_function</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">running_locally</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
         <span class="n">to_post</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">to_post</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;get_obs_surface&quot;</span>
