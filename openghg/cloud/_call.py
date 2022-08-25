@@ -1,13 +1,14 @@
 """
 Call OpenGHG serverless functions
 """
-import requests
-from typing import Dict, Optional, Union, Tuple
 import os
-import msgpack
-from openghg.types import FunctionError
 from pathlib import Path
-from openghg.util import hash_bytes, compress
+from typing import Dict, Optional, Tuple
+
+import msgpack
+import requests
+from openghg.types import FunctionError
+from openghg.util import compress, hash_bytes
 
 
 def create_file_package(filepath: Path, obs_type: str) -> Tuple[bytes, Dict]:
@@ -18,7 +19,6 @@ def create_file_package(filepath: Path, obs_type: str) -> Tuple[bytes, Dict]:
         obs_type: Observation type
     Returns:
         tuple: Compressed data as bytes and dictionary of file metadata
-
     """
     in_mem_limit = 300  # MB
     # To convert bytes to megabytes
@@ -83,7 +83,7 @@ def create_post_dict(
     return to_post
 
 
-def call_function(data: Union[Dict, bytes]) -> Dict:
+def call_function(data: Dict) -> Dict:
     """Calls an OpenGHG serverless function and returns its response
 
     Args:
@@ -91,7 +91,6 @@ def call_function(data: Union[Dict, bytes]) -> Dict:
     Returns:
         dict: Dictionary containing response status, headers and content.
     """
-    # First lookup the function URL
     fn_url = _get_function_url()
     auth_key = _get_auth_key()
 
@@ -100,20 +99,16 @@ def call_function(data: Union[Dict, bytes]) -> Dict:
     headers["authorization"] = auth_key
 
     packed_data = msgpack.packb(data)
-
     response = requests.post(url=fn_url, data=packed_data, headers=headers)
 
     if response.status_code != 200:
         raise FunctionError(f"Function call error: {str(response.content)}")
 
-    response_content = msgpack.unpackb(response.content)
-
-    d: Dict[str, Union[int, str, Dict, bytes]] = {}
-    d["status"] = response.status_code
-    d["headers"] = dict(response.headers)
-    d["content"] = response_content
-
-    return d
+    return {
+        "status": response.status_code,
+        "headers": dict(headers),
+        "content": msgpack.unpackb(response.content),
+    }
 
 
 def _get_function_url() -> str:
@@ -143,45 +138,3 @@ def _get_auth_key() -> str:
         return os.environ["AUTH_KEY"]
     except KeyError:
         raise FunctionError("A valid AUTH_KEY secret must be set.")
-
-
-def _put(
-    url: str, data: bytes, headers: Optional[Dict] = None, auth_key: Optional[str] = None
-) -> requests.Response:
-    """PUT some data to the URL
-
-    Args:
-        url: URL
-        data: Data as bytes
-        headers: Optional headers dictionary
-        auth_key: Authorisation key if required
-    Returns:
-        requests.Response
-    """
-    if headers is None:
-        headers = {}
-
-    headers["Content-Type"] = "application/octet-stream"
-
-    if auth_key is not None:
-        headers["authentication"] = auth_key
-
-    return requests.put(url=url, data=data, headers=headers)
-
-
-def _post(url: str, data: Optional[Dict] = None, auth_key: Optional[str] = None) -> requests.Response:
-    """POST to a URL
-
-    Args:
-        url: URL
-        data: Dictionary of data to POST
-    Returns:
-        requests.Response
-    """
-    if data is None:
-        data = {}
-
-    if auth_key is not None:
-        data["authorisation"] = auth_key
-
-    return requests.post(url=url, data=data)

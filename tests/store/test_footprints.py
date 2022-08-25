@@ -1,9 +1,8 @@
 import pytest
-
-from openghg.store import Footprints, recombine_datasets, metastore_manager, datasource_lookup
-from openghg.retrieve import search
-from openghg.objectstore import get_bucket
 from helpers import get_footprint_datapath
+from openghg.objectstore import get_bucket
+from openghg.retrieve import search
+from openghg.store import Footprints, datasource_lookup, metastore_manager, recombine_datasets
 from openghg.util import hash_bytes
 
 

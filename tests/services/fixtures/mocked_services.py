@@ -9,18 +9,16 @@ import uuid
 import Acquire
 import Acquire.Stubs
 import pytest
-
-from Acquire.Service import create_handler
 from access.route import route as access_functions
 from accounting.route import route as accounting_functions
+from Acquire.Service import create_handler
 from compute.route import route as compute_functions
 from identity.route import route as identity_functions
 from registry.route import route as registry_functions
-from storage.route import route as storage_functions
-
 # We no longer have the openghg_service folder but just have the service functions
 # in their respective files
 from route import route as openghg_functions
+from storage.route import route as storage_functions
 
 identity_handler = create_handler(identity_functions)
 accounting_handler = create_handler(accounting_functions)
@@ -83,7 +81,7 @@ class MockedRequests:
         if "identity" not in _services:
             raise ValueError("NO SERVICES? %s" % str)
 
-        from Acquire.Service import push_testing_objstore, pop_testing_objstore
+        from Acquire.Service import pop_testing_objstore, push_testing_objstore
 
         if url.startswith("http://"):
             url = url[7:]
@@ -154,8 +152,7 @@ def _login_admin(service_url, username, password, otp):
     """Internal function used to get a valid login to the specified
     service for the passed username, password and otp
     """
-    from Acquire.Client import User
-    from Acquire.Client import Wallet
+    from Acquire.Client import User, Wallet
 
     wallet = Wallet()
 
@@ -185,9 +182,9 @@ def aaai_services(tmpdir_factory):
     a dictionary (which is passed to the test functions as the
     fixture)
     """
+    from Acquire.Crypto import OTP, PrivateKey
     from Acquire.Identity import Authorisation
-    from Acquire.Crypto import PrivateKey, OTP
-    from Acquire.Service import call_function, Service
+    from Acquire.Service import Service, call_function
 
     _services = {}
     _services["registry"] = tmpdir_factory.mktemp("registry")
@@ -339,8 +336,8 @@ def aaai_services(tmpdir_factory):
 
 @pytest.fixture(scope="session")
 def authenticated_user(aaai_services):
-    from Acquire.Crypto import PrivateKey, OTP
     from Acquire.Client import User, Wallet
+    from Acquire.Crypto import OTP, PrivateKey
 
     username = str(uuid.uuid4())
     password = PrivateKey.random_passphrase()

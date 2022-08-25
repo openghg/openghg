@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 import xarray as xr
 from openghg.transform import regrid_uniform_cc
 

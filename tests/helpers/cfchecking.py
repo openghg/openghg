@@ -1,6 +1,7 @@
-from tempfile import NamedTemporaryFile
-import xarray as xr
 import warnings
+from tempfile import NamedTemporaryFile
+
+import xarray as xr
 
 
 def check_cf_compliance(dataset: xr.Dataset, debug: bool = False) -> bool:

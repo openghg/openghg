@@ -1,5 +1,5 @@
-from datetime import datetime
 import json
+from datetime import datetime
 from typing import Optional, TypeVar
 
 PAR_TYPE = TypeVar("PAR_TYPE", bound="PAR")

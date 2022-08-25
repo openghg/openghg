@@ -1,5 +1,6 @@
-import pytest
 import tempfile
+
+import pytest
 from openghg.util import load_surface_parser, read_header
 
 

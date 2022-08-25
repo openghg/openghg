@@ -1,29 +1,23 @@
-import os
+from openghg.util import running_locally
 
-cloud_env_var = os.environ.get("OPENGHG_CLOUD", False)
-
-if cloud_env_var:
-    cloud_env = bool(int(cloud_env_var))
-else:
-    cloud_env = False
+cloud_env = not running_locally()
 
 if cloud_env:
     from ._oci_store import (
+        create_bucket,
+        create_par,
+        delete_object,
+        delete_par,
         exists,
         get_all_object_names,
+        get_bucket,
         get_object,
         get_object_from_json,
         set_object,
         set_object_from_file,
         set_object_from_json,
-        get_bucket,
-        delete_object,
-        create_bucket,
         upload,
-        create_par,
-        delete_par,
     )
-
     from ._par import PAR
 else:
     from ._local_store import (
@@ -42,4 +36,4 @@ else:
         visualise_store,
     )
 
-from ._encoding import get_datetime_now, datetime_to_datetime, string_to_bytes, bytes_to_string
+from ._encoding import bytes_to_string, datetime_to_datetime, get_datetime_now, string_to_bytes

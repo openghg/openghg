@@ -1,5 +1,6 @@
-from typing import DefaultDict, Dict, Optional, Union
 from pathlib import Path
+from typing import DefaultDict, Dict, Optional, Union
+
 from pandas import DataFrame
 
 __all__ = ["parse_beaco2n"]
@@ -12,6 +13,7 @@ def parse_beaco2n(
     inlet: str,
     instrument: Optional[str] = "shinyei",
     sampling_period: Optional[str] = None,
+    **kwargs: Dict,
 ) -> Dict:
     """Read BEACO2N data files
 
@@ -25,10 +27,10 @@ def parse_beaco2n(
     Returns:
         dict: Dictionary of data
     """
-    import pandas as pd
-    from openghg.util import load_json
     from collections import defaultdict
-    from openghg.util import clean_string
+
+    import pandas as pd
+    from openghg.util import clean_string, load_json
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
@@ -102,6 +104,9 @@ def parse_beaco2n(
             "sampling_period": str(sampling_period),
             "instrument": instrument,
         }
+
+        # We'll put everything into metadata
+        species_metadata.update(site_metadata)
 
         gas_data[mt]["data"] = m_data
         gas_data[mt]["metadata"] = species_metadata

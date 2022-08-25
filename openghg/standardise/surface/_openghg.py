@@ -1,5 +1,6 @@
-from typing import Union, Optional, Dict, cast
 from pathlib import Path
+from typing import Dict, Optional, Union, cast
+
 import xarray as xr
 
 
@@ -46,8 +47,8 @@ def parse_openghg(
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
     """
+    from openghg.standardise.meta import assign_attributes, metadata_default_keys
     from openghg.util import clean_string, load_json, synonyms
-    from openghg.standardise.meta import metadata_default_keys, assign_attributes
 
     data_filepath = Path(data_filepath)
 

@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
+
 import pytest
 import yaml
-
 from openghg.retrieve import get_ceda_file
 
 # flake8: noqa : E501

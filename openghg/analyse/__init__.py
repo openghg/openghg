@@ -1,8 +1,8 @@
-from ._footprint import single_site_footprint, footprints_data_merge
+from ._footprint import footprints_data_merge, single_site_footprint
 from ._scenario import (
     ModelScenario,
-    combine_datasets,
-    stack_datasets,
     calc_dim_resolution,
+    combine_datasets,
     match_dataset_dims,
+    stack_datasets,
 )

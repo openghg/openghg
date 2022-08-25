@@ -1,11 +1,10 @@
 import pytest
-
-from openghg.retrieve import search, metadata_lookup
+from helpers import metadata_checker_obssurface
+from openghg.retrieve import metadata_lookup, search
 from openghg.store import metastore_manager
+from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_tzaware
 from pandas import Timestamp
-from helpers import metadata_checker_obssurface
-from openghg.types import DatasourceLookupError
 
 
 def test_specific_keyword_search():

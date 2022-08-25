@@ -1,5 +1,6 @@
 # Check if obssurface metadata contains the minimum expected
 from typing import Dict
+
 from openghg.dataobjects import SearchResults
 
 

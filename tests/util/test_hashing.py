@@ -1,10 +1,10 @@
-import pandas as pd
-import numpy as np
 import datetime
-import pytest
 
-from openghg.util import hash_string, hash_retrieved_data, hash_bytes
+import numpy as np
+import pandas as pd
+import pytest
 from helpers import get_datapath
+from openghg.util import hash_bytes, hash_retrieved_data, hash_string
 
 
 def test_hash_string():

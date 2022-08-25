@@ -1,7 +1,9 @@
 from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Union
+
 from openghg.store.base import BaseStore
 from pandas import Timestamp
-from typing import TYPE_CHECKING, List, Union
 
 if TYPE_CHECKING:
     from openghg.dataobjects import METData
@@ -88,8 +90,8 @@ class METStore(BaseStore):
         Returns:
             METData or None: METData object if found else None
         """
-        from openghg.store.base import Datasource
         from openghg.dataobjects import METData
+        from openghg.store.base import Datasource
 
         datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids)
 

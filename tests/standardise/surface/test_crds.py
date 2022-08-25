@@ -1,9 +1,9 @@
 import logging
-import pytest
 import tempfile
 
-from openghg.standardise.surface import parse_crds
+import pytest
 from helpers import check_cf_compliance
+from openghg.standardise.surface import parse_crds
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)

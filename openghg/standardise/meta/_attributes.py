@@ -1,4 +1,5 @@
-from typing import cast, Any, Dict, Optional, List, Tuple, Hashable, Union
+from typing import Any, Dict, Hashable, List, Optional, Tuple, Union, cast
+
 from xarray import Dataset
 
 
@@ -21,7 +22,7 @@ def assign_attributes(
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
-    from openghg.standardise.meta import surface_standardise
+    from openghg.standardise.meta import sync_surface_metadata
 
     for key, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
@@ -54,7 +55,7 @@ def assign_attributes(
 
         attrs = measurement_data.attrs
 
-        gas_data["metadata"] = surface_standardise(metadata=metadata, attributes=attrs)
+        gas_data["metadata"] = sync_surface_metadata(metadata=metadata, attributes=attrs)
 
     return data
 
@@ -96,8 +97,8 @@ def get_attributes(
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
     """
-    from pandas import Timestamp as pd_Timestamp
     from openghg.util import load_json, timestamp_now
+    from pandas import Timestamp as pd_Timestamp
 
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
@@ -322,14 +323,15 @@ def define_species_label(species: str) -> Tuple[str, str]:
             ("dch4c13", "DCH4C13")
     """
 
-    from openghg.util import synonyms, clean_string
+    from openghg.util import clean_string, synonyms
 
     # Extract species label using synonyms function
     try:
         species_label = synonyms(species, lower=False, allow_new_species=False)
     except ValueError:
         species_underscore = species.replace(" ", "_")
-        species_label = clean_string(species_underscore)
+        species_remove_dash = species_underscore.replace("-", "")
+        species_label = clean_string(species_remove_dash)
 
     species_label_lower = species_label.lower()
 

@@ -1,5 +1,5 @@
-from typing import Dict, Optional, Union
 from pathlib import Path
+from typing import Dict, Optional, Union
 
 
 def parse_icos(
@@ -28,6 +28,7 @@ def parse_icos(
         dict: Dictionary of gas data
     """
     from pathlib import Path
+
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string
 
@@ -90,8 +91,8 @@ def _read_data_large_header(
     Returns:
         dict: Dictionary of gas data
     """
-    from pandas import read_csv, to_datetime
     from openghg.util import read_header
+    from pandas import read_csv, to_datetime
 
     # Read metadata from the filename and cross check to make sure the passed
     # arguments match
@@ -262,8 +263,8 @@ def _read_data_small_header(
     Returns:
         dict: Dictionary of gas data
     """
-    from pandas import read_csv, Timestamp
     from openghg.util import read_header
+    from pandas import Timestamp, read_csv
 
     # Read some metadata from the filename
     split_filename = data_filepath.name.split(".")

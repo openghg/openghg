@@ -1,7 +1,8 @@
-from openghg.util import load_json
-from pandas import DataFrame, Timedelta
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
+
+from openghg.util import load_json
+from pandas import DataFrame, Timedelta
 
 
 def parse_crds(
@@ -30,6 +31,7 @@ def parse_crds(
         dict: Dictionary of gas data
     """
     from pathlib import Path
+
     from openghg.standardise.meta import assign_attributes
 
     if not isinstance(data_filepath, Path):
@@ -78,9 +80,10 @@ def _read_data(
     Returns:
         dict: Dictionary of gas data
     """
-    from pandas import RangeIndex, read_csv, to_datetime
     import warnings
+
     from openghg.util import clean_string, find_duplicate_timestamps
+    from pandas import RangeIndex, read_csv, to_datetime
 
     split_fname = data_filepath.stem.split(".")
     site = site.lower()
@@ -274,7 +277,22 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
     except KeyError:
         raise ValueError(f"Unable to read attributes for site: {site}")
 
+    # TODO - we need to combine the metadata
+    acrg_site_metadata = load_json(filename="acrg_site_info.json")
+
     attributes = global_attributes.copy()
+
+    try:
+        metadata = acrg_site_metadata[site.upper()]
+    except KeyError:
+        pass
+    else:
+        network_key = next(iter(metadata))
+        site_metadata = metadata[network_key]
+        attributes["station_latitude"] = str(site_metadata["latitude"])
+        attributes["station_longitude"] = str(site_metadata["longitude"])
+        attributes["station_long_name"] = site_metadata["long_name"]
+        attributes["station_height_masl"] = site_metadata["height_station_masl"]
 
     attributes["inlet_height_magl"] = inlet
     attributes["comment"] = crds_metadata["comment"]
