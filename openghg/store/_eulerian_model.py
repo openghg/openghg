@@ -1,6 +1,7 @@
-from openghg.store.base import BaseStore
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
+
+from openghg.store.base import BaseStore
 from xarray import Dataset
 
 __all__ = ["EulerianModel"]
@@ -46,15 +47,11 @@ class EulerianModel(BaseStore):
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
         from collections import defaultdict
-        from openghg.util import (
-            clean_string,
-            hash_file,
-            timestamp_now,
-            timestamp_tzaware,
-        )
-        from openghg.store import assign_data, load_metastore, datasource_lookup
-        from xarray import open_dataset
+
+        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from pandas import Timestamp as pd_Timestamp
+        from xarray import open_dataset
 
         model = clean_string(model)
         species = clean_string(species)

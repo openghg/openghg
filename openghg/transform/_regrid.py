@@ -1,10 +1,11 @@
 # TODO: Add import for xesmf within specific functions and NOT general import at the top.
 # TODO: Add try-except around xesmf import with helpful error message
 
+from typing import Optional, Tuple, TypeVar, Union, cast
+
 import numpy as np
-from numpy import ndarray
 import xarray as xr
-from typing import Union, Optional, Tuple, cast
+from numpy import ndarray
 
 xesmf_error_message = (
     "Unable to import xesmf for use with regridding algorithms"
@@ -66,15 +67,21 @@ def convert_to_ndarray(array: Union[ndarray, xr.DataArray]) -> ndarray:
     return values
 
 
+# Create types for ndarray or xr.DataArray inputs
+# Using TypeVar means - whichever type is passed in will be the one which is returned.
+ArrayLikeMatch = TypeVar("ArrayLikeMatch", np.ndarray, xr.DataArray)
+ArrayLike = Union[ndarray, xr.DataArray]
+
+
 def regrid_uniform_cc(
-    data: Union[ndarray, xr.DataArray],
-    lat_out: Union[ndarray, xr.DataArray],
-    lon_out: Union[ndarray, xr.DataArray],
-    lat_in: Optional[Union[ndarray, xr.DataArray]] = None,
-    lon_in: Optional[Union[ndarray, xr.DataArray]] = None,
+    data: ArrayLikeMatch,
+    lat_out: ArrayLike,
+    lon_out: ArrayLike,
+    lat_in: Optional[ArrayLike] = None,
+    lon_in: Optional[ArrayLike] = None,
     latlon: Optional[list] = None,
     method: str = "conservative",
-) -> Union[ndarray, xr.DataArray]:
+) -> ArrayLikeMatch:
     """
     Regrid data between two uniform, cell centered grids.
     All coordinates (lat_out, lon_out, lat_in, lon_in) should be for the centre
@@ -130,8 +137,8 @@ def regrid_uniform_cc(
         lat_in = lat_in_extracted
         lon_in = lon_in_extracted
 
-    lat_in = cast(Union[ndarray, xr.DataArray], lat_in)
-    lon_in = cast(Union[ndarray, xr.DataArray], lon_in)
+    lat_in = cast(ArrayLike, lat_in)
+    lon_in = cast(ArrayLike, lon_in)
 
     if data.shape != (lat_in.size, lon_in.size):
         raise ValueError(
@@ -148,14 +155,13 @@ def regrid_uniform_cc(
     output_grid = _create_xesmf_grid_uniform_cc(lat_out, lon_out)
 
     regridder = xesmf.Regridder(input_grid, output_grid, method)
-    regridded: Union[ndarray, xr.DataArray] = regridder(data)
+    regridded: ArrayLikeMatch = regridder(data)
 
     if isinstance(regridded, xr.DataArray):
         from scipy.sparse import coo_matrix  # type:ignore
 
         # Checking dimensions and mapping back lat_out and lon_out
         # May be overkill but attempting to make sure this is done correctly.
-
         # The regridded DataArray will contain dimensions of ('x', 'y') for
         # data, 'lat' and 'lon' coordinates e.g. lon = [[-10,-10],[0,0]]
         # This is to allow for the generic case where ('lat', 'lon') is not

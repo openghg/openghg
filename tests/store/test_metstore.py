@@ -1,8 +1,9 @@
-import pytest
-from openghg.store import METStore
-from openghg.objectstore import get_bucket
-from requests_mock import ANY
 from pathlib import Path
+
+import pytest
+from openghg.objectstore import get_bucket
+from openghg.store import METStore
+from requests_mock import ANY
 
 
 @pytest.fixture(scope="session")

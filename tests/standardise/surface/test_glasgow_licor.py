@@ -1,7 +1,7 @@
+import pytest
 from helpers import get_mobile_datapath
 from openghg.standardise.surface import parse_glasow_licor
 from pandas import Timestamp
-import pytest
 
 
 def test_glasgow_licor_read():

@@ -1,6 +1,7 @@
-from typing import Dict, List, Optional
-from copy import deepcopy
 import math
+from copy import deepcopy
+from typing import Dict, List, Optional
+
 from openghg.util import is_number
 
 
@@ -28,7 +29,7 @@ def metadata_default_keys() -> List:
     return default_keys
 
 
-def surface_standardise(
+def sync_surface_metadata(
     metadata: Dict,
     attributes: Dict,
     keys_to_add: Optional[List] = None,

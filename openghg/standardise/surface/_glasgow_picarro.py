@@ -1,7 +1,8 @@
-import pandas as pd
-from typing import Dict, Union, Optional
 from pathlib import Path
+from typing import Dict, Optional, Union
 from warnings import warn
+
+import pandas as pd
 from addict import Dict as aDict
 
 
@@ -13,6 +14,7 @@ def parse_glasow_picarro(
     instrument: str = "picarro",
     sampling_period: Optional[str] = None,
     measurement_type: str = "timeseries",
+    **kwargs: Dict,
 ) -> Dict:
     """Read the Glasgow Science Tower Picarro data
 

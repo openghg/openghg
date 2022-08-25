@@ -30,8 +30,9 @@ def get_ceda_file(  # type: ignore
 
     """
     import json
-    import yaml
     from pathlib import Path
+
+    import yaml
     from openghg.util import get_datapath
 
     if filepath:

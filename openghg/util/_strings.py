@@ -1,4 +1,4 @@
-from typing import Any, Dict, Set, List, Union, Tuple, Optional, overload
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, overload
 
 __all__ = ["clean_string", "to_lowercase"]
 

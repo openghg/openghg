@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import Dict, Optional, Union, Tuple, Any
-from xarray import Dataset, DataArray
+from tempfile import TemporaryDirectory
+from typing import Any, Dict, Optional, Tuple, Union
+
 import numpy as np
 from numpy import ndarray
-from tempfile import TemporaryDirectory
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from xarray import DataArray, Dataset
 
 __all__ = ["Emissions"]
 
@@ -77,13 +78,9 @@ class Emissions(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import EmissionsTypes
-        from openghg.util import (
-            clean_string,
-            hash_file,
-            load_emissions_parser,
-        )
+        from openghg.util import clean_string, hash_file, load_emissions_parser
 
         species = clean_string(species)
         source = clean_string(source)
@@ -179,7 +176,8 @@ class Emissions(BaseStore):
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
-        from openghg.store import assign_data, load_metastore, datasource_lookup
+
+        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import EmissionsDatabases
         from openghg.util import load_emissions_database_parser
 

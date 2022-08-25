@@ -1,13 +1,13 @@
 from typing import Optional
-import pytest
+
 import numpy as np
-import xarray as xr
 import pandas as pd
+import pytest
+import xarray as xr
+from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
+from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
+from pandas import Timedelta, Timestamp
 from xarray import Dataset
-from pandas import Timestamp, Timedelta
-from openghg.analyse import ModelScenario
-from openghg.analyse import match_dataset_dims, calc_dim_resolution, stack_datasets
-from openghg.retrieve import get_obs_surface, get_footprint, get_flux, get_bc
 
 #%% Test ModelScenario initialisation and update options
 
@@ -700,13 +700,13 @@ def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Option
 
     # Only relevant if lifetime_hrs input is set
     mean_age_vars = ["mean_age_particles_n", "mean_age_particles_e", "mean_age_particles_s", "mean_age_particles_w"]
-    
+
     dims = {"N": ["height", "lon"], "E": ["height", "lat"], "S": ["height", "lon"], "W": ["height", "lat"]}
 
     for i, bc_var, fp_var, age_var in zip(range(len(bc_vars)), bc_vars, fp_vars, mean_age_vars):
         input_bc_values = bc[bc_var].reindex_like(footprint, method="ffill")
         input_fp_values = footprint[fp_var]
-        
+
         direction = bc_var.split('_')[-1].upper()
 
         if lifetime_hrs is not None:
@@ -1269,8 +1269,7 @@ def test_match_dataset_dims_diff_time(flux_daily, flux_single_time):
 def test_calc_resolution(flux_daily):
     """Test frequency/resolution can be calculated (daily data)"""
     frequency = calc_dim_resolution(flux_daily, dim="time")
-
-    frequency_d = frequency.astype("timedelta64[D]").astype(int)
+    frequency_d = frequency.astype("timedelta64[D]")
     assert frequency_d == 1
 
 

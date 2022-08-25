@@ -1,25 +1,29 @@
-from xarray import Dataset
+import json
+from io import BytesIO
 from typing import Dict, List, Optional, Union
-from pandas import Timestamp
-from openghg.dataobjects import ObsData, FootprintData, FluxData, BoundaryConditionsData
 
-__all__ = ["get_obs_surface", "get_footprint", "get_flux", "get_bc"]
+from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
+from openghg.util import decompress, decompress_str, hash_bytes, running_on_hub
+from pandas import Timestamp
+from xarray import Dataset, load_dataset
 
 
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
-    keep_missing: Optional[bool] = False,
-    skip_ranking: Optional[bool] = False,
-) -> Union[ObsData, None]:
-    """Get measurements from one site.
+    inlet: str = None,
+    start_date: Union[str, Timestamp] = None,
+    end_date: Union[str, Timestamp] = None,
+    average: str = None,
+    network: str = None,
+    instrument: str = None,
+    calibration_scale: str = None,
+    keep_missing: bool = False,
+    skip_ranking: bool = False,
+) -> Optional[ObsData]:
+    """This is the equivalent of the get_obs function from the ACRG repository.
+
+    Usage and return values are the same whilst implementation may differ.
 
     Args:
         site: Site of interest e.g. MHD for the Mace Head site.
@@ -31,17 +35,125 @@ def get_obs_surface(
         the form e.g. "2H", "30min" (should match pandas offset aliases format).
         keep_missing: Keep missing data points or drop them.
         network: Network for the site/instrument (must match number of sites).
-        instrument: Specific instrument for the site (must match number of sites).
+        instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
     Returns:
-        ObsData: ObsData object
+        ObsData or None: ObsData object if data found, else None
     """
-    from pandas import Timestamp, Timedelta
+    from openghg.cloud import call_function
+
+    if running_on_hub():
+        to_post: Dict[str, Union[str, Dict]] = {}
+
+        to_post["function"] = "get_obs_surface"
+
+        search_terms = {
+            "site": site,
+            "species": species,
+            "keep_missing": keep_missing,
+            "skip_ranking": skip_ranking,
+        }
+
+        if inlet is not None:
+            search_terms["inlet"] = inlet
+        if start_date is not None:
+            search_terms["start_date"] = start_date
+        if end_date is not None:
+            search_terms["end_date"] = end_date
+        if average is not None:
+            search_terms["average"] = average
+        if network is not None:
+            search_terms["network"] = network
+        if instrument is not None:
+            search_terms["instrument"] = instrument
+        if calibration_scale is not None:
+            search_terms["calibration_scale"] = calibration_scale
+
+        to_post["search_terms"] = search_terms
+
+        result = call_function(data=to_post)
+
+        content = result["content"]
+        found = content["found"]
+
+        if found:
+            binary_data = decompress(data=content["data"])
+
+            file_metadata = content["file_metadata"]
+            sha1_hash_data = file_metadata["data"]["sha1_hash"]
+
+            if sha1_hash_data != hash_bytes(data=binary_data):
+                raise ValueError("Hash mismatch between local SHA1 and remote SHA1.")
+
+            buf = BytesIO(binary_data)
+            json_str = decompress_str(data=content["metadata"])
+            metadata = json.loads(json_str)
+            dataset = load_dataset(buf)
+
+            return ObsData(data=dataset, metadata=metadata)
+        else:
+            return None
+    else:
+        return get_obs_surface_local(
+            site=site,
+            species=species,
+            start_date=start_date,
+            end_date=end_date,
+            inlet=inlet,
+            average=average,
+            network=network,
+            instrument=instrument,
+            calibration_scale=calibration_scale,
+            keep_missing=keep_missing,
+            skip_ranking=skip_ranking,
+        )
+
+
+def get_obs_surface_local(
+    site: str,
+    species: str,
+    inlet: Optional[str] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
+    average: Optional[str] = None,
+    network: Optional[str] = None,
+    instrument: Optional[str] = None,
+    calibration_scale: Optional[str] = None,
+    keep_missing: Optional[bool] = False,
+    skip_ranking: Optional[bool] = False,
+) -> Optional[ObsData]:
+    """This is the equivalent of the get_obs function from the ACRG repository.
+
+    Usage and return values are the same whilst implementation may differ.
+
+    This function should not be used on the OpenGHG Hub.
+
+    Args:
+        site: Site of interest e.g. MHD for the Mace Head site.
+        species: Species identifier e.g. ch4 for methane.
+        start_date: Output start date in a format that Pandas can interpret
+        end_date: Output end date in a format that Pandas can interpret
+        inlet: Inlet label
+        average: Averaging period for each dataset. Each value should be a string of
+        the form e.g. "2H", "30min" (should match pandas offset aliases format).
+        keep_missing: Keep missing data points or drop them.
+        network: Network for the site/instrument (must match number of sites).
+        instrument: Specific instrument for the sipte (must match number of sites).
+        calibration_scale: Convert to this calibration scale
+    Returns:
+        ObsData or None: ObsData object if data found, else None
+    """
     import numpy as np
-    from xarray import concat as xr_concat
-    from openghg.retrieve import search
+    from openghg.retrieve import search_surface
     from openghg.store import recombine_datasets
-    from openghg.util import clean_string, load_json, timestamp_tzaware, synonyms
+    from openghg.util import clean_string, load_json, synonyms, timestamp_tzaware
+    from pandas import Timedelta, Timestamp
+    from xarray import concat as xr_concat
+
+    if running_on_hub():
+        raise ValueError(
+            "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
+        )
 
     site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
@@ -53,7 +165,7 @@ def get_obs_surface(
     species = clean_string(synonyms(species))
 
     # Get the observation data
-    obs_results = search(
+    obs_results = search_surface(
         site=site,
         species=species,
         inlet=inlet,
@@ -102,7 +214,7 @@ def get_obs_surface(
     except AttributeError:
         raise AttributeError("This dataset does not have a time attribute, unable to read date range")
     except IndexError:
-        return ObsData(data=Dataset(), metadata={})
+        return None
 
     if average is not None:
         # GJ - 2021-03-09
@@ -262,7 +374,7 @@ def get_flux(
     """
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
-    from openghg.util import clean_string, timestamp_epoch, timestamp_now, synonyms
+    from openghg.util import clean_string, synonyms, timestamp_epoch, timestamp_now
 
     # Find the correct synonym for the passed species
     species = clean_string(synonyms(species))
@@ -331,7 +443,7 @@ def get_bc(
     """
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
-    from openghg.util import clean_string, timestamp_epoch, timestamp_now, synonyms
+    from openghg.util import clean_string, synonyms, timestamp_epoch, timestamp_now
 
     # Find the correct synonym for the passed species
     species = clean_string(synonyms(species))
@@ -401,16 +513,16 @@ def get_footprint(
     Returns:
         FootprintData: FootprintData dataclass
     """
-    from openghg.store import recombine_datasets
-    from openghg.retrieve import search
     from openghg.dataobjects import FootprintData
+    from openghg.retrieve import search
+    from openghg.store import recombine_datasets
     from openghg.util import clean_string, synonyms
 
     # Find the correct synonym for the passed species
     if species is not None:
         species = clean_string(synonyms(species))
 
-    results = search(
+    results: Dict = search(
         site=site,
         domain=domain,
         height=height,
@@ -464,9 +576,9 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     Returns:
         xarray.Dataset: Dataset with mole fraction data scaled
     """
-    from pandas import read_csv
     from numexpr import evaluate
     from openghg.util import get_datapath
+    from pandas import read_csv
 
     # If scale is already correct, return
     ds_scale = data.attrs["scale"]

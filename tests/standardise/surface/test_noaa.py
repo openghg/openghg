@@ -1,10 +1,14 @@
 import logging
-from pandas import Timestamp
-import pytest
 
-from helpers import get_datapath, parsed_surface_metachecker
+import pytest
+from helpers import (
+    attributes_checker_obssurface,
+    check_cf_compliance,
+    get_datapath,
+    parsed_surface_metachecker,
+)
 from openghg.standardise.surface import parse_noaa
-from helpers import attributes_checker_obssurface, check_cf_compliance
+from pandas import Timestamp
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)

@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple
-from xarray import Dataset
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
+from xarray import Dataset
 
 __all__ = ["DataSchema"]
 

@@ -2,18 +2,17 @@ import datetime
 import os
 import uuid
 from pathlib import Path
-from addict import Dict as aDict
 
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-
-from openghg.store.base import Datasource
-from openghg.standardise.surface import parse_crds
-from openghg.objectstore import get_bucket, get_object_names
-from openghg.util import create_daterange_str, timestamp_tzaware, pairwise, daterange_overlap
+from addict import Dict as aDict
 from helpers import get_datapath
+from openghg.objectstore import get_bucket, get_object_names
+from openghg.standardise.surface import parse_crds
+from openghg.store.base import Datasource
+from openghg.util import create_daterange_str, daterange_overlap, pairwise, timestamp_tzaware
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 mocked_uuid2 = "10000000-0000-0000-00000-000000000001"

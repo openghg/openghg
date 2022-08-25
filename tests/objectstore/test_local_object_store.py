@@ -1,8 +1,8 @@
-import pytest
 from pathlib import Path
 
-from openghg.store import ObsSurface
+import pytest
 from openghg.objectstore import get_bucket, query_store
+from openghg.store import ObsSurface
 
 
 def get_datapath(filename, data_type):

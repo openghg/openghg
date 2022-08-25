@@ -1,11 +1,12 @@
-from typing import Dict, List, Optional, Union
+import json
+from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
+from typing import Dict, List, Optional, Union
+
 from oci.object_storage import ObjectStorageClient
 from oci.response import Response
-from functools import lru_cache
 from openghg.types import ObjectStoreError
-import json
 
 
 def _clean_key(key: str) -> str:
@@ -40,10 +41,11 @@ def _load_config() -> Dict:
     Returns:
         dict: Config as dictionary
     """
-    from json import loads
     import os
-    from cryptography.fernet import Fernet
+    from json import loads
     from pathlib import Path
+
+    from cryptography.fernet import Fernet
     from oci.config import validate_config
     from openghg.objectstore import string_to_bytes
 
@@ -307,10 +309,11 @@ def create_par(
     Returns:
         PAR: OpenGHG wrapper of OSPar
     """
-    from oci.object_storage.models import CreatePreauthenticatedRequestDetails
     from datetime import timedelta
     from uuid import uuid4
-    from openghg.objectstore import get_datetime_now, PAR
+
+    from oci.object_storage.models import CreatePreauthenticatedRequestDetails
+    from openghg.objectstore import PAR, get_datetime_now
 
     oci_config = _load_config()
     object_storage = _load_client()
