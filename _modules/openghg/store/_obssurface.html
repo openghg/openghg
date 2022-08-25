@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g5a4c7d3 documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g25bd747 documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -70,7 +70,7 @@
   
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g5a4c7d3 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g25bd747 documentation</p>
   
 </a>
     
@@ -190,7 +190,8 @@
               <article class="bd-article" role="main">
                 
   <h1>Source code for openghg.store._obssurface</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -200,6 +201,9 @@
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ObsSurface&quot;</span><span class="p">]</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.store&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
 <div class="viewcode-block" id="ObsSurface"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface">[docs]</a><span class="k">class</span> <span class="nc">ObsSurface</span><span class="p">(</span><span class="n">BaseStore</span><span class="p">):</span>
@@ -367,10 +371,10 @@
 
                 <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">&quot;This file has been uploaded previously with the filename : &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
                     <span class="p">)</span>
-                    <span class="k">continue</span>
 
                 <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -402,8 +406,8 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">ObsSurface</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;ERROR: Unable to validate and store data from file: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Unable to validate and store data from file: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
                             <span class="sa">f</span><span class="s2">&quot; Problem with species: </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
                         <span class="p">)</span>
                         <span class="n">validated</span> <span class="o">=</span> <span class="kc">False</span>
@@ -465,6 +469,9 @@
                 <span class="c1">#     results[&quot;error&quot;][data_filepath.name] = traceback.format_exc()</span>
 
                 <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">UUIDs: </span><span class="si">{</span><span class="n">datasource_uuids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Ensure we explicitly close the metadata store</span>
         <span class="c1"># as we&#39;re using the cached storage method</span>
@@ -639,13 +646,13 @@
         <span class="n">seen_before</span> <span class="o">=</span> <span class="p">{</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">obs</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="p">}</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seen_before</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Note: There is no new data to process.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Note: There is no new data to process.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">keys_to_process</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">seen_before</span><span class="p">:</span>
             <span class="c1"># TODO - add this to log</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: We&#39;ve seen </span><span class="si">{</span><span class="n">seen_before</span><span class="si">}</span><span class="s2"> before. Processing new data only.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: We&#39;ve seen </span><span class="si">{</span><span class="n">seen_before</span><span class="si">}</span><span class="s2"> before. Processing new data only.&quot;</span><span class="p">)</span>
             <span class="n">keys_to_process</span> <span class="o">-=</span> <span class="n">seen_before</span>
 
         <span class="n">to_process</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys_to_process</span><span class="p">}</span>
