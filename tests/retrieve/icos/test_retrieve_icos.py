@@ -9,6 +9,7 @@ from icoscp.station.station import Station
 from openghg.cloud import package_from_function
 from openghg.dataobjects import ObsData, SearchResults
 from openghg.retrieve.icos import retrieve_atmospheric
+from openghg.util import get_logfile_path
 
 
 def test_retrieve_icos_cloud(monkeypatch, mocker):
@@ -60,7 +61,7 @@ def test_icos_retrieve_invalid_site(mocker, capfd):
     assert out.rstrip() == "Please check you have passed a valid ICOS site."
 
 
-def test_icos_retrieve_and_store(mocker, capfd):
+def test_icos_retrieve_and_store(mocker):
     pid_csv = get_retrieval_data_file(filename="test_pids_icos.csv.gz")
     pid_df = pd.read_csv(pid_csv)
 
@@ -154,6 +155,5 @@ def test_icos_retrieve_and_store(mocker, capfd):
     # Now we do a force retrieve and make sure we get the correct message printed
     retrieve_atmospheric(site="WAO", force_retrieval=True)
 
-    out, _ = capfd.readouterr()
-
-    assert "There is no new data to process." in out.strip()
+    logfile_data = get_logfile_path().read_text()
+    assert "There is no new data to process." in logfile_data

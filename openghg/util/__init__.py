@@ -13,6 +13,7 @@ from ._file import (
     decompress_json,
     decompress_str,
     get_datapath,
+    get_logfile_path,
     load_emissions_database_parser,
     load_emissions_parser,
     load_json,

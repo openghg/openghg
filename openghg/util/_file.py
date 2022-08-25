@@ -188,3 +188,17 @@ def compress_json(data: Any) -> bytes:
     """
     json_str = json.dumps(data)
     return compress_str(json_str)
+
+
+def get_logfile_path() -> Path:
+    """Get the logfile path
+
+    Returns:
+        Path: Path to logfile
+    """
+    from openghg.util import running_locally
+
+    if running_locally():
+        return Path.home().joinpath("openghg.log")
+    else:
+        return Path("/tmp/openghg.log")
