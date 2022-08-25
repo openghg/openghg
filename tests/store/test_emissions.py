@@ -1,11 +1,10 @@
 import pytest
-from openghg.store import Emissions
-from openghg.retrieve import search
-from openghg.store import recombine_datasets, metastore_manager, datasource_lookup
-from xarray import open_dataset
 from helpers import get_emissions_datapath
-from openghg.util import hash_bytes
 from openghg.objectstore import get_bucket
+from openghg.retrieve import search
+from openghg.store import Emissions, datasource_lookup, metastore_manager, recombine_datasets
+from openghg.util import hash_bytes
+from xarray import open_dataset
 
 
 def test_read_binary_data(mocker):

@@ -20,10 +20,10 @@ def parse_openghg(
     Returns:
         dict: Dictionary of data
     """
-    from xarray import open_dataset
-    from openghg.util import timestamp_now
-    from openghg.store import infer_date_range
     from openghg.standardise.meta import assign_flux_attributes
+    from openghg.store import infer_date_range
+    from openghg.util import timestamp_now
+    from xarray import open_dataset
 
     em_data = open_dataset(filepath)
 

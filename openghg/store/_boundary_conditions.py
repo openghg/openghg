@@ -1,10 +1,15 @@
-from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union, Tuple
-from xarray import Dataset
-import numpy as np
-from tempfile import TemporaryDirectory
+from __future__ import annotations
 
-from openghg.store import DataSchema
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
+
+import numpy as np
+from xarray import Dataset
+
+if TYPE_CHECKING:
+    from openghg.store import DataSchema
+
 from openghg.store.base import BaseStore
 
 __all__ = ["BoundaryConditions"]
@@ -85,13 +90,10 @@ class BoundaryConditions(BaseStore):
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from collections import defaultdict
-        from xarray import open_dataset
+
         from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
-        from openghg.util import (
-            clean_string,
-            hash_file,
-            timestamp_now,
-        )
+        from openghg.util import clean_string, hash_file, timestamp_now
+        from xarray import open_dataset
 
         species = clean_string(species)
         bc_input = clean_string(bc_input)
@@ -211,6 +213,8 @@ class BoundaryConditions(BaseStore):
         Returns:
             DataSchema : Contains schema for BoundaryConditions.
         """
+        from openghg.store import DataSchema
+
         data_vars: Dict[str, Tuple[str, ...]] = {
             "vmr_n": ("time", "height", "lon"),
             "vmr_e": ("time", "height", "lat"),

@@ -1,7 +1,40 @@
 import os
+
 import pytest
-from openghg.util import site_code_finder, verify_site, read_header, to_lowercase
 from openghg.types import InvalidSiteError
+from openghg.util import (
+    read_header,
+    running_in_cloud,
+    running_locally,
+    running_on_hub,
+    site_code_finder,
+    to_lowercase,
+    verify_site,
+)
+
+
+def test_running_locally(monkeypatch):
+    monkeypatch.setenv("OPENGHG_PATH", "/tmp/this_that")
+    assert running_locally()
+
+    monkeypatch.setenv("OPENGHG_CLOUD", "1")
+    monkeypatch.setenv("OPENGHG_HUB", "1")
+
+    assert running_in_cloud()
+    assert running_on_hub()
+
+    assert not running_locally()
+
+    monkeypatch.setenv("OPENGHG_CLOUD", "0")
+
+    assert not running_in_cloud()
+    assert not running_locally()
+
+    monkeypatch.setenv("OPENGHG_HUB", "0")
+
+    assert not running_on_hub()
+
+    assert running_locally()
 
 
 def test_read_header():
@@ -53,7 +86,7 @@ def test_to_lowercase():
     lower = to_lowercase(d)
 
     assert lower == {"this": "isanuppercase", "spam": {"also_big": "foo", "baaar": 123}}
-    
+
     skip_keys = ["THIS"]
 
     with_skipped = to_lowercase(d, skip_keys=skip_keys)
@@ -68,4 +101,3 @@ def test_site_code_finder():
     assert site_code_finder("jungfraujoch") == "JFJ"
 
     assert site_code_finder("nonsensical") is None
-

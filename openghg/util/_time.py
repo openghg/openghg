@@ -1,6 +1,7 @@
 from datetime import date
-from pandas import DataFrame, Timestamp, DatetimeIndex, DateOffset, Timedelta
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
+
+from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
 from xarray import Dataset
 
 __all__ = [
@@ -363,8 +364,8 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
     Returns:
         list: List of dateranges
     """
-    from pandas import Timedelta
     from openghg.util import pairwise
+    from pandas import Timedelta
 
     if not dateranges:
         return []

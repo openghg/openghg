@@ -1,10 +1,10 @@
-from pandas import DataFrame
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
+from openghg.util import running_on_hub
 
 
-def retrieve(
+def retrieve_atmospheric(
     site: str,
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
@@ -30,19 +30,126 @@ def retrieve(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
+        function call environment.
     Returns:
         ObsData, list[ObsData] or None
     """
-    from openghg.retrieve import search
-    from openghg.store import ObsSurface
+    return retrieve(
+        site=site,
+        species=species,
+        sampling_height=sampling_height,
+        start_date=start_date,
+        end_date=end_date,
+        force_retrieval=force_retrieval,
+        data_level=data_level,
+    )
+
+
+def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
+    """Retrieve data from the ICOS Carbon Portal. If data is found in the local object store
+    it will be retrieved from there first.
+
+    This function detects the running environment and routes the call
+    to either the cloud or local search function.
+
+    Example / commonly used arguments are given below.
+
+    Args:
+        site: Site code
+        species: Species name
+        start_date: Start date
+        end_date: End date
+        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
+        data_level: ICOS data level (1, 2)
+        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
+        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
+                        to be distributed through the Carbon Portal.
+                        This level is the ICOS-data product and free available for users.
+        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
+        function call environment.
+    Returns:
+        ObsData, list[ObsData] or None
+    """
+    from io import BytesIO
+
+    from openghg.cloud import call_function, unpackage
+    from xarray import load_dataset
+
+    # The hub is the only place we want to make remote calls
+    if running_on_hub():
+        post_data: Dict[str, Union[str, Dict]] = {}
+        post_data["function"] = "retrieve_icos"
+        post_data["search_terms"] = kwargs
+
+        call_result = call_function(data=post_data)
+
+        content = call_result["content"]
+        found = content["found"]
+
+        if not found:
+            return None
+
+        observations = content["data"]
+
+        obs_data = []
+        for package in observations.values():
+            unpackaged = unpackage(data=package)
+            buf = BytesIO(unpackaged["data"])
+            ds = load_dataset(buf)
+            obs = ObsData(data=ds, metadata=unpackaged["metadata"])
+
+            obs_data.append(obs)
+
+        if len(obs_data) == 1:
+            return obs_data[0]
+        else:
+            return obs_data
+    else:
+        return local_retrieve(**kwargs)
+
+
+def local_retrieve(
+    site: str,
+    species: Optional[Union[str, List]] = None,
+    sampling_height: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    force_retrieval: bool = False,
+    data_level: int = 2,
+    **kwargs: Any,
+) -> Union[ObsData, List[ObsData], None]:
+    """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
+    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
+    If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
+    if returned, if nothing then None.
+
+    Args:
+        site: Site code
+        species: Species name
+        start_date: Start date
+        end_date: End date
+        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
+        data_level: ICOS data level (1, 2)
+        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
+        - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
+                        to be distributed through the Carbon Portal.
+                        This level is the ICOS-data product and free available for users.
+        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+    Returns:
+        ObsData, list[ObsData] or None
+    """
     from openghg.dataobjects import ObsData
+    from openghg.retrieve import search_surface
+    from openghg.store import ObsSurface
     from openghg.util import to_lowercase
 
     if not 1 <= data_level <= 2:
         print("Error: data level must be 1 or 2.")
 
     # NOTE - we skip ranking here, will we be ranking ICOS data?
-    results = search(
+    results = search_surface(
         site=site,
         species=species,
         sampling_height=sampling_height,
@@ -55,7 +162,7 @@ def retrieve(
     )
 
     if results and not force_retrieval:
-        obs_data: Union[ObsData, List[ObsData]] = results.retrieve_all()
+        obs_data = results.retrieve_all()
     else:
         # We'll also need to check we have current data
         standardised_data = _retrieve_remote(site=site, species=species, data_level=data_level)
@@ -105,18 +212,18 @@ def _retrieve_remote(
     """
     # icoscp isn't available to conda so we've got to resort to this for now
     try:
-        from icoscp.station import station  # type: ignore
         from icoscp.cpb.dobj import Dobj  # type: ignore
+        from icoscp.station import station  # type: ignore
     except ImportError:
         raise ImportError(
             "Cannot import icoscp, if you've installed OpenGHG using conda please run: pip install icoscp"
         )
 
-    from openghg.standardise.meta import assign_attributes
-    from openghg.util import load_json, download_data
-    from pandas import to_datetime
-    import json
     import re
+
+    from openghg.standardise.meta import assign_attributes
+    from openghg.util import load_json
+    from pandas import to_datetime
 
     if species is None:
         species = ["CO", "CO2", "CH4"]
@@ -166,58 +273,81 @@ def _retrieve_remote(
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
         # This is the metadata
-        dobj_info = dobj.info
+        dobj_info = dobj.meta
 
-        metadata = _extract_metadata(meta=dobj_info, site_metadata=site_metadata)
+        metadata = {}
 
-        # There's some extra metadata available from their API
-        # that isn't currently (2022-04-28) available using ICOS pylib
-        metadata_url = f"{dobj_url}/meta.json"
-        metadata_bytes = download_data(url=metadata_url)
+        specific_info = dobj_info["specificInfo"]
+        col_data = specific_info["columns"]
 
-        if metadata_bytes is not None:
-            extra_metadata = json.loads(metadata_bytes)
+        for col in col_data:
+            # Find the species
+            for s in species:
+                if col["label"] == s.lower():
+                    measurement_type = col["valueType"]["self"]["label"].lower()
+                    units = col["valueType"]["unit"].lower()
+                    this_species = str(s)
+                    break
 
-            to_add: Dict[str, Union[str, List, Dict]] = {}
+        metadata["species"] = this_species
+        acq_data = specific_info["acquisition"]
+        station_data = acq_data["station"]
 
-            try:
-                reference_data = extra_metadata["references"]
-            except KeyError:
-                to_add["citation_string"] = "NA"
-                to_add["licence"] = "NA"
+        to_store: Dict[str, Any] = {}
+        try:
+            instrument_metadata = acq_data["instrument"]
+        except KeyError:
+            to_store["instrument"] = "NA"
+            to_store["instrument_data"] = "NA"
+        else:
+            # Do some tidying of the instrument metadata
+            instruments = set()
+            cleaned_instrument_metadata = []
+
+            if not isinstance(instrument_metadata, list):
+                instrument_metadata = [instrument_metadata]
+
+            for inst in instrument_metadata:
+                instrument_name = inst["label"]
+                instruments.add(instrument_name)
+                uri = inst["uri"]
+
+                cleaned_instrument_metadata.extend([instrument_name, uri])
+
+            if len(instruments) == 1:
+                instrument = instruments.pop()
             else:
-                to_add["citation_string"] = reference_data.get("citationString", "NA")
-                to_add["licence"] = reference_data.get("licence", {}).get("baseLicence", "NA")
+                instrument = "multiple"
 
-            try:
-                instrument_metadata = extra_metadata["specificInfo"]["acquisition"]["instrument"]
-            except KeyError:
-                to_add["instrument"] = "NA"
-                to_add["instrument_data"] = "NA"
-            else:
-                # Do some tidying of the instrument metadata
-                instruments = set()
-                cleaned_instrument_metadata = []
+            to_store["instrument"] = instrument
+            to_store["instrument_data"] = cleaned_instrument_metadata
 
-                if not isinstance(instrument_metadata, list):
-                    instrument_metadata = [instrument_metadata]
+        metadata.update(to_store)
 
-                for inst in instrument_metadata:
-                    instrument_name = inst["label"]
-                    instruments.add(instrument_name)
-                    uri = inst["uri"]
+        metadata["site"] = station_data["id"]
+        metadata["measurement_type"] = measurement_type
+        metadata["units"] = units
 
-                    cleaned_instrument_metadata.extend([instrument_name, uri])
+        _sampling_height = acq_data["samplingHeight"]
+        metadata["sampling_height"] = f"{int(float(_sampling_height))}m"
+        metadata["inlet_height_magl"] = f"{int(float(_sampling_height))}m"
+        metadata["sampling_height_units"] = "metres"
+        metadata["inlet"] = f"{int(float(_sampling_height))}m"
 
-                if len(instruments) == 1:
-                    instrument = instruments.pop()
-                else:
-                    instrument = "multiple"
+        loc_data = station_data["location"]
+        metadata["station_long_name"] = loc_data["label"]
+        metadata["station_latitude"] = str(loc_data["lat"])
+        metadata["station_longitude"] = str(loc_data["lon"])
+        metadata["station_altitude"] = f"{int(float(loc_data['alt']))}m"
 
-                to_add["instrument"] = instrument
-                to_add["instrument_data"] = cleaned_instrument_metadata
+        site_specific = site_metadata[site.upper()]
+        metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
+        metadata["data_owner_email"] = site_specific["email"]
+        metadata["station_height_masl"] = f"{int(float(site_specific['eas']))}m"
 
-            metadata.update(to_add)
+        metadata["citation_string"] = dobj_info["references"]["citationString"]
+        metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
+        metadata["licence_info"] = dobj_info["references"]["licence"]["url"]
 
         # Add ICOS in directly here for now
         metadata["network"] = "ICOS"
@@ -274,69 +404,24 @@ def _retrieve_remote(
     return standardised_data
 
 
-def _extract_metadata(meta: List, site_metadata: Dict) -> Dict:
-    """Extract metadata from the list of pandas DataFrames that are
-    returned by the ICOS-CP pylib Dobj method.
+# def _read_site_metadata():
+#     """ Read site metadata from object store, if it doesn't exist we'll
+#     retrieve it from the ICOS CP and store it.
 
-    Args:
-        meta: List of dataframes containing metadata
-        site_metadata: Dictionary of site metadata
-    Returns:
-        dict: Dictionary of metadata
-    """
-    # From the ICOS documentation
-    # https://icos-carbon-portal.github.io/pylib/modules/#dobjinfo
-    # info[0] -> information about the dobj like, url, specification, number of rows, related file name.
-    # info[1] -> information about the data like colName, value type, unit, kind
-    # info[2] -> information about the station, where the data was obtained. Name, id, lat, lon etc..
-    spec_data = meta[0]
-    measurement_data = meta[1]
-    site_data = meta[2]
+#     Returns:
+#         dict: Dictionary of site data
+#     """
+#     from openghg.objectstore import get_bucket, get_object_from_json
+#     from openghg.types import ObjectStoreError
+#     from openghg.util import timestamp_now
+# raise NotImplementedError
+#     key = "metadata/icos_atmos_site_metadata"
+#     bucket = get_bucket()
 
-    metadata = {}
-
-    metadata["dobj_pid"] = _get_value(df=spec_data, col="dobj", index=0, lower=False)
-    metadata["species"] = _get_value(df=measurement_data, col="colName", index=4)
-
-    metadata["meas_type"] = _get_value(df=measurement_data, col="valueType", index=4)
-    metadata["units"] = _get_value(df=measurement_data, col="unit", index=4)
-
-    site = _get_value(df=site_data, col="stationId", index=0)
-    sampling_height = _get_value(df=site_data, col="samplingHeight", index=0)
-
-    metadata["site"] = site
-    metadata["station_long_name"] = _get_value(df=site_data, col="stationName", index=0)
-    # ICOS have sampling height as a float, we usually work with ints and an m on the end
-    # should we have a separate sampling_height_units record
-    metadata["sampling_height"] = f"{int(float(sampling_height))}m"
-    metadata["sampling_height_units"] = "metres"
-    metadata["inlet"] = f"{int(float(sampling_height))}m"
-    metadata["station_latitude"] = _get_value(df=site_data, col="latitude", index=0)
-    metadata["station_longitude"] = _get_value(df=site_data, col="longitude", index=0)
-    elevation = _get_value(df=site_data, col="elevation", index=0)
-    metadata["elevation"] = f"{int(float(elevation))}m"
-
-    site_specific = site_metadata[site.upper()]
-    metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
-    metadata["data_owner_email"] = site_specific["email"]
-    metadata["station_height_masl"] = f"{int(float(site_specific['eas']))}m"
-
-    return metadata
-
-
-def _get_value(df: DataFrame, col: str, index: int, lower: bool = True) -> str:
-    """Wrap the retrieval of data from the metadata DataFrame in a try/except
-
-    Args:
-        df: Metadata DataFrame
-        col: Column name
-        index: Index number
-    Returns:
-        str: Metadata value
-    """
-    try:
-        val = str(df[col][index])
-    except (KeyError, TypeError):
-        return "NA"
-    else:
-        return val.lower() if lower else val
+#     try:
+#         data = get_object_from_json(bucket=bucket, key=key)
+#     except ObjectStoreError:
+#         # Retrieve and store
+#         from icoscp import station
+#         station_data = station.getIdList()
+#         metadata = {d.id: dict(d) for _, d in df.iterrows()}

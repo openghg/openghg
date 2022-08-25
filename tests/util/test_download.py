@@ -1,4 +1,4 @@
-from openghg.util import parse_url_filename, download_data
+from openghg.util import download_data, parse_url_filename
 
 
 def test_url_parser():

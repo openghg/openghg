@@ -83,7 +83,7 @@ def glob_files(search_str: str, data_type: str) -> List:
     return files
 
 
-def call_function_packager(status: int, headers: Dict, content: bytes) -> Dict:
+def call_function_packager(status: int, headers: Dict, content: Dict) -> Dict:
     """Packages some data to mock the return value of the openghg.cloud.call_function
 
     Args:

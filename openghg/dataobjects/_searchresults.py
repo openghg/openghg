@@ -1,22 +1,19 @@
-from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
-from xarray import Dataset, open_dataset
+import json
 from io import BytesIO
+from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union, cast
 
 from addict import Dict as aDict
-import json
-
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
-
 from openghg.util import (
     clean_string,
     create_daterange_str,
     find_daterange_gaps,
     first_last_dates,
+    running_on_hub,
     split_daterange_str,
-    running_in_cloud,
 )
-
+from xarray import Dataset, open_dataset
 
 __all__ = ["SearchResults"]
 
@@ -30,13 +27,12 @@ class SearchResults:
     Args:
         results: Search results
         ranked_data: True if results are ranked, else False
-        cloud: True if running in cloud
     """
 
     def __init__(self, results: Optional[Dict] = None, ranked_data: bool = False):
         self.results = results if results is not None else {}
         self.ranked_data = ranked_data
-        self.cloud = running_in_cloud()
+        self.hub = running_on_hub()
 
     def __str__(self) -> str:
         if not self.results:
@@ -77,7 +73,7 @@ class SearchResults:
         return {
             "results": self.results,
             "ranked_data": self.ranked_data,
-            "cloud": self.cloud,
+            "cloud": self.hub,
         }
 
     def to_json(self) -> str:
@@ -250,7 +246,9 @@ class SearchResults:
                 from openghg.retrieve import search
 
                 with_inlet = search(site=site, species=species, inlet=inlet)
-                inlet_data: ObsData = with_inlet.retrieve(site=site, species=species, inlet=inlet)
+                # TODO - remove this cast once we always return a SearchResults object from search
+                with_inlet = cast(SearchResults, with_inlet)
+                inlet_data = with_inlet.retrieve(site=site, species=species, inlet=inlet)
                 return inlet_data
 
             for _site, site_data in self.results.items():
@@ -351,19 +349,19 @@ class SearchResults:
                         unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
 
                         if unranked_slice.time.size > 0:
-                            inlet = unranked_slice["inlet"].values[0]
-                            inlets.add(inlet)
-                            unranked_metadata[dr] = inlet
+                            _inlet = unranked_slice["inlet"].values[0]
+                            inlets.add(_inlet)
+                            unranked_metadata[dr] = _inlet
                             unranked_slices.append(unranked_slice)
 
                     dataset_slices.extend(unranked_slices)
                 else:
                     daterange_str = create_daterange_str(start=first_date, end=last_date)
-                    inlet = unranked_data["inlet"].values[0]
+                    _inlet = unranked_data["inlet"].values[0]
                     inlets.add(inlet)
-                    unranked_metadata[daterange_str] = inlet
+                    unranked_metadata[daterange_str] = _inlet
 
-                    dataset_slices.extend(unranked_data)
+                    dataset_slices.append(unranked_data)
 
                 metadata["rank_metadata"]["unranked"] = unranked_metadata
 
@@ -395,7 +393,7 @@ class SearchResults:
         """
         from openghg.cloud import call_function
 
-        if self.cloud:
+        if self.hub:
             to_post: Dict[str, Union[Dict, List, bool, str]] = {}
             to_post["keys"] = keys
             to_post["sort"] = sort
@@ -408,7 +406,8 @@ class SearchResults:
             result = call_function(data=to_post)
             binary_netcdf = result["content"]["data"]
             buf = BytesIO(binary_netcdf)
-            ds: Dataset = open_dataset(buf).load()
+            # TODO - remove this ignore once xarray have updated their type hints
+            ds: Dataset = open_dataset(buf).load()  # type: ignore
             return ds
         else:
             return recombine_datasets(

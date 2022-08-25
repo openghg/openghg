@@ -1,13 +1,13 @@
-from typing import DefaultDict, Dict, List, Optional, Union, NoReturn, Tuple
+from collections import defaultdict
 from pathlib import Path
-from pandas import Timestamp
-from xarray import Dataset
-import numpy as np
+from tempfile import TemporaryDirectory
+from typing import DefaultDict, Dict, List, NoReturn, Optional, Tuple, Union
 
+import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from collections import defaultdict
-from tempfile import TemporaryDirectory
+from pandas import Timestamp
+from xarray import Dataset
 
 __all__ = ["Footprints"]
 
@@ -223,14 +223,9 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
+        from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
+        from openghg.util import clean_string, hash_file, species_lifetime, timestamp_now
         from xarray import open_dataset
-        from openghg.util import (
-            hash_file,
-            timestamp_now,
-            clean_string,
-            species_lifetime,
-        )
-        from openghg.store import assign_data, infer_date_range, load_metastore, datasource_lookup
 
         filepath = Path(filepath)
 
@@ -332,7 +327,7 @@ class Footprints(BaseStore):
 
         metadata["heights"] = [float(h) for h in fp_data.height.values]
         # Do we also need to save all the variables we have available in this footprints?
-        metadata["variables"] = list(fp_data.keys())
+        metadata["variables"] = list(fp_data.data_vars)
 
         # if model_params is not None:
         #     metadata["model_parameters"] = model_params

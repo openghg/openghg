@@ -14,8 +14,8 @@ def plot_footprint(data: Dataset, label: str = None, vmin: float = None, vmax: f
     Returns:
         None
     """
-    import matplotlib.pyplot as plt
     import matplotlib.colors as colors
+    import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots()
 

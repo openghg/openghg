@@ -1,9 +1,10 @@
 import os
 import tempfile
+
 import pytest
-from helpers import get_datapath, get_emissions_datapath, get_bc_datapath, get_footprint_datapath
+from helpers import get_bc_datapath, get_datapath, get_emissions_datapath, get_footprint_datapath
 from openghg.objectstore import get_bucket
-from openghg.store import ObsSurface, Emissions, BoundaryConditions, Footprints
+from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
 
 
 @pytest.fixture(scope="module", autouse=True)

@@ -25,15 +25,15 @@ The NOAA ObsPack products are collections of observation data from many sites wh
 Ww can query the object store and find all the flask data for example
 
 ```{code-cell} ipython3
-from openghg.client import search
+from openghg.retrieve import search_surface
 
-search(species="ch4", measurement_type="flask", data_type="NOAA", network="NOAA")
+search_surface(species="ch4", measurement_type="flask", data_source="noaa_obspack", network="NOAA")
 ```
 
 Or we can do an all in one search and retrieve using `get_obs_surface`. Here we find CH4 data from Estevan Point, British Columbia, retrieve it and plot it.
 
 ```{code-cell} ipython3
-from openghg.client import get_obs_surface
+from openghg.retrieve import get_obs_surface
 
 data = get_obs_surface(site="HPB", species="ch4", network="NOAA")
 ```

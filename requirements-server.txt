@@ -1,27 +1,3 @@
-addict
-cdsapi
-dask
-folium
-h5py
-h5netcdf
-icoscp
-lazy_import
-matplotlib
-netcdf4
-numexpr
-numpy
-nc-time-axis
-pandas
-paramiko
-plotly
-pyvis
-rapidfuzz
-requests >= 2.25
-scipy
-tinydb
-tqdm
-xarray >= 0.18.2
-urllib3 >= 1.26.3
 # Server specific
 fdk
 uvloop

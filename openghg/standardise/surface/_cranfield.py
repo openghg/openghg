@@ -1,5 +1,5 @@
-from typing import Dict, List, Optional, Union
 from pathlib import Path
+from typing import Dict, List, Optional, Union
 
 
 def parse_cranfield(
@@ -21,8 +21,8 @@ def parse_cranfield(
     Returns:
         dict: Dictionary of gas data
     """
-    from pandas import read_csv
     from openghg.util import clean_string
+    from pandas import read_csv
 
     if sampling_period is None:
         sampling_period = "NOT_SET"

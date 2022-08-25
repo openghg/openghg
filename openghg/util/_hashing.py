@@ -65,6 +65,7 @@ def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
     """
     from hashlib import sha1
     from json import dumps
+
     from openghg.util import timestamp_now
 
     current_timestamp = str(timestamp_now())
