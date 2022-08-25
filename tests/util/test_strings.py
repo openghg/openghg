@@ -3,7 +3,7 @@ from openghg.util import clean_string, is_number
 
 
 def test_clean_string():
-    dirty_string = "tacol-neston"
+    dirty_string = "tacol?neston"
 
     assert clean_string(dirty_string) == "tacolneston"
 
@@ -17,7 +17,7 @@ def test_clean_string():
 
     messy_string = "top_rated-parrot!!!"
 
-    assert clean_string(messy_string) == "top_ratedparrot"
+    assert clean_string(messy_string) == "top_rated-parrot"
 
     model_type = "eulerian_model"
 

@@ -35,7 +35,8 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
         # Removes all whitespace
         cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
         # Removes non-alphanumeric characters but keep underscores
-        cleanest = re.sub(r"\W+", "", cleaner)
+        # cleanest = re.sub(r"\W+", "", cleaner)
+        cleanest = re.sub(r"[^\w-]+", "", cleaner)
     except TypeError:
         return to_clean
 

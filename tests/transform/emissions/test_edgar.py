@@ -53,6 +53,7 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
     if species == "co2":
         # May decide to change this to split into multiple keys
         source_start = '_'.join(folder.split('_')[-2:])
+        source_start = source_start.replace("shortcycle", "short-cycle")
         source = f"{source_start}_anthro"
     else:
         source = "anthro"
