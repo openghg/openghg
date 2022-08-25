@@ -427,7 +427,7 @@ class Footprints(BaseStore):
             # This includes a footprint data with an additional hourly back dimension
             data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
             dtypes["fp_HiTRes"] = np.floating
-            dtypes["H_back"] = np.integer
+            dtypes["H_back"] = np.number  # float or integer
 
         # Includes particle location directions - one for each regional boundary
         if particle_locations:
