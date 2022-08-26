@@ -105,8 +105,7 @@ class ObsColumn(BaseStore):
                  "species": species,
                  "network": network,
                  "instrument": instrument,
-                 "platform": platform,
-                 }
+                 "platform": platform}
 
         obs_data = parser_fn(**param)
 
