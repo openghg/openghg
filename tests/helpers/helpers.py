@@ -1,7 +1,7 @@
 """ Some helper functions for things we do in tests frequently
 """
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 __all__ = [
     "get_datapath",
@@ -86,3 +86,19 @@ def glob_files(search_str: str, data_type: str) -> List:
     files = [str(g) for g in globule]
 
     return files
+
+
+def call_function_packager(status: int, headers: Dict, content: Dict) -> Dict:
+    """Packages some data to mock the return value of the openghg.cloud.call_function
+
+    Args:
+        data: Data to package
+    Returns:
+        bytes:
+    """
+    d = {}
+    d["status"] = status
+    d["headers"] = dict(headers)
+    d["content"] = content
+
+    return d

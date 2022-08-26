@@ -1,5 +1,6 @@
-from typing import Union, Optional, Dict, cast
 from pathlib import Path
+from typing import Dict, Optional, Union, cast
+
 import xarray as xr
 
 
@@ -23,7 +24,7 @@ def parse_openghg(
     At the moment this must also be for a site known to OpenGHG. See
     'acrg_site_info.json' file.
 
-    The arguments specified below are the metadata needed to store this 
+    The arguments specified below are the metadata needed to store this
     surface observation file within the object store. If these keywords are
     not included within the attributes of the netcdf file being passed then
     these arguments must be specified.
@@ -46,7 +47,7 @@ def parse_openghg(
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, load_json
+    from openghg.util import clean_string, load_json, synonyms
     from openghg.standardise.meta import (
         metadata_default_keys,
         define_species_label,
@@ -109,6 +110,7 @@ def parse_openghg(
     # ).lower()
     # # May want to remove the .lower() here and centralise this
     metadata["species"] = define_species_label(metadata["species"])[0]
+
 
     # Update attributes to match metadata after cleaning
     attributes["site"] = metadata["site"]

@@ -1,18 +1,92 @@
-import pytest
-from pandas import Timestamp
-import xarray as xr
 import json
 
-from openghg.store.base import Datasource
+import pytest
+import xarray as xr
+from helpers import attributes_checker_obssurface, get_datapath
+from openghg.objectstore import exists, get_bucket
 from openghg.store import ObsSurface
-from openghg.objectstore import get_local_bucket, exists
+from openghg.store.base import Datasource
 from openghg.util import create_daterange_str
-from helpers import get_datapath, attributes_checker_obssurface
+from pandas import Timestamp
+
+
+def test_different_sampling_periods_diff_datasources():
+    one_min = get_datapath("tac.picarro.1minute.100m.test.dat", data_type="CRDS")
+
+    one_min_res = ObsSurface.read_file(filepath=one_min, site="tac", network="decc", data_type="CRDS")
+
+    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
+
+    for sp, data in min_uuids.items():
+        assert data["new"] is True
+
+    one_hour = get_datapath("tac.picarro.hourly.100m.test.dat", data_type="CRDS")
+
+    one_hour_res = ObsSurface.read_file(filepath=one_hour, site="tac", network="decc", data_type="CRDS")
+
+    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
+
+    for sp, data in hour_uuids.items():
+        assert data["new"] is True
+
+
+def test_read_data(mocker):
+    get_bucket(empty=True)
+    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+
+    # Get some bytes
+    filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    binary_bsd = filepath.read_bytes()
+
+    metadata = {
+        "data_type": "CRDS",
+        "site": "bsd",
+        "network": "DECC",
+    }
+
+    file_metadata = {"filename": "bsd.picarro.1minute.248m.min.dat"}
+
+    result = ObsSurface.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+
+    expected = {
+        "processed": {
+            "bsd.picarro.1minute.248m.min.dat": {
+                "ch4": {"uuid": "test-uuid-1", "new": True},
+                "co2": {"uuid": "test-uuid-2", "new": True},
+                "co": {"uuid": "test-uuid-3", "new": True},
+            }
+        }
+    }
+
+    assert result == expected
+
+    with pytest.raises(ValueError):
+        metadata = {}
+        _ = ObsSurface.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+
+        file_metadata = {}
+        _ = ObsSurface.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+
+
+def test_read_CRDS_incorrent_sampling_period_raises():
+    get_bucket(empty=True)
+
+    filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+
+    with pytest.raises(ValueError):
+        ObsSurface.read_file(
+            filepath=filepath, data_type="CRDS", site="bsd", network="DECC", sampling_period="60"
+        )
+        ObsSurface.read_file(
+            filepath=filepath, data_type="CRDS", site="bsd", network="DECC", sampling_period=60
+        )
+        ObsSurface.read_file(
+            filepath=filepath, data_type="CRDS", site="bsd", network="DECC", sampling_period="twelve-thousand"
+        )
 
 
 def test_read_CRDS():
-    get_local_bucket(empty=True)
-
     filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
     results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
 
@@ -82,7 +156,7 @@ def test_read_CRDS():
 
 
 def test_read_GC():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
@@ -209,7 +283,7 @@ def test_read_GC():
 
 
 def test_read_cranfield():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="THB_hourly_means_test.csv", data_type="Cranfield_CRDS")
 
@@ -264,15 +338,12 @@ def test_read_openghg_format():
     """
     datafile = get_datapath(filename="tac_co2_openghg.nc", data_type="OPENGHG")
 
-    results = ObsSurface.read_file(filepath=datafile,
-                                   data_type="OPENGHG",
-                                   site="TAC",
-                                   network="DECC")
+    results = ObsSurface.read_file(filepath=datafile, data_type="OPENGHG", site="TAC", network="DECC")
 
     uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
 
     co2_data = Datasource.load(uuid=uuid, shallow=False).data()
-    co2_data = co2_data['2012-07-30-17:03:08+00:00_2012-08-03-22:43:07+00:00']
+    co2_data = co2_data["2012-07-30-17:03:08+00:00_2012-08-03-22:43:07+00:00"]
 
     assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
     assert co2_data["co2"][0] == 385.25
@@ -280,7 +351,7 @@ def test_read_openghg_format():
 
 
 def test_read_noaa_raw():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
 
@@ -346,7 +417,7 @@ def test_read_noaa_obspack():
 
 
 def test_read_thames_barrier():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
@@ -376,12 +447,12 @@ def test_read_thames_barrier():
 
 
 def test_delete_Datasource():
-    bucket = get_local_bucket(empty=True)
+    bucket = get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
 
     ObsSurface.read_file(
-        filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period=60
+        filepath=data_filepath, data_type="THAMESBARRIER", site="tmb", network="LGHG", sampling_period="1m"
     )
 
     obs = ObsSurface.load()
@@ -406,7 +477,7 @@ def test_delete_Datasource():
 
 
 def test_add_new_data_correct_datasource():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     data_filepath = get_datapath(filename="capegrim-medusa.05.C", data_type="GC")
     precision_filepath = get_datapath(filename="capegrim-medusa.05.precisions.C", data_type="GC")
@@ -647,23 +718,25 @@ def test_store_icos_carbonportal_data(mocker):
 
     first_result = ObsSurface.store_data(data=data)
 
-    assert first_result == {'co2': {'uuid': 'test-uuid-1', 'new': True}}
+    assert first_result == {"co2": {"uuid": "test-uuid-1", "new": True}}
 
     second_result = ObsSurface.store_data(data=data)
 
     assert second_result is None
 
 
-@pytest.mark.parametrize("species,obs_variable",
-    [("carbon dioxide", "co2"),  # Known species (convert using synonyms)
-     ("radon", "rn"),  # Previous issues (added check)
-     ("c2f6", "c2f6"),  # Previous issues (added check)
-     ("CFC-11", "cfc11"),  # Known CFC (convert using synonyms)
-     ("CFC-999", "cfc999"),  # Unknown CFC (remove '-' during cleaning)
-     ("SF5CF3", "sf5cf3"),  # Unknown species (convert to lower case)
-    ]
+@pytest.mark.parametrize(
+    "species,obs_variable",
+    [
+        ("carbon dioxide", "co2"),  # Known species (convert using synonyms)
+        ("radon", "rn"),  # Previous issues (added check)
+        ("c2f6", "c2f6"),  # Previous issues (added check)
+        ("CFC-11", "cfc11"),  # Known CFC (convert using synonyms)
+        ("CFC-999", "cfc999"),  # Unknown CFC (remove '-' during cleaning)
+        ("SF5CF3", "sf5cf3"),  # Unknown species (convert to lower case)
+    ],
 )
-def test_obs_schema(species,obs_variable):
+def test_obs_schema(species, obs_variable):
     """
     Check expected expected data variables (based on species) are being
     included for default ObsSurface schema.

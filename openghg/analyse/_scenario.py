@@ -41,12 +41,12 @@ If some input types needed for these operations are missing, the user will be al
 on which data types are missing.
 """
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
+from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
 
-from openghg.dataobjects import FluxData, BoundaryConditionsData, FootprintData, ObsData
-from openghg.retrieve import get_flux, get_footprint, get_bc, get_obs_surface, search
-from openghg.util import synonyms
 import numpy as np
+from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
+from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface, search
+from openghg.util import synonyms
 from pandas import Timestamp
 from xarray import DataArray, Dataset
 
@@ -61,6 +61,7 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 # e.g. from_existing_data(), from_search(), empty() , ...
 
 ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
+methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
 class ModelScenario:
@@ -1299,7 +1300,7 @@ class ModelScenario:
                 This data will also be cached as the ModelScenario.modelled_baseline attribute.
                 The associated scenario data will be cached as the ModelScenario.scenario attribute.
         """
-        from openghg.util import time_offset, species_lifetime, check_lifetime_monthly
+        from openghg.util import check_lifetime_monthly, species_lifetime, time_offset
 
         self._check_data_is_present(need=["footprint", "bc"])
         bc = cast(BoundaryConditionsData, self.bc)
@@ -1361,10 +1362,10 @@ class ModelScenario:
                     )
 
             # Ignoring type below -  - problem with xarray patching np.exp to return DataArray rather than ndarray
-            loss_n: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename('loss_n')  # type: ignore
-            loss_e: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename('loss_e')  # type: ignore
-            loss_s: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename('loss_s')  # type: ignore
-            loss_w: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename('loss_w')  # type: ignore
+            loss_n: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_n"] / lifetime_hrs).rename("loss_n")  # type: ignore
+            loss_e: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_e"] / lifetime_hrs).rename("loss_e")  # type: ignore
+            loss_s: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_s"] / lifetime_hrs).rename("loss_s")  # type: ignore
+            loss_w: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename("loss_w")  # type: ignore
 
         else:
 
@@ -1596,7 +1597,7 @@ def _indexes_match(dataset_A: Dataset, dataset_B: Dataset) -> bool:
 
 
 def combine_datasets(
-    dataset_A: Dataset, dataset_B: Dataset, method: str = "ffill", tolerance: Optional[float] = None
+    dataset_A: Dataset, dataset_B: Dataset, method: methodType = "ffill", tolerance: Optional[float] = None
 ) -> Dataset:
     """
     Merges two datasets and re-indexes to the first dataset.
@@ -1632,7 +1633,7 @@ def combine_datasets(
 def match_dataset_dims(
     datasets: Sequence[Dataset],
     dims: Union[str, Sequence] = [],
-    method: str = "nearest",
+    method: methodType = "nearest",
     tolerance: Union[float, Dict[str, float]] = 1e-5,
 ) -> List[Dataset]:
     """
@@ -1688,6 +1689,9 @@ def match_dataset_dims(
     return datasets_aligned
 
 
+# ResType = Union[np.timedelta64, float, np.floating, np.integer]
+
+
 def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
     """
     Calculates the average frequency along a given dimension.
@@ -1699,21 +1703,26 @@ def calc_dim_resolution(dataset: Dataset, dim: str = "time") -> Any:
     Returns:
         np.timedelta64 / np.float / np.int : Resolution with input dtype
 
-        NaT : If unsuccessful and input dtype is np.datetime64
+        NaT : If unsuccessful and input dtype is np.timedelta64
         NaN : If unsuccessful for all other dtypes.
     """
     try:
-        resolution = dataset[dim].diff(dim=dim).mean().values
+        resolution = dataset[dim].diff(dim=dim).mean().item()
     except ValueError:
         if np.issubdtype(dataset[dim].dtype, np.datetime64):
             resolution = np.timedelta64("NaT")
         else:
             resolution = np.NaN
+    else:
+        if np.issubdtype(dataset[dim].dtype, np.datetime64):
+            # Extract units from original datetime string and use to recreate timedelta64
+            unit = dataset[dim].dtype.name.lstrip("timedelta64").lstrip("[").rstrip("]")
+            resolution = np.timedelta64(resolution, unit)
 
     return resolution
 
 
-def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: str = "ffill") -> Dataset:
+def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: methodType = "ffill") -> Dataset:
     """
     Stacks multiple datasets based on the input dimension. By default this is time
     and this will be aligned to the highest resolution / frequency

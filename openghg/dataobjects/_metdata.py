@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from xarray import Dataset
 from typing import Dict
+
+from xarray import Dataset
 
 
 @dataclass(frozen=True)

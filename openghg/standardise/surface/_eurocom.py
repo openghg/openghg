@@ -1,5 +1,5 @@
-from typing import Dict, Optional, Union
 from pathlib import Path
+from typing import Dict, Optional, Union
 
 
 def parse_eurocom(
@@ -23,8 +23,8 @@ def parse_eurocom(
         dict: Dictionary of measurement data
     """
     from openghg.standardise.meta import assign_attributes, get_attributes
-    from pandas import read_csv, Timestamp
-    from openghg.util import read_header, load_json
+    from openghg.util import load_json, read_header
+    from pandas import Timestamp, read_csv
 
     data_filepath = Path(data_filepath)
 

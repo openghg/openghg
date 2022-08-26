@@ -2,14 +2,16 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 
-def parse_openghg(filepath: Path,
-                  species: str,
-                  source: str,
-                  domain: str,
-                  date: Optional[str] = None,
-                  high_time_resolution: Optional[bool] = False,
-                  period: Optional[Union[str, tuple]] = None,
-                  continuous: bool = True) -> Dict:
+def parse_openghg(
+    filepath: Path,
+    species: str,
+    source: str,
+    domain: str,
+    date: Optional[str] = None,
+    high_time_resolution: Optional[bool] = False,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
+) -> Dict:
     """
     Read and parse input emissions data already in OpenGHG format.
 
@@ -18,10 +20,10 @@ def parse_openghg(filepath: Path,
     Returns:
         dict: Dictionary of data
     """
-    from xarray import open_dataset
-    from openghg.util import timestamp_now
-    from openghg.store import infer_date_range
     from openghg.standardise.meta import assign_flux_attributes
+    from openghg.store import infer_date_range
+    from openghg.util import timestamp_now
+    from xarray import open_dataset
 
     em_data = open_dataset(filepath)
 

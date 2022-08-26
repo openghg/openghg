@@ -3,9 +3,10 @@
 
 """
 from typing import Dict, List, Optional, Union
-from xarray.core.coordinates import DatasetCoordinates
+
 import numpy as np
 import xarray as xr
+from xarray.core.coordinates import DatasetCoordinates
 
 __all__ = ["recombine_multisite", "recombine_datasets"]
 
@@ -46,9 +47,9 @@ def recombine_datasets(
     Returns:
         xarray.Dataset: Combined Dataset
     """
-    from xarray import concat as xr_concat
-    from openghg.store.base import Datasource
     from openghg.objectstore import get_bucket
+    from openghg.store.base import Datasource
+    from xarray import concat as xr_concat
 
     if not keys:
         raise ValueError("No data keys passed.")
@@ -101,12 +102,9 @@ def recombine_datasets(
     # This is modified from https://stackoverflow.com/a/51077784/1303032
     unique, index, count = np.unique(combined.time, return_counts=True, return_index=True)
     n_dupes = unique[count > 1].size
-
-    dupes = unique[count > 1]
+    # dupes = unique[count > 1]
 
     if n_dupes > 5:
-        print(keys)
-        print("\n\n\n", dupes)
         raise ValueError("Large number of duplicate timestamps, check data overlap.")
 
     combined = combined.isel(time=index)

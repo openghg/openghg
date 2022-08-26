@@ -1,7 +1,7 @@
+from typing import Any, Dict, Tuple, Union
+
 import numpy as np
 from numpy import ndarray
-from typing import Tuple, Union, Dict, Any
-from openghg.util import get_datapath, load_json
 
 
 def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
@@ -15,6 +15,8 @@ def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
     Returns:
         array, array : Latitude and longitude values for the domain in degrees.
     """
+    from openghg.util import load_json
+
     domain_info = load_json(filename="domain_info.json")
 
     # Look for domain in domain_info file
@@ -57,6 +59,8 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     Returns:
         array: Extracted or derived coordinate values
     """
+    from openghg.util import get_datapath
+
     # Look for explicit file keyword in data e.g. "latitude_file"
     # Extract data from file if found and return
     filename_str = f"{coord}_file"
@@ -93,8 +97,9 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     return coord_data
 
 
-def convert_longitude(longitude: ndarray,
-                      return_index: bool = False) -> Union[ndarray, Tuple[ndarray, ndarray]]:
+def convert_longitude(
+    longitude: ndarray, return_index: bool = False
+) -> Union[ndarray, Tuple[ndarray, ndarray]]:
     """
     Convert longitude extent to -180 - 180 and reorder.
 

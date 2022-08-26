@@ -2,7 +2,7 @@ import contextlib
 import json
 from typing import Dict, Iterator, Optional, Sequence
 
-from openghg.objectstore import exists, get_local_bucket, get_object, set_object_from_json
+from openghg.objectstore import exists, get_bucket, get_object, set_object_from_json
 from tinydb import Storage, TinyDB
 from tinydb.middlewares import CachingMiddleware
 
@@ -41,7 +41,7 @@ class ObjectStorage(Storage):
         self._key = key
 
     def read(self) -> Optional[Dict]:
-        bucket = get_local_bucket()
+        bucket = get_bucket()
         key = self._key
 
         if not exists(bucket=bucket, key=key):
@@ -56,7 +56,7 @@ class ObjectStorage(Storage):
             return None
 
     def write(self, data: Dict) -> None:
-        bucket = get_local_bucket()
+        bucket = get_bucket()
         key = self._key
 
         set_object_from_json(bucket=bucket, key=key, data=data)

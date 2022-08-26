@@ -26,6 +26,7 @@ requirements:
     - h5netcdf
     - lazy_import
     - matplotlib
+    - msgpack-python
     - netcdf4
     - numexpr
     - numpy

@@ -1,44 +1,7 @@
+import bz2
+import json
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional, Callable
-
-# import urllib.request
-# from tqdm import tqdm
-
-
-# class _TqdmUpTo(tqdm):
-#     """Provides `update_to(n)` which uses `tqdm.update(delta_n)`.
-
-#     Modified from https://github.com/tqdm/tqdm#hooks-and-callbacks
-#     """
-
-#     def update_to(self, b: int = 1, bsize: int = 1, tsize: Optional[int] = None):
-#         """
-#         b: Number of blocks transferred so far [default: 1].
-#         bsize: Size of each block (in tqdm units) [default: 1].
-#         tsize: Total size (in tqdm units). If [default: None] remains unchanged.
-#         """
-#         if tsize is not None:
-#             self.total = tsize
-
-#         return self.update(b * bsize - self.n)  # also sets self.n = b * bsize
-
-# def download_file(url: str, download_path: Union[str, Path]) -> Path:
-#     """Downloads a file from the given URL and shows a process bar during download.
-
-#     Args:
-#         url: URL
-#         download_folder: Folder to save file
-#     Returns:
-#         Path: Path to downloaded file
-#     """
-#     filename = url.split("/")[-1]
-
-#     with _TqdmUpTo(
-#         unit="B", unit_scale=True, unit_divisor=1024, miniters=1, desc=filename
-#     ) as t:  # all optional kwargs
-#         _ = urllib.request.urlretrieve(url, filename=download_path, reporthook=t.update_to, data=None)
-
-#     return download_path
+from typing import Any, Callable, Dict, List, Optional, Union
 
 
 def load_parser(data_name:str, module_name: str) -> Callable:
@@ -207,3 +170,85 @@ def read_header(filepath: Union[str, Path], comment_char: str = "#") -> List:
                 break
 
     return header
+
+
+def compress(data: bytes) -> bytes:
+    """Compress the given data
+
+    Args:
+        data: Binary data
+    Returns:
+        bytes: Compressed data
+    """
+    return bz2.compress(data=data)
+
+
+def decompress(data: bytes) -> bytes:
+    """Decompress the given data
+
+    Args:
+        data: Compressed data
+    Returns:
+        bytes: Decompressed data
+    """
+    return bz2.decompress(data=data)
+
+
+def compress_str(s: str) -> bytes:
+    """Compress a string
+
+    Args:
+        s: String
+    Retruns:
+        bytes: Compressed data
+    """
+    return compress(data=s.encode(encoding="utf-8"))
+
+
+def decompress_str(data: bytes) -> str:
+    """Decompress a string from bytes
+
+    Args:
+        data: Compressed data
+    Returns:
+        str: Decompressed str
+    """
+    return decompress(data=data).decode(encoding="utf-8")
+
+
+def decompress_json(data: bytes) -> Any:
+    """Decompress a string and load to JSON
+
+    Args:
+        data: Compressed binary data
+    Returns:
+        Object loaded from JSON
+    """
+    decompressed = decompress_str(data=data)
+    return json.loads(decompressed)
+
+
+def compress_json(data: Any) -> bytes:
+    """Convert object to JSON string and compress
+
+    Args:
+        data: Object to pass to json.dumps
+    Returns:
+        bytes: Compressed binary data
+    """
+    json_str = json.dumps(data)
+    return compress_str(json_str)
+
+
+def get_logfile_path() -> Path:
+    """Get the logfile path
+
+    Returns:
+        Path: Path to logfile
+    """
+    from openghg.util import running_locally
+
+    if running_locally():
+        return Path.home().joinpath("openghg.log")
+    else:
+        return Path("/tmp/openghg.log")

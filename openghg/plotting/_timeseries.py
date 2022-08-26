@@ -1,6 +1,7 @@
 from typing import List, Optional, Union
-from openghg.dataobjects import ObsData
+
 import plotly.graph_objects as go
+from openghg.dataobjects import ObsData
 
 
 def plot_timeseries(
@@ -26,6 +27,7 @@ def plot_timeseries(
         go.Figure: Plotly Graph Object Figure
     """
     from openghg.util import load_json
+
     if not isinstance(data, list):
         data = [data]
 

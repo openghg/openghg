@@ -1,7 +1,8 @@
 """ This file contains the BaseStore class from which other retrieve
     modules inherit.
 """
-from typing import Dict, List, Optional, Union, Type, TypeVar
+from typing import Dict, List, Optional, Type, TypeVar, Union
+
 from pandas import Timestamp
 from tinydb import TinyDB
 
@@ -15,8 +16,8 @@ class BaseStore:
     _uuid = "root_uuid"
 
     def __init__(self) -> None:
-        from openghg.util import timestamp_now
         from addict import Dict as aDict
+        from openghg.util import timestamp_now
 
         self._creation_datetime = timestamp_now()
         self._stored = False
@@ -62,8 +63,8 @@ class BaseStore:
         Returns:
             cls: Class object of cls type
         """
-        from openghg.util import timestamp_tzaware
         from addict import Dict as aDict
+        from openghg.util import timestamp_tzaware
 
         if not data:
             raise ValueError("Unable to create object with empty dictionary")
@@ -195,8 +196,9 @@ class BaseStore:
         Returns:
             dict: Dictionary of rank and daterange covered by that rank
         """
-        from openghg.util import daterange_overlap, create_daterange_str
         from collections import defaultdict
+
+        from openghg.util import create_daterange_str, daterange_overlap
 
         if uuid not in self._rank_data:
             return {}
@@ -251,13 +253,14 @@ class BaseStore:
             None
         """
         from copy import deepcopy
+
         from openghg.util import (
             combine_dateranges,
-            daterange_overlap,
-            trim_daterange,
             daterange_contains,
-            split_encompassed_daterange,
+            daterange_overlap,
             sanitise_daterange,
+            split_encompassed_daterange,
+            trim_daterange,
         )
 
         rank = int(rank)

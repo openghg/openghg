@@ -1,9 +1,15 @@
-from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union, Tuple
-from xarray import Dataset
-import numpy as np
+from __future__ import annotations
 
-from openghg.store import DataSchema
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
+
+import numpy as np
+from xarray import Dataset
+
+if TYPE_CHECKING:
+    from openghg.store import DataSchema
+
 from openghg.store.base import BaseStore
 
 __all__ = ["BoundaryConditions"]
@@ -29,6 +35,30 @@ class BoundaryConditions(BaseStore):
 
         self._stored = True
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
+
+    @staticmethod
+    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Dict:
+        """Ready a footprint from binary data
+
+        Args:
+            binary_data: Footprint data
+            metadata: Dictionary of metadata
+            file_metadat: File metadata
+        Returns:
+            dict: UUIDs of Datasources data has been assigned to
+        """
+        with TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+
+            try:
+                filename = file_metadata["filename"]
+            except KeyError:
+                raise KeyError("We require a filename key for metadata read.")
+
+            filepath = tmpdir_path.joinpath(filename)
+            filepath.write_bytes(binary_data)
+
+            return BoundaryConditions.read_file(filepath=filepath, **metadata)
 
     @staticmethod
     def read_file(
@@ -60,13 +90,10 @@ class BoundaryConditions(BaseStore):
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from collections import defaultdict
-        from xarray import open_dataset
+
         from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
-        from openghg.util import (
-            clean_string,
-            hash_file,
-            timestamp_now,
-        )
+        from openghg.util import clean_string, hash_file, timestamp_now
+        from xarray import open_dataset
 
         species = clean_string(species)
         bc_input = clean_string(bc_input)
@@ -111,11 +138,9 @@ class BoundaryConditions(BaseStore):
         # Currently ACRG boundary conditions are split by month or year
         bc_time = bc_data.time
 
-        start_date, end_date, period_str \
-            = infer_date_range(bc_time,
-                               filepath=filepath,
-                               period=period,
-                               continuous=continuous)
+        start_date, end_date, period_str = infer_date_range(
+            bc_time, filepath=filepath, period=period, continuous=continuous
+        )
 
         if "year" in period_str:
             date = f"{start_date.year}"
@@ -188,22 +213,26 @@ class BoundaryConditions(BaseStore):
         Returns:
             DataSchema : Contains schema for BoundaryConditions.
         """
-        data_vars: Dict[str, Tuple[str, ...]] \
-            = {"vmr_n": ("time", "height", "lon"),
-               "vmr_e": ("time", "height", "lat"),
-               "vmr_s": ("time", "height", "lon"),
-               "vmr_w": ("time", "height", "lat")}
-        dtypes = {"lat": np.floating,
-                  "lon": np.floating,
-                  "height": np.floating,
-                  "time": np.datetime64,
-                  "vmr_n": np.floating,
-                  "vmr_e": np.floating,
-                  "vmr_s": np.floating,
-                  "vmr_w": np.floating}
+        from openghg.store import DataSchema
 
-        data_format = DataSchema(data_vars=data_vars,
-                                 dtypes=dtypes)
+        data_vars: Dict[str, Tuple[str, ...]] = {
+            "vmr_n": ("time", "height", "lon"),
+            "vmr_e": ("time", "height", "lat"),
+            "vmr_s": ("time", "height", "lon"),
+            "vmr_w": ("time", "height", "lat"),
+        }
+        dtypes = {
+            "lat": np.floating,
+            "lon": np.floating,
+            "height": np.floating,
+            "time": np.datetime64,
+            "vmr_n": np.floating,
+            "vmr_e": np.floating,
+            "vmr_s": np.floating,
+            "vmr_w": np.floating,
+        }
+
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
         return data_format
 

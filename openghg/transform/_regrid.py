@@ -1,16 +1,18 @@
 # TODO: Add import for xesmf within specific functions and NOT general import at the top.
 # TODO: Add try-except around xesmf import with helpful error message
 
-import numpy as np
-from numpy import ndarray
-import xarray as xr
-from typing import Union, Optional, Tuple, cast
+from typing import Optional, Tuple, TypeVar, Union, cast
 
-xesmf_error_message = \
-    "Unable to import xesmf for use with regridding algorithms" \
-    "To use transform modules please follow instructions" \
-    "for installing non-python dependencies (requires conda" \
+import numpy as np
+import xarray as xr
+from numpy import ndarray
+
+xesmf_error_message = (
+    "Unable to import xesmf for use with regridding algorithms"
+    "To use transform modules please follow instructions"
+    "for installing non-python dependencies (requires conda"
     "to be installed even if using pip to install other packages)"
+)
 # TODO: Add explicit link to instruction page once created
 
 
@@ -25,8 +27,8 @@ def _getGridCC(lat: ndarray, lon: ndarray) -> Tuple[ndarray, ndarray]:
     dy = np.mean(lat[1:] - lat[:-1])
     lon = np.append(lon, lon[-1] + dx)
     lat = np.append(lat, lat[-1] + dy)
-    lon -= dx / 2.
-    lat -= dy / 2.
+    lon -= dx / 2.0
+    lat -= dy / 2.0
     LON, LAT = np.meshgrid(lon, lat)
     return LON, LAT
 
@@ -42,10 +44,14 @@ def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -> xr.Dataset:
     LON, LAT = np.meshgrid(lon, lat)
     LON_b, LAT_b = _getGridCC(lat, lon)
 
-    grid = xr.Dataset({'lon': (['x', 'y'], LON),
-                       'lat': (['x', 'y'], LAT),
-                       'lon_b': (['x_b', 'y_b'], LON_b),
-                       'lat_b': (['x_b', 'y_b'], LAT_b)})
+    grid = xr.Dataset(
+        {
+            "lon": (["x", "y"], LON),
+            "lat": (["x", "y"], LAT),
+            "lon_b": (["x_b", "y_b"], LON_b),
+            "lat_b": (["x_b", "y_b"], LAT_b),
+        }
+    )
 
     return grid
 
@@ -61,13 +67,21 @@ def convert_to_ndarray(array: Union[ndarray, xr.DataArray]) -> ndarray:
     return values
 
 
-def regrid_uniform_cc(data: Union[ndarray, xr.DataArray],
-                      lat_out: Union[ndarray, xr.DataArray],
-                      lon_out: Union[ndarray, xr.DataArray],
-                      lat_in: Optional[Union[ndarray, xr.DataArray]] = None,
-                      lon_in: Optional[Union[ndarray, xr.DataArray]] = None,
-                      latlon: Optional[list] = None,
-                      method: str = "conservative") -> Union[ndarray, xr.DataArray]:
+# Create types for ndarray or xr.DataArray inputs
+# Using TypeVar means - whichever type is passed in will be the one which is returned.
+ArrayLikeMatch = TypeVar("ArrayLikeMatch", np.ndarray, xr.DataArray)
+ArrayLike = Union[ndarray, xr.DataArray]
+
+
+def regrid_uniform_cc(
+    data: ArrayLikeMatch,
+    lat_out: ArrayLike,
+    lon_out: ArrayLike,
+    lat_in: Optional[ArrayLike] = None,
+    lon_in: Optional[ArrayLike] = None,
+    latlon: Optional[list] = None,
+    method: str = "conservative",
+) -> ArrayLikeMatch:
     """
     Regrid data between two uniform, cell centered grids.
     All coordinates (lat_out, lon_out, lat_in, lon_in) should be for the centre
@@ -108,23 +122,29 @@ def regrid_uniform_cc(data: Union[ndarray, xr.DataArray],
 
         if lat_in is not None:
             if not np.isclose(lat_in, lat_in_extracted):
-                raise ValueError("Input for 'lat_in' should not be supplied if 'data' is a DataArray object.\n"
-                                 "Please check 'lat_out' have been supplied correctly as well.")
+                raise ValueError(
+                    "Input for 'lat_in' should not be supplied if 'data' is a DataArray object.\n"
+                    "Please check 'lat_out' have been supplied correctly as well."
+                )
 
         if lon_in is not None:
             if not np.isclose(lon_in, lon_in_extracted):
-                raise ValueError("Input for 'lon_in' should not be supplied if 'data' is a DataArray object.\n"
-                                 "Please check 'lon_out' has been supplied correctly as well.")
+                raise ValueError(
+                    "Input for 'lon_in' should not be supplied if 'data' is a DataArray object.\n"
+                    "Please check 'lon_out' has been supplied correctly as well."
+                )
 
         lat_in = lat_in_extracted
         lon_in = lon_in_extracted
 
-    lat_in = cast(Union[ndarray, xr.DataArray], lat_in)
-    lon_in = cast(Union[ndarray, xr.DataArray], lon_in)
+    lat_in = cast(ArrayLike, lat_in)
+    lon_in = cast(ArrayLike, lon_in)
 
     if data.shape != (lat_in.size, lon_in.size):
-        raise ValueError(f"Shape of input 'data' {data.shape}"
-                         f"does not match 'lat_in' and 'lon_in' lengths: {len(lat_in)}, {len(lon_in)}")
+        raise ValueError(
+            f"Shape of input 'data' {data.shape}"
+            f"does not match 'lat_in' and 'lon_in' lengths: {len(lat_in)}, {len(lon_in)}"
+        )
 
     lat_in = convert_to_ndarray(lat_in)
     lon_in = convert_to_ndarray(lon_in)
@@ -135,21 +155,20 @@ def regrid_uniform_cc(data: Union[ndarray, xr.DataArray],
     output_grid = _create_xesmf_grid_uniform_cc(lat_out, lon_out)
 
     regridder = xesmf.Regridder(input_grid, output_grid, method)
-    regridded: Union[ndarray, xr.DataArray] = regridder(data)
+    regridded: ArrayLikeMatch = regridder(data)
 
     if isinstance(regridded, xr.DataArray):
         from scipy.sparse import coo_matrix  # type:ignore
 
         # Checking dimensions and mapping back lat_out and lon_out
         # May be overkill but attempting to make sure this is done correctly.
-
         # The regridded DataArray will contain dimensions of ('x', 'y') for
         # data, 'lat' and 'lon' coordinates e.g. lon = [[-10,-10],[0,0]]
         # This is to allow for the generic case where ('lat', 'lon') is not
         # a rectilinear (uniform) grid.
         # Since we are creating a uniform grid we want to flatten this and
         # put data back on ('lat', 'lon') dimension.
-        regridded_stack = regridded.stack(z=('x', 'y'))
+        regridded_stack = regridded.stack(z=("x", "y"))
         lat_coord = regridded_stack["lat"]
         lon_coord = regridded_stack["lon"]
 
@@ -162,13 +181,14 @@ def regrid_uniform_cc(data: Union[ndarray, xr.DataArray],
         # Create a sparse matrix from the flattened data and the lat, lon index values.
         # Reshape to our required lat_out, lon_out and output as a numpy array
         shape = (len(lat_out), len(lon_out))
-        regridded_grid = coo_matrix((regridded_stack.data, (lat_index, lon_index)),
-                                    shape=shape).toarray()
+        regridded_grid = coo_matrix((regridded_stack.data, (lat_index, lon_index)), shape=shape).toarray()
 
-        regridded = xr.DataArray(regridded_grid,
-                            dims=("lat", "lon"),
-                            coords={"lat": lat_out, "lon": lon_out},
-                            attrs=regridded.attrs)
+        regridded = xr.DataArray(
+            regridded_grid,
+            dims=("lat", "lon"),
+            coords={"lat": lat_out, "lon": lon_out},
+            attrs=regridded.attrs,
+        )
 
         # # Alternative, more simplistic approach. May not be generic
         # regridded = regridded.drop(labels=("lat","lon"))

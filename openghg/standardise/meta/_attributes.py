@@ -1,4 +1,5 @@
-from typing import cast, Any, Dict, Optional, List, Tuple, Hashable
+from typing import Any, Dict, Hashable, List, Optional, Tuple, Union, cast
+
 from xarray import Dataset
 
 
@@ -6,7 +7,7 @@ def assign_attributes(
     data: Dict,
     site: Optional[str] = None,
     network: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    sampling_period: Optional[Union[str, float, int]] = None,
 ) -> Dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
     are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
@@ -21,7 +22,7 @@ def assign_attributes(
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
-    from openghg.standardise.meta import surface_standardise
+    from openghg.standardise.meta import sync_surface_metadata
 
     for key, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
@@ -54,7 +55,7 @@ def assign_attributes(
 
         attrs = measurement_data.attrs
 
-        gas_data["metadata"] = surface_standardise(metadata=metadata, attributes=attrs)
+        gas_data["metadata"] = sync_surface_metadata(metadata=metadata, attributes=attrs)
 
     return data
 
@@ -67,7 +68,7 @@ def get_attributes(
     global_attributes: Dict[str, str] = None,
     units: str = None,
     scale: str = None,
-    sampling_period: str = None,
+    sampling_period: Optional[Union[str, float, int]] = None,
     date_range: List[str] = None,
 ) -> Dataset:
     """
@@ -96,8 +97,8 @@ def get_attributes(
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
     """
-    from pandas import Timestamp as pd_Timestamp
     from openghg.util import load_json, timestamp_now
+    from pandas import Timestamp as pd_Timestamp
 
     if not isinstance(ds, Dataset):
         raise TypeError("This function only accepts xarray Datasets")
@@ -166,7 +167,7 @@ def get_attributes(
     if sampling_period is None:
         global_attributes["sampling_period"] = "NOT_SET"
     else:
-        global_attributes["sampling_period"] = sampling_period
+        global_attributes["sampling_period"] = str(sampling_period)
         global_attributes["sampling_period_unit"] = "s"
 
     # Update the Dataset attributes
@@ -277,7 +278,7 @@ def get_attributes(
     )
 
     if sampling_period is not None:
-        time_attributes["sampling_period_seconds"] = sampling_period
+        time_attributes["sampling_period_seconds"] = str(sampling_period)
 
     ds.time.attrs.update(time_attributes)
 
@@ -322,14 +323,15 @@ def define_species_label(species: str) -> Tuple[str, str]:
             ("dch4c13", "DCH4C13")
     """
 
-    from openghg.util import synonyms, clean_string
+    from openghg.util import clean_string, synonyms
 
     # Extract species label using synonyms function
     try:
         species_label = synonyms(species, lower=False, allow_new_species=False)
     except ValueError:
         species_underscore = species.replace(" ", "_")
-        species_label = clean_string(species_underscore)
+        species_remove_dash = species_underscore.replace("-", "")
+        species_label = clean_string(species_remove_dash)
 
     species_label_lower = species_label.lower()
 
@@ -386,12 +388,14 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     return attributes
 
 
-def assign_flux_attributes(data: Dict,
-                           species: Optional[str] = None,
-                           source: Optional[str] = None,
-                           domain: Optional[str] = None,
-                           units: str = "mol/m2/s",
-                           prior_info_dict: Optional[dict] = None) -> Dict:
+def assign_flux_attributes(
+    data: Dict,
+    species: Optional[str] = None,
+    source: Optional[str] = None,
+    domain: Optional[str] = None,
+    units: str = "mol/m2/s",
+    prior_info_dict: Optional[dict] = None,
+) -> Dict:
     """
     Assign attributes for the input flux dataset within dictionary based on
     metadata and passed arguments.
@@ -419,9 +423,7 @@ def assign_flux_attributes(data: Dict,
 
         # Ensure values for these attributes have been specified either manually
         # or within metadata.
-        attribute_values = {"species": species,
-                            "source": source,
-                            "domain": domain}
+        attribute_values = {"species": species, "source": source, "domain": domain}
 
         metadata = flux_dict["metadata"]
         for attr, value in attribute_values.items():
@@ -438,19 +440,21 @@ def assign_flux_attributes(data: Dict,
             units=units,
             prior_info_dict=prior_info_dict,
             global_attributes=flux_attributes,
-            **input_attributes
+            **input_attributes,
         )
 
-    return data  
+    return data
 
 
-def get_flux_attributes(ds: Dataset,
-                        species: str,
-                        source: str,
-                        domain: str,
-                        units: str = "mol/m2/s",
-                        prior_info_dict: Optional[dict] = None,
-                        global_attributes: Optional[Dict[Hashable, Any]] = None) -> Dataset:
+def get_flux_attributes(
+    ds: Dataset,
+    species: str,
+    source: str,
+    domain: str,
+    units: str = "mol/m2/s",
+    prior_info_dict: Optional[dict] = None,
+    global_attributes: Optional[Dict[Hashable, Any]] = None,
+) -> Dataset:
     """
     Assign additional attributes for the flux dataset.
 
@@ -482,30 +486,26 @@ def get_flux_attributes(ds: Dataset,
     # :prior_file_1_version = "/data/shared/Gridded_fluxes/N2O/EDGAR_v4.3.2/v432_N2O_TOTALS_nc/v432_N2O_2004.0.1x0.1.nc" ;
     # :prior_file_1_raw_resolution = "0.1 degree x 0.1 degree" ;
     # :prior_file_1_reference = "http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG" ;
-    # :regridder_used = "acrg_grid.regrid.regrid_3D" ; 
+    # :regridder_used = "acrg_grid.regrid.regrid_3D" ;
 
     from openghg.util import timestamp_now
 
     # Define species variable/coordinate attributes and assign
-    flux_attrs = {"source": source,
-                  "units": units,
-                  "species": species}
+    flux_attrs = {"source": source, "units": units, "species": species}
 
-    lat_attrs = {"long_name" : "latitude",
-                 "units" : "degrees_north",
-                 "notes" : "centre of cell"}
+    lat_attrs = {"long_name": "latitude", "units": "degrees_north", "notes": "centre of cell"}
 
-    lon_attrs = {"long_name" : "longitude",
-                 "units" : "degrees_east",
-                 "notes" : "centre of cell"}
+    lon_attrs = {"long_name": "longitude", "units": "degrees_east", "notes": "centre of cell"}
 
     ds["flux"].attrs = flux_attrs
     ds["lat"].attrs = lat_attrs
     ds["lon"].attrs = lon_attrs
 
     # Define default values for global attributes
-    global_attributes_default: Dict[Hashable, Any] = {"conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
-                                                      "Conventions": "CF-1.8"}
+    global_attributes_default: Dict[Hashable, Any] = {
+        "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+        "Conventions": "CF-1.8",
+    }
 
     if global_attributes is None:
         global_attributes = global_attributes_default

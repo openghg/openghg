@@ -1,8 +1,9 @@
-import pytest
-from openghg.store import METStore
-from openghg.objectstore import get_local_bucket
-from requests_mock import ANY
 from pathlib import Path
+
+import pytest
+from openghg.objectstore import get_bucket
+from openghg.store import METStore
+from requests_mock import ANY
 
 
 @pytest.fixture(scope="session")
@@ -28,7 +29,7 @@ def test_retrieve(met_object):
     met = met_object
 
     # Empty the object store to force retrieval
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     expected_metadata = {
         "product_type": "reanalysis",

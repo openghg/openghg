@@ -1,6 +1,7 @@
 from pathlib import Path
-from openghg.util import bilsdale_datapaths, retrieve_example_data
+
 from helpers import get_datapath
+from openghg.util import bilsdale_datapaths, retrieve_example_data
 
 
 def test_bilsdale_data():

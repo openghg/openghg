@@ -1,13 +1,17 @@
-from openghg.store.base import BaseStore
-from openghg.types import pathType, multiPathType, resultsType
+import logging
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Sequence, Union, Tuple
-from xarray import Dataset
-import numpy as np
+from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
 
+import numpy as np
 from openghg.store import DataSchema
+from openghg.store.base import BaseStore
+from openghg.types import multiPathType, pathType, resultsType
+from xarray import Dataset
 
 __all__ = ["ObsSurface"]
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class ObsSurface(BaseStore):
@@ -16,6 +20,70 @@ class ObsSurface(BaseStore):
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
+
+    @staticmethod
+    def read_data(
+        binary_data: bytes, metadata: Dict, file_metadata: Dict, precision_data: Optional[bytes] = None
+    ) -> Dict:
+        """Reads binary data passed in by serverless function.
+        The data dictionary should contain sub-dictionaries that contain
+        data and metadata keys.
+
+        This is clunky and the ObsSurface.read_file function could
+        be tidied up quite a lot to be more flexible.
+
+        Args:
+            binary_data: Binary measurement data
+            metadata: Metadata
+            file_metadata: File metadata such as original filename
+            precision_data: GCWERKS precision data
+        Returns:
+            dict: Dictionary of result
+        """
+        from tempfile import TemporaryDirectory
+
+        possible_kwargs = {
+            "data_type",
+            "network",
+            "site",
+            "inlet",
+            "instrument",
+            "sampling_period",
+            "measurement_type",
+            "overwrite",
+        }
+
+        # We've got a lot of functions that expect a file and read
+        # metadata from its filename. As Acquire handled all of this behind the scenes
+        # we'll create a temporary directory for now
+        # TODO - add in just passing a filename to prevent all this read / write
+        with TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+
+            try:
+                filename = file_metadata["filename"]
+            except KeyError:
+                raise KeyError("We require a filename key for metadata read.")
+
+            filepath = tmpdir_path.joinpath(filename)
+            filepath.write_bytes(binary_data)
+
+            meta_kwargs = {k: v for k, v in metadata.items() if k in possible_kwargs}
+
+            if not meta_kwargs:
+                raise ValueError("No valid metadata arguments passed, please check documentation.")
+
+            if precision_data is None:
+                result = ObsSurface.read_file(filepath=filepath, **meta_kwargs)
+            else:
+                # We'll assume that if we have precision data it's GCWERKS
+                # We don't read anything from the precision filepath so it's name doesn't matter
+                precision_filepath = tmpdir_path.joinpath("precision_data.C")
+                precision_filepath.write_bytes(precision_data)
+                # Create the expected GCWERKS tuple
+                result = ObsSurface.read_file(filepath=(filepath, precision_filepath), **meta_kwargs)
+
+        return result
 
     @staticmethod
     def read_file(
@@ -28,6 +96,7 @@ class ObsSurface(BaseStore):
         sampling_period: Optional[str] = None,
         measurement_type: str = "insitu",
         overwrite: bool = False,
+        verify_site_code: bool = True,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -44,19 +113,21 @@ class ObsSurface(BaseStore):
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
             overwrite: Overwrite previously uploaded data
+            verify_site_code: Verify the site code
         Returns:
             dict: Dictionary of Datasource UUIDs
         
         TODO: Should "measurement_type" be changed to "platform" to align
         with ModelScenario and ObsColumn?
         """
-        from collections import defaultdict
-        from pandas import Timedelta
         import sys
-        from tqdm import tqdm
-        from openghg.util import load_surface_parser, hash_file, clean_string, verify_site
+        from collections import defaultdict
+
+        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import SurfaceTypes
-        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.util import clean_string, hash_file, load_surface_parser, verify_site
+        from pandas import Timedelta
+        from tqdm import tqdm
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -69,16 +140,21 @@ class ObsSurface(BaseStore):
         # Test that the passed values are valid
         # Check validity of site, instrument, inlet etc in acrg_site_info.json
         # Clean the strings
-        site = verify_site(site=site)
+        site = verify_site(site=site) if verify_site_code else clean_string(site)
         network = clean_string(network)
         inlet = clean_string(inlet)
         instrument = clean_string(instrument)
-        sampling_period = clean_string(sampling_period)
+        # sampling_period = clean_string(sampling_period)
 
         sampling_period_seconds: Union[str, None] = None
         # If we have a sampling period passed we want the number of seconds
         if sampling_period is not None:
             sampling_period_seconds = str(float(Timedelta(sampling_period).total_seconds()))
+
+            if sampling_period_seconds == "0.0":
+                raise ValueError(
+                    "Invalid sampling period result, please pass a valid pandas time such as 1m for 1 minute."
+                )
 
         # Load the data retrieve object
         parser_fn = load_surface_parser(data_type=data_type)
@@ -97,15 +173,18 @@ class ObsSurface(BaseStore):
                     try:
                         data_filepath = Path(fp[0])
                         precision_filepath = Path(fp[1])
-                    except ValueError:
-                        raise ValueError("For GCWERKS data both data and precision filepaths must be given.")
+                    except (ValueError, TypeError):
+                        raise TypeError(
+                            "For GCWERKS data both data and precision filepaths must be given as a tuple."
+                        )
                 else:
                     data_filepath = Path(fp)
 
                 file_hash = hash_file(filepath=data_filepath)
                 if file_hash in obs._file_hashes and overwrite is False:
-                    print(
-                        f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]} - skipping."
+                    logger.warning(
+                        "This file has been uploaded previously with the filename : "
+                        f"{obs._file_hashes[file_hash]} - skipping."
                     )
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
@@ -134,12 +213,14 @@ class ObsSurface(BaseStore):
 
                 # Current workflow: if any species fails, whole filepath fails
                 for key, value in data.items():
-                    species = key.split('_')[0]
+                    species = key.split("_")[0]
                     try:
                         ObsSurface.validate_data(value["data"], species=species)
                     except ValueError:
-                        print(f"ERROR: Unable to validate and store data from file: {data_filepath.name}.",
-                              f" Problem with species: {species}\n")
+                        logger.error(
+                            f"Unable to validate and store data from file: {data_filepath.name}.",
+                            f" Problem with species: {species}\n",
+                        )
                         validated = False
                         break
                 else:
@@ -168,6 +249,7 @@ class ObsSurface(BaseStore):
                 required_keys = (
                     "species",
                     "site",
+                    "sampling_period",
                     "station_long_name",
                     "inlet",
                     "instrument",
@@ -199,13 +281,16 @@ class ObsSurface(BaseStore):
 
                 progress_bar.update(1)
 
+            logger.info(f"Completed processing: {data_filepath.name}.")
+            logger.info(f"\tUUIDs: {datasource_uuids}")
+
         # Ensure we explicitly close the metadata store
         # as we're using the cached storage method
         metastore.close()
         # Save this object back to the object store
         obs.save()
 
-        return results
+        return dict(results)
 
     @staticmethod
     def read_multisite_aqmesh(
@@ -224,10 +309,11 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
-        from openghg.standardise.surface import parse_aqmesh
-        from openghg.store import assign_data, load_metastore, datasource_lookup
-        from openghg.util import hash_file
         from collections import defaultdict
+
+        from openghg.standardise.surface import parse_aqmesh
+        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.util import hash_file
         from tqdm import tqdm
 
         data_filepath = Path(data_filepath)
@@ -317,11 +403,9 @@ class ObsSurface(BaseStore):
         name = define_species_label(species)[0]
 
         data_vars: Dict[str, Tuple[str, ...]] = {name: ("time",)}
-        dtypes = {name: np.floating,
-                 "time": np.datetime64}
+        dtypes = {name: np.floating, "time": np.datetime64}
 
-        data_format = DataSchema(data_vars=data_vars,
-                                 dtypes=dtypes)
+        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
         return data_format
 
@@ -361,7 +445,7 @@ class ObsSurface(BaseStore):
         Returns:
             Dict or None:
         """
-        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.util import hash_retrieved_data
 
         obs = ObsSurface.load()
@@ -373,13 +457,13 @@ class ObsSurface(BaseStore):
         seen_before = {next(iter(v)) for k, v in hashes.items() if k in obs._retrieved_hashes}
 
         if len(seen_before) == len(data):
-            print("Note: There is no new data to process.")
+            logger.warning("Note: There is no new data to process.")
             return None
 
         keys_to_process = set(data.keys())
         if seen_before:
             # TODO - add this to log
-            print(f"Note: We've seen {seen_before} before. Processing new data only.")
+            logger.warning(f"Note: We've seen {seen_before} before. Processing new data only.")
             keys_to_process -= seen_before
 
         to_process = {k: v for k, v in data.items() if k in keys_to_process}

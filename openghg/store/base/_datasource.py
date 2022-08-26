@@ -1,7 +1,8 @@
-from pandas import DataFrame, Timestamp
-from typing import DefaultDict, Dict, List, Optional, Tuple, Union, TypeVar, Type
-from xarray import Dataset
+from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
+
 import numpy as np
+from pandas import DataFrame, Timestamp
+from xarray import Dataset
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
@@ -20,9 +21,10 @@ class Datasource:
     _data_root = "data"
 
     def __init__(self) -> None:
-        from openghg.util import timestamp_now
         from collections import defaultdict
         from uuid import uuid4
+
+        from openghg.util import timestamp_now
 
         self._uuid: str = str(uuid4())
         self._creation_datetime = timestamp_now()
@@ -118,9 +120,9 @@ class Datasource:
         Returns:
             None
         """
+        from numpy import unique as np_unique
         from openghg.util import daterange_overlap
         from xarray import concat as xr_concat
-        from numpy import unique as np_unique
 
         # Group by year
         year_group = data.groupby("time.year")
@@ -191,7 +193,9 @@ class Datasource:
 
                     # TODO: May need to find a way to find period for *last point* rather than *current point*
                     # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
-                    combined_daterange = self.get_representative_daterange_str(dataset=combined, period=period)
+                    combined_daterange = self.get_representative_daterange_str(
+                        dataset=combined, period=period
+                    )
                     combined_datasets[combined_daterange] = combined
 
                 self._data.update(combined_datasets)
@@ -225,8 +229,8 @@ class Datasource:
         Returns:
             tuple (Timestamp, Timestamp): Start and end Timestamps for data
         """
-        from pandas import DatetimeIndex
         from openghg.util import timestamp_tzaware
+        from pandas import DatetimeIndex
 
         if not isinstance(dataframe.index, DatetimeIndex):
             raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
@@ -405,10 +409,11 @@ class Datasource:
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
-        from openghg.objectstore import get_object
-        from xarray import load_dataset
         import tempfile
         from pathlib import Path
+
+        from openghg.objectstore import get_object
+        from xarray import load_dataset
 
         data = get_object(bucket, key)
 
@@ -468,12 +473,8 @@ class Datasource:
         import tempfile
         from copy import deepcopy
 
+        from openghg.objectstore import get_bucket, set_object_from_file, set_object_from_json
         from openghg.util import timestamp_now
-        from openghg.objectstore import (
-            get_bucket,
-            set_object_from_file,
-            set_object_from_json,
-        )
 
         if bucket is None:
             bucket = get_bucket()

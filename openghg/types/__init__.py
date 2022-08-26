@@ -7,11 +7,11 @@ from ._enum import (
     EmissionsDatabases,
     DataTypes,
 )
-from ._types import pathType, multiPathType, resultsType
 from ._errors import (
-    InvalidSiteError,
-    UnknownDataError,
-    FunctionError,
-    ObjectStoreError,
     DatasourceLookupError,
+    FunctionError,
+    InvalidSiteError,
+    ObjectStoreError,
+    UnknownDataError,
 )
+from ._types import multiPathType, pathType, resultsType

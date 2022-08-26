@@ -1,7 +1,8 @@
-from openghg.util import load_json
-from pandas import DataFrame, Timedelta
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
+
+from openghg.util import load_json
+from pandas import DataFrame, Timedelta
 
 
 def parse_crds(
@@ -10,8 +11,9 @@ def parse_crds(
     network: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    sampling_period: Optional[Union[str, float, int]] = None,
     measurement_type: Optional[str] = None,
+    drop_duplicates: bool = True,
 ) -> Dict:
     """Parses a CRDS data file and creates a dictionary of xarray Datasets
     ready for storage in the object store.
@@ -22,12 +24,14 @@ def parse_crds(
         network: Network name
         inlet: Inlet height
         instrument: Instrument name
-        sampling_period: Sampling period e.g. 2 hour: 2H, 2 minute: 2m
+        sampling_period: Sampling period in seconds
         measurement_type: Measurement type e.g. insitu, flask
+        drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
     Returns:
         dict: Dictionary of gas data
     """
     from pathlib import Path
+
     from openghg.standardise.meta import assign_attributes
 
     if not isinstance(data_filepath, Path):
@@ -43,6 +47,7 @@ def parse_crds(
         instrument=instrument,
         sampling_period=sampling_period,
         measurement_type=measurement_type,
+        drop_duplicates=drop_duplicates,
     )
 
     # Ensure the data is CF compliant
@@ -57,8 +62,9 @@ def _read_data(
     network: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    sampling_period: Optional[Union[str, float, int]] = None,
     measurement_type: Optional[str] = None,
+    drop_duplicates: bool = True,
 ) -> Dict:
     """Read the datafile passed in and extract the data we require.
 
@@ -68,14 +74,16 @@ def _read_data(
         network: Network name
         inlet: Inlet height
         instrument: Instrument name
-        sampling_period: Sampling period including the unit (using pandas frequency aliases like '1H' or '1min')
+        sampling_period: Sampling period in seconds
         measurement_type: Measurement type e.g. insitu, flask
+        drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
     Returns:
         dict: Dictionary of gas data
     """
-    from pandas import RangeIndex, read_csv, to_datetime
     import warnings
+
     from openghg.util import clean_string, find_duplicate_timestamps
+    from pandas import RangeIndex, read_csv, to_datetime
 
     split_fname = data_filepath.stem.split(".")
     site = site.lower()
@@ -118,8 +126,10 @@ def _read_data(
 
     dupes = find_duplicate_timestamps(data=data)
 
-    if dupes:
+    if dupes and not drop_duplicates:
         raise ValueError(f"Duplicate dates detected: {dupes}")
+
+    data = data.loc[~data.index.duplicated(keep="first")]
 
     # Get the number of gases in dataframe and number of columns of data present for each gas
     n_gases, n_cols = _gas_info(data=data)
@@ -133,10 +143,12 @@ def _read_data(
         metadata["network"] = network
 
     if sampling_period is not None:
+        sampling_period = float(sampling_period)
         # Compare against value extracted from the file name
-        file_sampling_period = Timedelta(seconds=metadata["sampling_period"])
+        file_sampling_period = Timedelta(seconds=float(metadata["sampling_period"]))
+        given_sampling_period = Timedelta(seconds=sampling_period)
 
-        comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
+        comparison_seconds = abs(given_sampling_period - file_sampling_period).total_seconds()
         tolerance_seconds = 1
 
         if comparison_seconds > tolerance_seconds:
@@ -265,7 +277,22 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
     except KeyError:
         raise ValueError(f"Unable to read attributes for site: {site}")
 
+    # TODO - we need to combine the metadata
+    acrg_site_metadata = load_json(filename="acrg_site_info.json")
+
     attributes = global_attributes.copy()
+
+    try:
+        metadata = acrg_site_metadata[site.upper()]
+    except KeyError:
+        pass
+    else:
+        network_key = next(iter(metadata))
+        site_metadata = metadata[network_key]
+        attributes["station_latitude"] = str(site_metadata["latitude"])
+        attributes["station_longitude"] = str(site_metadata["longitude"])
+        attributes["station_long_name"] = site_metadata["long_name"]
+        attributes["station_height_masl"] = site_metadata["height_station_masl"]
 
     attributes["inlet_height_magl"] = inlet
     attributes["comment"] = crds_metadata["comment"]

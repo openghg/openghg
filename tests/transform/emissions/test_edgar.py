@@ -1,9 +1,8 @@
-import pytest
 import numpy as np
+import pytest
 from helpers import get_emissions_datapath
 from openghg.transform.emissions import parse_edgar
 from openghg.transform.emissions._edgar import _extract_file_info
-
 
 # TODO: Add tests
 # - single sector EDGAR data can be read and intepreted correctly for v6.0
@@ -54,6 +53,7 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
     if species == "co2":
         # May decide to change this to split into multiple keys
         source_start = '_'.join(folder.split('_')[-2:])
+        source_start = source_start.replace("shortcycle", "short-cycle")
         source = f"{source_start}_anthro"
     else:
         source = "anthro"

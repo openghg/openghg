@@ -1,7 +1,7 @@
 """
 Some functions for hashing data or strings for idendification of sources
 """
-from hashlib import sha1
+import hashlib
 from pathlib import Path
 from typing import Dict
 
@@ -14,7 +14,7 @@ def hash_string(to_hash: str) -> str:
     Returns:
         str: SHA1 hash of string
     """
-    return sha1(str(to_hash).encode("utf-8")).hexdigest()
+    return hashlib.sha1(str(to_hash).encode("utf-8")).hexdigest()
 
 
 def hash_file(filepath: Path) -> str:
@@ -27,8 +27,6 @@ def hash_file(filepath: Path) -> str:
     Returns:
         str: SHA1 hash
     """
-    import hashlib
-
     # Let's read stuff in 64kB chunks
     BUF_SIZE = 65536
     sha1 = hashlib.sha1()
@@ -41,6 +39,17 @@ def hash_file(filepath: Path) -> str:
             sha1.update(data)
 
     return sha1.hexdigest()
+
+
+def hash_bytes(data: bytes) -> str:
+    """Calculate the SHA1 sum of some data
+
+    Args:
+        data: Binary data
+    Returns:
+        str: SHA1 hash
+    """
+    return hashlib.sha1(data).hexdigest()
 
 
 def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
@@ -56,6 +65,7 @@ def hash_retrieved_data(to_hash: Dict[str, Dict]) -> Dict:
     """
     from hashlib import sha1
     from json import dumps
+
     from openghg.util import timestamp_now
 
     current_timestamp = str(timestamp_now())

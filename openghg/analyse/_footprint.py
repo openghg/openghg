@@ -2,10 +2,11 @@
 This hopes to recreate the functionality of the ACRG repo function
 footprints_data_merge
 """
-from pandas import Timestamp
-from xarray import Dataset, DataArray
-from typing import Optional, Tuple, Union, Dict, Any, cast
+from typing import Any, Dict, Optional, Tuple, Union, cast
+
 from openghg.dataobjects import FootprintData, ObsData
+from pandas import Timestamp
+from xarray import DataArray, Dataset
 
 # from openghg.dataobjects import FluxData
 
@@ -47,7 +48,7 @@ def single_site_footprint(
     Returns:
         xarray.Dataset
     """
-    from openghg.retrieve import get_obs_surface, get_footprint
+    from openghg.retrieve import get_footprint, get_obs_surface
     from openghg.util import timestamp_tzaware
 
     start_date = timestamp_tzaware(start_date)
@@ -243,10 +244,7 @@ def footprints_data_merge(
     if calc_timeseries:
         combined_dataset = add_timeseries(combined_dataset=combined_dataset, flux_dict=flux_dict)
 
-    return FootprintData(
-        data=combined_dataset,
-        metadata={}
-    )
+    return FootprintData(data=combined_dataset, metadata={})
 
 
 def combine_datasets(
@@ -557,11 +555,12 @@ def timeseries_HiTRes(
      TODO: mypy having trouble with different types options and incompatible types,
      included as Any for now.
     """
-    import numpy as np
-    import dask.array as da  # type: ignore
-    from tqdm import tqdm
-    from pandas import date_range
     from math import gcd
+
+    import dask.array as da  # type: ignore
+    import numpy as np
+    from pandas import date_range
+    from tqdm import tqdm
 
     fp_HiTRes = combined_dataset.fp_HiTRes
 

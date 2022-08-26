@@ -1,8 +1,8 @@
-
 from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple
-from xarray import Dataset
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
+from xarray import Dataset
 
 __all__ = ["DataSchema"]
 
@@ -20,6 +20,7 @@ class DataSchema:
             dims = ["time", "lat", "lon", ...]
         )
     """
+
     # TODO : Change or add additional checks as needed
 
     data_vars: Optional[Dict[str, Tuple[str, ...]]] = None
@@ -54,7 +55,9 @@ class DataSchema:
                 expected_dv_dims = expected_data_vars[edv]
                 for edim in expected_dv_dims:
                     if edim not in dims:
-                        raise ValueError(f"Missing dimension for data variable: {edv}, {edim}. Current dims: {dims}")
+                        raise ValueError(
+                            f"Missing dimension for data variable: {edv}, {edim}. Current dims: {dims}"
+                        )
             else:
                 raise ValueError(f"Expected data variable: {edv} not present in standardised data")
 
@@ -102,11 +105,14 @@ class DataSchema:
             if variable in data:
                 dtype = data[variable].dtype
                 if not np.issubdtype(dtype, edata_type):
-                    raise ValueError(f"Expected data type of variable {variable} to be: {edata_type}. Current {dtype}")
+                    raise ValueError(
+                        f"Expected data type of variable {variable} to be: {edata_type}. Current {dtype}"
+                    )
 
-    def validate_data(self,
-                      data: Dataset,
-                      ) -> None:
+    def validate_data(
+        self,
+        data: Dataset,
+    ) -> None:
         """
         Validate input data based on schema.
 

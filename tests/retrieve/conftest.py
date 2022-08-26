@@ -1,12 +1,12 @@
 import pytest
-from openghg.objectstore import get_local_bucket
-from openghg.store import ObsSurface, Emissions, Footprints
 from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
+from openghg.objectstore import get_bucket
+from openghg.store import Emissions, Footprints, ObsSurface
 
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     # DECC network sites
     network = "DECC"

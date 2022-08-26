@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import Dict, Optional, Union
-import xarray as xr
+from typing import Any, Dict, Hashable, Optional, Union, cast
+
 import numpy as np
+import xarray as xr
 
 
 def parse_noaa(
@@ -173,7 +174,9 @@ def _standarise_variables(obspack_ds: xr.Dataset, species: str) -> xr.Dataset:
     return processed_ds
 
 
-def _split_inlets(obspack_ds: xr.Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None) -> Dict:
+def _split_inlets(
+    obspack_ds: xr.Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None
+) -> Dict:
     """
     Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.
 
@@ -310,8 +313,8 @@ def _read_obspack(
     Returns:
         dict: Dictionary of results
     """
-    from openghg.util import clean_string
     from openghg.standardise.meta import assign_attributes
+    from openghg.util import clean_string
 
     valid_types = ("flask", "insitu", "pfp")
 
@@ -370,6 +373,7 @@ def _read_obspack(
     metadata["species"] = species
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
+    metadata["data_source"] = "noaa_obspack"
 
     # Add additional sampling_period_estimate if sampling_period is not set
     if sampling_period_estimate >= 0.0:
@@ -391,7 +395,7 @@ def _read_obspack(
     metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", "NOT_SET")
 
     # Create attributes with copy of metadata values
-    attributes = metadata.copy()
+    attributes = cast(Dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
 
     # TODO: At the moment all attributes from the NOAA ObsPack are being copied
     # plus any variables we're adding - decide if we want to reduce this
@@ -484,8 +488,8 @@ def _read_raw_data(
     Returns:
         dict: Dictionary containing attributes, data and metadata keys
     """
-    from openghg.util import clean_string, read_header, load_json
-    from pandas import read_csv, Timestamp
+    from openghg.util import clean_string, load_json, read_header
+    from pandas import Timestamp, read_csv
 
     header = read_header(filepath=data_filepath)
 

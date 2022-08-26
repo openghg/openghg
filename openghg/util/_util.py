@@ -1,8 +1,8 @@
 """ Utility functions that are used by multiple modules
 
 """
-from typing import Any, Dict, Tuple, Optional, Iterator
 from collections.abc import Iterable
+from typing import Any, Dict, Iterator, Optional, Tuple
 
 
 def running_in_cloud() -> bool:
@@ -15,9 +15,33 @@ def running_in_cloud() -> bool:
     """
     from os import environ
 
-    cloud_env = environ.get("OPENGHG_CLOUD")
+    cloud_env = environ.get("OPENGHG_CLOUD", "0")
 
-    return cloud_env is not None
+    return bool(int(cloud_env))
+
+
+def running_on_hub() -> bool:
+    """Are we running on the OpenGHG Hub?
+
+    Checks for the OPENGHG_CLOUD environment variable being set
+
+    Returns:
+        bool: True if running in cloud
+    """
+    from os import environ
+
+    hub_env = environ.get("OPENGHG_HUB", "0")
+
+    return bool(int(hub_env))
+
+
+def running_locally() -> bool:
+    """Are we running OpenGHG locally?
+
+    Returns:
+        bool: True if running locally
+    """
+    return not (running_on_hub() or running_in_cloud())
 
 
 def unanimous(seq: Dict) -> bool:
@@ -64,8 +88,8 @@ def site_code_finder(site_name: str) -> Optional[str]:
     Returns:
         str or None: Three letter site code if found
     """
-    from rapidfuzz import process  # type: ignore
     from openghg.util import load_json
+    from rapidfuzz import process  # type: ignore
 
     sites = load_json("site_lookup.json")
 
@@ -127,8 +151,8 @@ def verify_site(site: str) -> str:
     Returns:
         str: Verified three letter site code if valid site
     """
-    from openghg.util import load_json, remove_punctuation
     from openghg.types import InvalidSiteError
+    from openghg.util import load_json, remove_punctuation
 
     site_data = load_json("site_lookup.json")
 

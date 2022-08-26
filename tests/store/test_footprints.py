@@ -1,13 +1,49 @@
 import pytest
-
-from openghg.store import Footprints, recombine_datasets, metastore_manager, datasource_lookup
-from openghg.retrieve import search
-from openghg.objectstore import get_local_bucket
 from helpers import get_footprint_datapath
+from openghg.objectstore import get_bucket
+from openghg.retrieve import search
+from openghg.store import Footprints, datasource_lookup, metastore_manager, recombine_datasets
+from openghg.util import hash_bytes
+
+
+def test_read_footprint_co2_from_data(mocker):
+    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+
+    metadata = {
+        "site": "TAC",
+        "height": "100m",
+        "domain": "TEST",
+        "model": "NAME",
+        "metmodel": "UKV",
+        "species": "co2",
+        "high_time_res": True,
+    }
+
+    binary_data = datapath.read_bytes()
+    sha1_hash = hash_bytes(data=binary_data)
+    filename = datapath.name
+
+    file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": True}
+
+    # Expect co2 data to be high time resolution
+    # - could include high_time_res=True but don't need to as this will be set automatically
+
+    result = Footprints.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+
+    assert result == {"tac_test_NAME_100m": {"uuid": "test-uuid-1", "new": True}}
 
 
 def test_read_footprint_standard():
-    get_local_bucket()
+    """
+    Test standard footprint which should contain (at least)
+     - data variables: "fp"
+     - coordinates: "height", "lat", "lev", "lon", "time"
+    """
+
+    get_bucket()
 
     datapath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
 
@@ -64,7 +100,14 @@ def test_read_footprint_standard():
 
 
 def test_read_footprint_high_spatial_res():
-    get_local_bucket()
+    """
+    Test high spatial resolution footprint
+     - expects additional parameters for `fp_low` and `fp_high`
+     - expects additional coordinates for `lat_high`, `lon_high`
+     - expects keyword attributes to be set
+       - "spatial_resolution": "high_spatial_resolution"
+    """
+    get_bucket()
 
     datapath = get_footprint_datapath("footprint_test.nc")
     # model_params = {"simulation_params": "123"}
@@ -191,16 +234,28 @@ def test_read_footprint_high_spatial_res():
     assert footprint_data["pressure"].min().values == pytest.approx(1011.92)
 
 
-def test_read_footprint_co2():
-    get_local_bucket()
+@pytest.mark.parametrize("site,height,metmodel,start,end,filename",
+                         [("TAC", "100m", "UKV", "2014-07-01 00:00:00+00:00", "2014-07-04 00:59:59+00:00", "TAC-100magl_UKV_co2_TEST_201407.nc"),
+                          ("RGL", "90m", "UKV", "2014-01-10 00:00:00+00:00", "2014-01-12 00:59:59+00:00","RGL-90magl_UKV_co2_TEST_201401.nc"),
+                         ])
+def test_read_footprint_co2(site, height, metmodel, start, end, filename):
+    """
+    Test high spatial resolution footprint
+     - expects additional parameter for `fp_HiTRes`
+     - expects additional coordinate for `H_back`
+     - expects keyword attributes to be set
+       - "spatial_resolution": "high_time_resolution"
+    
+    Two tests included on same domain for CO2:
+    - TAC data - includes H_back as an integer (older style footprint)
+    - RGL data - includes H_back as a float (newer style footprint)
+    """
+    get_bucket()
 
-    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    datapath = get_footprint_datapath(filename)
 
-    site = "TAC"
-    height = "100m"
     domain = "TEST"
     model = "NAME"
-    metmodel = "UKV"
     species = "co2"
 
     # Expect co2 data to be high time resolution
@@ -237,14 +292,14 @@ def test_read_footprint_co2():
     expected_attrs = {
         "author": "OpenGHG Cloud",
         "data_type": "footprints",
-        "site": "tac",
-        "height": "100m",
+        "site": site.lower(),
+        "height": height,
         "model": "NAME",
         "species": "co2",
-        "metmodel": "ukv",
-        "domain": "test",
-        "start_date": "2014-07-01 00:00:00+00:00",
-        "end_date": "2014-07-04 00:59:59+00:00",
+        "metmodel": metmodel.lower(),
+        "domain": domain.lower(),
+        "start_date": start,
+        "end_date": end,
         "max_longitude": 3.476,
         "min_longitude": -0.396,
         "max_latitude": 53.785,
@@ -259,7 +314,7 @@ def test_read_footprint_co2():
 
 
 def test_read_footprint_short_lived():
-    get_local_bucket()
+    get_bucket()
 
     datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
 

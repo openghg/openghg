@@ -1,9 +1,37 @@
 import pytest
-from openghg.store import Emissions
-from openghg.retrieve import search
-from openghg.store import recombine_datasets, metastore_manager, datasource_lookup
-from xarray import open_dataset
 from helpers import get_emissions_datapath
+from openghg.objectstore import get_bucket
+from openghg.retrieve import search
+from openghg.store import Emissions, datasource_lookup, metastore_manager, recombine_datasets
+from openghg.util import hash_bytes
+from xarray import open_dataset
+
+
+def test_read_binary_data(mocker):
+    get_bucket(empty=True)
+    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+
+    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+
+    binary_data = test_datapath.read_bytes()
+
+    metadata = {
+        "species": "co2",
+        "source": "gpp-cardamom",
+        "date": "2012",
+        "domain": "europe",
+        "high_time_resolution": False,
+    }
+
+    sha1_hash = hash_bytes(data=binary_data)
+    filename = test_datapath.name
+
+    file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": False}
+
+    results = Emissions.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+
+    assert results == {"co2_gpp-cardamom_europe_2012": {"uuid": "test-uuid-1", "new": True}}
 
 
 def test_read_file():
@@ -16,9 +44,10 @@ def test_read_file():
         date="2012",
         domain="europe",
         high_time_resolution=False,
+        overwrite=True
     )
 
-    assert "co2_gppcardamom_europe_2012" in proc_results
+    assert "co2_gpp-cardamom_europe_2012" in proc_results
 
     search_results = search(
         species="co2", source="gpp-cardamom", date="2012", domain="europe", data_type="emissions"
@@ -50,7 +79,7 @@ def test_read_file():
         "comments": "fluxes copied from year 2013. december 2012 values copied from january 2013 values.",
         "species": "co2",
         "domain": "europe",
-        "source": "gppcardamom",
+        "source": "gpp-cardamom",
         "date": "2012",
         "start_date": "2012-01-01 00:00:00+00:00",
         "end_date": "2012-12-31 23:59:59+00:00",

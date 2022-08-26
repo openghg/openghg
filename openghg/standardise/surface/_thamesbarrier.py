@@ -1,5 +1,6 @@
-from typing import Dict, Optional
 from pathlib import Path
+from typing import Dict, Optional
+
 from openghg.types import pathType
 
 
@@ -22,8 +23,8 @@ def parse_tmb(
         list: UUIDs of Datasources data has been assigned to
     """
     from openghg.standardise.meta import assign_attributes
-    from pandas import read_csv as pd_read_csv
     from openghg.util import clean_string, load_json
+    from pandas import read_csv as pd_read_csv
 
     if sampling_period is None:
         sampling_period = "NOT_SET"

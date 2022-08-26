@@ -1,25 +1,27 @@
 import re
-import numpy as np
-from numpy import ndarray
-import xarray as xr
-from pathlib import Path
 import zipfile
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
-from typing import Dict, Tuple, Optional, Union, cast
 
+import numpy as np
+import xarray as xr
+from numpy import ndarray
 
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
 
 
-def parse_edgar(datapath: Path,
-                date: str,
-                species: Optional[str] = None,
-                domain: Optional[str] = None,
-                lat_out: ArrayType = None,
-                lon_out: ArrayType = None,
-                # sector: Optional[str] = None,
-                # period: Optional[Union[str, tuple]] = None,
-                edgar_version: Optional[str] = None) -> Dict:
+def parse_edgar(
+    datapath: Path,
+    date: str,
+    species: Optional[str] = None,
+    domain: Optional[str] = None,
+    lat_out: ArrayType = None,
+    lon_out: ArrayType = None,
+    # sector: Optional[str] = None,
+    # period: Optional[Union[str, tuple]] = None,
+    edgar_version: Optional[str] = None,
+) -> Dict:
     """
     Read and parse input EDGAR data.
     Notes: Only accepts annual 2D grid maps in netcdf (.nc) format for now.
@@ -58,21 +60,16 @@ def parse_edgar(datapath: Path,
     TODO: Add monthly parsing and sector stacking options
     """
     import tempfile
-    from openghg.util import (
-        synonyms,
-        molar_mass,
-        timestamp_now,
-        clean_string,
-        convert_longitude)
+
+    from openghg.standardise.meta import assign_flux_attributes, define_species_label
     from openghg.store import infer_date_range
-    from openghg.standardise.meta import define_species_label, assign_flux_attributes
+    from openghg.util import clean_string, convert_longitude, molar_mass, synonyms, timestamp_now
 
     # Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
     # Additional edgar functions which could be incorporated.
     # - getedgarv5annualsectors
     # - getedgarv432annualsectors
     # - (monthly sectors?)
-
     # TODO: Work out how to select frequency
     # - could try and relate to period e.g. "monthly" versus "yearly" etc.
     period = None
@@ -114,8 +111,7 @@ def parse_edgar(datapath: Path,
     data_files = [file for file in folder_filelist if file.suffix == suffix]
 
     if not data_files:
-        raise ValueError("Expect EDGAR '.nc' files."
-                         f"No suitable files found within datapath: {datapath}")
+        raise ValueError("Expect EDGAR '.nc' files." f"No suitable files found within datapath: {datapath}")
 
     for file in data_files:
         try:
@@ -138,12 +134,13 @@ def parse_edgar(datapath: Path,
         species_label = define_species_label(species)[0]
         # species_label = synonyms(species).lower()
     else:
-        raise ValueError("Unable to retrieve species from database filenames."
-                         " Please specify")
+        raise ValueError("Unable to retrieve species from database filenames." " Please specify")
 
     if species_from_file is not None and species_label != synonyms(species_from_file):
-        print("WARNING: Input species does not match species extracted from",
-              " database filenames. Please check.")
+        print(
+            "WARNING: Input species does not match species extracted from",
+            " database filenames. Please check.",
+        )
 
     # If version not yet found, extract version from file naming scheme
     if edgar_version is None:
@@ -152,8 +149,7 @@ def parse_edgar(datapath: Path,
             edgar_version = possible_version
 
     if edgar_version not in known_version:
-        raise ValueError(f"Unable to infer EDGAR version ({edgar_version})."
-                          " Please pass as an argument")
+        raise ValueError(f"Unable to infer EDGAR version ({edgar_version})." " Please pass as an argument")
 
     # TODO: May want to split out into a separate function, so we can use this for
     # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
@@ -189,11 +185,11 @@ def parse_edgar(datapath: Path,
         all_years.sort()
         start_year, end_year = all_years[0], all_years[-1]
         if year < start_year:
-            raise ValueError(f"EDGAR {edgar_version} range: {start_year}-{end_year}."
-                             f" {year} is before this period.")
+            raise ValueError(
+                f"EDGAR {edgar_version} range: {start_year}-{end_year}." f" {year} is before this period."
+            )
         elif year > end_year:
-            print(f"Using last available year from EDGAR {edgar_version} range:"
-                  f"{start_year}-{end_year}.")
+            print(f"Using last available year from EDGAR {edgar_version} range:" f"{start_year}-{end_year}.")
             edgar_file = files_by_year[end_year]
             edgar_file_info = _extract_file_info(edgar_file)
 
@@ -223,7 +219,7 @@ def parse_edgar(datapath: Path,
         edgar_ds = temp
 
     # Expected name e.g. "emi_ch4", "emi_co2"
-    name = f'emi_{species_label}'
+    name = f"emi_{species_label}"
 
     # For reference, from "_readme.html" from v6.0 data:
     # 'Yearly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / year
@@ -240,7 +236,7 @@ def parse_edgar(datapath: Path,
     kg_to_g = 1e3
 
     flux_da = edgar_ds[name]
-    flux_values = flux_da.values * kg_to_g / species_molar_mass
+    flux_values: ndarray[Any, Any] = flux_da.values * kg_to_g / species_molar_mass
     units = "mol/m2/s"
 
     lat_name = "lat"
@@ -249,8 +245,10 @@ def parse_edgar(datapath: Path,
         lat_in = edgar_ds[lat_name].values
         lon_in = edgar_ds[lon_name].values
     except KeyError:
-        raise ValueError(f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
-                          " Please check this is a 2D grid map.")
+        raise ValueError(
+            f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
+            " Please check this is a 2D grid map."
+        )
 
     # Check range of longitude values and convert to -180 - +180
     lon_in, ordinds = convert_longitude(lon_in, return_index=True)
@@ -262,9 +260,7 @@ def parse_edgar(datapath: Path,
 
         # regrid2d() used within acrg code for equivalent regrid function
         # but switched to using xesmf (rather than iris) here instead.
-        flux_values = regrid_uniform_cc(flux_values,
-                                        lat_out, lon_out,
-                                        lat_in, lon_in)
+        flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in, lon_in)
     else:
         lat_out = lat_in
         lon_out = lon_in
@@ -289,9 +285,9 @@ def parse_edgar(datapath: Path,
 
     dims = ("time", "lat", "lon")
 
-    em_data = xr.Dataset({"flux": (dims, flux)},
-                      coords={"time": time, "lat": lat_out, "lon": lon_out},
-                      attrs=edgar_attrs)
+    em_data = xr.Dataset(
+        {"flux": (dims, flux)}, coords={"time": time, "lat": lat_out, "lon": lon_out}, attrs=edgar_attrs
+    )
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -309,7 +305,7 @@ def parse_edgar(datapath: Path,
     if source_from_file in ("TOTALS", ""):
         source = "anthro"
     elif species_label == "co2" and "TOTALS" in source_from_file:
-        co2_source = "_".join(source_from_file.split('_')[:-1])
+        co2_source = "_".join(source_from_file.split("_")[:-1])
         source = clean_string(f"{co2_source}_anthro")
     else:
         source = clean_string(source_from_file)
@@ -328,20 +324,20 @@ def parse_edgar(datapath: Path,
     metadata["author"] = author_name
     metadata["processed"] = str(timestamp_now())
 
-    attrs = {"author": metadata["author"],
-             "processed": metadata["processed"]}
+    attrs = {"author": metadata["author"], "processed": metadata["processed"]}
 
     # Infer the date range associated with the flux data
     em_time = em_data.time
-    start_date, end_date, period_str = infer_date_range(
-        em_time, filepath=edgar_file.name, period=period
-    )
+    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
 
-    prior_info_dict = {"EDGAR": {"version": f"EDGAR {edgar_version}",
-                                 "filename": edgar_file.name,
-                                 "raw_resolution": "0.1 degrees x 0.1 degrees",
-                                 "reference": edgar_ds.attrs["source"]}
-                       }
+    prior_info_dict = {
+        "EDGAR": {
+            "version": f"EDGAR {edgar_version}",
+            "filename": edgar_file.name,
+            "raw_resolution": "0.1 degrees x 0.1 degrees",
+            "reference": edgar_ds.attrs["source"],
+        }
+    }
 
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)
@@ -362,16 +358,14 @@ def parse_edgar(datapath: Path,
     emissions_data[key]["metadata"] = metadata
     emissions_data[key]["attributes"] = attrs
 
-    emissions_data = assign_flux_attributes(emissions_data,
-                                            units=units,
-                                            prior_info_dict=prior_info_dict)
+    emissions_data = assign_flux_attributes(emissions_data, units=units, prior_info_dict=prior_info_dict)
 
     return emissions_data
 
 
-def _check_lat_lon(domain: Optional[str] = None,
-                   lat_out: ArrayType = None,
-                   lon_out: ArrayType = None) -> Tuple[Optional[ndarray], Optional[ndarray]]:
+def _check_lat_lon(
+    domain: Optional[str] = None, lat_out: ArrayType = None, lon_out: ArrayType = None
+) -> Tuple[Optional[ndarray], Optional[ndarray]]:
     """
     Define and check latitude and longitude values for a domain.
 
@@ -397,12 +391,13 @@ def _check_lat_lon(domain: Optional[str] = None,
         ndarray, ndarray: Latitude and longitude arrays
         None, None: if all inputs are None, a tuple of Nones will be returned.
     """
-    from openghg.util import find_domain, convert_longitude
+    from openghg.util import convert_longitude, find_domain
 
     if lat_out is not None or lon_out is not None:
         if domain is None:
-            raise ValueError("Please specify new 'domain' name if selecting new"
-                             " latitude, longitude values")
+            raise ValueError(
+                "Please specify new 'domain' name if selecting new" " latitude, longitude values"
+            )
 
     if isinstance(lat_out, xr.DataArray):
         lat_out = cast(ndarray, lat_out.values)
@@ -419,31 +414,36 @@ def _check_lat_lon(domain: Optional[str] = None,
             # If domain cannot be found and lat, lon values have not been
             # defined raise an error.
             if lat_out is None or lon_out is None:
-                raise ValueError("To create new domain please input"
-                                 " 'lat_out' and 'lon_out' values.")
+                raise ValueError("To create new domain please input" " 'lat_out' and 'lon_out' values.")
         else:
             # Check domain latitude and longitude values against any
             # lat_out and lon_out values specified to check they match.
             if lat_out is not None:
                 if not np.array_equal(lat_domain, lat_out):
-                    raise ValueError("Latitude values should not be specified"
-                                    f" when using pre-defined domain {domain}"
-                                     " (values don't match).")
+                    raise ValueError(
+                        "Latitude values should not be specified"
+                        f" when using pre-defined domain {domain}"
+                        " (values don't match)."
+                    )
             else:
                 lat_out = lat_domain
 
             if lon_out is not None:
                 if not np.array_equal(lon_domain, lon_out):
-                    raise ValueError("Longitude values should not be specified"
-                                    f" when using pre-defined domain {domain}"
-                                     " (values don't match).")
+                    raise ValueError(
+                        "Longitude values should not be specified"
+                        f" when using pre-defined domain {domain}"
+                        " (values don't match)."
+                    )
             else:
                 lon_out = lon_domain
 
             if lon_out.max() > 180 or lon_out.min() < -180:
-                raise ValueError("Invalid domain definition."
-                                 " Expected longitude in range: -180 - 180."
-                                f"Current longitude: {lon_out.min()} - {lon_out.max()}")
+                raise ValueError(
+                    "Invalid domain definition."
+                    " Expected longitude in range: -180 - 180."
+                    f"Current longitude: {lon_out.min()} - {lon_out.max()}"
+                )
 
     if lon_out is not None and (lon_out.max() > 180 or lon_out.min() < -180):
         print("Converting longitude to stay within -180 - 180 bounds")
@@ -459,8 +459,9 @@ def _edgar_known_versions() -> list:
     return known_version
 
 
-def _check_readme_version(datapath: Optional[Path] = None,
-                          zippath: Optional[ZipFile] = None) -> Optional[str]:
+def _check_readme_version(
+    datapath: Optional[Path] = None, zippath: Optional[ZipFile] = None
+) -> Optional[str]:
     """
     Attempts to extract the edgar version from the associated "_readme.html"
     file, if present.
@@ -515,7 +516,7 @@ def _check_readme_version(datapath: Optional[Path] = None,
             # Check against known versions and remove '.' if these don't match.
             known_version = _edgar_known_versions()
             if edgar_version not in known_version:
-                edgar_version = edgar_version.replace('.', '')
+                edgar_version = edgar_version.replace(".", "")
     else:
         edgar_version = None
 
@@ -553,7 +554,7 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     # Extract filename stem (name without extension) and split
     edgar_file = Path(edgar_file)
     filename = edgar_file.stem
-    filename_split = filename.split('_')
+    filename_split = filename.split("_")
 
     # Check if we can extract the known components from the filename
     # - version, species (upper), year
@@ -594,7 +595,7 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
         # filename_split[2] contains the year and resolution
         # e.g. "v50_CH4_2015.0.1x0.1.nc" --> "2015.0.1x0.1"
         try:
-            year = int(year_str.split('.')[0])
+            year = int(year_str.split(".")[0])
         except ValueError:
             raise ValueError(f"Could not find valid year value from file: {filename}")
     else:
@@ -614,15 +615,15 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
     # e.g. "v50_CH4_2015.0.1x0.1.nc" --> "2015.0.1x0.1" (note no source in filename)
     # e.g. "v432_CH4_2010_9_IPCC_6A_6D.0.1x0.1.nc" --> "IPCC_6A_6D.0.1x0.1"
     try:
-        source_resolution = '-'.join(filename_split[index_remaining:])
+        source_resolution = "-".join(filename_split[index_remaining:])
     except (IndexError, ValueError):
         raise ValueError(f"Unable to extract source: {filename}")
     else:
         # e.g. "TOTALS.0.1x0.1" --> "TOTALS", "0.1x0.1"
         # e.g. "2015.0.1x0.1" --> "2015", "0.1x0.1" --> "", "0.1x0.1"
         # e.g. "IPCC_6A_6D.0.1x0.1" --> "IPCC-6A-6D", "0.1x0.1"
-        em_source = source_resolution.split('.')[0]
-        resolution = source_resolution.lstrip(em_source).lstrip('.')
+        em_source = source_resolution.split(".")[0]
+        resolution = source_resolution.lstrip(em_source).lstrip(".")
         # Check source was actually contained in filename and not just the year
         # If so, set source to contain empty string
         if em_source == str(year):
@@ -630,11 +631,13 @@ def _extract_file_info(edgar_file: Union[Path, str]) -> Dict:
         else:
             source += em_source
 
-    file_info = {"version": version,
-                 "species": species,
-                 "year": year,
-                 "source": source,
-                 "resolution": resolution}
+    file_info = {
+        "version": version,
+        "species": species,
+        "year": year,
+        "source": source,
+        "resolution": resolution,
+    }
 
     if month is not None:
         file_info["month"] = month

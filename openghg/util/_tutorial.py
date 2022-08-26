@@ -25,8 +25,9 @@ def retrieve_example_data(
     """Retrieve data from the OpenGHG example data repository and write it to a temporary file
     for reading.
     """
-    import tempfile
     import shutil
+    import tempfile
+
     from openghg.util import download_data, parse_url_filename
 
     url = f"https://github.com/openghg/example_data/raw/main/{path}"

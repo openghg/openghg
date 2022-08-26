@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 import xarray as xr
 from openghg.store import DataSchema
 
@@ -12,7 +12,7 @@ def test_data_schema():
 
     assert data_schema.data_vars == data_vars
     assert data_schema.dtypes is None
-    assert data_schema.dims is None 
+    assert data_schema.dims is None
 
 
 @pytest.fixture(scope="module")
@@ -26,7 +26,7 @@ def dummy_data_1():
     values = np.zeros(shape, dtype=np.float64)
 
     ds = xr.Dataset({"fp": (("time", "lat", "lon"), values)},
-                     coords = {"time": time, "lat": lat, "lon": lon})    
+                     coords = {"time": time, "lat": lat, "lon": lon})
 
     return ds
 
@@ -44,7 +44,7 @@ def data_schema_1():
     data_schema = DataSchema(data_vars=data_vars,
                              dims=dims,
                              dtypes=dtypes)
-    
+
     return data_schema
 
 
@@ -71,6 +71,3 @@ def test_data_schema_empty(dummy_data_1):
     data_schema = DataSchema()
 
     data_schema.validate_data(dummy_data_1)
-
-
-
