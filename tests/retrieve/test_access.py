@@ -1,5 +1,6 @@
 import datetime
 
+import numpy as np
 import pandas as pd
 import pytest
 from helpers import (
@@ -11,7 +12,7 @@ from helpers import (
     metadata_checker_obssurface,
 )
 from openghg.dataobjects import ObsData
-from openghg.retrieve import get_flux, get_footprint, get_obs_surface, search
+from openghg.retrieve import get_flux, get_footprint, get_obs_surface, get_obs_column, search
 from openghg.util import compress, compress_str, hash_bytes
 from pandas import Timedelta, Timestamp
 
@@ -254,6 +255,17 @@ def test_get_obs_surface_cloud(mocker, monkeypatch):
     result = get_obs_surface(site="london", species="hawk")
 
     assert result == mock_obs
+
+
+def test_get_obs_column():
+    column_data = get_obs_column(species="ch4", satellite="gosat")
+
+    obscolumn = column_data.data
+
+    assert "xch4" in obscolumn
+    assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
+    assert np.isclose(obscolumn["xch4"][0], 1844.2019)
+    assert obscolumn.attrs["species"] == "ch4"
 
 
 def test_get_flux():

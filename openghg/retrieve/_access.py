@@ -2,7 +2,12 @@ import json
 from io import BytesIO
 from typing import Dict, List, Optional, Union
 
-from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
+from openghg.dataobjects import (
+    BoundaryConditionsData,
+    FluxData,
+    FootprintData,
+    ObsData,
+    ObsColumnData)
 from openghg.util import decompress, decompress_str, hash_bytes, running_on_hub
 from pandas import Timestamp
 from xarray import Dataset, load_dataset
@@ -347,6 +352,79 @@ def get_obs_surface_local(
     #     print("Suggestion: set calibration_scale to convert scales")
 
     return obs_data
+
+
+def get_obs_column(
+    satellite: Optional[str] = None,
+    domain: Optional[str] = None,
+    selection: Optional[str] = None,
+    site: Optional[str] = None,
+    species: Optional[str] = None,
+    network: Optional[str] = None,
+    instrument: Optional[str] = None,
+    platform: str = "satellite",
+    start_date: Optional[Timestamp] = None,
+    end_date: Optional[Timestamp] = None,
+) -> ObsColumnData:
+    """
+    Extract available column data from the object store using keywords.
+
+    Args:
+        species: Species name
+        source: Source name
+        domain: Domain e.g. EUROPE
+        start_date: Start date
+        end_date: End date
+        time_resolution: One of ["standard", "high"]
+    Returns:
+        ObsColumnData: ObsColumnData object
+    """
+    from openghg.retrieve import search
+    from openghg.store import recombine_datasets
+    from openghg.util import clean_string, synonyms, timestamp_epoch, timestamp_now
+
+    # Find the correct synonym for the passed species
+    species = clean_string(synonyms(species))
+
+    if start_date is None:
+        start_date = timestamp_epoch()
+    if end_date is None:
+        end_date = timestamp_now()
+
+    results: Dict = search(
+        satellite=satellite,
+        domain=domain,
+        selection=selection,
+        site=site,
+        species=species,
+        network=network,
+        instrument=instrument,
+        platform=platform,
+        start_date=start_date,
+        end_date=end_date,
+        data_type="column",
+    )  # type: ignore
+
+    if not results:
+        if satellite is not None:
+            raise ValueError(f"Unable to find obs column data for {species} for {satellite} in {domain} ({selection} if specfied)")
+        elif site is not None:
+            raise ValueError(f"Unable to find obs column data for {species} for {site}")
+
+    try:
+        column_key = list(results.keys())[0]
+    except IndexError:
+        raise ValueError(f"Unable to find obs column data")
+
+    data_keys = results[column_key]["keys"]
+    metadata = results[column_key]["metadata"]
+
+    column_ds = recombine_datasets(keys=data_keys, sort=False)
+
+    if species is None:
+        species = metadata.get("species", "NA")
+
+    return ObsColumnData(data=column_ds, metadata=metadata)
 
 
 def get_flux(
