@@ -302,7 +302,6 @@ def satellite_attribute_translation():
                 "satellite": "platform",
                 "network": "platform",
                 "data_owner": "creator_name",
-                "data_owner_email": "creator_email",
-               }
+                "data_owner_email": "creator_email"}
 
     return keywords
