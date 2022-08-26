@@ -44,3 +44,5 @@ def define_data_type_classes() -> Dict[str, Any]:
         "boundary_conditions": BoundaryConditions,
         "eulerian_model": EulerianModel,
     }
+
+    return data_type_classes

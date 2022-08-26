@@ -263,23 +263,10 @@ def local_search(**kwargs):  # type: ignore
     if data_type not in valid_data_types:
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
-    # data_type_classes = define_data_type_classes()
-    # objclass = data_type_classes[data_type]
-    # obj = objclass.load()
-
-    # Assume we want timeseries data
-    obj: Union[ObsSurface, ObsColumn, Footprints, Emissions, BoundaryConditions, EulerianModel] = ObsSurface.load()
-
-    if data_type == "column":
-        obj = ObsColumn.load()
-    elif data_type == "footprints":
-        obj = Footprints.load()
-    elif data_type == "emissions":
-        obj = Emissions.load()
-    elif data_type == "eulerian_model":
-        obj = EulerianModel.load()
-    elif data_type == "boundary_conditions":
-        obj = BoundaryConditions.load()
+    # Load associated object class (e.g. ObsSurface, Emissions) for data_type
+    data_type_classes = define_data_type_classes()
+    objclass = data_type_classes[data_type]
+    obj = objclass.load()
 
     datasource_uuids = obj.datasources()
 
