@@ -4,7 +4,7 @@ from typing import Dict, Tuple, Any
 __all__ = ["define_data_types", "define_data_type_classes"]
 
 
-def define_data_types() -> Tuple[str]:
+def define_data_types() -> Tuple[str, ...]:
     """
     Define names of data types for objects within OpenGHG
     """
@@ -18,7 +18,7 @@ def define_data_types() -> Tuple[str]:
         "boundary_conditions",
         "eulerian_model"
     )
-    
+
     return data_types
 
 

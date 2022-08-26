@@ -191,19 +191,10 @@ def local_search(**kwargs):  # type: ignore
     from itertools import chain as iter_chain
 
     from addict import Dict as aDict
-    from openghg.store import (
-        BoundaryConditions,
-        Emissions,
-        EulerianModel,
-        Footprints,
-        ObsSurface,
-        ObsColumn,
-    )
     from openghg.store.base import Datasource
     from openghg.util import (
         clean_string,
         find_daterange_gaps,
-        running_on_hub,
         split_daterange_str,
         synonyms,
         timestamp_epoch,

@@ -150,10 +150,8 @@ def get_obs_surface_local(
     """
     import numpy as np
     from openghg.retrieve import search_surface
-    from openghg.store import recombine_datasets
     from openghg.util import clean_string, load_json, synonyms, timestamp_tzaware
-    from pandas import Timedelta, Timestamp
-    from xarray import concat as xr_concat
+    from pandas import Timedelta
 
     if running_on_hub():
         raise ValueError(
@@ -355,11 +353,11 @@ def get_obs_surface_local(
 
 
 def get_obs_column(
+    species: str,
     satellite: Optional[str] = None,
     domain: Optional[str] = None,
     selection: Optional[str] = None,
     site: Optional[str] = None,
-    species: Optional[str] = None,
     network: Optional[str] = None,
     instrument: Optional[str] = None,
     platform: str = "satellite",
@@ -392,11 +390,11 @@ def get_obs_column(
         end_date = timestamp_now()
 
     results: Dict = search(
+        species=species,
         satellite=satellite,
         domain=domain,
         selection=selection,
         site=site,
-        species=species,
         network=network,
         instrument=instrument,
         platform=platform,
@@ -591,7 +589,6 @@ def get_footprint(
     Returns:
         FootprintData: FootprintData dataclass
     """
-    from openghg.dataobjects import FootprintData
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
     from openghg.util import clean_string, synonyms
@@ -675,7 +672,7 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
             f"Scales {ds_scale} and {to_scale} are not both in any one row in acrg_obs_scale_convert.csv for species {species}"
         )
     elif len(scale_converter_scales) > 1:
-        raise ValueError(f"Duplicate rows in acrg_obs_scale_convert.csv?")
+        raise ValueError("Duplicate rows in acrg_obs_scale_convert.csv?")
     else:
         row = scale_converter_scales.index[0]
 
