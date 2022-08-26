@@ -47,7 +47,7 @@ def load_surface_parser(data_type: str) -> Callable:
     return fn
 
 
-def load_column_parser(data_type) -> Callable:
+def load_column_parser(data_type: str) -> Callable:
     """
     Load a parsing object for the obscolumn data type.
     Used with `openghg.standardise.column` sub-module
@@ -63,7 +63,7 @@ def load_column_parser(data_type) -> Callable:
     return fn
 
 
-def load_column_source_parser(data_source) -> Callable:
+def load_column_source_parser(data_source: str) -> Callable:
     """
     Load a parsing object for the source of column data.
     Used with `openghg.transform.column` sub-module
