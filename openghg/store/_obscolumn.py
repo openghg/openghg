@@ -106,7 +106,7 @@ class ObsColumn(BaseStore):
                  "network": network,
                  "instrument": instrument,
                  "platform": platform,
-                }
+                 }
 
         obs_data = parser_fn(**param)
 
