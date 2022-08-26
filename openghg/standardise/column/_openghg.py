@@ -19,7 +19,7 @@ def parse_openghg(
     Parse and extract data from pre-formatted netcdf file which already
     matches expected OpenGHG format.
 
-    The arguments specified below are the metadata needed to store this 
+    The arguments specified below are the metadata needed to store this
     surface observation file within the object store. If these keywords are
     not included within the attributes of the netcdf file being passed then
     these arguments must be specified.
@@ -144,7 +144,7 @@ def parse_openghg(
     metadata["species"] = species
 
     if "site" in metadata:
-        metadata["site"] = clean_string(metadata["site"])    
+        metadata["site"] = clean_string(metadata["site"])
 
     # Define remaining keys needed for metadata
     metadata_needed = [param for param in metadata_required if param not in metadata]
