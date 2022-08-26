@@ -1,4 +1,4 @@
-from typing import Union, Optional, Dict, cast
+from typing import Union, Optional, Dict
 from pathlib import Path
 import xarray as xr
 
@@ -50,7 +50,7 @@ def parse_openghg(
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, load_json
+    from openghg.util import clean_string
     from openghg.standardise.meta import define_species_label
     # from openghg.standardise.meta import metadata_default_keys, assign_attributes
 
@@ -303,6 +303,6 @@ def satellite_attribute_translation():
                 "network": "platform",
                 "data_owner": "creator_name",
                 "data_owner_email": "creator_email",
-    }
+               }
 
     return keywords

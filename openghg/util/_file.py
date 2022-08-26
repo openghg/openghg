@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 
-def load_parser(data_name:str, module_name: str) -> Callable:
+def load_parser(data_name: str, module_name: str) -> Callable:
     """
     Load parse function from within module.
-    
+
     This expects a function of the form to be :
         - parse_{data_name}()
     and for this to have been imported with an appropriate __init__.py module.
@@ -17,7 +17,7 @@ def load_parser(data_name:str, module_name: str) -> Callable:
             parse function.
         module_name: Full module name to be imported e.g.
             "openghg.standardise.surface"
-    
+
     Returns:
         Callable : parse function
     """

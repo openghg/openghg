@@ -116,7 +116,7 @@ class ObsSurface(BaseStore):
             verify_site_code: Verify the site code
         Returns:
             dict: Dictionary of Datasource UUIDs
-        
+
         TODO: Should "measurement_type" be changed to "platform" to align
         with ModelScenario and ObsColumn?
         """

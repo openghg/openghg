@@ -1,10 +1,9 @@
 from pathlib import Path
-from typing import Dict, Optional, Union, Tuple, Any
-from xarray import Dataset, DataArray
-import numpy as np
+from typing import Dict, Optional, Union
+from xarray import DataArray
 from numpy import ndarray
 
-from openghg.store import DataSchema
+# from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 # from openghg.types import multiPathType
 
@@ -106,8 +105,8 @@ class ObsColumn(BaseStore):
                  "species": species,
                  "network": network,
                  "instrument": instrument,
-                 "platform": platform
-        }
+                 "platform": platform,
+                }
 
         obs_data = parser_fn(**param)
 

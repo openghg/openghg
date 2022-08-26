@@ -47,7 +47,7 @@ def parse_openghg(
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, load_json, synonyms
+    from openghg.util import clean_string, load_json
     from openghg.standardise.meta import (
         metadata_default_keys,
         define_species_label,
@@ -110,7 +110,6 @@ def parse_openghg(
     # ).lower()
     # # May want to remove the .lower() here and centralise this
     metadata["species"] = define_species_label(metadata["species"])[0]
-
 
     # Update attributes to match metadata after cleaning
     attributes["site"] = metadata["site"]
