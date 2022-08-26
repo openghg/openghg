@@ -142,6 +142,8 @@ class ObsColumn(BaseStore):
 
         return datasource_uuids
 
+    # TODO: Add in transform method for gosat and tropomi raw data files
+    #  - Included emissions version as starting point to be updated.
     # @staticmethod
     # def transform_data(
     #     datapath: Union[str, Path],
@@ -221,6 +223,7 @@ class ObsColumn(BaseStore):
 
     #     return datasource_uuids
 
+    # TODO: Define and add schema methods for ObsColumn
     # @staticmethod
     # def schema(species: str, platform: str = "satellite") -> DataSchema:
     #     """
