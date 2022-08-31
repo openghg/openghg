@@ -136,6 +136,8 @@ jobs:
         run: |
           mkdir ${{ github.workspace }}/build
           conda build --croot ${{ github.workspace }}/build recipes -c conda-forge
+        env:
+          OPENGHG_PATH: "/tmp/openghg_store"
       - name: Upload to conda
         run: |
           bash recipes/upload.sh
