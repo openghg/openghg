@@ -1,4 +1,4 @@
-from typing import Dict, Set, List, Union, Tuple, Optional, overload
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, overload
 
 __all__ = ["clean_string", "to_lowercase"]
 
@@ -35,7 +35,8 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
         # Removes all whitespace
         cleaner = re.sub(r"\s+", "", to_clean, flags=re.UNICODE).lower()
         # Removes non-alphanumeric characters but keep underscores
-        cleanest = re.sub(r"\W+", "", cleaner)
+        # cleanest = re.sub(r"\W+", "", cleaner)
+        cleanest = re.sub(r"[^\w-]+", "", cleaner)
     except TypeError:
         return to_clean
 
@@ -43,43 +44,56 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
 
 
 @overload
-def to_lowercase(d: Dict) -> Dict:
+def to_lowercase(d: Dict, skip_keys: Optional[List] = None) -> Dict:
     ...
 
 
 @overload
-def to_lowercase(d: List) -> List:
+def to_lowercase(d: List, skip_keys: Optional[List] = None) -> List:
     ...
 
 
 @overload
-def to_lowercase(d: Tuple) -> Tuple:
+def to_lowercase(d: Tuple, skip_keys: Optional[List] = None) -> Tuple:
     ...
 
 
 @overload
-def to_lowercase(d: Set) -> Set:
+def to_lowercase(d: Set, skip_keys: Optional[List] = None) -> Set:
     ...
 
 
 @overload
-def to_lowercase(d: str) -> str:
+def to_lowercase(d: str, skip_keys: Optional[List] = None) -> str:
     ...
 
 
-def to_lowercase(d: Union[Dict, List, Tuple, Set, str]) -> Union[Dict, List, Tuple, Set, str]:
+def to_lowercase(
+    d: Union[Dict, List, Tuple, Set, str], skip_keys: Optional[List] = None
+) -> Union[Dict, List, Tuple, Set, str]:
     """Convert an object to lowercase. All keys and values in a dictionary will be converted
-    to lowercase as will all objects in a list, tuple or set.
+    to lowercase as will all objects in a list, tuple or set. You can optionally pass in a list of keys to
+    skip when lowercasing a dictionary.
 
     Based on the answer https://stackoverflow.com/a/40789531/1303032
 
     Args:
         d: Object to lower case
+        skip_keys: List of keys to skip when lowercasing.
     Returns:
         dict: Dictionary of lower case keys and values
     """
+    if skip_keys is None:
+        skip_keys = []
+
     if isinstance(d, dict):
-        return {k.lower(): to_lowercase(v) for k, v in d.items()}
+        lowercased = {k.lower(): to_lowercase(v) for k, v in d.items() if k not in skip_keys}
+
+        if skip_keys:
+            missing = {k: v for k, v in d.items() if k not in lowercased}
+            lowercased.update(missing)
+
+        return lowercased
     elif isinstance(d, (list, set, tuple)):
         t = type(d)
         return t(to_lowercase(o) for o in d)
@@ -89,7 +103,7 @@ def to_lowercase(d: Union[Dict, List, Tuple, Set, str]) -> Union[Dict, List, Tup
         return d
 
 
-def is_number(s: str) -> bool:
+def is_number(s: Any) -> bool:
     """Is it a number?
 
     https://stackoverflow.com/q/354038
@@ -105,7 +119,7 @@ def is_number(s: str) -> bool:
     try:
         float(s)
         return True
-    except ValueError:
+    except (ValueError, TypeError):
         return False
 
 

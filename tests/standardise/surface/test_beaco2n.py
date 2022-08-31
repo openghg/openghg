@@ -1,9 +1,8 @@
-from openghg.standardise.surface import parse_beaco2n
-from pandas import Timestamp
 import pytest
 from helpers import get_datapath
 from numpy import isnan
-
+from openghg.standardise.surface import parse_beaco2n
+from pandas import Timestamp
 
 # def test_read_file():
 #     beacon = BEACO2N()

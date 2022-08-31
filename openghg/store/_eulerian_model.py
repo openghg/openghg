@@ -1,7 +1,7 @@
-from openghg.store.base import BaseStore
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
-from tinydb import TinyDB
+
+from openghg.store.base import BaseStore
 from xarray import Dataset
 
 __all__ = ["EulerianModel"]
@@ -47,15 +47,11 @@ class EulerianModel(BaseStore):
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
         from collections import defaultdict
-        from openghg.util import (
-            clean_string,
-            hash_file,
-            timestamp_now,
-            timestamp_tzaware,
-        )
-        from openghg.store import assign_data, load_metastore
-        from xarray import open_dataset
+
+        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from pandas import Timestamp as pd_Timestamp
+        from xarray import open_dataset
 
         model = clean_string(model)
         species = clean_string(species)
@@ -151,9 +147,8 @@ class EulerianModel(BaseStore):
         model_data[key]["data"] = em_data
         model_data[key]["metadata"] = metadata
 
-        keyed_metadata = {key: metadata}
-
-        lookup_results = em_store.datasource_lookup(metadata=keyed_metadata, metastore=metastore)
+        required = ("model", "species", "date")
+        lookup_results = datasource_lookup(metastore=metastore, data=model_data, required_keys=required)
 
         data_type = "eulerian_model"
         datasource_uuids = assign_data(
@@ -163,65 +158,12 @@ class EulerianModel(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(
-            uuids=datasource_uuids, metadata=keyed_metadata, metastore=metastore
-        )
+        em_store.add_datasources(uuids=datasource_uuids, data=model_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
 
         em_store.save()
-
         metastore.close()
 
         return datasource_uuids
-
-    def lookup_uuid(self, model: str, species: str, date: str) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
-
-        Args:
-            model: Eulerian model name
-            species: Species name
-            date: Start date associated with model run
-        Returns:
-            str or bool: UUID or False if no entry
-        """
-        uuid = self._datasource_table[model][species][date]
-
-        return uuid if uuid else False
-
-    def set_uuid(self, model: str, species: str, date: str, uuid: str) -> None:
-        """Record a UUID of a Datasource in the datasource table
-
-        Args:
-            model: Eulerian model name
-            species: Species name
-            date: Start date associated with model run
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[model][species][date] = uuid
-
-    def datasource_lookup(self, metadata: Dict, metastore: TinyDB) -> Dict:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        from openghg.retrieve import metadata_lookup
-
-        lookup_results = {}
-
-        for key, data in metadata.items():
-            model = data["model"]
-            species = data["species"]
-            date = data["date"]
-
-            result = metadata_lookup(database=metastore, model=model, species=species, date=date)
-
-            lookup_results[key] = result
-
-        return lookup_results

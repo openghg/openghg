@@ -5,28 +5,34 @@ User API
 This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
 OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.
 
-client
-======
+Data standardisation
+====================
 
-Classes within the client module are used to interact with OpenGHG, whether it be a cloud or local instance.
+The ``standardisation`` submodule handles the standardisation of different data types to the OpenGHG specification.
 
-:func:`~openghg.client.process_files`
-    Upload data files for standardisation and storage in the object store
+.. toctree::
+   :maxdepth: 2
 
-:func:`~openghg.client.search`
-    Search and retrieve data from the object store
+   api_standardise
 
-:func:`~openghg.client.rank_sources`
-    Rank data sources by date range
+Retrieval
+=========
 
-:func:`~openghg.client.get_obs_surface`
-    Retrieve data from the object store in a format expected by the ACRG
+The ``retrieve`` submodule contains the functionality needed to retrieve different data types from the OpenGHG store.
 
+.. toctree::
+   :maxdepth: 3
+
+   api_retrieve
 
 plotting
 ========
 
-These functions are a work in progress, we hope to soon allow users to easily create timeseries and 2D plots using Plotly.
+These are some helper functions to quickly create plots using ObsData objects.
 
-:func:`~openghg.plotting.plot_footprint`
-    Take a footprint dataset and return a 2D plot
+Classes within the client module are used to interact with OpenGHG, whether it be a cloud or local instance.
+
+.. toctree::
+   :maxdepth: 3
+
+   api_plotting

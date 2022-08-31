@@ -3,10 +3,12 @@
 
 """
 
-from typing import Any, Dict, Union
-from tinydb.database import TinyDB
+from typing import Any, Dict, List, Optional, Union, cast
 
-__all__ = ["search"]
+from openghg.dataobjects import SearchResults
+from openghg.util import decompress, running_on_hub
+from openghg.store.spec import define_data_types, define_data_type_classes
+from tinydb.database import TinyDB
 
 
 def _find_and(x: Any, y: Any) -> Any:
@@ -17,43 +19,106 @@ def _find_or(x: Any, y: Any) -> Any:
     return x | y
 
 
-def metadata_lookup(database: TinyDB, **kwargs: Dict) -> Union[bool, str]:
+def metadata_lookup(
+    metadata: Dict, database: TinyDB, additional_metadata: Optional[Dict] = None
+) -> Union[bool, str]:
     """Searches the passed database for the given metadata
 
     Args:
+        metadata: Keys we are required to find
         database: The tinydb database for the storage object
-        **kwargs: Terms to pass to the search of the metastore
-        e.g. site="tac", inlet="15m"
+        additional: Keys we'd like to find (currently unused)
     Returns:
         str or bool: UUID string if matching Datasource found, otherwise False
     """
-    from tinydb import Query
     from functools import reduce
+
     from openghg.types import DatasourceLookupError
+    from tinydb import Query
 
     q = Query()
 
-    search_attrs = [getattr(q, k) == v for k, v in kwargs.items()]
-    result = database.search(reduce(_find_and, search_attrs))
+    search_attrs = [getattr(q, k) == v for k, v in metadata.items()]
+    required_result = database.search(reduce(_find_and, search_attrs))
 
-    if not result:
+    if not required_result:
         return False
 
-    if len(result) > 1:
+    if len(required_result) > 1:
         raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
 
-    uuid: str = result[0]["uuid"]
+    # q = Query()
+
+    # search_attrs = [getattr(q, k) == v for k, v in additional_metadata.items()]
+    # required_results = database.search(reduce(_find_or, search_attrs))
+
+    uuid: str = required_result[0]["uuid"]
 
     return uuid
 
 
-# TODO
-# GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
-# facing interfaces to a more general search function, this would also make it easier to enforce types
-def search(**kwargs):  # type: ignore
+def search_surface(
+    species: Union[str, List[str], None] = None,
+    site: Union[str, List[str], None] = None,
+    inlet: Union[str, List[str], None] = None,
+    instrument: Union[str, List[str], None] = None,
+    measurement_type: Union[str, List[str], None] = None,
+    data_type: Union[str, List[str], None] = None,
+    start_date: Union[str, List[str], None] = None,
+    end_date: Union[str, List[str], None] = None,
+    data_source: Optional[str] = None,
+    **kwargs: Any,
+) -> SearchResults:
+    """Cloud object store search
+
+    Args:
+        species: Species
+        site: Three letter site code
+        inlet: Inlet height
+        instrument: Instrument name
+        measurement_type: Measurement type
+        data_type: Data type e.g. "timeseries", "column", "emissions"
+            See openghg.store.spec.define_data_types() for full details.
+        start_date: Start date
+        end_date: End date
+        data_source: Source of data, e.g. noaa_obspack, icoscp, ceda_archive. This
+        argument only needs to be used to narrow the search to data solely from these sources.
+        kwargs: Any other search arguments to constrain the search further
+    Returns:
+        SearchResults:  SearchResults object
+    """
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
+    results = search(
+        species=species,
+        site=site,
+        inlet=inlet,
+        instrument=instrument,
+        measurement_type=measurement_type,
+        data_type=data_type,
+        start_date=start_date,
+        end_date=end_date,
+        data_source=data_source,
+        **kwargs,
+    )
+
+    # TODO - remove this cast once we've updated search to ensure return of SearchResults object
+    # for all measurement types.
+    results = cast(SearchResults, results)
+
+    return results
+
+
+def search(**kwargs: Any) -> Union[SearchResults, Dict]:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
+
+    This function detects the running environment and routes the call
+    to either the cloud or local search function.
 
     Example / commonly used arguments are given below.
 
@@ -71,24 +136,78 @@ def search(**kwargs):  # type: ignore
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
-    from addict import Dict as aDict
+    from openghg.cloud import call_function
+
+    if running_on_hub():
+        post_data: Dict[str, Union[str, Dict]] = {}
+        post_data["function"] = "search"
+        post_data["search_terms"] = kwargs
+
+        result = call_function(data=post_data)
+
+        content = result["content"]
+
+        found = content["found"]
+        compressed_response = content["result"]
+
+        if found:
+            data_str = decompress(compressed_response)
+            sr = SearchResults.from_json(data=data_str)
+        else:
+            sr = SearchResults()
+    else:
+        sr = local_search(**kwargs)
+
+    return sr
+
+
+# TODO
+# GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
+# facing interfaces to a more general search function, this would also make it easier to enforce types
+def local_search(**kwargs):  # type: ignore
+    """Search for observations data. Any keyword arguments may be passed to the
+    the function and these keywords will be used to search metadata.
+
+    This function will only perform a "local" search. It may be used either by a cloud function
+    or when using OpenGHG locally, it does no environment detection.
+    We suggest using the search function that takes care of everything for you.
+
+    Example / commonly used arguments are given below.
+
+    Args:
+        species: Terms to search for in Datasources
+        locations: Where to search for the terms in species
+        inlet: Inlet height such as 100m
+        instrument: Instrument name such as picarro
+        find_all: Require all search terms to be satisfied
+        start_date: Start datetime for search.
+        If None a start datetime of UNIX epoch (1970-01-01) is set
+        end_date: End datetime for search.
+        If None an end datetime of the current datetime is set
+        skip_ranking: If True skip ranking system, defaults to False
+    Returns:
+        SearchResults or None: SearchResults object is results found, otherwise None
+    """
     from copy import deepcopy
     from itertools import chain as iter_chain
-    from pandas import Timedelta as pd_Timedelta
 
-    from openghg.store import ObsSurface, Footprints, Emissions, BoundaryConditions, EulerianModel
+    from addict import Dict as aDict
     from openghg.store.base import Datasource
-
     from openghg.util import (
-        timestamp_now,
-        timestamp_epoch,
-        timestamp_tzaware,
         clean_string,
         find_daterange_gaps,
         split_daterange_str,
-        load_json,
+        synonyms,
+        timestamp_epoch,
+        timestamp_now,
+        timestamp_tzaware,
     )
-    from openghg.dataobjects import SearchResults
+    from pandas import Timedelta as pd_Timedelta
+
+    if running_on_hub():
+        raise ValueError(
+            "This function can't be used on the OpenGHG Hub, please use openghg.retrieve.search instead."
+        )
 
     # Get a copy of kwargs as we make some modifications below
     kwargs_copy = deepcopy(kwargs)
@@ -127,39 +246,19 @@ def search(**kwargs):  # type: ignore
         if not isinstance(species, list):
             species = [species]
 
-        translator = load_json("species_translator.json")
-
-        updated_species = []
-
-        for s in species:
-            updated_species.append(s)
-
-            try:
-                translated = translator[s]
-            except KeyError:
-                pass
-            else:
-                updated_species.extend(translated)
-
+        updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
 
     data_type = search_kwargs.get("data_type", "timeseries")
 
-    valid_data_types = ("timeseries", "footprints", "emissions", "boundary_conditions", "eulerian_model")
+    valid_data_types = define_data_types()
     if data_type not in valid_data_types:
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
-    # Assume we want timeseries data
-    obj: Union[ObsSurface, Footprints, Emissions, EulerianModel] = ObsSurface.load()
-
-    if data_type == "footprints":
-        obj = Footprints.load()
-    elif data_type == "emissions":
-        obj = Emissions.load()
-    elif data_type == "eulerian_model":
-        obj = EulerianModel.load()
-    elif data_type == "boundary_conditions":
-        obj = BoundaryConditions.load()
+    # Load associated object class (e.g. ObsSurface, Emissions) for data_type
+    data_type_classes = define_data_type_classes()
+    objclass = data_type_classes[data_type]
+    obj = objclass.load()
 
     datasource_uuids = obj.datasources()
 
@@ -168,7 +267,9 @@ def search(**kwargs):  # type: ignore
 
     # For the time being this will return a dict until we know how best to represent
     # the footprints and emissions results in a SearchResult object
-    if data_type in {"emissions", "footprints", "boundary_conditions", "eulerian_model"}:
+    valid_data_types_without_timeseries = list(valid_data_types).copy()  # Temporary until SearchResults is used for all
+    valid_data_types_without_timeseries.remove("timeseries")
+    if data_type in valid_data_types_without_timeseries:
         sources: Dict = aDict()
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
@@ -180,6 +281,9 @@ def search(**kwargs):  # type: ignore
 
     # Find the Datasources that contain matching metadata
     matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
+
+    if not matching_sources:
+        return SearchResults()
 
     # TODO - Update this as it only uses the ACRG repo JSON at the moment
     # Check if this site only has one inlet, if so skip ranking

@@ -2,3 +2,4 @@
 - [ ] [Tests added and passed](https://docs.openghg.org/development/python_devel.html#testing) if fixing a bug or adding a new feature
 - [ ] All [code checks passed](https://docs.openghg.org/development/python_devel.html#pre-commit).
 - [ ] Added an entry in the latest `doc/source/whatsnew/vX.X.X.rst` file if fixing a bug or adding a new feature.
+- [ ] Added any new requirements to `requirements.txt` and `recipes/meta.yaml`.

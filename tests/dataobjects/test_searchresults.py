@@ -1,11 +1,12 @@
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import pytest
 from helpers import get_datapath
-
 from openghg.dataobjects import SearchResults
-from openghg.client import rank_sources
 from openghg.retrieve import search
-from openghg.store import ObsSurface
+from openghg.store import ObsSurface, rank_sources
 from openghg.util import split_daterange_str
 from pandas import Timestamp
 
@@ -32,7 +33,7 @@ def test_retrieve_unranked():
     results = search(species="ch4", skip_ranking=True)
 
     assert results.ranked_data is False
-    assert results.cloud is False
+    assert results.hub is False
 
     raw_results = results.raw()
     assert raw_results["tac"]["ch4"]["100m"]
@@ -184,18 +185,18 @@ def test_retrieve_complex_ranked():
                 "2014-01-01-00:00:00+00:00_2015-03-01-00:00:00+00:00": 1,
                 "2016-08-02-00:00:00+00:00_2017-03-01-00:00:00+00:00": 1,
             },
-            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
         },
         "108m": {
             "rank_data": {
                 "2015-03-02-00:00:00+00:00_2016-08-01-00:00:00+00:00": 1,
                 "2019-03-02-00:00:00+00:00_2021-12-01-00:00:00+00:00": 1,
             },
-            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
         },
         "248m": {
             "rank_data": {"2017-03-02-00:00:00+00:00_2019-03-01-00:00:00+00:00": 1},
-            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:31:30+00:00",
+            "data_range": "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
         },
     }
 
@@ -306,7 +307,7 @@ def test_inlet_gets_data_with_ranking():
 
 
 def test_retrieve_empty_object():
-    empty = SearchResults(results={}, ranked_data=False, cloud=False)
+    empty = SearchResults(results={}, ranked_data=False)
 
     result = empty.retrieve(site="test", species="hawk", inlet="888m")
 
@@ -316,7 +317,7 @@ def test_retrieve_empty_object():
 
     assert result is None
 
-    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+    empty = SearchResults(results={}, ranked_data=True)
 
     result_ranked = empty.retrieve(site="test", species="hawk")
 
@@ -327,17 +328,50 @@ def test_retrieve_empty_object():
     assert result_ranked is None
 
 
-def test_retrieve_cloud_raises():
-    results = search(site="bsd")
-
-    results.cloud = True
-
-    with pytest.raises(NotImplementedError):
-        _ = results.retrieve_all()
-
-
 def test_create_obsdata_no_data_raises():
-    empty = SearchResults(results={}, ranked_data=True, cloud=False)
+    empty = SearchResults(results={}, ranked_data=True)
 
     with pytest.raises(ValueError):
         _ = empty._create_obsdata(site="rome", inlet="-85m", species="ptarmigan")
+
+
+def test_search_result_retrieve_cloud_and_hub(monkeypatch, mocker, tmpdir):
+    monkeypatch.setenv("OPENGHG_HUB", "1")
+
+    df = pd.DataFrame({"A": range(0, 64), "B": range(0, 64)}, columns=list("AB"))
+    ds = df.to_xarray()
+
+    p = Path(tmpdir).joinpath("test.nc")
+    ds.to_netcdf(p)
+
+    ds_bytes = Path(str(tmpdir)).joinpath("test.nc").read_bytes()
+
+    function_reply = {}
+    function_reply["content"] = {"data": ds_bytes}
+    function_reply["status"] = 200
+
+    mock_call = mocker.patch("openghg.cloud.call_function", return_value=function_reply)
+
+    s = SearchResults(
+        results={
+            "site": {"species": {"inlet": {"keys": {"unranked": "other"}, "metadata": {"some": "metadata"}}}}
+        },
+        ranked_data=False,
+    )
+
+    retrieved = s.retrieve_all()
+
+    assert retrieved.data.equals(ds)
+    assert mock_call.call_count == 1
+
+    s = SearchResults(
+        results={
+            "site": {"species": {"inlet": {"keys": {"unranked": "other"}, "metadata": {"some": "metadata"}}}}
+        },
+        ranked_data=False,
+    )
+
+    retrieved = s.retrieve_all()
+
+    assert retrieved.data.equals(ds)
+    assert mock_call.call_count == 2

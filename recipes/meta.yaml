@@ -21,41 +21,44 @@ requirements:
     - addict
     - cdsapi
     - dask
+    - h5py
+    - h5netcdf
     - lazy_import
     - matplotlib
-    - nc-time-axis
+    - msgpack-python
     - netcdf4
     - numexpr
     - numpy
+    - nc-time-axis
     - pandas
-    - paramiko
     - plotly
-    - python
     - pyvis
-    - python
     - rapidfuzz
     - requests >=2.25
     - scipy
+    - tinydb
     - tqdm
-    - urllib3 >=1.26.3
     - xarray >=0.18.2
+    - urllib3 >=1.26.3
+
 
 test:
   imports:
     - openghg
     - openghg.analyse
-    - openghg.client
     - openghg.dataobjects
     - openghg.objectstore
     - openghg.plotting
     - openghg.retrieve
-    - openghg.retrieve.met
+    - openghg.retrieve.icos
+    - openghg.retrieve.ceda
     - openghg.service
     - openghg.standardise
     - openghg.standardise.meta
     - openghg.standardise.surface
     - openghg.store
     - openghg.store.base
+    - openghg.transform
     - openghg.types
     - openghg.util
 

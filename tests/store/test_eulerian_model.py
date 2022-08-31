@@ -1,8 +1,8 @@
 from pathlib import Path
-from openghg.store import EulerianModel
+
+from openghg.objectstore import get_bucket
 from openghg.retrieve import search
-from openghg.store import recombine_datasets
-from openghg.objectstore import get_local_bucket
+from openghg.store import EulerianModel, recombine_datasets
 from xarray import open_dataset
 
 
@@ -11,7 +11,7 @@ def get_datapath(filename):
 
 
 def test_read_file():
-    get_local_bucket()
+    get_bucket()
 
     test_datapath = get_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 

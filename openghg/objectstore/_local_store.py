@@ -1,12 +1,13 @@
 import glob
 import json
 import os
-from pathlib import Path
 import threading
-from openghg.types import ObjectStoreError
-import pyvis
-from uuid import uuid4
+from pathlib import Path
 from typing import Dict, List, Optional, Union
+from uuid import uuid4
+
+import pyvis
+from openghg.types import ObjectStoreError
 
 rlock = threading.RLock()
 
@@ -16,7 +17,7 @@ __all__ = [
     "get_all_object_names",
     "get_object_names",
     "get_bucket",
-    "get_local_bucket",
+    "get_bucket",
     "get_object",
     "set_object",
     "set_object_from_json",
@@ -192,8 +193,7 @@ def set_object_from_file(bucket: str, key: str, filename: Union[str, Path]) -> N
 
 
 def get_object_from_json(bucket: str, key: str) -> Dict[str, Union[str, Dict]]:
-    """Removes the daterange from the passed key and uses the reduced
-    key to get an object from the object store.
+    """Return an object constructed from JSON stored at key.
 
     Args:
         bucket: Bucket containing data
@@ -221,31 +221,22 @@ def exists(bucket: str, key: str) -> bool:
     return len(names) > 0
 
 
-def get_bucket() -> str:
+def get_bucket(empty: bool = False) -> str:
     """Find and return a new bucket in the object store called
     'bucket_name'. If 'create_if_needed' is True
     then the bucket will be created if it doesn't exist. Otherwise,
     if the bucket does not exist then an exception will be raised.
     """
-    bucket_path = get_openghg_local_path()
-
-    if not bucket_path.exists():
-        bucket_path.mkdir(parents=True)
-
-    return str(bucket_path)
-
-
-def get_local_bucket(empty: bool = False) -> str:
-    """Creates and returns a local bucket
-
-    Args:
-        empty: If True return an empty bucket
-    Returns:
-        str: Path to local bucket
-    """
     import shutil
 
-    local_buckets_dir = get_openghg_local_path()
+    try:
+        local_buckets_dir = os.environ["OPENGHG_PATH"]
+    except KeyError:
+        raise ValueError(
+            "No environment variable OPENGHG_PATH found, please set to use the local object store"
+        )
+
+    local_buckets_dir = Path(local_buckets_dir)
 
     if local_buckets_dir.exists():
         if empty is True:
@@ -263,8 +254,8 @@ def query_store() -> Dict:
     Returns:
         dict: Dictionary for data to be shown in force graph
     """
-    from openghg.store.base import Datasource
     from openghg.store import ObsSurface
+    from openghg.store.base import Datasource
 
     obs = ObsSurface.load()
 

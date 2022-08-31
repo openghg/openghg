@@ -1,5 +1,6 @@
-from typing import Dict, List, Optional, Union, Tuple
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple, Union
+
 from pandas import DataFrame
 
 
@@ -72,6 +73,7 @@ def parse_gcwerks(
         dict: Dictionary of source_name : UUIDs
     """
     from pathlib import Path
+
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, load_json
 
@@ -217,8 +219,9 @@ def _read_data(
     Returns:
         dict: Dictionary of gas data keyed by species
     """
-    from pandas import read_csv, to_datetime, Series
+    from pandas import Series
     from pandas import Timedelta as pd_Timedelta
+    from pandas import read_csv, to_datetime
 
     # Read header
     header = read_csv(data_filepath, skiprows=2, nrows=2, header=None, sep=r"\s+")
@@ -340,8 +343,9 @@ def _read_precision(filepath: Path) -> Tuple[DataFrame, List]:
         tuple (Pandas.DataFrame, list): Precision DataFrame and list of species in
         precision data
     """
-    from pandas import read_csv
     from datetime import datetime
+
+    from pandas import read_csv
 
     # Function for parsing datetime
     def prec_date_parser(date: str) -> datetime:
@@ -393,13 +397,10 @@ def _split_species(
     Returns:
         dict: Dataframe of gas data and metadata
     """
-    from addict import Dict as aDict
     from fnmatch import fnmatch
-    from openghg.util import load_json, clean_string
 
-    # Load species translator so we can keep species names consistent
-    attributes_data = load_json("attributes.json")
-    species_translator = attributes_data["species_translation"]
+    from addict import Dict as aDict
+    from openghg.standardise.meta import define_species_label
 
     # Read inlets from the parameters
     expected_inlets = _get_inlets(site_code=site, gc_params=gc_params)
@@ -495,10 +496,7 @@ def _split_species(
             spec_data = spec_data.to_xarray()
 
             # Create a standardised / cleaned species label
-            try:
-                comp_species = species_translator[spec.upper()]["chem"]
-            except KeyError:
-                comp_species = clean_string(spec.lower())
+            comp_species = define_species_label(spec)[0]
 
             # Add the cleaned species name to the metadata and alternative name if present
             spec_metadata["species"] = comp_species

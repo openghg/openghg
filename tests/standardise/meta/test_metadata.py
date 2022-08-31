@@ -1,5 +1,5 @@
 import pytest
-from openghg.standardise.meta import surface_standardise
+from openghg.standardise.meta import sync_surface_metadata
 
 
 def test_surface_standardise():
@@ -57,7 +57,7 @@ def test_surface_standardise():
         "station_height_masl": 3209.5,
     }
 
-    updated_metadata = surface_standardise(metadata=metadata, attributes=attrs)
+    updated_metadata = sync_surface_metadata(metadata=metadata, attributes=attrs)
 
     new_meta = {
         "site": "sum",
@@ -93,7 +93,7 @@ def test_metadata_latlon_tolerance():
         "station_latitude": 72.5962,
     }
 
-    surface_standardise(metadata, attrs)
+    sync_surface_metadata(metadata, attrs)
 
     attrs = {
         "station_longitude": -38.422,
@@ -101,7 +101,7 @@ def test_metadata_latlon_tolerance():
     }
 
     with pytest.raises(ValueError):
-        surface_standardise(metadata, attrs)
+        sync_surface_metadata(metadata, attrs)
 
     attrs = {
         "station_longitude": 38.422,
@@ -109,14 +109,14 @@ def test_metadata_latlon_tolerance():
     }
 
     with pytest.raises(ValueError):
-        surface_standardise(metadata, attrs)
+        sync_surface_metadata(metadata, attrs)
 
     attrs = {
         "station_longitude": -38.423,
         "station_latitude": 72.597,
     }
 
-    surface_standardise(metadata, attrs)
+    sync_surface_metadata(metadata, attrs)
 
 
 def test_ensure_mismatch_raises():
@@ -129,4 +129,4 @@ def test_ensure_mismatch_raises():
     attrs = {"site": "sum", "network": "NOAA", "measurement_type": "swallow-carrying-a-flask"}
 
     with pytest.raises(ValueError):
-        surface_standardise(metadata, attrs)
+        sync_surface_metadata(metadata, attrs)

@@ -1,21 +1,21 @@
-from typing import Optional, Union, Tuple
-from pathlib import Path
 import re
+from pathlib import Path
+from typing import Optional, Tuple, Union
+
 import pandas as pd
+from openghg.util import create_frequency_str, parse_period, relative_time_offset, timestamp_tzaware
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray
-from openghg.util import (
-    timestamp_tzaware,
-    parse_period,
-    create_frequency_str,
-    relative_time_offset,
-)
+
+TupleTimeType = Tuple[Union[int, float], str]
 
 
-def infer_date_range(time: DataArray,
-                     filepath: Optional[Union[str, Path]] = None,
-                     period: Optional[Union[str, tuple]] = None,
-                     continuous: bool = True) -> Tuple[Timestamp, Timestamp, str]:
+def infer_date_range(
+    time: DataArray,
+    filepath: Optional[Union[str, Path]] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: bool = True,
+) -> Tuple[Timestamp, Timestamp, str]:
     """
     Infer the date range from the time dimension. If the time dimension
     only includes one value the date range will be:
@@ -34,10 +34,8 @@ def infer_date_range(time: DataArray,
                     - suitable pandas Offset Alias
                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
         continuous: Whether time stamps have to be continuous.
-
     Returns:
-        Timestamp, Timestamp, str:
-            Derived start date, end date and period (containing the value and unit).
+        Timestamp, Timestamp, str: Derived start date, end date and period (containing the value and unit).
     """
 
     if filepath is not None:
@@ -45,14 +43,25 @@ def infer_date_range(time: DataArray,
 
     # Find frequency from period, if specified
     if period is not None:
-        freq: Optional[Tuple[int, str]] = parse_period(period)
+        freq: Optional[TupleTimeType] = parse_period(period)
     else:
         freq = None
 
-    n_dates = len(time)
-    if n_dates == 1:
+    # Changed this from len(time) as a length of a single value
+    # DataArray was throwing an len() of unsized object error
+    n_dates = time.size
 
-        start_date = timestamp_tzaware(time.values[0])
+    if n_dates == 1:
+        try:
+            start_date = timestamp_tzaware(timestamp=time.values[0])
+        except IndexError:
+            raise NotImplementedError(
+                "This type of BC file is not currently supported. Please see issue #349"
+            )
+            # try:
+            #     start_date = timestamp_tzaware(timestamp=time.values)
+            # except ValueError:
+            #     raise ValueError("Can't read date from dataset.")
 
         if filepath is not None:
             filename = filepath.stem  # Filename without the extension
@@ -70,7 +79,7 @@ def infer_date_range(time: DataArray,
                 date_match = ""
 
             # Set as default as annual if unable to derive from filepath
-            inferred_freq: Optional[Tuple[int, str]] = (1, "years")
+            inferred_freq: Optional[TupleTimeType] = (1, "years")
 
             if len(date_match) == 6:
                 # "yyyymm" format indicates monthly data
@@ -90,7 +99,7 @@ def infer_date_range(time: DataArray,
         # Because frequency cannot be inferred from the data and only the filename,
         # use the user specified input in preference of the inferred value
         if freq is not None:
-            time_value: Optional[int] = freq[0]
+            time_value: Optional[Union[int, float]] = freq[0]
             time_unit: Optional[str] = freq[1]
         else:
             if inferred_freq is not None:
@@ -99,7 +108,9 @@ def infer_date_range(time: DataArray,
 
         # Check input period against inferred period
         if inferred_freq != freq:
-            print(f"Warning: Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})")
+            print(
+                f"Warning: Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})"
+            )
 
         # Create time offset and use to create start and end datetime
         time_delta = relative_time_offset(unit=time_unit, value=time_value)
@@ -115,7 +126,9 @@ def infer_date_range(time: DataArray,
         inferred_period = pd.infer_freq(timestamps)
         if inferred_period is None:
             if continuous:
-                raise ValueError("Continuous data with no gaps is expected but no time period can be inferred. Run with continous=False to remove this constraint.")
+                raise ValueError(
+                    "Continuous data with no gaps is expected but no time period can be inferred. Run with continous=False to remove this constraint."
+                )
             else:
                 inferred_freq = None
                 time_value, time_unit = None, None

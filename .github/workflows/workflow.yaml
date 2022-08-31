@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         operating-system: [ubuntu-latest]
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10"]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -36,14 +36,12 @@ jobs:
     - name: Run mypy
       run: |
         mypy --python-version ${{ matrix.python-version }} openghg/
-      if: matrix.python-version == 3.8 || matrix.python-version == 3.9
     - name: Create mock cdsapi config file
       run: |
         echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
     - name: Install udunits package for CF compliance checks
       run: |
         sudo apt-get install libudunits2-0
-      if: matrix.operating-system == 'ubuntu-latest'
     - name: Test with pytest
       run: |
         pip install --upgrade pytest
@@ -62,6 +60,8 @@ jobs:
   docs:
     name: Run checks on tutorial notebooks and build docs
     runs-on: ubuntu-latest
+    env:
+      OPENGHG_PATH: "/tmp/openghg_store"
     needs: ["test"]
     steps:
       - uses: actions/checkout@v3
@@ -79,7 +79,7 @@ jobs:
           pip install -r requirements-doc.txt
       - name: Ensure notebooks can be executed correctly
         run: |
-          jupytext --sync --execute notebooks/tutorials/beginner_workflow/{1,2,3}_*.ipynb
+          jupytext --sync --execute notebooks/tutorials/beginner_workflow/{1,2}_*.ipynb
       - name: Build documentation
         run: |
           cd doc
@@ -105,17 +105,17 @@ jobs:
         run: |
           pip install --upgrade build
       - name: Build a binary wheel and a source tarball
-        run: | 
+        run: |
           python -m build --sdist --wheel --outdir dist/
       - name: Publish distribution 📦 to Test PyPI
-        uses: pypa/gh-action-pypi-publish@1.5.0
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
       - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@1.5.0
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}      
+          password: ${{ secrets.PYPI_API_TOKEN }}
   release_conda:
     name: Build and publish conda package
     runs-on: ubuntu-latest
@@ -132,21 +132,14 @@ jobs:
       - name: Install build tools
         run: |
           conda install -y conda-build conda-verify anaconda-client
-      - name: Build package
+      - name: Make build folder and build package
         run: |
-          conda build recipes -c conda-forge
+          mkdir ${{ github.workspace }}/build
+          conda build --croot ${{ github.workspace }}/build recipes -c conda-forge
+        env:
+          OPENGHG_PATH: "/tmp/openghg_store"
       - name: Upload to conda
         run: |
-          bash recipes/build_upload.sh
-        env: 
+          bash recipes/upload.sh
+        env:
           ACCESS_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-      
-      
-
-
-
-      
-        
-
-
-    

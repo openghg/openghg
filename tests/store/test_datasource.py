@@ -2,18 +2,17 @@ import datetime
 import os
 import uuid
 from pathlib import Path
-from addict import Dict as aDict
 
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-
-from openghg.store.base import Datasource
-from openghg.standardise.surface import parse_crds
-from openghg.objectstore import get_local_bucket, get_object_names
-from openghg.util import create_daterange_str, timestamp_tzaware, pairwise, daterange_overlap
+from addict import Dict as aDict
 from helpers import get_datapath
+from openghg.objectstore import get_bucket, get_object_names
+from openghg.standardise.surface import parse_crds
+from openghg.store.base import Datasource
+from openghg.util import create_daterange_str, daterange_overlap, pairwise, timestamp_tzaware
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
@@ -63,7 +62,7 @@ def test_add_data(data):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
     d.save()
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     data_chunks = [Datasource.load_dataset(bucket=bucket, key=k) for k in d.data_keys()]
 
@@ -176,7 +175,7 @@ def test_get_dataframe_daterange():
 
 
 def test_save(mock_uuid2):
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     datasource = Datasource()
     datasource.add_metadata_key(key="data_type", value="timeseries")
@@ -190,7 +189,7 @@ def test_save(mock_uuid2):
 
 
 def test_save_footprint():
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     metadata = {"test": "testing123", "start_date": "2013-06-02", "end_date": "2013-06-30"}
 
@@ -286,7 +285,7 @@ def test_from_data(data):
 
     obj_data = d.to_data()
 
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     # Create a new object with the data from d
     d_2 = Datasource.from_data(bucket=bucket, data=obj_data, shallow=False)
@@ -353,7 +352,7 @@ def test_load_dataset():
 
     key = list(keys.values())[0]
 
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     loaded_ds = Datasource.load_dataset(bucket=bucket, key=key)
 

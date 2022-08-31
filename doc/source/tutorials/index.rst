@@ -2,69 +2,28 @@
 Tutorials
 =========
 
-These tutorials will get you up and running with OpenGHG so you can process, analyse and query data from the cloud
-or a local object store. The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
-repository.
-
-Running the tutorials locally
------------------------------
-
-If you'd like to try out the tutorials locally accessing the notebooks is covered on the Local Tutorials page :ref:`Local Tutorials`.
+These tutorials will get you up and running with OpenGHG so you can process, analyse and query data.
+The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
+repository under ``notebooks/tutorials/beginner_workflow``.
 
 
-Tutorial 1 - Adding observation data
-------------------------------------
+Cloud
+-----
 
-This tutorial covers adding data to the object store using the standardisation functions.
+If you're using the OpenGHG Hub you'll find the tutorials in the ``tutorials`` folder in your home directory.
 
 .. toctree::
    :maxdepth: 1
 
-   beginner_workflow/1_Adding_observation_data
+   cloud/index
 
-Tutorial 2 - Ranking observations
----------------------------------
+Local
+-----
 
-This tutorial covers ranking the data available in the object store. This ensures users always find the correct data when using the search
-functions.
-
-.. toctree::
-   :maxdepth: 1
-
-   beginner_workflow/2_Ranking_for_observations
-
-Tutorial 3 - Comparing observations to emissions
-------------------------------------------------
-
-This tutorial covers the workflow comparing observations data to emissions using the new ``ModelScenario`` class.
-This replaces the ``footprint_data_merge`` function with an object that can be used to retrieve and manipulate observations,
-emissions and footprint data (with boundary conditions in the pipeline).
+If you've installed OpenGHG locally the tutorials below are available in the `OpenGHG repository <https://github.com/openghg/openghg>`_
+under ``notebooks/tutorials/local``.
 
 .. toctree::
    :maxdepth: 1
 
-   beginner_workflow/3_Comparing_with_emissions
-
-Tutorial 4 - Working with high time resolution CO2
---------------------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   beginner_workflow/4_Working_with_co2
-
-Tutorial 5 - Exploring the NOAA ObsPack data
---------------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   beginner_workflow/5_Explore_NOAA_ObsPack
-
-Tutorial 6 - Using the plotting submodule
------------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   beginner_workflow/6_Searching_and_plotting
+   local/index

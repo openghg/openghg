@@ -17,16 +17,25 @@ Covers how we develop OpenGHG and the standards we hope to adhere to
    python_devel
 
 
+Data Specifications
+-------------------
 
-Fn functions
--------------
-
-How to setup and Fn and develop functions using Docker
+The specifications for data accepted by storage functions in OpenGHG
 
 .. toctree::
    :maxdepth: 1
 
-   fn_devel
-   fn_usage
+   specifications/data_spec
 
-   
+
+Fn functions
+-------------
+
+How to setup Fn and develop functions using Docker
+
+.. toctree::
+   :maxdepth: 1
+
+   cloud/fn_setup
+   cloud/fn_devel
+   cloud/fn_usage

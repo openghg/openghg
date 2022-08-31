@@ -136,3 +136,6 @@ keys/
 doc/build/*
 
 .idea/*
+
+# Logging output
+*.log

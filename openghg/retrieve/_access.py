@@ -1,25 +1,34 @@
-from xarray import Dataset
+import json
+from io import BytesIO
 from typing import Dict, List, Optional, Union
-from pandas import Timestamp
-from openghg.dataobjects import ObsData, FootprintData, FluxData
 
-__all__ = ["get_obs_surface", "get_footprint", "get_flux"]
+from openghg.dataobjects import (
+    BoundaryConditionsData,
+    FluxData,
+    FootprintData,
+    ObsData,
+    ObsColumnData)
+from openghg.util import decompress, decompress_str, hash_bytes, running_on_hub
+from pandas import Timestamp
+from xarray import Dataset, load_dataset
 
 
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: Optional[str] = None,
-    start_date: Optional[Union[str, Timestamp]] = None,
-    end_date: Optional[Union[str, Timestamp]] = None,
-    average: Optional[str] = None,
-    network: Optional[str] = None,
-    instrument: Optional[str] = None,
-    calibration_scale: Optional[str] = None,
-    keep_missing: Optional[bool] = False,
-    skip_ranking: Optional[bool] = False,
-) -> Union[ObsData, None]:
-    """Get measurements from one site.
+    inlet: str = None,
+    start_date: Union[str, Timestamp] = None,
+    end_date: Union[str, Timestamp] = None,
+    average: str = None,
+    network: str = None,
+    instrument: str = None,
+    calibration_scale: str = None,
+    keep_missing: bool = False,
+    skip_ranking: bool = False,
+) -> Optional[ObsData]:
+    """This is the equivalent of the get_obs function from the ACRG repository.
+
+    Usage and return values are the same whilst implementation may differ.
 
     Args:
         site: Site of interest e.g. MHD for the Mace Head site.
@@ -31,17 +40,123 @@ def get_obs_surface(
         the form e.g. "2H", "30min" (should match pandas offset aliases format).
         keep_missing: Keep missing data points or drop them.
         network: Network for the site/instrument (must match number of sites).
-        instrument: Specific instrument for the site (must match number of sites).
+        instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
     Returns:
-        ObsData: ObsData object
+        ObsData or None: ObsData object if data found, else None
     """
-    from pandas import Timestamp, Timedelta
+    from openghg.cloud import call_function
+
+    if running_on_hub():
+        to_post: Dict[str, Union[str, Dict]] = {}
+
+        to_post["function"] = "get_obs_surface"
+
+        search_terms = {
+            "site": site,
+            "species": species,
+            "keep_missing": keep_missing,
+            "skip_ranking": skip_ranking,
+        }
+
+        if inlet is not None:
+            search_terms["inlet"] = inlet
+        if start_date is not None:
+            search_terms["start_date"] = start_date
+        if end_date is not None:
+            search_terms["end_date"] = end_date
+        if average is not None:
+            search_terms["average"] = average
+        if network is not None:
+            search_terms["network"] = network
+        if instrument is not None:
+            search_terms["instrument"] = instrument
+        if calibration_scale is not None:
+            search_terms["calibration_scale"] = calibration_scale
+
+        to_post["search_terms"] = search_terms
+
+        result = call_function(data=to_post)
+
+        content = result["content"]
+        found = content["found"]
+
+        if found:
+            binary_data = decompress(data=content["data"])
+
+            file_metadata = content["file_metadata"]
+            sha1_hash_data = file_metadata["data"]["sha1_hash"]
+
+            if sha1_hash_data != hash_bytes(data=binary_data):
+                raise ValueError("Hash mismatch between local SHA1 and remote SHA1.")
+
+            buf = BytesIO(binary_data)
+            json_str = decompress_str(data=content["metadata"])
+            metadata = json.loads(json_str)
+            dataset = load_dataset(buf)
+
+            return ObsData(data=dataset, metadata=metadata)
+        else:
+            return None
+    else:
+        return get_obs_surface_local(
+            site=site,
+            species=species,
+            start_date=start_date,
+            end_date=end_date,
+            inlet=inlet,
+            average=average,
+            network=network,
+            instrument=instrument,
+            calibration_scale=calibration_scale,
+            keep_missing=keep_missing,
+            skip_ranking=skip_ranking,
+        )
+
+
+def get_obs_surface_local(
+    site: str,
+    species: str,
+    inlet: Optional[str] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
+    average: Optional[str] = None,
+    network: Optional[str] = None,
+    instrument: Optional[str] = None,
+    calibration_scale: Optional[str] = None,
+    keep_missing: Optional[bool] = False,
+    skip_ranking: Optional[bool] = False,
+) -> Optional[ObsData]:
+    """This is the equivalent of the get_obs function from the ACRG repository.
+
+    Usage and return values are the same whilst implementation may differ.
+
+    This function should not be used on the OpenGHG Hub.
+
+    Args:
+        site: Site of interest e.g. MHD for the Mace Head site.
+        species: Species identifier e.g. ch4 for methane.
+        start_date: Output start date in a format that Pandas can interpret
+        end_date: Output end date in a format that Pandas can interpret
+        inlet: Inlet label
+        average: Averaging period for each dataset. Each value should be a string of
+        the form e.g. "2H", "30min" (should match pandas offset aliases format).
+        keep_missing: Keep missing data points or drop them.
+        network: Network for the site/instrument (must match number of sites).
+        instrument: Specific instrument for the sipte (must match number of sites).
+        calibration_scale: Convert to this calibration scale
+    Returns:
+        ObsData or None: ObsData object if data found, else None
+    """
     import numpy as np
-    from xarray import concat as xr_concat
-    from openghg.retrieve import search
-    from openghg.store import recombine_datasets
-    from openghg.util import clean_string, load_json, timestamp_tzaware
+    from openghg.retrieve import search_surface
+    from openghg.util import clean_string, load_json, synonyms, timestamp_tzaware
+    from pandas import Timedelta
+
+    if running_on_hub():
+        raise ValueError(
+            "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
+        )
 
     site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
@@ -50,10 +165,10 @@ def get_obs_surface(
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     # Find the correct synonym for the passed species
-    species = clean_string(_synonyms(species))
+    species = clean_string(synonyms(species))
 
     # Get the observation data
-    obs_results = search(
+    obs_results = search_surface(
         site=site,
         species=species,
         inlet=inlet,
@@ -67,13 +182,20 @@ def get_obs_surface(
     if not obs_results:
         raise ValueError(f"Unable to find results for {species} at {site}")
 
-    retrieved_data: Union[ObsData, None] = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
-    
+    retrieved_data: Union[ObsData, List[ObsData], None] = obs_results.retrieve(
+        site=site, species=species, inlet=inlet
+    )
+
     if retrieved_data is None:
+        return None
+    elif isinstance(retrieved_data, list):
+        print("No data returned.")
+        print(f"Multiple entries found for current input parameters - site: '{site}', species: '{species}'")
+        print("Please supply additional parameters or set ranking.")
+        metadata_difference(retrieved_data, params=["inlet", "network", "instrument"])
         return None
 
     data = retrieved_data.data
-
 
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
@@ -95,7 +217,7 @@ def get_obs_surface(
     except AttributeError:
         raise AttributeError("This dataset does not have a time attribute, unable to read date range")
     except IndexError:
-        return ObsData(data=Dataset(), metadata={})
+        return None
 
     if average is not None:
         # GJ - 2021-03-09
@@ -230,6 +352,79 @@ def get_obs_surface(
     return obs_data
 
 
+def get_obs_column(
+    species: str,
+    satellite: Optional[str] = None,
+    domain: Optional[str] = None,
+    selection: Optional[str] = None,
+    site: Optional[str] = None,
+    network: Optional[str] = None,
+    instrument: Optional[str] = None,
+    platform: str = "satellite",
+    start_date: Optional[Timestamp] = None,
+    end_date: Optional[Timestamp] = None,
+) -> ObsColumnData:
+    """
+    Extract available column data from the object store using keywords.
+
+    Args:
+        species: Species name
+        source: Source name
+        domain: Domain e.g. EUROPE
+        start_date: Start date
+        end_date: End date
+        time_resolution: One of ["standard", "high"]
+    Returns:
+        ObsColumnData: ObsColumnData object
+    """
+    from openghg.retrieve import search
+    from openghg.store import recombine_datasets
+    from openghg.util import clean_string, synonyms, timestamp_epoch, timestamp_now
+
+    # Find the correct synonym for the passed species
+    species = clean_string(synonyms(species))
+
+    if start_date is None:
+        start_date = timestamp_epoch()
+    if end_date is None:
+        end_date = timestamp_now()
+
+    results: Dict = search(
+        species=species,
+        satellite=satellite,
+        domain=domain,
+        selection=selection,
+        site=site,
+        network=network,
+        instrument=instrument,
+        platform=platform,
+        start_date=start_date,
+        end_date=end_date,
+        data_type="column",
+    )  # type: ignore
+
+    if not results:
+        if satellite is not None:
+            raise ValueError(f"Unable to find obs column data for {species} for {satellite} in {domain} ({selection} if specfied)")
+        elif site is not None:
+            raise ValueError(f"Unable to find obs column data for {species} for {site}")
+
+    try:
+        column_key = list(results.keys())[0]
+    except IndexError:
+        raise ValueError(f"Unable to find obs column data")
+
+    data_keys = results[column_key]["keys"]
+    metadata = results[column_key]["metadata"]
+
+    column_ds = recombine_datasets(keys=data_keys, sort=False)
+
+    if species is None:
+        species = metadata.get("species", "NA")
+
+    return ObsColumnData(data=column_ds, metadata=metadata)
+
+
 def get_flux(
     species: str,
     source: str,
@@ -255,7 +450,10 @@ def get_flux(
     """
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
-    from openghg.util import timestamp_epoch, timestamp_now
+    from openghg.util import clean_string, synonyms, timestamp_epoch, timestamp_now
+
+    # Find the correct synonym for the passed species
+    species = clean_string(synonyms(species))
 
     if start_date is None:
         start_date = timestamp_epoch()
@@ -295,14 +493,70 @@ def get_flux(
     if species is None:
         species = metadata.get("species", "NA")
 
-    return FluxData(
-        data=em_ds,
-        metadata=metadata,
-        flux={},
-        bc={},
+    return FluxData(data=em_ds, metadata=metadata)
+
+
+def get_bc(
+    species: str,
+    domain: str,
+    bc_input: Optional[str] = None,
+    start_date: Optional[Timestamp] = None,
+    end_date: Optional[Timestamp] = None,
+) -> BoundaryConditionsData:
+    """
+    Get boundary conditions for a given species, domain and bc_input name.
+
+    Args:
+        species: Species name
+        bc_input: Input used to create boundary conditions. For example:
+            - a model name such as "MOZART" or "CAMS"
+            - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
+        domain: Region for boundary conditions e.g. EUROPE
+        start_date: Start date
+        end_date: End date
+    Returns:
+        BoundaryConditionsData: BoundaryConditionsData object
+    """
+    from openghg.retrieve import search
+    from openghg.store import recombine_datasets
+    from openghg.util import clean_string, synonyms, timestamp_epoch, timestamp_now
+
+    # Find the correct synonym for the passed species
+    species = clean_string(synonyms(species))
+
+    if start_date is None:
+        start_date = timestamp_epoch()
+    if end_date is None:
+        end_date = timestamp_now()
+
+    results: Dict = search(
         species=species,
-        scales="FIXME",
-        units="FIXME",
+        bc_input=bc_input,
+        domain=domain,
+        start_date=start_date,
+        end_date=end_date,
+        data_type="boundary_conditions",
+    )  # type: ignore
+
+    if not results:
+        raise ValueError(f"Unable to find boundary conditions data for {species} for {bc_input}")
+
+    try:
+        bc_key = list(results.keys())[0]
+    except IndexError:
+        raise ValueError(f"Unable to find any boundary conditions data for {domain} for {species}.")
+
+    data_keys = results[bc_key]["keys"]
+    metadata = results[bc_key]["metadata"]
+
+    bc_ds = recombine_datasets(keys=data_keys, sort=False)
+
+    if species is None:
+        species = metadata.get("species", "NA")
+
+    return BoundaryConditionsData(
+        data=bc_ds,
+        metadata=metadata,
     )
 
 
@@ -335,11 +589,15 @@ def get_footprint(
     Returns:
         FootprintData: FootprintData dataclass
     """
-    from openghg.store import recombine_datasets
     from openghg.retrieve import search
-    from openghg.dataobjects import FootprintData
+    from openghg.store import recombine_datasets
+    from openghg.util import clean_string, synonyms
 
-    results = search(
+    # Find the correct synonym for the passed species
+    if species is not None:
+        species = clean_string(synonyms(species))
+
+    results: Dict = search(
         site=site,
         domain=domain,
         height=height,
@@ -376,58 +634,11 @@ def get_footprint(
     # fp_ds = recombine_datasets(keys=keys, sort=False) # Why did this have sort=False before?
     fp_ds = recombine_datasets(keys=keys, sort=True)
 
-    if species is None:
-        species = metadata.get("species", "NA")
+    # TODO: Could incorporate this somewhere? Setting species to INERT?
+    # if species is None:
+    #     species = metadata.get("species", "INERT")
 
-    return FootprintData(
-        data=fp_ds,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="FIXME",
-        units="FIXME",
-    )
-
-
-def _synonyms(species: str) -> str:
-    """
-    Check to see if there are other names that we should be using for
-    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc-11,
-    as this is used in species_info.json
-
-    Args:
-        species (str): Input string that you're trying to match
-    Returns:
-        str: Matched species string
-    """
-
-    from openghg.util import load_json
-
-    # Load in the species data
-    species_data = load_json(filename="acrg_species_info.json")
-
-    # First test whether site matches keys (case insensitive)
-    matched_strings = [k for k in species_data if k.upper() == species.upper()]
-
-    # Used to access the alternative names in species_data
-    alt_label = "alt"
-
-    # If not found, search synonyms
-    if not matched_strings:
-        for key in species_data:
-            # Iterate over the alternative labels and check for a match
-            matched_strings = [s for s in species_data[key][alt_label] if s.upper() == species.upper()]
-
-            if matched_strings:
-                matched_strings = [key]
-                break
-
-    if matched_strings:
-        updated_species = str(matched_strings[0])
-        return updated_species
-    else:
-        raise ValueError(f"Unable to find synonym for species {species}")
+    return FootprintData(data=fp_ds, metadata=metadata)
 
 
 def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
@@ -440,9 +651,9 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     Returns:
         xarray.Dataset: Dataset with mole fraction data scaled
     """
-    from pandas import read_csv
     from numexpr import evaluate
     from openghg.util import get_datapath
+    from pandas import read_csv
 
     # If scale is already correct, return
     ds_scale = data.attrs["scale"]
@@ -461,7 +672,7 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
             f"Scales {ds_scale} and {to_scale} are not both in any one row in acrg_obs_scale_convert.csv for species {species}"
         )
     elif len(scale_converter_scales) > 1:
-        raise ValueError(f"Duplicate rows in acrg_obs_scale_convert.csv?")
+        raise ValueError("Duplicate rows in acrg_obs_scale_convert.csv?")
     else:
         row = scale_converter_scales.index[0]
 
@@ -481,3 +692,49 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     data.attrs["scale"] = to_scale
 
     return data
+
+
+multDataTypes = Union[List[ObsData], List[FootprintData], List[FluxData]]
+
+
+def metadata_difference(
+    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+) -> list:
+    """
+    Check differences between metadata for returned data objects.
+
+    Args:
+        data : Multiple data objects e.g. multiple ObsData as a list
+        params : Specific metadata parameters to check. If None all parameters will be checked
+        print_output : Summarise and print output to screen.
+
+    Returns:
+        list : Keys from the metadata with differences
+    """
+    metadata = [d.metadata for d in data]
+    if params is not None:
+        metadata = [{param: m[param] for param in params} for m in metadata]
+
+    metadata0 = metadata[0]
+    difference = []
+    for metadata_compare in metadata[1:]:
+        metadata_diff = set(metadata0.items()) - set(metadata_compare.items())
+        difference.extend(list(metadata_diff))
+    param_difference = list(set([d[0] for d in difference]))
+
+    ignore_params = ["data_owner", "data_owner_email"]
+    for iparam in ignore_params:
+        try:
+            param_difference.remove(iparam)
+        except ValueError:
+            continue
+
+    if print_output:
+        print("Datasets contain:")
+        for param in param_difference:
+            print(f" {param}: ", end="")
+            for m in metadata:
+                print(f" '{m[param]}', ", end="")
+            print()  # print new line
+
+    return param_difference

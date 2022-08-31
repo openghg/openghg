@@ -1,12 +1,12 @@
 import pytest
-from openghg.objectstore import get_local_bucket
-from openghg.store import ObsSurface, Emissions, Footprints
-from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
+from helpers import get_datapath, get_column_datapath, get_emissions_datapath, get_footprint_datapath
+from openghg.objectstore import get_bucket
+from openghg.store import Emissions, Footprints, ObsSurface, ObsColumn
 
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
-    get_local_bucket(empty=True)
+    get_bucket(empty=True)
 
     # DECC network sites
     network = "DECC"
@@ -61,6 +61,15 @@ def data_read():
 
     obs.save()
 
+    # Obs Column data
+    column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
+
+    ObsColumn.read_file(filepath=column_datapath,
+                        data_type="OPENGHG",
+                        satellite="GOSAT",
+                        domain="BRAZIL",
+                        species="methane")
+
     # Emissions data
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
@@ -83,5 +92,5 @@ def data_read():
     model = "test_model"
 
     Footprints.read_file(
-        filepath=datapath, site=site, model=model, network=network, height=height, domain=domain
+        filepath=datapath, site=site, model=model, network=network, height=height, domain=domain, high_spatial_res=True,
     )

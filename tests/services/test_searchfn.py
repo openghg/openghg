@@ -1,12 +1,12 @@
 # import pytest
 # from openghg.client import process_files, search
-# from openghg.objectstore import get_local_bucket
+# from openghg.objectstore import get_bucket
 # from helpers import get_datapath, glob_files, metadata_checker_obssurface
 
 
 # @pytest.fixture(scope="session")
 # def read_data(authenticated_user):
-#     get_local_bucket(empty=True)
+#     get_bucket(empty=True)
 
 #     data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
 #     precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")

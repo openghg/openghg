@@ -1,7 +1,8 @@
 """ This file contains the BaseStore class from which other retrieve
     modules inherit.
 """
-from typing import Dict, List, Optional, Union, Type, TypeVar
+from typing import Dict, List, Optional, Type, TypeVar, Union
+
 from pandas import Timestamp
 from tinydb import TinyDB
 
@@ -15,8 +16,8 @@ class BaseStore:
     _uuid = "root_uuid"
 
     def __init__(self) -> None:
-        from openghg.util import timestamp_now
         from addict import Dict as aDict
+        from openghg.util import timestamp_now
 
         self._creation_datetime = timestamp_now()
         self._stored = False
@@ -27,6 +28,8 @@ class BaseStore:
         self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
         self._file_hashes: Dict[str, str] = {}
+        # Hashes of previously stored data from other data platforms
+        self._retrieved_hashes: Dict[str, Dict] = {}
         # Keyed by UUID
         self._rank_data = aDict()
 
@@ -60,8 +63,8 @@ class BaseStore:
         Returns:
             cls: Class object of cls type
         """
-        from openghg.util import timestamp_tzaware
         from addict import Dict as aDict
+        from openghg.util import timestamp_tzaware
 
         if not data:
             raise ValueError("Unable to create object with empty dictionary")
@@ -70,6 +73,7 @@ class BaseStore:
         c._creation_datetime = timestamp_tzaware(data["creation_datetime"])
         c._datasource_uuids = data["datasource_uuids"]
         c._file_hashes = data["file_hashes"]
+        c._retrieved_hashes = data.get("retrieved_hashes", {})
         c._datasource_table = aDict(data["datasource_table"])
         c._rank_data = aDict(data["rank_data"])
         c._stored = False
@@ -89,6 +93,7 @@ class BaseStore:
         data["datasource_table"] = self._datasource_table
         data["datasource_uuids"] = self._datasource_uuids
         data["file_hashes"] = self._file_hashes
+        data["retrieved_hashes"] = self._retrieved_hashes
         data["rank_data"] = self._rank_data
 
         return data
@@ -161,7 +166,7 @@ class BaseStore:
         """
         del self._datasource_uuids[uuid]
 
-    def add_datasources(self, uuids: Dict, metadata: Dict, metastore: TinyDB) -> None:
+    def add_datasources(self, uuids: Dict, data: Dict, metastore: TinyDB) -> None:
         """Add the passed list of Datasources to the current list
 
         Args:
@@ -170,16 +175,13 @@ class BaseStore:
         Returns:
             None
         """
-        for key, data in uuids.items():
-            new = data["new"]
-
-            # Should we do a UUID lookup here to check we're assigning to
-            # the correct UUID? Would that just be covered by the duplicate check?
+        for key, uuid_data in uuids.items():
+            new = uuid_data["new"]
             # Only add if this is a new Datasource
             if new:
-                meta_copy = metadata[key].copy()
-                uid = data["uuid"]
-                meta_copy["uuid"] = data["uuid"]
+                meta_copy = data[key]["metadata"].copy()
+                uid = uuid_data["uuid"]
+                meta_copy["uuid"] = uuid_data["uuid"]
 
                 metastore.insert(meta_copy)
                 self._datasource_uuids[uid] = key
@@ -194,8 +196,9 @@ class BaseStore:
         Returns:
             dict: Dictionary of rank and daterange covered by that rank
         """
-        from openghg.util import daterange_overlap, create_daterange_str
         from collections import defaultdict
+
+        from openghg.util import create_daterange_str, daterange_overlap
 
         if uuid not in self._rank_data:
             return {}
@@ -250,13 +253,14 @@ class BaseStore:
             None
         """
         from copy import deepcopy
+
         from openghg.util import (
             combine_dateranges,
-            daterange_overlap,
-            trim_daterange,
             daterange_contains,
-            split_encompassed_daterange,
+            daterange_overlap,
             sanitise_daterange,
+            split_encompassed_daterange,
+            trim_daterange,
         )
 
         rank = int(rank)
