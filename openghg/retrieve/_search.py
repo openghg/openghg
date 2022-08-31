@@ -77,7 +77,8 @@ def search_surface(
         inlet: Inlet height
         instrument: Instrument name
         measurement_type: Measurement type
-        data_type: Data type e.g. CRDS, GCWERKS, ICOS
+        data_type: Data type e.g. "timeseries", "column", "emissions"
+            See openghg.store.spec.define_data_types() for full details.
         start_date: Start date
         end_date: End date
         data_source: Source of data, e.g. noaa_obspack, icoscp, ceda_archive. This
@@ -266,7 +267,9 @@ def local_search(**kwargs):  # type: ignore
 
     # For the time being this will return a dict until we know how best to represent
     # the footprints and emissions results in a SearchResult object
-    if data_type in {"column", "emissions", "footprints", "boundary_conditions", "eulerian_model"}:
+    valid_data_types_without_timeseries = list(valid_data_types).copy()  # Temporary until SearchResults is used for all
+    valid_data_types_without_timeseries.remove("timeseries")
+    if data_type in valid_data_types_without_timeseries:
         sources: Dict = aDict()
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
