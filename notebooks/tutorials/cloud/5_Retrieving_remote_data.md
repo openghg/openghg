@@ -36,7 +36,9 @@ You can find the stations available in ICOS using [their map interface](https://
 
 +++
 
-!["Zoomed in screenshot of ICOS site map"](images/icos_map.jpg "ICOS site map")
+<div>
+<img src="images/icos_map.jpg" width="50%"/>
+</div>
 
 +++
 
