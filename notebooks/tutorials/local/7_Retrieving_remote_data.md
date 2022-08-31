@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.13.7
+    jupytext_version: 1.14.0
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -42,7 +42,9 @@ You can find the stations available in ICOS using [their map interface](https://
 
 +++
 
-!["Zoomed in screenshot of ICOS site map"](images/icos_map.jpg "ICOS site map")
+<div>
+<img src="images/icos_map.jpg" width="50%"/>
+</div>
 
 +++
 
@@ -51,11 +53,11 @@ You can find the stations available in ICOS using [their map interface](https://
 First we'll import `retrieve_icos` from the `client` submodule, then we'll retrieve some data from Weybourne (**WAO**). The function will first check for any data from **WAO** already stored in the object store, if any is found it is returned, otherwise it'll retrieve the data from the ICOS Carbon Portal, this may take a bit longer.
 
 ```{code-cell} ipython3
-from openghg.retrieve.icos import retrieve
+from openghg.retrieve.icos import retrieve_atmospheric
 ```
 
 ```{code-cell} ipython3
-wao_data = retrieve(site="WAO", species="ch4")
+wao_data = retrieve_atmospheric(site="WAO", species="ch4")
 ```
 
 Now we can inspect `wao_data`, an `ObsData` object to see what was retrieved.
