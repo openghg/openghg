@@ -6,8 +6,8 @@
 from typing import Any, Dict, List, Optional, Union, cast
 
 from openghg.dataobjects import SearchResults
+from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.util import decompress, running_on_hub
-from openghg.store.spec import define_data_types, define_data_type_classes
 from tinydb.database import TinyDB
 
 
@@ -267,7 +267,9 @@ def local_search(**kwargs):  # type: ignore
 
     # For the time being this will return a dict until we know how best to represent
     # the footprints and emissions results in a SearchResult object
-    valid_data_types_without_timeseries = list(valid_data_types).copy()  # Temporary until SearchResults is used for all
+    valid_data_types_without_timeseries = list(
+        valid_data_types
+    ).copy()  # Temporary until SearchResults is used for all
     valid_data_types_without_timeseries.remove("timeseries")
     if data_type in valid_data_types_without_timeseries:
         sources: Dict = aDict()
@@ -293,6 +295,7 @@ def local_search(**kwargs):  # type: ignore
     #         skip_ranking = True
 
     # If there isn't *any* ranking data at all, skip all the ranking functionality
+
     if not obj._rank_data:
         skip_ranking = True
 

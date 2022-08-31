@@ -140,6 +140,8 @@ jobs:
           OPENGHG_PATH: "/tmp/openghg_store"
       - name: Upload to conda
         run: |
-          bash recipes/upload.sh
+          BUILD_DIR=${GITHUB_WORKSPACE}/build
+          BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
+          anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
         env:
           ACCESS_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
