@@ -1,4 +1,12 @@
-from ._enum import DataTypes, EmissionsDatabases, EmissionsTypes, ObsTypes, SurfaceTypes
+from ._enum import (
+    SurfaceTypes,
+    ColumnTypes,
+    ColumnSources,
+    ObsTypes,
+    EmissionsTypes,
+    EmissionsDatabases,
+    DataTypes,
+)
 from ._errors import (
     DatasourceLookupError,
     FunctionError,

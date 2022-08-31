@@ -2,12 +2,12 @@ from dataclasses import dataclass
 
 from ._basedata import _BaseData
 
-__all__ = ["FootprintData"]
+__all__ = ["ObsColumnData"]
 
 
 @dataclass(frozen=True)
-class FootprintData(_BaseData):
-    """This class is used to return observations data from the get_footprint function
+class ObsColumnData(_BaseData):
+    """This class is used to return observations data from the get_obs_column function
 
     Args:
         data: xarray Dataset

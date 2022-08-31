@@ -1,12 +1,11 @@
 from collections import defaultdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import DefaultDict, Dict, List, NoReturn, Optional, Tuple, Union
+from typing import DefaultDict, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from pandas import Timestamp
 from xarray import Dataset
 
 __all__ = ["Footprints"]
@@ -493,23 +492,3 @@ class Footprints(BaseStore):
             short_lifetime=short_lifetime,
         )
         data_schema.validate_data(data)
-
-    def search(
-        self,
-        site: str,
-        network: str,
-        start_date: Optional[Union[str, Timestamp]],
-        end_date: Optional[Union[str, Timestamp]],
-    ) -> NoReturn:
-        """Search for a footprints from a specific site and network, return a dictionary of data
-        so the user can choose
-        """
-        raise NotImplementedError()
-
-    def retrieve(self, uuid: str, dates: str) -> NoReturn:
-        """"""
-        raise NotImplementedError()
-
-    def _get_metdata(self) -> NoReturn:
-        """This retrieves the metadata for this footprints"""
-        raise NotImplementedError()

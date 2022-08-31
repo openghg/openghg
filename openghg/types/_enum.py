@@ -20,6 +20,39 @@ class SurfaceTypes(Enum):
     OPENGHG = "OPENGHG"
 
 
+class ColumnTypes(Enum):
+    """Types of column data files that can be standardised"""
+
+    OPENGHG = "OPENGHG"
+
+
+class ColumnSources(Enum):
+    """Sources of column data that can be transformed"""
+
+    GOSAT = "GOSAT"
+
+
+class EmissionsTypes(Enum):
+    """For standardising emissions/flux inputs"""
+
+    OPENGHG = "OPENGHG"
+
+
+class EmissionsDatabases(Enum):
+    """For extracting and transforming emissions/flux databases"""
+
+    EDGAR = "EDGAR"
+
+
+class ObsTypes(Enum):
+    """
+    """
+
+    SURFACE = "ObsSurface"
+    COLUMN = "ObsColumn"
+    MOBILE = "ObsMobile"
+
+
 class DataTypes(Enum):
     CRDS = "CRDS"
     GCWERKS = "GCWERKS"
@@ -36,22 +69,3 @@ class DataTypes(Enum):
     GLASGOW_PICARRO = "GLASGOW_PICARRO"
     GLASGOW_LICOR = "GLASGOW_LICOR"
     OPENGHG = "OPENGHG"
-
-
-class ObsTypes(Enum):
-    SURFACE = "ObsSurface"
-    SATELLITE = "ObsSatellite"
-    FLASK = "ObsFlask"
-    MOBILE = "ObsMobile"
-
-
-class EmissionsTypes(Enum):
-    """For standardising emissions/flux inputs"""
-
-    OPENGHG = "OPENGHG"
-
-
-class EmissionsDatabases(Enum):
-    """For extracting and transforming emissions/flux databases"""
-
-    EDGAR = "EDGAR"

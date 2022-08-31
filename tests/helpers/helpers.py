@@ -37,6 +37,11 @@ def get_mobile_datapath(filename: str) -> Path:
     return get_datapath_base(data_type="mobile", filename=filename)
 
 
+def get_column_datapath(filename: str) -> Path:
+    """Return the path to the emissions test data file"""
+    return get_datapath_base(data_type="column", filename=filename)
+
+
 def get_emissions_datapath(filename: str) -> Path:
     """Return the path to the emissions test data file"""
     return get_datapath_base(data_type="emissions", filename=filename)

@@ -1,7 +1,7 @@
 import pytest
-from helpers import get_datapath, get_emissions_datapath, get_footprint_datapath
+from helpers import get_datapath, get_column_datapath, get_emissions_datapath, get_footprint_datapath
 from openghg.objectstore import get_bucket
-from openghg.store import Emissions, Footprints, ObsSurface
+from openghg.store import Emissions, Footprints, ObsSurface, ObsColumn
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -60,6 +60,15 @@ def data_read():
     obs.set_rank(uuid=uid_42, rank=1, date_range="2019-01-01_2021-01-01")
 
     obs.save()
+
+    # Obs Column data
+    column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
+
+    ObsColumn.read_file(filepath=column_datapath,
+                        data_type="OPENGHG",
+                        satellite="GOSAT",
+                        domain="BRAZIL",
+                        species="methane")
 
     # Emissions data
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")

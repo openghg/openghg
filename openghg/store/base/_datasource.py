@@ -4,6 +4,8 @@ import numpy as np
 from pandas import DataFrame, Timestamp
 from xarray import Dataset
 
+from openghg.store.spec import define_data_types
+
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
 __all___ = ["Datasource"]
@@ -92,14 +94,7 @@ class Datasource:
         Returns:
             None
         """
-        expected_data_types = (
-            "timeseries",
-            "emissions",
-            "met",
-            "footprints",
-            "boundary_conditions",
-            "eulerian_model",
-        )
+        expected_data_types = define_data_types()
 
         data_type = data_type.lower()
         if data_type not in expected_data_types:

@@ -267,32 +267,3 @@ class Emissions(BaseStore):
         """
         data_schema = Emissions.schema()
         data_schema.validate_data(data)
-
-    def lookup_uuid(self, species: str, source: str, domain: str, date: str) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
-
-        Args:
-            species: Site code
-            domain: Domain
-            model: Model name
-            height: Height
-        Returns:
-            str or dict: UUID or False if no entry
-        """
-        uuid = self._datasource_table[species][source][domain][date]
-
-        return uuid if uuid else False
-
-    def set_uuid(self, species: str, source: str, domain: str, date: str, uuid: str) -> None:
-        """Record a UUID of a Datasource in the datasource table
-
-        Args:
-            site: Site code
-            domain: Domain
-            model: Model name
-            height: Height
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[species][source][domain][date] = uuid

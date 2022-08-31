@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 
 from openghg.dataobjects import SearchResults
 from openghg.util import decompress, running_on_hub
+from openghg.store.spec import define_data_types, define_data_type_classes
 from tinydb.database import TinyDB
 
 
@@ -76,7 +77,8 @@ def search_surface(
         inlet: Inlet height
         instrument: Instrument name
         measurement_type: Measurement type
-        data_type: Data type e.g. CRDS, GCWERKS, ICOS
+        data_type: Data type e.g. "timeseries", "column", "emissions"
+            See openghg.store.spec.define_data_types() for full details.
         start_date: Start date
         end_date: End date
         data_source: Source of data, e.g. noaa_obspack, icoscp, ceda_archive. This
@@ -190,12 +192,10 @@ def local_search(**kwargs):  # type: ignore
     from itertools import chain as iter_chain
 
     from addict import Dict as aDict
-    from openghg.store import BoundaryConditions, Emissions, EulerianModel, Footprints, ObsSurface
     from openghg.store.base import Datasource
     from openghg.util import (
         clean_string,
         find_daterange_gaps,
-        running_on_hub,
         split_daterange_str,
         synonyms,
         timestamp_epoch,
@@ -251,21 +251,14 @@ def local_search(**kwargs):  # type: ignore
 
     data_type = search_kwargs.get("data_type", "timeseries")
 
-    valid_data_types = ("timeseries", "footprints", "emissions", "boundary_conditions", "eulerian_model")
+    valid_data_types = define_data_types()
     if data_type not in valid_data_types:
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
-    # Assume we want timeseries data
-    obj: Union[ObsSurface, Footprints, Emissions, BoundaryConditions, EulerianModel] = ObsSurface.load()
-
-    if data_type == "footprints":
-        obj = Footprints.load()
-    elif data_type == "emissions":
-        obj = Emissions.load()
-    elif data_type == "eulerian_model":
-        obj = EulerianModel.load()
-    elif data_type == "boundary_conditions":
-        obj = BoundaryConditions.load()
+    # Load associated object class (e.g. ObsSurface, Emissions) for data_type
+    data_type_classes = define_data_type_classes()
+    objclass = data_type_classes[data_type]
+    obj = objclass.load()
 
     datasource_uuids = obj.datasources()
 
@@ -274,7 +267,9 @@ def local_search(**kwargs):  # type: ignore
 
     # For the time being this will return a dict until we know how best to represent
     # the footprints and emissions results in a SearchResult object
-    if data_type in {"emissions", "footprints", "boundary_conditions", "eulerian_model"}:
+    valid_data_types_without_timeseries = list(valid_data_types).copy()  # Temporary until SearchResults is used for all
+    valid_data_types_without_timeseries.remove("timeseries")
+    if data_type in valid_data_types_without_timeseries:
         sources: Dict = aDict()
         for datasource in datasources:
             if datasource.search_metadata(**search_kwargs):
