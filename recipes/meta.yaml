@@ -21,7 +21,6 @@ requirements:
     - addict
     - cdsapi
     - dask
-    - folium
     - h5py
     - h5netcdf
     - lazy_import
@@ -32,7 +31,6 @@ requirements:
     - numpy
     - nc-time-axis
     - pandas
-    - paramiko
     - plotly
     - pyvis
     - rapidfuzz
@@ -48,18 +46,19 @@ test:
   imports:
     - openghg
     - openghg.analyse
-    - openghg.client
     - openghg.dataobjects
     - openghg.objectstore
     - openghg.plotting
     - openghg.retrieve
-    - openghg.retrieve.met
+    - openghg.retrieve.icos
+    - openghg.retrieve.ceda
     - openghg.service
     - openghg.standardise
     - openghg.standardise.meta
     - openghg.standardise.surface
     - openghg.store
     - openghg.store.base
+    - openghg.transform
     - openghg.types
     - openghg.util
 
