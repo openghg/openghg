@@ -13,7 +13,6 @@ numpy
 nc-time-axis
 oci
 pandas
-paramiko
 plotly
 pyvis
 rapidfuzz
