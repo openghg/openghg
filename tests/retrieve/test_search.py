@@ -1,32 +1,48 @@
 import pytest
-from helpers import metadata_checker_obssurface, get_datapath
-from openghg.retrieve import metadata_lookup, search
-from openghg.store import metastore_manager
+from helpers import get_datapath, metadata_checker_obssurface
+from openghg.objectstore import get_bucket
+from openghg.retrieve import meta_search, metadata_lookup, search
+from openghg.store import ObsSurface, load_metastore, metastore_manager
 from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_tzaware
-from openghg.store import ObsSurface
 from pandas import Timestamp
-from openghg.standardise import standardise_surface
+
+
+def test_metasearch():
+    obs_key = ObsSurface._metakey
+
+    metastore = load_metastore(key=obs_key)
+
+    search_terms = {"site": "bsd"}
+
+    search_res = meta_search(search_terms=search_terms, database=metastore)
+
+    assert len(search_res) == 9
+
+    search_terms = {"species": "co2"}
+    search_res = meta_search(search_terms=search_terms, database=metastore)
+
+    for s in search_res:
+        assert s["species"] == "co2"
+
+    assert len(s) == 6
 
 
 def test_recreate_ranking_no_ranking_error():
+    get_bucket(empty=True)
     # Read in some data
     bsd_248_path = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
-    bsd_108_path = get_datapath(filename="bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
-    bsd_42_path = get_datapath(filename="bsd.picarro.1minute.42m.min.dat", data_type="CRDS")
-
-    bsd_paths = [bsd_248_path, bsd_108_path, bsd_42_path]
-
-    bsd_results = ObsSurface.read_file(filepath=bsd_paths, data_type="CRDS", site="bsd", network="DECC")
+    bsd_results = ObsSurface.read_file(filepath=bsd_248_path, data_type="CRDS", site="bsd", network="DECC")
 
     obs = ObsSurface.load()
     uid_248 = bsd_results["processed"]["bsd.picarro.1minute.248m.min.dat"]["ch4"]["uuid"]
     obs.set_rank(uuid=uid_248, rank=1, date_range="2014-01-30_2015-01-01")
 
-    # Read in data for another site
+    hfd_50_path = get_datapath(filename="hfd.picarro.1minute.50m.min.dat", data_type="CRDS")
+    ObsSurface.read_file(filepath=hfd_50_path, data_type="CRDS", site="hfd", network="DECC")
 
-
-    # Do a search for site 2
+    with pytest.raises(ValueError):
+        search(site="hfd")
 
 
 def test_specific_keyword_search():

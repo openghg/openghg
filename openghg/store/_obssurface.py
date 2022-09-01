@@ -21,6 +21,14 @@ class ObsSurface(BaseStore):
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
+    # @staticmethod
+    # def load_metastore() -> TinyDB:
+    #     """ Load the ObsSurface metadata store
+
+    #     Returns:
+    #         TinyDB: TinyDB object
+    #     """
+
     @staticmethod
     def read_data(
         binary_data: bytes, metadata: Dict, file_metadata: Dict, precision_data: Optional[bytes] = None
@@ -186,6 +194,7 @@ class ObsSurface(BaseStore):
                         "This file has been uploaded previously with the filename : "
                         f"{obs._file_hashes[file_hash]} - skipping."
                     )
+                    break
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
@@ -281,8 +290,8 @@ class ObsSurface(BaseStore):
 
                 progress_bar.update(1)
 
-            logger.info(f"Completed processing: {data_filepath.name}.")
-            logger.info(f"\tUUIDs: {datasource_uuids}")
+                logger.info(f"Completed processing: {data_filepath.name}.")
+                logger.info(f"\tUUIDs: {datasource_uuids}")
 
         # Ensure we explicitly close the metadata store
         # as we're using the cached storage method
@@ -526,7 +535,9 @@ class ObsSurface(BaseStore):
             None
         """
         from openghg.objectstore import delete_object, get_bucket
+        from openghg.store import load_metastore
         from openghg.store.base import Datasource
+        from tinydb import where
 
         bucket = get_bucket()
         # Load the Datasource and get all its keys
@@ -545,6 +556,9 @@ class ObsSurface(BaseStore):
         # Then delete the Datasource itself
         key = f"{Datasource._datasource_root}/uuid/{uuid}"
         delete_object(bucket=bucket, key=key)
+
+        # Delete the UUID from the metastore
+        metastore = load
 
         del self._datasource_uuids[uuid]
 

@@ -1,32 +1,15 @@
-import contextlib
 import json
-from typing import Dict, Iterator, Optional, Sequence
+from typing import Dict, Optional, Sequence
 
 from openghg.objectstore import exists, get_bucket, get_object, set_object_from_json
 from tinydb import Storage, TinyDB
 from tinydb.middlewares import CachingMiddleware
 
 
-@contextlib.contextmanager
-def metastore_manager(key: str) -> Iterator:
-    """A context manager to be used to open the metadata database
-    at the given key.
-
-    Args:
-        key: Key for database in the object store
-    """
-    db = TinyDB(key, storage=CachingMiddleware(ObjectStorage))
-
-    yield db
-
-    db.close()
-
-
 def load_metastore(key: str) -> TinyDB:
-    """Load the metastore.
-
-    Note: the database must be closed with db.close()
-    to ensure correct writing of new values.
+    """Load the metastore. This can be used as a context manager
+    otherwise the database must be closed using the close method
+    otherwise records are not written to file.
 
     Args:
         key: Key to metadata store

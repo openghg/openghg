@@ -2,13 +2,18 @@
     the object store
 
 """
-
+import logging
+from collections import defaultdict
 from typing import Any, Dict, List, Optional, Union, cast
 
 from openghg.dataobjects import SearchResults
+from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.util import decompress, running_on_hub
 from tinydb.database import TinyDB
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def _find_and(x: Any, y: Any) -> Any:
@@ -17,6 +22,38 @@ def _find_and(x: Any, y: Any) -> Any:
 
 def _find_or(x: Any, y: Any) -> Any:
     return x | y
+
+
+
+def meta_search(search_terms: Dict, database: TinyDB) -> Dict:
+    """Search a metadata database and return dictionary of the
+    metadata for each Datasource keyed by their UUIDs.
+
+    Args:
+        search_terms: Keys we want to find
+        database: The tinydb database for the storage object
+    Returns:
+        dict: Dictionary of metadata
+    """
+    from functools import reduce
+
+    from tinydb import Query
+
+    q = Query()
+
+    search_attrs = [getattr(q, k) == v for k, v in search_terms.items()]
+    result = database.search(reduce(_find_and, search_attrs))
+
+    x = [s["uuid"] for s in result]
+
+    # Add in a quick check to make sure we don't have dupes
+    # TODO - remove this once a more thorough tests are added
+    if len(x) != len(set(x)):
+        error_msg = "Multiple results found with same UUID!"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    return {s["uuid"]: s for s in result}
 
 
 def metadata_lookup(
@@ -249,7 +286,7 @@ def local_search(**kwargs):  # type: ignore
         updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
 
-    data_type = search_kwargs.get("data_type", "timeseries")
+    data_type = search_kwargs.get("data_type", "timeseries").lower()
 
     valid_data_types = define_data_types()
     if data_type not in valid_data_types:
@@ -260,32 +297,50 @@ def local_search(**kwargs):  # type: ignore
     objclass = data_type_classes[data_type]
     obj = objclass.load()
 
-    datasource_uuids = obj.datasources()
+    # Load in the metastore
+    metastore = load_metastore(key=obj._metakey)
 
-    # Shallow load the Datasources so we can search their metadata
-    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+    search_results = meta_search(metadata=search_kwargs, database=metastore)
+
+    return SearchResults(results=search_results)
+
+
+    if not lookup_results:
+        return SearchResults()
+
+    # datasource_uuids = obj.datasources()
+    # # Shallow load the Datasources so we can search their metadata
+    # datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
     # For the time being this will return a dict until we know how best to represent
     # the footprints and emissions results in a SearchResult object
-    valid_data_types_without_timeseries = list(
-        valid_data_types
-    ).copy()  # Temporary until SearchResults is used for all
-    valid_data_types_without_timeseries.remove("timeseries")
-    if data_type in valid_data_types_without_timeseries:
-        sources: Dict = aDict()
-        for datasource in datasources:
-            if datasource.search_metadata(**search_kwargs):
-                uid = datasource.uuid()
-                sources[uid]["keys"] = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-                sources[uid]["metadata"] = datasource.metadata()
+    # Temporary until SearchResults is used for all
+    valid_data_types_without_timeseries = list(valid_data_types).copy().remove("timeseries")
 
+    if data_type == "timeseries":
+
+
+
+    if data_type in valid_data_types_without_timeseries:
+        sources = {}
+
+        for uid in datasource_uuids:
+            d = Datasource.load(uuid=uid, shallow=True)
+
+            sources[uid] = {
+                "keys": d.keys_in_daterange(start_date=start_date, end_date=end_date),
+                "metadata": d.metadata(),
+            }
+
+        # for datasource in datasources:
+        #     if datasource.search_metadata(**search_kwargs):
+        #         uid = datasource.uuid()
+        #         sources[uid]["keys"] = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+        #         sources[uid]["metadata"] = datasource.metadata()
         return sources
 
     # Find the Datasources that contain matching metadata
-    matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
-
-    if not matching_sources:
-        return SearchResults()
+    # matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
 
     # TODO - Update this as it only uses the ACRG repo JSON at the moment
     # Check if this site only has one inlet, if so skip ranking
@@ -295,25 +350,25 @@ def local_search(**kwargs):  # type: ignore
     #         skip_ranking = True
 
     # If there isn't *any* ranking data at all, skip all the ranking functionality
-
-    if not obj._rank_data:
-        skip_ranking = True
+    # if not obj._rank_data:
+    #     skip_ranking = True
 
     # If only one datasource has been returned, skip all the ranking functionality
-    if len(matching_sources) == 1:
-        skip_ranking = True
+    # if len(lookup_results) == 1:
+    #     skip_ranking = True
 
     # If we have the site, inlet and instrument then just return the data
     # TODO - should instrument be added here
     if {"site", "inlet", "species"} <= search_kwargs.keys() or skip_ranking is True:
         specific_sources = aDict()
-        for datasource in matching_sources.values():
-            specific_keys = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
+        for uid in datasource_uuids:
+            d = Datasource.load(uuid=uid, shallow=True)
+            specific_keys = d.keys_in_daterange(start_date=start_date, end_date=end_date)
 
             if not specific_keys:
                 continue
 
-            metadata = datasource.metadata()
+            metadata = d.metadata()
 
             site = metadata["site"]
             species = metadata["species"]
@@ -327,8 +382,11 @@ def local_search(**kwargs):  # type: ignore
         return SearchResults(results=specific_sources.to_dict(), ranked_data=False)
 
     highest_ranked = aDict()
+    # If we don't have any ranking data set add
+    no_ranking = aDict()
 
-    for uid, datasource in matching_sources.items():
+    for uid in datasource_uuids:
+        datasource = Datasource.load(uuid=uid, shallow=True)
         # Find the site and then the ranking
         metadata = datasource.metadata()
         # Get the site inlet and species
@@ -339,7 +397,7 @@ def local_search(**kwargs):  # type: ignore
 
         # If this Datasource doesn't have any ranking data skip it and move on
         if not rank_data:
-            continue
+            no_ranking[site] = {"species": species, "uuid": uid}
 
         # There will only be a single rank key
         rank_value = next(iter(rank_data))
@@ -366,13 +424,28 @@ def local_search(**kwargs):  # type: ignore
             highest_ranked[site][species]["rank"] = rank_value
             highest_ranked[site][species]["matching"] = [match]
 
-    if not highest_ranked:
-        raise ValueError(
-            (
-                "No ranking data set for the given search parameters."
-                " Please refine your search to include a specific site, species and inlet."
-            )
-        )
+    # # If we don't have any ranked data check if we found any unranked data
+    # if not highest_ranked:
+    #     if not no_ranking:
+    #         raise ValueError("With no ranked and no unranked data something has gone wrong.")
+
+    for site in no_ranking:
+        species = no_ranking[site]["species"]
+        # If there's ranking data for this species at this site skip it
+        if site in highest_ranked and species in highest_ranked[site]:
+            continue
+
+        # unranked = aDict()
+        # Otherwise store the data
+
+
+        #
+        # raise ValueError(
+        #     (
+        #         "No ranking data set for the given search parameters."
+        #         " Please refine your search to include a specific site, species and inlet."
+        #     )
+        # )
     # Now we have the highest ranked data the dateranges there are ranks for
     # we want to fill in the gaps with (currently) the highest inlet from that site
 
@@ -392,7 +465,7 @@ def local_search(**kwargs):  # type: ignore
                 match_dateranges = match_data["dateranges"]
                 # Get the datasource as it's already in the dictionary
                 # we created earlier
-                datasource = matching_sources[uuid]
+                datasource = Datasource.load(uuid=uuid, shallow=True)
                 metadata = datasource.metadata()
                 inlet = metadata["inlet"]
                 inlets.append(inlet)
