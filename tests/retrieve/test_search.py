@@ -2,7 +2,7 @@ import pytest
 from helpers import get_datapath, metadata_checker_obssurface
 from openghg.objectstore import get_bucket
 from openghg.retrieve import meta_search, metadata_lookup, search
-from openghg.store import ObsSurface, load_metastore, metastore_manager
+from openghg.store import ObsSurface, load_metastore
 from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_tzaware
 from pandas import Timestamp
@@ -16,6 +16,10 @@ def test_metasearch():
     search_terms = {"site": "bsd"}
 
     search_res = meta_search(search_terms=search_terms, database=metastore)
+
+    print(search_res)
+
+    return
 
     assert len(search_res) == 9
 

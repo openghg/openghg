@@ -29,31 +29,30 @@ class SearchResults:
         ranked_data: True if results are ranked, else False
     """
 
-    def __init__(self, results: Optional[Dict] = None, ranked_data: bool = False):
+    def __init__(self, results: Optional[Dict] = None):
         self.results = results if results is not None else {}
-        self.ranked_data = ranked_data
         self.hub = running_on_hub()
 
-    def __str__(self) -> str:
-        if not self.results:
-            return "No results"
+    # def __str__(self) -> str:
+    #     if not self.results:
+    #         return "No results"
 
-        print_strs = []
-        for site, species in self.results.items():
-            if self.ranked_data:
-                print_strs.append(
-                    f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}"
-                )
-            else:
-                print_strs.append(f"Site: {site.upper()}")
-                print_strs.append("---------")
-                print_strs.extend([f"{sp} at {', '.join(self.results[site][sp].keys())}" for sp in species])
-            print_strs.append("\n")
+    #     print_strs = []
+    #     for site, species in self.results.items():
+    #         if self.ranked_data:
+    #             print_strs.append(
+    #                 f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}"
+    #             )
+    #         else:
+    #             print_strs.append(f"Site: {site.upper()}")
+    #             print_strs.append("---------")
+    #             print_strs.extend([f"{sp} at {', '.join(self.results[site][sp].keys())}" for sp in species])
+    #         print_strs.append("\n")
 
-        return "\n".join(print_strs)
+    #     return "\n".join(print_strs)
 
-    def __repr__(self) -> str:
-        return self.__str__()
+    # def __repr__(self) -> str:
+    #     return self.__str__()
 
     def __bool__(self) -> bool:
         return bool(self.results)
@@ -72,7 +71,6 @@ class SearchResults:
         """
         return {
             "results": self.results,
-            "ranked_data": self.ranked_data,
             "cloud": self.hub,
         }
 
@@ -95,9 +93,10 @@ class SearchResults:
         """
         loaded = json.loads(data)
 
-        return cls(results=loaded["results"], ranked_data=loaded["ranked_data"])
+        return cls(results=loaded["results"])
 
     def rankings(self) -> Dict:
+        return NotImplementedError
         if not self.ranked_data:
             print("No rank data")
 
