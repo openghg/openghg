@@ -755,3 +755,14 @@ def test_obs_schema(species, obs_variable):
     assert "time" in data_vars[obs_variable]
 
     # TODO: Could also add checks for dims and dtypes?
+
+
+def test_check_obssurface_same_file_skips():
+    filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
+
+    assert results
+
+    results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
+
+    assert not results
