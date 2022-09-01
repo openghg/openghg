@@ -1,27 +1,19 @@
 import os
 import tempfile
 import pytest
+import datetime
+import pandas as pd
+import numpy as np
 from helpers import get_datapath, get_emissions_datapath, get_bc_datapath, get_footprint_datapath
 from openghg.store import ObsSurface, Emissions, BoundaryConditions, Footprints
-from openghg.retrieve import get_footprint, get_flux #, get_bc
+from openghg.retrieve import get_flux
+from openghg.retrieve import search
+from openghg.objectstore import get_bucket
 
-def data_read():
+def flux_data_read():
     """
-    Data set up for running tests for these sets of modules.
+    Flux data set up.
     """
-    # # Files for creating forward model (mf_mod) for methane and carbon dioxide at TAC site
-
-    # Observation data
-    #  - TAC at 100m for 201208 and 201407
-    #  - Includes CH4 and CO2 data
-    # site = "tac"
-    # network = "DECC"
-    # data_type = "CRDS"
-
-    # tac_path1 = get_datapath(filename="tac.picarro.1minute.100m.201208.dat", data_type="CRDS")
-    # tac_path2 = get_datapath(filename="tac.picarro.1minute.100m.201407.dat", data_type="CRDS")
-    # tac_filepaths = [tac_path1, tac_path2]
-    # ObsSurface.read_file(filepath=tac_filepaths, data_type=data_type, site=site, network=network)
 
     # Emissions data
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE
@@ -39,91 +31,16 @@ def data_read():
         high_time_resolution=False,
     )
 
-    # # Waste data for CH4 (from UKGHG model)
-    # source2 = "waste"
-
-    # emissions_datapath2 = get_emissions_datapath("ch4-ukghg-waste_EUROPE_2012.nc")
-
-    # Emissions.read_file(
-    #     filepath=emissions_datapath2,
-    #     species="ch4",
-    #     source=source2,
-    #     date="2012",
-    #     domain=domain,
-    #     high_time_resolution=False,
-    # )
-
-    # # Natural sources for CO2 (R-total from Cardamom)
-    # #  - 2 hourly (high resolution?)
-    # source3 = "natural-rtot"
-
-    # emissions_datapath3 = get_emissions_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
-
-    # Emissions.read_file(
-    #     filepath=emissions_datapath3,
-    #     species="co2",
-    #     source=source3,
-    #     date="2014",
-    #     domain="TEST",
-    #     high_time_resolution=True,
-    # )
-
-    # # Ocean flux for CO2
-    # #  - monthly
-    # source4 = "ocean"
-
-    # emissions_datapath4 = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
-
-    # Emissions.read_file(
-    #     filepath=emissions_datapath4,
-    #     species="co2",
-    #     source=source4,
-    #     date="2014",
-    #     domain="TEST",
-    #     high_time_resolution=False,
-    # )
-
-    # Boundary conditions data
-    # CH4
-    # bc_filepath1 = get_bc_datapath("ch4_EUROPE_201208.nc")
-
-    # BoundaryConditions.read_file(
-    #     filepath=bc_filepath1,
-    #     species="ch4",
-    #     domain="EUROPE",
-    #     bc_input="MOZART",
-    #     period="monthly",
-    # )
-
-    # # TODO: Make and add bc file for co2 which matched TEST domain
-
-    # Footprint data
-    # TAC footprint from 2012-08 - 2012-09 at 100m
-    # site = "tac"
-    # domain = "EUROPE"
-    # height = "100m"
-    # model = "NAME"
-
-    # fp_datapath1 = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
-
-    # Footprints.read_file(
-    #     filepath=fp_datapath1, site=site, model=model, height=height, domain=domain
-    # )
-
-    # # TAC footprint from 2014-07 - 2014-09 at 100m for CO2 (high time resolution)
-    # fp_datapath2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-
-    # Footprints.read_file(
-    #     filepath=fp_datapath2, site=site, model=model, network=network, metmodel="UKV",
-    #     height=height, domain="TEST", species="co2"
-    # )
-
 
 def test_database_update_repeat():
+    """
+    Test object store can handle the same date (flux data) being added twice.
+    """
 
     # Attempt to add same data to the database twice
-    data_read()
-    data_read()
+    get_bucket(empty=True)
+    flux_data_read()
+    flux_data_read()
 
     em_param = {}
     em_param["start_date"] = "2012-01-01"
@@ -161,3 +78,223 @@ def test_database_update_repeat():
     # footprint = get_footprint(**fp_param)
 
     # assert footprint is not None
+
+
+def bsd_data_read():
+    """
+    Add Bilsdale data for CRDS and GCMD instrument to object store.
+     - CRDS: ch4, co2, co
+     - GCMD: sf6, n2o
+    """
+
+    site = "bsd"
+    network = "DECC"
+    data_type1 = "CRDS"
+
+    bsd_path1 = get_datapath(filename="bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
+    
+    ObsSurface.read_file(filepath=bsd_path1, data_type=data_type1, site=site, network=network)
+
+    data_type2 = "GCWERKS"
+    instrument = "GCMD"
+
+    bsd_path2 = get_datapath(filename="bilsdale-md.14.C", data_type="GC")
+    bsd_prec_path2 = get_datapath(filename="bilsdale-md.14.precisions.C", data_type="GC")
+    
+    ObsSurface.read_file(filepath=(bsd_path2, bsd_prec_path2),
+                         data_type=data_type2,
+                         site=site,
+                         network=network,
+                         instrument=instrument)
+
+
+def bsd_small_edit_data_read():
+    """
+    Add overlapping Bilsdale data to the object store:
+     - Same data
+     - Small difference header details (should create different hash)
+    """
+    site = "bsd"
+    network = "DECC"
+    data_type2 = "GCWERKS"
+    instrument = "GCMD"
+
+    bsd_path3 = get_datapath(filename="bilsdale-md.small-edit.14.C", data_type="GC")
+    bsd_prec_path3 = get_datapath(filename="bilsdale-md.14.precisions.C", data_type="GC")
+    
+    ObsSurface.read_file(filepath=(bsd_path3, bsd_prec_path3),
+                         data_type=data_type2,
+                         site=site,
+                         network=network,
+                         instrument=instrument)
+
+
+def bsd_diff_data_read():
+    """
+    Add overlapping Bilsdale data to the object store:
+     - Small different in data values (should create different hash)
+    """
+    site = "bsd"
+    network = "DECC"
+    data_type2 = "GCWERKS"
+    instrument = "GCMD"
+
+    bsd_path4 = get_datapath(filename="bilsdale-md.diff-value.14.C", data_type="GC")
+    bsd_prec_path4 = get_datapath(filename="bilsdale-md.14.precisions.C", data_type="GC")
+    
+    ObsSurface.read_file(filepath=(bsd_path4, bsd_prec_path4),
+                         data_type=data_type2,
+                         site=site,
+                         network=network,
+                         instrument=instrument)
+
+
+def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
+    """
+    Read CRDS data file using pandas (to create expected values).
+    """
+    data_path = get_datapath(filename=filename, data_type="CRDS")
+
+    columns = ["date", "time", "type", "port"]
+    for species in species_list:
+        columns.append(species)
+        columns.append(f"{species} stdev")
+        columns.append(f"{species} N")
+
+    file_data = pd.read_csv(data_path, names=columns, delim_whitespace=True, skiprows=3, dtype={"date":str, "time":str})
+    file_data["date_time"] = file_data["date"] + file_data["time"]
+    file_data["date_time"] = pd.to_datetime(file_data["date_time"], format="%y%m%d%H%M%S")
+
+    file_data = file_data.dropna()
+
+    return file_data
+
+
+def read_gc_file_pd(filename):
+    """
+    Read GC data file using pandas (to create expected values).
+    """
+    data_path = get_datapath(filename=filename, data_type="GC")
+    gcwerks_file_data = pd.read_csv(data_path, delim_whitespace=True, skipinitialspace=True,
+                                    skiprows=4, dtype={"yyyy": str, "mm": str, "dd": str, "hh": str, "mi": str})
+
+    gcwerks_file_data["date_time"] = gcwerks_file_data["yyyy"] \
+                                   + gcwerks_file_data["mm"] \
+                                   + gcwerks_file_data["dd"] \
+                                   + gcwerks_file_data["hh"] \
+                                   + gcwerks_file_data["mi"]
+    
+    gcwerks_file_data["date_time"] = pd.to_datetime(gcwerks_file_data["date_time"], format="%Y%m%d%H%M")
+    gcwerks_file_data = gcwerks_file_data.dropna(subset="SF6")
+
+    return gcwerks_file_data
+
+
+def test_obs_data_read_small_diff():
+    """
+    Test adding new file for GC data (same data as original file but different header)
+    """
+    get_bucket(empty=True)
+    # Load BSD data
+    bsd_data_read()
+    # Load BSD data (GCWERKS) with small edit in header
+    bsd_small_edit_data_read()
+
+    # Search for expected species
+    # CRDS data
+    search_ch4 = search(site="bsd", species="ch4")
+    search_co2 = search(site="bsd", species="co2")
+    search_co = search(site="bsd", species="co")
+    # GCMD data
+    search_sf6 = search(site="bsd", species="sf6")
+    search_n2o = search(site="bsd", species="n2o")
+
+    # Check something is found for each search
+    assert bool(search_ch4) == True
+    assert bool(search_co2) == True
+    assert bool(search_co) == True
+    assert bool(search_sf6) == True
+    assert bool(search_n2o) == True
+
+    crds_file_data = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
+
+    obs_data_ch4 = search_ch4.retrieve()
+    data_ch4 = obs_data_ch4.data
+
+    ch4 = data_ch4["ch4"].values
+    expected_ch4 = crds_file_data["ch4"].values
+    np.testing.assert_allclose(ch4, expected_ch4)
+
+    # ch4_time = data_ch4["time"].values
+    # expected_ch4_time = crds_file_data["date_time"].values
+    # np.testing.assert_allclose(ch4_time, expected_ch4_time)
+
+    gcwerks_file_data = read_gc_file_pd("bilsdale-md.14.C")
+
+    obs_data_sf6 = search_sf6.retrieve()
+    data_sf6 = obs_data_sf6.data
+
+    sf6 = data_sf6["sf6"].values
+    expected_sf6 = gcwerks_file_data["SF6"].values
+    np.testing.assert_allclose(sf6, expected_sf6)
+
+    # Load datasource and keys, key dictionary includes "v1", "latest" etc.
+
+    # TODO: Can we check if this has been saved as a new version?   
+
+
+def test_obs_data_read_data_diff():
+    """
+    Test adding new file for GC with same time points but some different data values
+    """
+    get_bucket(empty=True)  
+    # Load BSD data
+    bsd_data_read()
+    # Load BSD data (GCWERKS) with edit to data (will produce different hash)
+    bsd_diff_data_read()
+
+    # Search for expected species
+    # CRDS data
+    search_ch4 = search(site="bsd", species="ch4")
+    search_co2 = search(site="bsd", species="co2")
+    search_co = search(site="bsd", species="co")
+    # GCMD data
+    search_sf6 = search(site="bsd", species="sf6")
+    search_n2o = search(site="bsd", species="n2o")
+
+    # Check something is found for each search
+    assert bool(search_ch4) == True
+    assert bool(search_co2) == True
+    assert bool(search_co) == True
+    assert bool(search_sf6) == True
+    assert bool(search_n2o) == True
+
+    crds_file_data = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
+
+    obs_data_ch4 = search_ch4.retrieve()
+    data_ch4 = obs_data_ch4.data
+
+    ch4 = data_ch4["ch4"].values
+    expected_ch4 = crds_file_data["ch4"].values
+    np.testing.assert_allclose(ch4, expected_ch4)
+
+    # ch4_time = data_ch4["time"].values
+    # expected_ch4_time = crds_file_data["date_time"].values
+    # np.testing.assert_allclose(ch4_time, expected_ch4_time)
+
+    gcwerks_file_data = read_gc_file_pd("bilsdale-md.small-edit.14.C")
+
+    obs_data_sf6 = search_sf6.retrieve()
+    data_sf6 = obs_data_sf6.data
+
+    sf6 = data_sf6["sf6"].values
+    expected_sf6 = gcwerks_file_data["SF6"].values
+    np.testing.assert_allclose(sf6, expected_sf6)
+
+    # TODO: Can we check if this has been saved as a new version?
+
+
+
+
+
+    
