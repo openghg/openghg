@@ -1,10 +1,32 @@
 import pytest
-from helpers import metadata_checker_obssurface
+from helpers import metadata_checker_obssurface, get_datapath
 from openghg.retrieve import metadata_lookup, search
 from openghg.store import metastore_manager
 from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_tzaware
+from openghg.store import ObsSurface
 from pandas import Timestamp
+from openghg.standardise import standardise_surface
+
+
+def test_recreate_ranking_no_ranking_error():
+    # Read in some data
+    bsd_248_path = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    bsd_108_path = get_datapath(filename="bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
+    bsd_42_path = get_datapath(filename="bsd.picarro.1minute.42m.min.dat", data_type="CRDS")
+
+    bsd_paths = [bsd_248_path, bsd_108_path, bsd_42_path]
+
+    bsd_results = ObsSurface.read_file(filepath=bsd_paths, data_type="CRDS", site="bsd", network="DECC")
+
+    obs = ObsSurface.load()
+    uid_248 = bsd_results["processed"]["bsd.picarro.1minute.248m.min.dat"]["ch4"]["uuid"]
+    obs.set_rank(uuid=uid_248, rank=1, date_range="2014-01-30_2015-01-01")
+
+    # Read in data for another site
+
+
+    # Do a search for site 2
 
 
 def test_specific_keyword_search():

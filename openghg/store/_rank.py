@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from openghg.util import running_locally
+from openghg.util import running_on_hub
 
 if TYPE_CHECKING:
     from openghg.dataobjects import RankSources
@@ -20,8 +20,8 @@ def rank_sources(site: str, species: str, service_url: str = None) -> RankSource
     """
     from openghg.dataobjects import RankSources
 
-    hub_or_cloud = not running_locally()
-    ranker = RankSources(cloud=hub_or_cloud, service_url=service_url)
+    hub = running_on_hub()
+    ranker = RankSources(cloud=hub)
     ranker.get_sources(site=site, species=species)
 
     return ranker
