@@ -186,6 +186,7 @@ class ObsSurface(BaseStore):
                         "This file has been uploaded previously with the filename : "
                         f"{obs._file_hashes[file_hash]} - skipping."
                     )
+                    break
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
