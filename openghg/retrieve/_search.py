@@ -240,17 +240,10 @@ def local_search(**kwargs):  # type: ignore
         SearchResults or None: SearchResults object is results found, otherwise None
     """
     from copy import deepcopy
-    from itertools import chain as iter_chain
     from functools import reduce
-    from addict import Dict as aDict
-    from tinydb import Query, where
-    from openghg.store.base import Datasource
+    from tinydb import Query
     from openghg.util import (
         clean_string,
-        in_daterange,
-        find_daterange_gaps,
-        split_daterange_str,
-        daterange_overlap,
         in_daterange,
         synonyms,
         timestamp_epoch,
@@ -265,6 +258,7 @@ def local_search(**kwargs):  # type: ignore
         )
 
     # Get a copy of kwargs as we make some modifications below
+    # TODO -Not sure I need to do this here
     kwargs_copy = deepcopy(kwargs)
 
     # As we might have kwargs that are None we want to get rid of those
@@ -298,8 +292,23 @@ def local_search(**kwargs):  # type: ignore
     start_date = search_kwargs.get("start_date")
     end_date = search_kwargs.get("end_date")
 
-    # Do this here otherwise we have to produce them for every datasource
+    search_by_date = False
+    # Narrow the search to a daterange if dates passed
+    if start_date is not None or end_date is not None:
+        search_by_date = True
+        if start_date is None:
+            start_date = timestamp_epoch()
+        else:
+            start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
+            del search_kwargs["start_date"]
 
+        if end_date is None:
+            end_date = timestamp_now()
+        else:
+            end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
+            del search_kwargs["end_date"]
+
+    # Now search the metadata store using the passed terms
     q = Query()
     search_attrs = [getattr(q, k) == v for k, v in search_kwargs.items()]
     results = metastore.search(reduce(_find_and, search_attrs))
@@ -312,18 +321,7 @@ def local_search(**kwargs):  # type: ignore
         logger.error(error_msg)
         raise ValueError(error_msg)
 
-    # Narrow the search to a daterange if dates passed
-    if start_date is not None or end_date is not None:
-        if start_date is None:
-            start_date = timestamp_epoch()
-        else:
-            start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
-
-        if end_date is None:
-            end_date = timestamp_now()
-        else:
-            end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
-
+    if search_by_date:
         dated_results = []
         for record in results:
             try:
