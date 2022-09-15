@@ -356,7 +356,7 @@ def local_search(**kwargs):  # type: ignore
         results_w_keys = []
         for record in results:
             uid = record["uuid"]
-            keys = Datasource.load().data_keys()
+            keys = Datasource.load(uuid=uid).data_keys()
             with_keys = {**record, "keys": keys}
 
             results_w_keys.append(with_keys)
