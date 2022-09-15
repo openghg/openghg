@@ -82,15 +82,16 @@ def test_add_data(data):
         "species": "ch4",
         "calibration_scale": "wmo-x2004a",
         "long_name": "bilsdale",
-        "calibration_scale": "wmo-x2004a",
+        "inlet_height_magl": "248m",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "station_longitude": -1.15033,
         "station_latitude": 54.35858,
         "station_long_name": "bilsdale, uk",
         "station_height_masl": 380.0,
-        "inlet_height_magl": "248m",
         "data_type": "timeseries",
+        "start_date": "2014-01-30 11:12:30+00:00",
+        "end_date": "2020-12-01 22:32:29+00:00",
     }
 
     assert d.metadata() == expected_metadata

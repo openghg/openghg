@@ -202,6 +202,10 @@ class Datasource:
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
+        # Store the start and end date of the most recent data
+        start, end = self.daterange()
+        self.add_metadata_key(key="start_date", value=str(start))
+        self.add_metadata_key(key="end_date", value=str(end))
 
     def add_metadata(self, metadata: Dict) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -722,14 +726,14 @@ class Datasource:
             bool: True if overlap
         """
         from openghg.util import timestamp_tzaware
-
-        # if self._start_date is None or self._end_date is None:
-        #     self.update_daterange()
+        from openghg.util import in_daterange as _in_daterange
 
         start_date = timestamp_tzaware(start_date)
         end_date = timestamp_tzaware(end_date)
 
-        return bool((start_date <= self._end_date) and (end_date >= self._start_date))
+        return _in_daterange(
+            start_a=start_date, end_a=end_date, start_b=self._start_date, end_b=self._end_date
+        )
 
     def keys_in_daterange(
         self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]

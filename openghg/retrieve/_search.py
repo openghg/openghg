@@ -24,7 +24,6 @@ def _find_or(x: Any, y: Any) -> Any:
     return x | y
 
 
-
 def meta_search(search_terms: Dict, database: TinyDB) -> Dict:
     """Search a metadata database and return dictionary of the
     metadata for each Datasource keyed by their UUIDs.
@@ -36,8 +35,23 @@ def meta_search(search_terms: Dict, database: TinyDB) -> Dict:
         dict: Dictionary of metadata
     """
     from functools import reduce
-
     from tinydb import Query
+    from openghg.util import timestamp_epoch, timestamp_now, timestamp_tzaware
+    from pandas import Timedelta
+
+    # Do this here otherwise we have to produce them for every datasource
+    start_date = search_terms.get("start_date")
+    end_date = search_terms.get("end_date")
+
+    if start_date is None:
+        start_date = timestamp_epoch()
+    else:
+        start_date = timestamp_tzaware(start_date) + Timedelta("1s")
+
+    if end_date is None:
+        end_date = timestamp_now()
+    else:
+        end_date = timestamp_tzaware(end_date) - Timedelta("1s")
 
     q = Query()
 
@@ -227,13 +241,17 @@ def local_search(**kwargs):  # type: ignore
     """
     from copy import deepcopy
     from itertools import chain as iter_chain
-
+    from functools import reduce
     from addict import Dict as aDict
+    from tinydb import Query, where
     from openghg.store.base import Datasource
     from openghg.util import (
         clean_string,
+        in_daterange,
         find_daterange_gaps,
         split_daterange_str,
+        daterange_overlap,
+        in_daterange,
         synonyms,
         timestamp_epoch,
         timestamp_now,
@@ -248,30 +266,6 @@ def local_search(**kwargs):  # type: ignore
 
     # Get a copy of kwargs as we make some modifications below
     kwargs_copy = deepcopy(kwargs)
-
-    # Do this here otherwise we have to produce them for every datasource
-    start_date = kwargs.get("start_date")
-    end_date = kwargs.get("end_date")
-
-    if start_date is None:
-        start_date = timestamp_epoch()
-    else:
-        start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
-
-    if end_date is None:
-        end_date = timestamp_now()
-    else:
-        end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
-
-    kwargs_copy["start_date"] = start_date
-    kwargs_copy["end_date"] = end_date
-
-    skip_ranking = kwargs_copy.get("skip_ranking", False)
-
-    try:
-        del kwargs_copy["skip_ranking"]
-    except KeyError:
-        pass
 
     # As we might have kwargs that are None we want to get rid of those
     search_kwargs = {k: clean_string(v) for k, v in kwargs_copy.items() if v is not None}
@@ -300,10 +294,54 @@ def local_search(**kwargs):  # type: ignore
     # Load in the metastore
     metastore = load_metastore(key=obj._metakey)
 
-    search_results = meta_search(metadata=search_kwargs, database=metastore)
+    # We only really need to search for dates if they're passed in.
+    start_date = search_kwargs.get("start_date")
+    end_date = search_kwargs.get("end_date")
 
-    return SearchResults(results=search_results)
+    # Do this here otherwise we have to produce them for every datasource
 
+    q = Query()
+    search_attrs = [getattr(q, k) == v for k, v in search_kwargs.items()]
+    results = metastore.search(reduce(_find_and, search_attrs))
+
+    # Add in a quick check to make sure we don't have dupes
+    n_uuids = [s["uuid"] for s in results]
+    # TODO - remove this once a more thorough tests are added
+    if len(n_uuids) != len(set(n_uuids)):
+        error_msg = "Multiple results found with same UUID!"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    # Narrow the search to a daterange if dates passed
+    if start_date is not None or end_date is not None:
+        if start_date is None:
+            start_date = timestamp_epoch()
+        else:
+            start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
+
+        if end_date is None:
+            end_date = timestamp_now()
+        else:
+            end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
+
+        dated_results = []
+        for record in results:
+            try:
+                ds_start_date = timestamp_tzaware(record["start_date"])
+                ds_end_date = timestamp_tzaware(record["end_date"])
+            except KeyError:
+                logger.exception("Unable to read dates from metadata")
+
+            if in_daterange(start_a=start_date, end_a=end_date, start_b=ds_start_date, end_b=ds_end_date):
+                dated_results.append(record)
+
+        if not dated_results:
+            logger.warning("No data found for the dates given, please try a wider search.")
+
+        # We've warned the user if this is empty
+        results = dated_results
+
+    return SearchResults(results=results)
 
     # if not lookup_results:
     #     return SearchResults()
@@ -319,7 +357,6 @@ def local_search(**kwargs):  # type: ignore
 
     # if data_type == "timeseries":
     #     pass
-
 
     # if data_type in valid_data_types_without_timeseries:
     #     sources = {}
@@ -437,7 +474,6 @@ def local_search(**kwargs):  # type: ignore
 
     #     # unranked = aDict()
     #     # Otherwise store the data
-
 
     #     #
     #     # raise ValueError(
