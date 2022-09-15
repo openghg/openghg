@@ -11,7 +11,7 @@ from openghg.util import split_daterange_str
 from pandas import Timestamp
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def load_CRDS():
     tac_100m = get_datapath("tac.picarro.1minute.100m.min.dat", data_type="CRDS")
     hfd_50m = get_datapath("hfd.picarro.1minute.50m.min.dat", data_type="CRDS")
@@ -24,10 +24,43 @@ def load_CRDS():
     ObsSurface.read_file(filepath=[bsd_42m, bsd_108m, bsd_248m], data_type="CRDS", site="bsd", network="DECC")
 
 
-def test_retrieve_all_bsd():
+def test_retrieve_all():
     results = search(site="bsd")
 
-    print(results)
+    all_bsd = results.retrieve_all()
+
+    assert len(all_bsd) == 9
+
+
+def test_retrieve_by_df():
+    r = search(site="bsd")
+
+    ch4_df = r.results[r.results["species"] == "ch4"]
+
+    ch4_datas = r.retrieve(dataframe=ch4_df)
+
+    inlets_required = ["248m", "108m", "42m"]
+    for d in ch4_datas:
+        inlets_required.remove(d.metadata["inlet"])
+
+    co2_108m_df = r.results[(r.results["inlet"] == "108m") & (r.results["species"] == "co2")]
+
+    co2_108m_datas = r.retrieve(dataframe=co2_108m_df)
+
+    assert len(co2_108m_datas) == 1
+    assert co2_108m_datas.metadata["species"] == "co2"
+    assert co2_108m_datas.metadata["inlet"] == "108m"
+
+
+def test_retrieve_by_terms():
+    r = search(site="hfd")
+
+    co_data = r.retrieve(species="co")
+
+    assert len(co_data) == 1
+    assert co_data.metadata["species"] == "co"
+    assert co_data.metadata["inlet"] == "50m"
+
 
 # @pytest.fixture(scope="session", autouse=False)
 # def with_ranking():

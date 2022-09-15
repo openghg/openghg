@@ -3,7 +3,6 @@
 
 """
 import logging
-from collections import defaultdict
 from typing import Any, Dict, List, Optional, Union, cast
 
 from openghg.dataobjects import SearchResults
@@ -251,7 +250,6 @@ def local_search(**kwargs):  # type: ignore
     from openghg.store.base import Datasource
     from openghg.util import (
         clean_string,
-        in_daterange,
         synonyms,
         timestamp_epoch,
         timestamp_now,

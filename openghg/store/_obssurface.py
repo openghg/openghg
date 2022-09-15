@@ -558,7 +558,9 @@ class ObsSurface(BaseStore):
         delete_object(bucket=bucket, key=key)
 
         # Delete the UUID from the metastore
-        metastore = load
+        metastore = load_metastore(key=self._metakey)
+        metastore.remove(where("uuid") == uuid)
+        metastore.close
 
         del self._datasource_uuids[uuid]
 
