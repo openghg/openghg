@@ -35,9 +35,10 @@ def meta_search(search_terms: Dict, database: TinyDB) -> Dict:
         dict: Dictionary of metadata
     """
     from functools import reduce
-    from tinydb import Query
+
     from openghg.util import timestamp_epoch, timestamp_now, timestamp_tzaware
     from pandas import Timedelta
+    from tinydb import Query
 
     # Do this here otherwise we have to produce them for every datasource
     start_date = search_terms.get("start_date")
@@ -246,7 +247,8 @@ def local_search(**kwargs):  # type: ignore
     """
     from copy import deepcopy
     from functools import reduce
-    from tinydb import Query
+
+    from openghg.store.base import Datasource
     from openghg.util import (
         clean_string,
         in_daterange,
@@ -256,7 +258,7 @@ def local_search(**kwargs):  # type: ignore
         timestamp_tzaware,
     )
     from pandas import Timedelta as pd_Timedelta
-    from openghg.store.base import Datasource
+    from tinydb import Query
 
     if running_on_hub():
         raise ValueError(
@@ -324,6 +326,8 @@ def local_search(**kwargs):  # type: ignore
         logger.exception(msg=error_msg)
         raise ValueError(error_msg)
 
+    keyed_metadata = {r["uuid"]: r for r in results}
+    data_keys = {}
     # Narrow the search to a daterange if dates passed
     if start_date is not None or end_date is not None:
         if start_date is None:
@@ -338,32 +342,25 @@ def local_search(**kwargs):  # type: ignore
             end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
             del search_kwargs["end_date"]
 
-        # TODO - Can we refactor this somehow so we don't repeat the record in results code?
-        dated_results = []
-        for record in results:
-            uid = record["uuid"]
-            keys = Datasource.load(uuid=uid).keys_in_daterange(start_date=start_date, end_date=end_date)
-            with_keys = {**record, "keys": keys}
+        metadata_in_daterange = {}
 
-            if keys:
-                dated_results.append(with_keys)
+        for uid, record in keyed_metadata.items():
+            _keys = Datasource.load(uuid=uid).keys_in_daterange(start_date=start_date, end_date=end_date)
 
-        if not dated_results:
+            if _keys:
+                metadata_in_daterange[uid] = record
+                data_keys[uid] = _keys
+
+        if not metadata_in_daterange:
             logger.warning("No data found for the dates given, please try a wider search.")
-        # We've warned the user if this is empty
-        results = dated_results
+        # Update the metadata we'll use to create the SearchResults object
+        keyed_metadata = metadata_in_daterange
     else:
-        results_w_keys = []
-        for record in results:
-            uid = record["uuid"]
-            keys = Datasource.load(uuid=uid).data_keys()
-            with_keys = {**record, "keys": keys}
+        # Here we only need to retrieve the keys
+        for uid in keyed_metadata:
+            data_keys[uid] = Datasource.load(uuid=uid).data_keys()
 
-            results_w_keys.append(with_keys)
-
-        results = results_w_keys
-
-    return SearchResults(results=results)
+    return SearchResults(keys=data_keys, metadata=keyed_metadata)
 
     # if not lookup_results:
     #     return SearchResults()

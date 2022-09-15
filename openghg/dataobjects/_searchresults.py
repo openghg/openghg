@@ -1,19 +1,12 @@
 import json
 from io import BytesIO
-from pandas import DataFrame
 from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
-from tinydb import TinyDB
+
 from addict import Dict as aDict
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
-from openghg.util import (
-    # clean_string,
-    # create_daterange_str,
-    # find_daterange_gaps,
-    # first_last_dates,
-    running_on_hub,
-    # split_daterange_str,
-)
+from openghg.util import running_on_hub
+from pandas import DataFrame
 from xarray import Dataset, open_dataset
 
 __all__ = ["SearchResults"]
@@ -30,21 +23,8 @@ class SearchResults:
         ranked_data: True if results are ranked, else False
     """
 
-    def __init__(self, results: Optional[List] = None):
-        # Here we do some processing so we can create a nice DataFrame to show
-        # the user the results but also enable us to save the keys for
-        # data retrieval
-        keys = {}
-        metadata = {}
-
-        for result in results:
-            # Should we just store the keys separately so we can retrieve them if needed?
-            # We want to remove the keys here
-            uid = result["uuid"]
-            keys[uid] = result["keys"]
-            # TODO - check if the metadata contains the UUID
-            metadata[uid] = {k: v for k, v in result.items() if k != "keys"}
-
+    # def __init__(self, results: Optional[List] = None):
+    def __init__(self, keys: Optional[Dict], metadata: Optional[Dict]):
         self.metadata = metadata
         self.results = DataFrame.from_dict(data=metadata, orient="index").reset_index()
         self.key_data = keys
@@ -74,10 +54,10 @@ class SearchResults:
         Returns:
             dict: Dictionary of data
         """
-        raise NotImplementedError
         return {
-            "results": self.results,
-            "cloud": self.hub,
+            "metadata": self.metadata,
+            "keys": self.key_data,
+            "hub": self.hub,
         }
 
     def to_json(self) -> str:
@@ -86,7 +66,6 @@ class SearchResults:
         Returns:
             str: JSON str
         """
-        raise NotImplementedError
         return json.dumps(self.to_data())
 
     @classmethod
@@ -98,10 +77,9 @@ class SearchResults:
         Returns:
             SearchResults: SearchResults object
         """
-        raise NotImplementedError
         loaded = json.loads(data)
 
-        return cls(results=loaded["results"])
+        return cls(keys=loaded["keys"], metadata=loaded["metadata"])
 
     def rankings(self) -> Dict:
         return NotImplementedError
@@ -118,15 +96,7 @@ class SearchResults:
 
         return to_return
 
-    def raw(self) -> Dict:
-        """Returns the raw results data
-
-        Returns:
-            dict: Dictionary of results returned from search function
-        """
-        return self.results
-
-    def retrieve(self, dataframe: DataFrame) -> Union[ObsData, List[ObsData]]:
+    def retrieve(self, dataframe: Optional[DataFrame] = None, **kwargs) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from object store using a filtered pandas DataFrame
 
         Args:
@@ -134,9 +104,11 @@ class SearchResults:
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
-        uuids = dataframe["uuid"].to_list()
-
-        return self._retrieve(uuids=uuids)
+        if dataframe is not None:
+            uuids = dataframe["uuid"].to_list()
+            return self._retrieve_by_uuid(uuids=uuids)
+        else:
+            return self._retrieve_by_term(**kwargs)
 
     def retrieve_all(self) -> Union[ObsData, List[ObsData]]:
         """Retrieves all data found during the search
@@ -145,9 +117,38 @@ class SearchResults:
             ObsData / List[ObsData]: ObsData object(s)
         """
         uuids = list(self.key_data.keys())
-        return self._retrieve(uuids=uuids)
+        return self._retrieve_by_uuid(uuids=uuids)
 
-    def _retrieve(self, uuids: List) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_term(self, **kwargs):
+        """ """
+        uuids = set()
+
+        for uid, metadata in self.metadata.items():
+            n_required = len(kwargs)
+            n_matched = 0
+            for key, value in kwargs.items():
+                try:
+                    # Here we want to check if it's a list and if so iterate over it
+                    if isinstance(value, (list, tuple)):
+                        for val in value:
+                            val = str(val).lower()
+                            if metadata[key.lower()] == val:
+                                n_matched += 1
+                                break
+                    else:
+                        value = str(value).lower()
+                        if metadata[key.lower()] == value:
+                            n_matched += 1
+                except KeyError:
+                    pass
+
+            if n_matched == n_required:
+                uuids.add(uid)
+
+        # Now we can retrieve the data using the UUIDs
+        return self._retrieve_by_uuid(uuids=uuids)
+
+    def _retrieve_by_uuid(self, uuids: List) -> Union[ObsData, List[ObsData]]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
         create ObsData object(s) and return the result.
@@ -206,7 +207,6 @@ class SearchResults:
             return recombine_datasets(
                 keys=keys, sort=sort, elevate_inlet=elevate_inlet, attrs_to_check=attrs_to_check
             )
-
 
     # def keys(self, key_codes: List) -> Optional:
     #     """ """
@@ -471,5 +471,3 @@ class SearchResults:
     #     metadata = specific_source["metadata"]
 
     #     return ObsData(data=final_dataset, metadata=metadata)
-
-    
