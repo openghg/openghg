@@ -215,6 +215,11 @@ def search(**kwargs: Any) -> Union[SearchResults, Dict]:
 # TODO
 # GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
 # facing interfaces to a more general search function, this would also make it easier to enforce types
+# TODO - rename this function!
+# 2.
+# _base_search()
+# 1.
+# _store_search()
 def local_search(**kwargs):  # type: ignore
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
@@ -251,6 +256,7 @@ def local_search(**kwargs):  # type: ignore
         timestamp_tzaware,
     )
     from pandas import Timedelta as pd_Timedelta
+    from openghg.store.base import Datasource
 
     if running_on_hub():
         raise ValueError(
@@ -280,6 +286,9 @@ def local_search(**kwargs):  # type: ignore
     if data_type not in valid_data_types:
         raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
 
+    # TODO - here maybe we could pull out the below into a function and loop over the
+    # data types. Then we could search across all types easily.
+
     # Load associated object class (e.g. ObsSurface, Emissions) for data_type
     data_type_classes = define_data_type_classes()
     objclass = data_type_classes[data_type]
@@ -288,14 +297,35 @@ def local_search(**kwargs):  # type: ignore
     # Load in the metastore
     metastore = load_metastore(key=obj._metakey)
 
-    # We only really need to search for dates if they're passed in.
-    start_date = search_kwargs.get("start_date")
-    end_date = search_kwargs.get("end_date")
+    try:
+        start_date = search_kwargs["start_date"]
+    except KeyError:
+        start_date = None
+    else:
+        del search_kwargs["start_date"]
 
-    search_by_date = False
+    try:
+        end_date = search_kwargs["end_date"]
+    except KeyError:
+        end_date = None
+    else:
+        del search_kwargs["end_date"]
+
+    # Now search the metadata store using the passed terms
+    q = Query()
+    search_attrs = [getattr(q, k) == v for k, v in search_kwargs.items()]
+    results = metastore.search(reduce(_find_and, search_attrs))
+
+    # Add in a quick check to make sure we don't have dupes
+    uuids = [s["uuid"] for s in results]
+    # TODO - remove this once a more thorough tests are added
+    if len(uuids) != len(set(uuids)):
+        error_msg = "Multiple results found with same UUID!"
+        logger.exception(msg=error_msg)
+        raise ValueError(error_msg)
+
     # Narrow the search to a daterange if dates passed
     if start_date is not None or end_date is not None:
-        search_by_date = True
         if start_date is None:
             start_date = timestamp_epoch()
         else:
@@ -308,36 +338,30 @@ def local_search(**kwargs):  # type: ignore
             end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
             del search_kwargs["end_date"]
 
-    # Now search the metadata store using the passed terms
-    q = Query()
-    search_attrs = [getattr(q, k) == v for k, v in search_kwargs.items()]
-    results = metastore.search(reduce(_find_and, search_attrs))
-
-    # Add in a quick check to make sure we don't have dupes
-    n_uuids = [s["uuid"] for s in results]
-    # TODO - remove this once a more thorough tests are added
-    if len(n_uuids) != len(set(n_uuids)):
-        error_msg = "Multiple results found with same UUID!"
-        logger.error(error_msg)
-        raise ValueError(error_msg)
-
-    if search_by_date:
+        # TODO - Can we refactor this somehow so we don't repeat the record in results code?
         dated_results = []
         for record in results:
-            try:
-                ds_start_date = timestamp_tzaware(record["start_date"])
-                ds_end_date = timestamp_tzaware(record["end_date"])
-            except KeyError:
-                logger.exception("Unable to read dates from metadata")
+            uid = record["uuid"]
+            keys = Datasource.load(uuid=uid).keys_in_daterange(start_date=start_date, end_date=end_date)
+            with_keys = {**record, "keys": keys}
 
-            if in_daterange(start_a=start_date, end_a=end_date, start_b=ds_start_date, end_b=ds_end_date):
-                dated_results.append(record)
+            if keys:
+                dated_results.append(with_keys)
 
         if not dated_results:
             logger.warning("No data found for the dates given, please try a wider search.")
-
         # We've warned the user if this is empty
         results = dated_results
+    else:
+        results_w_keys = []
+        for record in results:
+            uid = record["uuid"]
+            keys = Datasource.load().data_keys()
+            with_keys = {**record, "keys": keys}
+
+            results_w_keys.append(with_keys)
+
+        results = results_w_keys
 
     return SearchResults(results=results)
 

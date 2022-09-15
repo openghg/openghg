@@ -1,7 +1,8 @@
 import json
 from io import BytesIO
+from pandas import DataFrame
 from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union, cast
-
+from tinydb import TinyDB
 from addict import Dict as aDict
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
@@ -29,38 +30,38 @@ class SearchResults:
         ranked_data: True if results are ranked, else False
     """
 
-    def __init__(self, results: Optional[Dict] = None):
-        self.results = results if results is not None else {}
+    def __init__(self, results: Optional[List] = None):
+        # Here we do some processing so we can create a nice DataFrame to show
+        # the user the results but also enable us to save the keys for
+        # data retrieval
+        keys = {}
+        for_df = {}
+        for i, result in enumerate(results):
+            # Should we just store the keys separately so we can retrieve them if needed?
+            # We want to remove the keys here
+            keys[i] = result["keys"]
+            # TODO - check if the metadata contains the UUID
+            for_df[i] = {k: v for k, v in result if k != "keys"}
+
+        self.raw_results = {i: result for i, result in enumerate(results)}
+        self.results = DataFrame.from_dict(data=for_df, orient="index")
+        # self.results_db = TinyDB()
         self.hub = running_on_hub()
 
-    # def __str__(self) -> str:
-    #     if not self.results:
-    #         return "No results"
+    def __str__(self) -> str:
+        return self.results
 
-    #     print_strs = []
-    #     for site, species in self.results.items():
-    #         if self.ranked_data:
-    #             print_strs.append(
-    #                 f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}"
-    #             )
-    #         else:
-    #             print_strs.append(f"Site: {site.upper()}")
-    #             print_strs.append("---------")
-    #             print_strs.extend([f"{sp} at {', '.join(self.results[site][sp].keys())}" for sp in species])
-    #         print_strs.append("\n")
-
-    #     return "\n".join(print_strs)
-
-    # def __repr__(self) -> str:
-    #     return self.__str__()
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def __bool__(self) -> bool:
-        return bool(self.results)
+        return self.results.empty
 
     def __len__(self) -> int:
-        return len(self.results)
+        return len(self.results.index)
 
     def __iter__(self) -> Iterator:
+        raise NotImplementedError
         yield from self.results
 
     def to_data(self) -> Dict:
@@ -69,6 +70,7 @@ class SearchResults:
         Returns:
             dict: Dictionary of data
         """
+        raise NotImplementedError
         return {
             "results": self.results,
             "cloud": self.hub,
@@ -80,6 +82,7 @@ class SearchResults:
         Returns:
             str: JSON str
         """
+        raise NotImplementedError
         return json.dumps(self.to_data())
 
     @classmethod
@@ -91,6 +94,7 @@ class SearchResults:
         Returns:
             SearchResults: SearchResults object
         """
+        raise NotImplementedError
         loaded = json.loads(data)
 
         return cls(results=loaded["results"])
@@ -118,34 +122,38 @@ class SearchResults:
         """
         return self.results
 
-    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[List[str]]:
-        """Return the data keys for the specified site and species.
-        This is intended mainly for use in the search function when filling
-        gaps of unranked dateranges.
+    def keys(self, key_codes: List) -> Optional:
+        """ """
+        raise NotImplementedError
 
-            Args:
-                site: Three letter site code
-                species: Species name
-                inlet: Inlet height, required for unranked data
-            Returns:
-                list: List of keys
-        """
-        site = site.lower()
-        species = species.lower()
+    # def keys(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[List[str]]:
+    #     """Return the data keys for the specified site and species.
+    #     This is intended mainly for use in the search function when filling
+    #     gaps of unranked dateranges.
 
-        if inlet is not None:
-            inlet = inlet.lower()
+    #         Args:
+    #             site: Three letter site code
+    #             species: Species name
+    #             inlet: Inlet height, required for unranked data
+    #         Returns:
+    #             list: List of keys
+    #     """
+    #     site = site.lower()
+    #     species = species.lower()
 
-        try:
-            if self.ranked_data:
-                keys: List = self.results[site][species]["keys"]
-            else:
-                keys = self.results[site][species][inlet]["keys"]
+    #     if inlet is not None:
+    #         inlet = inlet.lower()
 
-            return keys
-        except KeyError:
-            print(f"No keys found for {species} at {site}")
-            return None
+    #     try:
+    #         if self.ranked_data:
+    #             keys: List = self.results[site][species]["keys"]
+    #         else:
+    #             keys = self.results[site][species][inlet]["keys"]
+
+    #         return keys
+    #     except KeyError:
+    #         print(f"No keys found for {species} at {site}")
+    #         return None
 
     def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[Dict]:
         """Return the metadata for the specified site and species

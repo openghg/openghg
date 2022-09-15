@@ -172,6 +172,7 @@ class BaseStore:
         Args:
             datasource_uuids: Datasource UUIDs
             metadata: Metadata for each species
+            metastore: TinyDB metadata store
         Returns:
             None
         """
