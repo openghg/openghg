@@ -1,6 +1,6 @@
 from helpers import get_bc_datapath
 from openghg.retrieve import search
-from openghg.store import BoundaryConditions, metastore_manager, recombine_datasets
+from openghg.store import BoundaryConditions, load_metastore, recombine_datasets
 from openghg.util import hash_bytes
 from xarray import open_dataset
 
@@ -171,7 +171,7 @@ def test_datasource_add_lookup():
         }
     }
 
-    with metastore_manager(key="test-key-123") as metastore:
+    with load_metastore(key="test-key-123") as metastore:
         bc.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
         assert bc.datasources() == ["mock-uuid-123456"]

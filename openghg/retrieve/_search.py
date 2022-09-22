@@ -118,7 +118,6 @@ def search_surface(
     start_date: Union[str, List[str], None] = None,
     end_date: Union[str, List[str], None] = None,
     data_source: Optional[str] = None,
-    **kwargs: Any,
 ) -> SearchResults:
     """Cloud object store search
 
@@ -153,7 +152,7 @@ def search_surface(
         start_date=start_date,
         end_date=end_date,
         data_source=data_source,
-        **kwargs,
+        # **kwargs,
     )
 
     # TODO - remove this cast once we've updated search to ensure return of SearchResults object
@@ -244,7 +243,6 @@ def local_search(**kwargs):  # type: ignore
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
-    from copy import deepcopy
     from functools import reduce
 
     from openghg.store.base import Datasource
@@ -263,12 +261,8 @@ def local_search(**kwargs):  # type: ignore
             "This function can't be used on the OpenGHG Hub, please use openghg.retrieve.search instead."
         )
 
-    # Get a copy of kwargs as we make some modifications below
-    # TODO -Not sure I need to do this here
-    kwargs_copy = deepcopy(kwargs)
-
     # As we might have kwargs that are None we want to get rid of those
-    search_kwargs = {k: clean_string(v) for k, v in kwargs_copy.items() if v is not None}
+    search_kwargs = {k: clean_string(v) for k, v in kwargs.items() if v is not None}
 
     # Species translation
     species = search_kwargs.get("species")
@@ -279,6 +273,9 @@ def local_search(**kwargs):  # type: ignore
 
         updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
+
+        # TODO - 2022-09-22 - is there a better way of doing this?
+        # Flatten out the list based on species
 
     data_type = search_kwargs.get("data_type", "timeseries").lower()
 
@@ -313,7 +310,14 @@ def local_search(**kwargs):  # type: ignore
 
     # Now search the metadata store using the passed terms
     q = Query()
-    search_attrs = [getattr(q, k) == v for k, v in search_kwargs.items()]
+    search_attrs = []
+    for k, v in search_kwargs.items():
+        if isinstance(v, (list, tuple)):
+            for val in v:
+                search_attrs.append(getattr(q, k) == val)
+        else:
+            search_attrs.append(getattr(q, k) == v)
+
     results = metastore.search(reduce(_find_and, search_attrs))
 
     # Add in a quick check to make sure we don't have dupes
@@ -332,13 +336,11 @@ def local_search(**kwargs):  # type: ignore
             start_date = timestamp_epoch()
         else:
             start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
-            del search_kwargs["start_date"]
 
         if end_date is None:
             end_date = timestamp_now()
         else:
             end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
-            del search_kwargs["end_date"]
 
         metadata_in_daterange = {}
 
@@ -349,7 +351,7 @@ def local_search(**kwargs):  # type: ignore
                 metadata_in_daterange[uid] = record
                 data_keys[uid] = _keys
 
-        if not metadata_in_daterange:
+        if not data_keys:
             logger.warning("No data found for the dates given, please try a wider search.")
         # Update the metadata we'll use to create the SearchResults object
         keyed_metadata = metadata_in_daterange

@@ -175,8 +175,8 @@ def get_obs_surface_local(
         start_date=start_date,
         end_date=end_date,
         instrument=instrument,
-        find_all=True,
-        skip_ranking=skip_ranking,
+        # find_all=True,
+        # skip_ranking=skip_ranking,
     )
 
     if not obs_results:

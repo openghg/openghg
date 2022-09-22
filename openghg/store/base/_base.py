@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Type, TypeVar, Union
 
 from pandas import Timestamp
 from tinydb import TinyDB
+from openghg.util import to_lowercase
 
 __all__ = ["BaseStore"]
 
@@ -184,6 +185,8 @@ class BaseStore:
                 uid = uuid_data["uuid"]
                 meta_copy["uuid"] = uuid_data["uuid"]
 
+                # Make sure all the metadata is lowercase for easier searching later
+                meta_copy = to_lowercase(d=meta_copy)
                 metastore.insert(meta_copy)
                 self._datasource_uuids[uid] = key
 

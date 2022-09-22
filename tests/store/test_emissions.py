@@ -2,7 +2,7 @@ import pytest
 from helpers import get_emissions_datapath
 from openghg.objectstore import get_bucket
 from openghg.retrieve import search
-from openghg.store import Emissions, datasource_lookup, metastore_manager, recombine_datasets
+from openghg.store import Emissions, datasource_lookup, load_metastore, recombine_datasets
 from openghg.util import hash_bytes
 from xarray import open_dataset
 
@@ -239,7 +239,7 @@ def test_datasource_add_lookup():
         }
     }
 
-    with metastore_manager(key="test-key-123") as metastore:
+    with load_metastore(key="test-key-123") as metastore:
         e.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
         assert e.datasources() == ["mock-uuid-123456"]

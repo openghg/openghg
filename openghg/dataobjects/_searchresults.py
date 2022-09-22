@@ -24,22 +24,27 @@ class SearchResults:
     """
 
     # def __init__(self, results: Optional[List] = None):
-    def __init__(self, keys: Optional[Dict], metadata: Optional[Dict]):
+    def __init__(self, keys: Optional[Dict] = None, metadata: Optional[Dict] = None):
         self.metadata = metadata
-        self.results = DataFrame.from_dict(data=metadata, orient="index").reset_index()
+
+        if metadata is not None:
+            self.results = (
+                DataFrame.from_dict(data=metadata, orient="index").reset_index().drop(columns="index")
+            )
+        else:
+            self.results = {}
+
         self.key_data = keys
         self.hub = running_on_hub()
 
     def __str__(self) -> str:
-        return (
-            f"Found {len(self.results.index)} results.\nView the results DataFrame using SearchResult.results"
-        )
+        return f"Found {len(self.results.index)} results.\nView the results DataFrame using the results property."
 
     def __repr__(self) -> str:
         return self.__str__()
 
     def __bool__(self) -> bool:
-        return self.results.empty
+        return bool(self.metadata)
 
     def __len__(self) -> int:
         return len(self.results.index)
@@ -208,9 +213,9 @@ class SearchResults:
                 keys=keys, sort=sort, elevate_inlet=elevate_inlet, attrs_to_check=attrs_to_check
             )
 
-    # def keys(self, key_codes: List) -> Optional:
-    #     """ """
-    #     raise NotImplementedError
+    def keys(self):
+        """Return the object store keys. If a UUID is given the"""
+        raise NotImplementedError
 
     # # def keys(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[List[str]]:
     # #     """Return the data keys for the specified site and species.

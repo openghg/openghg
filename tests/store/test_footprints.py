@@ -2,7 +2,7 @@ import pytest
 from helpers import get_footprint_datapath
 from openghg.objectstore import get_bucket
 from openghg.retrieve import search
-from openghg.store import Footprints, datasource_lookup, metastore_manager, recombine_datasets
+from openghg.store import Footprints, datasource_lookup, load_metastore, recombine_datasets
 from openghg.util import hash_bytes
 
 
@@ -401,7 +401,7 @@ def test_datasource_add_lookup():
         }
     }
 
-    with metastore_manager(key="test-metastore-123") as metastore:
+    with load_metastore(key="test-metastore-123") as metastore:
         f.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
         assert f.datasources() == ["mock-uuid-123456"]
