@@ -24,13 +24,11 @@ def test_recombination_CRDS():
 
     result = search(species=species, site=site, inlet=inlet)
 
-    keys = result.keys(site=site, species=species, inlet=inlet)
+    uuid = next(iter(result.key_data))
 
-    data_keys = keys["unranked"]
+    keys = result.key_data[uuid]
 
-    assert "ranked" not in keys
-
-    ch4_data_recombined = recombine_datasets(keys=data_keys)
+    ch4_data_recombined = recombine_datasets(keys=keys)
 
     ch4_data_recombined.attrs = {}
 
@@ -53,12 +51,12 @@ def test_recombination_GC():
     inlet = "70m"
 
     result = search(species=species, site=site, inlet=inlet)
-    keys = result.keys(site=site, species=species, inlet=inlet)
 
-    data_keys = keys["unranked"]
-    assert "ranked" not in keys
+    uuid = next(iter(result.key_data))
 
-    toluene_data_recombined = recombine_datasets(keys=data_keys)
+    keys = result.key_data[uuid]
+
+    toluene_data_recombined = recombine_datasets(keys=keys)
 
     toluene_data.attrs = {}
     toluene_data_recombined.attrs = {}

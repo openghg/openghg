@@ -130,7 +130,8 @@ class ObsColumn(BaseStore):
             metastore=metastore, data=obs_data, required_keys=required, min_keys=3
         )
 
-        # data_type = "timeseries"  # TODO: Would be nice to harmonise this with ObsSurface
+        # TODO: Would be nice to harmonise this with ObsSurface
+        # data_type = "timeseries"
         data_type = "column"
         datasource_uuids = assign_data(
             data_dict=obs_data,

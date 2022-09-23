@@ -19,11 +19,10 @@ class SearchResults:
     has member functions to retrieve data from the object store.
 
     Args:
-        results: Search results
-        ranked_data: True if results are ranked, else False
+        keys: Dictionary of keys keyed by Datasource UUID
+        metadata: Dictionary of metadata keyed by Datasource UUID
     """
 
-    # def __init__(self, results: Optional[List] = None):
     def __init__(self, keys: Optional[Dict] = None, metadata: Optional[Dict] = None):
         self.metadata = metadata
 
@@ -114,8 +113,19 @@ class SearchResults:
         uuids = list(self.key_data.keys())
         return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
 
-    def _retrieve_by_term(self, sort: bool, elevate_inlet: bool, **kwargs):
-        """ """
+    def _retrieve_by_term(self, sort: bool, elevate_inlet: bool, **kwargs) -> Union[ObsData, List[ObsData]]:
+        """Retrieve data from the object store by search term. This function scans the
+        metadata of the retrieved results, retrieves the UUID associated with that data,
+        pulls it from the object store, recombines it into an xarray Dataset and returns
+        ObsData object(s).
+
+        Args:
+            sort: Pass the sort argument to the recombination function
+            (sorts by time)
+            elevate_inlet: Elevate the inlet variable in the Dataset to
+            a variable (used for ranked data)
+            kwargs: Metadata values to search for
+        """
         uuids = set()
         # Make sure we don't have any Nones
         clean_kwargs = {k: v for k, v in kwargs.items() if v is not None}
@@ -156,7 +166,6 @@ class SearchResults:
             uuids: UUIDs of Datasources in the object store
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
-
         """
         results = []
         # For uid in uuids
