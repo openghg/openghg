@@ -131,7 +131,7 @@ def standardise_bc(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     overwrite: bool = False,
-) -> Dict:
+) -> Optional[Dict]:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
@@ -199,7 +199,7 @@ def standardise_footprint(
     high_spatial_res: bool = False,
     high_time_res: bool = False,
     overwrite: bool = False,
-) -> Dict:
+) -> Optional[Dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
@@ -216,7 +216,8 @@ def standardise_footprint(
                         Note this will be set to True automatically for Carbon Dioxide data.
         overwrite: Overwrite any currently stored data
     Returns:
-        dict: Dictionary containing confirmation of standardisation process.
+        dict / None: Dictionary containing confirmation of standardisation process. None
+        if file already processed.
     """
     from openghg.cloud import call_function
     from openghg.store import Footprints
@@ -286,7 +287,7 @@ def standardise_flux(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     overwrite: bool = False,
-) -> Dict:
+) -> Optional[Dict]:
     """Process flux data
 
     Args:

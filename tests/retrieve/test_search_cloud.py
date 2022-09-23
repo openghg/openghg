@@ -10,8 +10,13 @@ def set_env(monkeypatch):
     monkeypatch.setenv("OPENGHG_HUB", "1")
 
 
+# I'm not sure if these tests really do anything
+
+
 def test_cloud_search_with_results(mocker):
-    sr = SearchResults(results={"bsd_co2": {"keys": {"1": "1", "2": "2", "3": "3"}}})
+    metadata = {"site": "london"}
+    sr = SearchResults(keys={"data": [1, 2, 3]}, metadata=metadata)
+
     compressed_sr = compress(sr.to_json().encode("utf-8"))
 
     content = {"found": True, "result": compressed_sr}
@@ -22,7 +27,7 @@ def test_cloud_search_with_results(mocker):
 
     result = search_surface(species="co2", site="tac")
 
-    assert result.results == {"bsd_co2": {"keys": {"1": "1", "2": "2", "3": "3"}}}
+    assert result.metadata == metadata
 
 
 def test_cloud_search_no_results(mocker):

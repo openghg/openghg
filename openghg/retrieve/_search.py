@@ -119,6 +119,8 @@ def search_surface(
     start_date: Union[str, List[str], None] = None,
     end_date: Union[str, List[str], None] = None,
     data_source: Optional[str] = None,
+    sampling_height: Optional[str] = None,
+    icos_data_level: Optional[int] = None,
 ) -> SearchResults:
     """Cloud object store search
 
@@ -134,7 +136,8 @@ def search_surface(
         end_date: End date
         data_source: Source of data, e.g. noaa_obspack, icoscp, ceda_archive. This
         argument only needs to be used to narrow the search to data solely from these sources.
-        kwargs: Any other search arguments to constrain the search further
+        sampling_height: Sampling height of measurements
+        icos_data_level: ICOS data level, see ICOS documentation
     Returns:
         SearchResults:  SearchResults object
     """
@@ -154,6 +157,7 @@ def search_surface(
         end_date=end_date,
         data_source=data_source,
         network=network,
+        sampling_height=sampling_height,
         # **kwargs,
     )
 

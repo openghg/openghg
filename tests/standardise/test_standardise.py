@@ -52,6 +52,7 @@ def test_standardise_footprint():
         height=height,
         domain=domain,
         high_spatial_res=True,
+        overwrite=True
     )
 
     assert "error" not in results
@@ -68,10 +69,10 @@ def test_standardise_emissions():
         date="2012",
         domain="europe",
         high_time_resolution=False,
+        overwrite=True
     )
 
     assert "co2_gpp-cardamom_europe_2012" in proc_results
-
 
 
 def test_standardise(monkeypatch, mocker, tmpdir):
@@ -91,6 +92,7 @@ def test_standardise(monkeypatch, mocker, tmpdir):
         data_type="crds",
         sampling_period="1m",
         instrument="picarro",
+        overwrite=True
     )
 
     assert call_fn_mock.call_args == mocker.call(

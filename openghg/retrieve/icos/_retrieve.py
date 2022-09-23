@@ -158,7 +158,6 @@ def local_retrieve(
         start_date=start_date,
         end_date=end_date,
         icos_data_level=data_level,
-        skip_ranking=True,
     )
 
     if results and not force_retrieval:
