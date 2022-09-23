@@ -63,10 +63,8 @@ def test_read_footprint_standard():
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
 
-    fp_site_key = list(footprint_results.keys())[0]
-
-    footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+    footprint_obs = footprint_results.retrieve_all()
+    footprint_data = footprint_obs.data
 
     footprint_coords = list(footprint_data.coords.keys())
 
@@ -90,7 +88,7 @@ def test_read_footprint_standard():
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "spatial_resolution" : "standard_spatial_resolution",
+        "spatial_resolution": "standard_spatial_resolution",
         "time_resolution": "standard_time_resolution",
         "time_period": "2 hours",
     }
@@ -132,10 +130,8 @@ def test_read_footprint_high_spatial_res():
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
 
-    fp_site_key = list(footprint_results.keys())[0]
-
-    footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+    footprint_obs = footprint_results.retrieve_all()
+    footprint_data = footprint_obs.data
 
     footprint_coords = list(footprint_data.coords.keys())
     footprint_dims = list(footprint_data.dims)
@@ -234,10 +230,27 @@ def test_read_footprint_high_spatial_res():
     assert footprint_data["pressure"].min().values == pytest.approx(1011.92)
 
 
-@pytest.mark.parametrize("site,height,metmodel,start,end,filename",
-                         [("TAC", "100m", "UKV", "2014-07-01 00:00:00+00:00", "2014-07-04 00:59:59+00:00", "TAC-100magl_UKV_co2_TEST_201407.nc"),
-                          ("RGL", "90m", "UKV", "2014-01-10 00:00:00+00:00", "2014-01-12 00:59:59+00:00","RGL-90magl_UKV_co2_TEST_201401.nc"),
-                         ])
+@pytest.mark.parametrize(
+    "site,height,metmodel,start,end,filename",
+    [
+        (
+            "TAC",
+            "100m",
+            "UKV",
+            "2014-07-01 00:00:00+00:00",
+            "2014-07-04 00:59:59+00:00",
+            "TAC-100magl_UKV_co2_TEST_201407.nc",
+        ),
+        (
+            "RGL",
+            "90m",
+            "UKV",
+            "2014-01-10 00:00:00+00:00",
+            "2014-01-12 00:59:59+00:00",
+            "RGL-90magl_UKV_co2_TEST_201401.nc",
+        ),
+    ],
+)
 def test_read_footprint_co2(site, height, metmodel, start, end, filename):
     """
     Test high spatial resolution footprint
@@ -245,7 +258,7 @@ def test_read_footprint_co2(site, height, metmodel, start, end, filename):
      - expects additional coordinate for `H_back`
      - expects keyword attributes to be set
        - "spatial_resolution": "high_time_resolution"
-    
+
     Two tests included on same domain for CO2:
     - TAC data - includes H_back as an integer (older style footprint)
     - RGL data - includes H_back as a float (newer style footprint)
@@ -274,10 +287,8 @@ def test_read_footprint_co2(site, height, metmodel, start, end, filename):
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
 
-    fp_site_key = list(footprint_results.keys())[0]
-
-    footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+    footprint_obs = footprint_results.retrieve_all()
+    footprint_data = footprint_obs.data
 
     footprint_coords = list(footprint_data.coords.keys())
 
@@ -341,10 +352,8 @@ def test_read_footprint_short_lived():
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
 
-    fp_site_key = list(footprint_results.keys())[0]
-
-    footprint_keys = footprint_results[fp_site_key]["keys"]
-    footprint_data = recombine_datasets(keys=footprint_keys, sort=False)
+    footprint_obs = footprint_results.retrieve_all()
+    footprint_data = footprint_obs.data
 
     footprint_coords = list(footprint_data.coords.keys())
 
@@ -374,7 +383,7 @@ def test_read_footprint_short_lived():
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "spatial_resolution" : "standard_spatial_resolution",
+        "spatial_resolution": "standard_spatial_resolution",
         "time_resolution": "standard_time_resolution",
         "time_period": "1 hour",
     }
@@ -450,7 +459,7 @@ def test_footprint_schema_spatial():
     fp_high_dims = data_vars["fp_high"]
     assert "lat_high" in fp_high_dims
     assert "lon_high" in fp_high_dims
-    
+
 
 def test_footprint_schema_temporal():
     """

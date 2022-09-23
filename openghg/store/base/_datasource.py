@@ -1,10 +1,9 @@
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 import numpy as np
+from openghg.store.spec import define_data_types
 from pandas import DataFrame, Timestamp
 from xarray import Dataset
-
-from openghg.store.spec import define_data_types
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
@@ -19,7 +18,6 @@ class Datasource:
     """
 
     _datasource_root = "datasource"
-    _datavalues_root = "values"
     _data_root = "data"
 
     def __init__(self) -> None:
@@ -725,8 +723,8 @@ class Datasource:
         Returns:
             bool: True if overlap
         """
-        from openghg.util import timestamp_tzaware
         from openghg.util import in_daterange as _in_daterange
+        from openghg.util import timestamp_tzaware
 
         start_date = timestamp_tzaware(start_date)
         end_date = timestamp_tzaware(end_date)

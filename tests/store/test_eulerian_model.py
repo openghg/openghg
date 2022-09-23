@@ -23,12 +23,12 @@ def test_read_file():
         species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model"
     )
 
-    key = list(search_results.keys())[0]
+    euler_obs = search_results.retrieve_all()
 
-    data_keys = search_results[key]["keys"]
-    eulerian_data = recombine_datasets(keys=data_keys, sort=False)
+    assert euler_obs
 
-    metadata = search_results[key]["metadata"]
+    eulerian_data = euler_obs.data
+    metadata = euler_obs.metadata
 
     orig_data = open_dataset(test_datapath)
 

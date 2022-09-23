@@ -24,7 +24,10 @@ class SearchResults:
     """
 
     def __init__(self, keys: Optional[Dict] = None, metadata: Optional[Dict] = None):
-        self.metadata = metadata
+        if metadata is not None:
+            self.metadata = metadata
+        else:
+            self.metadata = {}
 
         if metadata is not None:
             self.results = (

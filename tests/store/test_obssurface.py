@@ -56,6 +56,26 @@ def test_different_sampling_periods_diff_datasources():
         assert data["new"] is True
 
 
+def test_different_sampling_periods_diff_datasources_why_why_why_delilah():
+    one_min = get_datapath("tac.picarro.1minute.100m.test.dat", data_type="CRDS")
+
+    one_min_res = ObsSurface.read_file(filepath=one_min, site="tac", network="decc", data_type="CRDS")
+
+    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
+
+    for sp, data in min_uuids.items():
+        assert data["new"] is True
+
+    one_hour = get_datapath("tac.picarro.hourly.100m.test.dat", data_type="CRDS")
+
+    one_hour_res = ObsSurface.read_file(filepath=one_hour, site="tac", network="decc", data_type="CRDS")
+
+    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
+
+    for sp, data in hour_uuids.items():
+        assert data["new"] is True
+
+
 def test_read_data(mocker):
     get_bucket(empty=True)
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]

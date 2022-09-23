@@ -354,7 +354,9 @@ def local_search(**kwargs):  # type: ignore
         metadata_in_daterange = {}
 
         for uid, record in keyed_metadata.items():
-            _keys = Datasource.load(uuid=uid).keys_in_daterange(start_date=start_date, end_date=end_date)
+            _keys = Datasource.load(uuid=uid, shallow=True).keys_in_daterange(
+                start_date=start_date, end_date=end_date
+            )
 
             if _keys:
                 metadata_in_daterange[uid] = record
@@ -367,9 +369,9 @@ def local_search(**kwargs):  # type: ignore
     else:
         # Here we only need to retrieve the keys
         for uid in keyed_metadata:
-            data_keys[uid] = Datasource.load(uuid=uid).data_keys()
+            data_keys[uid] = Datasource.load(uuid=uid, shallow=True).data_keys()
 
-    return SearchResults(keys=data_keys, metadata=keyed_metadata)
+    return SearchResults(keys=data_keys, metadata=dict(keyed_metadata))
 
     # if not lookup_results:
     #     return SearchResults()
