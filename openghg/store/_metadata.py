@@ -74,7 +74,7 @@ def datasource_lookup(
     results = {}
     for key, _data in data.items():
         metadata = _data["metadata"]
-        required_metadata = {k: v for k, v in metadata.items() if k in required_keys}
+        required_metadata = {k.lower(): str(v).lower() for k, v in metadata.items() if k in required_keys}
 
         if len(required_metadata) < min_keys:
             raise ValueError(

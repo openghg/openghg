@@ -10,6 +10,32 @@ from openghg.util import create_daterange_str
 from pandas import Timestamp
 
 
+def test_same_source_data_same_datasource():
+    site = "tac"
+    network = "DECC"
+    data_type = "CRDS"
+
+    tac_path1 = get_datapath(filename="tac.picarro.1minute.100m.201208.dat", data_type="CRDS")
+    tac_path2 = get_datapath(filename="tac.picarro.1minute.100m.201407.dat", data_type="CRDS")
+
+    res = ObsSurface.read_file(
+        filepath=tac_path1, data_type=data_type, site=site, network=network, overwrite=True
+    )
+
+    res_2 = ObsSurface.read_file(
+        filepath=tac_path2, data_type=data_type, site=site, network=network, overwrite=True
+    )
+
+    proc_data = res["processed"]["tac.picarro.1minute.100m.201208.dat"]
+    proc_data_2 = res_2["processed"]["tac.picarro.1minute.100m.201407.dat"]
+
+    assert proc_data["ch4"]["uuid"] == proc_data_2["ch4"]["uuid"]
+    assert proc_data["ch4"]["uuid"] == proc_data_2["ch4"]["uuid"]
+
+    assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
+    assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
+
+
 def test_different_sampling_periods_diff_datasources():
     one_min = get_datapath("tac.picarro.1minute.100m.test.dat", data_type="CRDS")
 

@@ -185,9 +185,7 @@ def get_obs_surface_local(
     if not obs_results:
         raise ValueError(f"Unable to find results for {species} at {site}")
 
-    retrieved_data: Union[ObsData, List[ObsData], None] = obs_results.retrieve(
-        site=site, species=species, inlet=inlet
-    )
+    retrieved_data: Union[ObsData, List[ObsData]] = obs_results.retrieve_all()
 
     if retrieved_data is None:
         print("No data returned.")
