@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
@@ -13,6 +14,9 @@ if TYPE_CHECKING:
 from openghg.store.base import BaseStore
 
 __all__ = ["BoundaryConditions"]
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class BoundaryConditions(BaseStore):
@@ -69,7 +73,7 @@ class BoundaryConditions(BaseStore):
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Dict:
+    ) -> Optional[Dict]:
         """Read boundary conditions file
 
         Args:
@@ -108,9 +112,11 @@ class BoundaryConditions(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in bc_store._file_hashes and not overwrite:
-            print(
-                f"This file has been uploaded previously with the filename : {bc_store._file_hashes[file_hash]} - skipping."
+            logger.warning(
+                "This file has been uploaded previously with the filename : "
+                f"{bc_store._file_hashes[file_hash]} - skipping."
             )
+            return None
 
         bc_data = open_dataset(filepath)
 
@@ -151,9 +157,11 @@ class BoundaryConditions(BaseStore):
 
         # Checking against expected format for boundary conditions
         BoundaryConditions.validate_data(bc_data)
+        data_type = "boundary_conditions"
 
         metadata["start_date"] = str(start_date)
         metadata["end_date"] = str(end_date)
+        metadata["data_type"] = data_type
 
         metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
         metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
@@ -178,7 +186,6 @@ class BoundaryConditions(BaseStore):
             metastore=metastore, data=boundary_conditions_data, required_keys=required_keys
         )
 
-        data_type = "boundary_conditions"
         datasource_uuids = assign_data(
             data_dict=boundary_conditions_data,
             lookup_results=lookup_results,

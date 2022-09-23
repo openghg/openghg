@@ -47,7 +47,7 @@ class SearchResults:
         return bool(self.metadata)
 
     def __len__(self) -> int:
-        return len(self.results.index)
+        return len(self.metadata)
 
     def __iter__(self) -> Iterator:
         raise NotImplementedError
@@ -88,20 +88,10 @@ class SearchResults:
 
     def rankings(self) -> Dict:
         return NotImplementedError
-        if not self.ranked_data:
-            print("No rank data")
 
-        rank_result = aDict()
-
-        for site, species_data in self.results.items():
-            for species, data in species_data.items():
-                rank_result[site][species] = data["rank_metadata"]
-
-        to_return: Dict = rank_result.to_dict()
-
-        return to_return
-
-    def retrieve(self, dataframe: Optional[DataFrame] = None, **kwargs) -> Union[ObsData, List[ObsData]]:
+    def retrieve(
+        self, dataframe: Optional[DataFrame] = None, sort: bool = True, elevate_inlet: bool = False, **kwargs
+    ) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from object store using a filtered pandas DataFrame
 
         Args:
@@ -111,27 +101,29 @@ class SearchResults:
         """
         if dataframe is not None:
             uuids = dataframe["uuid"].to_list()
-            return self._retrieve_by_uuid(uuids=uuids)
+            return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
         else:
-            return self._retrieve_by_term(**kwargs)
+            return self._retrieve_by_term(sort=sort, elevate_inlet=elevate_inlet, **kwargs)
 
-    def retrieve_all(self) -> Union[ObsData, List[ObsData]]:
+    def retrieve_all(self, sort: bool = True, elevate_inlet: bool = False) -> Union[ObsData, List[ObsData]]:
         """Retrieves all data found during the search
 
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
         uuids = list(self.key_data.keys())
-        return self._retrieve_by_uuid(uuids=uuids)
+        return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
 
-    def _retrieve_by_term(self, **kwargs):
+    def _retrieve_by_term(self, sort: bool, elevate_inlet: bool, **kwargs):
         """ """
         uuids = set()
+        # Make sure we don't have any Nones
+        clean_kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
         for uid, metadata in self.metadata.items():
-            n_required = len(kwargs)
+            n_required = len(clean_kwargs)
             n_matched = 0
-            for key, value in kwargs.items():
+            for key, value in clean_kwargs.items():
                 try:
                     # Here we want to check if it's a list and if so iterate over it
                     if isinstance(value, (list, tuple)):
@@ -151,9 +143,11 @@ class SearchResults:
                 uuids.add(uid)
 
         # Now we can retrieve the data using the UUIDs
-        return self._retrieve_by_uuid(uuids=uuids)
+        return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
 
-    def _retrieve_by_uuid(self, uuids: List) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_uuid(
+        self, uuids: List, sort: bool, elevate_inlet: bool
+    ) -> Union[ObsData, List[ObsData]]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
         create ObsData object(s) and return the result.
@@ -168,7 +162,7 @@ class SearchResults:
         # For uid in uuids
         for uid in uuids:
             keys = self.key_data[uid]
-            dataset = self._retrieve_dataset(keys, sort=True, elevate_inlet=False)
+            dataset = self._retrieve_dataset(keys, sort=sort, elevate_inlet=elevate_inlet)
             metadata = self.metadata[uid]
 
             results.append(ObsData(data=dataset, metadata=metadata))

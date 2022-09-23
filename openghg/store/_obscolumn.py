@@ -1,16 +1,22 @@
+import logging
 from pathlib import Path
 from typing import Dict, Optional, Union
-from xarray import DataArray
+
 from numpy import ndarray
 
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from xarray import DataArray
+
 # from openghg.types import multiPathType
 
 __all__ = ["ObsColumn"]
 
 
 ArrayType = Optional[Union[ndarray, DataArray]]
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class ObsColumn(BaseStore):
@@ -33,7 +39,7 @@ class ObsColumn(BaseStore):
         platform: str = "satellite",
         data_type: str = "openghg",
         overwrite: bool = False,
-    ) -> Dict:
+    ) -> Optional[Dict]:
         """Read column observation file
 
         Args:
@@ -58,13 +64,9 @@ class ObsColumn(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import ColumnTypes
-        from openghg.util import (
-            clean_string,
-            hash_file,
-            load_column_parser,
-        )
+        from openghg.util import clean_string, hash_file, load_column_parser
 
         # TODO: Evaluate which inputs need cleaning (if any)
         satellite = clean_string(satellite)
@@ -92,20 +94,24 @@ class ObsColumn(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in obs_store._file_hashes and not overwrite:
-            print(
-                f"This file has been uploaded previously with the filename : {obs_store._file_hashes[file_hash]} - skipping."
+            logger.warning(
+                "This file has been uploaded previously with the filename : "
+                f"{obs_store._file_hashes[file_hash]} - skipping."
             )
+            return None
 
         # Define parameters to pass to the parser function
-        param = {"data_filepath": filepath,
-                 "satellite": satellite,
-                 "domain": domain,
-                 "selection": selection,
-                 "site": site,
-                 "species": species,
-                 "network": network,
-                 "instrument": instrument,
-                 "platform": platform}
+        param = {
+            "data_filepath": filepath,
+            "satellite": satellite,
+            "domain": domain,
+            "selection": selection,
+            "site": site,
+            "species": species,
+            "network": network,
+            "instrument": instrument,
+            "platform": platform,
+        }
 
         obs_data = parser_fn(**param)
 
@@ -120,7 +126,9 @@ class ObsColumn(BaseStore):
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
         required = ("satellite", "selection", "domain", "site", "species", "network")
-        lookup_results = datasource_lookup(metastore=metastore, data=obs_data, required_keys=required, min_keys=3)
+        lookup_results = datasource_lookup(
+            metastore=metastore, data=obs_data, required_keys=required, min_keys=3
+        )
 
         # data_type = "timeseries"  # TODO: Would be nice to harmonise this with ObsSurface
         data_type = "column"

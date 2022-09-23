@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -9,6 +10,9 @@ from openghg.store.base import BaseStore
 from xarray import Dataset
 
 __all__ = ["Footprints"]
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class Footprints(BaseStore):
@@ -196,7 +200,7 @@ class Footprints(BaseStore):
         short_lifetime: bool = False,
         overwrite: bool = False,
         # model_params: Optional[Dict] = None,
-    ) -> Dict[str, Dict]:
+    ) -> Optional[Dict]:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
@@ -240,9 +244,10 @@ class Footprints(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in fp._file_hashes and not overwrite:
-            print(
+            logger.warning(
                 f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]} - skipping."
             )
+            return None
 
         fp_data = open_dataset(filepath)
 

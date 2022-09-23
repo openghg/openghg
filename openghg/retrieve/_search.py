@@ -11,7 +11,7 @@ from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.util import decompress, running_on_hub
 from tinydb.database import TinyDB
 
-logger = logging.getLogger("openghg.store")
+logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
@@ -114,6 +114,7 @@ def search_surface(
     inlet: Union[str, List[str], None] = None,
     instrument: Union[str, List[str], None] = None,
     measurement_type: Union[str, List[str], None] = None,
+    network: Union[str, List[str], None] = None,
     data_type: Union[str, List[str], None] = None,
     start_date: Union[str, List[str], None] = None,
     end_date: Union[str, List[str], None] = None,
@@ -152,6 +153,7 @@ def search_surface(
         start_date=start_date,
         end_date=end_date,
         data_source=data_source,
+        network=network,
         # **kwargs,
     )
 
@@ -319,6 +321,9 @@ def local_search(**kwargs):  # type: ignore
             search_attrs.append(getattr(q, k) == v)
 
     results = metastore.search(reduce(_find_and, search_attrs))
+
+    # Close the metastore now we're finished with it
+    metastore.close()
 
     # Add in a quick check to make sure we don't have dupes
     uuids = [s["uuid"] for s in results]

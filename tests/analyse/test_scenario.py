@@ -9,7 +9,41 @@ from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
 from pandas import Timedelta, Timestamp
 from xarray import Dataset
 
-#%% Test ModelScenario initialisation and update options
+
+def test_emissions_search():
+    from helpers import get_emissions_datapath
+    from openghg.retrieve import search
+    from openghg.store import BoundaryConditions, Emissions
+
+    source1 = "anthro"
+    domain = "EUROPE"
+
+    emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
+
+    Emissions.read_file(
+        filepath=emissions_datapath1,
+        species="ch4",
+        source=source1,
+        date="2012",
+        domain=domain,
+        high_time_resolution=False,
+    )
+
+    em_res = search(data_type="emissions")
+
+    bc_filepath1 = "/Users/gar/Documents/Devel/openghg/tests/data/boundary_conditions/ch4_EUROPE_201208.nc"
+
+    BoundaryConditions.read_file(
+        filepath=bc_filepath1,
+        species="ch4",
+        domain="EUROPE",
+        bc_input="MOZART",
+        period="monthly",
+    )
+
+    bc_res = search(data_type="boundary_conditions")
+
+    print(bc_res)
 
 
 def test_scenario_direct_objects():
@@ -294,9 +328,6 @@ def test_add_data():
     assert model_scenario.bc is not None
 
 
-#%% Test ModelScenario methods with real data
-
-
 @pytest.fixture(scope="function")
 def model_scenario_1():
     """Create model scenario as fixture for data in object store"""
@@ -444,6 +475,7 @@ def test_footprints_data_merge(model_scenario_1):
     attributes = combined_dataset.attrs
     assert attributes["resample_to"] == "coarsest"
 
+
 # TODO: Dummy tests included below but may want to add checks which use real
 # data for short-lived species (different footprint)
 # - species with single lifetime (e.g. "Rn")
@@ -452,6 +484,7 @@ def test_footprints_data_merge(model_scenario_1):
 #    - e.g. MHD-10magl_UKV_hfo-1234zee_EUROPE_201401.nc
 
 #%% Test method functionality with dummy data (CH4)
+
 
 @pytest.fixture
 def obs_ch4_dummy():
@@ -518,10 +551,10 @@ def footprint_dummy():
     nheight = len(height)
     shape_ns = (ntime, nlon, nheight)
     shape_ew = (ntime, nlat, nheight)
-    values_n = np.ones(shape_ns)*2
-    values_e = np.ones(shape_ew)*3
-    values_s = np.ones(shape_ns)*4
-    values_w = np.ones(shape_ew)*5
+    values_n = np.ones(shape_ns) * 2
+    values_e = np.ones(shape_ew) * 3
+    values_s = np.ones(shape_ns) * 4
+    values_w = np.ones(shape_ew) * 5
 
     data_vars["particle_locations_n"] = (("time", "lon", "height"), values_n)
     data_vars["particle_locations_e"] = (("time", "lat", "height"), values_e)
@@ -615,8 +648,8 @@ def bc_ch4_dummy():
             shape = shape_ew
             dims = dims_ew
         values = np.ones(shape)
-        values[0, ...] *= (2+i)  # 2, 3, 4, 5
-        values[1, ...] *= (3+i)  # 3, 4, 5, 6
+        values[0, ...] *= 2 + i  # 2, 3, 4, 5
+        values[1, ...] *= 3 + i  # 3, 4, 5, 6
         data_vars[dv] = (dims, values)
 
     coords = {"lat": lat, "lon": lon, "time": time, "height": height}
@@ -637,10 +670,9 @@ def bc_ch4_dummy():
 @pytest.fixture
 def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
     """Create ModelScenario with input dummy data"""
-    model_scenario = ModelScenario(obs=obs_ch4_dummy,
-                                   footprint=footprint_dummy,
-                                   flux=flux_ch4_dummy,
-                                   bc=bc_ch4_dummy)
+    model_scenario = ModelScenario(
+        obs=obs_ch4_dummy, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy
+    )
 
     return model_scenario
 
@@ -699,7 +731,12 @@ def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Option
     bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
 
     # Only relevant if lifetime_hrs input is set
-    mean_age_vars = ["mean_age_particles_n", "mean_age_particles_e", "mean_age_particles_s", "mean_age_particles_w"]
+    mean_age_vars = [
+        "mean_age_particles_n",
+        "mean_age_particles_e",
+        "mean_age_particles_s",
+        "mean_age_particles_w",
+    ]
 
     dims = {"N": ["height", "lon"], "E": ["height", "lat"], "S": ["height", "lon"], "W": ["height", "lat"]}
 
@@ -707,11 +744,11 @@ def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Option
         input_bc_values = bc[bc_var].reindex_like(footprint, method="ffill")
         input_fp_values = footprint[fp_var]
 
-        direction = bc_var.split('_')[-1].upper()
+        direction = bc_var.split("_")[-1].upper()
 
         if lifetime_hrs is not None:
             input_age_values = footprint[age_var]
-            loss = np.exp(-1*input_age_values/lifetime_hrs)
+            loss = np.exp(-1 * input_age_values / lifetime_hrs)
         else:
             loss = 1.0
 
@@ -965,6 +1002,7 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
 # HFO-1234zee - currently has monthly lifetimes defined
 # - see openghg/data/acrg_species_info.json for details
 
+
 def replace_species(data_object, species):
     """
     Create new dummy data based on the original but with a new species label
@@ -1020,10 +1058,7 @@ def footprint_radon_dummy(footprint_dummy):
     dims_ns = ("time", "lon", "height")
     dims_ew = ("time", "lat", "height")
 
-    param = ["mean_age_particles_n",
-             "mean_age_particles_e",
-             "mean_age_particles_s",
-             "mean_age_particles_w"]
+    param = ["mean_age_particles_n", "mean_age_particles_e", "mean_age_particles_s", "mean_age_particles_w"]
     data_vars = {}
     for i, dv in enumerate(param):
         direction = dv.split("_")[-1]
@@ -1035,8 +1070,8 @@ def footprint_radon_dummy(footprint_dummy):
             dims = dims_ew
         values = np.ones(shape)
         # Assuming dim 0 is time and has length 2...
-        values[0, ...] *= (10.0 + i)  # 10, 11, 12, 13
-        values[1, ...] *= (11.0 + i)  # 11, 12, 13, 14
+        values[0, ...] *= 10.0 + i  # 10, 11, 12, 13
+        values[1, ...] *= 11.0 + i  # 11, 12, 13, 14
         data_vars[dv] = (dims, values)
 
     footprint_ds = footprint_ds.assign(data_vars)
@@ -1086,7 +1121,7 @@ def test_modelled_baseline_radon(model_scenario_radon_dummy, footprint_radon_dum
     bc = bc_radon_dummy.data.sel(time=time_slice)
 
     lifetime_rn_days = 5.5157  # Should match value within acrg_species_info.json file
-    lifetime_rn_hrs = lifetime_rn_days*24.0
+    lifetime_rn_hrs = lifetime_rn_days * 24.0
 
     expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_rn_hrs)
 
@@ -1132,13 +1167,17 @@ def bc_short_life_dummy(bc_ch4_dummy):
 
 @pytest.fixture
 def model_scenario_short_life_dummy(obs_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy):
-    """Create ModelScenario with input dummy data for short-lived species 'HFO-1234zee' """
-    model_scenario = ModelScenario(obs=obs_short_life_dummy, footprint=footprint_short_life_dummy, bc=bc_short_life_dummy)
+    """Create ModelScenario with input dummy data for short-lived species 'HFO-1234zee'"""
+    model_scenario = ModelScenario(
+        obs=obs_short_life_dummy, footprint=footprint_short_life_dummy, bc=bc_short_life_dummy
+    )
 
     return model_scenario
 
 
-def test_modelled_baseline_short_life(model_scenario_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy):
+def test_modelled_baseline_short_life(
+    model_scenario_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy
+):
     """Test expected modelled baseline for short-lived species 'HFO-1234zee' with known dummy data"""
     modelled_baseline = model_scenario_short_life_dummy.calc_modelled_baseline()
 
@@ -1157,7 +1196,7 @@ def test_modelled_baseline_short_life(model_scenario_short_life_dummy, footprint
     bc = bc_short_life_dummy.data.sel(time=time_slice)
 
     lifetime_days_HFO1234zee_jan = 56.3  # Should match value within acrg_species_info.json file
-    lifetime_HFO1234zee_hrs = lifetime_days_HFO1234zee_jan*24.0
+    lifetime_HFO1234zee_hrs = lifetime_days_HFO1234zee_jan * 24.0
 
     expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_HFO1234zee_hrs)
 

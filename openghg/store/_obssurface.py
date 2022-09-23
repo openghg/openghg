@@ -346,6 +346,7 @@ class ObsSurface(BaseStore):
                 raise ValueError(
                     f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
                 )
+                break
 
             combined = {site: {"data": measurement_data, "metadata": metadata}}
 

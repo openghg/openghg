@@ -57,7 +57,7 @@ class Emissions(BaseStore):
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Dict:
+    ) -> Optional[Dict]:
         """Read emissions file
 
         Args:
@@ -107,6 +107,7 @@ class Emissions(BaseStore):
             print(
                 f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
             )
+            return None
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -119,6 +120,7 @@ class Emissions(BaseStore):
             "high_time_resolution": high_time_resolution,
             "period": period,
             "continuous": continuous,
+            "data_type": "emissions",
         }
 
         emissions_data = parser_fn(**param)

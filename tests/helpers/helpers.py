@@ -27,9 +27,8 @@ def get_datapath(filename: str, data_type: str) -> Path:
 
     return (
         Path(__file__)
-        .resolve(strict=True)
         .parent.parent.joinpath(f"data/proc_test_data/{data_type}/{filename}")
-    )
+    ).resolve()
 
 
 def get_mobile_datapath(filename: str) -> Path:
@@ -59,11 +58,11 @@ def get_footprint_datapath(filename: str) -> Path:
 
 def get_datapath_base(data_type: str, filename: str) -> Path:
     """Return the path to the footprints test data file"""
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/{data_type}/{filename}")
+    return Path(__file__).parent.parent.joinpath(f"data/{data_type}/{filename}").resolve()
 
 
 def get_retrieval_data_file(filename: str):
-    return Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/retrieve/{filename}")
+    return Path(__file__).parent.parent.joinpath(f"data/retrieve/{filename}").resolve()
 
 
 def glob_files(search_str: str, data_type: str) -> List:

@@ -7,6 +7,7 @@ def parse_openghg(
     species: str,
     source: str,
     domain: str,
+    data_type: str,
     date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
@@ -47,6 +48,7 @@ def parse_openghg(
     metadata["source"] = source
     metadata["date"] = date
     metadata["author"] = author_name
+    metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
 
     # As emissions files handle things slightly differently we need to check the time values
