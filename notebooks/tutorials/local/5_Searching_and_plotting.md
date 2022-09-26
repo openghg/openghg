@@ -57,6 +57,12 @@ ch4_results = search_surface(site="tac", species="ch4")
 ch4_results
 ```
 
+Let's take a look at the results property which is a pandas DataFrame object.
+
+```{code-cell} ipython3
+ch4_results.results
+```
+
 If we want to take a look at the data from the 185m inlet we can first retrieve the data from the object store and then create a quick timeseries plot. See the [`SearchResults`](https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults) object documentation for more information.
 
 ```{code-cell} ipython3
@@ -73,6 +79,36 @@ You can make some simple changes to the plot using arguments
 
 ```{code-cell} ipython3
 data_185m.plot_timeseries(title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
+```
+
+## Using the pandas DataFrame
+
++++
+
+We can also perform operations on the results pandas DataFrame. Let's search for all DECC network data.
+
+```{code-cell} ipython3
+decc_results = search_surface(network="DECC")
+```
+
+```{code-cell} ipython3
+results_df = decc_results.results
+```
+
+Say we want to just extract the CO2 data, we can extract the data we want using
+
+```{code-cell} ipython3
+co2_df = results_df[results_df["species"] == "co2"]
+```
+
+```{code-cell} ipython3
+co2_df
+```
+
+Then we can use this DataFrame to retrieve the data we want.
+
+```{code-cell} ipython3
+decc_results.retrieve(dataframe=co2_df)
 ```
 
 ## Plot all the data
