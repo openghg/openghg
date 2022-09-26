@@ -60,7 +60,7 @@ del v, get_versions
 import os as _os
 from pathlib import Path as _Path
 
-from openghg.util import create_default_config
+from openghg.util import create_default_config  # type: ignore
 
 cloud_env = _os.environ.get("OPENGHG_CLOUD", False)
 hub_env = _os.environ.get("OPENGHG_HUB", False)
