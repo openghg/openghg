@@ -9,6 +9,8 @@ class RankSources:
     def __init__(self, cloud: bool = False) -> None:
         self._cloud = cloud
 
+        raise NotImplementedError("Ranking currently not supported.")
+
         if cloud:
             raise NotImplementedError
 
