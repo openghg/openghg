@@ -16,6 +16,7 @@ from openghg.util import (
     daterange_overlap,
     find_daterange_gaps,
     find_duplicate_timestamps,
+    in_daterange,
     parse_period,
     relative_time_offset,
     split_daterange_str,
@@ -23,7 +24,6 @@ from openghg.util import (
     time_offset,
     timestamp_tzaware,
     trim_daterange,
-    in_daterange,
 )
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import Dataset
@@ -455,4 +455,4 @@ def test_in_daterange():
     start_b = timestamp_tzaware("1970-01-01")
     end_b = timestamp_tzaware("1980-01-01")
 
-    assert in_daterange(start_a=start_a, end_a=end_a, start_b=start_b, end_b=end_b)
+    assert not in_daterange(start_a=start_a, end_a=end_a, start_b=start_b, end_b=end_b)

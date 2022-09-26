@@ -10,6 +10,28 @@ from openghg.util import create_daterange_str
 from pandas import Timestamp
 
 
+def test_different_sampling_periods_diff_datasources():
+    get_bucket(empty=True)
+
+    one_min = get_datapath("tac.picarro.1minute.100m.test.dat", data_type="CRDS")
+
+    one_min_res = ObsSurface.read_file(filepath=one_min, site="tac", network="decc", data_type="CRDS")
+
+    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
+
+    for sp, data in min_uuids.items():
+        assert data["new"] is True
+
+    one_hour = get_datapath("tac.picarro.hourly.100m.test.dat", data_type="CRDS")
+
+    one_hour_res = ObsSurface.read_file(filepath=one_hour, site="tac", network="decc", data_type="CRDS")
+
+    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
+
+    for sp, data in hour_uuids.items():
+        assert data["new"] is True
+
+
 def test_same_source_data_same_datasource():
     site = "tac"
     network = "DECC"
@@ -34,46 +56,6 @@ def test_same_source_data_same_datasource():
 
     assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
     assert proc_data["co2"]["uuid"] == proc_data_2["co2"]["uuid"]
-
-
-def test_different_sampling_periods_diff_datasources():
-    one_min = get_datapath("tac.picarro.1minute.100m.test.dat", data_type="CRDS")
-
-    one_min_res = ObsSurface.read_file(filepath=one_min, site="tac", network="decc", data_type="CRDS")
-
-    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
-
-    for sp, data in min_uuids.items():
-        assert data["new"] is True
-
-    one_hour = get_datapath("tac.picarro.hourly.100m.test.dat", data_type="CRDS")
-
-    one_hour_res = ObsSurface.read_file(filepath=one_hour, site="tac", network="decc", data_type="CRDS")
-
-    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
-
-    for sp, data in hour_uuids.items():
-        assert data["new"] is True
-
-
-def test_different_sampling_periods_diff_datasources_why_why_why_delilah():
-    one_min = get_datapath("tac.picarro.1minute.100m.test.dat", data_type="CRDS")
-
-    one_min_res = ObsSurface.read_file(filepath=one_min, site="tac", network="decc", data_type="CRDS")
-
-    min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
-
-    for sp, data in min_uuids.items():
-        assert data["new"] is True
-
-    one_hour = get_datapath("tac.picarro.hourly.100m.test.dat", data_type="CRDS")
-
-    one_hour_res = ObsSurface.read_file(filepath=one_hour, site="tac", network="decc", data_type="CRDS")
-
-    hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
-
-    for sp, data in hour_uuids.items():
-        assert data["new"] is True
 
 
 def test_read_data(mocker):
