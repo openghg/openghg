@@ -9,9 +9,8 @@ pytest-mock
 requests-mock
 # For mypy
 mypy==0.971
-# For Python 3.7
-typing-extensions
 types-paramiko
 types-PyYAML
 types-requests
+types-toml
 msgpack-types

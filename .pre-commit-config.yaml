@@ -33,4 +33,5 @@ repos:
             types-paramiko,
             types-PyYAML,
             types-requests,
+            types-toml
           ]

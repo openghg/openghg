@@ -60,17 +60,20 @@ del v, get_versions
 import os as _os
 from pathlib import Path as _Path
 
+from openghg.util import create_default_config
+
 cloud_env = _os.environ.get("OPENGHG_CLOUD", False)
 hub_env = _os.environ.get("OPENGHG_HUB", False)
+
+# Start module level logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 if cloud_env or hub_env:
     logfile_path = "/tmp/openghg.log"
 else:
     logfile_path = str(_Path.home().joinpath("openghg.log"))
-
-# Start module level logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+    create_default_config()
 
 # Create file handler for log file - set to DEBUG (maximum detail)
 fileHandler = logging.FileHandler(logfile_path)  # May want to update this to user area
@@ -86,4 +89,4 @@ consoleHandler.setFormatter(consoleFormatter)
 consoleHandler.setLevel(logging.WARNING)
 logger.addHandler(consoleHandler)
 
-del logfile_path, hub_env, cloud_env
+del logfile_path, hub_env, cloud_env, create_default_config

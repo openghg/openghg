@@ -28,7 +28,7 @@ else:
         get_object,
         get_object_from_json,
         get_object_names,
-        get_openghg_local_path,
+        get_local_objectstore_path,
         query_store,
         set_object,
         set_object_from_file,
