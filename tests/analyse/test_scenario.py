@@ -10,42 +10,6 @@ from pandas import Timedelta, Timestamp
 from xarray import Dataset
 
 
-def test_emissions_search():
-    from helpers import get_emissions_datapath
-    from openghg.retrieve import search
-    from openghg.store import BoundaryConditions, Emissions
-
-    source1 = "anthro"
-    domain = "EUROPE"
-
-    emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
-
-    Emissions.read_file(
-        filepath=emissions_datapath1,
-        species="ch4",
-        source=source1,
-        date="2012",
-        domain=domain,
-        high_time_resolution=False,
-    )
-
-    em_res = search(data_type="emissions")
-
-    bc_filepath1 = "/Users/gar/Documents/Devel/openghg/tests/data/boundary_conditions/ch4_EUROPE_201208.nc"
-
-    BoundaryConditions.read_file(
-        filepath=bc_filepath1,
-        species="ch4",
-        domain="EUROPE",
-        bc_input="MOZART",
-        period="monthly",
-    )
-
-    bc_res = search(data_type="boundary_conditions")
-
-    print(bc_res)
-
-
 def test_scenario_direct_objects():
     """
     Test ModelScenario class can be created with direct objects
