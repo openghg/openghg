@@ -1,8 +1,7 @@
 import json
 from io import BytesIO
-from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
-from addict import Dict as aDict
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
 from openghg.util import running_on_hub
@@ -36,7 +35,11 @@ class SearchResults:
         else:
             self.results = {}
 
-        self.key_data = keys
+        if keys is not None:
+            self.key_data = keys
+        else:
+            self.key_data = {}
+
         self.hub = running_on_hub()
 
     def __str__(self) -> str:
@@ -51,9 +54,8 @@ class SearchResults:
     def __len__(self) -> int:
         return len(self.metadata)
 
-    def __iter__(self) -> Iterator:
-        raise NotImplementedError
-        yield from self.results
+    # def __iter__(self) -> Iterator:
+    #     yield from self.results.iterrows()
 
     def to_data(self) -> Dict:
         """Convert this object to a dictionary for JSON serialisation
@@ -88,11 +90,12 @@ class SearchResults:
 
         return cls(keys=loaded["keys"], metadata=loaded["metadata"])
 
-    def rankings(self) -> Dict:
-        return NotImplementedError
-
     def retrieve(
-        self, dataframe: Optional[DataFrame] = None, sort: bool = True, elevate_inlet: bool = False, **kwargs
+        self,
+        dataframe: Optional[DataFrame] = None,
+        sort: bool = True,
+        elevate_inlet: bool = False,
+        **kwargs: Any,
     ) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from object store using a filtered pandas DataFrame
 
@@ -116,7 +119,9 @@ class SearchResults:
         uuids = list(self.key_data.keys())
         return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
 
-    def _retrieve_by_term(self, sort: bool, elevate_inlet: bool, **kwargs) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_term(
+        self, sort: bool, elevate_inlet: bool, **kwargs: Any
+    ) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from the object store by search term. This function scans the
         metadata of the retrieved results, retrieves the UUID associated with that data,
         pulls it from the object store, recombines it into an xarray Dataset and returns
@@ -156,7 +161,7 @@ class SearchResults:
                 uuids.add(uid)
 
         # Now we can retrieve the data using the UUIDs
-        return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
+        return self._retrieve_by_uuid(uuids=list(uuids), sort=sort, elevate_inlet=elevate_inlet)
 
     def _retrieve_by_uuid(
         self, uuids: List, sort: bool, elevate_inlet: bool
@@ -218,10 +223,6 @@ class SearchResults:
             return recombine_datasets(
                 keys=keys, sort=sort, elevate_inlet=elevate_inlet, attrs_to_check=attrs_to_check
             )
-
-    def keys(self):
-        """Return the object store keys. If a UUID is given the"""
-        raise NotImplementedError
 
     # # def keys(self, site: str, species: str, inlet: Optional[str] = None) -> Optional[List[str]]:
     # #     """Return the data keys for the specified site and species.

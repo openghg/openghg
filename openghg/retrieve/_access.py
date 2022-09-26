@@ -1,7 +1,7 @@
 import json
 import logging
 from io import BytesIO
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -378,8 +378,7 @@ def get_obs_column(
     Returns:
         ObsColumnData: ObsColumnData object
     """
-    return _get_generic(
-        data_class=ObsColumnData,
+    obs_data = _get_generic(
         sort=False,
         species=species,
         satellite=satellite,
@@ -393,6 +392,8 @@ def get_obs_column(
         end_date=end_date,
         data_type="column",
     )
+
+    return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
 
 def get_flux(
@@ -419,7 +420,6 @@ def get_flux(
         FluxData: FluxData object
     """
     obs_data = _get_generic(
-        data_class=FluxData,
         sort=False,
         species=species,
         source=source,
@@ -438,7 +438,7 @@ def get_flux(
 
         em_ds = em_ds.drop_vars(names="lev")
 
-    return obs_data
+    return FluxData(data=obs_data.data, metadata=obs_data.metadata)
 
 
 def get_bc(
@@ -462,8 +462,7 @@ def get_bc(
     Returns:
         BoundaryConditionsData: BoundaryConditionsData object
     """
-    return _get_generic(
-        data_class=BoundaryConditionsData,
+    obs_data = _get_generic(
         sort=False,
         species=species,
         bc_input=bc_input,
@@ -473,13 +472,14 @@ def get_bc(
         data_type="boundary_conditions",
     )
 
+    return BoundaryConditionsData(data=obs_data.data, metadata=obs_data.metadata)
+
 
 def _get_generic(
-    data_class: Union[BoundaryConditionsData, FluxData, FootprintData, ObsData, ObsColumnData],
     sort: bool = True,
     elevate_inlets: bool = False,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> ObsData:
     """Perform a search and create a dataclass object with the results if any are found.
 
     Args:
@@ -501,8 +501,10 @@ def _get_generic(
         raise ValueError("Found more than one result, please narrow your search terms.")
 
     obs_data = results.retrieve_all(sort=sort, elevate_inlet=elevate_inlets)
+    # We can only get a single ObsData back here but mypy doesn't understand that
+    obs_data = cast(ObsData, obs_data)
 
-    return data_class(data=obs_data.data, metadata=obs_data.metadata)
+    return obs_data
 
 
 def get_footprint(
@@ -542,8 +544,7 @@ def get_footprint(
     if species is not None:
         species = clean_string(synonyms(species))
 
-    return _get_generic(
-        data_class=FootprintData,
+    fp_data = _get_generic(
         site=site,
         domain=domain,
         height=height,
@@ -553,6 +554,8 @@ def get_footprint(
         species=species,
         data_type="footprints",
     )
+
+    return FootprintData(data=fp_data.data, metadata=fp_data.metadata)
 
     # TODO: Could incorporate this somewhere? Setting species to INERT?
     # if species is None:

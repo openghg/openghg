@@ -41,7 +41,7 @@ class BoundaryConditions(BaseStore):
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
     @staticmethod
-    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Dict:
+    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
 
         Args:

@@ -168,7 +168,7 @@ def search_surface(
     return results
 
 
-def search(**kwargs: Any) -> Union[SearchResults, Dict]:
+def search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search the metadata associated
     with each Datasource.
