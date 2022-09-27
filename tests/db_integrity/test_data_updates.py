@@ -294,7 +294,7 @@ def test_obs_data_read_data_diff():
     # TODO: Can we check if this has been saved as a new version?
 
 
-
-
-
+# TODO: Add minutely versus hourly
+#  - bsd.picarro.1minute.108m.min.dat
+#  - bsd.picarro.hourly.108m.min.dat
     
