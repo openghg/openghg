@@ -55,7 +55,7 @@ def parse_cranfield(
     metadata["height"] = "10magl"
     metadata["inlet"] = "10magl"
     metadata["network"] = "CRANFIELD"
-    metadata["data_type"] = "timeseries"
+    metadata["data_type"] = "surface"
 
     # TODO - this feels fragile
     species: List[str] = [col for col in data.columns if " " not in col]

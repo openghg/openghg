@@ -500,7 +500,7 @@ def _split_species(
 
             # Add the cleaned species name to the metadata and alternative name if present
             spec_metadata["species"] = comp_species
-            spec_metadata["data_type"] = "timeseries"
+            spec_metadata["data_type"] = "surface"
 
             if comp_species != spec.lower() and comp_species != spec.upper():
                 spec_metadata["species_alt"] = spec

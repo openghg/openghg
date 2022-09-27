@@ -51,7 +51,7 @@ def parse_openghg(
     metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
     metadata["data_type"] = "emissions"
-    metadata["source_format"] = "emissions"
+    metadata["source_format"] = "openghg"
 
     # As emissions files handle things slightly differently we need to check the time values
     # more carefully.

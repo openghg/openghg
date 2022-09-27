@@ -39,7 +39,7 @@ class Datasource:
         # This dictionary stored the keys for each version of data uploaded
         # data_key = d._data_keys["latest"]["keys"][date_key]
         self._data_keys: dataKeyType = defaultdict(dict)
-        self._data_type: str = "timeseries"
+        self._data_type: str = ""
         # Hold information regarding the versions of the data
         # Currently unused
         self._latest_version: str = "latest"
@@ -87,7 +87,7 @@ class Datasource:
         Args:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
-            data_type: Type of data, one of ["timeseries", "emissions", "met", "footprints", "eulerian_model"].
+            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
             overwrite: Overwrite existing data
         Returns:
             None

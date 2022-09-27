@@ -117,7 +117,7 @@ def test_icos_retrieve_and_store(mocker):
         "licence_name": "icos ccby4 data licence",
         "licence_info": "http://meta.icos-cp.eu/ontologies/cpmeta/icoslicence",
         "network": "icos",
-        "data_type": "timeseries",
+        "data_type": "surface",
         "data_source": "icoscp",
         "icos_data_level": "2",
         "conditions_of_use": "ensure that you contact the data owner at the outset of your project.",

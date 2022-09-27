@@ -6,14 +6,14 @@ from openghg.store import EulerianModel, recombine_datasets
 from xarray import open_dataset
 
 
-def get_datapath(filename):
+def get_surface_datapath(filename):
     return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/eulerian_model/{filename}")
 
 
 def test_read_file():
     get_bucket()
 
-    test_datapath = get_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
+    test_datapath = get_surface_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
     proc_results = EulerianModel.read_file(filepath=test_datapath, model="GEOSChem", species="ch4")
 

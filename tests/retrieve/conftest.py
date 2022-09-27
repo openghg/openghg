@@ -1,7 +1,12 @@
 import pytest
-from helpers import get_datapath, get_column_datapath, get_emissions_datapath, get_footprint_datapath
+from helpers import (
+    get_column_datapath,
+    get_emissions_datapath,
+    get_footprint_datapath,
+    get_surface_datapath,
+)
 from openghg.objectstore import get_bucket
-from openghg.store import Emissions, Footprints, ObsSurface, ObsColumn
+from openghg.store import Emissions, Footprints, ObsColumn, ObsSurface
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -10,38 +15,38 @@ def data_read():
 
     # DECC network sites
     network = "DECC"
-    bsd_248_path = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
-    bsd_108_path = get_datapath(filename="bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
-    bsd_42_path = get_datapath(filename="bsd.picarro.1minute.42m.min.dat", data_type="CRDS")
+    bsd_248_path = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
+    bsd_108_path = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+    bsd_42_path = get_surface_datapath(filename="bsd.picarro.1minute.42m.min.dat", source_format="CRDS")
 
     bsd_paths = [bsd_248_path, bsd_108_path, bsd_42_path]
 
-    bsd_results = ObsSurface.read_file(filepath=bsd_paths, data_type="CRDS", site="bsd", network=network)
+    bsd_results = ObsSurface.read_file(filepath=bsd_paths, source_format="CRDS", site="bsd", network=network)
 
-    hfd_100_path = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
-    hfd_50_path = get_datapath(filename="hfd.picarro.1minute.50m.min.dat", data_type="CRDS")
+    hfd_100_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
+    hfd_50_path = get_surface_datapath(filename="hfd.picarro.1minute.50m.min.dat", source_format="CRDS")
     hfd_paths = [hfd_100_path, hfd_50_path]
 
-    ObsSurface.read_file(filepath=hfd_paths, data_type="CRDS", site="hfd", network=network)
+    ObsSurface.read_file(filepath=hfd_paths, source_format="CRDS", site="hfd", network=network)
 
-    tac_path = get_datapath(filename="tac.picarro.1minute.100m.test.dat", data_type="CRDS")
-    ObsSurface.read_file(filepath=tac_path, data_type="CRDS", site="tac", network=network)
+    tac_path = get_surface_datapath(filename="tac.picarro.1minute.100m.test.dat", source_format="CRDS")
+    ObsSurface.read_file(filepath=tac_path, source_format="CRDS", site="tac", network=network)
 
     # GCWERKS data (AGAGE network sites)
-    data_filepath = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-    prec_filepath = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+    data_filepath = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
+    prec_filepath = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
     ObsSurface.read_file(
-        filepath=(data_filepath, prec_filepath), site="CGO", data_type="GCWERKS", network="AGAGE"
+        filepath=(data_filepath, prec_filepath), site="CGO", source_format="GCWERKS", network="AGAGE"
     )
 
-    mhd_data_filepath = get_datapath(filename="macehead.12.C", data_type="GC")
-    mhd_prec_filepath = get_datapath(filename="macehead.12.precisions.C", data_type="GC")
+    mhd_data_filepath = get_surface_datapath(filename="macehead.12.C", source_format="GC")
+    mhd_prec_filepath = get_surface_datapath(filename="macehead.12.precisions.C", source_format="GC")
 
     ObsSurface.read_file(
         filepath=(mhd_data_filepath, mhd_prec_filepath),
         site="MHD",
-        data_type="GCWERKS",
+        source_format="GCWERKS",
         network="AGAGE",
         instrument="GCMD",
     )
@@ -65,7 +70,7 @@ def data_read():
     column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
 
     ObsColumn.read_file(filepath=column_datapath,
-                        data_type="OPENGHG",
+                        source_format="OPENGHG",
                         satellite="GOSAT",
                         domain="BRAZIL",
                         species="methane")

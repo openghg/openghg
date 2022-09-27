@@ -20,4 +20,5 @@ def test_glasgow_licor_read():
         "units": "ppb",
         "notes": "measurement value is methane enhancement over background",
         "sampling_period": "NOT_SET",
+        "data_type": "surface",
     }

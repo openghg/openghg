@@ -114,8 +114,8 @@ def search_surface(
     inlet: Union[str, List[str], None] = None,
     instrument: Union[str, List[str], None] = None,
     measurement_type: Union[str, List[str], None] = None,
+    source_format: Union[str, List[str], None] = None,
     network: Union[str, List[str], None] = None,
-    data_type: Union[str, List[str], None] = None,
     start_date: Union[str, List[str], None] = None,
     end_date: Union[str, List[str], None] = None,
     data_source: Optional[str] = None,
@@ -130,7 +130,7 @@ def search_surface(
         inlet: Inlet height
         instrument: Instrument name
         measurement_type: Measurement type
-        data_type: Data type e.g. "timeseries", "column", "emissions"
+        data_type: Data type e.g. "surface", "column", "emissions"
             See openghg.store.spec.define_data_types() for full details.
         start_date: Start date
         end_date: End date
@@ -152,7 +152,8 @@ def search_surface(
         inlet=inlet,
         instrument=instrument,
         measurement_type=measurement_type,
-        data_type=data_type,
+        data_type="surface",
+        source_format=source_format,
         start_date=start_date,
         end_date=end_date,
         data_source=data_source,
@@ -393,9 +394,9 @@ def local_search(**kwargs):  # type: ignore
     # # For the time being this will return a dict until we know how best to represent
     # # the footprints and emissions results in a SearchResult object
     # # Temporary until SearchResults is used for all
-    # valid_data_types_without_timeseries = list(valid_data_types).copy().remove("timeseries")
+    # valid_data_types_without_timeseries = list(valid_data_types).copy().remove("surface")
 
-    # if data_type == "timeseries":
+    # if data_type == "surface":
     #     pass
 
     # if data_type in valid_data_types_without_timeseries:

@@ -80,7 +80,7 @@ def parse_npl(
             "site": "NPL",
             "network": "LGHG",
             "inlet": inlet,
-            "data_type": "timeseries",
+            "data_type": "surface",
             "source_format": "npl",
         }
 

@@ -59,6 +59,8 @@ class ObsSurface(BaseStore):
             "sampling_period",
             "measurement_type",
             "overwrite",
+            "source_format",
+            "data_type",
         }
 
         # We've got a lot of functions that expect a file and read
@@ -274,8 +276,12 @@ class ObsSurface(BaseStore):
                 )
 
                 # Create Datasources, save them to the object store and get their UUIDs
+                data_type = "surface"
                 datasource_uuids = assign_data(
-                    data_dict=data, lookup_results=lookup_results, overwrite=overwrite
+                    data_dict=data,
+                    lookup_results=lookup_results,
+                    overwrite=overwrite,
+                    data_type=data_type,
                 )
 
                 results["processed"][data_filepath.name] = datasource_uuids
@@ -373,8 +379,12 @@ class ObsSurface(BaseStore):
             lookup_result = {site: uuid}
 
             # Create Datasources, save them to the object store and get their UUIDs
+            data_type = "surface"
             datasource_uuids = assign_data(
-                data_dict=combined, lookup_results=lookup_result, overwrite=overwrite
+                data_dict=combined,
+                lookup_results=lookup_result,
+                overwrite=overwrite,
+                data_type=data_type,
             )
 
             results[site] = datasource_uuids
@@ -500,8 +510,12 @@ class ObsSurface(BaseStore):
         )
 
         # Create Datasources, save them to the object store and get their UUIDs
+        data_type = "surface"
         datasource_uuids = assign_data(
-            data_dict=to_process, lookup_results=lookup_results, overwrite=overwrite
+            data_dict=to_process,
+            lookup_results=lookup_results,
+            overwrite=overwrite,
+            data_type=data_type,
         )
 
         # Record the Datasources we've created / appended to

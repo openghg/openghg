@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 import pytest
-from helpers import check_cf_compliance, get_datapath, parsed_surface_metachecker
+from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
 from openghg.standardise.surface import parse_npl
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -11,7 +11,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def npl_data():
-    filepath = get_datapath(filename="NPL_test.csv", data_type="LGHG")
+    filepath = get_surface_datapath(filename="NPL_test.csv", source_format="LGHG")
     data = parse_npl(data_filepath=filepath, sampling_period="60")
     return data
 

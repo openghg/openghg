@@ -2,7 +2,7 @@
 
 # from openghg.client import rank_sources, process_files
 # from openghg.objectstore import get_bucket
-# from helpers import get_datapath
+# from helpers import get_surface_datapath
 
 
 # @pytest.fixture(scope="session")
@@ -19,7 +19,7 @@
 #         "hfd.picarro.1minute.100m.min.dat",
 #         "hfd.picarro.1minute.50m.min.dat",
 #     ]
-#     filepaths = [get_datapath(filename=f, data_type="CRDS") for f in files]
+#     filepaths = [get_surface_datapath(filename=f, data_type="CRDS") for f in files]
 
 #     process_files(
 #         user=authenticated_user,

@@ -103,7 +103,7 @@ def parse_beaco2n(
             "network": "beaco2n",
             "sampling_period": str(sampling_period),
             "instrument": instrument,
-            "data_type": "timeseries",
+            "data_type": "surface",
             "source_format": "beaco2n",
         }
 
