@@ -186,6 +186,7 @@ class ObsSurface(BaseStore):
                         "This file has been uploaded previously with the filename : "
                         f"{obs._file_hashes[file_hash]} - skipping."
                     )
+                    break
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
@@ -281,8 +282,8 @@ class ObsSurface(BaseStore):
 
                 progress_bar.update(1)
 
-            logger.info(f"Completed processing: {data_filepath.name}.")
-            logger.info(f"\tUUIDs: {datasource_uuids}")
+                logger.info(f"Completed processing: {data_filepath.name}.")
+                logger.info(f"\tUUIDs: {datasource_uuids}")
 
         # Ensure we explicitly close the metadata store
         # as we're using the cached storage method
