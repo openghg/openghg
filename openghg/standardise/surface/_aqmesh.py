@@ -107,6 +107,8 @@ def _parse_metadata(filepath: pathType) -> Dict:
         site_data["inlet"] = row["Height"]
         site_data["network"] = "aqmesh_glasgow"
         site_data["sampling_period"] = "NA"
+        site_data["data_type"] = "timeseries"
+        site_data["source_format"] = "aqmesh"
 
     # TODO - I feel this is a bit clunky
     dict_metadata: Dict = site_metadata.to_dict()

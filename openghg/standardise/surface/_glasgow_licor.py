@@ -42,6 +42,7 @@ def parse_glasow_licor(filepath: Path, sampling_period: Optional[str] = None, **
         "units": "ppb",
         "notes": "measurement value is methane enhancement over background",
         "sampling_period": sampling_period,
+        "data_type": "timeseries",
     }
 
     data = aDict()

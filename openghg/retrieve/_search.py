@@ -283,22 +283,19 @@ def local_search(**kwargs):  # type: ignore
         # TODO - 2022-09-22 - is there a better way of doing this?
         # Flatten out the list based on species
 
-    data_type = search_kwargs.get("data_type", "timeseries").lower()
-
-    valid_data_types = define_data_types()
-    if data_type not in valid_data_types:
-        raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
-
-    # TODO - here maybe we could pull out the below into a function and loop over the
-    # data types. Then we could search across all types easily.
-
-    # Load associated object class (e.g. ObsSurface, Emissions) for data_type
+    data_type = search_kwargs.get("data_type")
     data_type_classes = define_data_type_classes()
-    objclass = data_type_classes[data_type]
-    obj = objclass.load()
 
-    # Load in the metastore
-    metastore = load_metastore(key=obj._metakey)
+    types_to_search = []
+    if data_type is not None:
+        valid_data_types = define_data_types()
+        if data_type not in valid_data_types:
+            raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
+        # Get the object we want to load in from the object store
+        type_class = data_type_classes[data_type]
+        types_to_search.append(type_class)
+    else:
+        types_to_search.extend(data_type_classes.values())
 
     try:
         start_date = search_kwargs["start_date"]
@@ -314,30 +311,43 @@ def local_search(**kwargs):  # type: ignore
     else:
         del search_kwargs["end_date"]
 
-    # Now search the metadata store using the passed terms
-    q = Query()
-    search_attrs = []
-    for k, v in search_kwargs.items():
-        if isinstance(v, (list, tuple)):
-            for val in v:
-                search_attrs.append(getattr(q, k) == val)
-        else:
-            search_attrs.append(getattr(q, k) == v)
+    general_results = []
+    # Load associated object class (e.g. ObsSurface, Emissions) for data_type
+    for data_type_class in types_to_search:
+        obj = data_type_class.load()
 
-    results = metastore.search(reduce(_find_and, search_attrs))
+        # Load in the metastore
+        metastore = load_metastore(key=obj._metakey)
 
-    # Close the metastore now we're finished with it
-    metastore.close()
+        # Now search the metadata store using the passed terms
+        q = Query()
+        search_attrs = []
+        for k, v in search_kwargs.items():
+            if isinstance(v, (list, tuple)):
+                for val in v:
+                    search_attrs.append(getattr(q, k) == val)
+            else:
+                search_attrs.append(getattr(q, k) == v)
+
+        results = metastore.search(reduce(_find_and, search_attrs))
+        general_results.extend(results)
+
+        # Close the metastore now we're finished with it
+        metastore.close()
 
     # Add in a quick check to make sure we don't have dupes
-    uuids = [s["uuid"] for s in results]
+    uuids = [s["uuid"] for s in general_results]
     # TODO - remove this once a more thorough tests are added
     if len(uuids) != len(set(uuids)):
         error_msg = "Multiple results found with same UUID!"
         logger.exception(msg=error_msg)
         raise ValueError(error_msg)
 
-    keyed_metadata = {r["uuid"]: r for r in results}
+    # Here we create a dictionary of the metadata keyed by the Datasource UUID
+    # we'll create a pandas DataFrame out of this in the SearchResult object
+    # for better printing / searching within a notebook
+    keyed_metadata = {r["uuid"]: r for r in general_results}
+
     data_keys = {}
     # Narrow the search to a daterange if dates passed
     if start_date is not None or end_date is not None:

@@ -55,6 +55,7 @@ def parse_glasow_picarro(
             "site": site,
             "instrument": "picarro",
             "units": units[s],
+            "data_type": "timeseries",
         }
 
     # TODO - remove this once mypy stubs for addict are added

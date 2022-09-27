@@ -59,3 +59,12 @@ def test_search_site():
     res = search(site="atlantis")
 
     assert not res
+
+
+def test_multi_type_search():
+    res = search(species="ch4")
+
+    print(res.metadata)
+
+    for m in res.metadata.values():
+        print(m["data_type"])

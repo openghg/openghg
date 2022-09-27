@@ -80,6 +80,8 @@ def parse_npl(
             "site": "NPL",
             "network": "LGHG",
             "inlet": inlet,
+            "data_type": "timeseries",
+            "source_format": "npl",
         }
 
         # TODO - add in better metadata reading

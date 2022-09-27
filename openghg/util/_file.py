@@ -5,19 +5,16 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 
 def load_parser(data_name: str, module_name: str) -> Callable:
-    """
-    Load parse function from within module.
+    """Load parse function from within module.
 
-    This expects a function of the form to be :
+    This expects a function of the form to be:
         - parse_{data_name}()
     and for this to have been imported with an appropriate __init__.py module.
 
     Args:
         data_name: Name of data type / database / data source for the
-            parse function.
-        module_name: Full module name to be imported e.g.
-            "openghg.standardise.surface"
-
+        parse function.
+        module_name: Full module name to be imported e.g. "openghg.standardise.surface"
     Returns:
         Callable : parse function
     """
@@ -31,82 +28,77 @@ def load_parser(data_name: str, module_name: str) -> Callable:
     return fn
 
 
-def load_surface_parser(data_type: str) -> Callable:
-    """
-    Load parsing object for the obssurface data type.
+def load_surface_parser(source_format: str) -> Callable:
+    """Load parsing object for the obssurface data type.
     Used with `openghg.standardise.surface` sub-module
 
     Args:
-        data_type: Name of data type such as CRDS
+        source_format: Name of data type such as CRDS
     Returns:
         callable: class_name object
     """
     surface_module_name = "openghg.standardise.surface"
-    fn = load_parser(data_type, surface_module_name)
+    fn = load_parser(data_name=source_format, module_name=surface_module_name)
 
     return fn
 
 
-def load_column_parser(data_type: str) -> Callable:
-    """
-    Load a parsing object for the obscolumn data type.
+def load_column_parser(source_format: str) -> Callable:
+    """Load a parsing object for the obscolumn data type.
     Used with `openghg.standardise.column` sub-module
 
     Args:
-        data_type: Name of data type e.g. OPENGHG
+        source_format: Name of data type e.g. OPENGHG
     Returns:
         callable: parser function
     """
     column_st_module = "openghg.standardise.column"
-    fn = load_parser(data_type, column_st_module)
+    fn = load_parser(data_name=source_format, module_name=column_st_module)
 
     return fn
 
 
-def load_column_source_parser(data_source: str) -> Callable:
-    """
-    Load a parsing object for the source of column data.
+def load_column_source_parser(source_format: str) -> Callable:
+    """Load a parsing object for the source of column data.
     Used with `openghg.transform.column` sub-module
 
     Args:
-        data_type: Name of data source e.g. GOSAT
+        source_format: Name of data source e.g. GOSAT
     Returns:
         callable: parser function
     """
     column_tr_module = "openghg.transform.column"
-    fn = load_parser(data_source, column_tr_module)
+    fn = load_parser(data_name=source_format, module_name=column_tr_module)
 
     return fn
 
 
-def load_emissions_parser(data_type: str) -> Callable:
-    """
-    Load a parsing object for the emissions data type.
+def load_emissions_parser(source_format: str) -> Callable:
+    """Load a parsing object for the emissions data type.
     Used with `openghg.standardise.emissions` sub-module
 
     Args:
-        data_type: Name of data type e.g. OPENGHG
+        source_format: Name of data type e.g. OPENGHG
     Returns:
         callable: parser function
     """
     emissions_st_module_name = "openghg.standardise.emissions"
-    fn = load_parser(data_type, emissions_st_module_name)
+    fn = load_parser(data_name=source_format, module_name=emissions_st_module_name)
 
     return fn
 
 
 def load_emissions_database_parser(database: str) -> Callable:
-    """
-    Load a parsing object for the source of column data.
+    """Load a parsing object for the source of column data.
     Used with `openghg.transform.emissions` sub-module
 
     Args:
-        data_type: Name of data source e.g. EDGAR
+        database: Name of data source e.g. EDGAR
     Returns:
         callable: parser function
     """
     emissions_tr_module_name = "openghg.transform.emissions"
-    fn = load_parser(database, emissions_tr_module_name)
+    fn = load_parser(data_name=database, module_name=emissions_tr_module_name)
 
     return fn
 

@@ -37,7 +37,7 @@ class ObsColumn(BaseStore):
         network: Optional[str] = None,
         instrument: Optional[str] = None,
         platform: str = "satellite",
-        data_type: str = "openghg",
+        source_format: str = "openghg",
         overwrite: bool = False,
     ) -> Optional[Dict]:
         """Read column observation file
@@ -59,7 +59,7 @@ class ObsColumn(BaseStore):
             platform: Type of platform. Should be one of:
                 - "satellite"
                 - "site"
-            data_type : Type of data being input e.g. openghg (internal format)
+            source_format : Type of data being input e.g. openghg (internal format)
             overwrite: Should this data overwrite currently stored data.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
@@ -80,12 +80,12 @@ class ObsColumn(BaseStore):
         filepath = Path(filepath)
 
         try:
-            data_type = ColumnTypes[data_type.upper()].value
+            source_format = ColumnTypes[source_format.upper()].value
         except KeyError:
-            raise ValueError(f"Unknown data type {data_type} selected.")
+            raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_column_parser(data_type=data_type)
+        parser_fn = load_column_parser(source_format=source_format)
 
         obs_store = ObsColumn.load()
 
@@ -130,8 +130,6 @@ class ObsColumn(BaseStore):
             metastore=metastore, data=obs_data, required_keys=required, min_keys=3
         )
 
-        # TODO: Would be nice to harmonise this with ObsSurface
-        # data_type = "timeseries"
         data_type = "column"
         datasource_uuids = assign_data(
             data_dict=obs_data,

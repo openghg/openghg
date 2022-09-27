@@ -55,6 +55,8 @@ def parse_btt(
     metadata["station_longitude"] = site_info["longitude"]
     metadata["station_latitude"] = site_info["latitude"]
     metadata["station_long_name"] = site_info["long_name"]
+    metadata["data_type"] = "timeseries"
+    metadata["source_format"] = "btt"
 
     attributes = network_params["global_attributes"]
     attributes["inlet_height_magl"] = network_params["inlet"].strip("m")
