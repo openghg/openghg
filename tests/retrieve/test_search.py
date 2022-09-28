@@ -1,6 +1,12 @@
 from openghg.retrieve import search
 
 
+def test_search_multi_inlet():
+    res = search(species=["co2", "ch4"], data_type="surface", inlet="108m")
+
+    print(res)
+
+
 def test_search_site():
     res = search(site="bsd", species="co2", inlet="42m")
 
@@ -64,7 +70,18 @@ def test_search_site():
 def test_multi_type_search():
     res = search(species="ch4")
 
-    print(res.metadata)
+    data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    for m in res.metadata.values():
-        print(m["data_type"])
+    assert data_types == {"surface", "column"}
+
+    res = search(species="co2")
+    data_types = set([m["data_type"] for m in res.metadata.values()])
+
+    assert data_types == {"emissions", "surface"}
+
+    obs = res.retrieve_all()
+
+    # Make sure the retrieval works correctly
+    data_types = set([ob.metadata["data_type"] for ob in obs])
+
+    assert data_types == {"emissions", "surface"}

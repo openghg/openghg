@@ -37,11 +37,11 @@ bsd_data = retrieve_example_data(path="timeseries/bsd_example.tar.gz")
 ```
 
 ```{code-cell} ipython3
-standardise_surface(filepaths=tac_data, data_type="CRDS", site="TAC", network="DECC")
+standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC")
 ```
 
 ```{code-cell} ipython3
-standardise_surface(filepaths=bsd_data, data_type="CRDS", site="BSD", network="DECC")
+standardise_surface(filepaths=bsd_data, source_format="CRDS", site="BSD", network="DECC")
 ```
 
 ## Searching
@@ -146,6 +146,10 @@ ch4_data
 Then we refine our search to only retrieve the inlets we want
 
 ```{code-cell} ipython3
+ch4_data.results
+```
+
+```{code-cell} ipython3
 lower_inlets = search_surface(species="ch4", inlet=["42m", "54m"])
 ```
 
@@ -161,6 +165,44 @@ lower_inlet_data = lower_inlets.retrieve_all()
 
 ```{code-cell} ipython3
 plot_timeseries(data=lower_inlet_data, title="Comparing CH4 measurements at Tacolneston and Bilsdale")
+```
+
+## Searching across types
+
++++
+
+You can also search for different data types, say we want to find surface measurement data and emissions data at the same time. We can do that with the more generic `search` function.
+
+```{code-cell} ipython3
+from openghg.retrieve import search
+from openghg.standardise import standardise_flux
+```
+
+We need to first load in some emissions data
+
+```{code-cell} ipython3
+flux_datapaths = retrieve_example_data(path="flux/ch4-ukghg-all_EUROPE_2016.tar.gz")
+```
+
+```{code-cell} ipython3
+flux_datapaths.sort()
+agri_data = flux_datapaths[0]
+```
+
+```{code-cell} ipython3
+flux_res = standardise_flux(filepath=agri_data, species="ch4", source="agri", date="2016", domain="europe")
+```
+
+```{code-cell} ipython3
+ch4_results = search(species="ch4")
+```
+
+```{code-cell} ipython3
+ch4_results.results
+```
+
+```{code-cell} ipython3
+
 ```
 
 ```{code-cell} ipython3
