@@ -126,6 +126,7 @@ def parse_eurocom(
     metadata["calibration_scale"] = calibration_scale
     metadata["network"] = "EUROCOM"
     metadata["sampling_period"] = str(sampling_period)
+    metadata["data_type"] = "surface"
 
     combined_data[species] = {
         "metadata": metadata,

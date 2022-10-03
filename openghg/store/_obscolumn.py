@@ -1,16 +1,22 @@
+import logging
 from pathlib import Path
 from typing import Dict, Optional, Union
-from xarray import DataArray
+
 from numpy import ndarray
 
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
+from xarray import DataArray
+
 # from openghg.types import multiPathType
 
 __all__ = ["ObsColumn"]
 
 
 ArrayType = Optional[Union[ndarray, DataArray]]
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class ObsColumn(BaseStore):
@@ -31,9 +37,9 @@ class ObsColumn(BaseStore):
         network: Optional[str] = None,
         instrument: Optional[str] = None,
         platform: str = "satellite",
-        data_type: str = "openghg",
+        source_format: str = "openghg",
         overwrite: bool = False,
-    ) -> Dict:
+    ) -> Optional[Dict]:
         """Read column observation file
 
         Args:
@@ -53,18 +59,14 @@ class ObsColumn(BaseStore):
             platform: Type of platform. Should be one of:
                 - "satellite"
                 - "site"
-            data_type : Type of data being input e.g. openghg (internal format)
+            source_format : Type of data being input e.g. openghg (internal format)
             overwrite: Should this data overwrite currently stored data.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.store import assign_data, load_metastore, datasource_lookup
+        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import ColumnTypes
-        from openghg.util import (
-            clean_string,
-            hash_file,
-            load_column_parser,
-        )
+        from openghg.util import clean_string, hash_file, load_column_parser
 
         # TODO: Evaluate which inputs need cleaning (if any)
         satellite = clean_string(satellite)
@@ -78,12 +80,12 @@ class ObsColumn(BaseStore):
         filepath = Path(filepath)
 
         try:
-            data_type = ColumnTypes[data_type.upper()].value
+            source_format = ColumnTypes[source_format.upper()].value
         except KeyError:
-            raise ValueError(f"Unknown data type {data_type} selected.")
+            raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_column_parser(data_type=data_type)
+        parser_fn = load_column_parser(source_format=source_format)
 
         obs_store = ObsColumn.load()
 
@@ -92,20 +94,24 @@ class ObsColumn(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in obs_store._file_hashes and not overwrite:
-            print(
-                f"This file has been uploaded previously with the filename : {obs_store._file_hashes[file_hash]} - skipping."
+            logger.warning(
+                "This file has been uploaded previously with the filename : "
+                f"{obs_store._file_hashes[file_hash]} - skipping."
             )
+            return None
 
         # Define parameters to pass to the parser function
-        param = {"data_filepath": filepath,
-                 "satellite": satellite,
-                 "domain": domain,
-                 "selection": selection,
-                 "site": site,
-                 "species": species,
-                 "network": network,
-                 "instrument": instrument,
-                 "platform": platform}
+        param = {
+            "data_filepath": filepath,
+            "satellite": satellite,
+            "domain": domain,
+            "selection": selection,
+            "site": site,
+            "species": species,
+            "network": network,
+            "instrument": instrument,
+            "platform": platform,
+        }
 
         obs_data = parser_fn(**param)
 
@@ -120,9 +126,10 @@ class ObsColumn(BaseStore):
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
         required = ("satellite", "selection", "domain", "site", "species", "network")
-        lookup_results = datasource_lookup(metastore=metastore, data=obs_data, required_keys=required, min_keys=3)
+        lookup_results = datasource_lookup(
+            metastore=metastore, data=obs_data, required_keys=required, min_keys=3
+        )
 
-        # data_type = "timeseries"  # TODO: Would be nice to harmonise this with ObsSurface
         data_type = "column"
         datasource_uuids = assign_data(
             data_dict=obs_data,

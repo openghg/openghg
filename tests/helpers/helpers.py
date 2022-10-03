@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List
 
 __all__ = [
-    "get_datapath",
+    "get_surface_datapath",
     "get_emissions_datapath",
     "get_bc_datapath",
     "get_footprint_datapath",
@@ -13,23 +13,21 @@ __all__ = [
 ]
 
 
-def get_datapath(filename: str, data_type: str) -> Path:
+def get_surface_datapath(filename: str, source_format: str) -> Path:
     """Return the full path of a test data file. This function is
     widely used in test functions
 
     Args:
         filename: Filename
-        data_type: Data type, folder with same name must exist in proc_test_data
+        source_format: Data type, folder with same name must exist in proc_test_data
     Returns:
         Path: Path to data file
     """
-    data_type = data_type.upper()
+    source_format = source_format.upper()
 
     return (
-        Path(__file__)
-        .resolve(strict=True)
-        .parent.parent.joinpath(f"data/proc_test_data/{data_type}/{filename}")
-    )
+        Path(__file__).parent.parent.joinpath(f"data/proc_test_data/{source_format}/{filename}")
+    ).resolve()
 
 
 def get_mobile_datapath(filename: str) -> Path:
@@ -52,6 +50,11 @@ def get_bc_datapath(filename: str) -> Path:
     return get_datapath_base(data_type="boundary_conditions", filename=filename)
 
 
+def get_eulerian_datapath(filename: str) -> Path:
+    """Return the path to the boundary conditions test data file"""
+    return get_datapath_base(data_type="eulerian_model", filename=filename)
+
+
 def get_footprint_datapath(filename: str) -> Path:
     """Return the path to the footprints test data file"""
     return get_datapath_base(data_type="footprints", filename=filename)
@@ -59,11 +62,11 @@ def get_footprint_datapath(filename: str) -> Path:
 
 def get_datapath_base(data_type: str, filename: str) -> Path:
     """Return the path to the footprints test data file"""
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/{data_type}/{filename}")
+    return Path(__file__).parent.parent.joinpath(f"data/{data_type}/{filename}").resolve()
 
 
 def get_retrieval_data_file(filename: str):
-    return Path(__file__).resolve(strict=True).parent.parent.joinpath(f"data/retrieve/{filename}")
+    return Path(__file__).parent.parent.joinpath(f"data/retrieve/{filename}").resolve()
 
 
 def glob_files(search_str: str, data_type: str) -> List:

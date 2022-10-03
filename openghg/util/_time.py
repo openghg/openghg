@@ -31,6 +31,7 @@ __all__ = [
     "time_offset",
     "relative_time_offset",
     "find_duplicate_timestamps",
+    "in_daterange",
 ]
 
 TupleTimeType = Tuple[Union[int, float], str]
@@ -832,3 +833,28 @@ def relative_time_offset(
         time_delta = time_offset(value, unit)
 
     return time_delta
+
+
+def in_daterange(
+    start_a: Union[str, Timestamp],
+    end_a: Union[str, Timestamp],
+    start_b: Union[str, Timestamp],
+    end_b: Union[str, Timestamp],
+) -> bool:
+    """Check if two dateranges overlap.
+
+    Args:
+        start: Start datetime
+        end: End datetime
+    Returns:
+        bool: True if overlap
+    """
+    from openghg.util import timestamp_tzaware
+
+    start_a = timestamp_tzaware(start_a)
+    end_a = timestamp_tzaware(end_a)
+
+    start_b = timestamp_tzaware(start_b)
+    end_b = timestamp_tzaware(end_b)
+
+    return bool((start_a <= end_b) and (end_a >= start_b))

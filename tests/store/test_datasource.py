@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 from addict import Dict as aDict
-from helpers import get_datapath
+from helpers import get_surface_datapath
 from openghg.objectstore import get_bucket, get_object_names
 from openghg.standardise.surface import parse_crds
 from openghg.store.base import Datasource
@@ -24,7 +24,7 @@ mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
 @pytest.fixture(scope="session")
 def data():
     filename = "bsd.picarro.1minute.248m.min.dat"
-    filepath = get_datapath(filename=filename, data_type="CRDS")
+    filepath = get_surface_datapath(filename=filename, source_format="CRDS")
 
     return parse_crds(data_filepath=filepath, site="bsd", network="DECC")
 
@@ -60,7 +60,7 @@ def test_add_data(data):
     assert ch4_data["ch4_variability"][0] == pytest.approx(0.79)
     assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
     d.save()
     bucket = get_bucket()
 
@@ -82,23 +82,24 @@ def test_add_data(data):
         "species": "ch4",
         "calibration_scale": "wmo-x2004a",
         "long_name": "bilsdale",
-        "calibration_scale": "wmo-x2004a",
+        "inlet_height_magl": "248m",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "station_longitude": -1.15033,
         "station_latitude": 54.35858,
         "station_long_name": "bilsdale, uk",
         "station_height_masl": 380.0,
-        "inlet_height_magl": "248m",
-        "data_type": "timeseries",
+        "data_type": "surface",
+        "start_date": "2014-01-30 11:12:30+00:00",
+        "end_date": "2020-12-01 22:32:29+00:00",
     }
 
     assert d.metadata() == expected_metadata
 
 
 def test_versioning(capfd):
-    min_tac_filepath = get_datapath(filename="tac.picarro.1minute.100m.min.dat", data_type="CRDS")
-    detailed_tac_filepath = get_datapath(filename="tac.picarro.1minute.100m.201407.dat", data_type="CRDS")
+    min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
+    detailed_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
 
     min_data = parse_crds(data_filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
 
@@ -112,7 +113,7 @@ def test_versioning(capfd):
 
     min_ch4_data = min_data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=min_ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=min_ch4_data, data_type="surface")
 
     d.save()
 
@@ -136,7 +137,7 @@ def test_versioning(capfd):
 
     detailed_ch4_data = detailed_data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="surface")
 
     d.save()
 
@@ -178,7 +179,7 @@ def test_save(mock_uuid2):
     bucket = get_bucket()
 
     datasource = Datasource()
-    datasource.add_metadata_key(key="data_type", value="timeseries")
+    datasource.add_metadata_key(key="data_type", value="surface")
     datasource.save(bucket)
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
@@ -261,7 +262,7 @@ def test_to_data(data):
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
     obj_data = d.to_data()
 
@@ -270,7 +271,7 @@ def test_to_data(data):
     assert metadata["instrument"] == "picarro"
     assert metadata["sampling_period"] == "60.0"
     assert metadata["inlet"] == "248m"
-    assert metadata["data_type"] == "timeseries"
+    assert metadata["data_type"] == "surface"
     assert len(obj_data["data_keys"]) == 0
 
 
@@ -280,7 +281,7 @@ def test_from_data(data):
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
     d.save()
 
     obj_data = d.to_data()
@@ -317,7 +318,7 @@ def test_update_daterange_replacement(data):
 
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
     assert d._start_date == pd.Timestamp("2014-01-30 11:12:30+00:00")
     assert d._end_date == pd.Timestamp("2020-12-01 22:31:30+00:00")
@@ -326,7 +327,7 @@ def test_update_daterange_replacement(data):
 
     d._data = None
 
-    d.add_data(metadata=metadata, data=ch4_short, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_short, data_type="surface")
 
     assert d._start_date == pd.Timestamp("2014-01-30 11:12:30+00:00")
     assert d._end_date == pd.Timestamp("2016-04-02 06:55:30+00:00")
@@ -443,7 +444,7 @@ def test_in_daterange(data):
 
     d = Datasource()
     d._uuid = "test-id-123"
-    d.add_data(metadata=metadata, data=data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=data, data_type="surface")
     d.save()
 
     expected_keys = [
@@ -472,7 +473,7 @@ def test_shallow_then_load_data(data):
     data = data["ch4"]["data"]
 
     d = Datasource()
-    d.add_data(metadata=metadata, data=data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=data, data_type="surface")
     d.save()
 
     new_d = Datasource.load(uuid=d.uuid(), shallow=True)

@@ -1,5 +1,6 @@
-from typing import cast, Union, Optional, Dict, List, MutableMapping
 from pathlib import Path
+from typing import Dict, List, MutableMapping, Optional, Union, cast
+
 import xarray as xr
 
 
@@ -51,8 +52,9 @@ def parse_openghg(
     Returns:
         Dict : Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string
     from openghg.standardise.meta import define_species_label
+    from openghg.util import clean_string
+
     # from openghg.standardise.meta import metadata_default_keys, assign_attributes
 
     data_filepath = Path(data_filepath)
@@ -76,8 +78,10 @@ def parse_openghg(
 
     if platform == "satellite":
         if domain is None:
-            raise ValueError("For satellite data, please specify selected domain."
-             "This can be 'global' if no selection has been made.")
+            raise ValueError(
+                "For satellite data, please specify selected domain."
+                "This can be 'global' if no selection has been made."
+            )
 
     # Define metadata based on input arguments.
     metadata_initial = {
@@ -88,6 +92,8 @@ def parse_openghg(
         "domain": domain,
         "network": network,
         "platform": platform,
+        "data_type": "column",
+        "source_format": "openghg",
     }
 
     # TODO: Tidy this up a bit (maybe split some into a separate function?)
@@ -146,6 +152,9 @@ def parse_openghg(
 
     if "site" in metadata:
         metadata["site"] = clean_string(metadata["site"])
+
+    # Add data type to metadata
+    metadata["data_type"] = "column"
 
     # Define remaining keys needed for metadata
     metadata_needed = [param for param in metadata_required if param not in metadata]
@@ -306,10 +315,12 @@ def satellite_attribute_translation() -> TranslationDict:
     """
     # Current values within (at least) GOSAT, TROPOMI files
     # - values can contain lists as well as single string values
-    keywords: TranslationDict = {"instrument": "sensor",
-                                 "satellite": "platform",
-                                 "network": "platform",
-                                 "data_owner": "creator_name",
-                                 "data_owner_email": "creator_email"}
+    keywords: TranslationDict = {
+        "instrument": "sensor",
+        "satellite": "platform",
+        "network": "platform",
+        "data_owner": "creator_name",
+        "data_owner_email": "creator_email",
+    }
 
     return keywords

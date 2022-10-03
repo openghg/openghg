@@ -1,6 +1,6 @@
 from helpers import get_bc_datapath
 from openghg.retrieve import search
-from openghg.store import BoundaryConditions, metastore_manager, recombine_datasets
+from openghg.store import BoundaryConditions, load_metastore, recombine_datasets
 from openghg.util import hash_bytes
 from xarray import open_dataset
 
@@ -50,22 +50,17 @@ def test_read_file_monthly():
         species="ch4", bc_input="MOZART", domain="europe", data_type="boundary_conditions"
     )
 
-    key = list(search_results.keys())[0]
-
-    data_keys = search_results[key]["keys"]
-    bc_data = recombine_datasets(keys=data_keys, sort=False)
-
-    metadata = search_results[key]["metadata"]
+    bc_data = search_results.retrieve_all()
 
     orig_data = open_dataset(test_datapath)
 
-    assert orig_data.lat.equals(bc_data.lat)
-    assert orig_data.lon.equals(bc_data.lon)
-    assert orig_data.time.equals(bc_data.time)
+    assert orig_data.lat.equals(bc_data.data.lat)
+    assert orig_data.lon.equals(bc_data.data.lon)
+    assert orig_data.time.equals(bc_data.data.time)
 
     data_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
     for dv in data_vars:
-        assert orig_data[dv].equals(bc_data[dv])
+        assert orig_data[dv].equals(bc_data.data[dv])
 
     expected_metadata = {
         "title": "mozart volume mixing ratios at domain edges",
@@ -84,8 +79,7 @@ def test_read_file_monthly():
         "time_period": "1 month",
     }
 
-    for key in expected_metadata.keys():
-        assert metadata[key] == expected_metadata[key]
+    assert expected_metadata.items() <= bc_data.metadata.items()
 
 
 def test_read_file_yearly():
@@ -95,25 +89,20 @@ def test_read_file_yearly():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    proc_results = BoundaryConditions.read_file(
+    BoundaryConditions.read_file(
         filepath=test_datapath,
         species=species,
         bc_input=bc_input,
         domain=domain,
     )
 
-    assert "n2o_mozart_europe_2012" in proc_results
-
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
     )
 
-    key = list(search_results.keys())[0]
-
-    data_keys = search_results[key]["keys"]
-    bc_data = recombine_datasets(keys=data_keys, sort=False)
-
-    metadata = search_results[key]["metadata"]
+    bc_obs = search_results.retrieve_all()
+    bc_data = bc_obs.data
+    metadata = bc_obs.metadata
 
     orig_data = open_dataset(test_datapath)
 
@@ -144,8 +133,7 @@ def test_read_file_yearly():
         "copied from": "2000",
     }
 
-    for key in expected_metadata.keys():
-        assert metadata[key] == expected_metadata[key]
+    assert expected_metadata.items() <= metadata.items()
 
 
 # TODO: Add test for co2 data - need to create TEST region to match other data for this
@@ -171,7 +159,7 @@ def test_datasource_add_lookup():
         }
     }
 
-    with metastore_manager(key="test-key-123") as metastore:
+    with load_metastore(key="test-key-123") as metastore:
         bc.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
         assert bc.datasources() == ["mock-uuid-123456"]

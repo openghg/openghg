@@ -62,6 +62,8 @@ def sync_surface_metadata(
                         f"Value not within tolerance, metadata: {value} - attributes: {attr_value}"
                     )
             else:
+                # Here we don't care about case. Within the Datasource we'll store the
+                # metadata as all lowercase, within the attributes we'll keep the case.
                 if str(value).lower() != str(attr_value).lower():
                     raise ValueError(
                         f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}"

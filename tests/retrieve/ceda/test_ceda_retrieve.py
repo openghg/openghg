@@ -84,7 +84,7 @@ def test_ceda_retrieve(mocker):
         "station_longitude": 0.23048,
         "Calibration_scale": "NOAA-2007",
         "species": "co2",
-        "data_type": "timeseries",
+        "data_type": "surface",
         "data_source": "ceda_archive",
         "network": "CEDA_RETRIEVED",
         "sampling_period": "NA",
