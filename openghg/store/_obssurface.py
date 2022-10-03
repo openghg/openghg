@@ -51,7 +51,7 @@ class ObsSurface(BaseStore):
         from tempfile import TemporaryDirectory
 
         possible_kwargs = {
-            "data_type",
+            "source_format",
             "network",
             "site",
             "inlet",
@@ -59,6 +59,8 @@ class ObsSurface(BaseStore):
             "sampling_period",
             "measurement_type",
             "overwrite",
+            "source_format",
+            "data_type",
         }
 
         # We've got a lot of functions that expect a file and read
@@ -96,7 +98,7 @@ class ObsSurface(BaseStore):
     @staticmethod
     def read_file(
         filepath: multiPathType,
-        data_type: str,
+        source_format: str,
         network: str,
         site: str,
         inlet: Optional[str] = None,
@@ -112,7 +114,7 @@ class ObsSurface(BaseStore):
 
         Args:
             filepath: Filepath(s)
-            data_type: Data type, for example CRDS, GCWERKS
+            source_format: Data format, for example CRDS, GCWERKS
             site: Site code/name
             network: Network name
             inlet: Inlet height. If retrieve multiple files pass None, OpenGHG will attempt to
@@ -141,9 +143,9 @@ class ObsSurface(BaseStore):
             filepath = [filepath]
 
         try:
-            data_type = SurfaceTypes[data_type.upper()].value
+            source_format = SurfaceTypes[source_format.upper()].value
         except KeyError:
-            raise ValueError(f"Unknown data type {data_type} selected.")
+            raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Test that the passed values are valid
         # Check validity of site, instrument, inlet etc in acrg_site_info.json
@@ -165,7 +167,7 @@ class ObsSurface(BaseStore):
                 )
 
         # Load the data retrieve object
-        parser_fn = load_surface_parser(data_type=data_type)
+        parser_fn = load_surface_parser(source_format=source_format)
 
         obs = ObsSurface.load()
 
@@ -177,7 +179,7 @@ class ObsSurface(BaseStore):
         # Create a progress bar object using the filepaths, iterate over this below
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
             for fp in filepath:
-                if data_type == "GCWERKS":
+                if source_format == "GCWERKS":
                     try:
                         data_filepath = Path(fp[0])
                         precision_filepath = Path(fp[1])
@@ -198,7 +200,7 @@ class ObsSurface(BaseStore):
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
-                if data_type == "GCWERKS":
+                if source_format == "GCWERKS":
                     data = parser_fn(
                         data_filepath=data_filepath,
                         precision_filepath=precision_filepath,
@@ -246,7 +248,7 @@ class ObsSurface(BaseStore):
                 #     try:
                 #         ObsSurface.validate_data(value["data"], species=species)
                 #     except ValueError:
-                #         print(f"WARNING: standardised data for '{data_type}' is not in expected OpenGHG format.")
+                #         print(f"WARNING: standardised data for '{source_format}' is not in expected OpenGHG format.")
                 #         print(f"Check data for {species}")
                 #         print(value["data"])
                 #         print("Not writing to object store.")
@@ -263,9 +265,10 @@ class ObsSurface(BaseStore):
                     "inlet",
                     "instrument",
                     "network",
-                    "data_type",
+                    "source_format",
                     "data_source",
                     "icos_data_level",
+                    "data_type",
                 )
 
                 lookup_results = datasource_lookup(
@@ -273,8 +276,12 @@ class ObsSurface(BaseStore):
                 )
 
                 # Create Datasources, save them to the object store and get their UUIDs
+                data_type = "surface"
                 datasource_uuids = assign_data(
-                    data_dict=data, lookup_results=lookup_results, overwrite=overwrite
+                    data_dict=data,
+                    lookup_results=lookup_results,
+                    overwrite=overwrite,
+                    data_type=data_type,
                 )
 
                 results["processed"][data_filepath.name] = datasource_uuids
@@ -372,8 +379,12 @@ class ObsSurface(BaseStore):
             lookup_result = {site: uuid}
 
             # Create Datasources, save them to the object store and get their UUIDs
+            data_type = "surface"
             datasource_uuids = assign_data(
-                data_dict=combined, lookup_results=lookup_result, overwrite=overwrite
+                data_dict=combined,
+                lookup_results=lookup_result,
+                overwrite=overwrite,
+                data_type=data_type,
             )
 
             results[site] = datasource_uuids
@@ -415,9 +426,9 @@ class ObsSurface(BaseStore):
         data_vars: Dict[str, Tuple[str, ...]] = {name: ("time",)}
         dtypes = {name: np.floating, "time": np.datetime64}
 
-        data_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
+        source_format = DataSchema(data_vars=data_vars, dtypes=dtypes)
 
-        return data_format
+        return source_format
 
     @staticmethod
     def validate_data(data: Dataset, species: str) -> None:
@@ -451,7 +462,7 @@ class ObsSurface(BaseStore):
             required_metakeys: Keys in the metadata we should use to store this metadata in the object store
             if None it defaults to:
             {"species", "site", "station_long_name", "inlet", "instrument",
-            "network", "data_type", "data_source", "icos_data_level"}
+            "network", "source_format", "data_source", "icos_data_level"}
         Returns:
             Dict or None:
         """
@@ -486,7 +497,7 @@ class ObsSurface(BaseStore):
                 "inlet",
                 "instrument",
                 "network",
-                "data_type",
+                "source_format",
                 "data_source",
                 "icos_data_level",
             )
@@ -499,8 +510,12 @@ class ObsSurface(BaseStore):
         )
 
         # Create Datasources, save them to the object store and get their UUIDs
+        data_type = "surface"
         datasource_uuids = assign_data(
-            data_dict=to_process, lookup_results=lookup_results, overwrite=overwrite
+            data_dict=to_process,
+            lookup_results=lookup_results,
+            overwrite=overwrite,
+            data_type=data_type,
         )
 
         # Record the Datasources we've created / appended to

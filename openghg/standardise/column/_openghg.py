@@ -92,6 +92,8 @@ def parse_openghg(
         "domain": domain,
         "network": network,
         "platform": platform,
+        "data_type": "column",
+        "source_format": "openghg",
     }
 
     # TODO: Tidy this up a bit (maybe split some into a separate function?)

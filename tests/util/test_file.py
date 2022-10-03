@@ -5,16 +5,16 @@ from openghg.util import load_surface_parser, read_header
 
 
 def test_load_surface_parser():
-    f = load_surface_parser(data_type="crds")
+    f = load_surface_parser(source_format="crds")
 
     assert f
 
-    f = load_surface_parser(data_type="CRDS")
+    f = load_surface_parser(source_format="CRDS")
 
     assert f
 
     with pytest.raises(AttributeError):
-        load_surface_parser(data_type="spam")
+        load_surface_parser(source_format="spam")
 
 
 def test_read_header():

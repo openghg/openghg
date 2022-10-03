@@ -7,4 +7,15 @@ from ._access import (
     get_obs_surface_local,
 )
 from ._export import get_ceda_file
-from ._search import local_search, meta_search, metadata_lookup, search, search_surface
+from ._search import (
+    local_search,
+    meta_search,
+    metadata_lookup,
+    search,
+    search_bc,
+    search_column,
+    search_emissions,
+    search_eulerian,
+    search_footprints,
+    search_surface,
+)

@@ -1,7 +1,7 @@
 import logging
 
 import pytest
-from helpers import get_datapath
+from helpers import get_surface_datapath
 from openghg.standardise.surface import parse_icos
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -9,7 +9,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def test_read_icos_large_header():
-    filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
+    filepath = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
 
     data = parse_icos(
         data_filepath=filepath, site="mhd", instrument="g2401", header_type="large", inlet="15m"
@@ -42,7 +42,7 @@ def test_read_icos_large_header():
 
 
 def test_read_icos_large_header_incorrect_site_raises():
-    filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
+    filepath = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
 
     with pytest.raises(ValueError):
         parse_icos(
@@ -55,7 +55,7 @@ def test_read_icos_large_header_incorrect_site_raises():
 
 
 def test_read_icos_large_header_incorrect_instrument_raises():
-    filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
+    filepath = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
 
     with pytest.raises(ValueError):
         parse_icos(
@@ -68,7 +68,7 @@ def test_read_icos_large_header_incorrect_instrument_raises():
 
 
 def test_read_icos_large_header_incorrect_inlet_raises():
-    filepath = get_datapath(filename="mhd.co.hourly.g2401.15m.dat", data_type="ICOS")
+    filepath = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
 
     with pytest.raises(ValueError):
         parse_icos(
@@ -81,7 +81,7 @@ def test_read_icos_large_header_incorrect_inlet_raises():
 
 
 def test_read_icos_small_header_file():
-    filepath = get_datapath(filename="tta.co2.1minute.222m.min.dat", data_type="ICOS")
+    filepath = get_surface_datapath(filename="tta.co2.1minute.222m.min.dat", source_format="ICOS")
 
     data = parse_icos(
         data_filepath=filepath,
@@ -133,6 +133,8 @@ def test_read_icos_small_header_file():
         "station_latitude": 56.55511,
         "station_long_name": "Angus Tower, UK",
         "station_height_masl": 300.0,
+        "data_type": "surface",
+        "source_format": "icos",
     }
 
     assert co2_metadata == expected_metadata

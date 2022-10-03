@@ -124,4 +124,5 @@ def test_to_dashboard_mobile_return_dict():
         "units": "ppb",
         "notes": "measurement value is methane enhancement over background",
         "sampling_period": "NOT_SET",
+        "data_type": "surface",
     }

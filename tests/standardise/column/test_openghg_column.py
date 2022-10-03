@@ -1,11 +1,11 @@
 import logging
-import numpy as np
-from pandas import Timestamp
-import pytest
 
+import numpy as np
+import pytest
+from helpers import get_column_datapath  # , parsed_surface_metachecker, check_cf_compliance
 from openghg.standardise.column import parse_openghg
 from openghg.standardise.meta import metadata_default_keys
-from helpers import get_column_datapath  #, parsed_surface_metachecker, check_cf_compliance
+from pandas import Timestamp
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -13,7 +13,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 def test_read_file():
     """
-    Test file in OpenGHG format (variables and attributes) can be 
+    Test file in OpenGHG format (variables and attributes) can be
     correctly parsed.
     """
     filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
@@ -66,7 +66,7 @@ def test_read_file():
 #     Note: this will extract station details from values pre-defined within
 #     the acrg_site_info.json file.
 #     """
-#     filepath = get_datapath(filename="tac_co2_no_attr_openghg.nc", data_type="OPENGHG")
+#     filepath = get_surface_datapath(filename="tac_co2_no_attr_openghg.nc", data_type="OPENGHG")
 
 #     param = {}
 
@@ -101,7 +101,7 @@ def test_read_file():
 #     assert metadata.items() >= expected_metadata.items()
 
 
-# # TODO: Add tests for new site (i.e. no current data stored) 
+# # TODO: Add tests for new site (i.e. no current data stored)
 # # - when/if possible!
 # # - [] Check this can read in a file if *all* keywords specified manually
 # #   - for this create file for *new* site and with no attributes
@@ -111,7 +111,7 @@ def test_read_file():
 
 # @pytest.fixture(scope="session")
 # def openghg_data():
-#     filepath = get_datapath(filename="tac_co2_openghg.nc", data_type="OPENGHG")
+#     filepath = get_surface_datapath(filename="tac_co2_openghg.nc", data_type="OPENGHG")
 #     data = parse_openghg(data_filepath=filepath)
 #     return data
 

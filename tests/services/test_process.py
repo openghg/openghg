@@ -4,7 +4,7 @@
 # from openghg.client import process_files
 # from openghg.objectstore import get_bucket
 
-# from helpers import get_datapath
+# from helpers import get_surface_datapath
 
 
 # # @pytest.fixture(autouse=True, scope="module")
@@ -23,7 +23,7 @@
 
 #     service_url = "openghg"
 
-#     bsd_file = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+#     bsd_file = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
 
 #     response = process_files(
 #         user=authenticated_user,
@@ -40,7 +40,7 @@
 
 # @pytest.mark.skip("Marked for removal")
 # def test_process_CRDS_incorrect_args(authenticated_user, set_env):
-#     hfd_file = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+#     hfd_file = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
 
 #     response = process_files(
 #         user=authenticated_user,
@@ -81,8 +81,8 @@
 # @pytest.mark.skip("Marked for removal")
 # def test_process_GCWERKS_files(authenticated_user):
 #     # Get the precisin filepath
-#     data = get_datapath("capegrim-medusa.18.C", "GC")
-#     precisions = get_datapath("capegrim-medusa.18.precisions.C", "GC")
+#     data = get_surface_datapath("capegrim-medusa.18.C", "GC")
+#     precisions = get_surface_datapath("capegrim-medusa.18.precisions.C", "GC")
 
 #     filepaths = [(data, precisions)]
 

@@ -6,9 +6,9 @@ import pytest
 from helpers import (
     attributes_checker_get_obs,
     call_function_packager,
-    get_datapath,
     get_emissions_datapath,
     get_footprint_datapath,
+    get_surface_datapath,
     metadata_checker_obssurface,
 )
 from openghg.dataobjects import ObsData

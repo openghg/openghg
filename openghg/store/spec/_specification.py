@@ -1,5 +1,4 @@
-from typing import Dict, Tuple, Any
-
+from typing import Any, Dict, Tuple
 
 __all__ = ["define_data_types", "define_data_type_classes"]
 
@@ -10,13 +9,13 @@ def define_data_types() -> Tuple[str, ...]:
     """
 
     data_types = (
-        "timeseries",
+        "surface",
         "column",
         "emissions",
         # "met",
         "footprints",
         "boundary_conditions",
-        "eulerian_model"
+        "eulerian_model",
     )
 
     return data_types
@@ -27,16 +26,16 @@ def define_data_type_classes() -> Dict[str, Any]:
     Define mapping between data types and associated input classes within OpenGHG
     """
     from openghg.store import (
-        ObsSurface,
-        ObsColumn,
-        Emissions,
-        Footprints,
         BoundaryConditions,
+        Emissions,
         EulerianModel,
+        Footprints,
+        ObsColumn,
+        ObsSurface,
     )
 
     data_type_classes = {
-        "timeseries": ObsSurface,
+        "surface": ObsSurface,
         "column": ObsColumn,
         "emissions": Emissions,
         # "met": ???

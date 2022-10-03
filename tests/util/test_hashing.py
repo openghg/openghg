@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
-from helpers import get_datapath
+from helpers import get_surface_datapath
 from openghg.util import hash_bytes, hash_retrieved_data, hash_string
 
 
@@ -23,7 +23,7 @@ def test_hash_bytes():
     with pytest.raises(TypeError):
         hash_bytes("silly walks")
 
-    filepath = get_datapath(filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     binary_bsd = filepath.read_bytes()
 
     bsd_hash = hash_bytes(data=binary_bsd)

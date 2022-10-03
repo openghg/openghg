@@ -7,7 +7,7 @@ from openghg.util import running_on_hub
 
 def standardise_surface(
     filepaths: Union[str, Path, List, Tuple],
-    data_type: str,
+    source_format: str,
     site: str,
     network: str,
     inlet: Optional[str] = None,
@@ -19,7 +19,7 @@ def standardise_surface(
 
     Args:
         filepaths: Path of file(s) to process
-        data_type: Type of data i.e. GCWERKS, CRDS, ICOS
+        source_format: Format of data i.e. GCWERKS, CRDS, ICOS
         site: Site code
         network: Network name
         inlet: Inlet height in metres
@@ -43,9 +43,9 @@ def standardise_surface(
 
         metadata = {}
         metadata["site"] = site
-        metadata["data_type"] = data_type
+        metadata["source_format"] = source_format
         metadata["network"] = network
-        metadata["data_type"]
+        metadata["data_type"] = "surface"
 
         if inlet is not None:
             metadata["inlet"] = inlet
@@ -57,8 +57,8 @@ def standardise_surface(
         responses = {}
         for fpath in filepaths:
             gcwerks = False
-            if data_type.lower() in ("gc", "gcwerks"):
-                metadata["data_type"] = "gcwerks"
+            if source_format.lower() in ("gc", "gcwerks"):
+                metadata["source_format"] = "gcwerks"
 
                 try:
                     filepath = Path(fpath[0])
@@ -111,7 +111,7 @@ def standardise_surface(
 
         results = ObsSurface.read_file(
             filepath=filepaths,
-            data_type=data_type,
+            source_format=source_format,
             site=site,
             network=network,
             instrument=instrument,

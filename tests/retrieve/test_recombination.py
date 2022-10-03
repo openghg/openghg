@@ -1,6 +1,6 @@
 import logging
 
-from helpers import get_datapath
+from helpers import get_surface_datapath
 from openghg.objectstore import get_bucket
 from openghg.retrieve import search
 from openghg.standardise.surface import parse_crds, parse_gcwerks
@@ -12,7 +12,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 def test_recombination_CRDS():
     filename = "hfd.picarro.1minute.100m.min.dat"
-    filepath = get_datapath(filename=filename, data_type="CRDS")
+    filepath = get_surface_datapath(filename=filename, source_format="CRDS")
 
     gas_data = parse_crds(data_filepath=filepath, site="HFD", network="AGAGE")
 
@@ -37,8 +37,8 @@ def test_recombination_CRDS():
 
 
 def test_recombination_GC():
-    data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-    precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+    data = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
+    precision = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
     data = parse_gcwerks(
         data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE"

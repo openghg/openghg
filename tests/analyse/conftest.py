@@ -1,8 +1,10 @@
-import os
-import tempfile
-
 import pytest
-from helpers import get_bc_datapath, get_datapath, get_emissions_datapath, get_footprint_datapath
+from helpers import (
+    get_bc_datapath,
+    get_emissions_datapath,
+    get_footprint_datapath,
+    get_surface_datapath,
+)
 from openghg.objectstore import get_bucket
 from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
 
@@ -23,10 +25,10 @@ def data_read():
     network = "DECC"
     data_type = "CRDS"
 
-    tac_path1 = get_datapath(filename="tac.picarro.1minute.100m.201208.dat", data_type="CRDS")
-    tac_path2 = get_datapath(filename="tac.picarro.1minute.100m.201407.dat", data_type="CRDS")
+    tac_path1 = get_surface_datapath(filename="tac.picarro.1minute.100m.201208.dat", source_format="CRDS")
+    tac_path2 = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
     tac_filepaths = [tac_path1, tac_path2]
-    ObsSurface.read_file(filepath=tac_filepaths, data_type=data_type, site=site, network=network)
+    ObsSurface.read_file(filepath=tac_filepaths, source_format=data_type, site=site, network=network)
 
     # Emissions data
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE

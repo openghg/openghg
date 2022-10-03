@@ -181,7 +181,7 @@ def local_retrieve_surface(
     # We'll take the attributes as metadata
     metadata = dataset.attrs.copy()
 
-    metadata["data_type"] = "timeseries"
+    metadata["data_type"] = "surface"
     metadata["data_source"] = "ceda_archive"
     # TODO - how should we find these? Need to change how we're retrieving Datasources
     # using metadata

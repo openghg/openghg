@@ -8,12 +8,12 @@ from openghg.standardise.surface import parse_crds
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
 
-from helpers import get_datapath, parsed_surface_metachecker
+from helpers import get_surface_datapath, parsed_surface_metachecker
 
 
 @pytest.fixture(scope="session")
 def crds_data():
-    hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+    hfd_filepath = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
     gas_data = parse_crds(data_filepath=hfd_filepath, site="hfd", network="DECC")
 
@@ -21,7 +21,7 @@ def crds_data():
 
 
 def test_file_with_dupes_doesnt_raise():
-    dupe_file = get_datapath(filename="bsd.picarro.1minute.42m.dupes.dat", data_type="CRDS")
+    dupe_file = get_surface_datapath(filename="bsd.picarro.1minute.42m.dupes.dat", source_format="CRDS")
 
     with pytest.raises(ValueError):
         parse_crds(data_filepath=dupe_file, site="bsd", inlet="42m", network="DECC", drop_duplicates=False)
@@ -31,14 +31,14 @@ def test_file_with_dupes_doesnt_raise():
 
 
 def test_read_file_wrong_sampling_period_raises():
-    hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+    hfd_filepath = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
     with pytest.raises(ValueError):
         parse_crds(data_filepath=hfd_filepath, site="hfd", network="DECC", sampling_period="1min")
 
 
 def test_read_file():
-    hfd_filepath = get_datapath(filename="hfd.picarro.1minute.100m.min.dat", data_type="CRDS")
+    hfd_filepath = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
     crds_data = parse_crds(data_filepath=hfd_filepath, site="hfd", network="DECC", sampling_period=60)
 

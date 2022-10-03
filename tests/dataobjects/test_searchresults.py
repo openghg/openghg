@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
-from helpers import get_datapath
+from helpers import get_surface_datapath
 from openghg.dataobjects import SearchResults
 from openghg.retrieve import search
 from openghg.store import ObsSurface, rank_sources
@@ -13,15 +13,15 @@ from pandas import Timestamp
 
 @pytest.fixture(scope="session", autouse=True)
 def load_CRDS():
-    tac_100m = get_datapath("tac.picarro.1minute.100m.min.dat", data_type="CRDS")
-    hfd_50m = get_datapath("hfd.picarro.1minute.50m.min.dat", data_type="CRDS")
-    bsd_42m = get_datapath("bsd.picarro.1minute.42m.min.dat", data_type="CRDS")
-    bsd_108m = get_datapath("bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
-    bsd_248m = get_datapath("bsd.picarro.1minute.248m.min.dat", data_type="CRDS")
+    tac_100m = get_surface_datapath("tac.picarro.1minute.100m.min.dat", source_format="CRDS")
+    hfd_50m = get_surface_datapath("hfd.picarro.1minute.50m.min.dat", source_format="CRDS")
+    bsd_42m = get_surface_datapath("bsd.picarro.1minute.42m.min.dat", source_format="CRDS")
+    bsd_108m = get_surface_datapath("bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+    bsd_248m = get_surface_datapath("bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
-    ObsSurface.read_file(filepath=tac_100m, data_type="CRDS", site="tac", network="DECC")
-    ObsSurface.read_file(filepath=hfd_50m, data_type="CRDS", site="hfd", network="DECC")
-    ObsSurface.read_file(filepath=[bsd_42m, bsd_108m, bsd_248m], data_type="CRDS", site="bsd", network="DECC")
+    ObsSurface.read_file(filepath=tac_100m, source_format="CRDS", site="tac", network="DECC")
+    ObsSurface.read_file(filepath=hfd_50m, source_format="CRDS", site="hfd", network="DECC")
+    ObsSurface.read_file(filepath=[bsd_42m, bsd_108m, bsd_248m], source_format="CRDS", site="bsd", network="DECC")
 
 
 def test_retrieve_all():

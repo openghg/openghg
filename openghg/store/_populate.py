@@ -88,7 +88,7 @@ def add_noaa_obspack(
                 site=site,
                 measurement_type=measurement_type,
                 network="NOAA",
-                data_type="NOAA",
+                source_format="NOAA",
                 overwrite=overwrite,
             )
         elif project in project_names_not_implemented:

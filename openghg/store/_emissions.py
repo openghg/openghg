@@ -51,7 +51,7 @@ class Emissions(BaseStore):
         species: str,
         source: str,
         domain: str,
-        data_type: str = "openghg",
+        source_format: str = "openghg",
         date: Optional[str] = None,
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
@@ -66,7 +66,7 @@ class Emissions(BaseStore):
             domain: Emissions domain
             source: Emissions source
             date : Date associated with emissions as a string
-            data_type : Type of data being input e.g. openghg (internal format)
+            source_format : Type of data being input e.g. openghg (internal format)
             high_time_resolution: If this is a high resolution file
             period: Period of measurements. Only needed if this can not be inferred from the time coords
                     If specified, should be one of:
@@ -90,12 +90,12 @@ class Emissions(BaseStore):
         filepath = Path(filepath)
 
         try:
-            data_type = EmissionsTypes[data_type.upper()].value
+            source_format = EmissionsTypes[source_format.upper()].value
         except KeyError:
-            raise ValueError(f"Unknown data type {data_type} selected.")
+            raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_emissions_parser(data_type=data_type)
+        parser_fn = load_emissions_parser(source_format=source_format)
 
         em_store = Emissions.load()
 

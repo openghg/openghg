@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 import pytest
-from helpers import check_cf_compliance, get_datapath, parsed_surface_metachecker
+from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
 from openghg.standardise.meta import metadata_default_keys
 from openghg.standardise.surface import parse_openghg
 from pandas import Timestamp
@@ -16,7 +16,7 @@ def test_read_file():
     Test file in OpenGHG format (variables and attributes) can be
     correctly parsed.
     """
-    filepath = get_datapath(filename="tac_co2_openghg.nc", data_type="OPENGHG")
+    filepath = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
     data = parse_openghg(filepath)
 
     assert "co2" in data
@@ -52,7 +52,7 @@ def test_read_file_no_attr():
     Note: this will extract station details from values pre-defined within
     the acrg_site_info.json file.
     """
-    filepath = get_datapath(filename="tac_co2_no_attr_openghg.nc", data_type="OPENGHG")
+    filepath = get_surface_datapath(filename="tac_co2_no_attr_openghg.nc", source_format="OPENGHG")
 
     param = {}
 
@@ -97,7 +97,7 @@ def test_read_file_no_attr():
 
 @pytest.fixture(scope="session")
 def openghg_data():
-    filepath = get_datapath(filename="tac_co2_openghg.nc", data_type="OPENGHG")
+    filepath = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
     data = parse_openghg(data_filepath=filepath)
     return data
 
