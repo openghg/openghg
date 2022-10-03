@@ -89,14 +89,12 @@ def test_read_file_yearly():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    proc_results = BoundaryConditions.read_file(
+    BoundaryConditions.read_file(
         filepath=test_datapath,
         species=species,
         bc_input=bc_input,
         domain=domain,
     )
-
-    assert "n2o_mozart_europe_2012" in proc_results
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"

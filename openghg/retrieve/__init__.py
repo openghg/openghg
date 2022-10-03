@@ -13,6 +13,7 @@ from ._search import (
     metadata_lookup,
     search,
     search_bc,
+    search_column,
     search_emissions,
     search_eulerian,
     search_footprints,

@@ -1,10 +1,41 @@
-from openghg.retrieve import search
+from openghg.retrieve import (
+    search,
+    search_bc,
+    search_column,
+    search_emissions,
+    search_eulerian,
+    search_footprints,
+    search_surface,
+)
 
 
-def test_search_multi_inlet():
-    res = search(species=["co2", "ch4"], data_type="surface", inlet="108m")
+def test_search_surface():
+    res = search_surface(site="hfd")
 
-    print(res)
+    assert len(res.metadata) == 6
+
+    res = search_surface(site="hfd", inlet="50m", species="co2")
+
+    key = next(iter(res.metadata))
+
+    partial_metdata = {
+        "site": "hfd",
+        "instrument": "picarro",
+        "sampling_period": "60.0",
+        "inlet": "50m",
+        "port": "9",
+        "type": "air",
+        "network": "decc",
+        "species": "co2",
+        "calibration_scale": "wmo-x2007",
+        "long_name": "heathfield",
+        "data_type": "surface",
+        "inlet_height_magl": "50m",
+    }
+
+    assert partial_metdata.items() <= res.metadata[key].items()
+
+    assert not search_surface(site="hfd", species="co2", inlet="888m")
 
 
 def test_search_site():
@@ -72,7 +103,7 @@ def test_multi_type_search():
 
     data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    assert data_types == {"surface", "column"}
+    assert data_types == {'surface', 'eulerian_model', 'column'}
 
     res = search(species="co2")
     data_types = set([m["data_type"] for m in res.metadata.values()])
@@ -119,3 +150,111 @@ def test_nonsense_terms():
     res = search(site="bsd", species="sparrow")
 
     assert not res
+
+
+def test_search_footprints():
+    res = search_footprints(site="TMB", network="LGHG", height="10m", domain="EUROPE", model="test_model")
+
+    key = next(iter(res.metadata))
+    partial_metadata = {
+        "data_type": "footprints",
+        "site": "tmb",
+        "height": "10m",
+        "domain": "europe",
+        "model": "test_model",
+        "network": "lghg",
+        "start_date": "2020-08-01 00:00:00+00:00",
+        "end_date": "2021-07-31 23:59:59+00:00",
+        "time_period": "1 year",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_emissions():
+    res = search_emissions(
+        species="co2",
+        source="gpp-cardamom",
+        date="2012",
+        domain="europe",
+    )
+
+    key = next(iter(res.metadata))
+
+    partial_metadata = {
+        "title": "gross primary productivity co2",
+        "author": "openghg cloud",
+        "regridder_used": "acrg_grid.regrid.regrid_3d",
+        "comments": "fluxes copied from year 2013. december 2012 values copied from january 2013 values.",
+        "species": "co2",
+        "domain": "europe",
+        "source": "gpp-cardamom",
+        "date": "2012",
+        "data_type": "emissions",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_column():
+    res = search_column(
+        satellite="GOSAT",
+        domain="BRAZIL",
+        species="methane",
+    )
+
+    key = next(iter(res.metadata))
+
+    partial_metadata = {
+        "satellite": "gosat",
+        "instrument": "tanso-fts",
+        "species": "ch4",
+        "domain": "brazil",
+        "network": "gosat",
+        "platform": "satellite",
+        "selection": "brazil",
+        "data_type": "column",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_bc():
+    res = search_bc(species="n2o", bc_input="MOZART", domain="EUROPE")
+
+    key = next(iter(res.metadata))
+
+    partial_metadata = {
+        "date_created": "2018-04-30 09:15:29.472284",
+        "author": "openghg cloud",
+        "run name": "newedgar",
+        "species": "n2o",
+        "title": "mozart volume mixing ratios at domain edges",
+        "time period": "climatology from 200901-201407 mozart output",
+        "copied from": "2000",
+        "date": "2012",
+        "domain": "europe",
+        "bc_input": "mozart",
+        "start_date": "2012-01-01 00:00:00+00:00",
+        "end_date": "2012-12-31 23:59:59+00:00",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_eulerian_model():
+    res = search_eulerian(model="GEOSChem", species="ch4")
+
+    key = next(iter(res.metadata))
+
+    partial_metadata = {
+        "title": "geos-chem diagnostic collection: speciesconc",
+        "format": "cfio",
+        "conventions": "coards",
+        "simulation_start_date_and_time": "2015-01-01 00:00:00z",
+        "simulation_end_date_and_time": "2016-01-01 00:00:00z",
+        "model": "geoschem",
+        "species": "ch4",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()

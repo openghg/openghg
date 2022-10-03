@@ -133,6 +133,7 @@ def search_bc(
         domain=domain,
         period=period,
         continuous=continuous,
+        data_type="boundary_conditions",
     )
 
 
@@ -153,10 +154,7 @@ def search_eulerian(
         SearchResults: SearchResults object
     """
     return search(
-        model=model,
-        species=species,
-        start_date=start_date,
-        end_date=end_date,
+        model=model, species=species, start_date=start_date, end_date=end_date, data_type="eulerian_model"
     )
 
 
@@ -165,7 +163,7 @@ def search_emissions(
     source: Optional[str] = None,
     domain: Optional[str] = None,
     date: Optional[str] = None,
-    high_time_resolution: Optional[bool] = False,
+    high_time_resolution: Optional[bool] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
 ) -> SearchResults:
@@ -195,6 +193,7 @@ def search_emissions(
         high_time_resolution=high_time_resolution,
         period=period,
         continuous=continuous,
+        data_type="emissions",
     )
 
 
@@ -246,6 +245,7 @@ def search_footprints(
         high_spatial_res=high_spatial_res,
         high_time_res=high_time_res,
         short_lifetime=short_lifetime,
+        data_type="footprints",
     )
 
 
@@ -304,6 +304,50 @@ def search_surface(
     )
 
     return results
+
+
+def search_column(
+    satellite: Optional[str] = None,
+    domain: Optional[str] = None,
+    selection: Optional[str] = None,
+    site: Optional[str] = None,
+    species: Optional[str] = None,
+    network: Optional[str] = None,
+    instrument: Optional[str] = None,
+    platform: Optional[str] = None,
+) -> SearchResults:
+    """Search column data
+
+    Args:
+        satellite: Name of satellite (if relevant)
+        domain: For satellite only. If data has been selected on an area include the
+            identifier name for domain covered. This can map to previously defined domains
+            (see domain_info.json) or a newly defined domain.
+        selection: For satellite only, identifier for any data selection which has been
+            performed on satellite data. This can be based on any form of filtering, binning etc.
+            but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
+            If not specified, domain will be used.
+        site : Site code/name (if relevant). Can include satellite OR site.
+        species: Species name or synonym e.g. "ch4"
+        instrument: Instrument name e.g. "TANSO-FTS"
+        network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
+        platform: Type of platform. Should be one of:
+            - "satellite"
+            - "site"
+    Returns:
+        SearchResults: SearchResults object
+    """
+    return search(
+        satellite=satellite,
+        domain=domain,
+        selection=selection,
+        site=site,
+        species=species,
+        network=network,
+        instrument=instrument,
+        platform=platform,
+        data_type="column",
+    )
 
 
 def search(**kwargs: Any) -> SearchResults:

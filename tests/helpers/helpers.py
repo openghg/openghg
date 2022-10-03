@@ -26,8 +26,7 @@ def get_surface_datapath(filename: str, source_format: str) -> Path:
     source_format = source_format.upper()
 
     return (
-        Path(__file__)
-        .parent.parent.joinpath(f"data/proc_test_data/{source_format}/{filename}")
+        Path(__file__).parent.parent.joinpath(f"data/proc_test_data/{source_format}/{filename}")
     ).resolve()
 
 
@@ -49,6 +48,11 @@ def get_emissions_datapath(filename: str) -> Path:
 def get_bc_datapath(filename: str) -> Path:
     """Return the path to the boundary conditions test data file"""
     return get_datapath_base(data_type="boundary_conditions", filename=filename)
+
+
+def get_eulerian_datapath(filename: str) -> Path:
+    """Return the path to the boundary conditions test data file"""
+    return get_datapath_base(data_type="eulerian_model", filename=filename)
 
 
 def get_footprint_datapath(filename: str) -> Path:

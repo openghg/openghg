@@ -1,12 +1,21 @@
 import pytest
 from helpers import (
+    get_bc_datapath,
     get_column_datapath,
     get_emissions_datapath,
+    get_eulerian_datapath,
     get_footprint_datapath,
     get_surface_datapath,
 )
 from openghg.objectstore import get_bucket
-from openghg.store import Emissions, Footprints, ObsColumn, ObsSurface
+from openghg.store import (
+    BoundaryConditions,
+    Emissions,
+    EulerianModel,
+    Footprints,
+    ObsColumn,
+    ObsSurface,
+)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -107,3 +116,20 @@ def data_read():
         domain=domain,
         high_spatial_res=True,
     )
+
+    test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
+
+    species = "n2o"
+    bc_input = "MOZART"
+    domain = "EUROPE"
+
+    BoundaryConditions.read_file(
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+    )
+
+    test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
+
+    proc_results = EulerianModel.read_file(filepath=test_datapath, model="GEOSChem", species="ch4")
