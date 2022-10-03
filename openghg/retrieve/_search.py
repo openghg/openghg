@@ -98,14 +98,155 @@ def metadata_lookup(
     if len(required_result) > 1:
         raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
 
-    # q = Query()
-
-    # search_attrs = [getattr(q, k) == v for k, v in additional_metadata.items()]
-    # required_results = database.search(reduce(_find_or, search_attrs))
-
     uuid: str = required_result[0]["uuid"]
 
     return uuid
+
+
+def search_bc(
+    species: Optional[str] = None,
+    bc_input: Optional[str] = None,
+    domain: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: Optional[bool] = None,
+) -> SearchResults:
+    """Search for boundary condition data
+
+    Args:
+        species: Species name
+        bc_input: Input used to create boundary conditions. For example:
+            - a model name such as "MOZART" or "CAMS"
+            - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
+        domain: Region for boundary conditions
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
+                If specified, should be one of:
+                    - "yearly", "monthly"
+                    - suitable pandas Offset Alias
+                    - tuple of (value, unit) as would be passed to pandas.Timedelta function
+        continuous: Whether time stamps have to be continuous.
+    Returns:
+        SearchResults: SearchResults object
+    """
+    return search(
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+        period=period,
+        continuous=continuous,
+    )
+
+
+def search_eulerian(
+    model: Optional[str] = None,
+    species: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+) -> SearchResults:
+    """Search for eulerian data
+
+    Args:
+        model: Eulerian model name
+        species: Species name
+        start_date: Start date (inclusive) associated with model run
+        end_date: End date (exclusive) associated with model run
+    Returns:
+        SearchResults: SearchResults object
+    """
+    return search(
+        model=model,
+        species=species,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+
+def search_emissions(
+    species: Optional[str] = None,
+    source: Optional[str] = None,
+    domain: Optional[str] = None,
+    date: Optional[str] = None,
+    high_time_resolution: Optional[bool] = False,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: Optional[bool] = None,
+) -> SearchResults:
+    """Search for emissions data
+
+    Args:
+        species: Species name
+        domain: Emissions domain
+        source: Emissions source
+        date : Date associated with emissions as a string
+        source_format : Type of data being input e.g. openghg (internal format)
+        high_time_resolution: If this is a high resolution file
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
+                If specified, should be one of:
+                    - "yearly", "monthly"
+                    - suitable pandas Offset Alias
+                    - tuple of (value, unit) as would be passed to pandas.Timedelta function
+        continuous: Whether time stamps have to be continuous.
+    Returns:
+        SearchResults: SearchResults object
+    """
+    return search(
+        species=species,
+        source=source,
+        domain=domain,
+        date=date,
+        high_time_resolution=high_time_resolution,
+        period=period,
+        continuous=continuous,
+    )
+
+
+def search_footprints(
+    site: Optional[str] = None,
+    height: Optional[str] = None,
+    domain: Optional[str] = None,
+    model: Optional[str] = None,
+    metmodel: Optional[str] = None,
+    species: Optional[str] = None,
+    network: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    continuous: Optional[bool] = None,
+    high_spatial_res: Optional[bool] = None,
+    high_time_res: Optional[bool] = None,
+    short_lifetime: Optional[bool] = None,
+) -> SearchResults:
+    """Search for footprints data
+
+    Args:
+        site: Site name
+        height: Height above ground level in metres
+        domain: Domain of footprints
+        model: Model used to create footprint (e.g. NAME or FLEXPART)
+        metmodel: Underlying meteorlogical model used (e.g. UKV)
+        species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
+        network: Network name
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
+        continuous: Whether time stamps have to be continuous.
+        retrieve_met: Whether to also download meterological data for this footprints area
+        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
+        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+                        Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+        short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
+                        Note this will be set to True if species has an associated lifetime.
+    Returns:
+        SearchResults: SearchResults object
+    """
+    return search(
+        site=site,
+        height=height,
+        domain=domain,
+        model=model,
+        metmodel=metmodel,
+        species=species,
+        network=network,
+        period=period,
+        continuous=continuous,
+        high_spatial_res=high_spatial_res,
+        high_time_res=high_time_res,
+        short_lifetime=short_lifetime,
+    )
 
 
 def search_surface(
@@ -139,7 +280,7 @@ def search_surface(
         sampling_height: Sampling height of measurements
         icos_data_level: ICOS data level, see ICOS documentation
     Returns:
-        SearchResults:  SearchResults object
+        SearchResults: SearchResults object
     """
     if start_date is not None:
         start_date = str(start_date)
@@ -159,7 +300,7 @@ def search_surface(
         data_source=data_source,
         network=network,
         sampling_height=sampling_height,
-        # **kwargs,
+        icos_data_level=icos_data_level,
     )
 
     return results
@@ -185,7 +326,6 @@ def search(**kwargs: Any) -> SearchResults:
         If None a start datetime of UNIX epoch (1970-01-01) is set
         end_date: End datetime for search.
         If None an end datetime of the current datetime is set
-        skip_ranking: If True skip ranking system, defaults to False
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
@@ -242,7 +382,6 @@ def local_search(**kwargs):  # type: ignore
         If None a start datetime of UNIX epoch (1970-01-01) is set
         end_date: End datetime for search.
         If None an end datetime of the current datetime is set
-        skip_ranking: If True skip ranking system, defaults to False
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
@@ -390,345 +529,3 @@ def local_search(**kwargs):  # type: ignore
             data_keys[uid] = Datasource.load(uuid=uid, shallow=True).data_keys()
 
     return SearchResults(keys=data_keys, metadata=dict(keyed_metadata))
-
-    # if not lookup_results:
-    #     return SearchResults()
-
-    # # datasource_uuids = obj.datasources()
-    # # # Shallow load the Datasources so we can search their metadata
-    # # datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
-
-    # # For the time being this will return a dict until we know how best to represent
-    # # the footprints and emissions results in a SearchResult object
-    # # Temporary until SearchResults is used for all
-    # valid_data_types_without_timeseries = list(valid_data_types).copy().remove("surface")
-
-    # if data_type == "surface":
-    #     pass
-
-    # if data_type in valid_data_types_without_timeseries:
-    #     sources = {}
-
-    #     for uid in datasource_uuids:
-    #         d = Datasource.load(uuid=uid, shallow=True)
-
-    #         sources[uid] = {
-    #             "keys": d.keys_in_daterange(start_date=start_date, end_date=end_date),
-    #             "metadata": d.metadata(),
-    #         }
-
-    #     # for datasource in datasources:
-    #     #     if datasource.search_metadata(**search_kwargs):
-    #     #         uid = datasource.uuid()
-    #     #         sources[uid]["keys"] = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-    #     #         sources[uid]["metadata"] = datasource.metadata()
-    #     return sources
-
-    # # Find the Datasources that contain matching metadata
-    # # matching_sources = {d.uuid(): d for d in datasources if d.search_metadata(**search_kwargs)}
-
-    # # TODO - Update this as it only uses the ACRG repo JSON at the moment
-    # # Check if this site only has one inlet, if so skip ranking
-    # # if "site" in search_kwargs:
-    # #     site = search_kwargs["site"]
-    # #     if not isinstance(site, list) and not multiple_inlets(site=site):
-    # #         skip_ranking = True
-
-    # # If there isn't *any* ranking data at all, skip all the ranking functionality
-    # # if not obj._rank_data:
-    # #     skip_ranking = True
-
-    # # If only one datasource has been returned, skip all the ranking functionality
-    # # if len(lookup_results) == 1:
-    # #     skip_ranking = True
-
-    # # If we have the site, inlet and instrument then just return the data
-    # # TODO - should instrument be added here
-    # if {"site", "inlet", "species"} <= search_kwargs.keys() or skip_ranking is True:
-    #     specific_sources = aDict()
-    #     for uid in datasource_uuids:
-    #         d = Datasource.load(uuid=uid, shallow=True)
-    #         specific_keys = d.keys_in_daterange(start_date=start_date, end_date=end_date)
-
-    #         if not specific_keys:
-    #             continue
-
-    #         metadata = d.metadata()
-
-    #         site = metadata["site"]
-    #         species = metadata["species"]
-    #         inlet = metadata["inlet"]
-
-    #         # Note that the keys here is just a list unlike the ranked keys dictionary
-    #         # which contains the dateranges covered.
-    #         specific_sources[site][species][inlet]["keys"]["unranked"] = specific_keys
-    #         specific_sources[site][species][inlet]["metadata"] = metadata
-
-    #     return SearchResults(results=specific_sources.to_dict(), ranked_data=False)
-
-    # highest_ranked = aDict()
-    # # If we don't have any ranking data set add
-    # no_ranking = aDict()
-
-    # for uid in datasource_uuids:
-    #     datasource = Datasource.load(uuid=uid, shallow=True)
-    #     # Find the site and then the ranking
-    #     metadata = datasource.metadata()
-    #     # Get the site inlet and species
-    #     site = metadata["site"]
-    #     species = metadata["species"]
-
-    #     rank_data = obj.get_rank(uuid=uid, start_date=start_date, end_date=end_date)
-
-    #     # If this Datasource doesn't have any ranking data skip it and move on
-    #     if not rank_data:
-    #         no_ranking[site] = {"species": species, "uuid": uid}
-
-    #     # There will only be a single rank key
-    #     rank_value = next(iter(rank_data))
-    #     # Get the daterange this rank covers
-    #     rank_dateranges = rank_data[rank_value]
-
-    #     # Each match we store gives us the information we need
-    #     # to retrieve the data
-    #     match = {"uuid": uid, "dateranges": rank_dateranges}
-
-    #     # Need to ensure we get all the dates covered
-    #     if species in highest_ranked[site]:
-    #         species_rank_data = highest_ranked[site][species]
-
-    #         # If we have a higher (lower number) rank save it
-    #         if rank_value < species_rank_data["rank"]:
-    #             species_rank_data["rank"] = rank_value
-    #             species_rank_data["matching"] = [match]
-    #         # If another Datasource has the same rank for another daterange
-    #         # we want to save that as well
-    #         elif rank_value == species_rank_data["rank"]:
-    #             species_rank_data["matching"].append(match)
-    #     else:
-    #         highest_ranked[site][species]["rank"] = rank_value
-    #         highest_ranked[site][species]["matching"] = [match]
-
-    # # # If we don't have any ranked data check if we found any unranked data
-    # # if not highest_ranked:
-    # #     if not no_ranking:
-    # #         raise ValueError("With no ranked and no unranked data something has gone wrong.")
-
-    # for site in no_ranking:
-    #     species = no_ranking[site]["species"]
-    #     # If there's ranking data for this species at this site skip it
-    #     if site in highest_ranked and species in highest_ranked[site]:
-    #         continue
-
-    #     # unranked = aDict()
-    #     # Otherwise store the data
-
-    #     #
-    #     # raise ValueError(
-    #     #     (
-    #     #         "No ranking data set for the given search parameters."
-    #     #         " Please refine your search to include a specific site, species and inlet."
-    #     #     )
-    #     # )
-    # # Now we have the highest ranked data the dateranges there are ranks for
-    # # we want to fill in the gaps with (currently) the highest inlet from that site
-
-    # # We just want some rank_metadata to go along with the final data scheme
-    # # Can key a key of date - inlet
-    # data_keys: Dict = aDict()
-    # for site, species in highest_ranked.items():
-    #     for sp, data in species.items():
-    #         species_keys = {}
-    #         species_rank_data = {}
-    #         species_metadata = {}
-    #         # Save the inlets so we can find the highest later
-    #         inlets = []
-
-    #         for match_data in data["matching"]:
-    #             uuid = match_data["uuid"]
-    #             match_dateranges = match_data["dateranges"]
-    #             # Get the datasource as it's already in the dictionary
-    #             # we created earlier
-    #             datasource = Datasource.load(uuid=uuid, shallow=True)
-    #             metadata = datasource.metadata()
-    #             inlet = metadata["inlet"]
-    #             inlets.append(inlet)
-
-    #             for dr in match_dateranges:
-    #                 keys = datasource.keys_in_daterange_str(daterange=dr)
-
-    #                 if keys:
-    #                     # We'll add this to the metadata in the search results we return at the end
-    #                     species_rank_data[dr] = inlet
-    #                     species_keys[dr] = keys
-
-    #             species_metadata[inlet] = metadata
-
-    #         # Only create the dictionary keys if we have some data keys
-    #         if species_keys:
-    #             data_keys[site][sp]["keys"]["ranked"] = species_keys
-    #             data_keys[site][sp]["rank_metadata"] = species_rank_data
-    #             data_keys[site][sp]["metadata"] = species_metadata
-    #         else:
-    #             continue
-
-    #         # We now need to retrieve data for the dateranges for which we don't have ranking data
-    #         # To do this find the gaps in the daterange over which the user has requested data
-    #         # and the dates for which we have ranking information
-
-    #         # Get the dateranges that are covered by ranking information
-    #         daterange_strs = list(iter_chain.from_iterable([m["dateranges"] for m in data["matching"]]))
-    #         # # Find the gaps in the ranking coverage
-    #         gap_dateranges = find_daterange_gaps(
-    #             start_search=start_date, end_search=end_date, dateranges=daterange_strs
-    #         )
-
-    #         def max_key(s: str) -> float:
-    #             return float(s.rstrip("m"))
-
-    #         # Here just select the highest inlet that's been ranked and use that
-    #         highest_inlet = max(inlets, key=max_key)
-
-    #         inlet_metadata = data_keys[site][sp]["metadata"][highest_inlet]
-    #         inlet_instrument = inlet_metadata["instrument"]
-    #         inlet_sampling_period = inlet_metadata["sampling_period"]
-
-    #         unranked_keys = []
-    #         for gap_daterange in gap_dateranges:
-    #             gap_start, gap_end = split_daterange_str(gap_daterange)
-
-    #             results: SearchResults = search(
-    #                 site=site,
-    #                 species=sp,
-    #                 inlet=highest_inlet,
-    #                 instrument=inlet_instrument,
-    #                 sampling_period=inlet_sampling_period,
-    #                 start_date=gap_start,
-    #                 end_date=gap_end,
-    #             )  # type: ignore
-
-    #             if not results:
-    #                 continue
-
-    #             # Retrieve the data keys
-    #             inlet_data_keys = results.keys(site=site, species=sp, inlet=highest_inlet)["unranked"]
-
-    #             unranked_keys.extend(inlet_data_keys)
-
-    #         # If we've got keys that overlap two dateranges we'll get duplicates, remove those here
-    #         data_keys[site][sp]["keys"]["unranked"] = list(set(unranked_keys))
-
-    # # TODO - create a stub for addict
-    # dict_data_keys = data_keys.to_dict()  # type: ignore
-
-    # return SearchResults(results=dict_data_keys, ranked_data=True)
-
-
-# def search_footprints(
-#     sites: Union[str, List[str]], domains: Union[str, List[str]], inlet: str, start_date: Timestamp, end_date: Timestamp
-# ) -> Dict:
-#     """Search for footprints for the given locations and inlet height.
-
-#     Args:
-#         locations: Location name or list of names
-#         inlet: Inlet height
-#         start_date: Start date
-#         end_date: End date
-#     Returns:
-#         dict: Dictionary of keys keyed by location
-#     """
-#     from collections import defaultdict
-#     from openghg.modules import Datasource, Footprints
-
-#     if not isinstance(sites, list):
-#         sites = [sites]
-
-#     if not isinstance(domains, list):
-#         domains = [domains]
-
-#     footprints = Footprints.load()
-#     datasource_uuids = footprints.datasources()
-#     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
-
-#     keys = defaultdict(dict)
-#     # If we have locations to search
-#     # for sites in sites:
-#     for datasource in datasources:
-#         for site in sites:
-#             # TODO - should we iterate over the domains? Will there be the same site in multiple footprints domains?
-#             search_terms = [inlet, site] + domains
-#             if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
-#                 # Get the data keys for the data in the matching daterange
-#                 in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-#                 keys[site]["keys"] = in_date
-#                 keys[site]["metadata"] = datasource.metadata()
-
-#     return keys
-
-
-# def search_emissions(
-#     species: Union[str, List[str]],
-#     sources: Union[str, List[str]],
-#     domains: Union[str, List[str]],
-#     high_time_res: Optional[bool] = False,
-#     start_date: Optional[Union[str, Timestamp]] = None,
-#     end_date: Optional[Union[str, Timestamp]] = None,
-# ) -> Dict:
-#     """Search for emissions for the given locations and inlet height.
-
-#     Args:
-#         locations: Location name or list of names
-#         inlet: Inlet height
-#         start_date: Start date
-#         end_date: End date
-#     Returns:
-#         dict: Dictionary of keys keyed by location
-#     """
-#     from collections import defaultdict
-#     from openghg.modules import Datasource, Emissions
-#     from openghg.util import timestamp_epoch, timestamp_now, timestamp_tzaware
-
-#     if not isinstance(species, list):
-#         species = [species]
-
-#     if not isinstance(domains, list):
-#         domains = [domains]
-
-#     if sources is not None and not isinstance(sources, list):
-#         sources = [sources]
-
-#     if start_date is None:
-#         start_date = timestamp_epoch()
-#     else:
-#         start_date = timestamp_tzaware(start_date)
-
-#     if end_date is None:
-#         end_date = timestamp_now()
-#     else:
-#         end_date = timestamp_tzaware(end_date)
-
-#     emissions = Emissions.load()
-#     datasource_uuids = emissions.datasources()
-#     datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
-
-#     gen_search_terms = []
-#     if sources is not None:
-#         gen_search_terms += sources
-#     if high_time_res:
-#         gen_search_terms.append("high_time_resolution")
-
-#     keys = defaultdict(dict)
-#     # If we have locations to search
-#     # for sites in sites:
-#     for datasource in datasources:
-#         for sp in species:
-#             for domain in domains:
-#                 search_terms = [sp, domain] + gen_search_terms
-#                 if datasource.search_metadata(search_terms=search_terms, start_date=start_date, end_date=end_date):
-#                     # Get the data keys for the data in the matching daterange
-#                     in_date = datasource.keys_in_daterange(start_date=start_date, end_date=end_date)
-#                     key = "_".join(search_terms)
-#                     keys[key]["keys"] = in_date
-#                     keys[key]["metadata"] = datasource.metadata()
-
-#     return keys
