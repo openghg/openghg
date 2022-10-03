@@ -250,7 +250,7 @@ def local_search(**kwargs):  # type: ignore
     Returns:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
-    from functools import reduce
+    import itertools
 
     from openghg.store.base import Datasource
     from openghg.util import (
@@ -281,20 +281,23 @@ def local_search(**kwargs):  # type: ignore
         updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
 
-        # TODO - 2022-09-22 - is there a better way of doing this?
-        # Flatten out the list based on species
-
     data_type = search_kwargs.get("data_type")
     data_type_classes = define_data_type_classes()
 
     types_to_search = []
     if data_type is not None:
+        if not isinstance(data_type, list):
+            data_type = [data_type]
+
         valid_data_types = define_data_types()
-        if data_type not in valid_data_types:
-            raise ValueError(f"{data_type} is not a valid data type, please select one of {valid_data_types}")
-        # Get the object we want to load in from the object store
-        type_class = data_type_classes[data_type]
-        types_to_search.append(type_class)
+        for d in data_type:
+            if d not in valid_data_types:
+                raise ValueError(
+                    f"{data_type} is not a valid data type, please select one of {valid_data_types}"
+                )
+            # Get the object we want to load in from the object store
+            type_class = data_type_classes[d]
+            types_to_search.append(type_class)
     else:
         types_to_search.extend(data_type_classes.values())
 
@@ -312,29 +315,37 @@ def local_search(**kwargs):  # type: ignore
     else:
         del search_kwargs["end_date"]
 
+    # Here we process the kwargs and flatten out the lists so
+    # we create the combinations of search queries correctly
+    a_list = {}
+    not_a_list = {}
+    for k, v in search_kwargs.items():
+        if isinstance(v, (list, tuple)):
+            a_list[k] = v
+        else:
+            not_a_list[k] = v
+
+    # If we have lists of values to find we need to flatten them out
+    expanded_search = []
+    if a_list:
+        keys, values = zip(*a_list.items())
+        for v in itertools.product(*values):
+            d = dict(zip(keys, v))
+            if not_a_list:
+                d.update(not_a_list)
+            expanded_search.append(d)
+    else:
+        expanded_search.append(not_a_list)
+
     general_results = []
-    # Load associated object class (e.g. ObsSurface, Emissions) for data_type
     for data_type_class in types_to_search:
-        obj = data_type_class.load()
+        meta_key = data_type_class._metakey
 
-        # Load in the metastore
-        metastore = load_metastore(key=obj._metakey)
-
-        # Now search the metadata store using the passed terms
-        q = Query()
-        search_attrs = []
-        for k, v in search_kwargs.items():
-            if isinstance(v, (list, tuple)):
-                for val in v:
-                    search_attrs.append(getattr(q, k) == val)
-            else:
-                search_attrs.append(getattr(q, k) == v)
-
-        results = metastore.search(reduce(_find_and, search_attrs))
-        general_results.extend(results)
-
-        # Close the metastore now we're finished with it
-        metastore.close()
+        with load_metastore(key=meta_key) as metastore:
+            for v in expanded_search:
+                res = metastore.search(Query().fragment(v))
+                if res:
+                    general_results.extend(res)
 
     # Add in a quick check to make sure we don't have dupes
     uuids = [s["uuid"] for s in general_results]

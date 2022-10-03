@@ -69,11 +69,13 @@ def data_read():
     # Obs Column data
     column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
 
-    ObsColumn.read_file(filepath=column_datapath,
-                        source_format="OPENGHG",
-                        satellite="GOSAT",
-                        domain="BRAZIL",
-                        species="methane")
+    ObsColumn.read_file(
+        filepath=column_datapath,
+        source_format="OPENGHG",
+        satellite="GOSAT",
+        domain="BRAZIL",
+        species="methane",
+    )
 
     # Emissions data
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
@@ -97,5 +99,11 @@ def data_read():
     model = "test_model"
 
     Footprints.read_file(
-        filepath=datapath, site=site, model=model, network=network, height=height, domain=domain, high_spatial_res=True,
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        high_spatial_res=True,
     )

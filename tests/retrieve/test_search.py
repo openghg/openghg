@@ -85,3 +85,37 @@ def test_multi_type_search():
     data_types = set([ob.metadata["data_type"] for ob in obs])
 
     assert data_types == {"emissions", "surface"}
+
+    res = search(species="ch4", data_type=["surface"])
+
+    assert len(res.metadata) == 7
+
+    res = search(species="co2", data_type=["surface", "emissions"])
+
+    assert len(res.metadata) == 7
+
+
+def test_many_term_search():
+    res = search(site=["bsd", "tac"], species=["co2", "ch4"], inlet=["42m", "100m"])
+
+    assert len(res.metadata) == 4
+    assert res.metadata
+
+    sites = set([x["site"] for x in res.metadata.values()])
+    assert sites == {"bsd", "tac"}
+
+    species = set([x["species"] for x in res.metadata.values()])
+    assert species == {"co2", "ch4"}
+
+    inlets = set([x["inlet"] for x in res.metadata.values()])
+    assert inlets == {"100m", "42m"}
+
+
+def test_nonsense_terms():
+    res = search(site="london", species="ch4")
+
+    assert not res
+
+    res = search(site="bsd", species="sparrow")
+
+    assert not res
