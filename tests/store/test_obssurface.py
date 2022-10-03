@@ -812,10 +812,10 @@ def test_obs_schema(species, obs_variable):
 
 def test_check_obssurface_same_file_skips():
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
-    results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
+    results = ObsSurface.read_file(filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
     assert results
 
-    results = ObsSurface.read_file(filepath=filepath, data_type="CRDS", site="bsd", network="DECC")
+    results = ObsSurface.read_file(filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
     assert not results
