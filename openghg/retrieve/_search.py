@@ -3,7 +3,7 @@
 
 """
 import logging
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import SearchResults
 from openghg.store import load_metastore
@@ -161,10 +161,6 @@ def search_surface(
         sampling_height=sampling_height,
         # **kwargs,
     )
-
-    # TODO - remove this cast once we've updated search to ensure return of SearchResults object
-    # for all measurement types.
-    results = cast(SearchResults, results)
 
     return results
 
