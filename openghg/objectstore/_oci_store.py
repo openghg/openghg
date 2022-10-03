@@ -4,8 +4,15 @@ from io import BytesIO
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from oci.object_storage import ObjectStorageClient
-from oci.response import Response
+try:
+    from oci.config import validate_config
+    from oci.object_storage import ObjectStorageClient, UploadManager
+    from oci.object_storage.models import CreateBucketDetails
+    from oci.object_storage.transfer.constants import MEBIBYTE
+    from oci.response import Response
+except ImportError:
+    raise ImportError("To use the OCI object store you must install oci.")
+
 from openghg.types import ObjectStoreError
 
 
@@ -46,7 +53,6 @@ def _load_config() -> Dict:
     from pathlib import Path
 
     from cryptography.fernet import Fernet
-    from oci.config import validate_config
     from openghg.objectstore import string_to_bytes
 
     try:
@@ -157,7 +163,6 @@ def _get_oci_bucket(bucket_name: str) -> Dict:
 
 def create_bucket(bucket: str) -> Dict:
     """Create a bucket"""
-    from oci.object_storage.models import CreateBucketDetails
 
     oci_config = _load_config()
     object_storage = _load_client()
@@ -251,9 +256,6 @@ def upload(
     Returns:
         oci.response.Response: Response from OCIs
     """
-    from oci.object_storage import UploadManager
-    from oci.object_storage.transfer.constants import MEBIBYTE
-
     # See
     # https://github.com/oracle/oci-python-sdk/blob/master/examples/multipart_object_upload.py
 
