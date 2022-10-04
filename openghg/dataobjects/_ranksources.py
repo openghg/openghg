@@ -6,19 +6,13 @@ from openghg.util import create_daterange_str, verify_site
 
 
 class RankSources:
-    def __init__(self, cloud: bool = False, service_url: str = None) -> None:
+    def __init__(self, cloud: bool = False) -> None:
         self._cloud = cloud
+
+        raise NotImplementedError("Ranking currently not supported.")
 
         if cloud:
             raise NotImplementedError
-            # from Acquire.Client import Wallet
-
-            # wallet = Wallet()
-
-            # if service_url is None:
-            #     service_url = "https://fn.openghg.org/t"
-
-            # self._service = wallet.get_service(service_url=f"{service_url}/openghg")
 
     def raw(self) -> Dict:
         """Return the raw ranking data

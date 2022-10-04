@@ -366,6 +366,8 @@ def _read_data_small_header(
         "sampling_period": sampling_period,
         "network": network,
         "instrument": instrument,
+        "data_type": "surface",
+        "source_format": "icos",
     }
 
     if measurement_type is not None:

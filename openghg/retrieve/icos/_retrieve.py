@@ -158,7 +158,6 @@ def local_retrieve(
         start_date=start_date,
         end_date=end_date,
         icos_data_level=data_level,
-        skip_ranking=True,
     )
 
     if results and not force_retrieval:
@@ -351,8 +350,9 @@ def _retrieve_remote(
 
         # Add ICOS in directly here for now
         metadata["network"] = "ICOS"
-        metadata["data_type"] = "timeseries"
+        metadata["data_type"] = "surface"
         metadata["data_source"] = "icoscp"
+        metadata["source_format"] = "icos"
         metadata["icos_data_level"] = str(data_level)
 
         dataframe.columns = [x.lower() for x in dataframe.columns]

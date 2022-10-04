@@ -203,6 +203,7 @@ def _read_data(
         species_metadata["inlet"] = inlet
         species_metadata["calibration_scale"] = scale
         species_metadata["long_name"] = site_attributes["long_name"]
+        species_metadata["data_type"] = "surface"
 
         # Make sure metadata keys are included in attributes
         site_attributes.update(species_metadata)

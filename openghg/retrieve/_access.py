@@ -1,16 +1,21 @@
 import json
+import logging
 from io import BytesIO
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 from openghg.dataobjects import (
     BoundaryConditionsData,
     FluxData,
     FootprintData,
+    ObsColumnData,
     ObsData,
-    ObsColumnData)
+)
 from openghg.util import decompress, decompress_str, hash_bytes, running_on_hub
 from pandas import Timestamp
 from xarray import Dataset, load_dataset
+
+logger = logging.getLogger("openghg.retrieve")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def get_obs_surface(
@@ -164,35 +169,31 @@ def get_obs_surface_local(
     if site not in site_info:
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
-    # Find the correct synonym for the passed species
-    species = clean_string(synonyms(species))
-
     # Get the observation data
     obs_results = search_surface(
         site=site,
         species=species,
         inlet=inlet,
         start_date=start_date,
+        network=network,
         end_date=end_date,
         instrument=instrument,
-        find_all=True,
-        skip_ranking=skip_ranking,
+        # find_all=True,
+        # skip_ranking=skip_ranking,
     )
 
     if not obs_results:
         raise ValueError(f"Unable to find results for {species} at {site}")
 
-    retrieved_data: Union[ObsData, List[ObsData], None] = obs_results.retrieve(
-        site=site, species=species, inlet=inlet
-    )
+    retrieved_data: Union[ObsData, List[ObsData]] = obs_results.retrieve_all()
 
     if retrieved_data is None:
+        print("No data returned.")
         return None
     elif isinstance(retrieved_data, list):
-        print("No data returned.")
         print(f"Multiple entries found for current input parameters - site: '{site}', species: '{species}'")
         print("Please supply additional parameters or set ranking.")
-        metadata_difference(retrieved_data, params=["inlet", "network", "instrument"])
+        metadata_difference(data=retrieved_data, params=["inlet", "network", "instrument"])
         return None
 
     data = retrieved_data.data
@@ -377,19 +378,8 @@ def get_obs_column(
     Returns:
         ObsColumnData: ObsColumnData object
     """
-    from openghg.retrieve import search
-    from openghg.store import recombine_datasets
-    from openghg.util import clean_string, synonyms, timestamp_epoch, timestamp_now
-
-    # Find the correct synonym for the passed species
-    species = clean_string(synonyms(species))
-
-    if start_date is None:
-        start_date = timestamp_epoch()
-    if end_date is None:
-        end_date = timestamp_now()
-
-    results: Dict = search(
+    obs_data = _get_generic(
+        sort=False,
         species=species,
         satellite=satellite,
         domain=domain,
@@ -401,28 +391,9 @@ def get_obs_column(
         start_date=start_date,
         end_date=end_date,
         data_type="column",
-    )  # type: ignore
+    )
 
-    if not results:
-        if satellite is not None:
-            raise ValueError(f"Unable to find obs column data for {species} for {satellite} in {domain} ({selection} if specfied)")
-        elif site is not None:
-            raise ValueError(f"Unable to find obs column data for {species} for {site}")
-
-    try:
-        column_key = list(results.keys())[0]
-    except IndexError:
-        raise ValueError(f"Unable to find obs column data")
-
-    data_keys = results[column_key]["keys"]
-    metadata = results[column_key]["metadata"]
-
-    column_ds = recombine_datasets(keys=data_keys, sort=False)
-
-    if species is None:
-        species = metadata.get("species", "NA")
-
-    return ObsColumnData(data=column_ds, metadata=metadata)
+    return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
 
 
 def get_flux(
@@ -448,19 +419,8 @@ def get_flux(
     Returns:
         FluxData: FluxData object
     """
-    from openghg.retrieve import search
-    from openghg.store import recombine_datasets
-    from openghg.util import clean_string, synonyms, timestamp_epoch, timestamp_now
-
-    # Find the correct synonym for the passed species
-    species = clean_string(synonyms(species))
-
-    if start_date is None:
-        start_date = timestamp_epoch()
-    if end_date is None:
-        end_date = timestamp_now()
-
-    results: Dict = search(
+    obs_data = _get_generic(
+        sort=False,
         species=species,
         source=source,
         domain=domain,
@@ -468,21 +428,9 @@ def get_flux(
         start_date=start_date,
         end_date=end_date,
         data_type="emissions",
-    )  # type: ignore
+    )
 
-    if not results:
-        raise ValueError(f"Unable to find flux data for {species} from {source}")
-
-    try:
-        em_key = list(results.keys())[0]
-    except IndexError:
-        raise ValueError(f"Unable to find any footprints data for {domain} for {species}.")
-
-    data_keys = results[em_key]["keys"]
-    metadata = results[em_key]["metadata"]
-
-    em_ds = recombine_datasets(keys=data_keys, sort=False)
-
+    em_ds = obs_data.data
     # Check for level coordinate. If one level, assume surface and drop
     if "lev" in em_ds.coords:
         if len(em_ds.lev) > 1:
@@ -490,10 +438,7 @@ def get_flux(
 
         em_ds = em_ds.drop_vars(names="lev")
 
-    if species is None:
-        species = metadata.get("species", "NA")
-
-    return FluxData(data=em_ds, metadata=metadata)
+    return FluxData(data=obs_data.data, metadata=obs_data.metadata)
 
 
 def get_bc(
@@ -517,47 +462,49 @@ def get_bc(
     Returns:
         BoundaryConditionsData: BoundaryConditionsData object
     """
-    from openghg.retrieve import search
-    from openghg.store import recombine_datasets
-    from openghg.util import clean_string, synonyms, timestamp_epoch, timestamp_now
-
-    # Find the correct synonym for the passed species
-    species = clean_string(synonyms(species))
-
-    if start_date is None:
-        start_date = timestamp_epoch()
-    if end_date is None:
-        end_date = timestamp_now()
-
-    results: Dict = search(
+    obs_data = _get_generic(
+        sort=False,
         species=species,
         bc_input=bc_input,
         domain=domain,
         start_date=start_date,
         end_date=end_date,
         data_type="boundary_conditions",
-    )  # type: ignore
+    )
+
+    return BoundaryConditionsData(data=obs_data.data, metadata=obs_data.metadata)
+
+
+def _get_generic(
+    sort: bool = True,
+    elevate_inlets: bool = False,
+    **kwargs: Any,
+) -> ObsData:
+    """Perform a search and create a dataclass object with the results if any are found.
+
+    Args:
+        data_class: Type of dataobject to create
+        sort: Sort Dataset during recombination
+        elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset
+        kwargs: Search terms
+    Returns:
+        dataclass
+    """
+    from openghg.retrieve import search
+
+    results = search(**kwargs)
 
     if not results:
-        raise ValueError(f"Unable to find boundary conditions data for {species} for {bc_input}")
+        raise ValueError(f"Unable to find data. Please try other parameters.")
 
-    try:
-        bc_key = list(results.keys())[0]
-    except IndexError:
-        raise ValueError(f"Unable to find any boundary conditions data for {domain} for {species}.")
+    if len(results) > 1:
+        raise ValueError("Found more than one result, please narrow your search terms.")
 
-    data_keys = results[bc_key]["keys"]
-    metadata = results[bc_key]["metadata"]
+    obs_data = results.retrieve_all(sort=sort, elevate_inlet=elevate_inlets)
+    # We can only get a single ObsData back here but mypy doesn't understand that
+    obs_data = cast(ObsData, obs_data)
 
-    bc_ds = recombine_datasets(keys=data_keys, sort=False)
-
-    if species is None:
-        species = metadata.get("species", "NA")
-
-    return BoundaryConditionsData(
-        data=bc_ds,
-        metadata=metadata,
-    )
+    return obs_data
 
 
 def get_footprint(
@@ -597,48 +544,22 @@ def get_footprint(
     if species is not None:
         species = clean_string(synonyms(species))
 
-    results: Dict = search(
+    fp_data = _get_generic(
         site=site,
         domain=domain,
         height=height,
+        model=model,
         start_date=start_date,
         end_date=end_date,
         species=species,
         data_type="footprints",
-    )  # type: ignore
-    # Get the footprints data
-    # if species is not None:
-    # else:
-    #     results = search(
-    #         site=site,
-    #         domain=domain,
-    #         domain=domain,
-    #         height=height,
-    #         start_date=start_date,
-    #         end_date=end_date,
-    #         data_type="footprints",
-    #     )  # type: ignore
+    )
 
-    try:
-        fp_site_key = list(results.keys())[0]
-    except IndexError:
-        if species is not None:
-            raise ValueError(
-                f"Unable to find any footprints data for {site} at a height of {height} for species {species}."
-            )
-        else:
-            raise ValueError(f"Unable to find any footprints data for {site} at a height of {height}.")
-
-    keys = results[fp_site_key]["keys"]
-    metadata = results[fp_site_key]["metadata"]
-    # fp_ds = recombine_datasets(keys=keys, sort=False) # Why did this have sort=False before?
-    fp_ds = recombine_datasets(keys=keys, sort=True)
+    return FootprintData(data=fp_data.data, metadata=fp_data.metadata)
 
     # TODO: Could incorporate this somewhere? Setting species to INERT?
     # if species is None:
     #     species = metadata.get("species", "INERT")
-
-    return FootprintData(data=fp_ds, metadata=metadata)
 
 
 def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
@@ -712,6 +633,12 @@ def metadata_difference(
         list : Keys from the metadata with differences
     """
     metadata = [d.metadata for d in data]
+
+    if not metadata:
+        err_msg = "Unable to read metadata."
+        logger.exception(err_msg)
+        raise ValueError(err_msg)
+
     if params is not None:
         metadata = [{param: m[param] for param in params} for m in metadata]
 

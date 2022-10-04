@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.13.7
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -47,6 +47,36 @@ You can make some simple changes to the plot using arguments
 
 ```{code-cell} ipython3
 data_185m.plot_timeseries(title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
+```
+
+## Using the pandas DataFrame
+
++++
+
+We can also perform operations on the results pandas DataFrame. Let's search for all DECC network data.
+
+```{code-cell} ipython3
+decc_results = search_surface(network="DECC")
+```
+
+```{code-cell} ipython3
+results_df = decc_results.results
+```
+
+Say we want to just extract the CO2 data, we can extract the data we want using
+
+```{code-cell} ipython3
+co2_df = results_df[results_df["species"] == "co2"]
+```
+
+```{code-cell} ipython3
+co2_df
+```
+
+Then we can use this DataFrame to retrieve the data we want.
+
+```{code-cell} ipython3
+decc_results.retrieve(dataframe=co2_df)
 ```
 
 ## Plot all the data

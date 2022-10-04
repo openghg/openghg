@@ -1,4 +1,4 @@
-from helpers import get_datapath
+from helpers import get_surface_datapath
 from openghg.store import add_noaa_obspack
 
 
@@ -10,7 +10,7 @@ def test_read_noaa_obspack_ch4():
      - surface flask files: "..._surface-flask_..."
      - aircraft pfp file: "..._aircraft-pfp_..." - this should be ignored for now
     """
-    data_directory = get_datapath("ObsPack_ch4", data_type="NOAA")
+    data_directory = get_surface_datapath("ObsPack_ch4", source_format="NOAA")
     out = add_noaa_obspack(data_directory)
 
     processed = out["processed"]

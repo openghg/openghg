@@ -73,7 +73,10 @@ def parse_tmb(
             "inlet": clean_string(tb_params["inlet"]),
             "network": "LGHG",
             "sampling_period": sampling_period,
+            "data_type": "surface",
+            "source_format": "tmb",
         }
+
         metadata.update(site_attributes)
 
         gas_data[species] = {

@@ -52,6 +52,7 @@ from ._time import (
     timestamp_tzaware,
     trim_daterange,
     valid_daterange,
+    in_daterange,
 )
 from ._tutorial import bilsdale_datapaths, retrieve_example_data
 from ._user import create_default_config, get_user_config_path, read_local_config

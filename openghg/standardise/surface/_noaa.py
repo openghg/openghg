@@ -614,6 +614,8 @@ def _read_raw_data(
     metadata["inlet"] = inlet
     metadata["sampling_period"] = sampling_period
     metadata["instrument"] = noaa_params["instrument"][species.upper()]
+    metadata["data_type"] = "surface"
+    metadata["source_format"] = "noaa"
 
     combined_data[species.lower()] = {
         "metadata": metadata,

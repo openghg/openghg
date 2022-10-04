@@ -1,9 +1,8 @@
-from pandas import Timestamp
 import numpy as np
-
-from openghg.store.base import Datasource
-from openghg.store import ObsColumn
 from helpers import get_column_datapath
+from openghg.store import ObsColumn
+from openghg.store.base import Datasource
+from pandas import Timestamp
 
 
 def test_read_openghg_format():
@@ -20,7 +19,7 @@ def test_read_openghg_format():
     species = "methane"
 
     results = ObsColumn.read_file(filepath=datafile,
-                                  data_type="OPENGHG",
+                                  source_format="OPENGHG",
                                   satellite=satellite,
                                   domain=domain,
                                   species=species,

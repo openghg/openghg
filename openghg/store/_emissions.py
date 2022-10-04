@@ -22,7 +22,7 @@ class Emissions(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
-    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Dict:
+    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
 
         Args:
@@ -51,13 +51,13 @@ class Emissions(BaseStore):
         species: str,
         source: str,
         domain: str,
-        data_type: str = "openghg",
+        source_format: str = "openghg",
         date: Optional[str] = None,
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Dict:
+    ) -> Optional[Dict]:
         """Read emissions file
 
         Args:
@@ -66,7 +66,7 @@ class Emissions(BaseStore):
             domain: Emissions domain
             source: Emissions source
             date : Date associated with emissions as a string
-            data_type : Type of data being input e.g. openghg (internal format)
+            source_format : Type of data being input e.g. openghg (internal format)
             high_time_resolution: If this is a high resolution file
             period: Period of measurements. Only needed if this can not be inferred from the time coords
                     If specified, should be one of:
@@ -90,12 +90,12 @@ class Emissions(BaseStore):
         filepath = Path(filepath)
 
         try:
-            data_type = EmissionsTypes[data_type.upper()].value
+            source_format = EmissionsTypes[source_format.upper()].value
         except KeyError:
-            raise ValueError(f"Unknown data type {data_type} selected.")
+            raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_emissions_parser(data_type=data_type)
+        parser_fn = load_emissions_parser(source_format=source_format)
 
         em_store = Emissions.load()
 
@@ -107,6 +107,7 @@ class Emissions(BaseStore):
             print(
                 f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
             )
+            return None
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -119,6 +120,7 @@ class Emissions(BaseStore):
             "high_time_resolution": high_time_resolution,
             "period": period,
             "continuous": continuous,
+            "data_type": "emissions",
         }
 
         emissions_data = parser_fn(**param)

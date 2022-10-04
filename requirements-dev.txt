@@ -8,7 +8,7 @@ pytest-cov
 pytest-mock
 requests-mock
 # For mypy
-mypy==0.971
+mypy==0.982
 types-paramiko
 types-PyYAML
 types-requests

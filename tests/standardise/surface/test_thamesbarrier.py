@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 import pytest
-from helpers import check_cf_compliance, get_datapath, parsed_surface_metachecker
+from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
 from openghg.standardise.surface import parse_tmb
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -11,7 +11,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def tmb_data():
-    filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
+    filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
     data = parse_tmb(data_filepath=filepath)
     return data
 
