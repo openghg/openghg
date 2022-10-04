@@ -2,6 +2,7 @@ import glob
 import json
 import os
 import threading
+import warnings
 from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -34,7 +35,17 @@ def get_local_objectstore_path() -> Path:
     Returns:
         pathlib.Path: Path of object store
     """
+    import os
+
     from openghg.util import read_local_config
+
+    openghg_env = os.getenv("OPENGHG_PATH")
+    if openghg_env is not None:
+        warnings.warn(
+            "Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object"
+            + " store path please use the configuration file. See docs.openghg.org/install",
+            category=DeprecationWarning,
+        )
 
     config = read_local_config()
 
