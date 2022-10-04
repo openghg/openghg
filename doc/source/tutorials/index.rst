@@ -4,7 +4,7 @@ Tutorials
 
 These tutorials will get you up and running with OpenGHG so you can process, analyse and query data.
 The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
-repository under ``notebooks/tutorials/beginner_workflow``.
+repository under ``notebooks/tutorials/``.
 
 
 Cloud
