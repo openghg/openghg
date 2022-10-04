@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -37,11 +37,11 @@ bsd_data = retrieve_example_data(path="timeseries/bsd_example.tar.gz")
 ```
 
 ```{code-cell} ipython3
-standardise_surface(filepaths=tac_data, data_type="CRDS", site="TAC", network="DECC")
+standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC")
 ```
 
 ```{code-cell} ipython3
-standardise_surface(filepaths=bsd_data, data_type="CRDS", site="BSD", network="DECC")
+standardise_surface(filepaths=bsd_data, source_format="CRDS", site="BSD", network="DECC")
 ```
 
 ## Searching
@@ -55,6 +55,12 @@ from openghg.retrieve import search_surface
 
 ch4_results = search_surface(site="tac", species="ch4")
 ch4_results
+```
+
+Let's take a look at the results property which is a pandas DataFrame object.
+
+```{code-cell} ipython3
+ch4_results.results
 ```
 
 If we want to take a look at the data from the 185m inlet we can first retrieve the data from the object store and then create a quick timeseries plot. See the [`SearchResults`](https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults) object documentation for more information.
@@ -73,6 +79,36 @@ You can make some simple changes to the plot using arguments
 
 ```{code-cell} ipython3
 data_185m.plot_timeseries(title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
+```
+
+## Using the pandas DataFrame
+
++++
+
+We can also perform operations on the results pandas DataFrame. Let's search for all DECC network data.
+
+```{code-cell} ipython3
+decc_results = search_surface(network="DECC")
+```
+
+```{code-cell} ipython3
+results_df = decc_results.results
+```
+
+Say we want to just extract the CO2 data, we can extract the data we want using
+
+```{code-cell} ipython3
+co2_df = results_df[results_df["species"] == "co2"]
+```
+
+```{code-cell} ipython3
+co2_df
+```
+
+Then we can use this DataFrame to retrieve the data we want.
+
+```{code-cell} ipython3
+decc_results.retrieve(dataframe=co2_df)
 ```
 
 ## Plot all the data
@@ -110,6 +146,10 @@ ch4_data
 Then we refine our search to only retrieve the inlets we want
 
 ```{code-cell} ipython3
+ch4_data.results
+```
+
+```{code-cell} ipython3
 lower_inlets = search_surface(species="ch4", inlet=["42m", "54m"])
 ```
 
@@ -125,6 +165,44 @@ lower_inlet_data = lower_inlets.retrieve_all()
 
 ```{code-cell} ipython3
 plot_timeseries(data=lower_inlet_data, title="Comparing CH4 measurements at Tacolneston and Bilsdale")
+```
+
+## Searching across types
+
++++
+
+You can also search for different data types, say we want to find surface measurement data and emissions data at the same time. We can do that with the more generic `search` function.
+
+```{code-cell} ipython3
+from openghg.retrieve import search
+from openghg.standardise import standardise_flux
+```
+
+We need to first load in some emissions data
+
+```{code-cell} ipython3
+flux_datapaths = retrieve_example_data(path="flux/ch4-ukghg-all_EUROPE_2016.tar.gz")
+```
+
+```{code-cell} ipython3
+flux_datapaths.sort()
+agri_data = flux_datapaths[0]
+```
+
+```{code-cell} ipython3
+flux_res = standardise_flux(filepath=agri_data, species="ch4", source="agri", date="2016", domain="europe")
+```
+
+```{code-cell} ipython3
+ch4_results = search(species="ch4")
+```
+
+```{code-cell} ipython3
+ch4_results.results
+```
+
+```{code-cell} ipython3
+
 ```
 
 ```{code-cell} ipython3

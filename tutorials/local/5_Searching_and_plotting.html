@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 5: Searching and plotting &#8212; OpenGHG 0+untagged.1.g53aecd3 documentation</title>
+    <title>Workflow 5: Searching and plotting &#8212; OpenGHG 0+untagged.1.g50937a4 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -25,7 +25,7 @@
     href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
   
@@ -37,11 +37,12 @@
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../_static/togglebutton.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/5_Searching_and_plotting';</script>
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -99,7 +100,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g53aecd3 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g50937a4 documentation</p>
   
 </a>
     
@@ -447,14 +448,14 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">bsd_data</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;BSD&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">bsd_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;BSD&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -468,6 +469,14 @@
 
 <span class="n">ch4_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
 <span class="n">ch4_results</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s take a look at the results property which is a pandas DataFrame object.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_results</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
 </div>
@@ -494,6 +503,47 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Methane at Tacolneston&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Conc.&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="using-the-pandas-dataframe">
+<h2>Using the pandas DataFrame<a class="headerlink" href="#using-the-pandas-dataframe" title="Permalink to this heading">#</a></h2>
+<p>We can also perform operations on the results pandas DataFrame. Let’s search for all DECC network data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">decc_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results_df</span> <span class="o">=</span> <span class="n">decc_results</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Say we want to just extract the CO2 data, we can extract the data we want using</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">co2_df</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="n">results_df</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">co2_df</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then we can use this DataFrame to retrieve the data we want.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">decc_results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">dataframe</span><span class="o">=</span><span class="n">co2_df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -540,6 +590,13 @@
 <p>Then we refine our search to only retrieve the inlets we want</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlets</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;42m&quot;</span><span class="p">,</span> <span class="s2">&quot;54m&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -563,6 +620,55 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">lower_inlet_data</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Comparing CH4 measurements at Tacolneston and Bilsdale&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="searching-across-types">
+<h2>Searching across types<a class="headerlink" href="#searching-across-types" title="Permalink to this heading">#</a></h2>
+<p>You can also search for different data types, say we want to find surface measurement data and emissions data at the same time. We can do that with the more generic <code class="docutils literal notranslate"><span class="pre">search</span></code> function.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+<span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_flux</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We need to first load in some emissions data</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">flux_datapaths</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;flux/ch4-ukghg-all_EUROPE_2016.tar.gz&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">flux_datapaths</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+<span class="n">agri_data</span> <span class="o">=</span> <span class="n">flux_datapaths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">flux_res</span> <span class="o">=</span> <span class="n">standardise_flux</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">agri_data</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;agri&quot;</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="s2">&quot;2016&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;europe&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_results</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
 </div>
@@ -621,6 +727,11 @@
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#using-the-pandas-dataframe">
+   Using the pandas DataFrame
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#plot-all-the-data">
    Plot all the data
   </a>
@@ -628,6 +739,11 @@
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#compare-different-sites">
    Compare different sites
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#searching-across-types">
+   Searching across types
   </a>
  </li>
 </ul>

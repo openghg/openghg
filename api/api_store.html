@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>store API detail &#8212; OpenGHG 0+untagged.1.g53aecd3 documentation</title>
+    <title>store API detail &#8212; OpenGHG 0+untagged.1.g50937a4 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -25,7 +25,7 @@
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
@@ -37,11 +37,12 @@
     <script src="../_static/underscore.js"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/api_store';</script>
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -97,7 +98,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g53aecd3 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g50937a4 documentation</p>
   
 </a>
     
@@ -381,7 +382,7 @@ that data from that Datasource will be preferred when a user searches for data.<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.Emissions.read_file">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openghg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions.read_file" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openghg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions.read_file" title="Permalink to this definition">#</a></dt>
 <dd><p>Read emissions file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -391,7 +392,7 @@ that data from that Datasource will be preferred when a user searches for data.<
 <li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Emissions domain</p></li>
 <li><p><strong>source</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Emissions source</p></li>
 <li><p><strong>date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Date associated with emissions as a string</p></li>
-<li><p><strong>data_type</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Type of data being input e.g. openghg (internal format)</p></li>
+<li><p><strong>source_format</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Type of data being input e.g. openghg (internal format)</p></li>
 <li><p><strong>high_time_resolution</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – If this is a high resolution file</p></li>
 <li><p><strong>period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – <p>Period of measurements. Only needed if this can not be inferred from the time coords
 If specified, should be one of:</p>
@@ -468,7 +469,7 @@ are determined by which database ie being used.</p>
 <li><p><strong>database</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of database</p></li>
 <li><p><strong>overwrite</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Should this data overwrite currently stored data
 which matches.</p></li>
-<li><p><strong>**kwargs</strong> – Inputs for underlying parser function for the database.
+<li><p><strong>**kwargs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Inputs for underlying parser function for the database.
 Necessary inputs will depend on the database being parsed.</p></li>
 </ul>
 </dd>
@@ -815,7 +816,7 @@ be tidied up quite a lot to be more flexible.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.ObsSurface.read_file">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'insitu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify_site_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.read_file" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'insitu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify_site_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obssurface.html#ObsSurface.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsSurface.read_file" title="Permalink to this definition">#</a></dt>
 <dd><dl class="simple">
 <dt>Process files and store in the object store. This function</dt><dd><p>utilises the process functions of the other classes in this submodule
 to handle each data type.</p>
@@ -825,7 +826,7 @@ to handle each data type.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>]) – Filepath(s)</p></li>
-<li><p><strong>data_type</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Data type, for example CRDS, GCWERKS</p></li>
+<li><p><strong>source_format</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Data format, for example CRDS, GCWERKS</p></li>
 <li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site code/name</p></li>
 <li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
 <li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet height. If retrieve multiple files pass None, OpenGHG will attempt to</p></li>
@@ -908,7 +909,7 @@ we’ll be retrieve in the future.</p>
 </dl>
 <p>:param :
 :param “network”:
-:param “data_type”:
+:param “source_format”:
 :param “data_source”:
 :param “icos_data_level”}:</p>
 <dl class="field-list simple">
@@ -1021,7 +1022,7 @@ If a list/string is passed, the attribute(s) will be removed.</p></li>
 <p>These handle the segmentation of data ready for storage in the object store.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.store.assign_data">
-<span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">assign_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'timeseries'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_segment.html#assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.assign_data" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">assign_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_segment.html#assign_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.assign_data" title="Permalink to this definition">#</a></dt>
 <dd><p>Assign data to a Datasource. This will either create a new Datasource
 Create or get an existing Datasource for each gas in the file</p>
 <blockquote>
@@ -1077,36 +1078,330 @@ overwrite: If True overwrite current data stored</p>
   <a class="reference internal nav-link" href="#openghg-store-emissions">
    openghg.store.Emissions
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.Emissions">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Emissions
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.Emissions.read_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Emissions.read_data()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.Emissions.read_file">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Emissions.read_file()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.Emissions.schema">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Emissions.schema()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.Emissions.transform_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Emissions.transform_data()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.Emissions.validate_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Emissions.validate_data()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#openghg-store-eulerianmodel">
    openghg.store.EulerianModel
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.EulerianModel">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       EulerianModel
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.EulerianModel.read_file">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         EulerianModel.read_file()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#openghg-store-footprints">
    openghg.store.Footprints
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.Footprints">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Footprints
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.Footprints.read_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Footprints.read_data()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.Footprints.read_file">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Footprints.read_file()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.Footprints.schema">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Footprints.schema()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.Footprints.validate_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         Footprints.validate_data()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#openghg-store-metstore">
    openghg.store.METStore
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.METStore">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       METStore
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.METStore._store">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         METStore._store()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.METStore.retrieve">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         METStore.retrieve()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.METStore.save">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         METStore.save()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.METStore.search">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         METStore.search()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#openghg-store-obssurface">
    openghg.store.ObsSurface
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.ObsSurface">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       ObsSurface
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.ObsSurface.delete">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ObsSurface.delete()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.ObsSurface.read_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ObsSurface.read_data()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.ObsSurface.read_file">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ObsSurface.read_file()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.ObsSurface.read_multisite_aqmesh">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ObsSurface.read_multisite_aqmesh()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.ObsSurface.schema">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ObsSurface.schema()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.ObsSurface.store_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ObsSurface.store_data()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.ObsSurface.store_hashes">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ObsSurface.store_hashes()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.ObsSurface.validate_data">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ObsSurface.validate_data()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#recombination-functions">
    Recombination functions
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.recombine_datasets">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       recombine_datasets()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.recombine_multisite">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       recombine_multisite()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#segmentation-functions">
    Segmentation functions
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.assign_data">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       assign_data()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
 </ul>
 

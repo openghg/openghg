@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g53aecd3 documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g50937a4 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -24,7 +24,7 @@
     href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
   
@@ -36,11 +36,12 @@
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../../_static/togglebutton.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/store/_obssurface';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -96,7 +97,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g53aecd3 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g50937a4 documentation</p>
   
 </a>
     
@@ -365,6 +366,14 @@
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1&quot;</span>
     <span class="n">_metakey</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">/metastore&quot;</span>
 
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># def load_metastore() -&gt; TinyDB:</span>
+    <span class="c1">#     &quot;&quot;&quot; Load the ObsSurface metadata store</span>
+
+    <span class="c1">#     Returns:</span>
+    <span class="c1">#         TinyDB: TinyDB object</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="ObsSurface.read_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.read_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span>
         <span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">precision_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -387,7 +396,7 @@
         <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
 
         <span class="n">possible_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_format&quot;</span><span class="p">,</span>
             <span class="s2">&quot;network&quot;</span><span class="p">,</span>
             <span class="s2">&quot;site&quot;</span><span class="p">,</span>
             <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
@@ -395,6 +404,8 @@
             <span class="s2">&quot;sampling_period&quot;</span><span class="p">,</span>
             <span class="s2">&quot;measurement_type&quot;</span><span class="p">,</span>
             <span class="s2">&quot;overwrite&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_format&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="c1"># We&#39;ve got a lot of functions that expect a file and read</span>
@@ -432,7 +443,7 @@
 <div class="viewcode-block" id="ObsSurface.read_file"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.read_file">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
         <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span>
-        <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -448,7 +459,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            filepath: Filepath(s)</span>
-<span class="sd">            data_type: Data type, for example CRDS, GCWERKS</span>
+<span class="sd">            source_format: Data format, for example CRDS, GCWERKS</span>
 <span class="sd">            site: Site code/name</span>
 <span class="sd">            network: Network name</span>
 <span class="sd">            inlet: Inlet height. If retrieve multiple files pass None, OpenGHG will attempt to</span>
@@ -477,9 +488,9 @@
             <span class="n">filepath</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">data_type</span> <span class="o">=</span> <span class="n">SurfaceTypes</span><span class="p">[</span><span class="n">data_type</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">source_format</span> <span class="o">=</span> <span class="n">SurfaceTypes</span><span class="p">[</span><span class="n">source_format</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span><span class="o">.</span><span class="n">value</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown data type </span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> selected.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown data type </span><span class="si">{</span><span class="n">source_format</span><span class="si">}</span><span class="s2"> selected.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Test that the passed values are valid</span>
         <span class="c1"># Check validity of site, instrument, inlet etc in acrg_site_info.json</span>
@@ -501,7 +512,7 @@
                 <span class="p">)</span>
 
         <span class="c1"># Load the data retrieve object</span>
-        <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_surface_parser</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_surface_parser</span><span class="p">(</span><span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">)</span>
 
         <span class="n">obs</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 
@@ -513,7 +524,7 @@
         <span class="c1"># Create a progress bar object using the filepaths, iterate over this below</span>
         <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">filepath</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span> <span class="k">as</span> <span class="n">progress_bar</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                         <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -530,10 +541,11 @@
                         <span class="s2">&quot;This file has been uploaded previously with the filename : &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
                     <span class="p">)</span>
+                    <span class="k">break</span>
 
                 <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span>
                         <span class="n">data_filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">,</span>
                         <span class="n">precision_filepath</span><span class="o">=</span><span class="n">precision_filepath</span><span class="p">,</span>
@@ -581,7 +593,7 @@
                 <span class="c1">#     try:</span>
                 <span class="c1">#         ObsSurface.validate_data(value[&quot;data&quot;], species=species)</span>
                 <span class="c1">#     except ValueError:</span>
-                <span class="c1">#         print(f&quot;WARNING: standardised data for &#39;{data_type}&#39; is not in expected OpenGHG format.&quot;)</span>
+                <span class="c1">#         print(f&quot;WARNING: standardised data for &#39;{source_format}&#39; is not in expected OpenGHG format.&quot;)</span>
                 <span class="c1">#         print(f&quot;Check data for {species}&quot;)</span>
                 <span class="c1">#         print(value[&quot;data&quot;])</span>
                 <span class="c1">#         print(&quot;Not writing to object store.&quot;)</span>
@@ -598,9 +610,10 @@
                     <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;network&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;source_format&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;data_source&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;icos_data_level&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
 
                 <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span>
@@ -608,8 +621,12 @@
                 <span class="p">)</span>
 
                 <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
+                <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
                 <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
-                    <span class="n">data_dict</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span>
+                    <span class="n">data_dict</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                    <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
+                    <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+                    <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
                 <span class="p">)</span>
 
                 <span class="n">results</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">][</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
@@ -625,8 +642,8 @@
 
                 <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">UUIDs: </span><span class="si">{</span><span class="n">datasource_uuids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">UUIDs: </span><span class="si">{</span><span class="n">datasource_uuids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Ensure we explicitly close the metadata store</span>
         <span class="c1"># as we&#39;re using the cached storage method</span>
@@ -681,6 +698,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">obs</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
+                <span class="k">break</span>
 
             <span class="n">combined</span> <span class="o">=</span> <span class="p">{</span><span class="n">site</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">measurement_data</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}}</span>
 
@@ -706,8 +724,12 @@
             <span class="n">lookup_result</span> <span class="o">=</span> <span class="p">{</span><span class="n">site</span><span class="p">:</span> <span class="n">uuid</span><span class="p">}</span>
 
             <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
             <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
-                <span class="n">data_dict</span><span class="o">=</span><span class="n">combined</span><span class="p">,</span> <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_result</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span>
+                <span class="n">data_dict</span><span class="o">=</span><span class="n">combined</span><span class="p">,</span>
+                <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_result</span><span class="p">,</span>
+                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+                <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="n">results</span><span class="p">[</span><span class="n">site</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
@@ -749,9 +771,9 @@
         <span class="n">data_vars</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,)}</span>
         <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">}</span>
 
-        <span class="n">data_format</span> <span class="o">=</span> <span class="n">DataSchema</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span> <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">)</span>
+        <span class="n">source_format</span> <span class="o">=</span> <span class="n">DataSchema</span><span class="p">(</span><span class="n">data_vars</span><span class="o">=</span><span class="n">data_vars</span><span class="p">,</span> <span class="n">dtypes</span><span class="o">=</span><span class="n">dtypes</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">data_format</span></div>
+        <span class="k">return</span> <span class="n">source_format</span></div>
 
 <div class="viewcode-block" id="ObsSurface.validate_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.validate_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -785,7 +807,7 @@
 <span class="sd">            required_metakeys: Keys in the metadata we should use to store this metadata in the object store</span>
 <span class="sd">            if None it defaults to:</span>
 <span class="sd">            {&quot;species&quot;, &quot;site&quot;, &quot;station_long_name&quot;, &quot;inlet&quot;, &quot;instrument&quot;,</span>
-<span class="sd">            &quot;network&quot;, &quot;data_type&quot;, &quot;data_source&quot;, &quot;icos_data_level&quot;}</span>
+<span class="sd">            &quot;network&quot;, &quot;source_format&quot;, &quot;data_source&quot;, &quot;icos_data_level&quot;}</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict or None:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -820,7 +842,7 @@
                 <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;network&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;source_format&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;data_source&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;icos_data_level&quot;</span><span class="p">,</span>
             <span class="p">)</span>
@@ -833,8 +855,12 @@
         <span class="p">)</span>
 
         <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
         <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
-            <span class="n">data_dict</span><span class="o">=</span><span class="n">to_process</span><span class="p">,</span> <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span>
+            <span class="n">data_dict</span><span class="o">=</span><span class="n">to_process</span><span class="p">,</span>
+            <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+            <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Record the Datasources we&#39;ve created / appended to</span>
@@ -870,7 +896,9 @@
 <span class="sd">            None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">delete_object</span><span class="p">,</span> <span class="n">get_bucket</span>
+        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">load_metastore</span>
         <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
+        <span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">where</span>
 
         <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
         <span class="c1"># Load the Datasource and get all its keys</span>
@@ -889,6 +917,11 @@
         <span class="c1"># Then delete the Datasource itself</span>
         <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Datasource</span><span class="o">.</span><span class="n">_datasource_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">delete_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="c1"># Delete the UUID from the metastore</span>
+        <span class="n">metastore</span> <span class="o">=</span> <span class="n">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_metakey</span><span class="p">)</span>
+        <span class="n">metastore</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;uuid&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">uuid</span><span class="p">)</span>
+        <span class="n">metastore</span><span class="o">.</span><span class="n">close</span>
 
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span></div>
 

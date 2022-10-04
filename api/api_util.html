@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Exporting &#8212; OpenGHG 0+untagged.1.g53aecd3 documentation</title>
+    <title>Exporting &#8212; OpenGHG 0+untagged.1.g50937a4 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -25,7 +25,7 @@
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
@@ -37,11 +37,12 @@
     <script src="../_static/underscore.js"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/api_util';</script>
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -97,7 +98,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g53aecd3 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g50937a4 documentation</p>
   
 </a>
     
@@ -1029,36 +1030,329 @@ sites with similar names.</p>
   <a class="reference internal nav-link" href="#">
    Exporting
   </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.to_dashboard">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       to_dashboard()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.to_dashboard_mobile">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       to_dashboard_mobile()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#hashing">
    Hashing
   </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.hash_file">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       hash_file()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.hash_string">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       hash_string()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#string-manipulation">
    String manipulation
   </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.clean_string">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       clean_string()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.to_lowercase">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       to_lowercase()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.remove_punctuation">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       remove_punctuation()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#time">
    Time
   </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.timestamp_tzaware">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       timestamp_tzaware()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.timestamp_now">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       timestamp_now()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.timestamp_epoch">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       timestamp_epoch()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.daterange_from_str">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       daterange_from_str()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.daterange_to_str">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       daterange_to_str()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.create_daterange_str">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       create_daterange_str()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.create_daterange">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       create_daterange()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.daterange_overlap">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       daterange_overlap()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.combine_dateranges">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       combine_dateranges()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.split_daterange_str">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       split_daterange_str()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.closest_daterange">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       closest_daterange()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.valid_daterange">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       valid_daterange()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.find_daterange_gaps">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       find_daterange_gaps()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.trim_daterange">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       trim_daterange()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.split_encompassed_daterange">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       split_encompassed_daterange()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.daterange_contains">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       daterange_contains()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.sanitise_daterange">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       sanitise_daterange()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.check_nan">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       check_nan()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.check_date">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       check_date()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#iteration">
    Iteration
   </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.pairwise">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       pairwise()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.unanimous">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       unanimous()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#site-checks">
    Site Checks
   </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.verify_site">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       verify_site()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.multiple_inlets">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       multiple_inlets()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#cloud">
    Cloud
   </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.running_in_cloud">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       running_in_cloud()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#errors">
