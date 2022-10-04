@@ -9,6 +9,4 @@ sphinx-issues >= 3.0.1
 sphinx_rtd_theme
 sphinxcontrib-programoutput
 sphinx-autodoc-typehints
-
-
-
+sphinx-togglebutton
