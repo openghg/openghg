@@ -80,11 +80,12 @@ def test_database_update_repeat():
     # assert footprint is not None
 
 
-def bsd_data_read():
+#%% Test variants in data from the same source being added
+
+def bsd_data_read_crds():
     """
-    Add Bilsdale data for CRDS and GCMD instrument to object store.
+    Add Bilsdale *minutely* data for CRDS instrument to object store.
      - CRDS: ch4, co2, co
-     - GCMD: sf6, n2o
     """
 
     site = "bsd"
@@ -95,6 +96,15 @@ def bsd_data_read():
     
     ObsSurface.read_file(filepath=bsd_path1, data_type=data_type1, site=site, network=network)
 
+
+def bsd_data_read_gcmd():
+    """
+    Add Bilsdale data GCMD instrument to object store.
+     - GCMD: sf6, n2o
+    """
+
+    site = "bsd"
+    network = "DECC"
     data_type2 = "GCWERKS"
     instrument = "GCMD"
 
@@ -110,7 +120,7 @@ def bsd_data_read():
 
 def bsd_small_edit_data_read():
     """
-    Add overlapping Bilsdale data to the object store:
+    Add overlapping Bilsdale GCMD data to the object store:
      - Same data
      - Small difference header details (should create different hash)
     """
@@ -131,7 +141,7 @@ def bsd_small_edit_data_read():
 
 def bsd_diff_data_read():
     """
-    Add overlapping Bilsdale data to the object store:
+    Add overlapping Bilsdale GCMD data to the object store:
      - Small different in data values (should create different hash)
     """
     site = "bsd"
@@ -170,9 +180,9 @@ def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
     return file_data
 
 
-def read_gc_file_pd(filename):
+def read_gcmd_file_pd(filename):
     """
-    Read GC data file using pandas (to create expected values).
+    Read GCMD data file using pandas (to create expected values).
     """
     data_path = get_datapath(filename=filename, data_type="GC")
     gcwerks_file_data = pd.read_csv(data_path, delim_whitespace=True, skipinitialspace=True,
@@ -190,14 +200,21 @@ def read_gc_file_pd(filename):
     return gcwerks_file_data
 
 
-def test_obs_data_read_small_diff():
+def test_obs_data_read_header_diff():
     """
-    Test adding new file for GC data (same data as original file but different header)
+    Test adding new file for GC data (same data as original file but different header).
+    Steps:
+     - BSD CRDS minutely data added
+     - BSD GCMD data added
+     - BSD GCMD different data added - header changed so hash will be different but data will be the same
+    Expect that GCMD (and CRDS) data can still be accessed.
     """
     get_bucket(empty=True)
-    # Load BSD data
-    bsd_data_read()
-    # Load BSD data (GCWERKS) with small edit in header
+    # Load BSD data - CRDS data
+    bsd_data_read_crds()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+    # Load BSD data - GCMD data (GCWERKS) with small edit in header
     bsd_small_edit_data_read()
 
     # Search for expected species
@@ -229,7 +246,7 @@ def test_obs_data_read_small_diff():
     # expected_ch4_time = crds_file_data["date_time"].values
     # np.testing.assert_allclose(ch4_time, expected_ch4_time)
 
-    gcwerks_file_data = read_gc_file_pd("bilsdale-md.14.C")
+    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.14.C")
 
     obs_data_sf6 = search_sf6.retrieve()
     data_sf6 = obs_data_sf6.data
@@ -245,12 +262,20 @@ def test_obs_data_read_small_diff():
 
 def test_obs_data_read_data_diff():
     """
-    Test adding new file for GC with same time points but some different data values
+    Test adding new file for GC with same time points but some different data values.
+    Steps:
+     - BSD CRDS minutely data added
+     - BSD GCMD data added
+     - BSD GCMD different data added - data has been changed
+    Expect that different GCMD will be retrieved from search (as latest version).
+    Expect CRDS data can still be accessed.
     """
     get_bucket(empty=True)  
-    # Load BSD data
-    bsd_data_read()
-    # Load BSD data (GCWERKS) with edit to data (will produce different hash)
+    # Load BSD data - CRDS
+    bsd_data_read_crds()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+    # Load BSD data - GCMD data (GCWERKS) with edit to data (will produce different hash)
     bsd_diff_data_read()
 
     # Search for expected species
@@ -282,7 +307,101 @@ def test_obs_data_read_data_diff():
     # expected_ch4_time = crds_file_data["date_time"].values
     # np.testing.assert_allclose(ch4_time, expected_ch4_time)
 
-    gcwerks_file_data = read_gc_file_pd("bilsdale-md.small-edit.14.C")
+    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.small-edit.14.C")
+
+    obs_data_sf6 = search_sf6.retrieve()
+    data_sf6 = obs_data_sf6.data
+
+    sf6 = data_sf6["sf6"].values
+    expected_sf6 = gcwerks_file_data["SF6"].values
+    np.testing.assert_allclose(sf6, expected_sf6)
+
+    # TODO: Can we check if this has been saved as a new version?
+
+#%% Look at different data frequencies for the same data
+# TODO: Add minutely versus hourly
+#  - bsd.picarro.1minute.108m.min.dat
+#  - bsd.picarro.hourly.108m.min.dat
+
+def bsd_data_read_crds_diff_frequency():
+    """
+    Add Bilsdale *hourly* data for CRDS instrument to object store
+     - CRDS: ch4, co2, co
+    """
+
+    site = "bsd"
+    network = "DECC"
+    data_type1 = "CRDS"
+
+    bsd_path_hourly = get_datapath(filename="bsd.picarro.hourly.108m.min.dat", data_type="CRDS")
+    
+    ObsSurface.read_file(filepath=bsd_path_hourly, data_type=data_type1, site=site, network=network)
+
+
+def test_obs_data_read_two_frequencies():
+    """
+    Test database when two different frequencies for the same site are added.
+    Steps:
+     - BSD CRDS minutely data added
+     - BSD CRDS hourly data added
+     - BSD GCMD data added
+    Expect both minutely and hourly CRDS data can be accessed (searching by sampling_period).
+    Expect hourly data to be found as "latest" version to be retrieved (is this what we want?).
+    Expect GCMD data to still be available.
+    """
+    get_bucket(empty=True)  
+    # Load BSD data - CRDS minutely frequency (and GCWERKS data)
+    bsd_data_read_crds()
+    # Load BSD data - CRDS hourly frequency
+    bsd_data_read_crds_diff_frequency()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+
+    # Search for expected species
+    # CRDS data
+    search_ch4 = search(site="bsd", species="ch4")
+    search_co2 = search(site="bsd", species="co2")
+    search_co = search(site="bsd", species="co")
+    # GCMD data
+    search_sf6 = search(site="bsd", species="sf6")
+    search_n2o = search(site="bsd", species="n2o")
+
+    # Check something is found for each search
+    assert bool(search_ch4) == True
+    assert bool(search_co2) == True
+    assert bool(search_co) == True
+    assert bool(search_sf6) == True
+    assert bool(search_n2o) == True
+
+    # Extract data from original files
+    crds_file_data_hourly = read_crds_file_pd(filename="bsd.picarro.hourly.108m.min.dat")
+    crds_file_data_minutely = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
+
+    # Compare ch4 data stored to data from file
+    data_ch4 = search_ch4.retrieve().data
+    ch4 = data_ch4["ch4"].values
+    expected_ch4 = crds_file_data_hourly["ch4"].values
+    np.testing.assert_allclose(ch4, expected_ch4)
+
+    # Check both minutely and hourly are still stored and correct
+    search_co_hourly = search(site="bsd", species="co", sampling_period="3600.0")
+    search_co_minutely = search(site="bsd", species="co", sampling_period="60.0")
+
+    assert bool(search_co_hourly) == True
+    assert bool(search_co_minutely) == True
+
+    data_co_hourly = search_co_hourly.retrieve().data
+    co_hourly = data_co_hourly["co"].values
+    expected_co_hourly = crds_file_data_hourly["co"].values
+    np.testing.assert_allclose(co_hourly, expected_co_hourly)
+
+    data_co_minutely = search_co_minutely.retrieve().data
+    co_minutely = data_co_minutely["co"].values
+    expected_co_minutely = crds_file_data_minutely["co"].values
+    np.testing.assert_allclose(co_minutely, expected_co_minutely)
+
+    # Check SF6 data can still be accessed
+    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.14.C")
 
     obs_data_sf6 = search_sf6.retrieve()
     data_sf6 = obs_data_sf6.data
@@ -294,7 +413,74 @@ def test_obs_data_read_data_diff():
     # TODO: Can we check if this has been saved as a new version?
 
 
-# TODO: Add minutely versus hourly
-#  - bsd.picarro.1minute.108m.min.dat
-#  - bsd.picarro.hourly.108m.min.dat
+#%% Check overwrite functionality
+
+
+def bsd_data_read_crds_overwrite():
+    """
+    Add Bilsdale data for CRDS instrument to object store.
+     - CRDS: ch4, co2, co
+    """
+
+    site = "bsd"
+    network = "DECC"
+    data_type1 = "CRDS"
+
+    bsd_path1 = get_datapath(filename="bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
     
+    ObsSurface.read_file(filepath=bsd_path1, data_type=data_type1, site=site, network=network, overwrite=True)
+
+
+# def test_obs_data_read_overwrite():
+#     """
+#     Test adding new file for GC with same time points but some different data values
+#     """
+#     get_bucket(empty=True)  
+#     # Load BSD data - CRDS minutely frequency
+#     bsd_data_read_crds()
+#     # Load BSD data - CRDS hourly frequency
+#     bsd_data_read_crds_diff_frequency()
+#     # Load BSD data - GCMD data (GCWERKS)
+#     bsd_data_read_gcmd()
+#     # Load BSD data - CRDS minutely frequency - overwrite
+#     bsd_data_read_crds_overwrite()
+
+#     # Search for expected species
+#     # CRDS data
+#     search_ch4 = search(site="bsd", species="ch4")
+#     search_co2 = search(site="bsd", species="co2")
+#     search_co = search(site="bsd", species="co")
+#     # GCMD data
+#     search_sf6 = search(site="bsd", species="sf6")
+#     search_n2o = search(site="bsd", species="n2o")
+
+#     # Check something is found for each search
+#     assert bool(search_ch4) == True
+#     assert bool(search_co2) == True
+#     assert bool(search_co) == True
+#     assert bool(search_sf6) == True
+#     assert bool(search_n2o) == True
+
+#     crds_file_data = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
+
+#     obs_data_ch4 = search_ch4.retrieve()
+#     data_ch4 = obs_data_ch4.data
+
+#     ch4 = data_ch4["ch4"].values
+#     expected_ch4 = crds_file_data["ch4"].values
+#     np.testing.assert_allclose(ch4, expected_ch4)
+
+#     # ch4_time = data_ch4["time"].values
+#     # expected_ch4_time = crds_file_data["date_time"].values
+#     # np.testing.assert_allclose(ch4_time, expected_ch4_time)
+
+#     # gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.small-edit.14.C")
+
+#     # obs_data_sf6 = search_sf6.retrieve()
+#     # data_sf6 = obs_data_sf6.data
+
+#     # sf6 = data_sf6["sf6"].values
+#     # expected_sf6 = gcwerks_file_data["SF6"].values
+#     # np.testing.assert_allclose(sf6, expected_sf6)
+
+#     # TODO: Can we check if this has been saved as a new version?
