@@ -69,10 +69,10 @@ class Emissions(BaseStore):
             source_format : Type of data being input e.g. openghg (internal format)
             high_time_resolution: If this is a high resolution file
             period: Period of measurements. Only needed if this can not be inferred from the time coords
-                    If specified, should be one of:
-                     - "yearly", "monthly"
-                     - suitable pandas Offset Alias
-                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            If specified, should be one of:
+                - "yearly", "monthly"
+                - suitable pandas Offset Alias
+                - tuple of (value, unit) as would be passed to pandas.Timedelta function
             continuous: Whether time stamps have to be continuous.
             overwrite: Should this data overwrite currently stored data.
         Returns:

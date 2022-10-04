@@ -10,7 +10,7 @@ repository under ``notebooks/tutorials/beginner_workflow``.
 Cloud
 -----
 
-If you're using the OpenGHG Hub you'll find the tutorials in the ``tutorials`` folder in your home directory.
+These tutorials will help you get up and running with the OpenGHG Cloud using our JupyterHub.
 
 .. toctree::
    :maxdepth: 1
