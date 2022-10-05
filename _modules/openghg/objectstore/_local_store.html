@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.gead694e documentation</title>
+    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.g48f6fc2 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -97,7 +97,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gead694e documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g48f6fc2 documentation</p>
   
 </a>
     
@@ -348,7 +348,8 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
+
+<span class="c1"># from functools import lru_cache</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
@@ -373,7 +374,7 @@
 <span class="p">]</span>
 
 
-<span class="nd">@lru_cache</span>
+<span class="c1"># @lru_cache</span>
 <span class="k">def</span> <span class="nf">get_local_objectstore_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Returns the path to the local OpenGHG object store bucket</span>
 
@@ -382,7 +383,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">os</span>
 
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">read_local_config</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">read_local_config</span><span class="p">,</span> <span class="n">tutorial_store_path</span>
 
     <span class="n">openghg_env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">openghg_env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -391,6 +392,10 @@
             <span class="o">+</span> <span class="s2">&quot; store path please use the configuration file. See docs.openghg.org/install&quot;</span><span class="p">,</span>
             <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="n">tutorial_store</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_TMP_STORE&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tutorial_store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tutorial_store_path</span><span class="p">()</span>
 
     <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
 
