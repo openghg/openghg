@@ -131,14 +131,8 @@ These dataclasses are used to facilitate the simple packaging and retrieval of d
 :class:`~openghg.dataobjects.FootprintData`
     Stores footprint data.
 
-:class:`~openghg.dataobjects.METData`
-    Stores meteorological data retrieved from the ECMWF / our local cache.
-
 :class:`~openghg.dataobjects.ObsData`
     Stores data returned by search functions.
-
-:class:`~openghg.dataobjects.RankSources`
-    Handles the ranking of datasources.
 
 :class:`~openghg.dataobjects.SearchResults`
     Makes the retrieval of data simple.
@@ -157,7 +151,7 @@ Searching
 
     Example usage:
 
-        search(site="bsd", inlet="50m", species="co2", interesting_metadata="special_units")
+        search(site="bsd", inlet="50m", species="co2")
 
 Specific retrieval
 ^^^^^^^^^^^^^^^^^^
@@ -194,9 +188,6 @@ directory in the user's filesystem specific by the ``OPENGHG_PATH`` environment 
 
 :func:`~openghg.objectstore.get_bucket`
     Get path to bucket
-
-:func:`~openghg.objectstore.get_local_bucket`
-    Get path to local bucket
 
 :func:`~openghg.objectstore.get_md5`
     Get MD5 has of file

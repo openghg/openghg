@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Data Specification &#8212; OpenGHG 0+untagged.1.gead694e documentation</title>
+    <title>Workflow 4: Searching and plotting &#8212; OpenGHG 0+untagged.1.gead694e documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -43,12 +43,10 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'development/specifications/data_spec';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/cloud/3_Searching_and_plotting';</script>
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Fn setup" href="../cloud/fn_setup.html" />
-    <link rel="prev" title="Development" href="../python_devel.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -132,14 +130,14 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../tutorials/index.html">
+                    <a class="nav-link" href="../index.html">
                         Tutorials
                     </a>
                 </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../index_devel.html">
+                <li class="nav-item">
+                    <a class="nav-link" href="../../development/index_devel.html">
                         Development
                     </a>
                 </li>
@@ -224,7 +222,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -254,14 +252,14 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../tutorials/index.html">
+                    <a class="nav-link" href="../index.html">
                         Tutorials
                     </a>
                 </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="../index_devel.html">
+                <li class="nav-item">
+                    <a class="nav-link" href="../../development/index_devel.html">
                         Development
                     </a>
                 </li>
@@ -324,49 +322,6 @@
   </div>
 
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../python_devel.html">
-   Development
-  </a>
- </li>
-</ul>
-<ul class="current nav bd-sidenav">
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   Data Specification
-  </a>
- </li>
-</ul>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="../cloud/fn_setup.html">
-   Fn setup
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../cloud/fn_devel.html">
-   Fn Development
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="../cloud/fn_usage.html">
-   Fn usage
-  </a>
- </li>
-</ul>
-
-  </div>
-</nav>
-    </div>
-  </div>
-  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -388,27 +343,158 @@
             
             <article class="bd-article" role="main">
               
-  <section id="data-specification">
-<h1>Data Specification<a class="headerlink" href="#data-specification" title="Permalink to this heading">#</a></h1>
-<p>Here we set out the specfication for the data we expect for the different storage classes.</p>
-<section id="obssurface">
-<h2>ObsSurface<a class="headerlink" href="#obssurface" title="Permalink to this heading">#</a></h2>
-<p>This handles all surface observations. Most data processing is done by <code class="docutils literal notranslate"><span class="pre">ObsSurface.readfile</span></code> which handles
-all of the data processing itself.</p>
-<p>If you need to use functions such as <code class="docutils literal notranslate"><span class="pre">ObsSurface.store_data</span></code>, these expect data in a specific format.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;site_name&quot;</span><span class="p">:</span> <span class="p">{</span>  <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
-                        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;site_code&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">},</span>
-                        <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
-                     <span class="p">},</span>
-        <span class="s2">&quot;site_name&quot;</span><span class="p">:</span> <span class="p">{</span>  <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
-                        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;site_code&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">},</span>
-                        <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>
-                    <span class="p">},</span>
-        <span class="p">}</span>
+  <section id="workflow-4-searching-and-plotting">
+<h1>Workflow 4: Searching and plotting<a class="headerlink" href="#workflow-4-searching-and-plotting" title="Permalink to this heading">#</a></h1>
+<p>In this short tutorial we’ll show how to retrieve some data and create a simple plot using one of our plotting functions.</p>
+<section id="searching">
+<h2>Searching<a class="headerlink" href="#searching" title="Permalink to this heading">#</a></h2>
+<p>Let’s search for all the methane data from Tacolneston</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+
+<span class="n">ch4_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+<span class="n">ch4_results</span>
 </pre></div>
 </div>
-<p>Each dataset must have a <code class="docutils literal notranslate"><span class="pre">time</span></code> variable, the species variable, species_variability and …</p>
+</div>
+</div>
+<p>If we want to take a look at the data from the 185m inlet we can first retrieve the data from the object store and then create a quick timeseries plot. See the <a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults"><code class="docutils literal notranslate"><span class="pre">SearchResults</span></code></a> object documentation for more information.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span> <span class="o">=</span> <span class="n">ch4_results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;185m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<blockquote>
+<div><p><strong><em>NOTE:</em></strong>  the plots created below may not show up on the online documentation version of this notebook.</p>
+</div></blockquote>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>You can make some simple changes to the plot using arguments</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Methane at Tacolneston&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Conc.&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="using-the-pandas-dataframe">
+<h2>Using the pandas DataFrame<a class="headerlink" href="#using-the-pandas-dataframe" title="Permalink to this heading">#</a></h2>
+<p>We can also perform operations on the results pandas DataFrame. Let’s search for all DECC network data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">decc_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results_df</span> <span class="o">=</span> <span class="n">decc_results</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Say we want to just extract the CO2 data, we can extract the data we want using</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">co2_df</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="n">results_df</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">co2_df</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then we can use this DataFrame to retrieve the data we want.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">decc_results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">dataframe</span><span class="o">=</span><span class="n">co2_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="plot-all-the-data">
+<h2>Plot all the data<a class="headerlink" href="#plot-all-the-data" title="Permalink to this heading">#</a></h2>
+<p>We can also retrieve all the data, get a <code class="docutils literal notranslate"><span class="pre">list</span></code> of <a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData"><code class="docutils literal notranslate"><span class="pre">ObsData</span></code></a> objects.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">all_ch4_tac</span> <span class="o">=</span> <span class="n">ch4_results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then we can use the <code class="docutils literal notranslate"><span class="pre">plot_timeseries</span></code> function from the <code class="docutils literal notranslate"><span class="pre">plotting</span></code> submodule to compare measurements from different inlets. This creates a <a class="reference external" href="https://plotly.com/python/">Plotly</a> plot that should be interactive and and responsive, even with relatively large amounts of data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.plotting</span> <span class="kn">import</span> <span class="n">plot_timeseries</span>
+
+<span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">all_ch4_tac</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppb&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="compare-different-sites">
+<h2>Compare different sites<a class="headerlink" href="#compare-different-sites" title="Permalink to this heading">#</a></h2>
+<p>We can easily compare data from different sites by doing a quick search to see what’s available</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then we refine our search to only retrieve the inlets we want</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlets</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;42m&quot;</span><span class="p">,</span> <span class="s2">&quot;54m&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlets</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then we can retrieve all the data and make a plot.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlet_data</span> <span class="o">=</span> <span class="n">lower_inlets</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">lower_inlet_data</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Comparing CH4 measurements at Tacolneston and Bilsdale&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
 </section>
 </section>
 
@@ -420,20 +506,6 @@ all of the data processing itself.</p>
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../python_devel.html" title="previous page">
-      <i class="fas fa-angle-left"></i>
-      <div class="prev-next-info">
-          <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Development</p>
-      </div>
-  </a>
-  <a class='right-next' id="next-link" href="../cloud/fn_setup.html" title="next page">
-  <div class="prev-next-info">
-      <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Fn setup</p>
-  </div>
-  <i class="fas fa-angle-right"></i>
-  </a>
 </div>
             </footer>
             
@@ -451,8 +523,23 @@ all of the data processing itself.</p>
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#obssurface">
-   ObsSurface
+  <a class="reference internal nav-link" href="#searching">
+   Searching
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#using-the-pandas-dataframe">
+   Using the pandas DataFrame
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#plot-all-the-data">
+   Plot all the data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#compare-different-sites">
+   Compare different sites
   </a>
  </li>
 </ul>
