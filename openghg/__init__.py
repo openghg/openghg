@@ -65,6 +65,7 @@ hub_env = _os.environ.get("OPENGHG_HUB", False)
 # Start module level logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+logging.captureWarnings(capture=True)
 
 if cloud_env or hub_env:
     logfile_path = "/tmp/openghg.log"

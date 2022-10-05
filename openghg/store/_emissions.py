@@ -7,6 +7,7 @@ from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
+import warnings
 
 __all__ = ["Emissions"]
 
@@ -104,7 +105,7 @@ class Emissions(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in em_store._file_hashes and not overwrite:
-            print(
+            warnings.warn(
                 f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
             )
             return None

@@ -21,6 +21,7 @@ from ._file import (
     load_json,
     load_surface_parser,
     read_header,
+    unpack_archive,
 )
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
 from ._species import check_lifetime_monthly, molar_mass, species_lifetime, synonyms
@@ -61,8 +62,10 @@ from ._tutorial import (
     populate_surface_data,
     retrieve_example_data,
     tutorial_store_path,
-    unpack_archive,
     use_tutorial_store,
+    populate_flux_data,
+    populate_footprint_data,
+    example_extract_path,
 )
 from ._user import create_default_config, get_user_config_path, read_local_config
 from ._util import (

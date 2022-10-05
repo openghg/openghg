@@ -1,6 +1,8 @@
 import bz2
 import json
 from pathlib import Path
+import tarfile
+import shutil
 from typing import Any, Callable, Dict, List, Optional, Union
 
 
@@ -244,3 +246,25 @@ def get_logfile_path() -> Path:
         return Path.home().joinpath("openghg.log")
     else:
         return Path("/tmp/openghg.log")
+
+
+def unpack_archive(archive_path: Path, extract_dir: Union[str, Path, None] = None) -> List[Path]:
+    """Unpacks an tar file to a temporary folder, or extract_dir if given.
+    Returns the filepath(s) of the objects.
+
+    Returns:
+        list: List of filepaths
+    """
+    from openghg.util import example_extract_path
+
+    if extract_dir is None:
+        extract_dir = example_extract_path()
+
+    with tarfile.open(archive_path) as tar:
+        filenames = [f.name for f in tar.getmembers()]
+
+    shutil.unpack_archive(filename=archive_path, extract_dir=extract_dir)
+
+    extracted_filepaths = [Path(extract_dir, str(fname)) for fname in filenames]
+
+    return extracted_filepaths
