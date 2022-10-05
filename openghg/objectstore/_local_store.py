@@ -3,7 +3,8 @@ import json
 import os
 import threading
 import warnings
-from functools import lru_cache
+
+# from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 from uuid import uuid4
@@ -28,7 +29,7 @@ __all__ = [
 ]
 
 
-@lru_cache
+# @lru_cache
 def get_local_objectstore_path() -> Path:
     """Returns the path to the local OpenGHG object store bucket
 
@@ -37,7 +38,7 @@ def get_local_objectstore_path() -> Path:
     """
     import os
 
-    from openghg.util import read_local_config
+    from openghg.util import read_local_config, tutorial_store_path
 
     openghg_env = os.getenv("OPENGHG_PATH")
     if openghg_env is not None:
@@ -46,6 +47,10 @@ def get_local_objectstore_path() -> Path:
             + " store path please use the configuration file. See docs.openghg.org/install",
             category=DeprecationWarning,
         )
+
+    tutorial_store = os.getenv("OPENGHG_TMP_STORE")
+    if tutorial_store is not None:
+        return tutorial_store_path()
 
     config = read_local_config()
 

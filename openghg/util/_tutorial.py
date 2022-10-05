@@ -1,15 +1,70 @@
 """ Helper functions to provide datapaths etc used in the tutorial notebooks
 
 """
+import contextlib
 import json
 import os
 import shutil
 import tarfile
 import tempfile
+import warnings
 from pathlib import Path
 from typing import List, Union
 
 __all__ = ["bilsdale_datapaths"]
+
+
+# def _suppress_output(func):
+#     def wrapper(*a, **ka):
+#         with warnings.catch_warnings():
+#             warnings.simplefilter("ignore")
+#             with open(os.devnull, "w") as devnull:
+#                 with contextlib.redirect_stdout(devnull):
+#                     return func(*a, **ka)
+
+#     return wrapper
+
+
+def populate_surface_data() -> None:
+    """Populates the example object store with data from the
+    example data repository.
+
+    Returns:
+        None
+    """
+    from openghg.standardise import standardise_surface
+
+    use_tutorial_store()
+
+    bsd_data = "https://github.com/openghg/example_data/raw/main/timeseries/bsd_example.tar.gz"
+    tac_data = "https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz"
+    capegrim_data = "https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz"
+
+    print("Retrieving example data...\n")
+    bsd_paths = retrieve_example_data(url=bsd_data)
+    tac_paths = retrieve_example_data(url=tac_data)
+    capegrim_paths = sorted(retrieve_example_data(url=capegrim_data))
+
+    # Create the tuple required
+    capegrim_tuple = (capegrim_paths[0], capegrim_paths[1])
+
+    print("Standardising data...\n")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_surface(filepaths=bsd_paths, source_format="crds", site="bsd", network="decc")
+                standardise_surface(filepaths=tac_paths, source_format="crds", site="tac", network="decc")
+                standardise_surface(
+                    filepaths=capegrim_tuple,
+                    instrument="medusa",
+                    source_format="gcwerks",
+                    site="cgo",
+                    network="agage",
+                )
+
+    print("Finished.\n")
 
 
 def bilsdale_datapaths() -> List:
@@ -24,6 +79,16 @@ def bilsdale_datapaths() -> List:
     return list(crds_path.glob("bsd.picarro.1minute.*.min.*"))
 
 
+def tutorial_store_path() -> Path:
+    """Returns the path to the tutorial object store
+    at Path(tempfile.gettempdir(), "openghg_temp_store")
+
+    Returns:
+        Path: Path to tutorial store
+    """
+    return Path(tempfile.gettempdir(), "openghg_temp_store")
+
+
 def use_tutorial_store() -> None:
     """Sets an environment variable telling OpenGHG to use a
     temporary object store. This sets the store to be
@@ -33,7 +98,7 @@ def use_tutorial_store() -> None:
     Returns:
         None
     """
-    os.environ["OPENGHG_TMP_STORE"] = str(Path(tempfile.gettempdir(), "openghg_temp_store"))
+    os.environ["OPENGHG_TMP_STORE"] = "1"
 
 
 def clear_tutorial_store() -> None:
@@ -42,7 +107,7 @@ def clear_tutorial_store() -> None:
     Returns:
         None
     """
-    temp_path = Path(tempfile.gettempdir(), "openghg_temp_store")
+    temp_path = tutorial_store_path()
 
     if temp_path.exists():
         shutil.rmtree(temp_path, ignore_errors=True)
@@ -54,7 +119,7 @@ def example_extract_path() -> Path:
     Returns:
         None
     """
-    return Path(tempfile.gettempdir(), "openghg_examples")
+    return Path(tutorial_store_path(), "extracted_files")
 
 
 def clear_example_cache() -> None:
@@ -98,7 +163,7 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
     extract the data and return the filepaths of the extracted files.
 
     Args:
-        url: URL to
+        url: URL to retrieve.
         extract_dir: Folder to extract example tarballs to
     Returns:
         list: List of filepaths
@@ -129,12 +194,13 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
         try:
             cached_datapath = Path(cache_data[output_filename])
         except KeyError:
-            cache_data[output_filename] = download_path
+            cache_data[output_filename] = str(download_path)
         else:
             return unpack_archive(archive_path=cached_datapath, extract_dir=extract_dir)
+    else:
+        cache_data = {}
+        cache_data[output_filename] = str(download_path)
 
-    cache_data = {}
-    cache_data[output_filename] = str(download_path)
     cache_record.write_text(json.dumps(cache_data))
 
     download_data(url=url, filepath=download_path)

@@ -58,7 +58,9 @@ from ._tutorial import (
     bilsdale_datapaths,
     clear_example_cache,
     clear_tutorial_store,
+    populate_surface_data,
     retrieve_example_data,
+    tutorial_store_path,
     unpack_archive,
     use_tutorial_store,
 )

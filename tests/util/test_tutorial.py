@@ -34,3 +34,15 @@ def test_retrieve_example_data(requests_mock, mocker):
     retrieve_example_data(url=url, extract_dir="/tmp")
 
     assert download_mock.call_count == 1
+
+
+def test_why_multidownload():
+    from openghg.util import use_tutorial_store
+
+    use_tutorial_store()
+
+    bsd_data = "https://github.com/openghg/example_data/raw/main/timeseries/bsd_example.tar.gz"
+    bsd_paths = retrieve_example_data(url=bsd_data)
+    # standardise_surface(filepaths=bsd_paths, source_format="crds", site="bsd", network="decc")
+
+    bsd_paths = retrieve_example_data(url=bsd_data)
