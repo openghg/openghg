@@ -40,6 +40,7 @@ from ._time import (
     find_daterange_gaps,
     find_duplicate_timestamps,
     first_last_dates,
+    in_daterange,
     parse_period,
     relative_time_offset,
     sanitise_daterange,
@@ -52,9 +53,15 @@ from ._time import (
     timestamp_tzaware,
     trim_daterange,
     valid_daterange,
-    in_daterange,
 )
-from ._tutorial import bilsdale_datapaths, retrieve_example_data
+from ._tutorial import (
+    bilsdale_datapaths,
+    clear_example_cache,
+    clear_tutorial_store,
+    retrieve_example_data,
+    unpack_archive,
+    use_tutorial_store,
+)
 from ._user import create_default_config, get_user_config_path, read_local_config
 from ._util import (
     find_matching_site,

@@ -2,7 +2,8 @@ import json
 import logging
 import os
 import platform
-from functools import lru_cache
+
+# from functools import lru_cache
 from pathlib import Path
 from typing import Dict
 
@@ -33,6 +34,8 @@ def get_user_config_path() -> Path:
         config_path = Path(appdata_path).joinpath("openghg", openghg_config_filename)
     elif user_platform in ("Linux", "Darwin"):
         config_path = Path.home().joinpath(".config", "openghg", openghg_config_filename)
+    else:
+        raise ValueError(f"Unknown platform: {user_platform}")
 
     return config_path
 
@@ -70,7 +73,7 @@ def create_default_config() -> None:
         user_config_path.write_text(toml_str)
 
 
-@lru_cache
+# @lru_cache
 def read_local_config() -> Dict:
     """Reads the local config file.
 

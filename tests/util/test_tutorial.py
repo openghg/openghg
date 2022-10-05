@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from helpers import get_surface_datapath
+from helpers import get_retrieval_datapath, get_surface_datapath
 from openghg.util import bilsdale_datapaths, retrieve_example_data
 
 
@@ -17,14 +17,20 @@ def test_bilsdale_data():
     ]
 
 
-def test_retrieve_example_data(requests_mock, tmpdir):
+def test_retrieve_example_data(requests_mock, mocker):
+    from openghg.util import download_data
+
+    download_mock = mocker.patch("openghg.util.download_data", side_effect=download_data, autospec=True)
+
     tar_data = Path(get_surface_datapath(filename="test.tar.gz", source_format="crds")).read_bytes()
 
     url = "https://github.com/openghg/example_data/raw/main/timeseries/bsd_example.tar.gz"
     requests_mock.get(url, content=tar_data, status_code=200)
 
-    filename = retrieve_example_data(path="timeseries/bsd_example.tar.gz", download_dir=str(tmpdir))
+    retrieve_example_data(url=url, extract_dir="/tmp")
 
-    with open(filename) as f:
-        d = f.readline()
-        assert d.strip() == "Created: 28 Sep 20 07:34 GMT"
+    assert download_mock.call_count == 1
+
+    retrieve_example_data(url=url, extract_dir="/tmp")
+
+    assert download_mock.call_count == 1
