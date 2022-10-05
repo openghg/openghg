@@ -37,8 +37,8 @@ def get_local_objectstore_path() -> Path:
         pathlib.Path: Path of object store
     """
     import os
-
-    from openghg.util import read_local_config, tutorial_store_path
+    from openghg.util import read_local_config
+    from openghg.tutorial import tutorial_store_path
 
     openghg_env = os.getenv("OPENGHG_PATH")
     if openghg_env is not None:

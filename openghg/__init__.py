@@ -1,6 +1,7 @@
 import logging
 import os as _os
 import sys as _sys
+from pathlib import Path as _Path
 
 from . import (
     analyse,
@@ -12,6 +13,7 @@ from . import (
     standardise,
     store,
     types,
+    tutorial,
     util,
 )
 from ._version import get_versions  # type: ignore
@@ -25,25 +27,13 @@ __all__ = [
     "plotting",
     "standardise",
     "store",
-    "util",
     "types",
+    "tutorial",
+    "util",
 ]
 
 if _sys.version_info < (3, 8):
     raise ImportError("openghg requires Python >= 3.8")
-
-# Let's do some quick checks for required environment variables
-_cloud = _os.environ.get("OPENGHG_CLOUD", False)
-_hub = _os.environ.get("OPENGHG_HUB", False)
-_openghg_path = _os.environ.get("OPENGHG_PATH", False)
-
-if not (_cloud or _hub):
-    if not _openghg_path:
-        raise ValueError(
-            "No environment variable OPENGHG_PATH found, please set to use the local object store"
-        )
-
-del _cloud, _hub, _openghg_path
 
 v = get_versions()
 
@@ -54,8 +44,6 @@ __revisionid__ = v.get("full-revisionid")
 
 del v, get_versions
 
-import os as _os
-from pathlib import Path as _Path
 
 from .util import create_default_config  # type: ignore
 
