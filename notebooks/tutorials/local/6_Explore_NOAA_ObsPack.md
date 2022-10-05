@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -16,7 +16,7 @@ kernelspec:
 
 +++
 
-The NOAA ObsPack products are collections of observation data from many sites which have been collated and standardised. ObsPack data products are prepared by NOAA in consultation with data providers. Available ObsPack products can be accessed and downlaoded from the [ObsPack download](https://gml.noaa.gov/ccgg/obspack/data.php) page.
+The NOAA ObsPack products are collections of observation data from many sites which have been collated and standardised. ObsPack data products are prepared by NOAA in consultation with data providers. Available ObsPack products can be accessed and downloaded from the [ObsPack download](https://gml.noaa.gov/ccgg/obspack/data.php) page.
 
 In this tutorial, we will demonstrate how the NOAA ObsPack can be loaded into the object store, explored and plotted.
 
@@ -24,22 +24,12 @@ In this tutorial, we will demonstrate how the NOAA ObsPack can be loaded into th
 
 ## 1. Loading the NOAA ObsPack data
 
-```{code-cell} ipython3
-import os
-import tempfile
++++
 
-tmp_dir = tempfile.TemporaryDirectory()
-os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
-
-%load_ext autoreload
-%autoreload 2
-```
-
-As the ObsPack products contain a large amount of data we'll use the temporary directory we've created for the object store above to download and unpack the data. If you're using a different path for the object store you can uncomment the cell below and use that directory instead. Remember to use `tmp_download.cleanup()` if you do.
+First we'll tell OpenGHG to use the tutorial object store, located in your computer's temporary directory.
 
 ```{code-cell} ipython3
-# tmp_download = tempfile.TemporaryDirectory()
-# tmp_download_path = tmp_download.name
+from openghg.tutorial import use_tutorial_store
 ```
 
 ### Download the data
@@ -49,11 +39,11 @@ As the ObsPack products contain a large amount of data we'll use the temporary d
 For convenience we have included a copy of the "obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24" to be retrieved from our example database. Once this has been downloaded, this can be processd using the `add_noaa_obspack()` function available from `openghg.store` subpackage. The file is ~ 128 MB in size so might take a short time to download depending on your internet connection.
 
 ```{code-cell} ipython3
-from openghg.util import retrieve_example_data
+from openghg.tutorial import retrieve_example_data
 from openghg.store import add_noaa_obspack
 
-noaa_obspack_directory = retrieve_example_data(path="obspack/obspack_ch4_example.tar.gz",
-                                                download_dir=tmp_dir.name)
+url = "https://github.com/openghg/example_data/blob/main/obspack/obspack_ch4_example.tar.gz"
+noaa_obspack_directory = retrieve_example_data(url=url)
 ```
 
 ### Process and store the data
