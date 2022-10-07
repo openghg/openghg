@@ -46,8 +46,19 @@ from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, c
 
 import numpy as np
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
-from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface, search
+from openghg.retrieve import (
+    get_obs_surface,
+    get_bc,
+    get_flux,
+    get_footprint,
+    search,
+    search_surface,
+    search_bc,
+    search_emissions,
+    search_footprints,
+)
 from openghg.util import synonyms
+from openghg.exceptions import SearchError
 from pandas import Timestamp
 from xarray import DataArray, Dataset
 
@@ -200,7 +211,7 @@ class ModelScenario:
 
         # TODO: Check species, site etc. values align between inputs?
 
-    def _get_data(self, keywords: ParamType, input_type: str) -> Any:
+    def _get_data(self, keywords: ParamType, data_type: str) -> Any:
         """
         Use appropriate get function to search for data in object store.
         """
@@ -212,11 +223,15 @@ class ModelScenario:
             "boundary_conditions": get_bc,
         }
 
-        # TODO: Add/write footprint and flux search? What's the syntax?
-        search_functions = {"obs_surface": search}
+        search_functions = {
+            "obs_surface": search_surface,
+            "footprint": search_footprints,
+            "flux": search_emissions,
+            "boundary_conditions": search_bc,
+        }
 
-        get_fn = get_functions[input_type]
-        search_fn = search_functions.get(input_type)
+        get_fn = get_functions[data_type]
+        search_fn = search_functions.get(data_type)
 
         if isinstance(keywords, dict):
             keywords = [keywords]
@@ -225,23 +240,24 @@ class ModelScenario:
         for i, keyword_set in enumerate(keywords):
             try:
                 data = get_fn(**keyword_set)  # type:ignore
-            except (ValueError, AttributeError):
+            except (SearchError, AttributeError):
                 num = i + 1
                 if num == num_checks:
-                    print(f"Unable to add {input_type} data based on keywords supplied.")
+                    print(f"Unable to add {data_type} data based on keywords supplied.")
                     print(" Inputs - \n")
                     for key, value in keyword_set.items():
                         print(f" {key}: {value}\n")
                     if search_fn is not None:
-                        data_search = search_fn(**keyword_set)
+                        data_search = search_fn(**keyword_set)  # type:ignore
                         print("---- Search results ---")
+                        print(f"Number of results returned: {len(data_search)}")
                         print(data_search)
                         # TODO: If we can determine how many results are returned from search
                         # we can use this to give better information about why no data has
                         # been found for these inputs.
                 data = None
             else:
-                print(f"Adding {input_type} to model scenario")
+                print(f"Adding {data_type} to model scenario")
                 break
 
         return data
@@ -274,7 +290,7 @@ class ModelScenario:
                 "end_date": end_date,
             }
 
-            obs = self._get_data(obs_keywords, input_type="obs_surface")
+            obs = self._get_data(obs_keywords, data_type="obs_surface")
 
         self.obs = obs
 
@@ -331,7 +347,7 @@ class ModelScenario:
             if species_lifetime_value is not None or species == "co2":
                 footprint_keywords["species"] = species
 
-            footprint = self._get_data(footprint_keywords, input_type="footprint")
+            footprint = self._get_data(footprint_keywords, data_type="footprint")
 
         self.footprint = footprint
 
@@ -388,7 +404,7 @@ class ModelScenario:
 
                 # TODO: Add something to allow for e.g. global domain or no domain
 
-                flux_source = self._get_data(flux_keywords, input_type="flux")
+                flux_source = self._get_data(flux_keywords, data_type="flux")
                 # TODO: May need to update this check if flux_source is empty FluxData() object
                 if flux_source is not None:
                     flux[name] = flux_source
@@ -439,7 +455,7 @@ class ModelScenario:
                 "species": species,
             }
 
-            bc = self._get_data(bc_keywords, input_type="boundary_conditions")
+            bc = self._get_data(bc_keywords, data_type="boundary_conditions")
 
         self.bc = bc
 
