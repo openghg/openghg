@@ -51,10 +51,9 @@ from openghg.retrieve import (
     get_bc,
     get_flux,
     get_footprint,
-    search,
     search_surface,
     search_bc,
-    search_emissions,
+    search_emissions,  # TODO: Update to search_flux when available
     search_footprints,
 )
 from openghg.util import synonyms
