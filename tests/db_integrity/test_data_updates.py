@@ -4,9 +4,9 @@ import pytest
 import datetime
 import pandas as pd
 import numpy as np
-from helpers import get_datapath, get_emissions_datapath, get_bc_datapath, get_footprint_datapath
+from helpers import get_surface_datapath, get_emissions_datapath, get_bc_datapath, get_footprint_datapath
 from openghg.store import ObsSurface, Emissions, BoundaryConditions, Footprints
-from openghg.retrieve import get_flux
+from openghg.retrieve import get_obs_surface, get_flux
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
 
@@ -90,11 +90,11 @@ def bsd_data_read_crds():
 
     site = "bsd"
     network = "DECC"
-    data_type1 = "CRDS"
+    source_format1 = "CRDS"
 
-    bsd_path1 = get_datapath(filename="bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
+    bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
     
-    ObsSurface.read_file(filepath=bsd_path1, data_type=data_type1, site=site, network=network)
+    ObsSurface.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network)
 
 
 def bsd_data_read_gcmd():
@@ -105,14 +105,14 @@ def bsd_data_read_gcmd():
 
     site = "bsd"
     network = "DECC"
-    data_type2 = "GCWERKS"
+    source_format2 = "GCWERKS"
     instrument = "GCMD"
 
-    bsd_path2 = get_datapath(filename="bilsdale-md.14.C", data_type="GC")
-    bsd_prec_path2 = get_datapath(filename="bilsdale-md.14.precisions.C", data_type="GC")
+    bsd_path2 = get_surface_datapath(filename="bilsdale-md.14.C", source_format="GC")
+    bsd_prec_path2 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
     
     ObsSurface.read_file(filepath=(bsd_path2, bsd_prec_path2),
-                         data_type=data_type2,
+                         source_format=source_format2,
                          site=site,
                          network=network,
                          instrument=instrument)
@@ -126,14 +126,14 @@ def bsd_small_edit_data_read():
     """
     site = "bsd"
     network = "DECC"
-    data_type2 = "GCWERKS"
+    source_format2 = "GCWERKS"
     instrument = "GCMD"
 
-    bsd_path3 = get_datapath(filename="bilsdale-md.small-edit.14.C", data_type="GC")
-    bsd_prec_path3 = get_datapath(filename="bilsdale-md.14.precisions.C", data_type="GC")
+    bsd_path3 = get_surface_datapath(filename="bilsdale-md.small-edit.14.C", source_format="GC")
+    bsd_prec_path3 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
     
     ObsSurface.read_file(filepath=(bsd_path3, bsd_prec_path3),
-                         data_type=data_type2,
+                         source_format=source_format2,
                          site=site,
                          network=network,
                          instrument=instrument)
@@ -146,14 +146,14 @@ def bsd_diff_data_read():
     """
     site = "bsd"
     network = "DECC"
-    data_type2 = "GCWERKS"
+    source_format2 = "GCWERKS"
     instrument = "GCMD"
 
-    bsd_path4 = get_datapath(filename="bilsdale-md.diff-value.14.C", data_type="GC")
-    bsd_prec_path4 = get_datapath(filename="bilsdale-md.14.precisions.C", data_type="GC")
+    bsd_path4 = get_surface_datapath(filename="bilsdale-md.diff-value.14.C", source_format="GC")
+    bsd_prec_path4 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
     
     ObsSurface.read_file(filepath=(bsd_path4, bsd_prec_path4),
-                         data_type=data_type2,
+                         source_format=source_format2,
                          site=site,
                          network=network,
                          instrument=instrument)
@@ -163,7 +163,7 @@ def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
     """
     Read CRDS data file using pandas (to create expected values).
     """
-    data_path = get_datapath(filename=filename, data_type="CRDS")
+    data_path = get_surface_datapath(filename=filename, source_format="CRDS")
 
     columns = ["date", "time", "type", "port"]
     for species in species_list:
@@ -184,7 +184,7 @@ def read_gcmd_file_pd(filename):
     """
     Read GCMD data file using pandas (to create expected values).
     """
-    data_path = get_datapath(filename=filename, data_type="GC")
+    data_path = get_surface_datapath(filename=filename, source_format="GC")
     gcwerks_file_data = pd.read_csv(data_path, delim_whitespace=True, skipinitialspace=True,
                                     skiprows=4, dtype={"yyyy": str, "mm": str, "dd": str, "hh": str, "mi": str})
 
@@ -319,9 +319,6 @@ def test_obs_data_read_data_diff():
     # TODO: Can we check if this has been saved as a new version?
 
 #%% Look at different data frequencies for the same data
-# TODO: Add minutely versus hourly
-#  - bsd.picarro.1minute.108m.min.dat
-#  - bsd.picarro.hourly.108m.min.dat
 
 def bsd_data_read_crds_diff_frequency():
     """
@@ -331,11 +328,11 @@ def bsd_data_read_crds_diff_frequency():
 
     site = "bsd"
     network = "DECC"
-    data_type1 = "CRDS"
+    source_format1 = "CRDS"
 
-    bsd_path_hourly = get_datapath(filename="bsd.picarro.hourly.108m.min.dat", data_type="CRDS")
+    bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.min.dat", source_format="CRDS")
     
-    ObsSurface.read_file(filepath=bsd_path_hourly, data_type=data_type1, site=site, network=network)
+    ObsSurface.read_file(filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
 
 
 def test_obs_data_read_two_frequencies():
@@ -378,25 +375,23 @@ def test_obs_data_read_two_frequencies():
     crds_file_data_minutely = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
 
     # Compare ch4 data stored to data from file
-    data_ch4 = search_ch4.retrieve().data
-    ch4 = data_ch4["ch4"].values
-    expected_ch4 = crds_file_data_hourly["ch4"].values
-    np.testing.assert_allclose(ch4, expected_ch4)
+    data_ch4_all = search_ch4.retrieve()
+    assert len(data_ch4_all) == 2
+    # ch4 = data_ch4["ch4"].values
+    # expected_ch4 = crds_file_data_hourly["ch4"].values
+    # np.testing.assert_allclose(ch4, expected_ch4)
 
     # Check both minutely and hourly are still stored and correct
-    search_co_hourly = search(site="bsd", species="co", sampling_period="3600.0")
-    search_co_minutely = search(site="bsd", species="co", sampling_period="60.0")
-
-    assert bool(search_co_hourly) == True
-    assert bool(search_co_minutely) == True
-
-    data_co_hourly = search_co_hourly.retrieve().data
+    # TODO: Make the get_* lines work (e.g. add kwargs to all get_* functions)
+    # data_co_hourly = get_obs_surface(site="bsd", species="ch4", sampling_period="3600.0").data
+    data_co_hourly = search_co.retrieve(sampling_period="3600.0").data
     co_hourly = data_co_hourly["co"].values
     expected_co_hourly = crds_file_data_hourly["co"].values
     np.testing.assert_allclose(co_hourly, expected_co_hourly)
 
-    data_co_minutely = search_co_minutely.retrieve().data
-    co_minutely = data_co_minutely["co"].values
+    # data_co_minutely = get_obs_surface(site="bsd", species="ch4", sampling_period="60.0").data
+    data_co_hourly = search_co.retrieve(sampling_period="60.0").data
+    co_minutely = data_co_hourly["co"].values
     expected_co_minutely = crds_file_data_minutely["co"].values
     np.testing.assert_allclose(co_minutely, expected_co_minutely)
 
@@ -414,6 +409,8 @@ def test_obs_data_read_two_frequencies():
 
 
 #%% Check overwrite functionality
+# TODO: Add check to overwrite functionality
+# - need to be clear on what we expect to happen here
 
 
 def bsd_data_read_crds_overwrite():
@@ -424,11 +421,11 @@ def bsd_data_read_crds_overwrite():
 
     site = "bsd"
     network = "DECC"
-    data_type1 = "CRDS"
+    source_format1 = "CRDS"
 
-    bsd_path1 = get_datapath(filename="bsd.picarro.1minute.108m.min.dat", data_type="CRDS")
+    bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
     
-    ObsSurface.read_file(filepath=bsd_path1, data_type=data_type1, site=site, network=network, overwrite=True)
+    ObsSurface.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True)
 
 
 # def test_obs_data_read_overwrite():
