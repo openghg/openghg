@@ -6,15 +6,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>store API detail &#8212; OpenGHG 0+untagged.1.g23c2759 documentation</title>
+    <title>store API detail &#8212; OpenGHG 0+untagged.1.gb844222 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
 
   
   <link rel="stylesheet"
@@ -23,6 +23,8 @@
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
@@ -30,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -68,7 +70,7 @@
     <div class="search-button__search-container">
       
 <form class="bd-search d-flex align-items-center" action="../search.html" method="get">
-  <i class="icon fas fa-search"></i>
+  <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
 </form>
@@ -78,7 +80,7 @@
   
   <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
-      <span class="fas fa-bars"></span>
+      <span class="fa-solid fa-bars"></span>
   </label>
   <div id="navbar-start">
     
@@ -98,7 +100,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g23c2759 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gb844222 documentation</p>
   
 </a>
     
@@ -124,7 +126,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../install.html">
-                        Installation
+                        Installation instructions
                     </a>
                 </li>
                 
@@ -180,16 +182,16 @@
     <div id="navbar-end">
       <div class="navbar-end-item navbar-end__search-button-container">
         
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
       </div>
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -204,14 +206,14 @@
 
   
   <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
-  <i class="fas fa-search"></i>
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
 </button>
   </div>
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
-      <span class="fas fa-outdent"></span>
+      <span class="fa-solid fa-outdent"></span>
   </label>
   
 
@@ -246,7 +248,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../install.html">
-                        Installation
+                        Installation instructions
                     </a>
                 </li>
                 
@@ -305,10 +307,10 @@
     <div class="sidebar-header-items__end">
       
       <div class="navbar-end-item">
-        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle">
-    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
-    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
-    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
 </span>
       </div>
       
@@ -345,6 +347,13 @@
               
   <section id="store-api-detail">
 <h1>store API detail<a class="headerlink" href="#store-api-detail" title="Permalink to this heading">#</a></h1>
+<section id="rank-sources">
+<h2>rank_sources<a class="headerlink" href="#rank-sources" title="Permalink to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">rank_sources</span></code> is used to rank sources of data. Provided with a site and a species the <code class="docutils literal notranslate"><span class="pre">rank_sources</span></code> function will search for the given
+site and species and return a <a class="reference internal" href="api_dataobjects.html#ranksources"><span class="std std-ref">RankSources</span></a> object</p>
+<p>Setting a high rank for a Datasource across a specific daterange means
+that data from that Datasource will be preferred when a user searches for data.</p>
+</section>
 <section id="openghg-store-emissions">
 <h2>openghg.store.Emissions<a class="headerlink" href="#openghg-store-emissions" title="Permalink to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Emissions</span></code> class is used to process emissions / flux data files.</p>
@@ -387,18 +396,15 @@
 <li><p><strong>date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Date associated with emissions as a string</p></li>
 <li><p><strong>source_format</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Type of data being input e.g. openghg (internal format)</p></li>
 <li><p><strong>high_time_resolution</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – If this is a high resolution file</p></li>
-<li><p><strong>period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Period of measurements. Only needed if this can not be inferred from the time coords</p></li>
-<li><p><strong>specified</strong> (<em>If</em>) – <ul>
-<li><p>“yearly”, “monthly”</p></li>
+<li><p><strong>period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – <p>Period of measurements. Only needed if this can not be inferred from the time coords
+If specified, should be one of:</p>
+<blockquote>
+<div><ul>
+<li><p>”yearly”, “monthly”</p></li>
 <li><p>suitable pandas Offset Alias</p></li>
 <li><p>tuple of (value, unit) as would be passed to pandas.Timedelta function</p></li>
 </ul>
-</p></li>
-<li><p><strong>of</strong> (<em>should be one</em>) – <ul>
-<li><p>“yearly”, “monthly”</p></li>
-<li><p>suitable pandas Offset Alias</p></li>
-<li><p>tuple of (value, unit) as would be passed to pandas.Timedelta function</p></li>
-</ul>
+</div></blockquote>
 </p></li>
 <li><p><strong>continuous</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether time stamps have to be continuous.</p></li>
 <li><p><strong>overwrite</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Should this data overwrite currently stored data.</p></li>
@@ -654,6 +660,102 @@ Footprints.schema(…) method.</p>
 <p>Raises a ValueError with details if the input data does not adhere
 to the Footprints schema.</p>
 </p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="openghg-store-metstore">
+<h2>openghg.store.METStore<a class="headerlink" href="#openghg-store-metstore" title="Permalink to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">METStore</span></code> class is used to find and retrieve meteorological data from the ECMWF data store.
+Some data may be cached locally for quicker access.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openghg.store.METStore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">METStore</span></span><a class="reference internal" href="../_modules/openghg/store/_metstore.html#METStore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.METStore" title="Permalink to this definition">#</a></dt>
+<dd><p>Controls the storage and retrieveal of meteorological data.</p>
+<p>Currently met data is retrieved from the ECMWF Copernicus data storage
+archive and then cached locally.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.METStore._store">
+<span class="sig-name descname"><span class="pre">_store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">met_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_metstore.html#METStore._store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.METStore._store" title="Permalink to this definition">#</a></dt>
+<dd><p>Store MET data within a Datasource</p>
+<p>Here we do some retrieve on the request JSON to
+make the metadata more easily searchable and of a similar
+format to Datasources used in other modules of OpenGHG.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>met_data</strong> (<a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.METData" title="openghg.dataobjects._metdata.METData"><code class="xref py py-class docutils literal notranslate"><span class="pre">METData</span></code></a>) – Dataset</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.METStore.retrieve">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_metstore.html#METStore.retrieve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.METStore.retrieve" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieve data from either the local METStore or from a
+remote store if we don’t have it locally</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Three letter site code</p></li>
+<li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
+<li><p><strong>years</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – Year(s) required</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>METData object holding data and metadata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.METData" title="openghg.dataobjects.METData">METData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.METStore.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_metstore.html#METStore.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.METStore.save" title="Permalink to this definition">#</a></dt>
+<dd><p>Save the object to the object store</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bucket</strong> – Bucket for data</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.METStore.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_metstore.html#METStore.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.METStore.search" title="Permalink to this definition">#</a></dt>
+<dd><p>Search the stored MET data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Site code</p></li>
+<li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
+<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – Start date</p></li>
+<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – End date</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>METData object if found else None</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.METData" title="openghg.dataobjects.METData">METData</a> or None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -965,10 +1067,15 @@ overwrite: If True overwrite current data stored</p>
 <div class="toc-item">
   
 <div class="tocsection onthispage">
-    <i class="fas fa-list"></i> On this page
+    <i class="fa-solid fa-list"></i> On this page
 </div>
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#rank-sources">
+   rank_sources
+  </a>
+ </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#openghg-store-emissions">
    openghg.store.Emissions
@@ -1105,6 +1212,60 @@ overwrite: If True overwrite current data stored</p>
        <code class="docutils literal notranslate">
         <span class="pre">
          Footprints.validate_data()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#openghg-store-metstore">
+   openghg.store.METStore
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.METStore">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       METStore
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.METStore._store">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         METStore._store()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.METStore.retrieve">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         METStore.retrieve()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.METStore.save">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         METStore.save()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.METStore.search">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         METStore.search()
         </span>
        </code>
       </a>
@@ -1251,6 +1412,11 @@ overwrite: If True overwrite current data stored</p>
 
 <div class="toc-item">
   
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
 </div>
 
 <div class="toc-item">
@@ -1274,7 +1440,7 @@ overwrite: If True overwrite current data stored</p>
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   

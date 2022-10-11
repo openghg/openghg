@@ -7,7 +7,7 @@ The source code for OpenGHG is available on `GitHub <https://github.com/openghg/
 Setting up your computer
 =========================
 
-OpenGHG requires Python >= 3.8, so please install this before continuing
+OpenGHG requires Python >= 3.7, so please install this before continuing
 further.
 
 Virtual environment
@@ -67,7 +67,7 @@ To ensure everything is working on your system running the tests is a good idea.
 Coding Style
 ============
 
-OpenGHG is written in Python 3 (>= 3.8). We aim as much as possible to follow a
+OpenGHG is written in Python 3 (>= 3.7). We aim as much as possible to follow a
 `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ python coding style and
 recommend that use a linter such as `flake8 <https://flake8.pycqa.org/en/latest/>`__.
 

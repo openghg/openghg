@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -58,7 +58,7 @@ site = "TAC"
 species = "co2"
 network = "DECC"
 
-decc_results = standardise_surface(filepaths=obs_data, data_type="CRDS", site=site, network=network)
+decc_results = standardise_surface(filepaths=obs_data, source_format="CRDS", site=site, network=network)
 ```
 
 Add some flux data.
