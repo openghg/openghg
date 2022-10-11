@@ -1,10 +1,9 @@
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 import numpy as np
+from openghg.store.spec import define_data_types
 from pandas import DataFrame, Timestamp
 from xarray import Dataset
-
-from openghg.store.spec import define_data_types
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
@@ -19,7 +18,6 @@ class Datasource:
     """
 
     _datasource_root = "datasource"
-    _datavalues_root = "values"
     _data_root = "data"
 
     def __init__(self) -> None:
@@ -41,7 +39,7 @@ class Datasource:
         # This dictionary stored the keys for each version of data uploaded
         # data_key = d._data_keys["latest"]["keys"][date_key]
         self._data_keys: dataKeyType = defaultdict(dict)
-        self._data_type: str = "timeseries"
+        self._data_type: str = ""
         # Hold information regarding the versions of the data
         # Currently unused
         self._latest_version: str = "latest"
@@ -89,7 +87,7 @@ class Datasource:
         Args:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
-            data_type: Type of data, one of ["timeseries", "emissions", "met", "footprints", "eulerian_model"].
+            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
             overwrite: Overwrite existing data
         Returns:
             None
@@ -202,6 +200,10 @@ class Datasource:
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
+        # Store the start and end date of the most recent data
+        start, end = self.daterange()
+        self.add_metadata_key(key="start_date", value=str(start))
+        self.add_metadata_key(key="end_date", value=str(end))
 
     def add_metadata(self, metadata: Dict) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -721,15 +723,15 @@ class Datasource:
         Returns:
             bool: True if overlap
         """
+        from openghg.util import in_daterange as _in_daterange
         from openghg.util import timestamp_tzaware
-
-        # if self._start_date is None or self._end_date is None:
-        #     self.update_daterange()
 
         start_date = timestamp_tzaware(start_date)
         end_date = timestamp_tzaware(end_date)
 
-        return bool((start_date <= self._end_date) and (end_date >= self._start_date))
+        return _in_daterange(
+            start_a=start_date, end_a=end_date, start_b=self._start_date, end_b=self._end_date
+        )
 
     def keys_in_daterange(
         self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]

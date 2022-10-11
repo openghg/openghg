@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 import pytest
-from helpers import check_cf_compliance, get_datapath, parsed_surface_metachecker
+from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
 from openghg.standardise.surface import parse_btt
 
 mpl_logger = logging.getLogger("matplotlib")
@@ -11,7 +11,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def btt_data():
-    filepath = get_datapath(filename="BTT_test.csv", data_type="LGHG")
+    filepath = get_surface_datapath(filename="BTT_test.csv", source_format="LGHG")
     data = parse_btt(data_filepath=filepath)
     return data
 

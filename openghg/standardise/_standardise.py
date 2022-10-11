@@ -7,7 +7,7 @@ from openghg.util import running_on_hub
 
 def standardise_surface(
     filepaths: Union[str, Path, List, Tuple],
-    data_type: str,
+    source_format: str,
     site: str,
     network: str,
     inlet: Optional[str] = None,
@@ -19,7 +19,7 @@ def standardise_surface(
 
     Args:
         filepaths: Path of file(s) to process
-        data_type: Type of data i.e. GCWERKS, CRDS, ICOS
+        source_format: Format of data i.e. GCWERKS, CRDS, ICOS
         site: Site code
         network: Network name
         inlet: Inlet height in metres
@@ -43,9 +43,9 @@ def standardise_surface(
 
         metadata = {}
         metadata["site"] = site
-        metadata["data_type"] = data_type
+        metadata["source_format"] = source_format
         metadata["network"] = network
-        metadata["data_type"]
+        metadata["data_type"] = "surface"
 
         if inlet is not None:
             metadata["inlet"] = inlet
@@ -57,8 +57,8 @@ def standardise_surface(
         responses = {}
         for fpath in filepaths:
             gcwerks = False
-            if data_type.lower() in ("gc", "gcwerks"):
-                metadata["data_type"] = "gcwerks"
+            if source_format.lower() in ("gc", "gcwerks"):
+                metadata["source_format"] = "gcwerks"
 
                 try:
                     filepath = Path(fpath[0])
@@ -111,7 +111,7 @@ def standardise_surface(
 
         results = ObsSurface.read_file(
             filepath=filepaths,
-            data_type=data_type,
+            source_format=source_format,
             site=site,
             network=network,
             instrument=instrument,
@@ -131,7 +131,7 @@ def standardise_bc(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     overwrite: bool = False,
-) -> Dict:
+) -> Optional[Dict]:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
@@ -199,7 +199,7 @@ def standardise_footprint(
     high_spatial_res: bool = False,
     high_time_res: bool = False,
     overwrite: bool = False,
-) -> Dict:
+) -> Optional[Dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
@@ -216,7 +216,8 @@ def standardise_footprint(
                         Note this will be set to True automatically for Carbon Dioxide data.
         overwrite: Overwrite any currently stored data
     Returns:
-        dict: Dictionary containing confirmation of standardisation process.
+        dict / None: Dictionary containing confirmation of standardisation process. None
+        if file already processed.
     """
     from openghg.cloud import call_function
     from openghg.store import Footprints
@@ -286,7 +287,7 @@ def standardise_flux(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     overwrite: bool = False,
-) -> Dict:
+) -> Optional[Dict]:
     """Process flux data
 
     Args:

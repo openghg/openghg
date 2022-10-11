@@ -1,344 +1,260 @@
-import pytest
-from helpers import metadata_checker_obssurface
-from openghg.retrieve import metadata_lookup, search
-from openghg.store import metastore_manager
-from openghg.types import DatasourceLookupError
-from openghg.util import timestamp_tzaware
-from pandas import Timestamp
+from openghg.retrieve import (
+    search,
+    search_bc,
+    search_column,
+    search_emissions,
+    search_eulerian,
+    search_footprints,
+    search_surface,
+)
 
 
-def test_specific_keyword_search():
-    site = "bsd"
-    species = "co2"
-    inlet = "248m"
-    instrument = "picarro"
+def test_search_surface():
+    res = search_surface(site="hfd")
 
-    results = search(species=species, site=site, inlet=inlet, instrument=instrument)
+    assert len(res.metadata) == 6
 
-    metadata = results.metadata(site=site, species=species, inlet=inlet)
+    res = search_surface(site="hfd", inlet="50m", species="co2")
 
-    assert metadata_checker_obssurface(metadata=metadata, species="co2")
+    key = next(iter(res.metadata))
 
-    data = results.retrieve(site=site, species=species, inlet="248m")
-    ds = data.data
-
-    del ds.attrs["file_created"]
-
-    expected_attrs = {
-        "data_owner": "Simon O'Doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "inlet_height_magl": "248m",
-        "comment": "Cavity ring-down measurements. Output from GCWerks",
-        "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
-        "source": "In situ measurements of air",
-        "Conventions": "CF-1.8",
-        "processed_by": "OpenGHG_Cloud",
-        "species": "co2",
-        "calibration_scale": "WMO-X2007",
-        "station_longitude": -1.15033,
-        "station_latitude": 54.35858,
-        "station_long_name": "Bilsdale, UK",
-        "station_height_masl": 380.0,
-        "site": "bsd",
+    partial_metdata = {
+        "site": "hfd",
         "instrument": "picarro",
         "sampling_period": "60.0",
-        "sampling_period_unit": "s",
-        "inlet": "248m",
+        "inlet": "50m",
         "port": "9",
         "type": "air",
         "network": "decc",
-        "calibration_scale": "WMO-X2007",
+        "species": "co2",
+        "calibration_scale": "wmo-x2007",
+        "long_name": "heathfield",
+        "data_type": "surface",
+        "inlet_height_magl": "50m",
+    }
+
+    assert partial_metdata.items() <= res.metadata[key].items()
+
+    assert not search_surface(site="hfd", species="co2", inlet="888m")
+
+
+def test_search_site():
+    res = search(site="bsd", species="co2", inlet="42m")
+
+    expected = {
+        "site": "bsd",
+        "instrument": "picarro",
+        "sampling_period": "60.0",
+        "inlet": "42m",
+        "port": "9",
+        "type": "air",
+        "network": "decc",
+        "species": "co2",
+        "calibration_scale": "wmo-x2007",
         "long_name": "bilsdale",
+        "inlet_height_magl": "42m",
+        "data_owner": "simon o'doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "station_longitude": -1.15033,
+        "station_latitude": 54.35858,
+        "station_long_name": "bilsdale, uk",
+        "station_height_masl": 380.0,
     }
 
-    assert ds.attrs == expected_attrs
+    key = next(iter(res.metadata))
+    metadata = res.metadata[key]
 
+    assert expected.items() <= metadata.items()
 
-def test_specific_search_gc():
-    results = search(species=["NF3"], site="CGO", inlet="70m")
+    res = search(site="bsd", species="co2", inlet="108m", instrument="picarro", calibration_scale="wmo-x2007")
 
-    metadata = results.metadata(site="cgo", species="nf3", inlet="70m")
-
-    assert metadata_checker_obssurface(metadata=metadata, species="nf3")
-
-
-def test_specific_search_translator():
-    results = search(species="toluene", site="CGO", skip_ranking=True)
-
-    metadata = results.results["cgo"]["c6h5ch3"]["70m"]["metadata"]
-    assert metadata["species"] == "c6h5ch3"
-
-    results = search(species="methylbenzene", site="CGO", skip_ranking=True)
-
-    metadata = results.results["cgo"]["c6h5ch3"]["70m"]["metadata"]
-    assert metadata["species"] == "c6h5ch3"
-
-    results = search(species="c6h5ch3", site="CGO", skip_ranking=True)
-
-    metadata = results.results["cgo"]["c6h5ch3"]["70m"]["metadata"]
-    assert metadata["species"] == "c6h5ch3"
-
-
-def test_unranked_location_search(capfd):
-    species = ["co2", "ch4"]
-    sites = ["hfd", "tac", "bsd"]
-
-    results = search(species=species, site=sites, inlet="100m")
-
-    assert len(results) == 2
-
-    tac_data = results.results["tac"]
-    hfd_data = results.results["hfd"]
-
-    assert sorted(list(tac_data.keys())) == ["ch4", "co2"]
-    assert sorted(list(hfd_data.keys())) == ["ch4", "co2"]
-
-    tac_co2_keys = results.keys(site="tac", species="co2", inlet="105m")
-
-    out, err = capfd.readouterr()
-
-    assert out.strip() == "No keys found for co2 at tac"
-
-    tac_co2_keys = results.keys(site="tac", species="co2", inlet="100m")
-    tac_ch4_keys = results.keys(site="tac", species="co2", inlet="100m")
-
-    assert "ranked" not in tac_co2_keys
-    assert "ranked" not in tac_ch4_keys
-
-    assert len(tac_co2_keys["unranked"]) == 4
-    assert len(tac_ch4_keys["unranked"]) == 4
-
-    results.keys(site="bsd", species="co2")
-
-    out, _ = capfd.readouterr()
-
-    assert out.strip() == "No keys found for co2 at bsd"
-
-    results.keys(site="bsd", species="ch4")
-
-    out, _ = capfd.readouterr()
-
-    assert out.strip() == "No keys found for ch4 at bsd"
-
-
-def test_unranked_search_datetimes():
-    species = ["co2"]
-    locations = ["bsd"]
-
-    start = timestamp_tzaware("2014-1-1")
-    end = timestamp_tzaware("2015-1-1")
-
-    results = search(
-        species=species,
-        site=locations,
-        inlet="248m",
-        start_date=start,
-        end_date=end,
-    )
-
-    metadata = results.metadata(site="bsd", species="co2", inlet="248m")
-
-    assert metadata_checker_obssurface(metadata=metadata, species="co2")
-
-    data_keys = results.keys(site="bsd", species="co2", inlet="248m")
-    assert len(data_keys) == 1
-
-    start = timestamp_tzaware("2001-1-1")
-    end = timestamp_tzaware("2021-1-1")
-
-    results = search(
-        species=species,
-        site=locations,
-        inlet="248m",
-        start_date=start,
-        end_date=end,
-    )
-
-    data_keys = results.keys(site="bsd", species="co2", inlet="248m")
-
-    assert "ranked" not in data_keys
-    assert len(data_keys["unranked"]) == 7
-
-
-def test_search_find_any_unranked():
-    species = ["co2"]
-    sites = ["bsd"]
-    inlet = "248m"
-    instrument = "picarro"
-
-    results = search(find_all=False, species=species, site=sites, inlet=inlet, instrument=instrument)
-
-    raw_results = results.raw()
-
-    assert len(raw_results) == 3
-
-    bsd_expected = ["ch4", "co", "co2"]
-    hfd_expected = ["ch4", "co", "co2"]
-    tac_expected = ["ch4", "co2"]
-
-    assert sorted(list(raw_results["bsd"].keys())) == bsd_expected
-    assert sorted(list(raw_results["hfd"].keys())) == hfd_expected
-    assert sorted(list(raw_results["tac"].keys())) == tac_expected
-
-    start = timestamp_tzaware("2014-1-1")
-    end = timestamp_tzaware("2015-1-1")
-
-    results = search(
-        find_all=False,
-        species=species,
-        site=sites,
-        start_date=start,
-        end_date=end,
-        inlet=inlet,
-        instrument=instrument,
-    )
-
-    raw_results = results.raw()
-
-    assert len(raw_results) == 2
-
-    assert sorted(list(raw_results.keys())) == ["bsd", "hfd"]
-
-
-def test_ranked_bsd_search():
-    site = "bsd"
-    species = "ch4"
-
-    result = search(site=site, species=species)
-
-    raw_result = result.raw()
-
-    expected_rank_metadata = {
-        "2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m",
-        "2016-04-01-00:00:00+00:00_2017-11-01-00:00:00+00:00": "248m",
-        "2015-01-02-00:00:00+00:00_2015-11-01-00:00:00+00:00": "108m",
-        "2019-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
+    expected = {
+        "site": "bsd",
+        "instrument": "picarro",
+        "sampling_period": "60.0",
+        "inlet": "108m",
+        "port": "9",
+        "type": "air",
+        "network": "decc",
+        "species": "co2",
+        "calibration_scale": "wmo-x2007",
+        "long_name": "bilsdale",
+        "inlet_height_magl": "108m",
+        "data_owner": "simon o'doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "station_longitude": -1.15033,
+        "station_latitude": 54.35858,
+        "station_long_name": "bilsdale, uk",
+        "station_height_masl": 380.0,
     }
 
-    assert expected_rank_metadata == raw_result["bsd"]["ch4"]["rank_metadata"]
+    key = next(iter(res.metadata))
+    metadata = res.metadata[key]
 
-    metadata = result.metadata(site="bsd", species="ch4")
+    assert expected.items() <= metadata.items()
 
-    for key, meta in metadata.items():
-        assert metadata_checker_obssurface(metadata=meta, species="ch4")
+    res = search(site="atlantis")
 
-    obs_data = result.retrieve(site="bsd", species="ch4")
-
-    ch4_data = obs_data.data
-
-    assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
-    assert ch4_data.time[-1] == Timestamp("2020-12-01T22:31:30")
-    assert ch4_data["ch4"][0] == pytest.approx(1959.55)
-    assert ch4_data["ch4"][-1] == pytest.approx(1955.93)
-    assert ch4_data["ch4_variability"][0] == 0.79
-    assert ch4_data["ch4_variability"][-1] == 0.232
-    assert len(ch4_data.time) == 126
+    assert not res
 
 
-# @pytest.mark.skip(reason="Needs update for ranking search")
-def test_search_find_any():
-    species = ["co2"]
-    sites = ["bsd"]
-    inlet = "248m"
-    instrument = "picarro"
+def test_multi_type_search():
+    res = search(species="ch4")
 
-    start = timestamp_tzaware("2014-1-1")
-    end = timestamp_tzaware("2015-1-1")
+    data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    results = search(
-        find_all=False,
-        species=species,
-        site=sites,
-        start_date=start,
-        end_date=end,
-        inlet=inlet,
-        instrument=instrument,
+    assert data_types == {'surface', 'eulerian_model', 'column'}
+
+    res = search(species="co2")
+    data_types = set([m["data_type"] for m in res.metadata.values()])
+
+    assert data_types == {"emissions", "surface"}
+
+    obs = res.retrieve_all()
+
+    # Make sure the retrieval works correctly
+    data_types = set([ob.metadata["data_type"] for ob in obs])
+
+    assert data_types == {"emissions", "surface"}
+
+    res = search(species="ch4", data_type=["surface"])
+
+    assert len(res.metadata) == 7
+
+    res = search(species="co2", data_type=["surface", "emissions"])
+
+    assert len(res.metadata) == 7
+
+
+def test_many_term_search():
+    res = search(site=["bsd", "tac"], species=["co2", "ch4"], inlet=["42m", "100m"])
+
+    assert len(res.metadata) == 4
+    assert res.metadata
+
+    sites = set([x["site"] for x in res.metadata.values()])
+    assert sites == {"bsd", "tac"}
+
+    species = set([x["species"] for x in res.metadata.values()])
+    assert species == {"co2", "ch4"}
+
+    inlets = set([x["inlet"] for x in res.metadata.values()])
+    assert inlets == {"100m", "42m"}
+
+
+def test_nonsense_terms():
+    res = search(site="london", species="ch4")
+
+    assert not res
+
+    res = search(site="bsd", species="sparrow")
+
+    assert not res
+
+
+def test_search_footprints():
+    res = search_footprints(site="TMB", network="LGHG", height="10m", domain="EUROPE", model="test_model")
+
+    key = next(iter(res.metadata))
+    partial_metadata = {
+        "data_type": "footprints",
+        "site": "tmb",
+        "height": "10m",
+        "domain": "europe",
+        "model": "test_model",
+        "network": "lghg",
+        "start_date": "2020-08-01 00:00:00+00:00",
+        "end_date": "2021-07-31 23:59:59+00:00",
+        "time_period": "1 year",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_emissions():
+    res = search_emissions(
+        species="co2",
+        source="gpp-cardamom",
+        date="2012",
+        domain="europe",
     )
 
-    raw_results = results.raw()
+    key = next(iter(res.metadata))
 
-    bsd_data = raw_results["bsd"]
-    hfd_data = raw_results["hfd"]
+    partial_metadata = {
+        "title": "gross primary productivity co2",
+        "author": "openghg cloud",
+        "regridder_used": "acrg_grid.regrid.regrid_3d",
+        "comments": "fluxes copied from year 2013. december 2012 values copied from january 2013 values.",
+        "species": "co2",
+        "domain": "europe",
+        "source": "gpp-cardamom",
+        "date": "2012",
+        "data_type": "emissions",
+    }
 
-    expected_bsd_heights = sorted(["248m", "108m", "42m"])
-
-    assert sorted(list(bsd_data["ch4"].keys())) == expected_bsd_heights
-    assert sorted(list(bsd_data["co"].keys())) == expected_bsd_heights
-    assert sorted(list(bsd_data["co2"].keys())) == expected_bsd_heights
-
-    expected_hfd_heights = ["100m", "50m"]
-
-    assert sorted(list(hfd_data["ch4"].keys())) == expected_hfd_heights
-    assert sorted(list(hfd_data["co"].keys())) == expected_hfd_heights
-    assert sorted(list(hfd_data["co2"].keys())) == expected_hfd_heights
-
-    ch4_metadata = bsd_data["ch4"]["42m"]["metadata"]
-    co2_metadata = bsd_data["co2"]["42m"]["metadata"]
-
-    assert metadata_checker_obssurface(metadata=ch4_metadata, species="ch4")
-    assert metadata_checker_obssurface(metadata=co2_metadata, species="co2")
+    assert partial_metadata.items() <= res.metadata[key].items()
 
 
-def test_search_incorrect_inlet_site_finds_nothing():
-    locations = "hfd"
-    inlet = "3695m"
-    species = "CH4"
+def test_search_column():
+    res = search_column(
+        satellite="GOSAT",
+        domain="BRAZIL",
+        species="methane",
+    )
 
-    results = search(site=locations, species=species, inlet=inlet)
+    key = next(iter(res.metadata))
 
-    assert not results
+    partial_metadata = {
+        "satellite": "gosat",
+        "instrument": "tanso-fts",
+        "species": "ch4",
+        "domain": "brazil",
+        "network": "gosat",
+        "platform": "satellite",
+        "selection": "brazil",
+        "data_type": "column",
+    }
 
-
-def test_no_ranked_data_raises():
-    with pytest.raises(ValueError):
-        _ = search(site="hfd", species="ch4")
-
-    # Make sure this doesn't fail
-    res = search(site="hfd", species="ch4", inlet="100m")
-
-    assert res
-
-
-def test_search_nonsense_terms():
-    species = ["spam", "eggs", "terry"]
-    locations = ["capegrim"]
-
-    results = search(species=species, locations=locations)
-
-    assert not results
+    assert partial_metadata.items() <= res.metadata[key].items()
 
 
-def test_metadata_lookup():
-    with metastore_manager(key="test-key-888") as metastore:
-        metadata = {
-            "site": "shop",
-            "species": "parrot",
-            "status": "six-feet-under",
-            "pining_for": "fjords",
-            "uuid": "uuid-888",
-        }
+def test_search_bc():
+    res = search_bc(species="n2o", bc_input="MOZART", domain="EUROPE")
 
-        metastore.insert(metadata)
+    key = next(iter(res.metadata))
 
-        result = metadata_lookup(database=metastore, metadata=metadata)
+    partial_metadata = {
+        "date_created": "2018-04-30 09:15:29.472284",
+        "author": "openghg cloud",
+        "run name": "newedgar",
+        "species": "n2o",
+        "title": "mozart volume mixing ratios at domain edges",
+        "time period": "climatology from 200901-201407 mozart output",
+        "copied from": "2000",
+        "date": "2012",
+        "domain": "europe",
+        "bc_input": "mozart",
+        "start_date": "2012-01-01 00:00:00+00:00",
+        "end_date": "2012-12-31 23:59:59+00:00",
+    }
 
-        assert result == "uuid-888"
+    assert partial_metadata.items() <= res.metadata[key].items()
 
-        result = metadata_lookup(database=metastore, metadata={"species": "turtle"})
 
-        assert result is False
+def test_search_eulerian_model():
+    res = search_eulerian(model="GEOSChem", species="ch4")
 
-        metadata = {
-            "site": "shop",
-            "species": "parrot",
-            "status": "six-feet-under",
-            "pining_for": "fjords",
-            "uuid": "uuid-777",
-        }
+    key = next(iter(res.metadata))
 
-        metastore.insert(metadata)
+    partial_metadata = {
+        "title": "geos-chem diagnostic collection: speciesconc",
+        "format": "cfio",
+        "conventions": "coards",
+        "simulation_start_date_and_time": "2015-01-01 00:00:00z",
+        "simulation_end_date_and_time": "2016-01-01 00:00:00z",
+        "model": "geoschem",
+        "species": "ch4",
+    }
 
-        to_find = {"species": "parrot", "site": "shop"}
-
-        with pytest.raises(DatasourceLookupError):
-            metadata_lookup(database=metastore, metadata=to_find)
+    assert partial_metadata.items() <= res.metadata[key].items()

@@ -323,6 +323,7 @@ def parse_edgar(
     metadata["database_version"] = database_version
     metadata["author"] = author_name
     metadata["processed"] = str(timestamp_now())
+    metadata["data_type"] = "emissions"
 
     attrs = {"author": metadata["author"], "processed": metadata["processed"]}
 

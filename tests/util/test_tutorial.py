@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from helpers import get_datapath
+from helpers import get_surface_datapath
 from openghg.util import bilsdale_datapaths, retrieve_example_data
 
 
@@ -18,7 +18,7 @@ def test_bilsdale_data():
 
 
 def test_retrieve_example_data(requests_mock, tmpdir):
-    tar_data = Path(get_datapath(filename="test.tar.gz", data_type="crds")).read_bytes()
+    tar_data = Path(get_surface_datapath(filename="test.tar.gz", source_format="crds")).read_bytes()
 
     url = "https://github.com/openghg/example_data/raw/main/timeseries/bsd_example.tar.gz"
     requests_mock.get(url, content=tar_data, status_code=200)

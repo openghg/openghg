@@ -100,6 +100,7 @@ class EulerianModel(BaseStore):
         metadata["model"] = model
         metadata["species"] = species
         metadata["processed"] = str(timestamp_now())
+        metadata["data_type"] = "eulerian_model"
 
         if start_date is None:
             if len(em_data["time"]) > 1:

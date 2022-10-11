@@ -1,15 +1,15 @@
 # import pytest
 # from openghg.client import process_files, search
 # from openghg.objectstore import get_bucket
-# from helpers import get_datapath, glob_files, metadata_checker_obssurface
+# from helpers import get_surface_datapath, glob_files, metadata_checker_obssurface
 
 
 # @pytest.fixture(scope="session")
 # def read_data(authenticated_user):
 #     get_bucket(empty=True)
 
-#     data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-#     precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+#     data = get_surface_datapath(filename="capegrim-medusa.18.C", data_type="GC")
+#     precision = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
 
 #     gc_files = (data, precision)
 
@@ -22,7 +22,7 @@
 #         service_url="openghg",
 #     )
 
-#     bsd_file = get_datapath(
+#     bsd_file = get_surface_datapath(
 #         filename="bsd.picarro.1minute.248m.min.dat", data_type="CRDS"
 #     )
 #     hfd_files = glob_files(search_str="hfd.picarro.1minute", data_type="CRDS")

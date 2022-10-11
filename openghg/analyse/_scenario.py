@@ -41,6 +41,7 @@ If some input types needed for these operations are missing, the user will be al
 on which data types are missing.
 """
 
+import logging
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
@@ -62,6 +63,10 @@ __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_reso
 
 ParamType = Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]
 methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
+
+
+logger = logging.getLogger("openghg.analyse")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class ModelScenario:
@@ -116,7 +121,6 @@ class ModelScenario:
             obs : Supply ObsData object directly (e.g. from get_obs...() functions)
             footprint : Supply FootprintData object directly (e.g. from get_footprint() function)
             flux : Supply FluxData object directly (e.g. from get_flux() function)
-
         Returns:
             None
 

@@ -2,7 +2,7 @@ import pytest
 from helpers import get_emissions_datapath
 from openghg.objectstore import get_bucket
 from openghg.retrieve import search
-from openghg.store import Emissions, datasource_lookup, metastore_manager, recombine_datasets
+from openghg.store import Emissions, datasource_lookup, load_metastore, recombine_datasets
 from openghg.util import hash_bytes
 from xarray import open_dataset
 
@@ -44,7 +44,7 @@ def test_read_file():
         date="2012",
         domain="europe",
         high_time_resolution=False,
-        overwrite=True
+        overwrite=True,
     )
 
     assert "co2_gpp-cardamom_europe_2012" in proc_results
@@ -53,12 +53,9 @@ def test_read_file():
         species="co2", source="gpp-cardamom", date="2012", domain="europe", data_type="emissions"
     )
 
-    key = list(search_results.keys())[0]
-
-    data_keys = search_results[key]["keys"]
-    emissions_data = recombine_datasets(keys=data_keys, sort=False)
-
-    metadata = search_results[key]["metadata"]
+    emissions_obs = search_results.retrieve_all()
+    emissions_data = emissions_obs.data
+    metadata = emissions_obs.metadata
 
     orig_data = open_dataset(test_datapath)
 
@@ -95,7 +92,7 @@ def test_read_file():
     del metadata["processed"]
     del metadata["prior_file_1_version"]
 
-    assert metadata == expected_metadata
+    assert metadata.items() >= expected_metadata.items()
 
 
 def test_add_edgar_database():
@@ -129,19 +126,17 @@ def test_add_edgar_database():
         data_type="emissions",
     )
 
-    key = list(search_results.keys())[0]
+    assert search_results
 
-    # TODO: Add tests for data as well?
-    # data_keys = search_results[key]["keys"]
-
-    metadata = search_results[key]["metadata"]
+    edgar_obs = search_results.retrieve_all()
+    metadata = edgar_obs.metadata
 
     expected_metadata = {
         "species": species,
         "domain": default_domain,
         "source": default_source,
         "database": database.lower(),
-        "database_version": version.replace('.',''),
+        "database_version": version.replace(".", ""),
         "date": "2015",
         "author": "OpenGHG Cloud".lower(),
         "start_date": "2015-01-01 00:00:00+00:00",
@@ -195,19 +190,18 @@ def test_transform_and_add_edgar_database():
         data_type="emissions",
     )
 
-    key = list(search_results.keys())[0]
+    edgar_data = search_results.retrieve_all()
+    metadata = edgar_data.metadata
 
     # TODO: Add tests for data as well?
     # data_keys = search_results[key]["keys"]
-
-    metadata = search_results[key]["metadata"]
 
     expected_metadata = {
         "species": species,
         "domain": domain.lower(),
         "source": "anthro",
         "database": "edgar",
-        "database_version": version.replace('.',''),
+        "database_version": version.replace(".", ""),
         "date": "2015",
         "author": "openghg cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
@@ -239,7 +233,7 @@ def test_datasource_add_lookup():
         }
     }
 
-    with metastore_manager(key="test-key-123") as metastore:
+    with load_metastore(key="test-key-123") as metastore:
         e.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
         assert e.datasources() == ["mock-uuid-123456"]

@@ -8,7 +8,7 @@ from . import (
     dataobjects,
     objectstore,
     retrieve,
-    service,
+    plotting,
     standardise,
     store,
     types,
@@ -22,17 +22,14 @@ __all__ = [
     "dataobjects",
     "objectstore",
     "retrieve",
-    "service",
+    "plotting",
     "standardise",
     "store",
     "util",
     "types",
 ]
 
-if _sys.version_info.major < 3:
-    raise ImportError("openghg requires Python >= 3.8")
-
-if _sys.version_info.minor < 8:
+if _sys.version_info < (3, 8):
     raise ImportError("openghg requires Python >= 3.8")
 
 # Let's do some quick checks for required environment variables
