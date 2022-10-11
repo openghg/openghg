@@ -77,15 +77,16 @@ jobs:
         run: |
           sudo apt-get install -yq pandoc
           pip install -r requirements-doc.txt
-      - name: Ensure notebooks can be executed correctly
+      - name: Ensure .md files are synced with notebooks
         run: |
-          jupytext --sync --execute notebooks/tutorials/beginner_workflow/{1,2}_*.ipynb
+          jupytext --sync notebooks/tutorials/local/*.ipynb
+          jupytext --sync notebooks/tutorials/cloud/*.ipynb
       - name: Build documentation
         run: |
           cd doc
           make
       - name: Deploy to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        uses: JamesIves/github-pages-deploy-action@v4.4.0
         with:
           branch: gh-pages
           folder: "doc/build/html"

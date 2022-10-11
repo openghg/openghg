@@ -195,9 +195,6 @@ directory in the user's filesystem specific by the ``OPENGHG_PATH`` environment 
 :func:`~openghg.objectstore.get_bucket`
     Get path to bucket
 
-:func:`~openghg.objectstore.get_local_bucket`
-    Get path to local bucket
-
 :func:`~openghg.objectstore.get_md5`
     Get MD5 has of file
 

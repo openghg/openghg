@@ -2,7 +2,7 @@ import pytest
 from openghg.standardise.meta import sync_surface_metadata
 
 
-def test_surface_standardise():
+def test_sync_surface_metadata():
     metadata = {
         "site": "sum",
         "network": "NOAA",

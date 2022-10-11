@@ -2,17 +2,6 @@
 store API detail
 ================
 
-rank_sources
-============
-
-The ``rank_sources`` is used to rank sources of data. Provided with a site and a species the ``rank_sources`` function will search for the given
-site and species and return a :ref:`RankSources<RankSources>` object
-
-Setting a high rank for a Datasource across a specific daterange means
-that data from that Datasource will be preferred when a user searches for data.
-
-.. autofunction:: openghg.client.rank_sources
-
 openghg.store.Emissions
 =======================
 
