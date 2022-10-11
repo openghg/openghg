@@ -14,8 +14,6 @@ These functions are used by OpenGHG to store and retrieve data from the object s
 
 .. autofunction:: openghg.objectstore.get_bucket
 
-.. autofunction:: openghg.objectstore.get_local_bucket
-
 .. autofunction:: openghg.objectstore.get_object
 
 .. autofunction:: openghg.objectstore.set_object

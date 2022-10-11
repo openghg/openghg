@@ -42,4 +42,4 @@ Metadata
 
 .. autofunction:: openghg.standardise.meta.get_attributes
 
-.. autofunction:: openghg.standardise.meta.surface_standardise
+.. autofunction:: openghg.standardise.meta.sync_surface_metadata
