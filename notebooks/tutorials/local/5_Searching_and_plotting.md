@@ -167,43 +167,7 @@ lower_inlet_data = lower_inlets.retrieve_all()
 plot_timeseries(data=lower_inlet_data, title="Comparing CH4 measurements at Tacolneston and Bilsdale")
 ```
 
-## Searching across types
-
-+++
-
-You can also search for different data types, say we want to find surface measurement data and emissions data at the same time. We can do that with the more generic `search` function.
-
-```{code-cell} ipython3
-from openghg.retrieve import search
-from openghg.standardise import standardise_flux
-```
-
-We need to first load in some emissions data
-
-```{code-cell} ipython3
-flux_datapaths = retrieve_example_data(path="flux/ch4-ukghg-all_EUROPE_2016.tar.gz")
-```
-
-```{code-cell} ipython3
-flux_datapaths.sort()
-agri_data = flux_datapaths[0]
-```
-
-```{code-cell} ipython3
-flux_res = standardise_flux(filepath=agri_data, species="ch4", source="agri", date="2016", domain="europe")
-```
-
-```{code-cell} ipython3
-ch4_results = search(species="ch4")
-```
-
-```{code-cell} ipython3
-ch4_results.results
-```
-
-```{code-cell} ipython3
-
-```
+Now we can clear up the temporary object store
 
 ```{code-cell} ipython3
 tmp_dir.cleanup()

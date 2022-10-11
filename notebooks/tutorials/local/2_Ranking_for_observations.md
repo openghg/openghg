@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -38,7 +38,7 @@ To demonstrate this we will start by loading data from the Bilsdale ("BSD") site
 from openghg.standardise import standardise_surface
 
 bsd_filepaths = ["../data/DECC/bsd.picarro.1minute.42m.min.dat", "../data/DECC/bsd.picarro.1minute.108m.min.dat", "../data/DECC/bsd.picarro.1minute.248m.min.dat"]
-decc_results = standardise_surface(filepaths=bsd_filepaths, data_type="CRDS", site="bsd", network="DECC")
+decc_results = standardise_surface(filepaths=bsd_filepaths, source_format="CRDS", site="bsd", network="DECC")
 ```
 
 ```{code-cell} ipython3
