@@ -47,6 +47,7 @@ def get_local_objectstore_path() -> Path:
             + " store path please use the configuration file. See docs.openghg.org/install",
             category=DeprecationWarning,
         )
+        return Path(openghg_env)
 
     tutorial_store = os.getenv("OPENGHG_TMP_STORE")
     if tutorial_store is not None:
