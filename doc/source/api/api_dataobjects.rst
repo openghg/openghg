@@ -44,22 +44,3 @@ This ``dataclass`` is used to return observations data from the get_footprint fu
 
 .. autoclass:: openghg.dataobjects.FootprintData
     :members:
-
-
-METData
-=======
-
-This ``dataclass`` is used to return observations data from the Met data retrieval function
-
-.. autoclass:: openghg.dataobjects.METData
-    :members:
-
-
-RankSources
-===========
-
-This ``dataclass`` is returned by the ``openghg.client.rank_sources`` function and allows easy setting of ranking attributes for data stored in the
-object store.
-
-.. autoclass:: openghg.dataobjects.RankSources
-    :members:

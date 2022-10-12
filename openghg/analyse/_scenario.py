@@ -68,8 +68,6 @@ methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 logger = logging.getLogger("openghg.analyse")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
-from memory_profiler import profile
-
 
 class ModelScenario:
     """
@@ -77,7 +75,6 @@ class ModelScenario:
     operations to be performed combining these inputs.
     """
 
-    @profile
     def __init__(
         self,
         site: Optional[str] = None,
