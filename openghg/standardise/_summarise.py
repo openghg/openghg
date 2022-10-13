@@ -147,7 +147,7 @@ def summary_site_codes() -> pd.DataFrame:
 
     site_info = load_json(filename="acrg_site_info.json")
 
-    site_dict = {}
+    site_dict: Dict[str, str] = {}
     site_dict["site"] = []
     site_dict["network"] = []
 
@@ -159,7 +159,7 @@ def summary_site_codes() -> pd.DataFrame:
         for network, data in network_data.items():
             for key in expected_keys:
                 if key in data:
-                    site_dict[key].append(data[key])
+                    site_dict[key].append(str(data[key]))
                 else:
                     site_dict[key].append("")
             site_dict["network"].append(network)
