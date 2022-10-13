@@ -4,4 +4,4 @@ from ._standardise import (
     standardise_footprint,
     standardise_surface,
 )
-from ._summarise import summary_data_types
+from ._summarise import summary_data_types, summary_site_codes
