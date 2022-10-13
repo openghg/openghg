@@ -147,7 +147,7 @@ def summary_site_codes() -> pd.DataFrame:
 
     site_info = load_json(filename="acrg_site_info.json")
 
-    site_dict: Dict[str, str] = {}
+    site_dict: Dict[str, list] = {}
     site_dict["site"] = []
     site_dict["network"] = []
 
