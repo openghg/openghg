@@ -317,7 +317,7 @@ def test_read_footprint_co2(site, height, metmodel, start, end, filename):
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_read_footprint_short_lived()"
+def test_read_footprint_short_lived():
     datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
 
     site = "WAO"
