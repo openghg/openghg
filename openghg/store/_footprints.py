@@ -249,7 +249,7 @@ class Footprints(BaseStore):
             )
             return None
 
-        fp_data = open_dataset(filepath)
+        fp_data = open_dataset(filepath, engine="h5netcdf")
 
         if species == "co2":
             # Expect co2 data to have high time resolution
