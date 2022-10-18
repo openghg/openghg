@@ -29,7 +29,7 @@ def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
 
 def recombine_datasets(
     keys: List[str],
-    sort: Optional[bool] = True,
+    sort: Optional[bool] = False,
     attrs_to_check: Dict[str, str] = None,
     elevate_inlet: bool = False,
 ) -> xr.Dataset:
@@ -107,7 +107,8 @@ def recombine_datasets(
     if n_dupes > 5:
         raise ValueError("Large number of duplicate timestamps, check data overlap.")
 
-    combined = combined.isel(time=index)
+    if n_dupes > 0:
+        combined = combined.isel(time=index)
 
     return combined
 

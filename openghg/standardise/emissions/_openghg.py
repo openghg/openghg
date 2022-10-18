@@ -26,7 +26,7 @@ def parse_openghg(
     from openghg.util import timestamp_now
     from xarray import open_dataset
 
-    em_data = open_dataset(filepath)
+    em_data = open_dataset(filepath, chunks="auto")
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here

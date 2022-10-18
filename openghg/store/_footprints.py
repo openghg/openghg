@@ -251,7 +251,7 @@ class Footprints(BaseStore):
             return None
 
         # Load this into memory
-        fp_data = xr.open_dataset(filepath, engine="h5netcdf", chunks="auto")
+        fp_data = xr.open_dataset(filepath, chunks="auto")
 
         if species == "co2":
             # Expect co2 data to have high time resolution
