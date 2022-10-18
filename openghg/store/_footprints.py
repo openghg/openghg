@@ -226,9 +226,10 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
+        # from xarray import load_dataset
+        import xarray as xr
         from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
         from openghg.util import clean_string, hash_file, species_lifetime, timestamp_now
-        from xarray import open_dataset
 
         filepath = Path(filepath)
 
@@ -249,7 +250,8 @@ class Footprints(BaseStore):
             )
             return None
 
-        fp_data = open_dataset(filepath, engine="h5netcdf")
+        # Load this into memory
+        fp_data = xr.open_dataset(filepath)
 
         if species == "co2":
             # Expect co2 data to have high time resolution

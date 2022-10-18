@@ -117,19 +117,26 @@ class Datasource:
         from openghg.util import daterange_overlap
         from xarray import concat as xr_concat
 
+        # For now we'll only group timeseries data.
+        # This is to a
+        # if data_type != "timeseries"
         # Group by year
-        year_group = data.groupby("time.year")
-
-        # Use a dictionary keyed with the daterange covered by each segment of data
-        new_data = {}
-
+        # year_group = data.groupby("time.year")
         # Extract period associated with data from metadata
         # TODO: May want to add period as a potential data variable so would need to extract from there if needed
         period = self.get_period()
 
-        for _, data in year_group:
-            daterange_str = self.get_representative_daterange_str(data, period=period)
-            new_data[daterange_str] = data
+        new_data = {
+            self.get_representative_daterange_str(year_data, period=period): year_data
+            for _, year_data in data.groupby("time.year")
+        }
+
+        # Use a dictionary keyed with the daterange covered by each segment of data
+        # new_data = {}
+
+        # for _, data in year_group:
+        #     daterange_str = self.get_representative_daterange_str(data, period=period)
+        #     new_data[daterange_str] = data
 
         if self._data:
             # We need to remove them from the curre
@@ -467,9 +474,8 @@ class Datasource:
         Returns:
             None
         """
-        # import tempfile
+        import tempfile
         from copy import deepcopy
-        from pathlib import Path
 
         from openghg.objectstore import get_bucket, set_object_from_file, set_object_from_json
         from openghg.util import timestamp_now
@@ -494,33 +500,24 @@ class Datasource:
                 new_keys[daterange] = data_key
                 data = self._data[daterange]
 
-                filepath = Path(f"{bucket}/{data_key}._data")
-                parent_folder = filepath.parent
-                if not parent_folder.exists():
-                    parent_folder.mkdir(parents=True, exist_ok=True)
-
-                data.to_netcdf(filepath)
-
-                # Can we just take the bytes from the data here and then write then straight?
                 # TODO - for now just create a temporary directory - will have to update Acquire
                 # or work on a PR for xarray to allow returning a NetCDF as bytes
-                # with tempfile.TemporaryDirectory() as tmpdir:
-                #     filepath = f"{tmpdir}/temp.nc"
-                #     data.to_netcdf(filepath)
-                #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
-                # path = f"{bucket_path}/data"
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    filepath = f"{tmpdir}/temp.nc"
+                    data.to_netcdf(filepath)
+                    set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
 
             # Copy the last version
             if "latest" in self._data_keys:
                 self._data_keys[version_str] = deepcopy(self._data_keys["latest"])
 
-        # Save the new keys and create a timestamp
-        self._data_keys[version_str]["keys"] = new_keys
-        self._data_keys[version_str]["timestamp"] = str(timestamp_now())  # type: ignore
+            # Save the new keys and create a timestamp
+            self._data_keys[version_str]["keys"] = new_keys
+            self._data_keys[version_str]["timestamp"] = str(timestamp_now())  # type: ignore
 
-        # Link latest to the newest version
-        self._data_keys["latest"] = self._data_keys[version_str]
-        self._latest_version = version_str
+            # Link latest to the newest version
+            self._data_keys["latest"] = self._data_keys[version_str]
+            self._latest_version = version_str
 
         self._stored = True
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
