@@ -504,7 +504,7 @@ class Datasource:
                 # or work on a PR for xarray to allow returning a NetCDF as bytes
                 with tempfile.TemporaryDirectory() as tmpdir:
                     filepath = f"{tmpdir}/temp.nc"
-                    data.to_netcdf(filepath)
+                    data.to_netcdf(filepath, engine="h5netcdf")
                     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
 
             # Copy the last version
