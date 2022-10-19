@@ -1,6 +1,6 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Literal, Optional, Tuple, Union
 
 import numpy as np
 from numpy import ndarray
@@ -56,7 +56,7 @@ class Emissions(BaseStore):
         date: Optional[str] = None,
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[str, Dict, None] = None,
+        chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         overwrite: bool = False,
     ) -> Optional[Dict]:

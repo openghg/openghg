@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import DefaultDict, Dict, List, Optional, Tuple, Union
+from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union
 
 import numpy as np
 from openghg.store import DataSchema
@@ -193,6 +193,7 @@ class Footprints(BaseStore):
         species: Optional[str] = None,
         network: Optional[str] = None,
         period: Optional[Union[str, tuple]] = None,
+        chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_res: bool = False,
@@ -222,7 +223,6 @@ class Footprints(BaseStore):
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
             overwrite: Overwrite any currently stored data
-
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -251,7 +251,7 @@ class Footprints(BaseStore):
             return None
 
         # Load this into memory
-        fp_data = xr.open_dataset(filepath, chunks="auto")
+        fp_data = xr.open_dataset(filepath, chunks=chunks)
 
         if species == "co2":
             # Expect co2 data to have high time resolution

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, Literal, Optional, Union
 
 
 def parse_openghg(
@@ -11,7 +11,7 @@ def parse_openghg(
     date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[str, Dict, None] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
 ) -> Dict:
     """
