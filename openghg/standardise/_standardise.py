@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.util import running_on_hub
@@ -195,6 +195,7 @@ def standardise_footprint(
     species: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = "auto",
     continuous: bool = True,
     retrieve_met: bool = False,
     high_spatial_res: bool = False,
@@ -214,6 +215,7 @@ def standardise_footprint(
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
         period: Period of measurements. Only needed if this can not be inferred from the time coords
+        chunks: Chunk size to use when opening the NetCDF. Set to "auto" for automated chunk sizing
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_res : Indicate footprints include both a low and high spatial resolution.
@@ -242,19 +244,14 @@ def standardise_footprint(
             "high_spatial_res": high_spatial_res,
             "high_time_res": high_time_res,
             "overwrite": overwrite,
+            "metmodel": metmodel,
+            "species": species,
+            "network": network,
+            "period": period,
+            "chunks": chunks,
         }
 
-        if metmodel is not None:
-            metadata["metmodel"] = metmodel
-
-        if species is not None:
-            metadata["species"] = species
-
-        if network is not None:
-            metadata["network"] = network
-
-        if period is not None:
-            metadata["period"] = period
+        metadata = {k: v for k, v in metadata.items() if v is not None}
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -274,6 +271,7 @@ def standardise_footprint(
             species=species,
             network=network,
             period=period,
+            chunks=chunks,
             continuous=continuous,
             retrieve_met=retrieve_met,
             high_spatial_res=high_spatial_res,
@@ -290,6 +288,7 @@ def standardise_flux(
     date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
     overwrite: bool = False,
 ) -> Optional[Dict]:
@@ -324,13 +323,12 @@ def standardise_flux(
             "high_time_resolution": high_time_resolution,
             "continuous": continuous,
             "overwrite": overwrite,
+            "chunks": chunks,
+            "date": date,
+            "period": period,
         }
 
-        if date is None:
-            metadata["date"] = date
-
-        if period is None:
-            metadata["period"] = period
+        metadata = {k: v for k, v in metadata.items()}
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -349,6 +347,7 @@ def standardise_flux(
             high_time_resolution=high_time_resolution,
             period=period,
             continuous=continuous,
+            chunks=chunks,
             overwrite=overwrite,
         )
 

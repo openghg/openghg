@@ -18,30 +18,14 @@ In this short tutorial we'll show how to retrieve some data and create a simple 
 
 +++
 
-As in the [previous tutorial](1_Adding_observation_data.ipynb), we will start by setting up our temporary object store for our data. If you've already create your own local object store you can skip the next few steps and move onto the **Searching** section.
+As in the [previous tutorial](Adding_observation_data.ipynb), we will start by setting up our temporary object store for our data. If you've already create your own local object store you can skip the next few steps and move onto the **Searching** section.
 
 ```{code-cell} ipython3
-import os
-import tempfile
-
-tmp_dir = tempfile.TemporaryDirectory()
-os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
+from openghg.tutorial import populate_surface_data
 ```
 
 ```{code-cell} ipython3
-from openghg.util import retrieve_example_data
-from openghg.standardise import standardise_surface
-
-tac_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
-bsd_data = retrieve_example_data(path="timeseries/bsd_example.tar.gz")
-```
-
-```{code-cell} ipython3
-standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC")
-```
-
-```{code-cell} ipython3
-standardise_surface(filepaths=bsd_data, source_format="CRDS", site="BSD", network="DECC")
+populate_surface_data()
 ```
 
 ## Searching
@@ -79,36 +63,6 @@ You can make some simple changes to the plot using arguments
 
 ```{code-cell} ipython3
 data_185m.plot_timeseries(title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
-```
-
-## Using the pandas DataFrame
-
-+++
-
-We can also perform operations on the results pandas DataFrame. Let's search for all DECC network data.
-
-```{code-cell} ipython3
-decc_results = search_surface(network="DECC")
-```
-
-```{code-cell} ipython3
-results_df = decc_results.results
-```
-
-Say we want to just extract the CO2 data, we can extract the data we want using
-
-```{code-cell} ipython3
-co2_df = results_df[results_df["species"] == "co2"]
-```
-
-```{code-cell} ipython3
-co2_df
-```
-
-Then we can use this DataFrame to retrieve the data we want.
-
-```{code-cell} ipython3
-decc_results.retrieve(dataframe=co2_df)
 ```
 
 ## Plot all the data
@@ -167,8 +121,30 @@ lower_inlet_data = lower_inlets.retrieve_all()
 plot_timeseries(data=lower_inlet_data, title="Comparing CH4 measurements at Tacolneston and Bilsdale")
 ```
 
-Now we can clear up the temporary object store
+You can also search for different data types, say we want to find surface measurement data and emissions data at the same time. We can do that with the more generic `search` function.
+
++++
+
+We need to first load in some emissions data
 
 ```{code-cell} ipython3
-tmp_dir.cleanup()
+from openghg.tutorial import populate_flux_data
+```
+
+```{code-cell} ipython3
+populate_flux_data()
+```
+
+To search across different types we can use the more generic `search` function.
+
+```{code-cell} ipython3
+from openghg.retrieve import search
+```
+
+```{code-cell} ipython3
+results = search(species="ch4", data_type=["surface", "emissions"])
+```
+
+```{code-cell} ipython3
+results.results
 ```

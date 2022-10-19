@@ -2,6 +2,9 @@ import glob
 import json
 import os
 import threading
+import warnings
+
+# from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 from uuid import uuid4
@@ -13,11 +16,9 @@ rlock = threading.RLock()
 
 __all__ = [
     "delete_object",
-    "get_openghg_local_path",
+    "get_local_objectstore_path",
     "get_all_object_names",
     "get_object_names",
-    "get_bucket",
-    "get_bucket",
     "get_object",
     "set_object",
     "set_object_from_json",
@@ -28,20 +29,35 @@ __all__ = [
 ]
 
 
-def get_openghg_local_path() -> Path:
+# @lru_cache
+def get_local_objectstore_path() -> Path:
     """Returns the path to the local OpenGHG object store bucket
 
     Returns:
         pathlib.Path: Path of object store
     """
-    env_path = os.getenv("OPENGHG_PATH")
+    import os
+    from openghg.util import read_local_config
+    from openghg.tutorial import tutorial_store_path
 
-    if env_path is not None:
-        return Path(env_path)
-    else:
-        raise ValueError(
-            "No environment variable OPENGHG_PATH found, please set to use the local object store"
+    openghg_env = os.getenv("OPENGHG_PATH")
+    if openghg_env is not None:
+        warnings.warn(
+            "Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object"
+            + " store path please use the configuration file. See docs.openghg.org/install",
+            category=DeprecationWarning,
         )
+        return Path(openghg_env)
+
+    tutorial_store = os.getenv("OPENGHG_TMP_STORE")
+    if tutorial_store is not None:
+        return tutorial_store_path()
+
+    config = read_local_config()
+
+    object_store_path = Path(config["object_store"]["local_store"])
+
+    return object_store_path
 
 
 def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_prefix: bool = False) -> List:
@@ -229,23 +245,13 @@ def get_bucket(empty: bool = False) -> str:
     """
     import shutil
 
-    try:
-        local_buckets_dir = os.environ["OPENGHG_PATH"]
-    except KeyError:
-        raise ValueError(
-            "No environment variable OPENGHG_PATH found, please set to use the local object store"
-        )
+    local_bucket = get_local_objectstore_path()
 
-    local_buckets_dir = Path(local_buckets_dir)
+    if empty is True:
+        shutil.rmtree(local_bucket)
+        local_bucket.mkdir(parents=True)
 
-    if local_buckets_dir.exists():
-        if empty is True:
-            shutil.rmtree(local_buckets_dir)
-            local_buckets_dir.mkdir(parents=True)
-    else:
-        local_buckets_dir.mkdir(parents=True)
-
-    return str(local_buckets_dir)
+    return str(local_bucket)
 
 
 def query_store() -> Dict:

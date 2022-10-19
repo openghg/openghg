@@ -14,12 +14,12 @@ from ._file import (
     decompress_str,
     get_datapath,
     get_logfile_path,
-    load_json,
-    load_surface_parser,
     load_column_parser,
     load_column_source_parser,
-    load_emissions_parser,
     load_emissions_database_parser,
+    load_emissions_parser,
+    load_json,
+    load_surface_parser,
     read_header,
 )
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
@@ -40,6 +40,7 @@ from ._time import (
     find_daterange_gaps,
     find_duplicate_timestamps,
     first_last_dates,
+    in_daterange,
     parse_period,
     relative_time_offset,
     sanitise_daterange,
@@ -52,9 +53,8 @@ from ._time import (
     timestamp_tzaware,
     trim_daterange,
     valid_daterange,
-    in_daterange,
 )
-from ._tutorial import bilsdale_datapaths, retrieve_example_data
+from ._user import create_default_config, get_user_config_path, read_local_config
 from ._util import (
     find_matching_site,
     multiple_inlets,

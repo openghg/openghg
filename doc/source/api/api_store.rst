@@ -40,19 +40,6 @@ Some data may be cached locally for quicker access.
    :maxdepth: 1
 
 
-openghg.store.METStore
-======================
-
-The ``METStore`` class is used to find and retrieve meteorological data from the ECMWF data store.
-Some data may be cached locally for quicker access.
-
-.. autoclass:: openghg.store.METStore
-    :members:
-    :private-members:
-
-.. toctree::
-   :maxdepth: 1
-
 openghg.store.ObsSurface
 ========================
 
