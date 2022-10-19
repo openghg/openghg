@@ -84,7 +84,10 @@ def recombine_datasets(
         data = elevate_duplicate_attrs(ds_list=data, attributes=attributes, elevate_inlet=elevate_inlet)
 
     # Concatenate datasets along time dimension
-    combined = xr_concat(data, dim="time")
+    if len(data) > 1:
+        combined = xr_concat(data, dim="time")
+    else:
+        combined = data[0]
 
     # Replace/remove incorrect attributes
     #  - xr.concat will only take value from first dataset if duplicated

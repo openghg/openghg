@@ -413,24 +413,25 @@ class Datasource:
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
-        import tempfile
-        from pathlib import Path
+        import io
 
         from openghg.objectstore import get_object
         from xarray import load_dataset
 
-        data = get_object(bucket, key)
+        # data = get_object(bucket, key)
 
-        # TODO - is there a cleaner way of doing this?
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp_path = Path(tmpdir).joinpath("tmp.nc")
+        return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
 
-            with open(tmp_path, "wb") as f:
-                f.write(data)
+        # # TODO - is there a cleaner way of doing this?
+        # with tempfile.TemporaryDirectory() as tmpdir:
+        #     tmp_path = Path(tmpdir).joinpath("tmp.nc")
 
-            ds: Dataset = load_dataset(tmp_path)
+        #     with open(tmp_path, "wb") as f:
+        #         f.write(data)
 
-            return ds
+        #     ds: Dataset = load_dataset(tmp_path)
+
+        #     return ds
 
     @classmethod
     def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:
