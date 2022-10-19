@@ -33,4 +33,4 @@ def test_retrieve_example_data(requests_mock, mocker):
 
     retrieve_example_data(url=url)
 
-    assert download_mock.call_count == 1
+    assert download_mock.call_count == 2
