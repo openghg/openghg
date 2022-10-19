@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.ge3a185f.dirty documentation</title>
+    <title>dataobjects API detail &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -100,7 +100,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.ge3a185f.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge35adc1 documentation</p>
   
 </a>
     
@@ -126,7 +126,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -248,7 +248,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -465,7 +465,7 @@ has member functions to retrieve data from the object store.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.retrieve">
-<span class="sig-name descname"><span class="pre">retrieve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevate_inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.retrieve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.retrieve" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevate_inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.retrieve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.retrieve" title="Permalink to this definition">#</a></dt>
 <dd><p>Retrieve data from object store using a filtered pandas DataFrame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -487,14 +487,21 @@ has member functions to retrieve data from the object store.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.dataobjects.SearchResults.retrieve_all">
-<span class="sig-name descname"><span class="pre">retrieve_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevate_inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.retrieve_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.retrieve_all" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevate_inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_searchresults.html#SearchResults.retrieve_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.SearchResults.retrieve_all" title="Permalink to this definition">#</a></dt>
 <dd><p>Retrieves all data found during the search</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>ObsData object(s)</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sort</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Sort by time. Note that this may be very memory hungry for large Datasets.</p></li>
+<li><p><strong>elevate_inlet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Elevate inlet to a variable within the Dataset, useful</p></li>
+<li><p><strong>data.</strong> (<em>for ranked</em>) – </p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ObsData / List[<a class="reference internal" href="#openghg.dataobjects.ObsData" title="openghg.dataobjects.ObsData">ObsData</a>]</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>ObsData object(s)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ObsData / List[<a class="reference internal" href="#openghg.dataobjects.ObsData" title="openghg.dataobjects.ObsData">ObsData</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -772,159 +779,6 @@ containing a Dataset for each site code.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="metdata">
-<h2>METData<a class="headerlink" href="#metdata" title="Permalink to this heading">#</a></h2>
-<p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is used to return observations data from the Met data retrieval function</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="openghg.dataobjects.METData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">METData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_metdata.html#METData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.METData" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.METData.__delattr__">
-<span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__delattr__" title="Permalink to this definition">#</a></dt>
-<dd><p>Implement delattr(self, name).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.METData.__eq__">
-<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__eq__" title="Permalink to this definition">#</a></dt>
-<dd><p>Return self==value.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.METData.__hash__">
-<span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__hash__" title="Permalink to this definition">#</a></dt>
-<dd><p>Return hash(self).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.METData.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__init__" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.METData.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__repr__" title="Permalink to this definition">#</a></dt>
-<dd><p>Return repr(self).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.METData.__setattr__">
-<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#openghg.dataobjects.METData.__setattr__" title="Permalink to this definition">#</a></dt>
-<dd><p>Implement setattr(self, name, value).</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="ranksources">
-<h2>RankSources<a class="headerlink" href="#ranksources" title="Permalink to this heading">#</a></h2>
-<p>This <code class="docutils literal notranslate"><span class="pre">dataclass</span></code> is returned by the <code class="docutils literal notranslate"><span class="pre">openghg.client.rank_sources</span></code> function and allows easy setting of ranking attributes for data stored in the
-object store.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="openghg.dataobjects.RankSources">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.dataobjects.</span></span><span class="sig-name descname"><span class="pre">RankSources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.RankSources.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cloud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.__init__" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.RankSources.clear_rank">
-<span class="sig-name descname"><span class="pre">clear_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.clear_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.clear_rank" title="Permalink to this definition">#</a></dt>
-<dd><p>Clear the ranking data for a Datasource</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>key</strong> – Key for specific source</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.RankSources.get_sources">
-<span class="sig-name descname"><span class="pre">get_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.get_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.get_sources" title="Permalink to this definition">#</a></dt>
-<dd><p>Get the datasources for this site and species to allow a ranking to be set</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Three letter site code</p></li>
-<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of datasource metadata</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.RankSources.get_specific_source">
-<span class="sig-name descname"><span class="pre">get_specific_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.get_specific_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.get_specific_source" title="Permalink to this definition">#</a></dt>
-<dd><p>Return the ranking data of a specific key</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>key</strong> – Key</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of ranking data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.RankSources.raw">
-<span class="sig-name descname"><span class="pre">raw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.raw" title="Permalink to this definition">#</a></dt>
-<dd><p>Return the raw ranking data</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Raw ranking data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="openghg.dataobjects.RankSources.set_rank">
-<span class="sig-name descname"><span class="pre">set_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/dataobjects/_ranksources.html#RankSources.set_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.dataobjects.RankSources.set_rank" title="Permalink to this definition">#</a></dt>
-<dd><p>Set the rank data for the</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>inlet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Inlet to set ranking data</p></li>
-<li><p><strong>rank</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Number between 1 and 9</p></li>
-<li><p><strong>start_date</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Start date</p></li>
-<li><p><strong>end_date</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – End date</p></li>
-<li><p><strong>overwrite</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True overwrite current ranking data</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1400,150 +1254,6 @@ object store.</p>
        <code class="docutils literal notranslate">
         <span class="pre">
          FootprintData.__str__()
-        </span>
-       </code>
-      </a>
-     </li>
-    </ul>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#metdata">
-   METData
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.dataobjects.METData">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       METData
-      </span>
-     </code>
-    </a>
-    <ul class="nav section-nav flex-column">
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.METData.__delattr__">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         METData.__delattr__()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.METData.__eq__">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         METData.__eq__()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.METData.__hash__">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         METData.__hash__()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.METData.__init__">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         METData.__init__()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.METData.__repr__">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         METData.__repr__()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.METData.__setattr__">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         METData.__setattr__()
-        </span>
-       </code>
-      </a>
-     </li>
-    </ul>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#ranksources">
-   RankSources
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.dataobjects.RankSources">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       RankSources
-      </span>
-     </code>
-    </a>
-    <ul class="nav section-nav flex-column">
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.RankSources.__init__">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         RankSources.__init__()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.RankSources.clear_rank">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         RankSources.clear_rank()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.RankSources.get_sources">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         RankSources.get_sources()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.RankSources.get_specific_source">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         RankSources.get_specific_source()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.RankSources.raw">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         RankSources.raw()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.dataobjects.RankSources.set_rank">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         RankSources.set_rank()
         </span>
        </code>
       </a>

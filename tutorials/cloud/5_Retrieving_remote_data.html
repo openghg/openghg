@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 7: Retrieving data from remote archives &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
+    <title>Workflow 6: Retrieving data from remote archives &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -45,12 +45,10 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/7_Retrieving_remote_data';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/cloud/5_Retrieving_remote_data';</script>
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Development" href="../../development/index_devel.html" />
-    <link rel="prev" title="Workflow 6: Explore NOAA ObsPack" href="6_Explore_NOAA_ObsPack.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -133,7 +131,7 @@
                 </li>
                 
 
-                <li class="nav-item current active">
+                <li class="nav-item">
                     <a class="nav-link" href="../index.html">
                         Tutorials
                     </a>
@@ -226,7 +224,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -255,7 +253,7 @@
                 </li>
                 
 
-                <li class="nav-item current active">
+                <li class="nav-item">
                     <a class="nav-link" href="../index.html">
                         Tutorials
                     </a>
@@ -326,29 +324,6 @@
   </div>
 
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials - Local</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="1_Adding_observation_data.html">Workflow 1: processing, searching and retrieving observations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3_Comparing_with_emissions.html">Workflow 3: comparing observations to emissions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_Working_with_co2.html">Workflow 4: Working with carbon dioxide</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_Searching_and_plotting.html">Workflow 5: Searching and plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_Explore_NOAA_ObsPack.html">Workflow 6: Explore NOAA ObsPack</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Workflow 7: Retrieving data from remote archives</a></li>
-</ul>
-</li>
-</ul>
-
-  </div>
-</nav>
-    </div>
-  </div>
-  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -370,20 +345,9 @@
             
             <article class="bd-article" role="main">
               
-  <section id="workflow-7-retrieving-data-from-remote-archives">
-<h1>Workflow 7: Retrieving data from remote archives<a class="headerlink" href="#workflow-7-retrieving-data-from-remote-archives" title="Permalink to this heading">#</a></h1>
+  <section id="workflow-6-retrieving-data-from-remote-archives">
+<h1>Workflow 6: Retrieving data from remote archives<a class="headerlink" href="#workflow-6-retrieving-data-from-remote-archives" title="Permalink to this heading">#</a></h1>
 <p>This tutorial covers the retrieval of data from the ICOS Carbon Portal and the CEDA archives.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-
-<span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_dir</span><span class="o">.</span><span class="n">name</span>   <span class="c1"># temporary directory</span>
-</pre></div>
-</div>
-</div>
-</div>
 <section id="icos">
 <h2>ICOS<a class="headerlink" href="#icos" title="Permalink to this heading">#</a></h2>
 <p>It’s easy to retrieve atmospheric gas measurements from the <a class="reference external" href="https://www.icos-cp.eu/observations/carbon-portal">ICOS Carbon Portal</a> using OpenGHG. To do so we’ll use the <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.client</span></code>.</p>
@@ -474,7 +438,7 @@
 <p>By default level 2 data is retrieved but this can be changed by passing <code class="docutils literal notranslate"><span class="pre">data_level</span></code> to <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code>. Below we’ll retrieve some more recent data from <strong>WAO</strong>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span> <span class="o">=</span> <span class="n">retrieve_icos</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -504,7 +468,7 @@
 <p>If you retrieve data using <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> and notice that it does not return the most up to date data (compare the dates with those on the portal) you can force a retrieval using <code class="docutils literal notranslate"><span class="pre">force_retrieval</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">new_data</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">force_retrieval</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">new_data</span> <span class="o">=</span> <span class="n">retrieve_icos</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">force_retrieval</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -568,16 +532,6 @@
 </div>
 </div>
 </section>
-<section id="cleanup-the-temporary-object-store">
-<h3>Cleanup the temporary object store<a class="headerlink" href="#cleanup-the-temporary-object-store" title="Permalink to this heading">#</a></h3>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tmp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</section>
 </section>
 </section>
 
@@ -589,20 +543,6 @@
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="6_Explore_NOAA_ObsPack.html" title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-          <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Workflow 6: Explore NOAA ObsPack</p>
-      </div>
-  </a>
-  <a class='right-next' id="next-link" href="../../development/index_devel.html" title="next page">
-  <div class="prev-next-info">
-      <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Development</p>
-  </div>
-  <i class="fa-solid fa-angle-right"></i>
-  </a>
 </div>
             </footer>
             
@@ -664,11 +604,6 @@
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#retrieving-a-second-time">
      Retrieving a second time
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#cleanup-the-temporary-object-store">
-     Cleanup the temporary object store
     </a>
    </li>
   </ul>

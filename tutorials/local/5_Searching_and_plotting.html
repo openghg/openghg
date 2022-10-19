@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 5: Searching and plotting &#8212; OpenGHG 0+untagged.1.ge3a185f.dirty documentation</title>
+    <title>Workflow 5: Searching and plotting &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -102,7 +102,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.ge3a185f.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge35adc1 documentation</p>
   
 </a>
     
@@ -128,7 +128,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -250,7 +250,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -335,7 +335,6 @@
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials - Local</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="1_Adding_observation_data.html">Workflow 1: processing, searching and retrieving observations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_Ranking_for_observations.html">Workflow 2: handling overlapping observation data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3_Comparing_with_emissions.html">Workflow 3: comparing observations to emissions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4_Working_with_co2.html">Workflow 4: Working with carbon dioxide</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Workflow 5: Searching and plotting</a></li>
@@ -374,39 +373,17 @@
   <section id="workflow-5-searching-and-plotting">
 <h1>Workflow 5: Searching and plotting<a class="headerlink" href="#workflow-5-searching-and-plotting" title="Permalink to this heading">#</a></h1>
 <p>In this short tutorial we’ll show how to retrieve some data and create a simple plot using one of our plotting functions.</p>
-<p>As in the <a class="reference internal" href="1_Adding_observation_data.html"><span class="doc std std-doc">previous tutorial</span></a>, we will start by setting up our temporary object store for our data. If you’ve already create your own local object store you can skip the next few steps and move onto the <strong>Searching</strong> section.</p>
+<p>As in the <span class="xref myst">previous tutorial</span>, we will start by setting up our temporary object store for our data. If you’ve already create your own local object store you can skip the next few steps and move onto the <strong>Searching</strong> section.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-
-<span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_dir</span><span class="o">.</span><span class="n">name</span>   <span class="c1"># temporary directory</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_surface_data</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
-<span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
-
-<span class="n">tac_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;timeseries/tac_example.tar.gz&quot;</span><span class="p">)</span>
-<span class="n">bsd_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;timeseries/bsd_example.tar.gz&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">bsd_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;BSD&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -454,47 +431,6 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Methane at Tacolneston&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Conc.&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppm&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</section>
-<section id="using-the-pandas-dataframe">
-<h2>Using the pandas DataFrame<a class="headerlink" href="#using-the-pandas-dataframe" title="Permalink to this heading">#</a></h2>
-<p>We can also perform operations on the results pandas DataFrame. Let’s search for all DECC network data.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">decc_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results_df</span> <span class="o">=</span> <span class="n">decc_results</span><span class="o">.</span><span class="n">results</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Say we want to just extract the CO2 data, we can extract the data we want using</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">co2_df</span> <span class="o">=</span> <span class="n">results_df</span><span class="p">[</span><span class="n">results_df</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">co2_df</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Then we can use this DataFrame to retrieve the data we want.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">decc_results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">dataframe</span><span class="o">=</span><span class="n">co2_df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -576,9 +512,40 @@
 </div>
 </div>
 <p>Now we can clear up the temporary object store</p>
+<p>You can also search for different data types, say we want to find surface measurement data and emissions data at the same time. We can do that with the more generic <code class="docutils literal notranslate"><span class="pre">search</span></code> function.</p>
+<p>We need to first load in some emissions data</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tmp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_flux_data</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_flux_data</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To search across different types we can use the more generic <code class="docutils literal notranslate"><span class="pre">search</span></code> function.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;surface&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
 </div>
@@ -627,11 +594,6 @@
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#searching">
    Searching
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#using-the-pandas-dataframe">
-   Using the pandas DataFrame
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">

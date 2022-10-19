@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._recombination &#8212; OpenGHG 0+untagged.1.ge3a185f.dirty documentation</title>
+    <title>openghg.store._recombination &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -99,7 +99,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.ge3a185f.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge35adc1 documentation</p>
   
 </a>
     
@@ -125,7 +125,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../../../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -247,7 +247,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../../../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -376,8 +376,8 @@
 
 <div class="viewcode-block" id="recombine_datasets"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.recombine_datasets">[docs]</a><span class="k">def</span> <span class="nf">recombine_datasets</span><span class="p">(</span>
     <span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">attrs_to_check</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">attrs_to_check</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">elevate_inlet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Combines datasets stored separately in the object store</span>
@@ -431,7 +431,10 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">elevate_duplicate_attrs</span><span class="p">(</span><span class="n">ds_list</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="n">elevate_inlet</span><span class="p">)</span>
 
     <span class="c1"># Concatenate datasets along time dimension</span>
-    <span class="n">combined</span> <span class="o">=</span> <span class="n">xr_concat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">xr_concat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Replace/remove incorrect attributes</span>
     <span class="c1">#  - xr.concat will only take value from first dataset if duplicated</span>
@@ -443,8 +446,8 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">combined</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
-        <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+    <span class="c1"># if sort:</span>
+    <span class="c1">#     combined = combined.sortby(&quot;time&quot;)</span>
 
     <span class="c1"># This is modified from https://stackoverflow.com/a/51077784/1303032</span>
     <span class="n">unique</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">combined</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -454,7 +457,14 @@
     <span class="k">if</span> <span class="n">n_dupes</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Large number of duplicate timestamps, check data overlap.&quot;</span><span class="p">)</span>
 
-    <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+    <span class="c1"># print(f&quot;\n\nNumber of dupes: {n_dupes}&quot;)</span>
+    <span class="c1"># Using isel is a memory hungry operation, there&#39;s no point doing it if we don&#39;t have any dupes</span>
+    <span class="c1"># if n_dupes &gt; 0:</span>
+    <span class="c1">#     combined = combined.isel(time=index)</span>
+
+    <span class="c1"># Only keep the unique values if we have dupes</span>
+    <span class="c1"># if index.size != combined.time.size:</span>
+    <span class="c1">#    combined = combined.isel(time=index)</span>
 
     <span class="k">return</span> <span class="n">combined</span></div>
 

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>objectstore API Detail &#8212; OpenGHG 0+untagged.1.ge3a185f.dirty documentation</title>
+    <title>objectstore API Detail &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -100,7 +100,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.ge3a185f.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge35adc1 documentation</p>
   
 </a>
     
@@ -126,7 +126,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -248,7 +248,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -369,20 +369,6 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="openghg.objectstore.get_openghg_local_path">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_openghg_local_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_openghg_local_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_openghg_local_path" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns the path to the local OpenGHG object store bucket</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Path of object store</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>pathlib.Path</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_all_object_names">
 <span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_all_object_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">without_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_all_object_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_all_object_names" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the names of all objects in the passed bucket</p>
@@ -446,10 +432,10 @@ if the bucket does not exist then an exception will be raised.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Object from store</p>
+<dd class="field-even"><p>Binary data from the store</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Object</p>
+<dd class="field-odd"><p>bytes</p>
 </dd>
 </dl>
 </dd></dl>
@@ -603,15 +589,6 @@ if the bucket does not exist then an exception will be raised.</p>
    <code class="docutils literal notranslate">
     <span class="pre">
      delete_object()
-    </span>
-   </code>
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#openghg.objectstore.get_openghg_local_path">
-   <code class="docutils literal notranslate">
-    <span class="pre">
-     get_openghg_local_path()
     </span>
    </code>
   </a>

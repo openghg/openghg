@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 4: Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.ge3a185f.dirty documentation</title>
+    <title>Workflow 4: Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -102,7 +102,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.ge3a185f.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge35adc1 documentation</p>
   
 </a>
     
@@ -128,7 +128,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -250,7 +250,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="../../install.html">
-                        Installation instructions
+                        Installation
                     </a>
                 </li>
                 
@@ -335,7 +335,6 @@
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials - Local</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="1_Adding_observation_data.html">Workflow 1: processing, searching and retrieving observations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_Ranking_for_observations.html">Workflow 2: handling overlapping observation data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3_Comparing_with_emissions.html">Workflow 3: comparing observations to emissions</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Workflow 4: Working with carbon dioxide</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_Searching_and_plotting.html">Workflow 5: Searching and plotting</a></li>
@@ -379,90 +378,36 @@
 <blockquote>
 <div><p><strong><em>NOTE:</em></strong>  Plots created within this tutorial may not show up on the online documentation version of this notebook.</p>
 </div></blockquote>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-
-<span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_dir</span><span class="o">.</span><span class="n">name</span>   <span class="c1"># temporary directory</span>
-
-<span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-</pre></div>
-</div>
-</div>
-</div>
 <section id="loading-data-sources-into-the-object-store">
 <h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Permalink to this heading">#</a></h2>
-<p>For this tutorial we will again set up a temporary object store to store our data. See <a class="reference internal" href="1_Adding_observation_data.html"><span class="doc std std-doc">1_Adding_observation_data.ipynb</span></a> for more details around this.</p>
-<p>First we define some input variables.</p>
+<p>For this tutorial we will again use a helper function from the <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule to add some data to your local object store. As we’re going to be comparing CO2 emissions with flux data here, we’ll add surface, flux and footprint data to the object store. Don’t worry if you get a message telling you the file has already been added, this might happen if you’ve been through one of the other tutorials previously.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;TAC&quot;</span>
-<span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;DECC&quot;</span>
-<span class="n">height</span> <span class="o">=</span> <span class="s2">&quot;100m&quot;</span>
-
-<span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;EUROPE&quot;</span>
-<span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;co2&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_flux_data</span><span class="p">,</span> <span class="n">populate_surface_data</span><span class="p">,</span> <span class="n">populate_footprint_data</span>
 </pre></div>
 </div>
 </div>
 </div>
+<p>First we’ll add some surface measurment data</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
-<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
-
-<span class="n">obs_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;timeseries/tac_example.tar.gz&quot;</span><span class="p">)</span>
-
-<span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;TAC&quot;</span>
-<span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;co2&quot;</span>
-<span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;DECC&quot;</span>
-
-<span class="n">decc_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 </div>
-<p>Add some flux data.</p>
+<p>Next we’ll add some flux data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_flux</span>
-
-<span class="n">flux_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;flux/co2-flux_EUROPE_2017.tar.gz&quot;</span><span class="p">)</span>
-
-<span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;EUROPE&quot;</span>
-<span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;co2&quot;</span>
-<span class="n">date</span> <span class="o">=</span> <span class="s2">&quot;2017&quot;</span>
-
-<span class="n">source_natural</span> <span class="o">=</span> <span class="s2">&quot;natural&quot;</span>
-<span class="n">source_fossil</span> <span class="o">=</span> <span class="s2">&quot;ff-edgar-bp&quot;</span>
-
-<span class="n">flux_file_natural</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">flux_data</span> <span class="k">if</span> <span class="n">source_natural</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">flux_file_ff</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">flux_data</span> <span class="k">if</span> <span class="n">source_fossil</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">standardise_flux</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">flux_file_natural</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source_natural</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">high_time_resolution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">standardise_flux</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">flux_file_ff</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source_fossil</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_flux_data</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 </div>
-<p>Add some footprint data</p>
+<p>And finally some footprint data</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_footprint</span>
-
-<span class="n">footprint_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;footprint/tac_footprint_co2_201707.tar.gz&quot;</span><span class="p">)</span>
-
-<span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;TAC&quot;</span>
-<span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;EUROPE&quot;</span>
-<span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;co2&quot;</span>
-<span class="n">height</span> <span class="o">=</span> <span class="s2">&quot;185m&quot;</span>
-<span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;NAME&quot;</span>
-<span class="n">metmodel</span> <span class="o">=</span> <span class="s2">&quot;UKV&quot;</span>
-
-<span class="n">standardise_footprint</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_footprint_data</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -475,6 +420,11 @@
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.analyse</span> <span class="kn">import</span> <span class="n">ModelScenario</span>
 
+<span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;TAC&quot;</span>
+<span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;EUROPE&quot;</span>
+<span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;co2&quot;</span>
+<span class="n">height</span> <span class="o">=</span> <span class="s2">&quot;185m&quot;</span>
+<span class="n">source_natural</span> <span class="o">=</span> <span class="s2">&quot;natural&quot;</span>
 <span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;2017-07-01&quot;</span>
 <span class="n">end_date</span> <span class="o">=</span> <span class="s2">&quot;2017-07-07&quot;</span>
 
@@ -521,7 +471,9 @@
 <p>As in the previous tutorial, multiple fluxes can be linked to your <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object if required. This can include additional high frequency (&lt;24 hourly) or low frequency flux data. In this case we have added monthly “fossil fuel” emissions:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">source_fossil</span> <span class="o">=</span> <span class="s2">&quot;ff-edgar-bp&quot;</span>
+
+<span class="n">scenario</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
                   <span class="n">source</span><span class="o">=</span><span class="n">source_fossil</span><span class="p">,</span>
                   <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
 </pre></div>

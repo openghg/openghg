@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 3: comparing observations to emissions &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
+    <title>Workflow 2: comparing observations to emissions &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -45,12 +45,10 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/3_Comparing_with_emissions';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/cloud/1_Comparing_with_emissions';</script>
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Workflow 4: Working with carbon dioxide" href="4_Working_with_co2.html" />
-    <link rel="prev" title="Workflow 1: processing, searching and retrieving observations" href="1_Adding_observation_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -133,7 +131,7 @@
                 </li>
                 
 
-                <li class="nav-item current active">
+                <li class="nav-item">
                     <a class="nav-link" href="../index.html">
                         Tutorials
                     </a>
@@ -226,7 +224,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -255,7 +253,7 @@
                 </li>
                 
 
-                <li class="nav-item current active">
+                <li class="nav-item">
                     <a class="nav-link" href="../index.html">
                         Tutorials
                     </a>
@@ -326,29 +324,6 @@
   </div>
 
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials - Local</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="1_Adding_observation_data.html">Workflow 1: processing, searching and retrieving observations</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Workflow 3: comparing observations to emissions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_Working_with_co2.html">Workflow 4: Working with carbon dioxide</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_Searching_and_plotting.html">Workflow 5: Searching and plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="6_Explore_NOAA_ObsPack.html">Workflow 6: Explore NOAA ObsPack</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_Retrieving_remote_data.html">Workflow 7: Retrieving data from remote archives</a></li>
-</ul>
-</li>
-</ul>
-
-  </div>
-</nav>
-    </div>
-  </div>
-  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -370,8 +345,8 @@
             
             <article class="bd-article" role="main">
               
-  <section id="workflow-3-comparing-observations-to-emissions">
-<h1>Workflow 3: comparing observations to emissions<a class="headerlink" href="#workflow-3-comparing-observations-to-emissions" title="Permalink to this heading">#</a></h1>
+  <section id="workflow-2-comparing-observations-to-emissions">
+<h1>Workflow 2: comparing observations to emissions<a class="headerlink" href="#workflow-2-comparing-observations-to-emissions" title="Permalink to this heading">#</a></h1>
 <p>In addition to observation files, ancillary data can also be added to an openghg object store which can be used to perform analysis.</p>
 <p>At the moment, the accepted files include:</p>
 <ul class="simple">
@@ -385,86 +360,9 @@
 <blockquote>
 <div><p><strong><em>NOTE:</em></strong>  Plots created within this tutorial may not show up on the online documentation version of this notebook.</p>
 </div></blockquote>
-<section id="loading-data-sources-into-the-object-store">
-<h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Permalink to this heading">#</a></h2>
-<p>For this tutorial we will again set up a temporary object store to store our data.</p>
-<p>See <a class="reference internal" href="1_Adding_observation_data.html"><span class="doc std std-doc">1_Adding_observation_data.ipynb</span></a> for more details and advice on how to create a more permanent object store. Once a permanent object store is set up, these steps would only need to be performed once. Any added data can then be retrieved using searches.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-
-<span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_dir</span><span class="o">.</span><span class="n">name</span>   <span class="c1"># temporary directory</span>
-
-<span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>For this, we will add observation, footprint and flux data to the object store. This data relates to Tacolneston (TAC) site within the DECC network and the area around Europe (EUROPE domain).</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
-<span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
-
-<span class="n">obs_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;timeseries/tac_example.tar.gz&quot;</span><span class="p">)</span>
-
-<span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span>
-<span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span>
-<span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span>
-<span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span>
-
-<span class="n">obs_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">obs_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_flux</span>
-
-<span class="n">flux_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;flux/ch4-ukghg-all_EUROPE_2016.tar.gz&quot;</span><span class="p">)</span>
-
-<span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span>
-<span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span>
-<span class="n">date</span> <span class="o">=</span> <span class="s2">&quot;2016&quot;</span>
-
-<span class="n">source_waste</span> <span class="o">=</span> <span class="s2">&quot;waste&quot;</span>
-<span class="n">source_energyprod</span> <span class="o">=</span> <span class="s2">&quot;energyprod&quot;</span>
-
-<span class="n">flux_data_waste</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">flux_data</span> <span class="k">if</span> <span class="n">source_waste</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">flux_data_energyprod</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">flux_data</span> <span class="k">if</span> <span class="n">source_energyprod</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
-
-
-
-<span class="n">standardise_flux</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">flux_data_waste</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source_waste</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
-<span class="n">standardise_flux</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">flux_data_energyprod</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">source_energyprod</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">date</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_footprint</span>
-
-<span class="n">footprint_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;footprint/tac_footprint_inert_201607.tar.gz&quot;</span><span class="p">)</span>
-
-<span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span>
-<span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span>
-<span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span>
-<span class="n">model</span><span class="o">=</span><span class="s2">&quot;NAME&quot;</span>
-
-<span class="n">standardise_footprint</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</section>
 <section id="creating-a-model-scenario">
-<h2>2. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Permalink to this heading">#</a></h2>
-<p>With this ancillary data, we can start to make comparisons between model data, such as bottom-up inventories, and our observations. This analysis is based around a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> class which can be created to link together observation, footprint and emissions data.</p>
+<h2>1. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Permalink to this heading">#</a></h2>
+<p>We can start to make comparisons between model data, such as bottom-up inventories, and our observations. This analysis is based around a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> class which can be created to link together observation, footprint and emissions data.</p>
 <p><em>Boundary conditions and other model data will be added soon</em></p>
 <p>Above we loaded observation data from the Tacolneston site into the object store. We also added an associated footprint (sensitivity map) and anthropogenic emissions maps both for a domain defined over Europe.</p>
 <p>To access and link this data we can set up our <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> instance using a similiar set of keywords. In this case we have also limited ourselves to a date range:</p>
@@ -472,16 +370,13 @@
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.analyse</span> <span class="kn">import</span> <span class="n">ModelScenario</span>
 
-<span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;2016-07-01&quot;</span>
-<span class="n">end_date</span> <span class="o">=</span> <span class="s2">&quot;2016-08-01&quot;</span>
-
-<span class="n">scenario</span> <span class="o">=</span> <span class="n">ModelScenario</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-                         <span class="n">inlet</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-                         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-                         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-                         <span class="n">source</span><span class="o">=</span><span class="n">source_waste</span><span class="p">,</span>
-                         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
-                         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+<span class="n">scenario</span> <span class="o">=</span> <span class="n">ModelScenario</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span>
+                         <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">,</span>
+                         <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span>
+                         <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span>
+                         <span class="n">source</span><span class="o">=</span><span class="s2">&quot;waste&quot;</span><span class="p">,</span>
+                         <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2016-07-01&quot;</span><span class="p">,</span>
+                         <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2016-08-01&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -564,7 +459,7 @@
 <p>One benefit of this interface is to reduce searching the database if the same data needs to be used for multiple different scenarios.</p>
 </section>
 <section id="comparing-data-sources">
-<h2>3. Comparing data sources<a class="headerlink" href="#comparing-data-sources" title="Permalink to this heading">#</a></h2>
+<h2>2. Comparing data sources<a class="headerlink" href="#comparing-data-sources" title="Permalink to this heading">#</a></h2>
 <p>Once your <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> has been created you can then start to use the linked data to compare outputs. For example we may want to calculate modelled observations at our site based on our linkec footprint and emissions data:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -646,20 +541,6 @@
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="1_Adding_observation_data.html" title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-          <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Workflow 1: processing, searching and retrieving observations</p>
-      </div>
-  </a>
-  <a class='right-next' id="next-link" href="4_Working_with_co2.html" title="next page">
-  <div class="prev-next-info">
-      <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Workflow 4: Working with carbon dioxide</p>
-  </div>
-  <i class="fa-solid fa-angle-right"></i>
-  </a>
 </div>
             </footer>
             
@@ -677,18 +558,13 @@
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#loading-data-sources-into-the-object-store">
-   1. Loading data sources into the object store
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#creating-a-model-scenario">
-   2. Creating a model scenario
+   1. Creating a model scenario
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#comparing-data-sources">
-   3. Comparing data sources
+   2. Comparing data sources
   </a>
  </li>
 </ul>

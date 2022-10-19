@@ -6,8 +6,6 @@ These functions are used by OpenGHG to store and retrieve data from the object s
 
 .. autofunction:: openghg.objectstore.delete_object
 
-.. autofunction:: openghg.objectstore.get_openghg_local_path
-
 .. autofunction:: openghg.objectstore.get_all_object_names
 
 .. autofunction:: openghg.objectstore.get_object_names
