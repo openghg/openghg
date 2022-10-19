@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Workflow 1: processing, searching and retrieving observations &#8212; OpenGHG 0+untagged.1.ge35adc1 documentation</title>
+    <title>Processing, searching and retrieving observations &#8212; OpenGHG 0+untagged.1.gb4a83f6 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -102,7 +102,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.ge35adc1 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gb4a83f6 documentation</p>
   
 </a>
     
@@ -334,7 +334,7 @@
   <div class="bd-toc-item navbar-nav">
     <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials - Local</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Workflow 1: processing, searching and retrieving observations</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Processing, searching and retrieving observations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3_Comparing_with_emissions.html">Workflow 3: comparing observations to emissions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4_Working_with_co2.html">Workflow 4: Working with carbon dioxide</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_Searching_and_plotting.html">Workflow 5: Searching and plotting</a></li>
@@ -370,9 +370,12 @@
             
             <article class="bd-article" role="main">
               
-  <section id="workflow-1-processing-searching-and-retrieving-observations">
-<h1>Workflow 1: processing, searching and retrieving observations<a class="headerlink" href="#workflow-1-processing-searching-and-retrieving-observations" title="Permalink to this heading">#</a></h1>
+  <section id="processing-searching-and-retrieving-observations">
+<h1>Processing, searching and retrieving observations<a class="headerlink" href="#processing-searching-and-retrieving-observations" title="Permalink to this heading">#</a></h1>
 <p>This tutorial demonstrates how OpenGHG can be used to process new measurement data, search the data present and to retrieve this for analysis and visualisation.</p>
+<blockquote>
+<div><p><strong><em>NOTE:</em></strong>  This tutorial needs updating and will not currently work</p>
+</div></blockquote>
 <section id="check-installation">
 <h2>Check installation<a class="headerlink" href="#check-installation" title="Permalink to this heading">#</a></h2>
 <p>This tutorial assumes that you have installed <code class="docutils literal notranslate"><span class="pre">openghg</span></code>. To ensure install has been successful you can open an <code class="docutils literal notranslate"><span class="pre">ipython</span></code> console and try to import this module.</p>
@@ -395,22 +398,14 @@
 <section id="setting-up-an-object-store">
 <h2>1. Setting up an object store<a class="headerlink" href="#setting-up-an-object-store" title="Permalink to this heading">#</a></h2>
 <p>The OpenGHG platform uses what’s called an <em>object store</em> to save data. Any saved data has been processed into a standardised format, assigned universally unique identifiers (UUIDs) and stored alongside associated metadata (such as site and species details). Storing data in this way allows for fast retrieval and efficient searching.</p>
-<p>When using OpenGHG on a local machine the location of the object store is set using an <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable (explained below) and this can be any directory on your local system.</p>
-<p>For this tutorial, we will create a temporary object store which we can add data to. This path is fine for this purpose but as it is a temporary directory it may not survive a reboot of the computer.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable can be set up in the following way.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-
-<span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_dir</span><span class="o">.</span><span class="n">name</span>   <span class="c1"># temporary directory</span>
+<p>When you first import openghg it will create a configuration file in your home directory under <code class="docutils literal notranslate"><span class="pre">~/.config/openghg/openghg.conf</span></code>. This is a <a class="reference external" href="https://toml.io/en/">TOML</a> file that is used by OpenGHG to store user settings and should look like this if you’re using Linux:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[object_store]</span><span class="w"></span>
+<span class="n">local_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/your_username/openghg_store&quot;</span><span class="w"></span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>When creating your own longer term object store we recommend a path such as <code class="docutils literal notranslate"><span class="pre">~/openghg_store</span></code> which will create the object store in your home directory in a directory called <code class="docutils literal notranslate"><span class="pre">openghg_store</span></code>. If you want this to be a permanent location this can be added to your shell profile. If you’re using <code class="docutils literal notranslate"><span class="pre">bash</span></code> you could add it to <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> or <code class="docutils literal notranslate"><span class="pre">~/.bash_profile</span></code> file depending on the system being used. e.g. as</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span> <span class="nb">export</span> <span class="nv">OPENGHG_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/openghg_store&quot;</span>
+<p>Or if you’re using macOS</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[object_store]</span><span class="w"></span>
+<span class="n">local_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/Users/your_username/openghg_store&quot;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -449,9 +444,9 @@
 <p>We will start by adding data to the object store from a surface site within the DECC network. Here we have accessed a subset of data from the Tacolneston site (site code “TAC”) in the UK.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
-<span class="n">tac_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;timeseries/tac_example.tar.gz&quot;</span><span class="p">)</span>
+<span class="n">tac_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">&quot;timeseries/tac_example.tar.gz&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

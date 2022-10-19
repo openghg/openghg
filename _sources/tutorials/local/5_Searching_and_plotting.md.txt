@@ -121,10 +121,6 @@ lower_inlet_data = lower_inlets.retrieve_all()
 plot_timeseries(data=lower_inlet_data, title="Comparing CH4 measurements at Tacolneston and Bilsdale")
 ```
 
-Now we can clear up the temporary object store
-
-+++
-
 You can also search for different data types, say we want to find surface measurement data and emissions data at the same time. We can do that with the more generic `search` function.
 
 +++
