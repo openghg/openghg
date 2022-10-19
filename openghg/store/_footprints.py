@@ -227,9 +227,10 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
+        # from xarray import load_dataset
+        import xarray as xr
         from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
         from openghg.util import clean_string, hash_file, species_lifetime, timestamp_now
-        from xarray import open_dataset
 
         filepath = Path(filepath)
 
@@ -250,9 +251,8 @@ class Footprints(BaseStore):
             )
             return None
 
-        # Use auto chunking on read in so we don't load the whole thing at once
-        # TODO - check how different chunk sizes affect memory usage
-        fp_data = open_dataset(filepath, chunks="auto")
+        # Load this into memory
+        fp_data = xr.open_dataset(filepath, chunks="auto")
 
         if species == "co2":
             # Expect co2 data to have high time resolution

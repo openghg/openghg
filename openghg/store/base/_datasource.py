@@ -117,19 +117,26 @@ class Datasource:
         from openghg.util import daterange_overlap
         from xarray import concat as xr_concat
 
+        # For now we'll only group timeseries data.
+        # This is to a
+        # if data_type != "timeseries"
         # Group by year
-        year_group = data.groupby("time.year")
-
-        # Use a dictionary keyed with the daterange covered by each segment of data
-        new_data = {}
-
+        # year_group = data.groupby("time.year")
         # Extract period associated with data from metadata
         # TODO: May want to add period as a potential data variable so would need to extract from there if needed
         period = self.get_period()
 
-        for _, data in year_group:
-            daterange_str = self.get_representative_daterange_str(data, period=period)
-            new_data[daterange_str] = data
+        new_data = {
+            self.get_representative_daterange_str(year_data, period=period): year_data
+            for _, year_data in data.groupby("time.year")
+        }
+
+        # Use a dictionary keyed with the daterange covered by each segment of data
+        # new_data = {}
+
+        # for _, data in year_group:
+        #     daterange_str = self.get_representative_daterange_str(data, period=period)
+        #     new_data[daterange_str] = data
 
         if self._data:
             # We need to remove them from the curre
@@ -410,14 +417,8 @@ class Datasource:
 
         from openghg.objectstore import get_object
         from xarray import open_dataset
-
-        data = get_object(bucket, key)
-        buf = io.BytesIO(data)
-
-        return open_dataset(buf)
-        # Instead of loading in the dataset here we just pass the bytes back
-
-        # return get_object(bucket=bucket, key)
+        
+        return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
 
         # # TODO - is there a cleaner way of doing this?
         # with tempfile.TemporaryDirectory() as tmpdir:
