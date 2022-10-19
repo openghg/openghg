@@ -2,7 +2,6 @@
 
 """
 import contextlib
-import json
 import os
 import shutil
 import tarfile
@@ -288,33 +287,33 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
     if not example_cache_path.exists():
         example_cache_path.mkdir(parents=True)
 
-    cache_record = example_cache_path / "cache_record.json"
+    # cache_record = example_cache_path / "cache_record.json"
     download_path = Path(example_cache_path).joinpath(output_filename)
 
-    cache_exists = cache_record.is_file()
+    # cache_exists = cache_record.is_file()
 
-    if cache_exists:
-        cache_data = json.loads(cache_record.read_text())
+    # if cache_exists:
+    #     cache_data = json.loads(cache_record.read_text())
 
-        try:
-            cached_datapath = Path(cache_data[output_filename])
-        except KeyError:
-            cache_data[output_filename] = str(download_path)
-        else:
-            return unpack_example_archive(archive_path=cached_datapath, extract_dir=extract_dir)
-    else:
-        cache_data = {}
-        cache_data[output_filename] = str(download_path)
+    #     try:
+    #         cached_datapath = Path(cache_data[output_filename])
+    #     except KeyError:
+    #         cache_data[output_filename] = str(download_path)
+    #     else:
+    #         return unpack_example_archive(archive_path=cached_datapath, extract_dir=extract_dir)
+    # else:
+    #     cache_data = {}
+    #     cache_data[output_filename] = str(download_path)
 
     download_data(url=url, filepath=download_path)
 
-    # Make sure we still have all the files in the cache we expect to
-    checked_cache = {}
-    for filename, path in cache_data.items():
-        if Path(path).exists():
-            checked_cache[filename] = path
+    # # Make sure we still have all the files in the cache we expect to
+    # checked_cache = {}
+    # for filename, path in cache_data.items():
+    #     if Path(path).exists():
+    #         checked_cache[filename] = path
 
-    cache_record.write_text(json.dumps(checked_cache))
+    # cache_record.write_text(json.dumps(checked_cache))
 
     return unpack_example_archive(archive_path=download_path, extract_dir=extract_dir)
 

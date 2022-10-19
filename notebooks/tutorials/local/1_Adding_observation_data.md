@@ -12,9 +12,13 @@ kernelspec:
   name: python3
 ---
 
-# Workflow 1: processing, searching and retrieving observations
+# Processing, searching and retrieving observations
 
 This tutorial demonstrates how OpenGHG can be used to process new measurement data, search the data present and to retrieve this for analysis and visualisation.
+
++++
+
+> **_NOTE:_**  This tutorial needs updating and will not currently work
 
 +++
 
@@ -48,24 +52,24 @@ If you haven't used Jupyter notebooks before please see [this introduction](http
 
 The OpenGHG platform uses what's called an *object store* to save data. Any saved data has been processed into a standardised format, assigned universally unique identifiers (UUIDs) and stored alongside associated metadata (such as site and species details). Storing data in this way allows for fast retrieval and efficient searching.
 
-When using OpenGHG on a local machine the location of the object store is set using an `OPENGHG_PATH` environment variable (explained below) and this can be any directory on your local system.
+When you first import openghg it will create a configuration file in your home directory under `~/.config/openghg/openghg.conf`. This is a [TOML](https://toml.io/en/) file that is used by OpenGHG to store user settings and should look like this if you're using Linux:
 
-For this tutorial, we will create a temporary object store which we can add data to. This path is fine for this purpose but as it is a temporary directory it may not survive a reboot of the computer.
++++
 
-The `OPENGHG_PATH` environment variable can be set up in the following way.
-
-```{code-cell} ipython3
-import os
-import tempfile
-
-tmp_dir = tempfile.TemporaryDirectory()
-os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
+```toml
+[object_store]
+local_store = "/home/your_username/openghg_store"
 ```
 
-When creating your own longer term object store we recommend a path such as ``~/openghg_store`` which will create the object store in your home directory in a directory called ``openghg_store``. If you want this to be a permanent location this can be added to your shell profile. If you're using `bash` you could add it to `~/.bashrc` or `~/.bash_profile` file depending on the system being used. e.g. as
++++
 
-```bash
- export OPENGHG_PATH="$HOME/openghg_store"
+Or if you're using macOS
+
++++
+
+```toml
+[object_store]
+local_store = "/Users/your_username/openghg_store"
 ```
 
 +++
@@ -104,9 +108,9 @@ summary[summary["Site code"] == "TAC"]
 We will start by adding data to the object store from a surface site within the DECC network. Here we have accessed a subset of data from the Tacolneston site (site code "TAC") in the UK.
 
 ```{code-cell} ipython3
-from openghg.util import retrieve_example_data
+from openghg.tutorial import retrieve_example_data
 
-tac_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
+tac_data = retrieve_example_data(url="timeseries/tac_example.tar.gz")
 ```
 
 As this data is measured in-situ, this is classed as a surface site and we need to use the `ObsSurface` class to interpret this data. We can pass our list of files to the `read_file` method associated within the `ObsSurface` class, also providing details on:
