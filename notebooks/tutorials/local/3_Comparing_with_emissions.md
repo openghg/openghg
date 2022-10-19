@@ -5,9 +5,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.13.6
+    jupytext_version: 1.14.1
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -26,9 +26,11 @@ These inputs must adhere to an expected format and are expected to minimally con
 
 *At the moment, the expected format for these files is created through standard methods from within the ACRG repository.*
 
+> **_NOTE:_**  Plots created within this tutorial may not show up on the online documentation version of this notebook.
+
 +++
 
-## Loading data sources into the object store
+## 1. Loading data sources into the object store
 
 For this tutorial we will again set up a temporary object store to store our data.
 
@@ -40,51 +42,35 @@ import tempfile
 
 tmp_dir = tempfile.TemporaryDirectory()
 os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
+
+%load_ext autoreload
+%autoreload 2
 ```
 
 For this, we will add observation, footprint and flux data to the object store. This data relates to Tacolneston (TAC) site within the DECC network and the area around Europe (EUROPE domain).
 
 ```{code-cell} ipython3
-from openghg.client import process_obs
+from openghg.util import retrieve_example_data
+from openghg.standardise import standardise_surface
 
-obs_file = "../data/DECC/tac.picarro.1minute.100m.201208.dat"
+obs_data = retrieve_example_data(path="timeseries/tac_example.tar.gz")
 
 site="tac"
 network="DECC"
 height="100m"
 species="ch4"
 
-process_obs(files=obs_file, data_type="CRDS", site=site, network=network, inlet=height)
+obs_results = standardise_surface(filepaths=obs_data, source_format="CRDS", site=site, network=network)
 ```
 
 ```{code-cell} ipython3
-from openghg.client import process_footprint
+from openghg.standardise import standardise_flux
 
-fp_file_path = "../data/footprints/TAC-100magl_EUROPE_201208.nc"
-
-site="tac"
-height="100m"
-domain="EUROPE"
-model="NAME"
-
-process_footprint(files=fp_file_path, site=site, height=height, domain=domain, model=model)
-```
-
-```{code-cell} ipython3
-from openghg.util import retrieve_example_data
-
-flux_data = retrieve_example_data(path="flux/ch4-ukghg-all_EUROPE_2012.tar.gz")
-```
-
-```{code-cell} ipython3
-from openghg.util import retrieve_example_data
-from openghg.client import process_flux
-
-flux_data = retrieve_example_data(path="flux/ch4-ukghg-all_EUROPE_2012.tar.gz")
+flux_data = retrieve_example_data(path="flux/ch4-ukghg-all_EUROPE_2016.tar.gz")
 
 site="tac"
 domain="EUROPE"
-date = "2012"
+date = "2016"
 
 source_waste = "waste"
 source_energyprod = "energyprod"
@@ -92,11 +78,26 @@ source_energyprod = "energyprod"
 flux_data_waste = [filename for filename in flux_data if source_waste in str(filename)][0]
 flux_data_energyprod = [filename for filename in flux_data if source_energyprod in str(filename)][0]
 
-process_flux(files=flux_data_waste, species=species, source=source_waste, domain=domain, date=date)
-process_flux(files=flux_data_energyprod, species=species, source=source_energyprod, domain=domain, date=date)
+
+
+standardise_flux(filepath=flux_data_waste, species=species, source=source_waste, domain=domain, date=date)
+standardise_flux(filepath=flux_data_energyprod, species=species, source=source_energyprod, domain=domain, date=date)
 ```
 
-## Creating a model scenario
+```{code-cell} ipython3
+from openghg.standardise import standardise_footprint
+
+footprint_data = retrieve_example_data(path="footprint/tac_footprint_inert_201607.tar.gz")
+
+site="tac"
+height="100m"
+domain="EUROPE"
+model="NAME"
+
+standardise_footprint(filepath=footprint_data, site=site, height=height, domain=domain, model=model)
+```
+
+## 2. Creating a model scenario
 
 With this ancillary data, we can start to make comparisons between model data, such as bottom-up inventories, and our observations. This analysis is based around a `ModelScenario` class which can be created to link together observation, footprint and emissions data.
 
@@ -109,8 +110,8 @@ To access and link this data we can set up our `ModelScenario` instance using a 
 ```{code-cell} ipython3
 from openghg.analyse import ModelScenario
 
-start_date = "2012-08-01"
-end_date = "2012-09-01"
+start_date = "2016-07-01"
+end_date = "2016-08-01"
 
 scenario = ModelScenario(site=site,
                          inlet=height,
@@ -160,15 +161,15 @@ from openghg.retrieve import get_obs_surface, get_footprint, get_flux
 obs_results = get_obs_surface(site=site,
                               species=species,
                               inlet=height,
-                              start_date="2012-08-01",
-                              end_date="2012-09-01")
+                              start_date="2016-07-01",
+                              end_date="2016-08-01")
 
 # Extract footprint results from object store
 footprint_results = get_footprint(site=site,
                                   domain=domain,
                                   height=height,
-                                  start_date="2012-08-01",
-                                  end_date="2012-09-01")
+                                  start_date="2016-07-01",
+                                  end_date="2016-08-01")
 
 # Extract flux results from object store
 flux_results = get_flux(species=species,
@@ -186,7 +187,7 @@ One benefit of this interface is to reduce searching the database if the same da
 
 +++
 
-## Comparing data sources
+## 3. Comparing data sources
 
 Once your `ModelScenario` has been created you can then start to use the linked data to compare outputs. For example we may want to calculate modelled observations at our site based on our linkec footprint and emissions data:
 
@@ -200,10 +201,10 @@ This could then be plotted directlt using the xarray plotting methods:
 modelled_observations.plot()  # Can plot using xarray plotting methods
 ```
 
-To compare the these modelled observations to the ovbservations themselves, the `ModelScenario.plot_comparison()` method can be used:
+To compare the these modelled observations to the ovbservations themselves, the `ModelScenario.plot_comparison()` method can be used.
 
 ```{code-cell} ipython3
-scenario.plot_comparison()
+scenario.plot_comparison(baseline="percentile")
 ```
 
 The `ModelScenario.footprints_data_merge()` method can also be used to created a combined output, with all aligned data stored directly within an `xarray.Dataset`:
@@ -231,7 +232,7 @@ scenario.add_flux(species=species, domain=domain, source=source_energyprod)
 ```
 
 ```{code-cell} ipython3
-scenario.plot_comparison()
+scenario.plot_comparison(baseline="percentile")
 ```
 
 Output for individual sources can also be created by specifying the `sources` as an input:

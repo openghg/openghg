@@ -142,6 +142,7 @@ def standardise_bc(
             - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
         domain: Region for boundary conditions
         period: Period of measurements, if not passed this is inferred from the time coords
+        continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
     returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -206,10 +207,14 @@ def standardise_footprint(
     Args:
         filepath: Path of file to load
         site: Site name
-        network: Network name
         height: Height above ground level in metres
         domain: Domain of footprints
-        model_params: Model run parameters
+        model: Model used to create footprint (e.g. NAME or FLEXPART)
+        metmodel: Underlying meteorlogical model used (e.g. UKV)
+        species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
+        network: Network name
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
+        continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_res : Indicate footprints include both a low and high spatial resolution.
         high_time_res: Indicate footprints are high time resolution (include H_back dimension)
@@ -293,10 +298,13 @@ def standardise_flux(
     Args:
         filepath: Path of emissions file
         species: Species name
-        domain: Emissions domain
         source: Emissions source
+        domain: Emissions domain
+        date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
+               Only needed if this can not be inferred from the time coords
         high_time_resolution: If this is a high resolution file
         period: Period of measurements, if not passed this is inferred from the time coords
+        continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to

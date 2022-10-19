@@ -145,7 +145,7 @@ def get_object(bucket: str, key: str) -> bytes:
         bucket: Bucket containing data
         key: Key for data in bucket
     Returns:
-        Object: Object from store
+        bytes: Binary data from the store
     """
     with rlock:
         filepath = Path(f"{bucket}/{key}._data")

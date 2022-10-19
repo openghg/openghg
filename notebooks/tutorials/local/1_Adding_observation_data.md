@@ -119,7 +119,7 @@ This is shown below:
 ```{code-cell} ipython3
 from openghg.standardise import standardise_surface
 
-decc_results = standardise_surface(filepaths=tac_data, data_type="CRDS", site="TAC", network="DECC")
+decc_results = standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC")
 ```
 
 ```{code-cell} ipython3
@@ -169,7 +169,7 @@ We can add these files to the object store in the same way as the DECC data by i
  - network - `"AGAGE"`
 
 ```{code-cell} ipython3
-agage_results = standardise_surface(filepaths=capegrim_tuple, data_type="GCWERKS", site="CGO",
+agage_results = standardise_surface(filepaths=capegrim_tuple, source_format="GCWERKS", site="CGO",
                               network="AGAGE", instrument="medusa")
 ```
 

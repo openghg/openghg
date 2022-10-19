@@ -66,7 +66,8 @@ class Emissions(BaseStore):
             species: Species name
             domain: Emissions domain
             source: Emissions source
-            date : Date associated with emissions as a string
+            date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
+                   Only needed if this can not be inferred from the time coords
             source_format : Type of data being input e.g. openghg (internal format)
             high_time_resolution: If this is a high resolution file
             period: Period of measurements. Only needed if this can not be inferred from the time coords

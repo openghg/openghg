@@ -4,18 +4,8 @@ Tutorials
 
 These tutorials will get you up and running with OpenGHG so you can process, analyse and query data.
 The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
-repository under ``notebooks/tutorials/``.
+repository under ``notebooks/tutorials``.
 
-
-Cloud
------
-
-These tutorials will help you get up and running with the OpenGHG Cloud using our JupyterHub.
-
-.. toctree::
-   :maxdepth: 1
-
-   cloud/index
 
 Local
 -----

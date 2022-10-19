@@ -114,7 +114,7 @@ Data available on the ICOS Carbon Portal is made available under three different
 By default level 2 data is retrieved but this can be changed by passing `data_level` to `retrieve_icos`. Below we'll retrieve some more recent data from **WAO**.
 
 ```{code-cell} ipython3
-wao_data_level1 = retrieve_icos(site="WAO", species="CH4", data_level=1)
+wao_data_level1 = retrieve_atmospheric(site="WAO", species="CH4", data_level=1)
 ```
 
 ```{code-cell} ipython3
@@ -136,7 +136,7 @@ As ICOS data is cached by OpenGHG you may sometimes need to force a retrieval fr
 If you retrieve data using `retrieve_icos` and notice that it does not return the most up to date data (compare the dates with those on the portal) you can force a retrieval using `force_retrieval`.
 
 ```{code-cell} ipython3
-new_data = retrieve_icos(site="WAO", species="CH4", data_level=1, force_retrieval=True)
+new_data = retrieve_atmospheric(site="WAO", species="CH4", data_level=1, force_retrieval=True)
 ```
 
 Here you may notice we get a message telling us there is no new data to process, if you force a retrieval and there is no newer data you'll see this message.
