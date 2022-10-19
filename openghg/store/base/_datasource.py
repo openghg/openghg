@@ -416,10 +416,8 @@ class Datasource:
         import io
 
         from openghg.objectstore import get_object
-        from xarray import load_dataset
-
-        # data = get_object(bucket, key)
-
+        from xarray import open_dataset
+        
         return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
 
         # # TODO - is there a cleaner way of doing this?
@@ -429,7 +427,7 @@ class Datasource:
         #     with open(tmp_path, "wb") as f:
         #         f.write(data)
 
-        #     ds: Dataset = load_dataset(tmp_path)
+        #     ds: Dataset = xr_load_dataset(tmp_path)
 
         #     return ds
 
@@ -477,6 +475,7 @@ class Datasource:
         """
         import tempfile
         from copy import deepcopy
+        from pathlib import Path
 
         from openghg.objectstore import get_bucket, set_object_from_file, set_object_from_json
         from openghg.util import timestamp_now
@@ -501,12 +500,21 @@ class Datasource:
                 new_keys[daterange] = data_key
                 data = self._data[daterange]
 
+                filepath = Path(f"{bucket}/{data_key}._data")
+                parent_folder = filepath.parent
+                if not parent_folder.exists():
+                    parent_folder.mkdir(parents=True, exist_ok=True)
+
+                data.to_netcdf(filepath)
+
+                # Can we just take the bytes from the data here and then write then straight?
                 # TODO - for now just create a temporary directory - will have to update Acquire
                 # or work on a PR for xarray to allow returning a NetCDF as bytes
-                with tempfile.TemporaryDirectory() as tmpdir:
-                    filepath = f"{tmpdir}/temp.nc"
-                    data.to_netcdf(filepath)
-                    set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
+                # with tempfile.TemporaryDirectory() as tmpdir:
+                #     filepath = f"{tmpdir}/temp.nc"
+                #     data.to_netcdf(filepath)
+                #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
+                # path = f"{bucket_path}/data"
 
             # Copy the last version
             if "latest" in self._data_keys:

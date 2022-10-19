@@ -63,7 +63,10 @@ def download_data(
 
     try:
         r = http.get(url=url, stream=True, allow_redirects=True, timeout=timeout)
-    except (requests.exceptions.RequestException, requests.exceptions.ConnectionError) as e:
+    except (
+        requests.exceptions.RequestException,
+        requests.exceptions.ConnectionError,
+    ) as e:
         print(f"Unable to retrieve data from {url}, error: {str(e)}")
         return None
 

@@ -33,18 +33,19 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
-        with TemporaryDirectory() as tmpdir:
-            tmpdir_path = Path(tmpdir)
+        raise NotImplementedError("This branch doesn't currently support cloud.")
+        # with TemporaryDirectory() as tmpdir:
+        #     tmpdir_path = Path(tmpdir)
 
-            try:
-                filename = file_metadata["filename"]
-            except KeyError:
-                raise KeyError("We require a filename key for metadata read.")
+        #     try:
+        #         filename = file_metadata["filename"]
+        #     except KeyError:
+        #         raise KeyError("We require a filename key for metadata read.")
 
-            filepath = tmpdir_path.joinpath(filename)
-            filepath.write_bytes(binary_data)
+        #     filepath = tmpdir_path.joinpath(filename)
+        #     filepath.write_bytes(binary_data)
 
-            return Footprints.read_file(filepath=filepath, **metadata)
+        #     return Footprints.read_file(filepath=filepath, **metadata)
 
     # @staticmethod
     # def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Dict:
@@ -370,6 +371,7 @@ class Footprints(BaseStore):
 
         fp.save()
 
+        fp_data.close()
         metastore.close()
 
         return datasource_uuids

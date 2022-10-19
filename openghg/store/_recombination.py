@@ -115,6 +115,11 @@ def recombine_datasets(
     # if n_dupes > 0:
     #     combined = combined.isel(time=index)
 
+    # Only keep the unique values if we have dupes
+    #if index.size != combined.time.size:
+    #    combined = combined.isel(time=index)
+
+
     return combined
 
 

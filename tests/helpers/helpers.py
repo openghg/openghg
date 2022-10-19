@@ -65,7 +65,7 @@ def get_datapath_base(data_type: str, filename: str) -> Path:
     return Path(__file__).parent.parent.joinpath(f"data/{data_type}/{filename}").resolve()
 
 
-def get_retrieval_data_file(filename: str):
+def get_retrieval_datapath(filename: str):
     return Path(__file__).parent.parent.joinpath(f"data/retrieve/{filename}").resolve()
 
 

@@ -1,6 +1,6 @@
-=========================
-Installation instructions
-=========================
+============
+Installation
+============
 
 The easiest way to install OpenGHG is using pip, first ensure you have a recent version of
 Python installed.
@@ -11,8 +11,8 @@ Checking your Python installation
 OpenGHG is developed and `tested on Linux and MacOS <https://github.com/openghg/openghg/actions>`__,
 support for Windows is planned.
 
-To install OpenGHG, you first need to install Python >= 3.7. To check
-if you have Python 3.7 installed type;
+To install OpenGHG, you first need to install Python >= 3.8. To check
+if you have Python 3.8 installed type;
 
 .. code-block:: bash
 
@@ -25,9 +25,9 @@ If the version number is ``2.x`` then you must use the ``python3`` command, if t
 
     python3 -V
 
-and see if you have a Python 3 that has a version number >= 3.7. If so, please use ``python3`` instead of ``python``.
+and see if you have a Python 3 that has a version number >= 3.8. If so, please use ``python3`` instead of ``python``.
 
-If you don't have Python >=3.7 installed, then you can install Python either via your package manager if using Linux or
+If you don't have Python >= 3.8 installed, then you can install Python either via your package manager if using Linux or
 `Homebrew on MacOS <https://docs.brew.sh/Homebrew-and-Python>`__. An alternative for both platforms is `anaconda <https://anaconda.org>`__.
 
 Installation
@@ -72,6 +72,34 @@ Next install OpenGHG from our conda channel
 .. code-block:: bash
 
     conda install --channel conda-forge --channel openghg openghg
+
+
+Configuration
+=============
+
+Deprecation of ``OPENGHG_PATH``
+-------------------------------
+
+If you've previously used OpenGHG and worked through our tutorials you might have encountered
+the need to set the ``OPENGHG_PATH`` environment variable. Now that we've moved to a configuration
+file this is not longer used. If you previously set a custom path using the variable please update
+the configuration file as below.
+
+Updating the config file
+------------------------
+
+On the first run on OpenGHG a configuration file will be created in your home folder. On Linux this should be under
+``/home/<your username>/.config/openghg/openghg.conf`` or on macOS
+``/Users/<your username>/.config/openghg/openghg.conf``. In this file we set the path for the object store.
+By default the object store will be created at ``/home/<your username>/openghg_store``.
+To modify this path open the config file with a text editor and change the value assigned to ``local_store``.
+
+.. code-block:: toml
+
+    [object_store]
+    local_store = "/home/<your username>/openghg_store"
+
+Remember to replace ``<your username>`` with your username.
 
 
 Developers

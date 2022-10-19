@@ -3,7 +3,7 @@ import json
 
 import pandas as pd
 import pytest
-from helpers import get_retrieval_data_file, metadata_checker_obssurface
+from helpers import get_retrieval_datapath, metadata_checker_obssurface
 from icoscp.cpb.dobj import Dobj  # type: ignore
 from icoscp.station.station import Station
 from openghg.cloud import package_from_function
@@ -62,19 +62,19 @@ def test_icos_retrieve_invalid_site(mocker, capfd):
 
 
 def test_icos_retrieve_and_store(mocker):
-    pid_csv = get_retrieval_data_file(filename="test_pids_icos.csv.gz")
+    pid_csv = get_retrieval_datapath(filename="test_pids_icos.csv.gz")
     pid_df = pd.read_csv(pid_csv)
 
     valid_station = Station()
     valid_station._valid = True
 
-    example_metadata_path = get_retrieval_data_file(filename="wao_co2_10m_metadata.json")
+    example_metadata_path = get_retrieval_datapath(filename="wao_co2_10m_metadata.json")
     example_metadata = json.loads(example_metadata_path.read_text())
 
     mocker.patch("icoscp.station.station.get", return_value=valid_station)
     mocker.patch.object(Station, "data", return_value=pid_df)
 
-    mock_dobj_file = get_retrieval_data_file(filename="sample_icos_site.csv.gz")
+    mock_dobj_file = get_retrieval_datapath(filename="sample_icos_site.csv.gz")
     sample_icos_data = pd.read_csv(mock_dobj_file)
 
     # Mock the info property on the Dobj class

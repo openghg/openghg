@@ -1,11 +1,11 @@
 import pytest
 from helpers import get_footprint_datapath
-from openghg.objectstore import get_bucket
 from openghg.retrieve import search
 from openghg.store import Footprints, datasource_lookup, load_metastore, recombine_datasets
 from openghg.util import hash_bytes
 
 
+@pytest.mark.xfail("Need to add a better way of passing in binary data to the read_file functions.")
 def test_read_footprint_co2_from_data(mocker):
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
@@ -42,9 +42,6 @@ def test_read_footprint_standard():
      - data variables: "fp"
      - coordinates: "height", "lat", "lev", "lon", "time"
     """
-
-    get_bucket()
-
     datapath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
 
     site = "TAC"
@@ -105,8 +102,6 @@ def test_read_footprint_high_spatial_res():
      - expects keyword attributes to be set
        - "spatial_resolution": "high_spatial_resolution"
     """
-    get_bucket()
-
     datapath = get_footprint_datapath("footprint_test.nc")
     # model_params = {"simulation_params": "123"}
 
@@ -263,8 +258,6 @@ def test_read_footprint_co2(site, height, metmodel, start, end, filename):
     - TAC data - includes H_back as an integer (older style footprint)
     - RGL data - includes H_back as a float (newer style footprint)
     """
-    get_bucket()
-
     datapath = get_footprint_datapath(filename)
 
     domain = "TEST"
@@ -325,8 +318,6 @@ def test_read_footprint_co2(site, height, metmodel, start, end, filename):
 
 
 def test_read_footprint_short_lived():
-    get_bucket()
-
     datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
 
     site = "WAO"

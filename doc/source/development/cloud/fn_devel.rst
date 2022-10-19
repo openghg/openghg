@@ -243,7 +243,7 @@ Base image
 First we'll look at the base image which can be found in ``docker/base_image``. This folder contains a Python script
 that makes building the image easier and a Dockerfile.
 
-.. literalinclude:: ../../../docker/base_image/Dockerfile
+.. literalinclude:: ../../../../docker/base_image/Dockerfile
     :language: dockerfile
 
 This ``Dockerfile`` is very similar to the one shown above. Some differences are that we copy an extra requirements file into the image
@@ -268,7 +268,7 @@ can be found in ``docker/``. It contains ``func.yaml`` which tells Fn how to run
 the ``openghg-base`` image we build in the previous step, adding ``route.py`` to the ``/function`` folder and then copying the OpenGHG
 code into ``/python``. We also copy the services code which form the functions that calls are routed to by ``route.py``.
 
-.. literalinclude:: ../../../docker/Dockerfile
+.. literalinclude:: ../../../../docker/Dockerfile
     :language: dockerfile
 
 We have also modified ``func.yaml`` to increase the amount of memory available to this function to 2048 MB / 2 GB. If you notice functions failing unexpectedly
