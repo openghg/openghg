@@ -414,10 +414,9 @@ class Datasource:
             xarray.Dataset: Dataset from NetCDF file
         """
         import io
-
         from openghg.objectstore import get_object
-        from xarray import open_dataset
-        
+        from xarray import load_dataset
+
         return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
 
         # # TODO - is there a cleaner way of doing this?
@@ -473,11 +472,10 @@ class Datasource:
         Returns:
             None
         """
-        import tempfile
         from copy import deepcopy
         from pathlib import Path
 
-        from openghg.objectstore import get_bucket, set_object_from_file, set_object_from_json
+        from openghg.objectstore import get_bucket, set_object_from_json
         from openghg.util import timestamp_now
 
         if bucket is None:

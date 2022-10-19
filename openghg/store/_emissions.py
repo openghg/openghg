@@ -56,6 +56,7 @@ class Emissions(BaseStore):
         date: Optional[str] = None,
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
+        chunks: Union[str, Dict, None] = None,
         continuous: bool = True,
         overwrite: bool = False,
     ) -> Optional[Dict]:
@@ -123,6 +124,7 @@ class Emissions(BaseStore):
             "period": period,
             "continuous": continuous,
             "data_type": "emissions",
+            "chunks": chunks,
         }
 
         emissions_data = parser_fn(**param)

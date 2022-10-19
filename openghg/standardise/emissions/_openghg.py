@@ -11,6 +11,7 @@ def parse_openghg(
     date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
+    chunks: Union[str, Dict, None] = None,
     continuous: bool = True,
 ) -> Dict:
     """
@@ -18,6 +19,8 @@ def parse_openghg(
 
     Args:
         filepath: Path to data file
+        chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
+        Passing "auto" will ask xarray to calculate a chunk size.
     Returns:
         dict: Dictionary of data
     """
@@ -26,7 +29,7 @@ def parse_openghg(
     from openghg.util import timestamp_now
     from xarray import open_dataset
 
-    em_data = open_dataset(filepath, chunks="auto")
+    em_data = open_dataset(filepath, chunks=chunks)
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here

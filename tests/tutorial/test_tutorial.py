@@ -24,7 +24,7 @@ def test_retrieve_example_data(requests_mock, mocker):
 
     tar_data = Path(get_surface_datapath(filename="test.tar.gz", source_format="crds")).read_bytes()
 
-    url = "https://github.com/openghg/example_data/raw/main/timeseries/bsd_example.tar.gz"
+    url = "https://github.com/openghg/example_data/raw/main/timeseries/bsd_888_example.tar.gz"
     requests_mock.get(url, content=tar_data, status_code=200)
 
     retrieve_example_data(url=url)
@@ -34,10 +34,3 @@ def test_retrieve_example_data(requests_mock, mocker):
     retrieve_example_data(url=url)
 
     assert download_mock.call_count == 1
-
-def test_retrieve_yahh():
-    url = "https://github.com/phayes/geoPHP/archive/refs/tags/1.2.tar.gz"
-
-    retrieve_example_data(url=url)
-
-    retrieve_example_data(url=url)

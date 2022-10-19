@@ -5,7 +5,7 @@ from openghg.store import Footprints, datasource_lookup, load_metastore, recombi
 from openghg.util import hash_bytes
 
 
-@pytest.mark.xfail("Need to add a better way of passing in binary data to the read_file functions.")
+@pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
 def test_read_footprint_co2_from_data(mocker):
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
