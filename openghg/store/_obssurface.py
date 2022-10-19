@@ -104,6 +104,7 @@ class ObsSurface(BaseStore):
         inlet: Optional[str] = None,
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
+        calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
         overwrite: bool = False,
         verify_site_code: bool = True,
@@ -220,6 +221,7 @@ class ObsSurface(BaseStore):
                         instrument=instrument,
                         sampling_period=sampling_period_seconds,
                         measurement_type=measurement_type,
+                        calibration_scale=calibration_scale,
                     )
 
                 # Current workflow: if any species fails, whole filepath fails

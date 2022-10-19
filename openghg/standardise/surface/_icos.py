@@ -190,8 +190,14 @@ def _read_data_large_header(
 
     df = df.rename(columns=rename_dict)
 
+    print(df.dtypes)
+
     # Convert to xarray Dataset
     data = df.to_xarray()
+
+    data["flag"] = data["flag"].astype(str)
+
+    print(data.dtypes)
 
     if file_sampling_period == "1minute":
         file_sampling_period = "60.0"

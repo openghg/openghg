@@ -43,16 +43,11 @@ def parse_openghg(
         data_owner: Name of data owner.
         data_owner_email: Email address for data owner.
         kwargs: Any additional attributes to be associated with the data.
-
     Returns:
-        Dict : Dictionary of source_name : data, metadata, attributes
+        Dict: Dictionary of source_name : data, metadata, attributes
     """
     from openghg.util import clean_string, load_json
-    from openghg.standardise.meta import (
-        metadata_default_keys,
-        define_species_label,
-        assign_attributes
-    )
+    from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
 
     data_filepath = Path(data_filepath)
 
@@ -79,11 +74,14 @@ def parse_openghg(
 
     # TODO: Decide if to allow any of these to be missed.
 
+    # Run some checks on the
+    data_attrs = {k.lower().replace(" ", "_"): v for k, v in data.attrs.items()}
+
     # Populate metadata with values from attributes if inputs have not been passed
     for key, value in metadata_initial.items():
         if value is None:
             try:
-                metadata_initial[key] = attributes[key]
+                metadata_initial[key] = data_attrs[key]
             except KeyError:
                 raise ValueError(f"Input '{key}' must be specified if not included in data attributes.")
         else:

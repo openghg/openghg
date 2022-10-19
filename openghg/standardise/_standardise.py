@@ -13,6 +13,7 @@ def standardise_surface(
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
+    calibration_scale: Optional[str] = None,
     overwrite: bool = False,
 ) -> Optional[Dict]:
     """Standardise surface measurements and store the data in the object store.
