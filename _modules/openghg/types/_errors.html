@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.types._errors &#8212; OpenGHG 0+untagged.1.gb1c87d6 documentation</title>
+    <title>openghg.types._errors &#8212; OpenGHG 0+untagged.1.g2c64a21 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -99,7 +99,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb1c87d6 documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g2c64a21 documentation</p>
   
 </a>
     
@@ -345,23 +345,28 @@
             <article class="bd-article" role="main">
               
   <h1>Source code for openghg.types._errors</h1><div class="highlight"><pre>
-<div class="viewcode-block" id="InvalidSiteError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.InvalidSiteError">[docs]</a><span></span><span class="k">class</span> <span class="nc">InvalidSiteError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span></span>
+<span class="k">class</span> <span class="nc">OpenGHGError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Top level OpenGHG error&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="InvalidSiteError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.InvalidSiteError">[docs]</a><span class="k">class</span> <span class="nc">InvalidSiteError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raised if an invalid site is passed&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="UnknownDataError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.UnknownDataError">[docs]</a><span class="k">class</span> <span class="nc">UnknownDataError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="UnknownDataError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.UnknownDataError">[docs]</a><span class="k">class</span> <span class="nc">UnknownDataError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raised if an unknown data type is passed&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="FunctionError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.FunctionError">[docs]</a><span class="k">class</span> <span class="nc">FunctionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="FunctionError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.FunctionError">[docs]</a><span class="k">class</span> <span class="nc">FunctionError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raised if a serverless function cannot be called correctly&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="ObjectStoreError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.ObjectStoreError">[docs]</a><span class="k">class</span> <span class="nc">ObjectStoreError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="ObjectStoreError"><a class="viewcode-back" href="../../../api/api_types.html#openghg.types.ObjectStoreError">[docs]</a><span class="k">class</span> <span class="nc">ObjectStoreError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raised if an error accessing an object at a key in the object store occurs&quot;&quot;&quot;</span></div>
 
 
-<span class="k">class</span> <span class="nc">DatasourceLookupError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">DatasourceLookupError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raised if Datasource lookup fails&quot;&quot;&quot;</span>
 
 
@@ -369,12 +374,16 @@
     <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">MutexTimeoutError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MutexTimeoutError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">RequestBucketError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">RequestBucketError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
     <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">SearchError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Related to searching the object store&quot;&quot;&quot;</span>
 </pre></div>
 
             </article>
