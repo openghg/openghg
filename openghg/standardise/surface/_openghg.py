@@ -94,9 +94,10 @@ def parse_openghg(
     # Read the inlet
     if inlet is None:
         inlet_val = [v for k, v in data_attrs.items() if "inlet" in k]
+
         if not inlet_val:
             raise ValueError("Cannot read inlet from attributes, please pass as argument.")
-        if len(inlet_val) > 1:
+        if len(set(inlet_val)) > 1:
             raise ValueError("More than one inlet value found in attributes, please pass as argument.")
 
         inlet = inlet_val[0]
