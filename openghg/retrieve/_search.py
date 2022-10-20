@@ -107,6 +107,8 @@ def search_bc(
     species: Optional[str] = None,
     bc_input: Optional[str] = None,
     domain: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
 ) -> SearchResults:
@@ -118,6 +120,8 @@ def search_bc(
             - a model name such as "MOZART" or "CAMS"
             - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
         domain: Region for boundary conditions
+        start_date: Start date (inclusive) for boundary conditions
+        end_date: End date (exclusive) for boundary conditions
         period: Period of measurements. Only needed if this can not be inferred from the time coords
                 If specified, should be one of:
                     - "yearly", "monthly"
@@ -127,10 +131,18 @@ def search_bc(
     Returns:
         SearchResults: SearchResults object
     """
+
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
     return search(
         species=species,
         bc_input=bc_input,
         domain=domain,
+        start_date=start_date,
+        end_date=end_date,
         period=period,
         continuous=continuous,
         data_type="boundary_conditions",
@@ -153,6 +165,12 @@ def search_eulerian(
     Returns:
         SearchResults: SearchResults object
     """
+
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
     return search(
         model=model, species=species, start_date=start_date, end_date=end_date, data_type="eulerian_model"
     )
@@ -162,7 +180,9 @@ def search_emissions(
     species: Optional[str] = None,
     source: Optional[str] = None,
     domain: Optional[str] = None,
-    date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    date: Optional[str] = None,  # May want to remove this?
     high_time_resolution: Optional[bool] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
@@ -185,10 +205,18 @@ def search_emissions(
     Returns:
         SearchResults: SearchResults object
     """
+
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
     return search(
         species=species,
         source=source,
         domain=domain,
+        start_date=start_date,
+        end_date=end_date,
         date=date,
         high_time_resolution=high_time_resolution,
         period=period,
@@ -204,6 +232,8 @@ def search_footprints(
     model: Optional[str] = None,
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
@@ -232,6 +262,12 @@ def search_footprints(
     Returns:
         SearchResults: SearchResults object
     """
+
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
     return search(
         site=site,
         height=height,
@@ -240,6 +276,8 @@ def search_footprints(
         metmodel=metmodel,
         species=species,
         network=network,
+        start_date=start_date,
+        end_date=end_date,
         period=period,
         continuous=continuous,
         high_spatial_res=high_spatial_res,

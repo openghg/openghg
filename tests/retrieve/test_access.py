@@ -14,6 +14,7 @@ from helpers import (
 from openghg.dataobjects import ObsData
 from openghg.retrieve import get_flux, get_footprint, get_obs_column, get_obs_surface, search
 from openghg.util import compress, compress_str, hash_bytes
+from openghg.types import SearchError
 from pandas import Timedelta, Timestamp
 
 # a = [
@@ -62,9 +63,30 @@ def test_get_obs_surface():
     assert not time.equals(averaged_time)
 
 
-# def test_no_inlet_no_ranked_data_raises():
-#     with pytest.raises(ValueError):
-#         get_obs_surface(site="bsd", species="co2")
+def test_ambiguous_no_ranked_data_raises():
+    """
+    Test sensible error message is raised when result is ambiguous for
+    get_obs_surface() function
+    """
+    with pytest.raises(SearchError) as excinfo:
+        get_obs_surface(site="bsd", species="co2")
+        assert "Multiple entries found for input parameters" in excinfo
+
+
+def test_no_data_raises():
+    """
+    Test sensible error message is raised when no data can be found
+    get_obs_surface() function
+    """
+    with pytest.raises(SearchError) as excinfo:
+        site = "bsd"
+        species = "cfc11"
+        get_obs_surface(site=site, species=species)
+
+        assert "Unable to find results for" in excinfo
+        assert f"site='{site}'" in excinfo
+        assert f"species='{species}'" in excinfo
+
 
 
 # def test_get_obs_surface_ranked_data_only():
@@ -282,8 +304,14 @@ def test_get_flux():
 
 
 def test_get_flux_no_result():
-    with pytest.raises(ValueError):
+    """Test sensible error message is being returned when no results are found 
+    with input keywords for get_flux function"""
+    with pytest.raises(SearchError) as execinfo:
         get_flux(species="co2", source="cinnamon", domain="antarctica")
+        assert "Unable to find results" in execinfo
+        assert "species='co2'" in execinfo
+        assert "source='cinnamon'" in execinfo
+        assert "domain='antarctica'" in execinfo
 
 
 def test_get_footprint():
@@ -303,5 +331,13 @@ def test_get_footprint():
 
 
 def test_get_footprint_no_result():
-    with pytest.raises(ValueError):
+    """Test sensible error message is being returned when no results are found 
+    with input keywords for get_footprint function"""
+    with pytest.raises(SearchError) as execinfo:
         get_footprint(site="seville", domain="spain", height="10m", model="test_model")
+        assert "Unable to find results" in execinfo
+        assert "site='seville'" in execinfo
+        assert "domain='spain'" in execinfo
+        assert "height='10m'" in execinfo
+        assert "model='test_model'" in execinfo
+

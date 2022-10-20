@@ -259,9 +259,6 @@ def test_scenario_too_few_inputs():
     # Explicitly not including inlet to test this can be inferred.
     model_scenario = ModelScenario(site=site)
 
-    # TODO: This may be updated to be include empty ObsData() class
-    # May need to include:
-    # assert model_scenario.obs.data is None
     assert model_scenario.obs is None
 
     # TODO: get_footprint() is not currently returning None - check this

@@ -13,5 +13,6 @@ from ._errors import (
     InvalidSiteError,
     ObjectStoreError,
     UnknownDataError,
+    SearchError,
 )
 from ._types import multiPathType, pathType, resultsType
