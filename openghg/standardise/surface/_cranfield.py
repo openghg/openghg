@@ -10,6 +10,7 @@ def parse_cranfield(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    **kwargs: Dict,
 ) -> Dict:
     """Creates a CRDS object holding data stored within Datasources
 

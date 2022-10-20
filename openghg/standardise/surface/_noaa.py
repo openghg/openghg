@@ -13,6 +13,7 @@ def parse_noaa(
     network: str = "NOAA",
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
+    **kwarg: Dict,
 ) -> Dict:
     """Read NOAA data from raw text file or ObsPack NetCDF
 

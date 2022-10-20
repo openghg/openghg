@@ -11,6 +11,7 @@ def parse_icos(
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
     header_type: str = "large",
+    **kwargs: Dict,
 ) -> Dict:
     """Parses an ICOS data file and creates a dictionary containing the Dataset and metadata
 
@@ -77,6 +78,7 @@ def _read_data_large_header(
     instrument: str,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    **kwargs: Dict,
 ) -> Dict:
     """Parses ICOS files with the larger (~40) line header
 
@@ -190,14 +192,10 @@ def _read_data_large_header(
 
     df = df.rename(columns=rename_dict)
 
-    print(df.dtypes)
-
     # Convert to xarray Dataset
     data = df.to_xarray()
 
     data["flag"] = data["flag"].astype(str)
-
-    print(data.dtypes)
 
     if file_sampling_period == "1minute":
         file_sampling_period = "60.0"
