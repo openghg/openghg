@@ -64,15 +64,12 @@ def parse_openghg(
         "site": site,
         "species": species,
         "network": network,
-        "inlet": inlet,
         "instrument": instrument,
         "sampling_period": sampling_period,
         "calibration_scale": calibration_scale,
         "data_owner": data_owner,
         "data_owner_email": data_owner_email,
     }
-
-    # TODO: Decide if to allow any of these to be missed.
 
     # Run some checks on the
     data_attrs = {k.lower().replace(" ", "_"): v for k, v in data.attrs.items()}
@@ -93,6 +90,18 @@ def parse_openghg(
                     raise ValueError(
                         f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
                     )
+
+    # Read the inlet
+    if inlet is None:
+        inlet_val = [v for k, v in data_attrs.items() if "inlet" in k]
+        if not inlet_val:
+            raise ValueError("Cannot read inlet from attributes, please pass as argument.")
+        if len(inlet_val) > 1:
+            raise ValueError("More than one inlet value found in attributes, please pass as argument.")
+
+        inlet = inlet_val[0]
+
+    metadata_initial["inlet"] = inlet
 
     metadata = cast(Dict[str, str], metadata_initial)
 
