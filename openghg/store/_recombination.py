@@ -29,8 +29,8 @@ def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
 
 def recombine_datasets(
     keys: List[str],
-    sort: Optional[bool] = True,
-    attrs_to_check: Dict[str, str] = None,
+    sort: Optional[bool] = False,
+    attrs_to_check: Optional[Dict[str, str]] = None,
     elevate_inlet: bool = False,
 ) -> xr.Dataset:
     """Combines datasets stored separately in the object store
@@ -84,7 +84,10 @@ def recombine_datasets(
         data = elevate_duplicate_attrs(ds_list=data, attributes=attributes, elevate_inlet=elevate_inlet)
 
     # Concatenate datasets along time dimension
-    combined = xr_concat(data, dim="time")
+    if len(data) > 1:
+        combined = xr_concat(data, dim="time")
+    else:
+        combined = data[0]
 
     # Replace/remove incorrect attributes
     #  - xr.concat will only take value from first dataset if duplicated
@@ -96,8 +99,8 @@ def recombine_datasets(
                 else:
                     combined.attrs.pop(attr)
 
-    if sort:
-        combined = combined.sortby("time")
+    # if sort:
+    #     combined = combined.sortby("time")
 
     # This is modified from https://stackoverflow.com/a/51077784/1303032
     unique, index, count = np.unique(combined.time, return_counts=True, return_index=True)
@@ -107,7 +110,14 @@ def recombine_datasets(
     if n_dupes > 5:
         raise ValueError("Large number of duplicate timestamps, check data overlap.")
 
-    combined = combined.isel(time=index)
+    # print(f"\n\nNumber of dupes: {n_dupes}")
+    # Using isel is a memory hungry operation, there's no point doing it if we don't have any dupes
+    # if n_dupes > 0:
+    #     combined = combined.isel(time=index)
+
+    # Only keep the unique values if we have dupes
+    # if index.size != combined.time.size:
+    #    combined = combined.isel(time=index)
 
     return combined
 

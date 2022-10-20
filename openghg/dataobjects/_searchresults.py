@@ -93,7 +93,7 @@ class SearchResults:
     def retrieve(
         self,
         dataframe: Optional[DataFrame] = None,
-        sort: bool = True,
+        sort: bool = False,
         elevate_inlet: bool = False,
         **kwargs: Any,
     ) -> Union[ObsData, List[ObsData]]:
@@ -113,8 +113,13 @@ class SearchResults:
         else:
             return self._retrieve_by_term(sort=sort, elevate_inlet=elevate_inlet, **kwargs)
 
-    def retrieve_all(self, sort: bool = True, elevate_inlet: bool = False) -> Union[ObsData, List[ObsData]]:
+    def retrieve_all(self, sort: bool = False, elevate_inlet: bool = False) -> Union[ObsData, List[ObsData]]:
         """Retrieves all data found during the search
+
+        Args:
+            sort: Sort by time. Note that this may be very memory hungry for large Datasets.
+            elevate_inlet: Elevate inlet to a variable within the Dataset, useful
+            for ranked data.
 
         Returns:
             ObsData / List[ObsData]: ObsData object(s)

@@ -1,12 +1,13 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Literal, Optional, Tuple, Union
 
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
+import warnings
 
 __all__ = ["Emissions"]
 
@@ -55,6 +56,7 @@ class Emissions(BaseStore):
         date: Optional[str] = None,
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
+        chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         overwrite: bool = False,
     ) -> Optional[Dict]:
@@ -65,14 +67,15 @@ class Emissions(BaseStore):
             species: Species name
             domain: Emissions domain
             source: Emissions source
-            date : Date associated with emissions as a string
+            date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
+                   Only needed if this can not be inferred from the time coords
             source_format : Type of data being input e.g. openghg (internal format)
             high_time_resolution: If this is a high resolution file
             period: Period of measurements. Only needed if this can not be inferred from the time coords
-                    If specified, should be one of:
-                     - "yearly", "monthly"
-                     - suitable pandas Offset Alias
-                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
+            If specified, should be one of:
+                - "yearly", "monthly"
+                - suitable pandas Offset Alias
+                - tuple of (value, unit) as would be passed to pandas.Timedelta function
             continuous: Whether time stamps have to be continuous.
             overwrite: Should this data overwrite currently stored data.
         Returns:
@@ -104,7 +107,7 @@ class Emissions(BaseStore):
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in em_store._file_hashes and not overwrite:
-            print(
+            warnings.warn(
                 f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
             )
             return None
@@ -121,6 +124,7 @@ class Emissions(BaseStore):
             "period": period,
             "continuous": continuous,
             "data_type": "emissions",
+            "chunks": chunks,
         }
 
         emissions_data = parser_fn(**param)

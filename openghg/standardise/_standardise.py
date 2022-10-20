@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.util import running_on_hub
@@ -142,6 +142,7 @@ def standardise_bc(
             - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
         domain: Region for boundary conditions
         period: Period of measurements, if not passed this is inferred from the time coords
+        continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
     returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -194,6 +195,7 @@ def standardise_footprint(
     species: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = "auto",
     continuous: bool = True,
     retrieve_met: bool = False,
     high_spatial_res: bool = False,
@@ -206,10 +208,15 @@ def standardise_footprint(
     Args:
         filepath: Path of file to load
         site: Site name
-        network: Network name
         height: Height above ground level in metres
         domain: Domain of footprints
-        model_params: Model run parameters
+        model: Model used to create footprint (e.g. NAME or FLEXPART)
+        metmodel: Underlying meteorlogical model used (e.g. UKV)
+        species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
+        network: Network name
+        period: Period of measurements. Only needed if this can not be inferred from the time coords
+        chunks: Chunk size to use when opening the NetCDF. Set to "auto" for automated chunk sizing
+        continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_res : Indicate footprints include both a low and high spatial resolution.
         high_time_res: Indicate footprints are high time resolution (include H_back dimension)
@@ -237,19 +244,14 @@ def standardise_footprint(
             "high_spatial_res": high_spatial_res,
             "high_time_res": high_time_res,
             "overwrite": overwrite,
+            "metmodel": metmodel,
+            "species": species,
+            "network": network,
+            "period": period,
+            "chunks": chunks,
         }
 
-        if metmodel is not None:
-            metadata["metmodel"] = metmodel
-
-        if species is not None:
-            metadata["species"] = species
-
-        if network is not None:
-            metadata["network"] = network
-
-        if period is not None:
-            metadata["period"] = period
+        metadata = {k: v for k, v in metadata.items() if v is not None}
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -269,6 +271,7 @@ def standardise_footprint(
             species=species,
             network=network,
             period=period,
+            chunks=chunks,
             continuous=continuous,
             retrieve_met=retrieve_met,
             high_spatial_res=high_spatial_res,
@@ -285,6 +288,7 @@ def standardise_flux(
     date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
     overwrite: bool = False,
 ) -> Optional[Dict]:
@@ -293,10 +297,13 @@ def standardise_flux(
     Args:
         filepath: Path of emissions file
         species: Species name
-        domain: Emissions domain
         source: Emissions source
+        domain: Emissions domain
+        date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
+               Only needed if this can not be inferred from the time coords
         high_time_resolution: If this is a high resolution file
         period: Period of measurements, if not passed this is inferred from the time coords
+        continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
@@ -316,13 +323,12 @@ def standardise_flux(
             "high_time_resolution": high_time_resolution,
             "continuous": continuous,
             "overwrite": overwrite,
+            "chunks": chunks,
+            "date": date,
+            "period": period,
         }
 
-        if date is None:
-            metadata["date"] = date
-
-        if period is None:
-            metadata["period"] = period
+        metadata = {k: v for k, v in metadata.items()}
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -341,6 +347,7 @@ def standardise_flux(
             high_time_resolution=high_time_resolution,
             period=period,
             continuous=continuous,
+            chunks=chunks,
             overwrite=overwrite,
         )
 

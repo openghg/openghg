@@ -1,8 +1,7 @@
 import logging
 from collections import defaultdict
 from pathlib import Path
-from tempfile import TemporaryDirectory
-from typing import DefaultDict, Dict, List, Optional, Tuple, Union
+from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union
 
 import numpy as np
 from openghg.store import DataSchema
@@ -33,18 +32,19 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
-        with TemporaryDirectory() as tmpdir:
-            tmpdir_path = Path(tmpdir)
+        raise NotImplementedError("This branch doesn't currently support cloud.")
+        # with TemporaryDirectory() as tmpdir:
+        #     tmpdir_path = Path(tmpdir)
 
-            try:
-                filename = file_metadata["filename"]
-            except KeyError:
-                raise KeyError("We require a filename key for metadata read.")
+        #     try:
+        #         filename = file_metadata["filename"]
+        #     except KeyError:
+        #         raise KeyError("We require a filename key for metadata read.")
 
-            filepath = tmpdir_path.joinpath(filename)
-            filepath.write_bytes(binary_data)
+        #     filepath = tmpdir_path.joinpath(filename)
+        #     filepath.write_bytes(binary_data)
 
-            return Footprints.read_file(filepath=filepath, **metadata)
+        #     return Footprints.read_file(filepath=filepath, **metadata)
 
     # @staticmethod
     # def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Dict:
@@ -193,6 +193,7 @@ class Footprints(BaseStore):
         species: Optional[str] = None,
         network: Optional[str] = None,
         period: Optional[Union[str, tuple]] = None,
+        chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_res: bool = False,
@@ -222,13 +223,13 @@ class Footprints(BaseStore):
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
             overwrite: Overwrite any currently stored data
-
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
+        # from xarray import load_dataset
+        import xarray as xr
         from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
         from openghg.util import clean_string, hash_file, species_lifetime, timestamp_now
-        from xarray import open_dataset
 
         filepath = Path(filepath)
 
@@ -249,7 +250,8 @@ class Footprints(BaseStore):
             )
             return None
 
-        fp_data = open_dataset(filepath)
+        # Load this into memory
+        fp_data = xr.open_dataset(filepath, chunks=chunks)
 
         if species == "co2":
             # Expect co2 data to have high time resolution
@@ -368,6 +370,7 @@ class Footprints(BaseStore):
 
         fp.save()
 
+        fp_data.close()
         metastore.close()
 
         return datasource_uuids

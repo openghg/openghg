@@ -1,6 +1,6 @@
 import io
 
-from helpers import get_retrieval_data_file
+from helpers import get_retrieval_datapath
 from openghg.cloud import package_from_function
 from openghg.dataobjects import SearchResults
 from openghg.retrieve.ceda import retrieve_surface
@@ -23,7 +23,7 @@ def test_ceda_retrieve_cloud_no_results(monkeypatch, mocker):
 def test_ceda_retrieve_cloud(monkeypatch, mocker):
     monkeypatch.setenv("OPENGHG_HUB", "1")
 
-    sample_hfd = get_retrieval_data_file(filename="sample_of_bristol-crds_heathfield_20130101_co2-100m.nc")
+    sample_hfd = get_retrieval_datapath(filename="sample_of_bristol-crds_heathfield_20130101_co2-100m.nc")
 
     mock_data = sample_hfd.read_bytes()
     mock_metadata = {"site": "london", "species": "tiger"}
@@ -44,7 +44,7 @@ def test_ceda_retrieve_cloud(monkeypatch, mocker):
 
 
 def test_ceda_retrieve(mocker):
-    sample_hfd = get_retrieval_data_file(filename="sample_of_bristol-crds_heathfield_20130101_co2-100m.nc")
+    sample_hfd = get_retrieval_datapath(filename="sample_of_bristol-crds_heathfield_20130101_co2-100m.nc")
 
     ds_bytes = sample_hfd.read_bytes()
 
