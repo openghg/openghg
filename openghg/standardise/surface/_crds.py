@@ -14,6 +14,7 @@ def parse_crds(
     sampling_period: Optional[Union[str, float, int]] = None,
     measurement_type: Optional[str] = None,
     drop_duplicates: bool = True,
+    **kwargs: Dict,
 ) -> Dict:
     """Parses a CRDS data file and creates a dictionary of xarray Datasets
     ready for storage in the object store.
