@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g061125e documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.gf084fce documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -99,7 +99,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g061125e documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gf084fce documentation</p>
   
 </a>
     
@@ -349,6 +349,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">SearchError</span>
 
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BoundaryConditionsData</span><span class="p">,</span>
@@ -363,6 +364,66 @@
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.retrieve&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
+
+<span class="n">DataTypes</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">,</span> <span class="n">ObsColumnData</span><span class="p">,</span> <span class="n">ObsData</span><span class="p">]</span>
+<span class="n">multDataTypes</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FluxData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsColumnData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]]</span>
+
+
+<span class="k">def</span> <span class="nf">_get_generic</span><span class="p">(</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">elevate_inlets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">ambig_check_params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Perform a search and create a dataclass object with the results if any are found.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_class: Type of dataobject to create</span>
+<span class="sd">        sort: Sort Dataset during recombination</span>
+<span class="sd">        elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset</span>
+<span class="sd">        ambig_check_params: Parameters to check and print if result is ambiguous.</span>
+<span class="sd">        kwargs: Search terms</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dataclass</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+    <span class="kn">from</span> <span class="nn">openghg.store.spec</span> <span class="kn">import</span> <span class="n">define_data_type_classes</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">keyword_string</span> <span class="o">=</span> <span class="n">_create_keyword_string</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unable to find results for </span><span class="si">{</span><span class="n">keyword_string</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SearchError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="c1"># TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.</span>
+    <span class="n">retrieved_data</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="n">elevate_inlets</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">retrieved_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unable to retrieve results for </span><span class="si">{</span><span class="n">keyword_string</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SearchError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">retrieved_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">retrieved_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">param_diff_formatted</span> <span class="o">=</span> <span class="n">_metadata_difference_formatted</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">retrieved_data</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">ambig_check_params</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        Multiple entries found for input parameters for </span><span class="si">{</span><span class="n">keyword_string</span><span class="si">}</span><span class="s2">.</span>
+<span class="s2">        Parameter differences:</span>
+<span class="s2">        </span><span class="si">{</span><span class="n">param_diff_formatted</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">        Please supply additional parameters or set ranking.</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">SearchError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">retrieved_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">retrieved_data</span> <span class="o">=</span> <span class="n">retrieved_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># TODO: Included output of this as Any for now because we there are many</span>
+    <span class="c1"># options for types returned but can update this</span>
+
+    <span class="c1"># We can only get a single data object back here but mypy doesn&#39;t understand that</span>
+    <span class="c1"># retrieved_data = cast(ObsData, retrieved_data)</span>
+
+    <span class="k">return</span> <span class="n">retrieved_data</span>
 
 
 <div class="viewcode-block" id="get_obs_surface"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_obs_surface">[docs]</a><span class="k">def</span> <span class="nf">get_obs_surface</span><span class="p">(</span>
@@ -510,38 +571,30 @@
             <span class="s2">&quot;This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead.&quot;</span>
         <span class="p">)</span>
 
+    <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
+
     <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span>
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
+    <span class="c1"># TODO: Evaluate this constraint - how do we want to handle and incorporate new sites?</span>
     <span class="k">if</span> <span class="n">site</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">site_info</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No site called </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, please enter a valid site name.&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Get the observation data</span>
-    <span class="n">obs_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span>
-        <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-        <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
-        <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
-        <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
-        <span class="c1"># find_all=True,</span>
-        <span class="c1"># skip_ranking=skip_ranking,</span>
-    <span class="p">)</span>
+    <span class="n">surface_keywords</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;site&quot;</span><span class="p">:</span><span class="n">site</span><span class="p">,</span>
+        <span class="s2">&quot;species&quot;</span><span class="p">:</span><span class="n">species</span><span class="p">,</span>
+        <span class="s2">&quot;inlet&quot;</span><span class="p">:</span><span class="n">inlet</span><span class="p">,</span>
+        <span class="s2">&quot;start_date&quot;</span><span class="p">:</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="s2">&quot;end_date&quot;</span><span class="p">:</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="s2">&quot;network&quot;</span><span class="p">:</span><span class="n">network</span><span class="p">,</span>
+        <span class="s2">&quot;instrument&quot;</span><span class="p">:</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="s2">&quot;data_type&quot;</span><span class="p">:</span><span class="n">data_type</span><span class="p">,</span>
+    <span class="p">}</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">obs_results</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find results for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">retrieved_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]]</span> <span class="o">=</span> <span class="n">obs_results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">retrieved_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No data returned.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">retrieved_data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multiple entries found for current input parameters - site: &#39;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&#39;, species: &#39;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please supply additional parameters or set ranking.&quot;</span><span class="p">)</span>
-        <span class="n">metadata_difference</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">retrieved_data</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">,</span> <span class="s2">&quot;instrument&quot;</span><span class="p">])</span>
-        <span class="k">return</span> <span class="kc">None</span>
+    <span class="c1"># # Get the observation data</span>
+    <span class="c1"># obs_results = search_surface(**surface_keywords)</span>
+    <span class="n">retrieved_data</span> <span class="o">=</span> <span class="n">_get_generic</span><span class="p">(</span><span class="n">ambig_check_params</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">,</span> <span class="s2">&quot;instrument&quot;</span><span class="p">],</span>
+                                  <span class="o">**</span><span class="n">surface_keywords</span><span class="p">)</span>  <span class="c1"># type:ignore</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">retrieved_data</span><span class="o">.</span><span class="n">data</span>
 
@@ -766,7 +819,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        FluxData: FluxData object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">obs_data</span> <span class="o">=</span> <span class="n">_get_generic</span><span class="p">(</span>
+    <span class="n">em_data</span> <span class="o">=</span> <span class="n">_get_generic</span><span class="p">(</span>
         <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
@@ -777,7 +830,7 @@
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;emissions&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">em_ds</span> <span class="o">=</span> <span class="n">obs_data</span><span class="o">.</span><span class="n">data</span>
+    <span class="n">em_ds</span> <span class="o">=</span> <span class="n">em_data</span><span class="o">.</span><span class="n">data</span>
     <span class="c1"># Check for level coordinate. If one level, assume surface and drop</span>
     <span class="k">if</span> <span class="s2">&quot;lev&quot;</span> <span class="ow">in</span> <span class="n">em_ds</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">em_ds</span><span class="o">.</span><span class="n">lev</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -785,7 +838,7 @@
 
         <span class="n">em_ds</span> <span class="o">=</span> <span class="n">em_ds</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s2">&quot;lev&quot;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">FluxData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">FluxData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">em_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">em_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_bc"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_bc">[docs]</a><span class="k">def</span> <span class="nf">get_bc</span><span class="p">(</span>
@@ -809,7 +862,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        BoundaryConditionsData: BoundaryConditionsData object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">obs_data</span> <span class="o">=</span> <span class="n">_get_generic</span><span class="p">(</span>
+    <span class="n">bc_data</span> <span class="o">=</span> <span class="n">_get_generic</span><span class="p">(</span>
         <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">bc_input</span><span class="o">=</span><span class="n">bc_input</span><span class="p">,</span>
@@ -819,39 +872,7 @@
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;boundary_conditions&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">BoundaryConditionsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
-
-
-<span class="k">def</span> <span class="nf">_get_generic</span><span class="p">(</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">elevate_inlets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsData</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Perform a search and create a dataclass object with the results if any are found.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data_class: Type of dataobject to create</span>
-<span class="sd">        sort: Sort Dataset during recombination</span>
-<span class="sd">        elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset</span>
-<span class="sd">        kwargs: Search terms</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        dataclass</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
-
-    <span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find data. Please try other parameters.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Found more than one result, please narrow your search terms.&quot;</span><span class="p">)</span>
-
-    <span class="n">obs_data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="n">elevate_inlets</span><span class="p">)</span>
-    <span class="c1"># We can only get a single ObsData back here but mypy doesn&#39;t understand that</span>
-    <span class="n">obs_data</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">obs_data</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">obs_data</span>
+    <span class="k">return</span> <span class="n">BoundaryConditionsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">bc_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">bc_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_footprint"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_footprint">[docs]</a><span class="k">def</span> <span class="nf">get_footprint</span><span class="p">(</span>
@@ -962,14 +983,24 @@
     <span class="k">return</span> <span class="n">data</span>
 
 
-<span class="n">multDataTypes</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FluxData</span><span class="p">]]</span>
-
-
-<span class="k">def</span> <span class="nf">metadata_difference</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">multDataTypes</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">print_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_create_keyword_string</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check differences between metadata for returned data objects.</span>
+<span class="sd">    Create a formatted string for supplied keyword values. This will ignore</span>
+<span class="sd">    keywords where the value is None.</span>
+<span class="sd">    This is used for printing details of keywords passed to the search functions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">used_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="n">keyword_string</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=&#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39;&quot;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">used_keywords</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+
+    <span class="k">return</span> <span class="n">keyword_string</span>
+
+
+<span class="k">def</span> <span class="nf">_metadata_difference</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">multDataTypes</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">print_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check differences between metadata for returned data objects. Note this will</span>
+<span class="sd">    only look at differences between values which are strings (not lists, floats etc.)</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data : Multiple data objects e.g. multiple ObsData as a list</span>
@@ -977,8 +1008,9 @@
 <span class="sd">        print_output : Summarise and print output to screen.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        list : Keys from the metadata with differences</span>
+<span class="sd">        Dict[str, list] : Keys and lists of values from the metadata with differences.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Extract metadata dictionaries from each data object in list</span>
     <span class="n">metadata</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">metadata</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
@@ -989,29 +1021,72 @@
     <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">[{</span><span class="n">param</span><span class="p">:</span> <span class="n">m</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">}</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">]</span>
 
+    <span class="n">ignore_params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">,</span> <span class="s2">&quot;data_owner&quot;</span><span class="p">,</span> <span class="s2">&quot;data_owner_email&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ignore_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">[{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore_params</span><span class="p">}</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">]</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">[{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)}</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">]</span>
+
     <span class="n">metadata0</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">difference</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">metadata_compare</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-        <span class="n">metadata_diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metadata0</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">metadata_compare</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
-        <span class="n">difference</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">metadata_diff</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metadata_diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metadata0</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">metadata_compare</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to compare metadata between ambiguous results&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">difference</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">metadata_diff</span><span class="p">))</span>
     <span class="n">param_difference</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">difference</span><span class="p">]))</span>
 
-    <span class="n">ignore_params</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;data_owner&quot;</span><span class="p">,</span> <span class="s2">&quot;data_owner_email&quot;</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">iparam</span> <span class="ow">in</span> <span class="n">ignore_params</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">param_difference</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">iparam</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="k">continue</span>
+    <span class="c1"># ignore_params = [&quot;data_owner&quot;, &quot;data_owner_email&quot;]</span>
+    <span class="c1"># for iparam in ignore_params:</span>
+    <span class="c1">#     try:</span>
+    <span class="c1">#         param_difference.remove(iparam)</span>
+    <span class="c1">#     except ValueError:</span>
+    <span class="c1">#         continue</span>
 
-    <span class="k">if</span> <span class="n">print_output</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Datasets contain:&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_difference</span><span class="p">:</span>
+    <span class="n">summary_difference</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_difference</span><span class="p">:</span>
+        <span class="n">summary_difference</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">print_output</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">: &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+            <span class="n">summary_difference</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">param</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">print_output</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;, &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">print_output</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">()</span>  <span class="c1"># print new line</span>
 
-    <span class="k">return</span> <span class="n">param_difference</span>
+    <span class="c1"># if print_output:</span>
+    <span class="c1">#     print(&quot;Datasets contain:&quot;)</span>
+    <span class="c1">#     for param in param_difference:</span>
+    <span class="c1">#         print(f&quot; {param}: &quot;, end=&quot;&quot;)</span>
+    <span class="c1">#         for m in metadata:</span>
+    <span class="c1">#             print(f&quot; &#39;{m[param]}&#39;, &quot;, end=&quot;&quot;)</span>
+    <span class="c1">#         print()  # print new line</span>
+
+    <span class="k">return</span> <span class="n">summary_difference</span>
+
+
+<span class="k">def</span> <span class="nf">_metadata_difference_formatted</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">multDataTypes</span><span class="p">,</span>
+                                   <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">print_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create formatted string for the difference in metadata between input objects.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data : Multiple data objects e.g. multiple ObsData as a list</span>
+<span class="sd">        params : Specific metadata parameters to check. If None all parameters will be checked</span>
+<span class="sd">        print_output : Summarise and print output to screen.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str : Formatted string summarising differences in keys and sets of values</span>
+<span class="sd">              from the metadata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">param_difference</span> <span class="o">=</span> <span class="n">_metadata_difference</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">print_output</span><span class="p">)</span>
+    <span class="n">formatted</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">param_difference</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+    <span class="k">return</span> <span class="n">formatted</span>
 </pre></div>
 
             </article>
