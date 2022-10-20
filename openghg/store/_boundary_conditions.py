@@ -153,7 +153,8 @@ class BoundaryConditions(BaseStore):
         elif "month" in period_str:
             date = f"{start_date.year}{start_date.month:02}"
         else:
-            date = start_date.astype("datetime64[s]").astype(str)
+            # date = start_date.astype("datetime64[s]").astype(str)
+            date = str(start_date).replace(" ", "_")
 
         # Checking against expected format for boundary conditions
         BoundaryConditions.validate_data(bc_data)
