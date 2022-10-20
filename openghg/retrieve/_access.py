@@ -2,7 +2,7 @@ import json
 import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Union, cast
-from openghg.exceptions import SearchError
+from openghg.types import SearchError
 
 from openghg.dataobjects import (
     BoundaryConditionsData,

@@ -57,7 +57,7 @@ from openghg.retrieve import (
     search_footprints,
 )
 from openghg.util import synonyms
-from openghg.exceptions import SearchError
+from openghg.types import SearchError
 from pandas import Timestamp
 from xarray import DataArray, Dataset
 

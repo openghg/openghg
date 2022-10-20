@@ -14,7 +14,7 @@ from helpers import (
 from openghg.dataobjects import ObsData
 from openghg.retrieve import get_flux, get_footprint, get_obs_column, get_obs_surface, search
 from openghg.util import compress, compress_str, hash_bytes
-from openghg.exceptions import SearchError
+from openghg.types import SearchError
 from pandas import Timedelta, Timestamp
 
 # a = [
