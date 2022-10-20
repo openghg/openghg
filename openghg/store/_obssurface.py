@@ -180,6 +180,9 @@ class ObsSurface(BaseStore):
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
             for fp in filepath:
                 if source_format == "GCWERKS":
+                    if not isinstance(fp, tuple):
+                        raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
+
                     try:
                         data_filepath = Path(fp[0])
                         precision_filepath = Path(fp[1])
