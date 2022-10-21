@@ -1,16 +1,16 @@
-from openghg.standardise import summary_data_types, summary_site_codes
+from openghg.standardise import summary_source_format, summary_site_codes
 
 
-def test_summarise():
-    """Test to check summary_data_types() function is producing expected output"""
-    summary_df = summary_data_types()
+def test_summarise_format():
+    """Test to check summary_source_formats() function is producing expected output"""
+    summary_df = summary_source_format()
 
     # Check subset of columns in DataFrame
-    expected_columns = ["Long name", "Data type", "Platform"]
+    expected_columns = ["Long name", "Source format", "Platform"]
     for col in expected_columns:
         assert col in summary_df
 
-    # Check expected data type is returned for specific value
+    # Check expected source format is returned for specific value
     name = "mtecimone"
     expected_data_type = "GCWERKS"
 
