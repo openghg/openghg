@@ -307,6 +307,9 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
 
     download_data(url=url, filepath=download_path)
 
+    if not download_path.exists():
+        raise ValueError("Unable to download file. Please check the URL is correct.")
+
     # # Make sure we still have all the files in the cache we expect to
     # checked_cache = {}
     # for filename, path in cache_data.items():
