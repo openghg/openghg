@@ -22,11 +22,21 @@ class SearchResults:
         metadata: Dictionary of metadata keyed by Datasource UUID
     """
 
-    def __init__(self, keys: Optional[Dict] = None, metadata: Optional[Dict] = None):
+    def __init__(self, keys: Optional[Dict] = None,
+                 metadata: Optional[Dict] = None,
+                 start_result: Optional[str] = None):
         if metadata is not None:
             self.metadata = metadata
         else:
             self.metadata = {}
+
+        if start_result is not None:
+            for uuid_key, uuid_metadata in metadata.items():
+                if start_result in uuid_metadata:
+                    other_keys = list(uuid_metadata.keys())
+                    other_keys.remove(start_result)
+                    reorder = [start_result] + other_keys
+                    metadata[uuid_key] = {key: uuid_metadata[key] for key in reorder}
 
         if metadata is not None:
             self.results = (
