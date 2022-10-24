@@ -168,7 +168,7 @@ def summary_site_codes() -> pd.DataFrame:
                     search_keys = (key, )
                 else:
                     search_keys = key
-                
+
                 name = search_keys[0]
                 for key in search_keys:
                     if key in data:
