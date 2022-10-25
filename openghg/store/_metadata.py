@@ -1,8 +1,11 @@
 import json
-from typing import Dict, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Union
 
 from openghg.objectstore import exists, get_bucket, get_object, set_object_from_json
-from tinydb import Storage, TinyDB
+from openghg.retrieve import search
+from openghg.store.base import Datasource
+from openghg.store.spec import define_data_type_classes
+from tinydb import Storage, TinyDB, where
 from tinydb.middlewares import CachingMiddleware
 
 
@@ -84,3 +87,55 @@ def datasource_lookup(
         results[key] = metadata_lookup(metadata=required_metadata, database=metastore)
 
     return results
+
+
+#  These handle the modification of metadata
+def find_metadata(data_type: str, **kwargs):
+    """Lookup the metadata you'd like to modify
+
+    Args:
+        data_type: Type of data, for example surface, flux, footprint
+        kwargs: Any pair of keyword arguments for searching
+    Returns:
+        MetadataHandler: A handler object to help modify the metadata
+    """
+    res = search(data_type=data_type, **kwargs)
+    metadata = res.metadata
+    return MetadataHandler(metadata=metadata)
+
+
+class MetadataHandler:
+    def __init__(self, metadata: Optional[Dict[str, Dict]] = None):
+        self._metadata = metadata if metadata is not None else {}
+
+    def update_metadata(self, uid: Union[List, str], updated_metadata: Dict):
+        if uid not in self._metadata:
+            raise ValueError("Invalid UUID, please check metadata.")
+
+        if not isinstance(uid, list):
+            uid = [uid]
+
+        # We should only have one data type
+        data_types = {self._metadata[i]["data_type"] for i in uid}
+        if len(data_types) > 1:
+            raise ValueError(
+                f"We can only modify Datasources of a single data type at once. We currently have {data_types}"
+            )
+
+        dtype = data_types.pop()
+
+        data_objs = define_data_type_classes()
+        metakey = data_objs[dtype]._metakey
+
+        with load_metastore(key=metakey) as store:
+            for u in uid:
+                #         res = store.search(where("uuid") == uid)
+                response = store.update(updated_metadata, where("uuid") == u)
+                if not response:
+                    raise ValueError("Unable to update metadata, possibly metadata sync error.")
+
+                d = Datasource.load(uuid=u, shallow=True)
+                d._metadata = updated_metadata
+                d.save()
+
+        print(f"Modified metadata for {uid}.")
