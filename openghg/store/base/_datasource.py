@@ -212,6 +212,50 @@ class Datasource:
         self.add_metadata_key(key="start_date", value=str(start))
         self.add_metadata_key(key="end_date", value=str(end))
 
+    def delete_call_data(self) -> None:
+        """Delete the data associated with this Datasource
+
+        Returns:
+            None
+        """
+        from openghg.objectstore import delete_object, get_bucket
+
+        bucket = get_bucket()
+
+        to_delete = []
+        for key_data in self._data_keys.values():
+            keys = list(key_data["keys"].values())
+            to_delete.extend(keys)
+
+        for key in set(to_delete):
+            delete_object(bucket=bucket, key=key)
+
+    def delete_data(self, keys: List) -> None:
+        """Delete specific keys
+
+        Args:
+            keys: List of keys to delete
+        """
+        from openghg.objectstore import delete_object, get_bucket
+
+        bucket = get_bucket()
+
+        for key in set(keys):
+            delete_object(bucket=bucket, key=key)
+
+    def delete_version(self, version: str) -> None:
+        """Delete a specific version of data.
+
+        Args:
+            version: Version string
+        Returns:
+            None
+        """
+        if version not in self._data_keys:
+            raise KeyError("Invalid version.")
+
+        # keys =
+
     def add_metadata(self, metadata: Dict) -> None:
         """Add all metadata in the dictionary to this Datasource
 
