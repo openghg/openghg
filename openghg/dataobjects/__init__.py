@@ -7,4 +7,4 @@ from ._obsdata import ObsData
 from ._obscolumn_data import ObsColumnData
 from ._ranksources import RankSources
 from ._searchresults import SearchResults
-from ._metadata_handler import MetadataHandler
+from ._metadata_handler import DataHandler
