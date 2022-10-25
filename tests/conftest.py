@@ -5,9 +5,6 @@ import tempfile
 
 import pytest
 
-# Added for import of services modules in tests
-sys.path.insert(0, os.path.abspath("services"))
-
 # Added for import of openghg from testing directory
 sys.path.insert(0, os.path.abspath("."))
 

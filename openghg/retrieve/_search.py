@@ -3,14 +3,12 @@
 
 """
 import logging
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Union
 from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.util import decompress, running_on_hub
 from tinydb.database import TinyDB
-
-if TYPE_CHECKING:
-    from openghg.dataobjects import SearchResults
+from openghg.dataobjects import SearchResults
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -445,7 +443,7 @@ def search(**kwargs: Any) -> SearchResults:
 # _base_search()
 # 1.
 # _store_search()
-def local_search(**kwargs) -> SearchResults:
+def local_search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
 

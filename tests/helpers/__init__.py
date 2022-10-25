@@ -1,6 +1,7 @@
 from .cfchecking import check_cf_compliance
 from .helpers import (
     call_function_packager,
+    clear_test_store,
     get_bc_datapath,
     get_column_datapath,
     get_emissions_datapath,

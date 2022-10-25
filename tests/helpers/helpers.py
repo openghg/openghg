@@ -1,5 +1,7 @@
 """ Some helper functions for things we do in tests frequently
 """
+import os
+import shutil
 from pathlib import Path
 from typing import Dict, List
 
@@ -9,8 +11,15 @@ __all__ = [
     "get_bc_datapath",
     "get_footprint_datapath",
     "glob_files",
-    # "get_datapath_mobile",
+    "clear_test_store"
 ]
+
+
+def clear_test_store():
+    # Clears the testing object store
+    path = os.getenv("OPENGHG_PATH")
+    if path is not None:
+        shutil.rmtree(path)
 
 
 def get_surface_datapath(filename: str, source_format: str) -> Path:
