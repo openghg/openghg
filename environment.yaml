@@ -4,23 +4,24 @@ channels:
   - defaults
 dependencies:
   - addict
-  - cdsapi
   - dask
-  - lazy_import
+  - h5netcdf
+  - icoscp
   - matplotlib
-  - netcdf4
+  - msgpack
   - numexpr
   - numpy
   - nc-time-axis
   - pandas
-  - paramiko
   - plotly
   - pyvis
   - rapidfuzz
-  - requests>=2.25
+  - requests >= 2.25
   - scipy
+  - tinydb
+  - toml
   - tqdm
-  - xarray>=0.18.2
-  - urllib3>=1.26.3
+  - xarray >= 0.18.2
+  - urllib3 >= 1.26.3
   - pip
   - xesmf

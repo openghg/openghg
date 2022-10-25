@@ -43,7 +43,7 @@ class SearchResults:
         self.hub = running_on_hub()
 
     def __str__(self) -> str:
-        return f"Found {len(self.results.index)} results.\nView the results DataFrame using the results property."
+        return f"Found {len(self.results)} results.\nView the results DataFrame using the results property."
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -126,6 +126,14 @@ class SearchResults:
         """
         uuids = list(self.key_data.keys())
         return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
+
+    def uuids(self) -> List:
+        """Return the UUIDs of the found data
+
+        Returns:
+            list: List of UUIDs
+        """
+        return list(self.metadata.keys())
 
     def _retrieve_by_term(
         self, sort: bool, elevate_inlet: bool, **kwargs: Any
