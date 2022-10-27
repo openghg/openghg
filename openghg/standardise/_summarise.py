@@ -155,17 +155,17 @@ def summary_site_codes() -> pd.DataFrame:
                            "latitude",
                            "longitude",
                            "height_station_masl",
-                          ("heights", "height")]
+                          ["heights", "height"]]
 
-    name_keys = [key[0] if isinstance(key, tuple) else key for key in expected_keys]
+    name_keys = [key[0] if isinstance(key, list) else key for key in expected_keys]
     for key in name_keys:
         site_dict[key] = []
 
     for site, network_data in site_info.items():
         for network, data in network_data.items():
             for key in expected_keys:
-                if not isinstance(key, tuple):
-                    search_keys = (key, )
+                if not isinstance(key, list):
+                    search_keys = [key, ]
                 else:
                     search_keys = key
 

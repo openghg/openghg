@@ -30,7 +30,7 @@ class SearchResults:
         else:
             self.metadata = {}
 
-        if start_result is not None:
+        if start_result is not None and metadata is not None:
             for uuid_key, uuid_metadata in metadata.items():
                 if start_result in uuid_metadata:
                     other_keys = list(uuid_metadata.keys())
