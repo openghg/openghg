@@ -1,9 +1,9 @@
-from openghg.standardise import summary_source_format, summary_site_codes
+from openghg.standardise import summary_source_formats, summary_site_codes
 
 
 def test_summarise_format():
     """Test to check summary_source_formats() function is producing expected output"""
-    summary_df = summary_source_format()
+    summary_df = summary_source_formats()
 
     # Check subset of columns in DataFrame
     expected_columns = ["Long name", "Source format", "Platform"]
@@ -15,7 +15,7 @@ def test_summarise_format():
     expected_data_type = "GCWERKS"
 
     selection = summary_df[summary_df["Long name"] == name]
-    assert selection["Data type"].values == expected_data_type
+    assert selection["Source format"].values == expected_data_type
 
 
 def test_summarise_site():
@@ -23,12 +23,12 @@ def test_summarise_site():
     summary_df = summary_site_codes()
 
     # Check subset of columns in DataFrame
-    expected_columns = ["network",
-                        "long_name",
-                        "latitude",
-                        "longitude",
-                        "height_station_masl",
-                        "heights"]
+    expected_columns = ["Network",
+                        "Long name",
+                        "Latitude",
+                        "Longitude",
+                        "Station height (masl)",
+                        "Inlet heights"]
 
     for col in expected_columns:
         assert col in summary_df
@@ -39,6 +39,6 @@ def test_summarise_site():
     expected_long_name = "Bilsdale, UK"
 
     selection_all = summary_df.loc[site_code]
-    selection = selection_all[selection_all["network"] == network]
-    assert selection["long_name"].values == expected_long_name
+    selection = selection_all[selection_all["Network"] == network]
+    assert selection["Long name"].values == expected_long_name
 
