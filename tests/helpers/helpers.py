@@ -3,7 +3,7 @@
 import os
 import shutil
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 
 __all__ = [
     "get_surface_datapath",
@@ -11,7 +11,9 @@ __all__ = [
     "get_bc_datapath",
     "get_footprint_datapath",
     "glob_files",
-    "clear_test_store"
+    "clear_test_store",
+    "key_to_local_filepath,",
+    "all_datasource_keys",
 ]
 
 
@@ -114,3 +116,22 @@ def call_function_packager(status: int, headers: Dict, content: Dict) -> Dict:
     d["content"] = content
 
     return d
+
+
+def key_to_local_filepath(key: Union[str, List]):
+    from openghg.objectstore import get_bucket
+    from pathlib import Path
+
+    if not isinstance(key, list):
+        key = [key]
+
+    return [Path(get_bucket()).joinpath(f"{k}._data") for k in key]
+
+
+def all_datasource_keys(keys):
+    ds_keys = []
+    for key_data in keys.values():
+        data_keys = list(key_data["keys"].values())
+        ds_keys.extend(data_keys)
+
+    return ds_keys

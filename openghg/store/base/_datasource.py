@@ -212,7 +212,7 @@ class Datasource:
         self.add_metadata_key(key="start_date", value=str(start))
         self.add_metadata_key(key="end_date", value=str(end))
 
-    def delete_call_data(self) -> None:
+    def delete_all_data(self) -> None:
         """Delete the data associated with this Datasource
 
         Returns:
@@ -243,18 +243,18 @@ class Datasource:
         for key in set(keys):
             delete_object(bucket=bucket, key=key)
 
-    def delete_version(self, version: str) -> None:
-        """Delete a specific version of data.
+    # def delete_version(self, version: str) -> None:
+    #     """Delete a specific version of data.
 
-        Args:
-            version: Version string
-        Returns:
-            None
-        """
-        if version not in self._data_keys:
-            raise KeyError("Invalid version.")
+    #     Args:
+    #         version: Version string
+    #     Returns:
+    #         None
+    #     """
+    #     if version not in self._data_keys:
+    #         raise KeyError("Invalid version.")
 
-        # keys =
+    #     # keys =
 
     def add_metadata(self, metadata: Dict) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -574,6 +574,14 @@ class Datasource:
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
         set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
+
+    def _key(self) -> str:
+        """Returns the Datasource's key
+
+        Returns:
+            str: Key for Datasource in object store
+        """
+        return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
     @classmethod
     def load(
