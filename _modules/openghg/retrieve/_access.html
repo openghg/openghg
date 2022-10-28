@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.gcc18c28.dirty documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g7d8e9ae documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -99,7 +99,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gcc18c28.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g7d8e9ae documentation</p>
   
 </a>
     
@@ -430,6 +430,7 @@
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">average</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -448,7 +449,8 @@
 <span class="sd">        species: Species identifier e.g. ch4 for methane.</span>
 <span class="sd">        start_date: Output start date in a format that Pandas can interpret</span>
 <span class="sd">        end_date: Output end date in a format that Pandas can interpret</span>
-<span class="sd">        inlet: Inlet label</span>
+<span class="sd">        inlet: Inlet height above ground level in metres</span>
+<span class="sd">        height: Alias for inlet</span>
 <span class="sd">        average: Averaging period for each dataset. Each value should be a string of</span>
 <span class="sd">        the form e.g. &quot;2H&quot;, &quot;30min&quot; (should match pandas offset aliases format).</span>
 <span class="sd">        keep_missing: Keep missing data points or drop them.</span>
@@ -459,6 +461,13 @@
 <span class="sd">        ObsData or None: ObsData object if data found, else None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">call_function</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">format_inlet</span>
+
+    <span class="c1"># Allow height to be an alias for inlet but we do not expect height</span>
+    <span class="c1"># to be within the metadata (for now)</span>
+    <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">height</span>
+    <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
         <span class="n">to_post</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -531,6 +540,7 @@
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">average</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -551,7 +561,8 @@
 <span class="sd">        species: Species identifier e.g. ch4 for methane.</span>
 <span class="sd">        start_date: Output start date in a format that Pandas can interpret</span>
 <span class="sd">        end_date: Output end date in a format that Pandas can interpret</span>
-<span class="sd">        inlet: Inlet label</span>
+<span class="sd">        inlet: Inlet height above ground level in metres</span>
+<span class="sd">        height: Alias for inlet</span>
 <span class="sd">        average: Averaging period for each dataset. Each value should be a string of</span>
 <span class="sd">        the form e.g. &quot;2H&quot;, &quot;30min&quot; (should match pandas offset aliases format).</span>
 <span class="sd">        keep_missing: Keep missing data points or drop them.</span>
@@ -563,7 +574,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">timestamp_tzaware</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">timestamp_tzaware</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
 
     <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
@@ -572,6 +583,12 @@
         <span class="p">)</span>
 
     <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
+
+    <span class="c1"># Allow height to be an alias for inlet but we do not expect height</span>
+    <span class="c1"># to be within the metadata (for now)</span>
+    <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">height</span>
+    <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>    
 
     <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span>
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -878,7 +895,8 @@
 <div class="viewcode-block" id="get_footprint"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_footprint">[docs]</a><span class="k">def</span> <span class="nf">get_footprint</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">height</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -894,7 +912,8 @@
 <span class="sd">              file. E.g. site=&quot;DJI&quot;, site_modifier = &quot;DJI-SAM&quot; -</span>
 <span class="sd">              station called DJI, footprints site called DJI-SAM</span>
 <span class="sd">        domain : Domain name for the footprints</span>
-<span class="sd">        height: Height of inlet in metres</span>
+<span class="sd">        inlet: Height above ground level in metres</span>
+<span class="sd">        height: Alias for inlet</span>
 <span class="sd">        start_date: Output start date in a format that Pandas can interpret</span>
 <span class="sd">        end_date: Output end date in a format that Pandas can interpret</span>
 <span class="sd">        species: Species identifier e.g. &quot;co2&quot; for carbon dioxide. Only needed</span>
@@ -906,15 +925,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">synonyms</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">format_inlet</span>
 
     <span class="c1"># Find the correct synonym for the passed species</span>
     <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">))</span>
 
+    <span class="c1"># Allow inlet or height to be specified, both or either may be included</span>
+    <span class="c1"># within the metadata so could use either to search</span>
+    <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+
     <span class="n">fp_data</span> <span class="o">=</span> <span class="n">_get_generic</span><span class="p">(</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
