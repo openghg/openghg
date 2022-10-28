@@ -118,7 +118,7 @@ def call_function_packager(status: int, headers: Dict, content: Dict) -> Dict:
     return d
 
 
-def key_to_local_filepath(key: Union[str, List]):
+def key_to_local_filepath(key: Union[str, List]) -> List[Path]:
     from openghg.objectstore import get_bucket
     from pathlib import Path
 
@@ -128,7 +128,7 @@ def key_to_local_filepath(key: Union[str, List]):
     return [Path(get_bucket()).joinpath(f"{k}._data") for k in key]
 
 
-def all_datasource_keys(keys):
+def all_datasource_keys(keys: Dict) -> List[str]:
     ds_keys = []
     for key_data in keys.values():
         data_keys = list(key_data["keys"].values())

@@ -89,8 +89,8 @@ def datasource_lookup(
     return results
 
 
-def find_metadata(data_type: str, **kwargs: Dict):  # type: ignore
-    """Lookup the metadata you'd like to modify
+def data_handler_lookup(data_type: str, **kwargs: Dict):  # type: ignore
+    """Lookup the data / metadata you'd like to modify.
 
     Args:
         data_type: Type of data, for example surface, flux, footprint
