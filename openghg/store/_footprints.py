@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union
+from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
 
 import numpy as np
 from openghg.store import DataSchema
@@ -249,6 +249,7 @@ class Footprints(BaseStore):
         # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
         inlet = clean_string(inlet)
         inlet = format_inlet(inlet)
+        inlet = cast(str, inlet)
 
         fp = Footprints.load()
 
