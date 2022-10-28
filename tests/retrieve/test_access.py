@@ -41,8 +41,21 @@ from pandas import Timedelta, Timestamp
 # ]
 
 
-def test_get_obs_surface():
-    obsdata = get_obs_surface(site="bsd", species="co2", inlet="248m")
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "248m"),
+        ("height", "248m"),
+        ("inlet", "248magl"),
+        ("inlet", "248"),
+    ],
+)
+def test_get_obs_surface(inlet_keyword, inlet_value):
+
+    if inlet_keyword == "inlet":
+        obsdata = get_obs_surface(site="bsd", species="co2", inlet=inlet_value)
+    elif inlet_keyword == "height":
+        obsdata = get_obs_surface(site="bsd", species="co2", height=inlet_value)
     co2_data = obsdata.data
 
     assert co2_data.time[0] == Timestamp("2014-01-30T11:12:30")
@@ -313,9 +326,20 @@ def test_get_flux_no_result():
         assert "source='cinnamon'" in execinfo
         assert "domain='antarctica'" in execinfo
 
-
-def test_get_footprint():
-    fp_result = get_footprint(site="tmb", domain="europe", height="10m", model="test_model")
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "10m"),
+        ("height", "10m"),
+        ("inlet", "10magl"),
+        ("inlet", "10"),
+    ],
+)
+def test_get_footprint(inlet_keyword,inlet_value):
+    if inlet_keyword == "inlet":
+        fp_result = get_footprint(site="tmb", domain="europe", inlet=inlet_value, model="test_model")
+    elif inlet_keyword == "height":
+        fp_result = get_footprint(site="tmb", domain="europe", height=inlet_value, model="test_model")
 
     footprint = fp_result.data
     metadata = fp_result.metadata
@@ -340,4 +364,3 @@ def test_get_footprint_no_result():
         assert "domain='spain'" in execinfo
         assert "height='10m'" in execinfo
         assert "model='test_model'" in execinfo
-

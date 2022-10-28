@@ -90,6 +90,7 @@ class ModelScenario:
         site: Optional[str] = None,
         species: Optional[str] = None,
         inlet: Optional[str] = None,
+        height: Optional[str] = None,
         network: Optional[str] = None,
         domain: Optional[str] = None,
         model: Optional[str] = None,
@@ -120,6 +121,7 @@ class ModelScenario:
             site : Site code e.g. "TAC"
             species : Species code e.g. "ch4"
             inlet : Inlet value e.g. "10m"
+            height: Alias for inlet.
             network : Network name e.g. "AGAGE"
             domain : Domain name e.g. "EUROPE"
             model : Model name used in creation of footprint e.g. "NAME"
@@ -153,6 +155,7 @@ class ModelScenario:
             site=site,
             species=species,
             inlet=inlet,
+            height=height,
             network=network,
             start_date=start_date,
             end_date=end_date,
@@ -172,6 +175,7 @@ class ModelScenario:
         self.add_footprint(
             site=site,
             inlet=inlet,
+            height=height,
             domain=domain,
             model=model,
             metmodel=metmodel,
@@ -266,6 +270,7 @@ class ModelScenario:
         site: Optional[str] = None,
         species: Optional[str] = None,
         inlet: Optional[str] = None,
+        height: Optional[str] = None,
         network: Optional[str] = None,
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
@@ -274,11 +279,17 @@ class ModelScenario:
         """
         Add observation data based on keywords or direct ObsData object.
         """
-        from openghg.util import clean_string
+        from openghg.util import clean_string, format_inlet
 
         # Search for obs data based on keywords
         if site is not None and obs is None:
             site = clean_string(site)
+
+            if height is not None and inlet is None:
+                inlet = height
+            inlet = format_inlet(inlet)
+            inlet = clean_string(inlet)
+
             # search for obs based on suitable keywords - site, species, inlet
             obs_keywords = {
                 "site": site,
@@ -302,6 +313,7 @@ class ModelScenario:
         self,
         site: Optional[str] = None,
         inlet: Optional[str] = None,
+        height: Optional[str] = None,
         domain: Optional[str] = None,
         model: Optional[str] = None,
         metmodel: Optional[str] = None,
@@ -313,7 +325,7 @@ class ModelScenario:
         """
         Add footprint data based on keywords or direct FootprintData object.
         """
-        from openghg.util import clean_string, species_lifetime
+        from openghg.util import clean_string, format_inlet, species_lifetime
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs), model, metmodel
@@ -321,6 +333,13 @@ class ModelScenario:
             site = clean_string(site)
             if inlet is None and self.obs is not None:
                 inlet = self.obs.metadata["inlet"]
+            elif inlet is None and height is not None:
+                inlet = height                        
+                inlet = format_inlet(inlet)
+                inlet = clean_string(inlet)
+            else:
+                inlet = format_inlet(inlet)
+                inlet = clean_string(inlet)
 
             # TODO: Add case to deal with "multiple" inlets
             if inlet == "multiple":
@@ -331,6 +350,7 @@ class ModelScenario:
             footprint_keywords = {
                 "site": site,
                 "height": inlet,
+                "inlet": inlet,
                 "domain": domain,
                 "model": model,  # Not currently used in get_footprint - should be added
                 # "metmodel": metmodel,  # Should be added to inputs for get_footprint()

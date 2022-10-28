@@ -1,3 +1,4 @@
+import pytest
 from openghg.retrieve import (
     search,
     search_bc,
@@ -9,12 +10,24 @@ from openghg.retrieve import (
 )
 
 
-def test_search_surface():
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "50m"),
+        ("height", "50m"),
+        ("inlet", "50magl"),
+        ("inlet", "50"),
+    ],
+)
+def test_search_surface(inlet_keyword, inlet_value):
     res = search_surface(site="hfd")
 
     assert len(res.metadata) == 6
 
-    res = search_surface(site="hfd", inlet="50m", species="co2")
+    if inlet_keyword == "inlet":
+        res = search_surface(site="hfd", inlet=inlet_value, species="co2")
+    elif inlet_keyword == "height":
+        res = search_surface(site="hfd", height=inlet_value, species="co2")
 
     key = next(iter(res.metadata))
 
@@ -151,15 +164,27 @@ def test_nonsense_terms():
 
     assert not res
 
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "10m"),
+        ("height", "10m"),
+        ("inlet", "10magl"),
+        ("inlet", "10"),
+    ],
+)
+def test_search_footprints(inlet_keyword,inlet_value):
 
-def test_search_footprints():
-    res = search_footprints(site="TMB", network="LGHG", height="10m", domain="EUROPE", model="test_model")
+    if inlet_keyword == "inlet":
+        res = search_footprints(site="TMB", network="LGHG", inlet=inlet_value, domain="EUROPE", model="test_model")
+    elif inlet_keyword == "height":
+        res = search_footprints(site="TMB", network="LGHG", height=inlet_value, domain="EUROPE", model="test_model")
 
     key = next(iter(res.metadata))
     partial_metadata = {
         "data_type": "footprints",
         "site": "tmb",
-        "height": "10m",
+        "inlet": "10m",
         "domain": "europe",
         "model": "test_model",
         "network": "lghg",
