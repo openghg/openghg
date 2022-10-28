@@ -287,8 +287,8 @@ class ModelScenario:
 
             if height is not None and inlet is None:
                 inlet = height
-            inlet = format_inlet(inlet)
             inlet = clean_string(inlet)
+            inlet = format_inlet(inlet)
 
             # search for obs based on suitable keywords - site, species, inlet
             obs_keywords = {
@@ -335,11 +335,11 @@ class ModelScenario:
                 inlet = self.obs.metadata["inlet"]
             elif inlet is None and height is not None:
                 inlet = height                        
-                inlet = format_inlet(inlet)
                 inlet = clean_string(inlet)
+                inlet = format_inlet(inlet)
             else:
-                inlet = format_inlet(inlet)
                 inlet = clean_string(inlet)
+                inlet = format_inlet(inlet)
 
             # TODO: Add case to deal with "multiple" inlets
             if inlet == "multiple":
