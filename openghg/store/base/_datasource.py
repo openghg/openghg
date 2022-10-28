@@ -575,7 +575,7 @@ class Datasource:
 
         set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
 
-    def _key(self) -> str:
+    def key(self) -> str:
         """Returns the Datasource's key
 
         Returns:
