@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g3d249ed documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g185a392.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -99,7 +99,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g3d249ed documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g185a392.dirty documentation</p>
   
 </a>
     
@@ -351,12 +351,11 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-
-<span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">load_metastore</span>
 <span class="kn">from</span> <span class="nn">openghg.store.spec</span> <span class="kn">import</span> <span class="n">define_data_type_classes</span><span class="p">,</span> <span class="n">define_data_types</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">decompress</span><span class="p">,</span> <span class="n">running_on_hub</span>
 <span class="kn">from</span> <span class="nn">tinydb.database</span> <span class="kn">import</span> <span class="n">TinyDB</span>
+<span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.retrieve&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
@@ -813,7 +812,7 @@
 <span class="c1"># _base_search()</span>
 <span class="c1"># 1.</span>
 <span class="c1"># _store_search()</span>
-<span class="k">def</span> <span class="nf">local_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+<span class="k">def</span> <span class="nf">local_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Search for observations data. Any keyword arguments may be passed to the</span>
 <span class="sd">    the function and these keywords will be used to search metadata.</span>
 
@@ -839,6 +838,7 @@
     <span class="kn">import</span> <span class="nn">itertools</span>
 
     <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
+    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">clean_string</span><span class="p">,</span>
         <span class="n">synonyms</span><span class="p">,</span>

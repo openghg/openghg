@@ -1,0 +1,849 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Modifying and deleting data &#8212; OpenGHG 0+untagged.1.g185a392.dirty documentation</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Modifying_and_deleting_data';</script>
+    <script src="../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Development" href="../../development/index_devel.html" />
+    <link rel="prev" title="Workflow 7: Retrieving data from remote archives" href="7_Retrieving_remote_data.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">OpenGHG 0+untagged.1.g185a392.dirty documentation</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../features.html">
+                        Features
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../install.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="../index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../development/index_devel.html">
+                        Development
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../../api/index_devapi.html">
+                        Developer API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../whatsnew/index.html">
+                        What’s new
+                    </a>
+                </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../features.html">
+                        Features
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../install.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="../index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../development/index_devel.html">
+                        Development
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../../api/index_devapi.html">
+                        Developer API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../whatsnew/index.html">
+                        What’s new
+                    </a>
+                </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Tutorials - Local</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_Adding_observation_data.html">Processing, searching and retrieving observations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_Comparing_with_emissions.html">Workflow 3: comparing observations to emissions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_Working_with_co2.html">Workflow 4: Working with carbon dioxide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_Searching_and_plotting.html">Workflow 5: Searching and plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_Explore_NOAA_ObsPack.html">Workflow 6: Explore NOAA ObsPack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_Retrieving_remote_data.html">Workflow 7: Retrieving data from remote archives</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Modifying and deleting data</a></li>
+
+</ul>
+</li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="modifying-and-deleting-data">
+<h1>Modifying and deleting data<a class="headerlink" href="#modifying-and-deleting-data" title="Permalink to this heading">#</a></h1>
+<p>Sometimes you might want to modify some metadata after running the data through the standardisation scripts.
+After the standardisation process the metadata associated with some data can still be edited. This can save
+time if the data standardisation process is quite time consuming. Data can also be deleted from the object store.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">data_handler_lookup</span>
+<span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_footprint_inert</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We’ll first add some footprint data to the object store.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_footprint_inert</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:   0%|          | 0/70216145 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:  11%|█         | 7.31M/67.0M [00:00&lt;00:00, 76.6MB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:  42%|████▏     | 28.4M/67.0M [00:00&lt;00:00, 161MB/s] 
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:  74%|███████▍  | 49.8M/67.0M [00:00&lt;00:00, 190MB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz: 100%|██████████| 67.0M/67.0M [00:00&lt;00:00, 162MB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Standardising footprint data...
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">IndexError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/api.py:1230,</span> in <span class="ni">to_netcdf</span><span class="nt">(dataset, path_or_file, mode, format, group, engine, encoding, unlimited_dims, compute, multifile, invalid_netcdf)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1227</span> <span class="k">try</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1228</span>     <span class="c1"># TODO: allow this work (setting up the file for writing array data)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1229</span>     <span class="c1"># to be parallelized with dask</span>
+<span class="ne">-&gt; </span><span class="mi">1230</span>     <span class="n">dump_to_store</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1231</span>         <span class="n">dataset</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span>
+<span class="g g-Whitespace">   </span><span class="mi">1232</span>     <span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1233</span>     <span class="k">if</span> <span class="n">autoclose</span><span class="p">:</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/api.py:1277,</span> in <span class="ni">dump_to_store</span><span class="nt">(dataset, store, writer, encoder, encoding, unlimited_dims)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1275</span>     <span class="n">variables</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">1277</span> <span class="n">store</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="n">check_encoding</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/common.py:270,</span> in <span class="ni">AbstractWritableDataStore.store</span><span class="nt">(self, variables, attributes, check_encoding_set, writer, unlimited_dims)</span>
+<span class="g g-Whitespace">    </span><span class="mi">269</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_dimensions</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">270</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_variables</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">271</span>     <span class="n">variables</span><span class="p">,</span> <span class="n">check_encoding_set</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span>
+<span class="g g-Whitespace">    </span><span class="mi">272</span> <span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/common.py:308,</span> in <span class="ni">AbstractWritableDataStore.set_variables</span><span class="nt">(self, variables, check_encoding_set, writer, unlimited_dims)</span>
+<span class="g g-Whitespace">    </span><span class="mi">307</span> <span class="n">check</span> <span class="o">=</span> <span class="n">vn</span> <span class="ow">in</span> <span class="n">check_encoding_set</span>
+<span class="ne">--&gt; </span><span class="mi">308</span> <span class="n">target</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_variable</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">309</span>     <span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span>
+<span class="g g-Whitespace">    </span><span class="mi">310</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">312</span> <span class="n">writer</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/scipy_.py:226,</span> in <span class="ni">ScipyDataStore.prepare_variable</span><span class="nt">(self, name, variable, check_encoding, unlimited_dims)</span>
+<span class="g g-Whitespace">    </span><span class="mi">225</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">226</span>     <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">variable</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">227</span> <span class="n">scipy_var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:387,</span> in <span class="ni">netcdf_file.createVariable</span><span class="nt">(self, name, type, dimensions)</span>
+<span class="g g-Whitespace">    </span><span class="mi">386</span> <span class="n">data</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">shape_</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">type</span><span class="o">.</span><span class="n">newbyteorder</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">))</span>  <span class="c1"># convert to big endian always for NetCDF 3</span>
+<span class="ne">--&gt; </span><span class="mi">387</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">netcdf_variable</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">388</span>         <span class="n">data</span><span class="p">,</span> <span class="n">typecode</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">389</span>         <span class="n">maskandscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maskandscale</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">390</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+<span class="ne">IndexError</span>: only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`) and integer or boolean arrays are valid indices
+
+<span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
+
+<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">populate_footprint_inert</span><span class="p">()</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/tutorial/_tutorial.py:62,</span> in <span class="ni">populate_footprint_inert</span><span class="nt">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">59</span> <span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;EUROPE&quot;</span>
+<span class="g g-Whitespace">     </span><span class="mi">60</span> <span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;NAME&quot;</span>
+<span class="ne">---&gt; </span><span class="mi">62</span> <span class="n">standardise_footprint</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">63</span>     <span class="n">filepath</span><span class="o">=</span><span class="n">tac_inert_path</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span>
+<span class="g g-Whitespace">     </span><span class="mi">64</span> <span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/standardise/_standardise.py:265,</span> in <span class="ni">standardise_footprint</span><span class="nt">(filepath, site, height, domain, model, metmodel, species, network, period, chunks, continuous, retrieve_met, high_spatial_res, high_time_res, overwrite)</span>
+<span class="g g-Whitespace">    </span><span class="mi">263</span>     <span class="k">return</span> <span class="n">response_content</span>
+<span class="g g-Whitespace">    </span><span class="mi">264</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">265</span>     <span class="k">return</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">266</span>         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">267</span>         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">268</span>         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">269</span>         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">270</span>         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">271</span>         <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">272</span>         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">273</span>         <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">274</span>         <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">275</span>         <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">276</span>         <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">277</span>         <span class="n">retrieve_met</span><span class="o">=</span><span class="n">retrieve_met</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">278</span>         <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">279</span>         <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">280</span>         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">281</span>     <span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_footprints.py:375,</span> in <span class="ni">Footprints.read_file</span><span class="nt">(filepath, site, domain, model, inlet, height, metmodel, species, network, period, chunks, continuous, retrieve_met, high_spatial_res, high_time_res, short_lifetime, overwrite)</span>
+<span class="g g-Whitespace">    </span><span class="mi">372</span> <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">374</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;footprints&quot;</span>
+<span class="ne">--&gt; </span><span class="mi">375</span> <span class="n">datasource_uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">376</span>     <span class="n">data_dict</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">377</span>     <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">378</span>     <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">379</span>     <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">380</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">382</span> <span class="n">fp</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">384</span> <span class="c1"># Record the file hash in case we see this file again</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_segment.py:51,</span> in <span class="ni">assign_data</span><span class="nt">(data_dict, lookup_results, overwrite, data_type)</span>
+<span class="g g-Whitespace">     </span><span class="mi">49</span> <span class="n">datasource</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">50</span> <span class="c1"># Save Datasource to object store</span>
+<span class="ne">---&gt; </span><span class="mi">51</span> <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">53</span> <span class="n">new_datasource</span> <span class="o">=</span> <span class="n">uuid</span> <span class="ow">is</span> <span class="kc">False</span>
+<span class="g g-Whitespace">     </span><span class="mi">54</span> <span class="n">uuids</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">(),</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="n">new_datasource</span><span class="p">}</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/base/_datasource.py:550,</span> in <span class="ni">Datasource.save</span><span class="nt">(self, bucket)</span>
+<span class="g g-Whitespace">    </span><span class="mi">547</span>     <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_folder</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+<span class="g g-Whitespace">    </span><span class="mi">548</span>         <span class="n">parent_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">550</span>     <span class="n">data</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">552</span>     <span class="c1"># Can we just take the bytes from the data here and then write then straight?</span>
+<span class="g g-Whitespace">    </span><span class="mi">553</span>     <span class="c1"># TODO - for now just create a temporary directory - will have to update Acquire</span>
+<span class="g g-Whitespace">    </span><span class="mi">554</span>     <span class="c1"># or work on a PR for xarray to allow returning a NetCDF as bytes</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">560</span> 
+<span class="g g-Whitespace">    </span><span class="mi">561</span> <span class="c1"># Copy the last version</span>
+<span class="g g-Whitespace">    </span><span class="mi">562</span> <span class="k">if</span> <span class="s2">&quot;latest&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">:</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/core/dataset.py:1899,</span> in <span class="ni">Dataset.to_netcdf</span><span class="nt">(self, path, mode, format, group, engine, encoding, unlimited_dims, compute, invalid_netcdf)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1896</span>     <span class="n">encoding</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="g g-Whitespace">   </span><span class="mi">1897</span> <span class="kn">from</span> <span class="nn">..backends.api</span> <span class="kn">import</span> <span class="n">to_netcdf</span>
+<span class="ne">-&gt; </span><span class="mi">1899</span> <span class="k">return</span> <span class="n">to_netcdf</span><span class="p">(</span>  <span class="c1"># type: ignore  # mypy cannot resolve the overloads:(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1900</span>     <span class="bp">self</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1901</span>     <span class="n">path</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1902</span>     <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1903</span>     <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1904</span>     <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1905</span>     <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1906</span>     <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1907</span>     <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1908</span>     <span class="n">compute</span><span class="o">=</span><span class="n">compute</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1909</span>     <span class="n">multifile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1910</span>     <span class="n">invalid_netcdf</span><span class="o">=</span><span class="n">invalid_netcdf</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1911</span> <span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/api.py:1246,</span> in <span class="ni">to_netcdf</span><span class="nt">(dataset, path_or_file, mode, format, group, engine, encoding, unlimited_dims, compute, multifile, invalid_netcdf)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1244</span> <span class="k">finally</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1245</span>     <span class="k">if</span> <span class="ow">not</span> <span class="n">multifile</span> <span class="ow">and</span> <span class="n">compute</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1246</span>         <span class="n">store</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="g g-Whitespace">   </span><span class="mi">1248</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">compute</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1249</span>     <span class="kn">import</span> <span class="nn">dask</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/scipy_.py:240,</span> in <span class="ni">ScipyDataStore.close</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">239</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">240</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/file_manager.py:224,</span> in <span class="ni">CachingFileManager.close</span><span class="nt">(self, needs_lock)</span>
+<span class="g g-Whitespace">    </span><span class="mi">222</span> <span class="n">file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">223</span> <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">224</span>     <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:292,</span> in <span class="ni">netcdf_file.close</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">290</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;fp&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">291</span>     <span class="k">try</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">292</span>         <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">293</span>     <span class="k">finally</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">294</span>         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:402,</span> in <span class="ni">netcdf_file.flush</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">393</span> <span class="sd">&quot;&quot;&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">394</span><span class="sd"> Perform a sync-to-disk flush if the `netcdf_file` object is in write mode.</span>
+<span class="g g-Whitespace">    </span><span class="mi">395</span><span class="sd"> </span>
+<span class="sd">   (...)</span>
+<span class="g g-Whitespace">    </span><span class="mi">399</span><span class="sd"> </span>
+<span class="g g-Whitespace">    </span><span class="mi">400</span><span class="sd"> &quot;&quot;&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">401</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="s1">&#39;wa&#39;</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">402</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">()</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:411,</span> in <span class="ni">netcdf_file._write</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">408</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version_byte</span><span class="p">,</span> <span class="s1">&#39;&gt;b&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+<span class="g g-Whitespace">    </span><span class="mi">410</span> <span class="c1"># Write headers and data.</span>
+<span class="ne">--&gt; </span><span class="mi">411</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_numrecs</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">412</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_dim_array</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">413</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_gatt_array</span><span class="p">()</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:418,</span> in <span class="ni">netcdf_file._write_numrecs</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">416</span> <span class="k">def</span> <span class="nf">_write_numrecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">417</span>     <span class="c1"># Get highest record count from all record variables.</span>
+<span class="ne">--&gt; </span><span class="mi">418</span>     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+<span class="g g-Whitespace">    </span><span class="mi">419</span>         <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">isrec</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recs</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">420</span>             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_recs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+<span class="ne">AttributeError</span>: &#39;numpy.ndarray&#39; object has no attribute &#39;values&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We want to update the model name so we’ll use the <code class="docutils literal notranslate"><span class="pre">update_metadata</span></code> method of the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> object. To do this we need to take the
+UUID of the Datasource returned by the <code class="docutils literal notranslate"><span class="pre">data_handler_lookup</span></code> function, this is the key of the metadata dictionary.</p>
+<blockquote>
+<div><p><strong><em>NOTE:</em></strong>  The UUID below will be different on your computer. Take the UUID from the metadata dictionary.</p>
+</div></blockquote>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">uuid</span> <span class="o">=</span> <span class="s2">&quot;b2177d42-9df9-4a08-b50b-8aadbd7fb9d7&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">updated</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;new_model&quot;</span><span class="p">}</span>
+
+<span class="n">result</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">to_update</span><span class="o">=</span><span class="n">updated</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To confirm the metadata has been updated we can run the lookup data</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">new_result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="n">new_result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>And check the model has been changed.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="deleting-keys">
+<h2>Deleting keys<a class="headerlink" href="#deleting-keys" title="Permalink to this heading">#</a></h2>
+<p>Let’s accidentally add too much metadata for the footprint and then delete.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">excess_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;useless_key&quot;</span><span class="p">:</span> <span class="s2">&quot;useless_value&quot;</span><span class="p">}</span>
+<span class="n">new_result</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">to_update</span><span class="o">=</span><span class="n">excess_metadata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Oh no! We’ve added some useless metadata, let’s remove it.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">to_delete</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;useless_key&quot;</span><span class="p">]</span>
+<span class="n">new_result</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">to_delete</span><span class="o">=</span><span class="n">to_delete</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>And check if the key is in the metadata:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;useless_key&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="deleting-data">
+<h1>Deleting data<a class="headerlink" href="#deleting-data" title="Permalink to this heading">#</a></h1>
+<p>To remove data from the object store we use <code class="docutils literal notranslate"><span class="pre">data_handler_lookup</span></code> again</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Each key of the metadata dictionary is a Datasource UUID. Please make sure that you double check the UUID of the Datasource you want to delete, this operation cannot be undone! Again, remember to change the UUID.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">uuid</span> <span class="o">=</span> <span class="s2">&quot;b2177d42-9df9-4a08-b50b-8aadbd7fb9d7&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">delete_datasource</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To make sure it’s gone let’s run the search again</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>An empty dictionary means no results, the deletion worked.</p>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="7_Retrieving_remote_data.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Workflow 7: Retrieving data from remote archives</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="../../development/index_devel.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Development</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Modifying and deleting data
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#deleting-keys">
+     Deleting keys
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#deleting-data">
+   Deleting data
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022 OpenGHG development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>
