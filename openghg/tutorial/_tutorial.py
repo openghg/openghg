@@ -10,6 +10,8 @@ import warnings
 from pathlib import Path
 from typing import List, Union
 
+from openghg.standardise import standardise_footprint, standardise_flux
+
 __all__ = ["bilsdale_datapaths"]
 
 
@@ -22,27 +24,57 @@ __all__ = ["bilsdale_datapaths"]
 #                     return func(*a, **ka)
 
 #     return wrapper
-
-
 def populate_footprint_data() -> None:
+    """Adds all footprint data to the tutorial object store
+
+    Returns:
+        None
+    """
+    populate_footprint_inert()
+    populate_footprint_co2()
+
+
+def populate_footprint_inert() -> None:
+    """Populates the tutorial object store with inert footprint data
+
+    Returns:
+        None
+    """
+    use_tutorial_store()
+
+    tac_fp_inert = (
+        "https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_inert_201607.tar.gz"
+    )
+
+    tac_inert_path = retrieve_example_data(url=tac_fp_inert)[0]
+
+    print("Standardising footprint data...")
+    # TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                site = "TAC"
+                height = "100m"
+                domain = "EUROPE"
+                model = "NAME"
+
+                standardise_footprint(
+                    filepath=tac_inert_path, site=site, height=height, domain=domain, model=model
+                )
+
+
+def populate_footprint_co2() -> None:
     """Populates the tutorial object store with footprints data from the
     example data repository.
 
     Returns:
         None
     """
-    from openghg.standardise import standardise_footprint
-
-    use_tutorial_store()
-
     tac_fp_co2 = "https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_co2_201707.tar.gz"
-    tac_fp_inert = (
-        "https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_inert_201607.tar.gz"
-    )
 
     print("Retrieving example data...")
     tac_co2_path = retrieve_example_data(url=tac_fp_co2)[0]
-    tac_inert_path = retrieve_example_data(url=tac_fp_inert)[0]
 
     print("Standardising footprint data...")
     # TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?
@@ -67,33 +99,25 @@ def populate_footprint_data() -> None:
                     species=species,
                 )
 
-                site = "TAC"
-                height = "100m"
-                domain = "EUROPE"
-                model = "NAME"
-
-                standardise_footprint(
-                    filepath=tac_inert_path, site=site, height=height, domain=domain, model=model
-                )
-
     print("Done.")
 
 
 def populate_flux_data() -> None:
-    """Populates the tutorial object store with flux data from the
-    example data repository.
+    """Populate the tutorial store with flux data
 
     Returns:
         None
     """
-    from openghg.standardise import standardise_flux
+    populate_flux_ch4()
+    populate_flux_co2()
 
-    use_tutorial_store()
 
-    print("Retrieving data...")
-    eur_2016_flux = "https://github.com/openghg/example_data/raw/main/flux/ch4-ukghg-all_EUROPE_2016.tar.gz"
-    flux_data = retrieve_example_data(url=eur_2016_flux)
+def populate_flux_co2() -> None:
+    """Populate the tutorial object store with CO2 flux data
 
+    Returns:
+        None
+    """
     co2_flux_eur = "https://github.com/openghg/example_data/raw/main/flux/co2-flux_EUROPE_2017.tar.gz"
     co2_flux_paths = retrieve_example_data(url=co2_flux_eur)
 
@@ -102,6 +126,37 @@ def populate_flux_data() -> None:
 
     flux_file_natural = [filename for filename in co2_flux_paths if source_natural in str(filename)][0]
     flux_file_ff = [filename for filename in co2_flux_paths if source_fossil in str(filename)][0]
+
+    domain = "EUROPE"
+    species = "co2"
+    date = "2017"
+
+    source_natural = "natural"
+    source_fossil = "ff-edgar-bp"
+
+    standardise_flux(
+        filepath=flux_file_natural,
+        species=species,
+        source=source_natural,
+        domain=domain,
+        date=date,
+        high_time_resolution=True,
+    )
+    standardise_flux(filepath=flux_file_ff, species=species, source=source_fossil, domain=domain, date=date)
+
+
+def populate_flux_ch4() -> None:
+    """Populates the tutorial object store with flux data from the
+    example data repository.
+
+    Returns:
+        None
+    """
+    use_tutorial_store()
+
+    print("Retrieving data...")
+    eur_2016_flux = "https://github.com/openghg/example_data/raw/main/flux/ch4-ukghg-all_EUROPE_2016.tar.gz"
+    flux_data = retrieve_example_data(url=eur_2016_flux)
 
     source_waste = "waste"
     source_energyprod = "energyprod"
@@ -127,25 +182,6 @@ def populate_flux_data() -> None:
                     source=source_energyprod,
                     domain=domain,
                     date=date,
-                )
-
-                domain = "EUROPE"
-                species = "co2"
-                date = "2017"
-
-                source_natural = "natural"
-                source_fossil = "ff-edgar-bp"
-
-                standardise_flux(
-                    filepath=flux_file_natural,
-                    species=species,
-                    source=source_natural,
-                    domain=domain,
-                    date=date,
-                    high_time_resolution=True,
-                )
-                standardise_flux(
-                    filepath=flux_file_ff, species=species, source=source_fossil, domain=domain, date=date
                 )
 
     print("Done.")

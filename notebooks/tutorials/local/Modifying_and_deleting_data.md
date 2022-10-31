@@ -21,31 +21,18 @@ After the standardisation process the metadata associated with some data can sti
 time if the data standardisation process is quite time consuming. Data can also be deleted from the object store.
 
 ```{code-cell} ipython3
-from openghg.store import data_handler_lookup, ObsSurface, Footprints
-from openghg.store.base import Datasource
+from openghg.store import data_handler_lookup
+from openghg.tutorial import populate_footprint_inert
+```
+
+We'll first add some footprint data to the object store.
+
+```{code-cell} ipython3
+populate_footprint_inert()
 ```
 
 ```{code-cell} ipython3
-site = "TMB"
-network = "LGHG"
-height = "10m"
-domain = "EUROPE"
-model = "test_model"
-
-Footprints.read_file(
-    filepath=fp_path,
-    site=site,
-    model=model,
-    network=network,
-    height=height,
-    domain=domain,
-    period="monthly",
-    high_spatial_res=True,
-)
-```
-
-```{code-cell} ipython3
-result = data_handler_lookup(data_type="footprints", site="TMB", network="LGHG")
+result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
 ```
 
 ```{code-cell} ipython3
@@ -53,11 +40,17 @@ result.metadata
 ```
 
 We want to update the model name so we'll use the ``update_metadata`` method of the ``DataHandler`` object. To do this we need to take the
-UUID of the Datasource returned by the ``data_handler_lookup`` function, this is the key of the metadata dictionary, being ``012f6272-4fb1-4201-9d11-b5fb25f282e3``
-in this example. If run successfully we'll see a message printed.
+UUID of the Datasource returned by the ``data_handler_lookup`` function, this is the key of the metadata dictionary.
+
++++
+
+> **_NOTE:_**  The UUID below will be different on your computer. Take the UUID from the metadata dictionary.
 
 ```{code-cell} ipython3
-uuid = "012f6272-4fb1-4201-9d11-b5fb25f282e3"
+uuid = "b2177d42-9df9-4a08-b50b-8aadbd7fb9d7"
+```
+
+```{code-cell} ipython3
 updated = {"model": "new_model"}
 
 result.update_metadata(uuid=uuid, to_update=updated)
@@ -66,7 +59,7 @@ result.update_metadata(uuid=uuid, to_update=updated)
 To confirm the metadata has been updated we can run the lookup data
 
 ```{code-cell} ipython3
-new_result = data_handler_lookup(data_type="footprints", site="TMB", network="LGHG")
+new_result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
 ```
 
 ```{code-cell} ipython3
@@ -98,7 +91,7 @@ new_result.update_metadata(uuid=uuid, to_delete=to_delete)
 ```
 
 ```{code-cell} ipython3
-result = data_handler_lookup(data_type="footprints", site="TMB", network="LGHG")
+result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
 ```
 
 And check if the key is in the metadata:
@@ -114,17 +107,17 @@ And check if the key is in the metadata:
 To remove data from the object store we use `data_handler_lookup` again
 
 ```{code-cell} ipython3
-result = data_handler_lookup(data_type="footprints", site="TMB", network="LGHG")
+result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
 ```
 
 ```{code-cell} ipython3
 result.metadata
 ```
 
-We can see from the returned metadata that the UUID of the Datasource storing this data is `012f6272-4fb1-4201-9d11-b5fb25f282e3`. Please make sure that you double check the UUID of the Datasource you want to delete, this operation cannot be undone!
+Each key of the metadata dictionary is a Datasource UUID. Please make sure that you double check the UUID of the Datasource you want to delete, this operation cannot be undone! Again, remember to change the UUID.
 
 ```{code-cell} ipython3
-uuid = "012f6272-4fb1-4201-9d11-b5fb25f282e3"
+uuid = "b2177d42-9df9-4a08-b50b-8aadbd7fb9d7"
 ```
 
 ```{code-cell} ipython3
@@ -134,7 +127,7 @@ result.delete_datasource(uuid=uuid)
 To make sure it's gone let's run the search again
 
 ```{code-cell} ipython3
-result = data_handler_lookup(data_type="footprints", site="TMB", network="LGHG")
+result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
 ```
 
 ```{code-cell} ipython3
