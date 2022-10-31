@@ -6,7 +6,7 @@ from openghg.store import load_metastore
 
 # from openghg.util import timestamp_now
 import tinydb
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Set, Optional, Union
 
 
 class DataHandler:
@@ -37,7 +37,7 @@ class DataHandler:
             raise ValueError(f"Invalid UUIDs: {invalid_keys}")
 
         # We should only have one data type
-        data_types: set[str] = {self.metadata[i]["data_type"] for i in uuid}
+        data_types: Set[str] = {self.metadata[i]["data_type"] for i in uuid}
 
         if not data_types:
             raise ValueError("Unable to read data_type from metadata.")
