@@ -1,10 +1,18 @@
-from typing import Optional
+from typing import Optional, overload
 
 
-def format_inlet(inlet: Optional[str],
-                 special_keywords: Optional[list] = None) -> Optional[str]:
-    """
-    Make sure inlet name conforms to standard of number followed by unit
+@overload
+def format_inlet(inlet: str, special_keywords: Optional[list] = None) -> str:
+    ...
+
+
+@overload
+def format_inlet(inlet: None, special_keywords: Optional[list] = None) -> None:
+    ...
+
+
+def format_inlet(inlet: Optional[str], special_keywords: Optional[list] = None) -> Optional[str]:
+    """Make sure inlet name conforms to standard of number followed by unit
     (or is one of the special keywords).
     If the string just contains numbers, it is assumed this is in metres and
     units of "m" will be added.
@@ -16,11 +24,9 @@ def format_inlet(inlet: Optional[str],
         special_keywords: Specify special keywords inlet could be set to
             If so do not apply any formatting.
             If this is not set a special keyword of "multiple" and "column" will still be allowed.
-
     Returns:
         str: formatted inlet string / None
     """
-
     if inlet is None:
         return None
 
@@ -47,4 +53,4 @@ def format_inlet(inlet: Optional[str],
     if inlet.endswith("magl"):
         inlet = inlet.rstrip("lga")
 
-    return inlet
+    return str(inlet)

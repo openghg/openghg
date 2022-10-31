@@ -3,7 +3,7 @@
 
 """
 import logging
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import SearchResults
 from openghg.store import load_metastore
@@ -343,7 +343,7 @@ def search_surface(
     if inlet is None and height is not None:
         inlet = height
     if isinstance(inlet, list):
-        inlet = [cast(str, format_inlet(value)) for value in inlet]
+        inlet = [format_inlet(value) for value in inlet]
     else:
         inlet = format_inlet(inlet)
 
