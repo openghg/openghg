@@ -7,6 +7,7 @@ from openghg.retrieve import (
     search_footprints,
     search_surface,
 )
+from pandas import Timestamp
 
 
 def test_search_surface():
@@ -153,6 +154,10 @@ def test_nonsense_terms():
 
 
 def test_search_footprints():
+    """
+    Test search for footprint data which has been added to the object store.
+    This has been stored using one footprint file which represents a year of data.
+    """
     res = search_footprints(site="TMB", network="LGHG", height="10m", domain="EUROPE", model="test_model")
 
     key = next(iter(res.metadata))
@@ -163,12 +168,70 @@ def test_search_footprints():
         "domain": "europe",
         "model": "test_model",
         "network": "lghg",
-        "start_date": "2020-08-01 00:00:00+00:00",
-        "end_date": "2021-07-31 23:59:59+00:00",
+        # "start_date": "2020-08-01 00:00:00+00:00",
+        # "end_date": "2021-07-31 23:59:59+00:00",
         "time_period": "1 year",
+    }
+    # 31/10/2022 (RT): Removed start_date and end_date from metadata since
+    # multiple files covering different date ranges can be added to a data source
+    # and this was causing confusion.
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_footprints_multiple():
+    """
+    Test search for footprint source which is comprised of multiple uploaded files.
+    Each file contains hourly data and covers 1 month:
+        - 2016-07-01 - 2016-07-31
+        - 2016-08-01 - 2016-08-31
+    """
+    res = search_footprints(site="TAC", network="DECC", height="100m", domain="TEST", model="NAME")
+
+    key = next(iter(res.metadata))
+    partial_metadata = {
+        "data_type": "footprints",
+        "site": "tac",
+        "height": "100m",
+        "domain": "test",
+        "model": "name",
+        "metmodel": "ukv",
+        "network": "decc",
+        "time_period": "1 hour",
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+    # Test retrieved footprint data found from the search contains data spanning
+    # the whole range.
+    footprint_data = res.retrieve()
+    data = footprint_data.data
+    time = data["time"]
+    assert time[0] == Timestamp("2016-07-01T00:00:00")
+    assert time[-1] == Timestamp("2016-08-31T23:00:00")
+
+
+def test_search_footprints_select():
+    """
+    Test limited date range can be searched for footprint source.
+    (Same data as previous test)
+    """
+    res = search_footprints(site = "TAC",
+                            network = "DECC",
+                            height = "100m",
+                            domain = "TEST",
+                            model = "NAME",
+                            start_date = "2016-01-01",
+                            end_date = "2016-08-01",
+                            )
+
+    # Test retrieved footprint data found from the search contains data
+    # spanning the reduced date range
+    footprint_data = res.retrieve()
+    data = footprint_data.data
+    time = data["time"]
+    assert time[0] == Timestamp("2016-07-01T00:00:00")
+    assert time[-1] == Timestamp("2016-07-31T23:00:00")
 
 
 def test_search_emissions():

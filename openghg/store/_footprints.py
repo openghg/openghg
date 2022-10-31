@@ -304,8 +304,12 @@ class Footprints(BaseStore):
             fp_time, filepath=filepath, period=period, continuous=continuous
         )
 
-        metadata["start_date"] = str(start_date)
-        metadata["end_date"] = str(end_date)
+        # # 31/10/2022 (RT): Removed start_date and end_date from metadata since
+        # # multiple files covering different date ranges can be added to a data source
+        # # and this was causing confusion.
+        # metadata["start_date"] = str(start_date)
+        # metadata["end_date"] = str(end_date)
+
         metadata["time_period"] = period_str
 
         metadata["max_longitude"] = round(float(fp_data["lon"].max()), 5)
@@ -352,6 +356,7 @@ class Footprints(BaseStore):
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
+        # TODO: Decide if to add "time_period" to this as well?
         required = ("site", "model", "height", "domain")
         lookup_results = datasource_lookup(metastore=metastore, data=footprint_data, required_keys=required)
 
