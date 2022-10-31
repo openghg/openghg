@@ -172,9 +172,6 @@ def test_search_footprints():
         # "end_date": "2021-07-31 23:59:59+00:00",
         "time_period": "1 year",
     }
-    # 31/10/2022 (RT): Removed start_date and end_date from metadata since
-    # multiple files covering different date ranges can be added to a data source
-    # and this was causing confusion.
 
     assert partial_metadata.items() <= res.metadata[key].items()
 

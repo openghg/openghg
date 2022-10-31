@@ -79,8 +79,8 @@ def test_read_footprint_standard():
         "height": "100m",
         "model": "NAME",
         "domain": "europe",
-        "start_date": "2012-08-01 00:00:00+00:00",
-        "end_date": "2012-08-31 23:59:59+00:00",
+        # "start_date": "2012-08-01 00:00:00+00:00",
+        # "end_date": "2012-08-31 23:59:59+00:00",
         "max_longitude": 39.38,
         "min_longitude": -97.9,
         "max_latitude": 79.057,
@@ -200,8 +200,8 @@ def test_read_footprint_high_spatial_res():
         "height": "10m",
         "model": "test_model",
         "domain": "europe",
-        "start_date": "2020-08-01 00:00:00+00:00",
-        "end_date": "2020-08-31 23:59:59+00:00",
+        # "start_date": "2020-08-01 00:00:00+00:00",
+        # "end_date": "2020-08-31 23:59:59+00:00",
         "time_period": "1 month",
         "max_longitude": 39.38,
         "min_longitude": -97.9,
@@ -226,27 +226,29 @@ def test_read_footprint_high_spatial_res():
 
 
 @pytest.mark.parametrize(
-    "site,height,metmodel,start,end,filename",
+    # "site,height,metmodel,start,end,filename",
+    "site,height,metmodel,filename",
     [
         (
             "TAC",
             "100m",
             "UKV",
-            "2014-07-01 00:00:00+00:00",
-            "2014-07-04 00:59:59+00:00",
+            # "2014-07-01 00:00:00+00:00",
+            # "2014-07-04 00:59:59+00:00",
             "TAC-100magl_UKV_co2_TEST_201407.nc",
         ),
         (
             "RGL",
             "90m",
             "UKV",
-            "2014-01-10 00:00:00+00:00",
-            "2014-01-12 00:59:59+00:00",
+            # "2014-01-10 00:00:00+00:00",
+            # "2014-01-12 00:59:59+00:00",
             "RGL-90magl_UKV_co2_TEST_201401.nc",
         ),
     ],
 )
-def test_read_footprint_co2(site, height, metmodel, start, end, filename):
+# def test_read_footprint_co2(site, height, metmodel, start, end, filename):
+def test_read_footprint_co2(site, height, metmodel, filename):
     """
     Test high spatial resolution footprint
      - expects additional parameter for `fp_HiTRes`
@@ -302,8 +304,8 @@ def test_read_footprint_co2(site, height, metmodel, start, end, filename):
         "species": "co2",
         "metmodel": metmodel.lower(),
         "domain": domain.lower(),
-        "start_date": start,
-        "end_date": end,
+        # "start_date": start,
+        # "end_date": end,
         "max_longitude": 3.476,
         "min_longitude": -0.396,
         "max_latitude": 53.785,
@@ -368,8 +370,8 @@ def test_read_footprint_short_lived():
         "species": "rn",  # TODO: May want to see if we can keep this capitalised?
         "metmodel": "ukv",
         "domain": "test",
-        "start_date": "2018-01-01 00:00:00+00:00",
-        "end_date": "2018-01-02 23:59:59+00:00",
+        # "start_date": "2018-01-01 00:00:00+00:00",
+        # "end_date": "2018-01-02 23:59:59+00:00",
         "max_longitude": 3.476,
         "min_longitude": -0.396,
         "max_latitude": 53.785,
