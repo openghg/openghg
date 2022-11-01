@@ -107,7 +107,7 @@ conda install --channel conda-forge --channel openghg openghg
 
 Note: the `xesmf` library is already incorporated into the conda install from vx.x onwards and so does not need to be installed separately.
 
-### Setting the object store path
+## Setting the object store path
 
 On first import OpenGHG will create a configuration file at `~/.config/openghg/openghg.conf`. This file contains the path to the object store, which by default is set to `~/openghg_store`.
 
