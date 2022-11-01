@@ -819,3 +819,10 @@ def test_check_obssurface_same_file_skips():
     results = ObsSurface.read_file(filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
     assert not results
+
+
+def test_gcwerks_fp_not_a_tuple_raises():
+    filepath = "/tmp/test_filepath.txt"
+    with pytest.raises(TypeError):
+        ObsSurface.read_file(filepath=filepath, source_format="GCWERKS", site="cgo", network="agage")
+        ObsSurface.read_file(filepath=filepath, source_format="gc", site="cgo", network="agage")
