@@ -73,15 +73,3 @@ Tutorial 7 - Retrieving data from ICOS and CEDA
    :maxdepth: 1
 
    7_Retrieving_remote_data
-
-
-Handling data
--------------
-
-These tutorials will help you understand how to add differnet types of data to the OpenGHG object store and how to
-delete or modify already existing data.
-
-.. toctree::
-   :maxdepth: 1
-
-   Modifying_and_deleting_data
