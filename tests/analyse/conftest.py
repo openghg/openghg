@@ -73,13 +73,22 @@ def data_read():
     )
 
     # Ocean flux for CO2
-    #  - monthly
+    #  - monthly (cut down data to 1 month)
     source4 = "ocean"
 
-    emissions_datapath4 = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
+    emissions_datapath4a = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
+    emissions_datapath4b = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
 
     Emissions.read_file(
-        filepath=emissions_datapath4,
+        filepath=emissions_datapath4a,
+        species="co2",
+        source=source4,
+        domain="TEST",
+        high_time_resolution=False,
+    )
+
+    Emissions.read_file(
+        filepath=emissions_datapath4b,
         species="co2",
         source=source4,
         domain="TEST",
