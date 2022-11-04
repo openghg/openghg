@@ -632,4 +632,4 @@ def local_search(**kwargs):  # type: ignore
         for uid in keyed_metadata:
             data_keys[uid] = Datasource.load(uuid=uid, shallow=True).data_keys()
 
-    return SearchResults(keys=data_keys, metadata=dict(keyed_metadata))
+    return SearchResults(keys=data_keys, metadata=dict(keyed_metadata), start_result="data_type")
