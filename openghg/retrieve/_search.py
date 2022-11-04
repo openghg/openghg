@@ -227,9 +227,10 @@ def search_emissions(
 
 def search_footprints(
     site: Optional[str] = None,
-    height: Optional[str] = None,
+    inlet: Optional[str] = None,
     domain: Optional[str] = None,
     model: Optional[str] = None,
+    height: Optional[str] = None,
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
     start_date: Optional[str] = None,
@@ -245,9 +246,10 @@ def search_footprints(
 
     Args:
         site: Site name
-        height: Height above ground level in metres
+        inlet: Height above ground level in metres
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
+        height: Alias for inlet
         metmodel: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
@@ -262,14 +264,21 @@ def search_footprints(
     Returns:
         SearchResults: SearchResults object
     """
+    from openghg.util import format_inlet
 
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
         end_date = str(end_date)
 
+    # Allow inlet or height to be specified, both or either may be included
+    # within the metadata so could use either to search
+    inlet = format_inlet(inlet)
+    height = format_inlet(height)
+
     return search(
         site=site,
+        inlet=inlet,
         height=height,
         domain=domain,
         model=model,
@@ -291,6 +300,7 @@ def search_surface(
     species: Union[str, List[str], None] = None,
     site: Union[str, List[str], None] = None,
     inlet: Union[str, List[str], None] = None,
+    height: Union[str, List[str], None] = None,
     instrument: Union[str, List[str], None] = None,
     measurement_type: Union[str, List[str], None] = None,
     source_format: Union[str, List[str], None] = None,
@@ -306,7 +316,8 @@ def search_surface(
     Args:
         species: Species
         site: Three letter site code
-        inlet: Inlet height
+        inlet: Inlet height above ground level in metres
+        height: Alias for inlet
         instrument: Instrument name
         measurement_type: Measurement type
         data_type: Data type e.g. "surface", "column", "emissions"
@@ -320,10 +331,21 @@ def search_surface(
     Returns:
         SearchResults: SearchResults object
     """
+    from openghg.util import format_inlet
+
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
         end_date = str(end_date)
+
+    # Allow height to be an alias for inlet but we do not expect height
+    # to be within the metadata (for now)
+    if inlet is None and height is not None:
+        inlet = height
+    if isinstance(inlet, list):
+        inlet = [format_inlet(value) for value in inlet]
+    else:
+        inlet = format_inlet(inlet)
 
     results = search(
         species=species,
@@ -610,4 +632,4 @@ def local_search(**kwargs):  # type: ignore
         for uid in keyed_metadata:
             data_keys[uid] = Datasource.load(uuid=uid, shallow=True).data_keys()
 
-    return SearchResults(keys=data_keys, metadata=dict(keyed_metadata))
+    return SearchResults(keys=data_keys, metadata=dict(keyed_metadata), start_result="data_type")
