@@ -305,7 +305,6 @@ def test_search_bc():
         "title": "mozart volume mixing ratios at domain edges",
         "time period": "climatology from 200901-201407 mozart output",
         "copied from": "2000",
-        "date": "2012",
         "domain": "europe",
         "bc_input": "mozart",
         "start_date": "2012-01-01 00:00:00+00:00",

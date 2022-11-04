@@ -12,7 +12,7 @@ from helpers import (
     metadata_checker_obssurface,
 )
 from openghg.dataobjects import ObsData
-from openghg.retrieve import get_flux, get_footprint, get_obs_column, get_obs_surface, search
+from openghg.retrieve import get_flux, get_bc, get_footprint, get_obs_column, get_obs_surface, search
 from openghg.util import compress, compress_str, hash_bytes
 from openghg.types import SearchError
 from pandas import Timedelta, Timestamp
@@ -313,7 +313,6 @@ def test_get_flux():
     assert float(flux.lon.max()) == pytest.approx(39.38)
     assert float(flux.lon.min()) == pytest.approx(-97.9)
     assert sorted(list(flux.variables)) == ["flux", "lat", "lon", "time"]
-    assert flux.attrs["species"] == "co2"
 
     # Check whole flux range has been retrieved (2 files)
     time = flux["time"]
@@ -330,6 +329,24 @@ def test_get_flux_no_result():
         assert "species='co2'" in execinfo
         assert "source='cinnamon'" in execinfo
         assert "domain='antarctica'" in execinfo
+
+
+def test_get_bc():
+    bc_data = get_bc(species="n2o", bc_input="mozart", domain="europe")
+
+    bc = bc_data.data
+
+    assert float(bc.lat.max()) == pytest.approx(79.057)
+    assert float(bc.lat.min()) == pytest.approx(10.729)
+    assert float(bc.lon.max()) == pytest.approx(39.38)
+    assert float(bc.lon.min()) == pytest.approx(-97.9)
+
+    bc_variables = ['height', 'lat', 'lon', 'time',
+                    'vmr_e', 'vmr_n', 'vmr_s', 'vmr_w']
+    assert sorted(list(bc.variables)) == bc_variables
+
+    time = bc["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
 
 
 @pytest.mark.parametrize(
