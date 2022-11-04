@@ -8,6 +8,7 @@ from openghg.retrieve import (
     search_footprints,
     search_surface,
 )
+from pandas import Timestamp
 
 
 @pytest.mark.parametrize(
@@ -197,6 +198,12 @@ def test_search_footprints(inlet_keyword,inlet_value):
 
 
 def test_search_flux():
+    """
+    Test search for flux which is comprised of multiple uploaded files.
+    Each file contains "yearly" data:
+        - 2012-01-01 - 2012-12-31
+        - 2013-01-01 - 2013-12-31
+    """
     res = search_flux(
         species="co2",
         source="gpp-cardamom",
@@ -209,7 +216,6 @@ def test_search_flux():
         "title": "gross primary productivity co2",
         "author": "openghg cloud",
         "regridder_used": "acrg_grid.regrid.regrid_3d",
-        "comments": "fluxes copied from year 2013. december 2012 values copied from january 2013 values.",
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
@@ -217,6 +223,50 @@ def test_search_flux():
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+    # Test retrieved flux data found from the search contains data spanning
+    # the whole range.
+    flux_data = res.retrieve()
+    data = flux_data.data
+    time = data["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+    assert time[-1] == Timestamp("2013-01-01T00:00:00")
+
+
+def test_search_flux_select():
+    """
+    Test limited date range can be searched for footprint source.
+    (Same data as previous test)
+    """
+    res = search_flux(
+        species="co2",
+        source="gpp-cardamom",
+        domain="europe",
+        start_date="2012-01-01",
+        end_date="2013-01-01"
+    )
+
+    key = next(iter(res.metadata))
+
+    partial_metadata = {
+        "title": "gross primary productivity co2",
+        "author": "openghg cloud",
+        "regridder_used": "acrg_grid.regrid.regrid_3d",
+        "species": "co2",
+        "domain": "europe",
+        "source": "gpp-cardamom",
+        "data_type": "emissions",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+    # Test retrieved flux data found from the search contains data
+    # spanning the reduced date range
+    flux_data = res.retrieve()
+    data = flux_data.data
+    time = data["time"]
+    assert len(time) == 1
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
 
 
 def test_search_column():

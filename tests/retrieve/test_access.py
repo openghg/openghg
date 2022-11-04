@@ -315,6 +315,11 @@ def test_get_flux():
     assert sorted(list(flux.variables)) == ["flux", "lat", "lon", "time"]
     assert flux.attrs["species"] == "co2"
 
+    # Check whole flux range has been retrieved (2 files)
+    time = flux["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+    assert time[-1] == Timestamp("2013-01-01T00:00:00")
+
 
 def test_get_flux_no_result():
     """Test sensible error message is being returned when no results are found 
@@ -325,6 +330,7 @@ def test_get_flux_no_result():
         assert "species='co2'" in execinfo
         assert "source='cinnamon'" in execinfo
         assert "domain='antarctica'" in execinfo
+
 
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
