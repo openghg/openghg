@@ -93,7 +93,6 @@ def data_read():
         filepath=test_datapath,
         species="co2",
         source="gpp-cardamom",
-        date="2012",
         domain="europe",
         high_time_resolution=False,
     )

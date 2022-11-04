@@ -3,7 +3,7 @@ from openghg.retrieve import (
     search,
     search_bc,
     search_column,
-    search_emissions,
+    search_flux,
     search_eulerian,
     search_footprints,
     search_surface,
@@ -196,11 +196,10 @@ def test_search_footprints(inlet_keyword,inlet_value):
     assert partial_metadata.items() <= res.metadata[key].items()
 
 
-def test_search_emissions():
-    res = search_emissions(
+def test_search_flux():
+    res = search_flux(
         species="co2",
         source="gpp-cardamom",
-        date="2012",
         domain="europe",
     )
 
@@ -214,7 +213,6 @@ def test_search_emissions():
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
-        "date": "2012",
         "data_type": "emissions",
     }
 

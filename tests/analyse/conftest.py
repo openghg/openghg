@@ -41,7 +41,6 @@ def data_read():
         filepath=emissions_datapath1,
         species="ch4",
         source=source1,
-        date="2012",
         domain=domain,
         high_time_resolution=False,
     )
@@ -55,7 +54,6 @@ def data_read():
         filepath=emissions_datapath2,
         species="ch4",
         source=source2,
-        date="2012",
         domain=domain,
         high_time_resolution=False,
     )
@@ -70,7 +68,6 @@ def data_read():
         filepath=emissions_datapath3,
         species="co2",
         source=source3,
-        date="2014",
         domain="TEST",
         high_time_resolution=True,
     )
@@ -85,7 +82,6 @@ def data_read():
         filepath=emissions_datapath4,
         species="co2",
         source=source4,
-        date="2014",
         domain="TEST",
         high_time_resolution=False,
     )

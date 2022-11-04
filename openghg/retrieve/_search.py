@@ -176,13 +176,12 @@ def search_eulerian(
     )
 
 
-def search_emissions(
+def search_flux(
     species: Optional[str] = None,
     source: Optional[str] = None,
     domain: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    date: Optional[str] = None,  # May want to remove this?
     high_time_resolution: Optional[bool] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
@@ -193,7 +192,6 @@ def search_emissions(
         species: Species name
         domain: Emissions domain
         source: Emissions source
-        date : Date associated with emissions as a string
         source_format : Type of data being input e.g. openghg (internal format)
         high_time_resolution: If this is a high resolution file
         period: Period of measurements. Only needed if this can not be inferred from the time coords
@@ -217,7 +215,6 @@ def search_emissions(
         domain=domain,
         start_date=start_date,
         end_date=end_date,
-        date=date,
         high_time_resolution=high_time_resolution,
         period=period,
         continuous=continuous,
