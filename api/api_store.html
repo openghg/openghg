@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>store API detail &#8212; OpenGHG 0+untagged.1.g1066e8b.dirty documentation</title>
+    <title>store API detail &#8212; OpenGHG 0+untagged.1.g7ea21f9.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -100,7 +100,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g1066e8b.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g7ea21f9.dirty documentation</p>
   
 </a>
     
@@ -377,7 +377,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="openghg.store.Emissions.read_file">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openghg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions.read_file" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openghg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_time_resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_emissions.html#Emissions.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.Emissions.read_file" title="Permalink to this definition">#</a></dt>
 <dd><p>Read emissions file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -386,8 +386,6 @@
 <li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
 <li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Emissions domain</p></li>
 <li><p><strong>source</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Emissions source</p></li>
-<li><p><strong>date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Date as a string e.g. “2012” or “201206” associated with emissions as a string.
-Only needed if this can not be inferred from the time coords</p></li>
 <li><p><strong>source_format</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Type of data being input e.g. openghg (internal format)</p></li>
 <li><p><strong>high_time_resolution</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – If this is a high resolution file</p></li>
 <li><p><strong>period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Period of measurements. Only needed if this can not be inferred from the time coords</p></li>

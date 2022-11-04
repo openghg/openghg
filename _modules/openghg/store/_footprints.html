@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.g1066e8b.dirty documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.g7ea21f9.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -99,7 +99,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g1066e8b.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g7ea21f9.dirty documentation</p>
   
 </a>
     
@@ -667,12 +667,8 @@
             <span class="n">fp_time</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span>
         <span class="p">)</span>
 
-        <span class="c1"># # 31/10/2022 (RT): Removed start_date and end_date from metadata since</span>
-        <span class="c1"># # multiple files covering different date ranges can be added to a data source</span>
-        <span class="c1"># # and this was causing confusion.</span>
-        <span class="c1"># metadata[&quot;start_date&quot;] = str(start_date)</span>
-        <span class="c1"># metadata[&quot;end_date&quot;] = str(end_date)</span>
-
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">period_str</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
@@ -719,7 +715,6 @@
         <span class="c1"># These are the keys we will take from the metadata to search the</span>
         <span class="c1"># metadata store for a Datasource, they should provide as much detail as possible</span>
         <span class="c1"># to uniquely identify a Datasource</span>
-        <span class="c1"># TODO: Decide if to add &quot;time_period&quot; to this as well?</span>
         <span class="n">required</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;site&quot;</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">)</span>
         <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
 
