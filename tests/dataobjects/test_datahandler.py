@@ -349,3 +349,44 @@ def test_delete_data():
 
     obs = ObsSurface.load()
     assert uid not in obs._datasource_uuids
+
+
+def test_metadata_backup_restore():
+    res_one = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
+
+    uid = next(iter(res_one.metadata))
+
+    version_one = res_one.metadata[uid]
+
+    to_update = {"owner": "john"}
+
+    res_one.update_metadata(uuid=uid, to_update=to_update)
+
+    assert res_one.metadata[uid]["owner"] == "john"
+
+    # Force a refresh from the object store
+    res_one.refresh()
+
+    assert res_one.metadata[uid]["owner"] == "john"
+
+    backup = res_one.restore(uuid=uid)
+
+    assert backup == version_one
+
+
+def test_metadata_backup_restore_multiple_changes():
+    res_one = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
+
+    uid = next(iter(res_one.metadata))
+
+    to_update = {"owner": "john"}
+
+    res_one.update_metadata(uuid=uid, to_update=to_update)
+
+    to_update = {"species": "sparrow"}
+
+    res_one.update_metadata(uuid=uid, to_update=to_update)
+
+    assert len(res_one._backup[uid]) == 2
+
+    print(res_one._backup[uid]["1"])
