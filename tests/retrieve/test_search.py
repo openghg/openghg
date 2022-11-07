@@ -203,9 +203,9 @@ def test_search_footprints(inlet_keyword,inlet_value):
 def test_search_footprints_multiple():
     """
     Test search for footprint source which is comprised of multiple uploaded files.
-    Each file contains hourly data and covers 1 month:
-        - 2016-07-01 - 2016-07-31
-        - 2016-08-01 - 2016-08-31
+    Each file contains cutdown hourly data and covers 1 month:
+        - 2016-07-01 (3 time points)
+        - 2016-08-01 (3 time points)
     """
     res = search_footprints(site="TAC", network="DECC", height="100m", domain="TEST", model="NAME")
 
@@ -229,7 +229,7 @@ def test_search_footprints_multiple():
     data = footprint_data.data
     time = data["time"]
     assert time[0] == Timestamp("2016-07-01T00:00:00")
-    assert time[-1] == Timestamp("2016-08-31T23:00:00")
+    assert time[-1] == Timestamp("2016-08-01T02:00:00")
 
 
 def test_search_footprints_select():
@@ -252,7 +252,7 @@ def test_search_footprints_select():
     data = footprint_data.data
     time = data["time"]
     assert time[0] == Timestamp("2016-07-01T00:00:00")
-    assert time[-1] == Timestamp("2016-07-31T23:00:00")
+    assert time[-1] == Timestamp("2016-07-01T02:00:00")
 
 
 def test_search_emissions():
