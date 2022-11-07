@@ -29,7 +29,7 @@ def test_read_data_monthly(mocker):
         binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
     )
 
-    assert proc_results == {"ch4_mozart_europe_201208": {"uuid": "test-uuid-1", "new": True}}
+    assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
 
 
 def test_read_file_monthly():
@@ -44,7 +44,7 @@ def test_read_file_monthly():
         overwrite=True,
     )
 
-    assert "ch4_mozart_europe_201208" in proc_results
+    assert "ch4_mozart_europe" in proc_results
 
     search_results = search(
         species="ch4", bc_input="MOZART", domain="europe", data_type="boundary_conditions"
