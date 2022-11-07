@@ -356,7 +356,7 @@ def test_metadata_backup_restore():
 
     uid = next(iter(res_one.metadata))
 
-    version_one = res_one.metadata[uid]
+    version_one = res_one.metadata[uid].copy()
 
     to_update = {"owner": "john"}
 
@@ -369,9 +369,25 @@ def test_metadata_backup_restore():
 
     assert res_one.metadata[uid]["owner"] == "john"
 
-    backup = res_one.restore(uuid=uid)
+    assert res_one.metadata[uid] != version_one
 
-    assert backup == version_one
+    res_one.restore(uuid=uid)
+
+    assert res_one.metadata[uid] == version_one
+
+    res_one.refresh()
+
+    assert res_one.metadata[uid] == version_one
+
+
+def test_delete_update_uuid_raises():
+    res_one = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
+    uid = next(iter(res_one.metadata))
+    with pytest.raises(ValueError):
+        res_one.update_metadata(uuid=uid, to_delete=["uuid"])
+
+    with pytest.raises(ValueError):
+        res_one.update_metadata(uuid=uid, to_update={"uuid": 123})
 
 
 def test_metadata_backup_restore_multiple_changes():
@@ -383,10 +399,28 @@ def test_metadata_backup_restore_multiple_changes():
 
     res_one.update_metadata(uuid=uid, to_update=to_update)
 
+    assert res_one.metadata[uid]["owner"] == "john"
+
+    res_one.refresh()
+
+    assert res_one.metadata[uid]["owner"] == "john"
+
     to_update = {"species": "sparrow"}
 
     res_one.update_metadata(uuid=uid, to_update=to_update)
 
+    first_backup = res_one._backup[uid]["1"]
+
+    assert "owner" not in first_backup
+
+    second_backup = res_one._backup[uid]["2"]
+
+    assert second_backup["owner"] == "john"
+
+    assert "sparrow" not in second_backup
+
     assert len(res_one._backup[uid]) == 2
 
-    print(res_one._backup[uid]["1"])
+    res_one.restore(uuid=uid, version=1)
+
+    assert res_one.metadata[uid] == first_backup

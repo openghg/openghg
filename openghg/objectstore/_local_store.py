@@ -4,8 +4,9 @@ import os
 import threading
 import warnings
 
-# from functools import lru_cache
+from functools import lru_cache
 from pathlib import Path
+import shutil
 from typing import Dict, List, Optional, Union
 from uuid import uuid4
 
@@ -17,6 +18,8 @@ rlock = threading.RLock()
 __all__ = [
     "delete_object",
     "get_local_objectstore_path",
+    "get_tutorial_store_path",
+    "clear_tutorial_store",
     "get_all_object_names",
     "get_object_names",
     "get_object",
@@ -29,32 +32,36 @@ __all__ = [
 ]
 
 
+def get_tutorial_store_path() -> Path:
+    """Get the path to the local tutorial store
+
+    Returns:
+        pathlib.Path: Path of tutorial store
+    """
+    return get_local_objectstore_path() / "tutorial"
+
+
+def clear_tutorial_store() -> None:
+    """Delete the contents of the tutorial object store
+
+    Returns:
+        None
+    """
+    path = get_tutorial_store_path()
+
+    shutil.rmtree(path=path, ignore_errors=True)
+
+
 # @lru_cache
 def get_local_objectstore_path() -> Path:
-    """Returns the path to the local OpenGHG object store bucket
+    """Read
 
     Returns:
         pathlib.Path: Path of object store
     """
-    import os
     from openghg.util import read_local_config
-    from openghg.tutorial import tutorial_store_path
-
-    openghg_env = os.getenv("OPENGHG_PATH")
-    if openghg_env is not None:
-        warnings.warn(
-            "Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object"
-            + " store path please use the configuration file. See docs.openghg.org/install",
-            category=DeprecationWarning,
-        )
-        return Path(openghg_env)
-
-    tutorial_store = os.getenv("OPENGHG_TMP_STORE")
-    if tutorial_store is not None:
-        return tutorial_store_path()
 
     config = read_local_config()
-
     object_store_path = Path(config["object_store"]["local_store"])
 
     return object_store_path
@@ -127,7 +134,7 @@ def delete_object(bucket: str, key: str) -> None:
         pass
 
 
-def get_object_names(bucket: str, prefix: str = None) -> List[str]:
+def get_object_names(bucket: str, prefix: Optional[str] = None) -> List[str]:
     """List all the keys in the object store
 
     Args:
@@ -244,14 +251,28 @@ def get_bucket(empty: bool = False) -> str:
     if the bucket does not exist then an exception will be raised.
     """
     import shutil
+    import os
 
-    local_bucket = get_local_objectstore_path()
+    openghg_env = os.getenv("OPENGHG_PATH")
+    if openghg_env is not None:
+        warnings.warn(
+            "Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object"
+            + " store path please use the configuration file. See docs.openghg.org/install",
+            category=DeprecationWarning,
+        )
+        return openghg_env
+
+    local_store = get_local_objectstore_path()
+
+    tutorial_store = os.getenv("OPENGHG_TMP_STORE")
+    if tutorial_store is not None:
+        return str(get_tutorial_store_path())
 
     if empty is True:
-        shutil.rmtree(local_bucket)
-        local_bucket.mkdir(parents=True)
+        shutil.rmtree(local_store)
+        local_store.mkdir(parents=True)
 
-    return str(local_bucket)
+    return str(local_store)
 
 
 def query_store() -> Dict:

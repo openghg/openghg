@@ -29,6 +29,7 @@ else:
         get_object_from_json,
         get_object_names,
         get_local_objectstore_path,
+        get_tutorial_store_path,
         query_store,
         set_object,
         set_object_from_file,

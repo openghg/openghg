@@ -29,6 +29,8 @@ class DataHandler:
         Returns:
             None
         """
+        if not isinstance(uuid, list):
+            uuid = [uuid]
 
         invalid_keys = [k for k in uuid if k not in self.metadata]
 
@@ -61,23 +63,36 @@ class DataHandler:
 
         self.metadata = res.metadata
 
-    def restore(self, uuid: str, version: str = "latest") -> Dict:
-        """Retrieve a backed-up metadata dictionary from the object store.
-        You'll need to use the update_metadata function to perform the update.
+    def restore(self, uuid: str, version: Union[str, int] = "latest") -> None:
+        """Restore a backed-up version of a Datasource's metadata.
 
         Args:
             uuid: UUID of Datasource to retrieve
             version: Version of metadata to restore
         Returns:
-            dict: Dictionary of metadata
+            None
         """
         if version == "latest":
             version = self._latest
 
         version = str(version)
-        return dict(self._backup[uuid][version])
 
-    def view_backup(self, uuid: Optional[str] = None) -> Dict:
+        dtype = self._check_datatypes(uuid=uuid)
+
+        data_objs = define_data_type_classes()
+        metakey = data_objs[dtype]._metakey
+
+        backup = self._backup[uuid][version]
+        self.metadata[uuid] = backup
+
+        with load_metastore(key=metakey) as store:
+            store.remove(tinydb.where("uuid") == uuid)
+            store.insert(backup)
+
+            d = Datasource.load(uuid=uuid)
+            d._metadata = backup
+
+    def view_backup(self, uuid: Optional[str] = None, version: Optional[str] = None) -> Dict:
         """View backed-up metadata for all Datasources
         or a single Datasource if a UUID is passed in.
 
@@ -87,9 +102,13 @@ class DataHandler:
             dict: Dictionary of versioned metadata
         """
         if uuid is not None:
-            return dict(self._backup)[uuid]
+            if version is not None:
+                version = str(version)
+                return self._backup[uuid][version]
+
+            return self._backup[uuid]
         else:
-            return dict(self._backup)
+            return self._backup
 
     def update_metadata(
         self,
@@ -138,6 +157,9 @@ class DataHandler:
 
                 # Do a quick check to make sure we're not being asked to delete all the metadata
                 if to_delete is not None:
+                    if "uuid" in to_delete:
+                        raise ValueError("Cannot delete the UUID key.")
+
                     if len(to_delete) == n_records:
                         raise ValueError("We can't remove all the metadata associated with this Datasource.")
                     for k in to_delete:
@@ -154,6 +176,9 @@ class DataHandler:
                         )
 
                 if to_update is not None:
+                    if "uuid" in to_update:
+                        raise ValueError("Cannot update the UUID.")
+
                     d._metadata.update(to_update)
                     internal_copy.update(to_update)
                     response = store.update(to_update, tinydb.where("uuid") == u)
@@ -164,7 +189,7 @@ class DataHandler:
                 d.save()
 
                 # Update the metadata stored internally so we're up to date
-                self.metadata[uuid] = internal_copy
+                self.metadata[u] = internal_copy
 
                 print(f"Modified metadata for {u}.")
 

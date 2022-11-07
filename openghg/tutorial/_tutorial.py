@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import List, Union
 
 from openghg.standardise import standardise_footprint, standardise_flux
+from openghg.objectstore import get_bucket
 
 __all__ = ["bilsdale_datapaths"]
 
@@ -241,16 +242,6 @@ def bilsdale_datapaths() -> List:
     return list(crds_path.glob("bsd.picarro.1minute.*.min.*"))
 
 
-def tutorial_store_path() -> Path:
-    """Returns the path to the tutorial object store
-    at Path(tempfile.gettempdir(), "openghg_temp_store")
-
-    Returns:
-        Path: Path to tutorial store
-    """
-    return Path(tempfile.gettempdir(), "openghg_temp_store")
-
-
 def use_tutorial_store() -> None:
     """Sets an environment variable telling OpenGHG to use a
     temporary object store. This sets the store to be
@@ -263,25 +254,15 @@ def use_tutorial_store() -> None:
     os.environ["OPENGHG_TMP_STORE"] = "1"
 
 
-def clear_tutorial_store() -> None:
-    """Cleans up the tutorial store
-
-    Returns:
-        None
-    """
-    temp_path = tutorial_store_path()
-
-    if temp_path.exists():
-        shutil.rmtree(temp_path, ignore_errors=True)
-
-
 def example_extract_path() -> Path:
     """Return the path to folder containing the extracted example files
 
     Returns:
         None
     """
-    return Path(tutorial_store_path(), "extracted_files")
+    from openghg.objectstore import get_tutorial_store_path
+
+    return Path(get_tutorial_store_path(), "extracted_files")
 
 
 def clear_example_cache() -> None:
@@ -290,7 +271,9 @@ def clear_example_cache() -> None:
     Returns:
         None
     """
-    example_cache_path = tutorial_store_path() / "example_cache"
+    from openghg.objectstore import get_tutorial_store_path
+
+    example_cache_path = get_tutorial_store_path() / "example_cache"
     extracted_examples = example_extract_path()
 
     if example_cache_path.exists():
@@ -308,7 +291,7 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
     Returns:
         list: List of filepaths
     """
-    from openghg.tutorial import tutorial_store_path
+    from openghg.objectstore import get_tutorial_store_path
     from openghg.util import download_data, parse_url_filename
 
     # Check we're getting a tar
@@ -318,7 +301,7 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
     if ".tar" not in suffixes:
         raise ValueError("This function can only currently works with tar files.")
 
-    example_cache_path = tutorial_store_path() / "example_cache"
+    example_cache_path = get_tutorial_store_path() / "example_cache"
 
     if not example_cache_path.exists():
         example_cache_path.mkdir(parents=True)

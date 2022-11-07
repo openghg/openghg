@@ -1,26 +1,24 @@
 from pathlib import Path
 
 import pytest
-from openghg.objectstore import get_bucket, query_store
-from openghg.store import ObsSurface
+from openghg.objectstore import get_local_objectstore_path, get_tutorial_store_path
+
+# @pytest.fixture(scope="session")
+# def setup_config():
+@pytest.fixture()
+def mock_read_config(mocker):
+    mock_config = {"object_store": {"local_store": "/tmp/tutorial_store"}}
+    mocker.patch("toml.loads", return_value=mock_config)
 
 
-def get_surface_datapath(filename, data_type):
-    return (
-        Path(__file__).resolve(strict=True).parent.joinpath(f"../data/proc_test_data/{data_type}/{filename}")
-    )
+def test_get_local_object_store(mock_read_config):
+    path = get_local_objectstore_path()
+    print(path)
 
 
-def hfd_filepath():
-    return get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
+# def test_get_tutorial_store(mocker):
 
-
-# Add some stuff to the object store?
-@pytest.fixture(scope="session")
-def populate_store():
-    get_bucket(empty=True)
-    filepath = hfd_filepath()
-    ObsSurface.read_file(filepath=filepath, source_format="CRDS", site="hfd")
+#     mocker.patch("toml.load", )
 
 
 # @pytest.mark.skip(reason="Unfinished")
