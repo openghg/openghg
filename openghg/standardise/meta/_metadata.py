@@ -56,7 +56,7 @@ def sync_surface_metadata(
             # This should mainly be used for lat/long
             relative_tolerance = 1e-3
 
-            if is_number(attr_value):
+            if is_number(attr_value) and is_number(value):
                 if not math.isclose(float(attr_value), float(value), rel_tol=relative_tolerance):
                     raise ValueError(
                         f"Value not within tolerance, metadata: {value} - attributes: {attr_value}"

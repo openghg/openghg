@@ -46,7 +46,7 @@ def parse_openghg(
     Returns:
         Dict: Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, load_json
+    from openghg.util import clean_string, load_json, format_inlet
     from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
 
     data_filepath = Path(data_filepath)
@@ -102,11 +102,12 @@ def parse_openghg(
 
         inlet = inlet_val[0]
 
+    inlet = format_inlet(str(inlet))
     metadata_initial["inlet"] = inlet
 
     metadata = cast(Dict[str, str], metadata_initial)
 
-    metadata["inlet_height_magl"] = metadata["inlet"]
+    metadata["inlet_height_magl"] = str(metadata["inlet"]).strip("m")
     metadata["data_type"] = "surface"
 
     # Define remaining keys needed for metadata
