@@ -4,7 +4,7 @@ import os
 import threading
 import warnings
 
-from functools import lru_cache
+# from functools import lru_cache
 from pathlib import Path
 import shutil
 from typing import Dict, List, Optional, Union
@@ -38,7 +38,7 @@ def get_tutorial_store_path() -> Path:
     Returns:
         pathlib.Path: Path of tutorial store
     """
-    return get_local_objectstore_path() / "tutorial"
+    return get_local_objectstore_path() / "tutorial_store"
 
 
 def clear_tutorial_store() -> None:
@@ -313,6 +313,7 @@ def visualise_store() -> pyvis.network.Network:
     Returns:
         pyvis.network.Network
     """
+    raise NotImplementedError
     from addict import Dict as aDict
 
     data = query_store()

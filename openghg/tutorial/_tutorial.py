@@ -5,13 +5,11 @@ import contextlib
 import os
 import shutil
 import tarfile
-import tempfile
 import warnings
 from pathlib import Path
 from typing import List, Union
 
 from openghg.standardise import standardise_footprint, standardise_flux
-from openghg.objectstore import get_bucket
 
 __all__ = ["bilsdale_datapaths"]
 

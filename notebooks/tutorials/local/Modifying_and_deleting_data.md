@@ -22,18 +22,10 @@ time if the data standardisation process is quite time consuming. Data can also 
 
 ```{code-cell} ipython3
 from openghg.store import data_handler_lookup
-from openghg.tutorial import populate_footprint_inert, clear_tutorial_store, tutorial_store_path
-```
-
-```{code-cell} ipython3
-tutorial_store_path()
+from openghg.tutorial import populate_footprint_inert
 ```
 
 We'll first add some footprint data to the object store.
-
-```{code-cell} ipython3
-clear_tutorial_store()
-```
 
 ```{code-cell} ipython3
 populate_footprint_inert()
@@ -52,10 +44,14 @@ UUID of the Datasource returned by the ``data_handler_lookup`` function, this is
 
 +++
 
-> **_NOTE:_**  The UUID below will be different on your computer. Take the UUID from the metadata dictionary.
+> **_NOTE:_**  Each time an object is added to the object store it is assigned a unique id using the Python uuid4 function. This means any UUIDs you see in the documentation won't match those created when you run these tutorials.
+
++++
+
+For the purposes of this tutorial we take the first key from the metadata dictionary. We can do this only because we've checked the dictionary and seen that only one key exists. It also means you can run through this notebook and it should work without you having to modify it. But be careful, if the dictionary contains more than one key, running the cell below might not result in the UUID you want. Each time you want to modify the data **copy and paste** the UUID and **double check** it.
 
 ```{code-cell} ipython3
-uuid = "60d68d7b-7d13-4b1d-8c78-237f9f7a0dea"
+uuid = next(iter(result.metadata))
 ```
 
 ```{code-cell} ipython3
@@ -88,18 +84,18 @@ Let's accidentally add too much metadata for the footprint and then delete.
 
 ```{code-cell} ipython3
 excess_metadata = {"useless_key": "useless_value"}
-new_result.update_metadata(uuid=uuid, to_update=excess_metadata)
+result.update_metadata(uuid=uuid, to_update=excess_metadata)
+```
+
+```{code-cell} ipython3
+result.metadata[uuid]["useless_key"]
 ```
 
 Oh no! We've added some useless metadata, let's remove it.
 
 ```{code-cell} ipython3
 to_delete = ["useless_key"]
-new_result.update_metadata(uuid=uuid, to_delete=to_delete)
-```
-
-```{code-cell} ipython3
-result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
+result.update_metadata(uuid=uuid, to_delete=to_delete)
 ```
 
 And check if the key is in the metadata:
@@ -110,18 +106,10 @@ And check if the key is in the metadata:
 
 # Restore from backup
 
-If you've accidentally pushed some bad metadata you can fix this easily by restoring from backup. Each `DataHandler` object stores a backup of the current metadata each time you run `update_metadata`. Let's add some bad metadata, have a quick look at the backup and then restore it.
+If you've accidentally pushed some bad metadata you can fix this easily by restoring from backup. Each `DataHandler` object stores a backup of the current metadata each time you run `update_metadata`. Let's add some bad metadata, have a quick look at the backup and then restore it. We'll start with a fresh `DataHandler` object.
 
 ```{code-cell} ipython3
 result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
-```
-
-```{code-cell} ipython3
-result.metadata.keys()
-```
-
-```{code-cell} ipython3
-uuid = "b703e490-2fdd-4bb3-bb16-66673673bf16"
 ```
 
 ```{code-cell} ipython3
@@ -132,25 +120,37 @@ bad_metadata = {"domain": "neptune"}
 result.update_metadata(uuid=uuid, to_update=bad_metadata)
 ```
 
+Let's check the domain
+
 ```{code-cell} ipython3
 result.metadata[uuid]["domain"]
 ```
+
+Using `view_backup` we can check the different versions of metadata we have backed up for each `Datasource`.
 
 ```{code-cell} ipython3
 result.view_backup()
 ```
 
+To restore the metadata to the previous version we use the `restore` function. This takes the UUID of the datasource and optionally a version string. The default for the version string is `"latest"`, which is the version most recently backed up. We'll use the default here.
+
 ```{code-cell} ipython3
 result.restore(uuid=uuid)
 ```
+
+Now we can check the domain again
 
 ```{code-cell} ipython3
 result.metadata[uuid]["domain"]
 ```
 
+To really make sure we can force a refresh of all the metadata from the object store and the `Datasource`.
+
 ```{code-cell} ipython3
 result.refresh()
 ```
+
+Then check again
 
 ```{code-cell} ipython3
 result.metadata[uuid]["domain"]
@@ -158,14 +158,38 @@ result.metadata[uuid]["domain"]
 
 ## Multiple backups
 
++++
+
+The `DataHandler` object will store a backup each time you run `update_metadata`. This means you can restore any version of the metadata since you started editing. Do note that the backups, currently, only exist in memory belonging to the `DataHandler` object.
+
 ```{code-cell} ipython3
 more_metadata = {"time_period": "1m"}
 result.update_metadata(uuid=uuid, to_update=more_metadata)
 ```
 
+We can view a specific metadata backup using the `version` argument. The first version is version 1, here we take a look at the backup made just before we made the update above.
+
 ```{code-cell} ipython3
-result.view_backup(uuid=uuid, version=2)
+backup_2 = result.view_backup(uuid=uuid, version=2)
 ```
+
+```{code-cell} ipython3
+backup_2["time_period"]
+```
+
+Say we want to keep some of the changes we've made to the metadata but undo the last one we can restore the last backup. To do this we can pass "latest" to the version argument when using `restore`.
+
+```{code-cell} ipython3
+result.restore(uuid=uuid, version="latest")
+```
+
+```{code-cell} ipython3
+result.metadata[uuid]["time_period"]
+```
+
+We're now back to where we want to be.
+
++++
 
 # Deleting data
 
@@ -181,10 +205,10 @@ result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
 result.metadata
 ```
 
-Each key of the metadata dictionary is a Datasource UUID. Please make sure that you double check the UUID of the Datasource you want to delete, this operation cannot be undone! Again, remember to change the UUID.
+Each key of the metadata dictionary is a Datasource UUID. Please make sure that you double check the UUID of the Datasource you want to delete, this operation cannot be undone! Also remember to change the UUID below to the one in your version of the metadata.
 
 ```{code-cell} ipython3
-uuid = "b2177d42-9df9-4a08-b50b-8aadbd7fb9d7"
+uuid = "13fd70dd-e549-4b06-afdb-9ed495552eed"
 ```
 
 ```{code-cell} ipython3
@@ -202,15 +226,3 @@ result.metadata
 ```
 
 An empty dictionary means no results, the deletion worked.
-
-+++
-
-
-
-+++
-
-
-
-```{code-cell} ipython3
-
-```

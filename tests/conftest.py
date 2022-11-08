@@ -20,7 +20,6 @@ sys.path.insert(0, os.path.abspath("."))
 
 temporary_store = tempfile.TemporaryDirectory()
 temporary_store_path = temporary_store.name
-from openghg.tutorial import tutorial_store_path
 
 
 def pytest_sessionstart(session):
@@ -36,8 +35,6 @@ def pytest_sessionfinish(session, exitstatus):
     """
     print(f"\n\nCleaning up testing store at {temporary_store.name}")
     temporary_store.cleanup()
-    tut_store = tutorial_store_path()
-    shutil.rmtree(tut_store, ignore_errors=True)
 
 
 def pytest_addoption(parser):
