@@ -14,7 +14,7 @@ from ._search import (
     search,
     search_bc,
     search_column,
-    search_emissions,
+    search_flux,
     search_eulerian,
     search_footprints,
     search_surface,

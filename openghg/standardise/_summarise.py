@@ -89,10 +89,10 @@ def _extract_site_names(site_params: Dict, source_format: str) -> Dict:
     return site_names
 
 
-def summary_data_types() -> pd.DataFrame:
+def summary_source_formats() -> pd.DataFrame:
     """
-    Create summary DataFrame of accepted input data types. This includes
-    the site code, long name, platform and data type.
+    Create summary DataFrame of accepted input source formats. This includes
+    the site code, long name, platform and source format.
 
     Returns:
         pandas.DataFrame
@@ -100,11 +100,11 @@ def summary_data_types() -> pd.DataFrame:
     TODO: Add source_format details for mobile / column etc. when added
     """
     # Could include input for surface / mobile / column etc.?
-    surface_data_types = list(SurfaceTypes.__members__)
+    surface_source_formats = list(SurfaceTypes.__members__)
 
     collated_site_data = pd.DataFrame()
 
-    for source_format in surface_data_types:
+    for source_format in surface_source_formats:
         site_params = _extract_site_param(source_format)
 
         if site_params:
@@ -116,7 +116,7 @@ def summary_data_types() -> pd.DataFrame:
             site_names = [""]
 
         site_data = pd.DataFrame({"Site code": site_codes, "Long name": site_names})
-        site_data["Data type"] = source_format
+        site_data["Source format"] = source_format
         site_data["Platform"] = "surface site"
 
         collated_site_data = pd.concat([collated_site_data, site_data], ignore_index=True)
@@ -126,3 +126,71 @@ def summary_data_types() -> pd.DataFrame:
     # collated_site_data = collated_site_data.sort_values(by="Site code")
 
     return collated_site_data
+
+
+def summary_site_codes() -> pd.DataFrame:
+    """
+    Create summary DataFrame of site codes. This includes details of the network,
+    longitude, latitude, height above sea level and stored heights.
+
+    Note: there may be multiple entries for the same site code if this is
+    associated with multiple networks.
+
+    Returns:
+        pandas.DataFrame
+
+    TODO: Allow input for site json file to use. Must match to format within
+    acrg_site_info.json file.
+    """
+
+    from openghg.util import load_json
+
+    site_info = load_json(filename="acrg_site_info.json")
+
+    site_dict: Dict[str, list] = {}
+    site_dict["site"] = []
+    site_dict["network"] = []
+
+    expected_keys: list = ["long_name",
+                           "latitude",
+                           "longitude",
+                           "height_station_masl",
+                          ["heights", "height"]]
+
+    name_keys = [key[0] if isinstance(key, list) else key for key in expected_keys]
+    for key in name_keys:
+        site_dict[key] = []
+
+    for site, network_data in site_info.items():
+        for network, data in network_data.items():
+            for key in expected_keys:
+                if not isinstance(key, list):
+                    search_keys = [key, ]
+                else:
+                    search_keys = key
+
+                name = search_keys[0]
+                for key in search_keys:
+                    if key in data:
+                        site_dict[name].append(str(data[key]))
+                        break
+                else:
+                    site_dict[name].append("")
+
+            site_dict["network"].append(network)
+            site_dict["site"].append(site)
+
+    site_df = pd.DataFrame(site_dict)
+
+    all_keys = name_keys.copy()
+    all_keys.extend(["site", "network"])
+    descriptive_names = {"site": "Site Code",
+                         "long_name": "Long name",
+                         "height_station_masl": "Station height (masl)",
+                         "heights": "Inlet heights"}
+    column_names = {name: (descriptive_names[name] if name in descriptive_names else name.capitalize()) for name in all_keys}
+
+    site_df = site_df.rename(columns=column_names)
+    site_df = site_df.set_index("Site Code")
+
+    return site_df

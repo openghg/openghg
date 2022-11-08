@@ -169,18 +169,16 @@ def populate_flux_ch4() -> None:
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
                 domain = "EUROPE"
-                date = "2016"
                 species = "ch4"
 
                 standardise_flux(
-                    filepath=flux_data_waste, species=species, source=source_waste, domain=domain, date=date
+                    filepath=flux_data_waste, species=species, source=source_waste, domain=domain
                 )
                 standardise_flux(
                     filepath=flux_data_energyprod,
                     species=species,
                     source=source_energyprod,
                     domain=domain,
-                    date=date,
                 )
 
     print("Done.")

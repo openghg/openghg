@@ -83,6 +83,7 @@ def get_obs_surface(
     site: str,
     species: str,
     inlet: str = None,
+    height: str = None,
     start_date: Union[str, Timestamp] = None,
     end_date: Union[str, Timestamp] = None,
     average: str = None,
@@ -101,7 +102,8 @@ def get_obs_surface(
         species: Species identifier e.g. ch4 for methane.
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet label
+        inlet: Inlet height above ground level in metres
+        height: Alias for inlet
         average: Averaging period for each dataset. Each value should be a string of
         the form e.g. "2H", "30min" (should match pandas offset aliases format).
         keep_missing: Keep missing data points or drop them.
@@ -112,6 +114,13 @@ def get_obs_surface(
         ObsData or None: ObsData object if data found, else None
     """
     from openghg.cloud import call_function
+    from openghg.util import format_inlet
+
+    # Allow height to be an alias for inlet but we do not expect height
+    # to be within the metadata (for now)
+    if inlet is None and height is not None:
+        inlet = height
+    inlet = format_inlet(inlet)
 
     if running_on_hub():
         to_post: Dict[str, Union[str, Dict]] = {}
@@ -184,6 +193,7 @@ def get_obs_surface_local(
     site: str,
     species: str,
     inlet: Optional[str] = None,
+    height: Optional[str] = None,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
     average: Optional[str] = None,
@@ -204,7 +214,8 @@ def get_obs_surface_local(
         species: Species identifier e.g. ch4 for methane.
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet label
+        inlet: Inlet height above ground level in metres
+        height: Alias for inlet
         average: Averaging period for each dataset. Each value should be a string of
         the form e.g. "2H", "30min" (should match pandas offset aliases format).
         keep_missing: Keep missing data points or drop them.
@@ -216,7 +227,7 @@ def get_obs_surface_local(
     """
     import numpy as np
     from openghg.retrieve import search_surface
-    from openghg.util import clean_string, load_json, synonyms, timestamp_tzaware
+    from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware
     from pandas import Timedelta
 
     if running_on_hub():
@@ -225,6 +236,12 @@ def get_obs_surface_local(
         )
 
     data_type = "surface"
+
+    # Allow height to be an alias for inlet but we do not expect height
+    # to be within the metadata (for now)
+    if inlet is None and height is not None:
+        inlet = height
+    inlet = format_inlet(inlet)    
 
     site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
@@ -531,7 +548,8 @@ def get_bc(
 def get_footprint(
     site: str,
     domain: str,
-    height: str,
+    inlet: str = None,
+    height: str = None,
     model: str = None,
     start_date: Timestamp = None,
     end_date: Timestamp = None,
@@ -547,7 +565,8 @@ def get_footprint(
               file. E.g. site="DJI", site_modifier = "DJI-SAM" -
               station called DJI, footprints site called DJI-SAM
         domain : Domain name for the footprints
-        height: Height of inlet in metres
+        inlet: Height above ground level in metres
+        height: Alias for inlet
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
         species: Species identifier e.g. "co2" for carbon dioxide. Only needed
@@ -559,15 +578,21 @@ def get_footprint(
     """
     from openghg.retrieve import search
     from openghg.store import recombine_datasets
-    from openghg.util import clean_string, synonyms
+    from openghg.util import clean_string, synonyms, format_inlet
 
     # Find the correct synonym for the passed species
     if species is not None:
         species = clean_string(synonyms(species))
 
+    # Allow inlet or height to be specified, both or either may be included
+    # within the metadata so could use either to search
+    inlet = format_inlet(inlet)
+    height = format_inlet(height)
+
     fp_data = _get_generic(
         site=site,
         domain=domain,
+        inlet=inlet,
         height=height,
         model=model,
         start_date=start_date,

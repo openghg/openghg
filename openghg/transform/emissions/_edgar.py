@@ -57,6 +57,7 @@ def parse_edgar(
     Returns:
         dict: Dictionary of data
 
+    TODO: Allow date range to be extracted rather than year?
     TODO: Add monthly parsing and sector stacking options
     """
     import tempfile

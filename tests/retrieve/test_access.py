@@ -12,7 +12,7 @@ from helpers import (
     metadata_checker_obssurface,
 )
 from openghg.dataobjects import ObsData
-from openghg.retrieve import get_flux, get_footprint, get_obs_column, get_obs_surface, search
+from openghg.retrieve import get_flux, get_bc, get_footprint, get_obs_column, get_obs_surface, search
 from openghg.util import compress, compress_str, hash_bytes
 from openghg.types import SearchError
 from pandas import Timedelta, Timestamp
@@ -41,8 +41,21 @@ from pandas import Timedelta, Timestamp
 # ]
 
 
-def test_get_obs_surface():
-    obsdata = get_obs_surface(site="bsd", species="co2", inlet="248m")
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "248m"),
+        ("height", "248m"),
+        ("inlet", "248magl"),
+        ("inlet", "248"),
+    ],
+)
+def test_get_obs_surface(inlet_keyword, inlet_value):
+
+    if inlet_keyword == "inlet":
+        obsdata = get_obs_surface(site="bsd", species="co2", inlet=inlet_value)
+    elif inlet_keyword == "height":
+        obsdata = get_obs_surface(site="bsd", species="co2", height=inlet_value)
     co2_data = obsdata.data
 
     assert co2_data.time[0] == Timestamp("2014-01-30T11:12:30")
@@ -300,7 +313,11 @@ def test_get_flux():
     assert float(flux.lon.max()) == pytest.approx(39.38)
     assert float(flux.lon.min()) == pytest.approx(-97.9)
     assert sorted(list(flux.variables)) == ["flux", "lat", "lon", "time"]
-    assert flux.attrs["species"] == "co2"
+
+    # Check whole flux range has been retrieved (2 files)
+    time = flux["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+    assert time[-1] == Timestamp("2013-01-01T00:00:00")
 
 
 def test_get_flux_no_result():
@@ -314,8 +331,38 @@ def test_get_flux_no_result():
         assert "domain='antarctica'" in execinfo
 
 
-def test_get_footprint():
-    fp_result = get_footprint(site="tmb", domain="europe", height="10m", model="test_model")
+def test_get_bc():
+    bc_data = get_bc(species="n2o", bc_input="mozart", domain="europe")
+
+    bc = bc_data.data
+
+    assert float(bc.lat.max()) == pytest.approx(79.057)
+    assert float(bc.lat.min()) == pytest.approx(10.729)
+    assert float(bc.lon.max()) == pytest.approx(39.38)
+    assert float(bc.lon.min()) == pytest.approx(-97.9)
+
+    bc_variables = ['height', 'lat', 'lon', 'time',
+                    'vmr_e', 'vmr_n', 'vmr_s', 'vmr_w']
+    assert sorted(list(bc.variables)) == bc_variables
+
+    time = bc["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+
+
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "10m"),
+        ("height", "10m"),
+        ("inlet", "10magl"),
+        ("inlet", "10"),
+    ],
+)
+def test_get_footprint(inlet_keyword,inlet_value):
+    if inlet_keyword == "inlet":
+        fp_result = get_footprint(site="tmb", domain="europe", inlet=inlet_value, model="test_model")
+    elif inlet_keyword == "height":
+        fp_result = get_footprint(site="tmb", domain="europe", height=inlet_value, model="test_model")
 
     footprint = fp_result.data
     metadata = fp_result.metadata
@@ -340,4 +387,3 @@ def test_get_footprint_no_result():
         assert "domain='spain'" in execinfo
         assert "height='10m'" in execinfo
         assert "model='test_model'" in execinfo
-

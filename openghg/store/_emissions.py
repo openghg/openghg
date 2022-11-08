@@ -53,7 +53,6 @@ class Emissions(BaseStore):
         source: str,
         domain: str,
         source_format: str = "openghg",
-        date: Optional[str] = None,
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
         chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -67,8 +66,6 @@ class Emissions(BaseStore):
             species: Species name
             domain: Emissions domain
             source: Emissions source
-            date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
-                   Only needed if this can not be inferred from the time coords
             source_format : Type of data being input e.g. openghg (internal format)
             high_time_resolution: If this is a high resolution file
             period: Period of measurements. Only needed if this can not be inferred from the time coords
@@ -88,7 +85,6 @@ class Emissions(BaseStore):
         species = clean_string(species)
         source = clean_string(source)
         domain = clean_string(domain)
-        date = clean_string(date)
 
         filepath = Path(filepath)
 
@@ -119,7 +115,6 @@ class Emissions(BaseStore):
             "species": species,
             "domain": domain,
             "source": source,
-            "date": date,
             "high_time_resolution": high_time_resolution,
             "period": period,
             "continuous": continuous,
@@ -134,7 +129,7 @@ class Emissions(BaseStore):
             em_data = split_data["data"]
             Emissions.validate_data(em_data)
 
-        required = ("species", "source", "domain", "date")
+        required = ("species", "source", "domain")
         lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
 
         data_type = "emissions"
@@ -216,7 +211,7 @@ class Emissions(BaseStore):
             em_data = split_data["data"]
             Emissions.validate_data(em_data)
 
-        required = ("species", "source", "domain", "date")
+        required = ("species", "source", "domain")
         lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
 
         data_type = "emissions"

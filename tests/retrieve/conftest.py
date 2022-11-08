@@ -86,15 +86,28 @@ def data_read():
         species="methane",
     )
 
-    # Emissions data
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    # Emissions data - added consecutive data for 2012-2013
+    # This will be seen as "yearly" data and each file only contains one time point.
+    test_datapath1 = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    test_datapath2 = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
+
+    species="co2"
+    source="gpp-cardamom"
+    domain="europe"
 
     Emissions.read_file(
-        filepath=test_datapath,
-        species="co2",
-        source="gpp-cardamom",
-        date="2012",
-        domain="europe",
+        filepath=test_datapath1,
+        species=species,
+        source=source,
+        domain=domain,
+        high_time_resolution=False,
+    )
+
+    Emissions.read_file(
+        filepath=test_datapath2,
+        species=species,
+        source=source,
+        domain=domain,
         high_time_resolution=False,
     )
 

@@ -102,6 +102,7 @@ class ObsSurface(BaseStore):
         network: str,
         site: str,
         inlet: Optional[str] = None,
+        height: Optional[str] = None,
         instrument: Optional[str] = None,
         sampling_period: Optional[str] = None,
         calibration_scale: Optional[str] = None,
@@ -118,7 +119,10 @@ class ObsSurface(BaseStore):
             source_format: Data format, for example CRDS, GCWERKS
             site: Site code/name
             network: Network name
-            inlet: Inlet height. If retrieve multiple files pass None, OpenGHG will attempt to
+            inlet: Inlet height. Format 'NUMUNIT' e.g. "10m".
+                If retrieve multiple files pass None, OpenGHG will attempt to
+                extract this from the file.
+            height: Alias for inlet.
             read inlets from data.
             instrument: Instrument name
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
@@ -136,7 +140,7 @@ class ObsSurface(BaseStore):
 
         from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import SurfaceTypes
-        from openghg.util import clean_string, hash_file, load_surface_parser, verify_site
+        from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
         from pandas import Timedelta
         from tqdm import tqdm
 
@@ -153,9 +157,16 @@ class ObsSurface(BaseStore):
         # Clean the strings
         site = verify_site(site=site) if verify_site_code else clean_string(site)
         network = clean_string(network)
-        inlet = clean_string(inlet)
         instrument = clean_string(instrument)
         # sampling_period = clean_string(sampling_period)
+
+        # Check if alias `height` is included instead of `inlet`
+        if inlet is None and height is not None:
+            inlet = height        
+
+        # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
+        inlet = clean_string(inlet)
+        inlet = format_inlet(inlet)
 
         sampling_period_seconds: Union[str, None] = None
         # If we have a sampling period passed we want the number of seconds
@@ -181,6 +192,9 @@ class ObsSurface(BaseStore):
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
             for fp in filepath:
                 if source_format == "GCWERKS":
+                    if not isinstance(fp, tuple):
+                        raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
+
                     try:
                         data_filepath = Path(fp[0])
                         precision_filepath = Path(fp[1])

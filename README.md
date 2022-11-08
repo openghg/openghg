@@ -18,7 +18,7 @@ You can login to our [OpenGHG Cloud JupyterHub](https://hub.openghg.org) and use
 
 ## Install locally
 
-To run OpenGHG locally you'll need Python 3.7 or later on Linux or MacOS, we don't currently support Windows.
+To run OpenGHG locally you'll need Python 3.8 or later on Linux or MacOS, we don't currently support Windows.
 
 ### Install OpenGHG
 
@@ -29,20 +29,21 @@ If using `pip` or `conda`, we recommend creating a virtual environment first and
 #### pip
 
 To use `pip`, first create a virtual environment using the following
-```
-$ python -m venv openghg_env
+
+```bash
+python -m venv openghg_env
 ```
 
 Then activate the environment
 
-```
-$ source openghg_env/bin/activate
+```bash
+source openghg_env/bin/activate
 ```
 
 Then install OpenGHG
 
-```
-$ pip install openghg
+```bash
+pip install openghg
 ```
 
 This will allow the majority of functionality to be accessed but see below for more details on accessing optional regridding (`tranform`) functionality introduced in v.x.x.
@@ -54,23 +55,23 @@ Some optional functionality is available within OpenGHG to allow for multi-dimen
 To use this functionality these libraries must be installed separately. One suggestion for how to do this is as follows.
 
 If still within the created virtual environment, exit this using
-```
-$ deactivate
+```bash
+deactivate
 ```
 
 We will need to create a `conda` environment to contain just the additional C and FORTRAN libraries necessary for the `xesmf` module (and dependencies) to run. This can be done by installing the `esmf` package using `conda`
-```
-$ conda create --name openghg_add esmf -c conda-forge
+```bash
+conda create --name openghg_add esmf -c conda-forge
 ```
 
 Then activate the Python virtual environment in the same way as above:
-```
-$ source openghg_env/bin/activate
+```bash
+source openghg_env/bin/activate
 ```
 
 Run the following lines to link the Python virtual environment to the installed dependencies, doing so by installing the `esmpy` Python wrapper (a dependency of `xesmf`):
-```
-$ ESMFVERSION='v'$(conda list -n openghg_add esmf | tail -n1 | awk '{print $2}')
+```bash
+ESMFVERSION='v'$(conda list -n openghg_add esmf | tail -n1 | awk '{print $2}')
 $ export ESMFMKFILE="$(conda env list | grep openghg_add | awk '{print $2}')/lib/esmf.mk"
 $ pip install "git+https://github.com/esmf-org/esmf.git@${ESMFVERSION}#subdirectory=src/addon/ESMPy/"
 ```
@@ -78,44 +79,53 @@ $ pip install "git+https://github.com/esmf-org/esmf.git@${ESMFVERSION}#subdirect
 **Note**: The pip install command above for `esmf` module may produce an AttributeError. At present (19/07/2022) an error of this type is expected and may not mean the `xesmf` module cannot be installed. This error will be fixed if [PR #49](https://github.com/esmf-org/esmf/pull/49) is merged.
 
 Now the dependencies have all been installed, the `xesmf` library can be installed within the virtual environment
-```
-$ pip install xesmf
+
+```bash
+pip install xesmf
 ```
 
 #### conda
 
 Create a conda environment called `openghg_env` and enable the use of conda-forge
 
-```
-$ conda create --name openghg_env
+```bash
+conda create --name openghg_env
 ```
 
 Activate the environment
 
-```
-$ conda activate openghg_env
+```bash
+conda activate openghg_env
 ```
 
 Then install OpenGHG and its dependencies from our [conda channel](https://anaconda.org/openghg/openghg)
 and conda-forge.
 
-```
-$ conda install --channel conda-forge --channel openghg openghg
+```bash
+conda install --channel conda-forge --channel openghg openghg
 ```
 
 Note: the `xesmf` library is already incorporated into the conda install from vx.x onwards and so does not need to be installed separately.
 
-### Set environment variable
+## Setting the object store path
 
-OpenGHG expects an environment variable `OPENGHG_PATH` to be set. This tells OpenGHG where to place the local object store.
+On first import OpenGHG will create a configuration file at `~/.config/openghg/openghg.conf`. This file contains the path to the object store, which by default is set to `~/openghg_store`.
 
-Please add the following line to your shell profile (`~/.bashrc`, `~/.profile`, ...).
+The contents of the file will look like this
 
+```toml
+[object_store]
+local_store = "/home/your_username/openghg_store"
 ```
-OPENGHG_PATH=/your/selected/path
+
+or on macOS
+
+```toml
+[object_store]
+local_store = "/Users/your_username/openghg_store"
 ```
 
-We recommend a path such as `/home/your_username/openghg_store`.
+Change this path to set the object store path.
 
 ## Developers
 
@@ -123,31 +133,41 @@ If you'd like to contribute to OpenGHG please see the contributing section of ou
 
 ### Clone
 
-```
-$ git clone https://github.com/openghg/openghg.git
+```bash
+git clone https://github.com/openghg/openghg.git
 ```
 
 ### Install dependencies
 
 We recommend you create a virtual environment first
 
-```
-$ python -m venv openghg_env
+```bash
+python -m venv openghg_env
 ```
 
 Then activate the environment
 
-```
-$ source openghg_env/bin/activate
+```bash
+source openghg_env/bin/activate
 ```
 
 Then install the dependencies
 
+```bash
+cd openghg
+pip install --upgrade pip wheel
+pip install -r requirements.txt -r requirements-dev.txt
 ```
-$ cd openghg
-$ pip install --upgrade pip wheel
-$ pip install -r requirements-dev.txt
+
+Next you Next you can install OpenGHG in editable mode using the `-e` flag. This installs the package from
+the local path and means any changes you make to the code will be immediately available when
+using the package.
+
+```bash
+pip install -e .
 ```
+
+OpenGHG should now be installed in your virtual environment.
 
 See above for additional steps to install the `xesmf` library as required.
 
@@ -155,22 +175,22 @@ See above for additional steps to install the `xesmf` library as required.
 
 To run the tests
 
-```
-$ pytest -v tests/
+```bash
+pytest -v tests/
 ```
 
 > **_NOTE:_**  Some of the tests require the [udunits2](https://www.unidata.ucar.edu/software/udunits/) library to be installed.
 
 The `udunits` package is not `pip` installable so we've added a separate flag to specifically run these tests. If you're on Debian / Ubuntu you can do
 
-```
-$ sudo apt-get install libudunits2-0
+```bash
+sudo apt-get install libudunits2-0
 ```
 
 You can then run the `cfchecks` marked tests using
 
-```
-$ pytest -v --run-cfchecks tests/
+```bash
+pytest -v --run-cfchecks tests/
 ```
 
 If all the tests pass then you're good to go. If they don't please [open an issue](https://github.com/openghg/openghg/issues/new) and let us

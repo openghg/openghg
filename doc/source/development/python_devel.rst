@@ -50,7 +50,16 @@ To get a copy of the repo and ensure you have all the required depdencies for de
 
     git clone https://github.com/openghg/openghg.git
     cd openghg
-    pip install -r requirements-dev.txt
+    pip install -r requirements.txt -r requirements-dev.txt
+
+
+Next you can install OpenGHG in editable mode using the `-e` flag. This installs the package from
+the local path and means any changes you make to the code will be immediately available when
+using the package.
+
+.. code-block:: bash
+
+   pip install -e .
 
 OpenGHG should now be installed within your virtual environment.
 
@@ -268,7 +277,7 @@ for details. The documentation is automatically built using `Sphinx <http://sphi
 documentation is automatically rebuilt and updated.
 
 To build the documentation locally you will first need to install some
-additional packages. If you haven't yet installed the developer requirements please do so by running
+additional packages. If you haven't yet installed the documentation requirements please do so by running
 
 .. code-block:: bash
 
