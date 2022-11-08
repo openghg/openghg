@@ -253,6 +253,10 @@ def get_bucket(empty: bool = False) -> str:
     import shutil
     import os
 
+    tutorial_store = os.getenv("OPENGHG_TMP_STORE")
+    if tutorial_store is not None:
+        return str(get_tutorial_store_path())
+
     openghg_env = os.getenv("OPENGHG_PATH")
     if openghg_env is not None:
         warnings.warn(
@@ -260,19 +264,39 @@ def get_bucket(empty: bool = False) -> str:
             + " store path please use the configuration file. See docs.openghg.org/install",
             category=DeprecationWarning,
         )
+
+        if empty is True:
+            shutil.rmtree(openghg_env)
+            Path(openghg_env).mkdir(parents=True)
+
         return openghg_env
 
     local_store = get_local_objectstore_path()
 
-    tutorial_store = os.getenv("OPENGHG_TMP_STORE")
-    if tutorial_store is not None:
-        return str(get_tutorial_store_path())
-
     if empty is True:
-        shutil.rmtree(local_store)
-        local_store.mkdir(parents=True)
+        raise NotImplementedError(
+            "You cannot delete the object store using get_bucket any long"
+            + "please check you really want to delete the whole store and use openghg.object_store.clear_store."
+        )
 
     return str(local_store)
+
+
+def clear_object_store() -> None:
+    """Delete the object store. This will only delete a local object store and not
+    a group level or other store. You will be asked for input to confirm the path.
+
+    Returns:
+        None
+    """
+    local_store = str(get_local_objectstore_path())
+    print(f"You have requested to delete {local_store}.")
+
+    confirmed_path = input("Please enter the full path of the store: ")
+    if confirmed_path == local_store:
+        shutil.rmtree(local_store, ignore_errors=True)
+    else:
+        print("Cannot delete object store.")
 
 
 def query_store() -> Dict:
