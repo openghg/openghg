@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.g472e904.dirty documentation</title>
+    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.g7da138a.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -99,7 +99,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g472e904.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g7da138a.dirty documentation</p>
   
 </a>
     
@@ -353,6 +353,7 @@
 
 <span class="c1"># from functools import lru_cache</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
@@ -364,6 +365,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;delete_object&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_local_objectstore_path&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_tutorial_store_path&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clear_tutorial_store&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_all_object_names&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_object_names&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_object&quot;</span><span class="p">,</span>
@@ -376,32 +379,36 @@
 <span class="p">]</span>
 
 
+<span class="k">def</span> <span class="nf">get_tutorial_store_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get the path to the local tutorial store</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pathlib.Path: Path of tutorial store</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_local_objectstore_path</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tutorial_store&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">clear_tutorial_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Delete the contents of the tutorial object store</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">get_tutorial_store_path</span><span class="p">()</span>
+
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
 <span class="c1"># @lru_cache</span>
 <span class="k">def</span> <span class="nf">get_local_objectstore_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns the path to the local OpenGHG object store bucket</span>
+    <span class="sd">&quot;&quot;&quot;Read</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        pathlib.Path: Path of object store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">os</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">read_local_config</span>
-    <span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">tutorial_store_path</span>
-
-    <span class="n">openghg_env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">openghg_env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot; store path please use the configuration file. See docs.openghg.org/install&quot;</span><span class="p">,</span>
-            <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">openghg_env</span><span class="p">)</span>
-
-    <span class="n">tutorial_store</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_TMP_STORE&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">tutorial_store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">tutorial_store_path</span><span class="p">()</span>
 
     <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
-
     <span class="n">object_store_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">][</span><span class="s2">&quot;local_store&quot;</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">object_store_path</span>
@@ -474,7 +481,7 @@
         <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="get_object_names"><a class="viewcode-back" href="../../../api/api_objectstore.html#openghg.objectstore.get_object_names">[docs]</a><span class="k">def</span> <span class="nf">get_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="get_object_names"><a class="viewcode-back" href="../../../api/api_objectstore.html#openghg.objectstore.get_object_names">[docs]</a><span class="k">def</span> <span class="nf">get_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;List all the keys in the object store</span>
 
 <span class="sd">    Args:</span>
@@ -591,14 +598,52 @@
 <span class="sd">    if the bucket does not exist then an exception will be raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">shutil</span>
+    <span class="kn">import</span> <span class="nn">os</span>
 
-    <span class="n">local_bucket</span> <span class="o">=</span> <span class="n">get_local_objectstore_path</span><span class="p">()</span>
+    <span class="n">tutorial_store</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_TMP_STORE&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tutorial_store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_tutorial_store_path</span><span class="p">())</span>
+
+    <span class="n">openghg_env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">openghg_env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot; store path please use the configuration file. See docs.openghg.org/install&quot;</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">openghg_env</span><span class="p">)</span>
+            <span class="n">Path</span><span class="p">(</span><span class="n">openghg_env</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">openghg_env</span>
+
+    <span class="n">local_store</span> <span class="o">=</span> <span class="n">get_local_objectstore_path</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">local_bucket</span><span class="p">)</span>
-        <span class="n">local_bucket</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;You cannot delete the object store using get_bucket any long&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;please check you really want to delete the whole store and use openghg.object_store.clear_store.&quot;</span>
+        <span class="p">)</span>
 
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">local_bucket</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">local_store</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">clear_object_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Delete the object store. This will only delete a local object store and not</span>
+<span class="sd">    a group level or other store. You will be asked for input to confirm the path.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">local_store</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_local_objectstore_path</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;You have requested to delete </span><span class="si">{</span><span class="n">local_store</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="n">confirmed_path</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Please enter the full path of the store: &quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">confirmed_path</span> <span class="o">==</span> <span class="n">local_store</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">local_store</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cannot delete object store.&quot;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">query_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
@@ -639,6 +684,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        pyvis.network.Network</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
     <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">query_store</span><span class="p">()</span>
