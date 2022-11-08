@@ -1,7 +1,10 @@
 import json
 from typing import Dict, Optional, Sequence
-
 from openghg.objectstore import exists, get_bucket, get_object, set_object_from_json
+
+# from openghg.dataobjects import DataHandler
+# DHType = TypeVar('U', bound=DataHandler)
+
 from tinydb import Storage, TinyDB
 from tinydb.middlewares import CachingMiddleware
 
@@ -84,3 +87,20 @@ def datasource_lookup(
         results[key] = metadata_lookup(metadata=required_metadata, database=metastore)
 
     return results
+
+
+def data_handler_lookup(data_type: str, **kwargs: Dict):  # type: ignore
+    """Lookup the data / metadata you'd like to modify.
+
+    Args:
+        data_type: Type of data, for example surface, flux, footprint
+        kwargs: Any pair of keyword arguments for searching
+    Returns:
+        DataHandler: A handler object to help modify the metadata
+    """
+    from openghg.retrieve import search
+    from openghg.dataobjects import DataHandler
+
+    res = search(data_type=data_type, **kwargs)
+    metadata = res.metadata
+    return DataHandler(metadata=metadata)
