@@ -101,8 +101,8 @@ def parse_openghg(
             raise ValueError("More than one inlet value found in attributes, please pass as argument.")
 
         inlet = inlet_val[0]
+        inlet = format_inlet(str(inlet))
 
-    inlet = format_inlet(str(inlet))
     metadata_initial["inlet"] = inlet
 
     metadata = cast(Dict[str, str], metadata_initial)
@@ -115,15 +115,14 @@ def parse_openghg(
     metadata_needed = [param for param in metadata_needed if param not in metadata]
 
     metadata["site"] = clean_string(metadata["site"])
-    # metadata["species"] = synonyms(
-    #     metadata["species"]
-    # ).lower()
-    # # May want to remove the .lower() here and centralise this
     metadata["species"] = define_species_label(metadata["species"])[0]
 
     # Update attributes to match metadata after cleaning
     attributes["site"] = metadata["site"]
     attributes["species"] = metadata["species"]
+
+    if "inlet" in attributes:
+        attributes["inlet_height_magl"] = str(attributes["inlet"]).strip("m")
 
     site = metadata["site"]
     network = metadata["network"]
