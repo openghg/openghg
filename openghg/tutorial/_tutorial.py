@@ -128,7 +128,6 @@ def populate_flux_co2() -> None:
 
     domain = "EUROPE"
     species = "co2"
-    date = "2017"
 
     source_natural = "natural"
     source_fossil = "ff-edgar-bp"
@@ -138,10 +137,9 @@ def populate_flux_co2() -> None:
         species=species,
         source=source_natural,
         domain=domain,
-        date=date,
         high_time_resolution=True,
     )
-    standardise_flux(filepath=flux_file_ff, species=species, source=source_fossil, domain=domain, date=date)
+    standardise_flux(filepath=flux_file_ff, species=species, source=source_fossil, domain=domain)
 
 
 def populate_flux_ch4() -> None:

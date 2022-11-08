@@ -5,13 +5,13 @@ from openghg.store.spec import define_data_type_classes
 from openghg.store import load_metastore
 
 import tinydb
-from typing import Dict, List, Set, Optional, Union
+from typing import DefaultDict, Dict, List, Set, Optional, Union
 
 
 class DataHandler:
     def __init__(self, metadata: Optional[Dict[str, Dict]] = None):
         self.metadata = metadata if metadata is not None else {}
-        self._backup = defaultdict(dict)
+        self._backup: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict)
         self._latest = "latest"
 
     def __str__(self) -> str:
