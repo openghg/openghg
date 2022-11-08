@@ -61,9 +61,8 @@ def test_local_obs_openghg():
 
     results = results["processed"]["DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc"]
 
-    # assert "error" not in results
-    # assert "ch4" in results
-    # assert "co2" in results
+    assert "error" not in results
+    assert "co2" in results
 
 
 def test_standardise_footprint():
