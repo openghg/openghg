@@ -205,7 +205,7 @@ result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
 result.metadata
 ```
 
-Each key of the metadata dictionary is a Datasource UUID. Please make sure that you double check the UUID of the Datasource you want to delete, this operation cannot be undone! Also remember to change the UUID below to the one in your version of the metadata.
+Each key of the metadata dictionary is a Datasource UUID. Please make sure that you **double check the UUID** of the Datasource you want to delete, this operation cannot be undone! Also remember to change the UUID below to the one in your version of the metadata.
 
 ```{code-cell} ipython3
 uuid = "13fd70dd-e549-4b06-afdb-9ed495552eed"
