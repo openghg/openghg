@@ -75,6 +75,16 @@ def data_read():
 
     obs.save()
 
+    # Obs Surface - openghg pre-formatted data
+    # - This shouldn't conflict with TAC data above as this is for 185m rather than 100m
+    openghg_path = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG")
+    ObsSurface.read_file(filepath=openghg_path,
+                         source_format="OPENGHG",
+                         site="tac",
+                         network="DECC",
+                         instrument="picarro",
+                         sampling_period="1H")
+
     # Obs Column data
     column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
 
