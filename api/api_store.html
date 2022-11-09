@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>store API detail &#8212; OpenGHG 0+untagged.1.gc00d94a.dirty documentation</title>
+    <title>store API detail &#8212; OpenGHG 0+untagged.1.g02f660f.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -49,6 +49,8 @@
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dataobjects API detail" href="api_dataobjects.html" />
+    <link rel="prev" title="Developer API" href="index_devapi.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -100,7 +102,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gc00d94a.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g02f660f.dirty documentation</p>
   
 </a>
     
@@ -157,7 +159,7 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                <li class="nav-item">
+                <li class="nav-item current active">
                     <a class="nav-link" href="index_devapi.html">
                         Developer API
                     </a>
@@ -224,7 +226,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -279,7 +281,7 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                <li class="nav-item">
+                <li class="nav-item current active">
                     <a class="nav-link" href="index_devapi.html">
                         Developer API
                     </a>
@@ -324,6 +326,32 @@
   </div>
 
   
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">store API detail</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="simple">
+</ul>
+</li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api_dataobjects.html">dataobjects API detail</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api_retrieve.html">Retrieval functions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api_objectstore.html">objectstore API Detail</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -347,8 +375,151 @@
               
   <section id="store-api-detail">
 <h1>store API detail<a class="headerlink" href="#store-api-detail" title="Permalink to this heading">#</a></h1>
+<section id="storage">
+<h2>Storage<a class="headerlink" href="#storage" title="Permalink to this heading">#</a></h2>
+<p>These classes are used to store each type of data in the object store. Each has a static <em class="xref py py-obj">load</em> function that loads a version
+of itself from the object store. The <em class="xref py py-obj">read_file</em> function is then used to read data files, call standardisation functions based on
+the format of the data file, collect metadata and then store the data and metadata in the object store.</p>
+<section id="openghg-store-boundaryconditions">
+<h3>openghg.store.BoundaryConditions<a class="headerlink" href="#openghg-store-boundaryconditions" title="Permalink to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">BoundaryConditions</span></code> class is used to standardise and store boundary conditions data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openghg.store.BoundaryConditions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">BoundaryConditions</span></span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions" title="Permalink to this definition">#</a></dt>
+<dd><p>This class is used to process boundary condition data</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.read_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.read_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.read_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Ready a footprint from binary data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>binary_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – Footprint data</p></li>
+<li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Dictionary of metadata</p></li>
+<li><p><strong>file_metadat</strong> – File metadata</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>UUIDs of Datasources data has been assigned to</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.read_file">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.read_file" title="Permalink to this definition">#</a></dt>
+<dd><p>Read boundary conditions file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of boundary conditions file</p></li>
+<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
+<li><p><strong>bc_input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Input used to create boundary conditions. For example:
+- a model name such as “MOZART” or “CAMS”
+- a description such as “UniformAGAGE” (uniform values based on AGAGE average)</p></li>
+<li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Region for boundary conditions</p></li>
+<li><p><strong>period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – <p>Period of measurements. Only needed if this can not be inferred from the time coords
+If specified, should be one of:</p>
+<blockquote>
+<div><ul>
+<li><p>”yearly”, “monthly”</p></li>
+<li><p>suitable pandas Offset Alias</p></li>
+<li><p>tuple of (value, unit) as would be passed to pandas.Timedelta function</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>continuous</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether time stamps have to be continuous.</p></li>
+<li><p><strong>overwrite</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Should this data overwrite currently stored data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary of datasource UUIDs data assigned to</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.save" title="Permalink to this definition">#</a></dt>
+<dd><p>Save the object to the object store</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.schema">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.schema" title="Permalink to this definition">#</a></dt>
+<dd><p>Define schema for boundary conditions Dataset.</p>
+<dl class="simple">
+<dt>Includes volume mole fractions for each time and ordinal, vertical boundary at the edge of the defined domain:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>“vmr_n”, “vmr_s”</dt><dd><ul>
+<li><p>expected dimensions: (“time”, “height”, “lon”)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>“vmr_e”, “vmr_w”</dt><dd><ul>
+<li><p>expected dimensions: (“time”, “height”, “lat”)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<p>Expected data types for all variables and coordinates also included.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Contains schema for BoundaryConditions.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>DataSchema</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.BoundaryConditions.validate_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_boundary_conditions.html#BoundaryConditions.validate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.BoundaryConditions.validate_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Validate input data against BoundaryConditions schema - definition from
+BoundaryConditions.schema() method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>) – xarray Dataset in expected format</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>None</p>
+<p>Raises a ValueError with details if the input data does not adhere
+to the BoundaryConditions schema.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</section>
 <section id="openghg-store-emissions">
-<h2>openghg.store.Emissions<a class="headerlink" href="#openghg-store-emissions" title="Permalink to this heading">#</a></h2>
+<h3>openghg.store.Emissions<a class="headerlink" href="#openghg-store-emissions" title="Permalink to this heading">#</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">Emissions</span></code> class is used to process emissions / flux data files.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.store.Emissions">
@@ -505,6 +676,7 @@ to the Emissions schema.</p>
 <div class="toctree-wrapper compound">
 </div>
 </section>
+</section>
 <section id="openghg-store-eulerianmodel">
 <h2>openghg.store.EulerianModel<a class="headerlink" href="#openghg-store-eulerianmodel" title="Permalink to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">EulerianModel</span></code> class is used to process Eulerian model data.</p>
@@ -656,6 +828,54 @@ Footprints.schema(…) method.</p>
 <p>Raises a ValueError with details if the input data does not adhere
 to the Footprints schema.</p>
 </p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="openghg-store-obscolumn">
+<h2>openghg.store.ObsColumn<a class="headerlink" href="#openghg-store-obscolumn" title="Permalink to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ObsColumn</span></code> class is used to process column / satellite observation data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="openghg.store.ObsColumn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">ObsColumn</span></span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn" title="Permalink to this definition">#</a></dt>
+<dd><p>This class is used to process emissions / flux data</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="openghg.store.ObsColumn.read_file">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">satellite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">platform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'satellite'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'openghg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_obscolumn.html#ObsColumn.read_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.ObsColumn.read_file" title="Permalink to this definition">#</a></dt>
+<dd><p>Read column observation file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of observation file</p></li>
+<li><p><strong>satellite</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Name of satellite (if relevant)</p></li>
+<li><p><strong>domain</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – For satellite only. If data has been selected on an area include the
+identifier name for domain covered. This can map to previously defined domains
+(see domain_info.json) or a newly defined domain.</p></li>
+<li><p><strong>selection</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – For satellite only, identifier for any data selection which has been
+performed on satellite data. This can be based on any form of filtering, binning etc.
+but should be unique compared to other selections made e.g. “land”, “glint”, “upperlimit”.
+If not specified, domain will be used.</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Site code/name (if relevant). Can include satellite OR site.</p></li>
+<li><p><strong>species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Species name or synonym e.g. “ch4”</p></li>
+<li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name e.g. “TANSO-FTS”</p></li>
+<li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Name of in-situ or satellite network e.g. “TCCON”, “GOSAT”</p></li>
+<li><p><strong>platform</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Type of platform. Should be one of:
+- “satellite”
+- “site”</p></li>
+<li><p><strong>source_format</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Type of data being input e.g. openghg (internal format)</p></li>
+<li><p><strong>overwrite</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Should this data overwrite currently stored data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary of datasource UUIDs data assigned to</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -948,6 +1168,31 @@ overwrite: If True overwrite current data stored</p>
 </dd></dl>
 
 </section>
+<section id="metadata-handling">
+<h2>Metadata Handling<a class="headerlink" href="#metadata-handling" title="Permalink to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">data_handler_lookup</span></code> function is used in the same way as the search functions. It takes any number of
+keyword arguments for searching of metadata and a <code class="docutils literal notranslate"><span class="pre">data_type</span></code> argument. It returns a <a class="reference internal" href="api_dataobjects.html#datahandler"><span class="std std-ref">DataHandler</span></a> object.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.store.data_handler_lookup">
+<span class="sig-prename descclassname"><span class="pre">openghg.store.</span></span><span class="sig-name descname"><span class="pre">data_handler_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/store/_metadata.html#data_handler_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.store.data_handler_lookup" title="Permalink to this definition">#</a></dt>
+<dd><p>Lookup the data / metadata you’d like to modify.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_type</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Type of data, for example surface, flux, footprint</p></li>
+<li><p><strong>kwargs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Any pair of keyword arguments for searching</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A handler object to help modify the metadata</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.DataHandler" title="openghg.dataobjects.DataHandler">DataHandler</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -958,6 +1203,20 @@ overwrite: If True overwrite current data stored</p>
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="index_devapi.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Developer API</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="api_dataobjects.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">dataobjects API detail</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
 </div>
             </footer>
             
@@ -975,63 +1234,133 @@ overwrite: If True overwrite current data stored</p>
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#openghg-store-emissions">
-   openghg.store.Emissions
+  <a class="reference internal nav-link" href="#storage">
+   Storage
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.store.Emissions">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       Emissions
-      </span>
-     </code>
+    <a class="reference internal nav-link" href="#openghg-store-boundaryconditions">
+     openghg.store.BoundaryConditions
     </a>
     <ul class="nav section-nav flex-column">
      <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.store.Emissions.read_data">
+      <a class="reference internal nav-link" href="#openghg.store.BoundaryConditions">
        <code class="docutils literal notranslate">
         <span class="pre">
-         Emissions.read_data()
+         BoundaryConditions
         </span>
        </code>
       </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.read_data">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           BoundaryConditions.read_data()
+          </span>
+         </code>
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.read_file">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           BoundaryConditions.read_file()
+          </span>
+         </code>
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.save">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           BoundaryConditions.save()
+          </span>
+         </code>
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.schema">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           BoundaryConditions.schema()
+          </span>
+         </code>
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.BoundaryConditions.validate_data">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           BoundaryConditions.validate_data()
+          </span>
+         </code>
+        </a>
+       </li>
+      </ul>
      </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg-store-emissions">
+     openghg.store.Emissions
+    </a>
+    <ul class="nav section-nav flex-column">
      <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.store.Emissions.read_file">
+      <a class="reference internal nav-link" href="#openghg.store.Emissions">
        <code class="docutils literal notranslate">
         <span class="pre">
-         Emissions.read_file()
+         Emissions
         </span>
        </code>
       </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.store.Emissions.schema">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         Emissions.schema()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.store.Emissions.transform_data">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         Emissions.transform_data()
-        </span>
-       </code>
-      </a>
-     </li>
-     <li class="toc-h4 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#openghg.store.Emissions.validate_data">
-       <code class="docutils literal notranslate">
-        <span class="pre">
-         Emissions.validate_data()
-        </span>
-       </code>
-      </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.Emissions.read_data">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           Emissions.read_data()
+          </span>
+         </code>
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.Emissions.read_file">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           Emissions.read_file()
+          </span>
+         </code>
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.Emissions.schema">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           Emissions.schema()
+          </span>
+         </code>
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.Emissions.transform_data">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           Emissions.transform_data()
+          </span>
+         </code>
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#openghg.store.Emissions.validate_data">
+         <code class="docutils literal notranslate">
+          <span class="pre">
+           Emissions.validate_data()
+          </span>
+         </code>
+        </a>
+       </li>
+      </ul>
      </li>
     </ul>
    </li>
@@ -1110,6 +1439,33 @@ overwrite: If True overwrite current data stored</p>
        <code class="docutils literal notranslate">
         <span class="pre">
          Footprints.validate_data()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#openghg-store-obscolumn">
+   openghg.store.ObsColumn
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.ObsColumn">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       ObsColumn
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#openghg.store.ObsColumn.read_file">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         ObsColumn.read_file()
         </span>
        </code>
       </a>
@@ -1243,6 +1599,22 @@ overwrite: If True overwrite current data stored</p>
      <code class="docutils literal notranslate">
       <span class="pre">
        assign_data()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#metadata-handling">
+   Metadata Handling
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.store.data_handler_lookup">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       data_handler_lookup()
       </span>
      </code>
     </a>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._hashing &#8212; OpenGHG 0+untagged.1.g02f660f.dirty documentation</title>
+    <title>openghg.store._metadata &#8212; OpenGHG 0+untagged.1.g02f660f.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -44,7 +44,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/util/_hashing';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/store/_metadata';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -344,104 +344,113 @@
             
             <article class="bd-article" role="main">
               
-  <h1>Source code for openghg.util._hashing</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Some functions for hashing data or strings for idendification of sources</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">hashlib</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+  <h1>Source code for openghg.store._metadata</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">exists</span><span class="p">,</span> <span class="n">get_bucket</span><span class="p">,</span> <span class="n">get_object</span><span class="p">,</span> <span class="n">set_object_from_json</span>
+
+<span class="c1"># from openghg.dataobjects import DataHandler</span>
+<span class="c1"># DHType = TypeVar(&#39;U&#39;, bound=DataHandler)</span>
+
+<span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">Storage</span><span class="p">,</span> <span class="n">TinyDB</span>
+<span class="kn">from</span> <span class="nn">tinydb.middlewares</span> <span class="kn">import</span> <span class="n">CachingMiddleware</span>
 
 
-<div class="viewcode-block" id="hash_string"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.hash_string">[docs]</a><span class="k">def</span> <span class="nf">hash_string</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Return the SHA-1 hash of a string</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        to_hash: String to hash</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        str: SHA1 hash of string</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">to_hash</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="hash_file"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.hash_file">[docs]</a><span class="k">def</span> <span class="nf">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Opens the file at filepath and calculates its SHA1 hash</span>
-
-<span class="sd">    Taken from https://stackoverflow.com/a/22058673</span>
+<span class="k">def</span> <span class="nf">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TinyDB</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Load the metastore. This can be used as a context manager</span>
+<span class="sd">    otherwise the database must be closed using the close method</span>
+<span class="sd">    otherwise records are not written to file.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filepath (pathlib.Path): Path to file</span>
+<span class="sd">        key: Key to metadata store</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        str: SHA1 hash</span>
+<span class="sd">        TinyDB: instance of metadata database</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Let&#39;s read stuff in 64kB chunks</span>
-    <span class="n">BUF_SIZE</span> <span class="o">=</span> <span class="mi">65536</span>
-    <span class="n">sha1</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">()</span>
-
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">BUF_SIZE</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
-                <span class="k">break</span>
-            <span class="n">sha1</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">sha1</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="n">TinyDB</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="n">CachingMiddleware</span><span class="p">(</span><span class="n">ObjectStorage</span><span class="p">))</span>
 
 
-<span class="k">def</span> <span class="nf">hash_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the SHA1 sum of some data</span>
+<span class="k">class</span> <span class="nc">ObjectStorage</span><span class="p">(</span><span class="n">Storage</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">=</span> <span class="n">key</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        data: Binary data</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        str: SHA1 hash</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
-<span class="k">def</span> <span class="nf">hash_retrieved_data</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Hash data retrieved from a data platform. This calculates the SHA1 of the metadata</span>
-<span class="sd">    and the start date, end date and the number of timestamps in the Dataset.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        to_hash: Dictionary to hash</span>
-<span class="sd">        We expected this to be a dictionary such as</span>
-<span class="sd">        {species_key: {&quot;data&quot;: xr.Dataset, &quot;metadata&quot;: {...}}}</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary of hash: species_key</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha1</span>
-    <span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dumps</span>
-
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">timestamp_now</span>
-
-    <span class="n">current_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_now</span><span class="p">())</span>
-    <span class="n">hashes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">to_hash</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">get_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">del</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;file_created&quot;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span>
+            <span class="n">json_data</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">json_data</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="n">metadata_hash</span> <span class="o">=</span> <span class="n">sha1</span><span class="p">(</span><span class="n">dumps</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
 
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="n">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="n">start_date</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-        <span class="n">end_date</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-        <span class="n">n_timestamps</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
 
-        <span class="n">basic_info</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">start_date</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">end_date</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">n_timestamps</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
-        <span class="n">time_hash</span> <span class="o">=</span> <span class="n">sha1</span><span class="p">(</span><span class="n">basic_info</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
 
-        <span class="n">combo</span> <span class="o">=</span> <span class="p">(</span><span class="n">metadata_hash</span> <span class="o">+</span> <span class="n">time_hash</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
-        <span class="n">combo_hash</span> <span class="o">=</span> <span class="n">sha1</span><span class="p">(</span><span class="n">combo</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">datasource_lookup</span><span class="p">(</span>
+    <span class="n">metastore</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">required_keys</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">min_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys</span>
+<span class="sd">    to be present and will require at leas min_keys of these to be present when searching.</span>
 
-        <span class="n">hashes</span><span class="p">[</span><span class="n">combo_hash</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">current_timestamp</span><span class="p">}</span>
+<span class="sd">    As some metadata value might change (such as data owners etc) we don&#39;t want to do an exact</span>
+<span class="sd">    search on *all* the metadata so we extract a subset (the required keys) and search for these.</span>
 
-    <span class="k">return</span> <span class="n">hashes</span>
+<span class="sd">    Args:</span>
+<span class="sd">        metastore: Metadata database</span>
+<span class="sd">        data: Combined data dictionary of form {key: {data: Dataset, metadata: Dict}}</span>
+<span class="sd">        required_keys: Iterable of keys to extract from metadata</span>
+<span class="sd">        min_keys: The minimum number of required keys, if not given it will be set</span>
+<span class="sd">        to the length of required_keys</span>
+<span class="sd">    Return:</span>
+<span class="sd">        dict: Dictionary of datasource information</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">metadata_lookup</span>
+
+    <span class="k">if</span> <span class="n">min_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">min_keys</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_keys</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_data</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+        <span class="n">required_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_keys</span><span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_metadata</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">min_keys</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The given metadata doesn&#39;t contain enough information, we need: </span><span class="si">{</span><span class="n">required_keys</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata_lookup</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">required_metadata</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+
+
+<div class="viewcode-block" id="data_handler_lookup"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.data_handler_lookup">[docs]</a><span class="k">def</span> <span class="nf">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+    <span class="sd">&quot;&quot;&quot;Lookup the data / metadata you&#39;d like to modify.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_type: Type of data, for example surface, flux, footprint</span>
+<span class="sd">        kwargs: Any pair of keyword arguments for searching</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        DataHandler: A handler object to help modify the metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">DataHandler</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">metadata</span>
+    <span class="k">return</span> <span class="n">DataHandler</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span></div>
 </pre></div>
 
             </article>
