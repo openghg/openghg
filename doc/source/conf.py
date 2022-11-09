@@ -275,7 +275,8 @@ nbsphinx_custom_formats = {
     ".md": ["jupytext.reads", {"fmt": "mystnb"}],
 }
 
-execution_excludepatterns = [f"{i}_*" for i in range(1, 8)]
+nbsphinx_execute = "never"
+nb_execution_excludepatterns = ["*.md", "*.ipynb"]
 
 
 # Napoleon settings
