@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Developer API &#8212; OpenGHG 0+untagged.1.g02f660f.dirty documentation</title>
+    <title>Developer API &#8212; OpenGHG 0+untagged.1.g9ad092e.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -49,7 +49,7 @@
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="store API detail" href="api_store.html" />
+    <link rel="next" title="What’s new" href="../whatsnew/index.html" />
     <link rel="prev" title="Plotting functions" href="api_plotting.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
@@ -102,7 +102,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g02f660f.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g9ad092e.dirty documentation</p>
   
 </a>
     
@@ -226,7 +226,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -326,32 +326,6 @@
   </div>
 
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="api_store.html">store API detail</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="simple">
-</ul>
-</li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="api_dataobjects.html">dataobjects API detail</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="api_retrieve.html">Retrieval functions</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="api_objectstore.html">objectstore API Detail</a></li>
-</ul>
-
-  </div>
-</nav>
-    </div>
-  </div>
-  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -435,84 +409,235 @@ are recorded with the data, and that the data is <a class="reference external" h
 <section id="storage">
 <h2>Storage<a class="headerlink" href="#storage" title="Permalink to this heading">#</a></h2>
 <p>These functions and classes handle the lower level storage and retrieval of data from the object store.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api_store.html">store API detail</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api_store.html#storage">Storage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_store.html#openghg-store-eulerianmodel">openghg.store.EulerianModel</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_store.html#openghg-store-footprints">openghg.store.Footprints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_store.html#openghg-store-obscolumn">openghg.store.ObsColumn</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_store.html#openghg-store-obssurface">openghg.store.ObsSurface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_store.html#recombination-functions">Recombination functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_store.html#segmentation-functions">Segmentation functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_store.html#metadata-handling">Metadata Handling</a></li>
-</ul>
-</li>
-</ul>
-</div>
+<section id="base-class">
+<h3>Base class<a class="headerlink" href="#base-class" title="Permalink to this heading">#</a></h3>
+<p>This provides the functionality required by all data storage and processing classes, namely the saving, retrieval and loading
+of data from the object store.</p>
+<dl class="simple">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseStore</span></code></dt><dd><p>Base class which the other core processing modules inherit</p>
+</dd>
+</dl>
+</section>
+<section id="datasource">
+<h3>Datasource<a class="headerlink" href="#datasource" title="Permalink to this heading">#</a></h3>
+<p>The Datasource is the smallest data provider within the OpenGHG topology. A Datasource represents a data provider such as an instrument
+measuring a specific gas at a specific height at a specific site. For an instrument measuring three gas species at an inlet height of 100m
+at a site we would have three Datasources.</p>
+<dl class="simple">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">Datasource</span></code></dt><dd><p>Handles the storage of data, metadata and version information for measurements</p>
+</dd>
+</dl>
+</section>
+<section id="emissions">
+<h3>Emissions<a class="headerlink" href="#emissions" title="Permalink to this heading">#</a></h3>
+<p>Handles the storage of emissions data.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Emissions</span></code></p>
+</section>
+<section id="eulerianmodel">
+<h3>EulerianModel<a class="headerlink" href="#eulerianmodel" title="Permalink to this heading">#</a></h3>
+<p>Handles the storage of Eulerian model data.</p>
+<p><a class="reference internal" href="api_store.html#openghg.store.EulerianModel" title="openghg.store.EulerianModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">EulerianModel</span></code></a></p>
+</section>
+<section id="metstore">
+<h3>METStore<a class="headerlink" href="#metstore" title="Permalink to this heading">#</a></h3>
+<p>Handles the storage of met data from the ECMWF data.</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">METStore</span></code></p>
+</section>
+<section id="footprints">
+<h3>Footprints<a class="headerlink" href="#footprints" title="Permalink to this heading">#</a></h3>
+<p>Handles the storage of footprints / flux data.</p>
+<p><a class="reference internal" href="api_store.html#openghg.store.Footprints" title="openghg.store.Footprints"><code class="xref py py-class docutils literal notranslate"><span class="pre">Footprints</span></code></a></p>
+</section>
+<section id="obssurface">
+<h3>ObsSurface<a class="headerlink" href="#obssurface" title="Permalink to this heading">#</a></h3>
+<p>Handles the storage of surface measurement data.</p>
+<p><a class="reference internal" href="api_store.html#openghg.store.ObsSurface" title="openghg.store.ObsSurface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsSurface</span></code></a></p>
+</section>
 </section>
 <section id="dataclasses">
 <h2>Dataclasses<a class="headerlink" href="#dataclasses" title="Permalink to this heading">#</a></h2>
-<p>These dataclasses are used to return data and metadata from the object store. Some of them also contain helper functions to quickly plot data,
-modify metadata and delete data in the object store.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api_dataobjects.html">dataobjects API detail</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#basedata">_BaseData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#datahandler">DataHandler</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#searchresults">SearchResults</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#obsdata">ObsData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#fluxdata">FluxData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#obscolumndata">ObsColumnData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#footprintdata">FootprintData</a></li>
-</ul>
-</li>
-</ul>
-</div>
+<p>These dataclasses are used to facilitate the simple packaging and retrieval of data from the object store.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects._BaseData" title="openghg.dataobjects._BaseData"><code class="xref py py-class docutils literal notranslate"><span class="pre">_BaseData</span></code></a></dt><dd><p>The base class that (most of) the dataclasses inherit.</p>
+</dd>
+<dt><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.FluxData" title="openghg.dataobjects.FluxData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FluxData</span></code></a></dt><dd><p>Stores flux data.</p>
+</dd>
+<dt><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.FootprintData" title="openghg.dataobjects.FootprintData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FootprintData</span></code></a></dt><dd><p>Stores footprint data.</p>
+</dd>
+<dt><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a></dt><dd><p>Stores data returned by search functions.</p>
+</dd>
+<dt><a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.SearchResults" title="openghg.dataobjects.SearchResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchResults</span></code></a></dt><dd><p>Makes the retrieval of data simple.</p>
+</dd>
+</dl>
 </section>
 <section id="retrieval-functions">
 <h2>Retrieval functions<a class="headerlink" href="#retrieval-functions" title="Permalink to this heading">#</a></h2>
 <p>These handle the retrieval of data from the object store.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api_retrieve.html">Retrieval functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api_retrieve.html#search-functions">Search functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_retrieve.html#specific-retrieval-functions">Specific retrieval functions</a></li>
-</ul>
-</li>
-</ul>
-</div>
+<section id="searching">
+<h3>Searching<a class="headerlink" href="#searching" title="Permalink to this heading">#</a></h3>
+<dl>
+<dt><a class="reference internal" href="api_retrieve.html#openghg.retrieve.search" title="openghg.retrieve.search"><code class="xref py py-func docutils literal notranslate"><span class="pre">search()</span></code></a></dt><dd><p>Search for data in the object store, accepts any pair of keyword - argument pairs</p>
+<p>Example usage:</p>
+<blockquote>
+<div><p>search(site=”bsd”, inlet=”50m”, species=”co2”)</p>
+</div></blockquote>
+</dd>
+</dl>
+</section>
+<section id="specific-retrieval">
+<h3>Specific retrieval<a class="headerlink" href="#specific-retrieval" title="Permalink to this heading">#</a></h3>
+<p>Handle the retrieval of specific data types, some functions may try to mirror the interface of functions in the Bristol ACRG
+repository but should hopefully be useful to all users.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_retrieve.html#openghg.retrieve.get_obs_surface" title="openghg.retrieve.get_obs_surface"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_obs_surface()</span></code></a></dt><dd><p>Get measurements from one site</p>
+</dd>
+<dt><a class="reference internal" href="api_retrieve.html#openghg.retrieve.get_flux" title="openghg.retrieve.get_flux"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_flux()</span></code></a></dt><dd><p>Reads in all flux files for the domain and species as an <code class="docutils literal notranslate"><span class="pre">xarray</span></code> Dataset</p>
+</dd>
+<dt><a class="reference internal" href="api_retrieve.html#openghg.retrieve.get_footprint" title="openghg.retrieve.get_footprint"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_footprint()</span></code></a></dt><dd><p>Gets footprints from one site</p>
+</dd>
+</dl>
+</section>
 </section>
 <section id="object-store">
 <h2>Object Store<a class="headerlink" href="#object-store" title="Permalink to this heading">#</a></h2>
 <p>These functions handle the storage of data in the object store, in JSON or binary format. Each object and piece of data in the
 object store is stored at a specific <code class="docutils literal notranslate"><span class="pre">key</span></code>, which can be thought of as the address of the data. The data is stored
 in a <code class="docutils literal notranslate"><span class="pre">bucket</span></code> which in the cloud is a section of the OpenGHG object store. Locally a <code class="docutils literal notranslate"><span class="pre">bucket</span></code> is just a normal
-directory in the user’s filesystem specified by the path given in the configuration file at <code class="docutils literal notranslate"><span class="pre">~/.config/openghg/openghg.conf</span></code>.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api_objectstore.html">objectstore API Detail</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.delete_object"><code class="docutils literal notranslate"><span class="pre">delete_object()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_all_object_names"><code class="docutils literal notranslate"><span class="pre">get_all_object_names()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_object_names"><code class="docutils literal notranslate"><span class="pre">get_object_names()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_bucket"><code class="docutils literal notranslate"><span class="pre">get_bucket()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_object"><code class="docutils literal notranslate"><span class="pre">get_object()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.set_object"><code class="docutils literal notranslate"><span class="pre">set_object()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.set_object_from_json"><code class="docutils literal notranslate"><span class="pre">set_object_from_json()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.set_object_from_file"><code class="docutils literal notranslate"><span class="pre">set_object_from_file()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_object_from_json"><code class="docutils literal notranslate"><span class="pre">get_object_from_json()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.exists"><code class="docutils literal notranslate"><span class="pre">exists()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_objectstore.html#openghg.objectstore.visualise_store"><code class="docutils literal notranslate"><span class="pre">visualise_store()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</div>
+directory in the user’s filesystem specific by the <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_objectstore.html#openghg.objectstore.delete_object" title="openghg.objectstore.delete_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">delete_object()</span></code></a></dt><dd><p>Delete an object in the store</p>
+</dd>
+<dt><a class="reference internal" href="api_objectstore.html#openghg.objectstore.exists" title="openghg.objectstore.exists"><code class="xref py py-func docutils literal notranslate"><span class="pre">exists()</span></code></a></dt><dd><p>Check if an object exists at that key</p>
+</dd>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">get_abs_filepaths()</span></code></dt><dd><p>Get absolute filepaths for objects</p>
+</dd>
+<dt><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_bucket" title="openghg.objectstore.get_bucket"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_bucket()</span></code></a></dt><dd><p>Get path to bucket</p>
+</dd>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">get_md5()</span></code></dt><dd><p>Get MD5 has of file</p>
+</dd>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">get_md5_bytes()</span></code></dt><dd><p>Get MD5 hash of passed bytes</p>
+</dd>
+<dt><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_object" title="openghg.objectstore.get_object"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_object()</span></code></a></dt><dd><p>Retrieve object from object store</p>
+</dd>
+<dt><a class="reference internal" href="api_objectstore.html#openghg.objectstore.get_object_from_json" title="openghg.objectstore.get_object_from_json"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_object_from_json()</span></code></a></dt><dd><p>Retrieve JSON object from object store</p>
+</dd>
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">hash_files()</span></code></dt><dd><p>Get the MD5 hashes of the given files</p>
+</dd>
+<dt><a class="reference internal" href="api_objectstore.html#openghg.objectstore.set_object_from_file" title="openghg.objectstore.set_object_from_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_object_from_file()</span></code></a></dt><dd><p>Set an object in the object store</p>
+</dd>
+<dt><a class="reference internal" href="api_objectstore.html#openghg.objectstore.set_object_from_json" title="openghg.objectstore.set_object_from_json"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_object_from_json()</span></code></a></dt><dd><p>Create a JSON object in the object store</p>
+</dd>
+</dl>
 </section>
 <section id="utility-functions">
 <h2>Utility functions<a class="headerlink" href="#utility-functions" title="Permalink to this heading">#</a></h2>
 <p>This module contains all the helper functions used throughout OpenGHG.</p>
-<div class="toctree-wrapper compound">
-</div>
+<section id="exporting">
+<h3>Exporting<a class="headerlink" href="#exporting" title="Permalink to this heading">#</a></h3>
+<p>These are used to export data to a format readable by the <a class="reference external" href="https://github.com/openghg/dashboard">OpenGHG data dashboard</a>.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_util.html#openghg.util.to_dashboard" title="openghg.util.to_dashboard"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_dashboard()</span></code></a></dt><dd><p>Export timeseries data to JSON</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.to_dashboard_mobile" title="openghg.util.to_dashboard_mobile"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_dashboard_mobile()</span></code></a></dt><dd><p>Export mobile observations data to JSON</p>
+</dd>
+</dl>
+</section>
+<section id="hashing">
+<h3>Hashing<a class="headerlink" href="#hashing" title="Permalink to this heading">#</a></h3>
+<p>These handle hashing of data (usually with SHA1)</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_util.html#openghg.util.hash_file" title="openghg.util.hash_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">hash_file()</span></code></a></dt><dd><p>Calculate the SHA1 hash of a file</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.hash_string" title="openghg.util.hash_string"><code class="xref py py-func docutils literal notranslate"><span class="pre">hash_string()</span></code></a></dt><dd><p>Calculate the SHA1 hash of a UTF-8 encoded string</p>
+</dd>
+</dl>
+</section>
+<section id="string-manipulation">
+<h3>String manipulation<a class="headerlink" href="#string-manipulation" title="Permalink to this heading">#</a></h3>
+<p>String cleaning and formatting functions</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_util.html#openghg.util.clean_string" title="openghg.util.clean_string"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean_string()</span></code></a></dt><dd><p>Return a lowercase cleaned string</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.to_lowercase" title="openghg.util.to_lowercase"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_lowercase()</span></code></a></dt><dd><p>Converts a string to lowercase</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.remove_punctuation" title="openghg.util.remove_punctuation"><code class="xref py py-func docutils literal notranslate"><span class="pre">remove_punctuation()</span></code></a></dt><dd><p>Removes punctuation from a string</p>
+</dd>
+</dl>
+</section>
+<section id="time">
+<h3>Time<a class="headerlink" href="#time" title="Permalink to this heading">#</a></h3>
+<p>Helpers to deal with all things datetime.</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_util.html#openghg.util.timestamp_tzaware" title="openghg.util.timestamp_tzaware"><code class="xref py py-func docutils literal notranslate"><span class="pre">timestamp_tzaware()</span></code></a></dt><dd><p>Create a Timestamp with a UTC timezone</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.timestamp_now" title="openghg.util.timestamp_now"><code class="xref py py-func docutils literal notranslate"><span class="pre">timestamp_now()</span></code></a></dt><dd><p>Create a timezone aware timestamp for now</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.timestamp_epoch" title="openghg.util.timestamp_epoch"><code class="xref py py-func docutils literal notranslate"><span class="pre">timestamp_epoch()</span></code></a></dt><dd><p>Create a timezone aware timestamp for the UNIX epoch (1970-01-01)</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.daterange_from_str" title="openghg.util.daterange_from_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">daterange_from_str()</span></code></a></dt><dd><p>Create a daterange from two timestamp strings</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.daterange_to_str" title="openghg.util.daterange_to_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">daterange_to_str()</span></code></a></dt><dd><p>Convert a daterange to string</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.create_daterange_str" title="openghg.util.create_daterange_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_daterange_str()</span></code></a></dt><dd><p>Create a daterange string from two timestamps or strings</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.create_daterange" title="openghg.util.create_daterange"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_daterange()</span></code></a></dt><dd><p>Create a pandas DatetimeIndex from two timestamps</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.daterange_overlap" title="openghg.util.daterange_overlap"><code class="xref py py-func docutils literal notranslate"><span class="pre">daterange_overlap()</span></code></a></dt><dd><p>Check if two dateranges overlap</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.combine_dateranges" title="openghg.util.combine_dateranges"><code class="xref py py-func docutils literal notranslate"><span class="pre">combine_dateranges()</span></code></a></dt><dd><p>Combine a list of dateranges</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.split_daterange_str" title="openghg.util.split_daterange_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_daterange_str()</span></code></a></dt><dd><p>Split a daterange string to the component start and end Timestamps</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.closest_daterange" title="openghg.util.closest_daterange"><code class="xref py py-func docutils literal notranslate"><span class="pre">closest_daterange()</span></code></a></dt><dd><p>Finds the closest daterange in a list of dateranges</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.valid_daterange" title="openghg.util.valid_daterange"><code class="xref py py-func docutils literal notranslate"><span class="pre">valid_daterange()</span></code></a></dt><dd><p>Check if the passed daterange is valid</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.find_daterange_gaps" title="openghg.util.find_daterange_gaps"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_daterange_gaps()</span></code></a></dt><dd><p>Find the gaps in a list of dateranges</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.trim_daterange" title="openghg.util.trim_daterange"><code class="xref py py-func docutils literal notranslate"><span class="pre">trim_daterange()</span></code></a></dt><dd><p>Removes overlapping dates from to_trim</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.split_encompassed_daterange" title="openghg.util.split_encompassed_daterange"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_encompassed_daterange()</span></code></a></dt><dd><p>Checks if one of the passed dateranges contains the other, if so, then
+split the larger daterange into three sections.</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.daterange_contains" title="openghg.util.daterange_contains"><code class="xref py py-func docutils literal notranslate"><span class="pre">daterange_contains()</span></code></a></dt><dd><p>Checks if one daterange contains another</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.sanitise_daterange" title="openghg.util.sanitise_daterange"><code class="xref py py-func docutils literal notranslate"><span class="pre">sanitise_daterange()</span></code></a></dt><dd><p>Make sure the daterange is correct and return tzaware daterange.</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.check_nan" title="openghg.util.check_nan"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_nan()</span></code></a></dt><dd><p>Check if the given value is NaN, is so return an NA string</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.check_date" title="openghg.util.check_date"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_date()</span></code></a></dt><dd><p>Check if the passed string is a valid date or not, if not returns NA</p>
+</dd>
+</dl>
+</section>
+<section id="iteration">
+<h3>Iteration<a class="headerlink" href="#iteration" title="Permalink to this heading">#</a></h3>
+<p>Our own personal <code class="xref py py-obj docutils literal notranslate"><span class="pre">itertools</span></code></p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_util.html#openghg.util.pairwise" title="openghg.util.pairwise"><code class="xref py py-func docutils literal notranslate"><span class="pre">pairwise()</span></code></a></dt><dd><p>Return a zip of an iterable where a is the iterable
+and b is the iterable advanced one step.</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.unanimous" title="openghg.util.unanimous"><code class="xref py py-func docutils literal notranslate"><span class="pre">unanimous()</span></code></a></dt><dd><p>Checks that all values in an iterable object are the same</p>
+</dd>
+</dl>
+</section>
+<section id="site-checks">
+<h3>Site Checks<a class="headerlink" href="#site-checks" title="Permalink to this heading">#</a></h3>
+<p>These perform checks to ensure data processed for each site is correct</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_util.html#openghg.util.verify_site" title="openghg.util.verify_site"><code class="xref py py-func docutils literal notranslate"><span class="pre">verify_site()</span></code></a></dt><dd><p>Verify that the given site is one we recognize, does fuzzy text matching to suggest a possible valid value.</p>
+</dd>
+<dt><a class="reference internal" href="api_util.html#openghg.util.multiple_inlets" title="openghg.util.multiple_inlets"><code class="xref py py-func docutils literal notranslate"><span class="pre">multiple_inlets()</span></code></a></dt><dd><p>Check if the passed site has more than one inlet</p>
+</dd>
+</dl>
+</section>
+<section id="cloud">
+<h3>Cloud<a class="headerlink" href="#cloud" title="Permalink to this heading">#</a></h3>
+<p>These handle cloud based functionality</p>
+<dl class="simple">
+<dt><a class="reference internal" href="api_util.html#openghg.util.running_in_cloud" title="openghg.util.running_in_cloud"><code class="xref py py-func docutils literal notranslate"><span class="pre">running_in_cloud()</span></code></a></dt><dd><p>Checks if we’re running in the cloud by checking for the <code class="docutils literal notranslate"><span class="pre">OPENGHG_CLOUD</span></code> environment variable.</p>
+</dd>
+</dl>
+</section>
 </section>
 <section id="custom-data-types">
 <h2>Custom Data Types<a class="headerlink" href="#custom-data-types" title="Permalink to this heading">#</a></h2>
@@ -555,10 +680,10 @@ directory in the user’s filesystem specified by the path given in the configur
           <p class="prev-next-title">Plotting functions</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="api_store.html" title="next page">
+  <a class='right-next' id="next-link" href="../whatsnew/index.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">store API detail</p>
+      <p class="prev-next-title">What’s new</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -611,6 +736,43 @@ directory in the user’s filesystem specified by the path given in the configur
   <a class="reference internal nav-link" href="#storage">
    Storage
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#base-class">
+     Base class
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#datasource">
+     Datasource
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#emissions">
+     Emissions
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#eulerianmodel">
+     EulerianModel
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#metstore">
+     METStore
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#footprints">
+     Footprints
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#obssurface">
+     ObsSurface
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#dataclasses">
@@ -621,6 +783,18 @@ directory in the user’s filesystem specified by the path given in the configur
   <a class="reference internal nav-link" href="#retrieval-functions">
    Retrieval functions
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#searching">
+     Searching
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#specific-retrieval">
+     Specific retrieval
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#object-store">
@@ -631,6 +805,43 @@ directory in the user’s filesystem specified by the path given in the configur
   <a class="reference internal nav-link" href="#utility-functions">
    Utility functions
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#exporting">
+     Exporting
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#hashing">
+     Hashing
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#string-manipulation">
+     String manipulation
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#time">
+     Time
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#iteration">
+     Iteration
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#site-checks">
+     Site Checks
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#cloud">
+     Cloud
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#custom-data-types">

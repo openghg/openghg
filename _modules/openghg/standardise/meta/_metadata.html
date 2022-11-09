@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0+untagged.1.g02f660f.dirty documentation</title>
+    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0+untagged.1.g9ad092e.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -99,7 +99,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g02f660f.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g9ad092e.dirty documentation</p>
   
 </a>
     
@@ -403,7 +403,7 @@
             <span class="c1"># This should mainly be used for lat/long</span>
             <span class="n">relative_tolerance</span> <span class="o">=</span> <span class="mf">1e-3</span>
 
-            <span class="k">if</span> <span class="n">is_number</span><span class="p">(</span><span class="n">attr_value</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">is_number</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_number</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">attr_value</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="n">relative_tolerance</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Value not within tolerance, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span>
