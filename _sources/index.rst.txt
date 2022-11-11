@@ -9,23 +9,10 @@ within the realm of greenhouse gases. The platform is built on open source techn
 to create a cloud agnostic platform for simulation and analysis of large datasets.
 
 
-Background
-==========
-
-OpenGHG is based on the work of the `HUGS project <https://hugs-cloud.com>`_ to develop a cloud based platform for
-analysis of greenhouse gas measurement data.
-
-
-Features
-========
-
-.. toctree::
-   :maxdepth: 2
-
-   features
-
 Installation
 ============
+
+OpenGHG is easily installed using ``pip`` or ``conda``, to get started quickly follow our installation guide.
 
 .. toctree::
    :maxdepth: 2
@@ -35,11 +22,20 @@ Installation
 Tutorials
 =========
 
+We've created tutorials to get you started with OpenGHG. They cover searching, retrieving, plotting and standardisation of data.
+
 .. toctree::
    :maxdepth: 2
 
    tutorials/index
 
+API Reference
+=============
+
+.. toctree::
+   :maxdepth: 2
+
+   api/index
 
 Development
 ===========
@@ -50,14 +46,6 @@ Development
    development/index_devel
 
 
-API Reference
-=============
-
-.. toctree::
-   :maxdepth: 2
-
-   api/index
-
 Devloper API Reference
 ======================
 
@@ -66,10 +54,10 @@ Devloper API Reference
 
    api/index_devapi
 
-What's new
-==========
+Help
+====
 
-.. toctree::
-   :maxdepth: 2
+If you have any questions about OpenGHG, how to use particular function or you think you've found a bug, join our `Gitter channel <https://gitter.im/openghg/community>`_
+and we'll try our best to help.
 
-   whatsnew/index
+Bug reports can also be filed by opening an issue on our `GitHub repository page <https://github.com/openghg/openghg/issues/new/choose>`_.

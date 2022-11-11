@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Modifying and deleting data &#8212; OpenGHG 0+untagged.1.g0afe976.dirty documentation</title>
+    <title>Modifying and deleting data &#8212; OpenGHG 0+untagged.1.g4aa79ab.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -49,7 +49,7 @@
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Development" href="../../development/index_devel.html" />
+    <link rel="next" title="User API" href="../../api/index.html" />
     <link rel="prev" title="Workflow 7: Retrieving data from remote archives" href="7_Retrieving_remote_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
@@ -102,7 +102,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g0afe976.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g4aa79ab.dirty documentation</p>
   
 </a>
     
@@ -120,13 +120,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                 <li class="nav-item">
-                    <a class="nav-link" href="../../features.html">
-                        Features
-                    </a>
-                </li>
-                
-
-                <li class="nav-item">
                     <a class="nav-link" href="../../install.html">
                         Installation
                     </a>
@@ -141,6 +134,13 @@
                 
 
                 <li class="nav-item">
+                    <a class="nav-link" href="../../api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
                     <a class="nav-link" href="../../development/index_devel.html">
                         Development
                     </a>
@@ -148,33 +148,11 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../api/index.html">
-                        User API
-                    </a>
-                </li>
-                
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                <li class="nav-item">
                     <a class="nav-link" href="../../api/index_devapi.html">
                         Developer API
                     </a>
                 </li>
                 
-
-                <li class="nav-item">
-                    <a class="nav-link" href="../../whatsnew/index.html">
-                        What’s new
-                    </a>
-                </li>
-                
-                </div>
-            </div>
-            
     </ul>
 </nav>
       </div>
@@ -242,13 +220,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                 <li class="nav-item">
-                    <a class="nav-link" href="../../features.html">
-                        Features
-                    </a>
-                </li>
-                
-
-                <li class="nav-item">
                     <a class="nav-link" href="../../install.html">
                         Installation
                     </a>
@@ -263,6 +234,13 @@
                 
 
                 <li class="nav-item">
+                    <a class="nav-link" href="../../api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
                     <a class="nav-link" href="../../development/index_devel.html">
                         Development
                     </a>
@@ -270,33 +248,11 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../../api/index.html">
-                        User API
-                    </a>
-                </li>
-                
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                <li class="nav-item">
                     <a class="nav-link" href="../../api/index_devapi.html">
                         Developer API
                     </a>
                 </li>
                 
-
-                <li class="nav-item">
-                    <a class="nav-link" href="../../whatsnew/index.html">
-                        What’s new
-                    </a>
-                </li>
-                
-                </div>
-            </div>
-            
     </ul>
 </nav>
       </div>
@@ -380,7 +336,7 @@ After the standardisation process the metadata associated with some data can sti
 time if the data standardisation process is quite time consuming. Data can also be deleted from the object store.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">data_handler_lookup</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">data_handler_lookup</span>
 <span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_footprint_inert</span>
 </pre></div>
 </div>
@@ -389,215 +345,21 @@ time if the data standardisation process is quite time consuming. Data can also 
 <p>We’ll first add some footprint data to the object store.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_footprint_inert</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:   0%|          | 0/70216145 [00:00&lt;?, ?it/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:  34%|███▍      | 22.9M/67.0M [00:00&lt;00:00, 240MB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:  76%|███████▌  | 50.9M/67.0M [00:00&lt;00:00, 271MB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz: 100%|██████████| 67.0M/67.0M [00:00&lt;00:00, 228MB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Standardising footprint data...
-</pre></div>
-</div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">IndexError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/api.py:1226,</span> in <span class="ni">to_netcdf</span><span class="nt">(dataset, path_or_file, mode, format, group, engine, encoding, unlimited_dims, compute, multifile, invalid_netcdf)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1223</span> <span class="k">try</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1224</span>     <span class="c1"># TODO: allow this work (setting up the file for writing array data)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1225</span>     <span class="c1"># to be parallelized with dask</span>
-<span class="ne">-&gt; </span><span class="mi">1226</span>     <span class="n">dump_to_store</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1227</span>         <span class="n">dataset</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span>
-<span class="g g-Whitespace">   </span><span class="mi">1228</span>     <span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1229</span>     <span class="k">if</span> <span class="n">autoclose</span><span class="p">:</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/api.py:1273,</span> in <span class="ni">dump_to_store</span><span class="nt">(dataset, store, writer, encoder, encoding, unlimited_dims)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1271</span>     <span class="n">variables</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
-<span class="ne">-&gt; </span><span class="mi">1273</span> <span class="n">store</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="n">check_encoding</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span><span class="p">)</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/common.py:267,</span> in <span class="ni">AbstractWritableDataStore.store</span><span class="nt">(self, variables, attributes, check_encoding_set, writer, unlimited_dims)</span>
-<span class="g g-Whitespace">    </span><span class="mi">266</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_dimensions</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">267</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_variables</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">268</span>     <span class="n">variables</span><span class="p">,</span> <span class="n">check_encoding_set</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span>
-<span class="g g-Whitespace">    </span><span class="mi">269</span> <span class="p">)</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/common.py:305,</span> in <span class="ni">AbstractWritableDataStore.set_variables</span><span class="nt">(self, variables, check_encoding_set, writer, unlimited_dims)</span>
-<span class="g g-Whitespace">    </span><span class="mi">304</span> <span class="n">check</span> <span class="o">=</span> <span class="n">vn</span> <span class="ow">in</span> <span class="n">check_encoding_set</span>
-<span class="ne">--&gt; </span><span class="mi">305</span> <span class="n">target</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepare_variable</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">306</span>     <span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span>
-<span class="g g-Whitespace">    </span><span class="mi">307</span> <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">309</span> <span class="n">writer</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/scipy_.py:226,</span> in <span class="ni">ScipyDataStore.prepare_variable</span><span class="nt">(self, name, variable, check_encoding, unlimited_dims)</span>
-<span class="g g-Whitespace">    </span><span class="mi">225</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">226</span>     <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">variable</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">227</span> <span class="n">scipy_var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:387,</span> in <span class="ni">netcdf_file.createVariable</span><span class="nt">(self, name, type, dimensions)</span>
-<span class="g g-Whitespace">    </span><span class="mi">386</span> <span class="n">data</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">shape_</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">type</span><span class="o">.</span><span class="n">newbyteorder</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">))</span>  <span class="c1"># convert to big endian always for NetCDF 3</span>
-<span class="ne">--&gt; </span><span class="mi">387</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">netcdf_variable</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">388</span>         <span class="n">data</span><span class="p">,</span> <span class="n">typecode</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">389</span>         <span class="n">maskandscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">maskandscale</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">390</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-
-<span class="ne">IndexError</span>: only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`) and integer or boolean arrays are valid indices
-
-<span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
-
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">populate_footprint_inert</span><span class="p">()</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/tutorial/_tutorial.py:61,</span> in <span class="ni">populate_footprint_inert</span><span class="nt">()</span>
-<span class="g g-Whitespace">     </span><span class="mi">58</span> <span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;EUROPE&quot;</span>
-<span class="g g-Whitespace">     </span><span class="mi">59</span> <span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;NAME&quot;</span>
-<span class="ne">---&gt; </span><span class="mi">61</span> <span class="n">standardise_footprint</span><span class="p">(</span>
-<span class="g g-Whitespace">     </span><span class="mi">62</span>     <span class="n">filepath</span><span class="o">=</span><span class="n">tac_inert_path</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span>
-<span class="g g-Whitespace">     </span><span class="mi">63</span> <span class="p">)</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/standardise/_standardise.py:265,</span> in <span class="ni">standardise_footprint</span><span class="nt">(filepath, site, height, domain, model, metmodel, species, network, period, chunks, continuous, retrieve_met, high_spatial_res, high_time_res, overwrite)</span>
-<span class="g g-Whitespace">    </span><span class="mi">263</span>     <span class="k">return</span> <span class="n">response_content</span>
-<span class="g g-Whitespace">    </span><span class="mi">264</span> <span class="k">else</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">265</span>     <span class="k">return</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">266</span>         <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">267</span>         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">268</span>         <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">269</span>         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">270</span>         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">271</span>         <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">272</span>         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">273</span>         <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">274</span>         <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">275</span>         <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">276</span>         <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">277</span>         <span class="n">retrieve_met</span><span class="o">=</span><span class="n">retrieve_met</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">278</span>         <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">279</span>         <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">280</span>         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">281</span>     <span class="p">)</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_footprints.py:375,</span> in <span class="ni">Footprints.read_file</span><span class="nt">(filepath, site, domain, model, inlet, height, metmodel, species, network, period, chunks, continuous, retrieve_met, high_spatial_res, high_time_res, short_lifetime, overwrite)</span>
-<span class="g g-Whitespace">    </span><span class="mi">372</span> <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">374</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;footprints&quot;</span>
-<span class="ne">--&gt; </span><span class="mi">375</span> <span class="n">datasource_uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">376</span>     <span class="n">data_dict</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">377</span>     <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">378</span>     <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">379</span>     <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">380</span> <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">382</span> <span class="n">fp</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">384</span> <span class="c1"># Record the file hash in case we see this file again</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_segment.py:51,</span> in <span class="ni">assign_data</span><span class="nt">(data_dict, lookup_results, overwrite, data_type)</span>
-<span class="g g-Whitespace">     </span><span class="mi">49</span> <span class="n">datasource</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">50</span> <span class="c1"># Save Datasource to object store</span>
-<span class="ne">---&gt; </span><span class="mi">51</span> <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-<span class="g g-Whitespace">     </span><span class="mi">53</span> <span class="n">new_datasource</span> <span class="o">=</span> <span class="n">uuid</span> <span class="ow">is</span> <span class="kc">False</span>
-<span class="g g-Whitespace">     </span><span class="mi">54</span> <span class="n">uuids</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">(),</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="n">new_datasource</span><span class="p">}</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/base/_datasource.py:550,</span> in <span class="ni">Datasource.save</span><span class="nt">(self, bucket)</span>
-<span class="g g-Whitespace">    </span><span class="mi">547</span>     <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_folder</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-<span class="g g-Whitespace">    </span><span class="mi">548</span>         <span class="n">parent_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">550</span>     <span class="n">data</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">552</span>     <span class="c1"># Can we just take the bytes from the data here and then write then straight?</span>
-<span class="g g-Whitespace">    </span><span class="mi">553</span>     <span class="c1"># TODO - for now just create a temporary directory - will have to update Acquire</span>
-<span class="g g-Whitespace">    </span><span class="mi">554</span>     <span class="c1"># or work on a PR for xarray to allow returning a NetCDF as bytes</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">560</span> 
-<span class="g g-Whitespace">    </span><span class="mi">561</span> <span class="c1"># Copy the last version</span>
-<span class="g g-Whitespace">    </span><span class="mi">562</span> <span class="k">if</span> <span class="s2">&quot;latest&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_keys</span><span class="p">:</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/core/dataset.py:1890,</span> in <span class="ni">Dataset.to_netcdf</span><span class="nt">(self, path, mode, format, group, engine, encoding, unlimited_dims, compute, invalid_netcdf)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1887</span>     <span class="n">encoding</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="g g-Whitespace">   </span><span class="mi">1888</span> <span class="kn">from</span> <span class="nn">..backends.api</span> <span class="kn">import</span> <span class="n">to_netcdf</span>
-<span class="ne">-&gt; </span><span class="mi">1890</span> <span class="k">return</span> <span class="n">to_netcdf</span><span class="p">(</span>  <span class="c1"># type: ignore  # mypy cannot resolve the overloads:(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1891</span>     <span class="bp">self</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1892</span>     <span class="n">path</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1893</span>     <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1894</span>     <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1895</span>     <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1896</span>     <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1897</span>     <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1898</span>     <span class="n">unlimited_dims</span><span class="o">=</span><span class="n">unlimited_dims</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1899</span>     <span class="n">compute</span><span class="o">=</span><span class="n">compute</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1900</span>     <span class="n">multifile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1901</span>     <span class="n">invalid_netcdf</span><span class="o">=</span><span class="n">invalid_netcdf</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1902</span> <span class="p">)</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/api.py:1242,</span> in <span class="ni">to_netcdf</span><span class="nt">(dataset, path_or_file, mode, format, group, engine, encoding, unlimited_dims, compute, multifile, invalid_netcdf)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1240</span> <span class="k">finally</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1241</span>     <span class="k">if</span> <span class="ow">not</span> <span class="n">multifile</span> <span class="ow">and</span> <span class="n">compute</span><span class="p">:</span>
-<span class="ne">-&gt; </span><span class="mi">1242</span>         <span class="n">store</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-<span class="g g-Whitespace">   </span><span class="mi">1244</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">compute</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1245</span>     <span class="kn">import</span> <span class="nn">dask</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/scipy_.py:240,</span> in <span class="ni">ScipyDataStore.close</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">239</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="ne">--&gt; </span><span class="mi">240</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/xarray/backends/file_manager.py:224,</span> in <span class="ni">CachingFileManager.close</span><span class="nt">(self, needs_lock)</span>
-<span class="g g-Whitespace">    </span><span class="mi">222</span> <span class="n">file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">223</span> <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">224</span>     <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:292,</span> in <span class="ni">netcdf_file.close</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">290</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;fp&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">291</span>     <span class="k">try</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">292</span>         <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">293</span>     <span class="k">finally</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">294</span>         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:402,</span> in <span class="ni">netcdf_file.flush</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">393</span> <span class="sd">&quot;&quot;&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">394</span><span class="sd"> Perform a sync-to-disk flush if the `netcdf_file` object is in write mode.</span>
-<span class="g g-Whitespace">    </span><span class="mi">395</span><span class="sd"> </span>
-<span class="sd">   (...)</span>
-<span class="g g-Whitespace">    </span><span class="mi">399</span><span class="sd"> </span>
-<span class="g g-Whitespace">    </span><span class="mi">400</span><span class="sd"> &quot;&quot;&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">401</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="s1">&#39;wa&#39;</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">402</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">()</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:411,</span> in <span class="ni">netcdf_file._write</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">408</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version_byte</span><span class="p">,</span> <span class="s1">&#39;&gt;b&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
-<span class="g g-Whitespace">    </span><span class="mi">410</span> <span class="c1"># Write headers and data.</span>
-<span class="ne">--&gt; </span><span class="mi">411</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_numrecs</span><span class="p">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">412</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_dim_array</span><span class="p">()</span>
-<span class="g g-Whitespace">    </span><span class="mi">413</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_gatt_array</span><span class="p">()</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/scipy/io/_netcdf.py:418,</span> in <span class="ni">netcdf_file._write_numrecs</span><span class="nt">(self)</span>
-<span class="g g-Whitespace">    </span><span class="mi">416</span> <span class="k">def</span> <span class="nf">_write_numrecs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="g g-Whitespace">    </span><span class="mi">417</span>     <span class="c1"># Get highest record count from all record variables.</span>
-<span class="ne">--&gt; </span><span class="mi">418</span>     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-<span class="g g-Whitespace">    </span><span class="mi">419</span>         <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">isrec</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recs</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">420</span>             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_recs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-
-<span class="ne">AttributeError</span>: &#39;numpy.ndarray&#39; object has no attribute &#39;values&#39;
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_footprint_inert</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span>
 </pre></div>
 </div>
 </div>
@@ -610,14 +372,14 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>For the purposes of this tutorial we take the first key from the metadata dictionary. We can do this only because we’ve checked the dictionary and seen that only one key exists. It also means you can run through this notebook and it should work without you having to modify it. But be careful, if the dictionary contains more than one key, running the cell below might not result in the UUID you want. Each time you want to modify the data <strong>copy and paste</strong> the UUID and <strong>double check</strong> it.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">uuid</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">uuid</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">updated</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;new_model&quot;</span><span class="p">}</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">updated</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;new_model&quot;</span><span class="p">}</span>
 
 <span class="n">result</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">to_update</span><span class="o">=</span><span class="n">updated</span><span class="p">)</span>
 </pre></div>
@@ -627,14 +389,14 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>When you run <code class="docutils literal notranslate"><span class="pre">update_metadata</span></code> the internal store of metadata for each <code class="docutils literal notranslate"><span class="pre">Datasource</span></code> is updated. If you want to <strong>really</strong> make sure that the metadata in the object store has been updated you can run <code class="docutils literal notranslate"><span class="pre">refresh</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -642,7 +404,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>And check the model has been changed.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -652,7 +414,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>Let’s accidentally add too much metadata for the footprint and then delete.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">excess_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;useless_key&quot;</span><span class="p">:</span> <span class="s2">&quot;useless_value&quot;</span><span class="p">}</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">excess_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;useless_key&quot;</span><span class="p">:</span> <span class="s2">&quot;useless_value&quot;</span><span class="p">}</span>
 <span class="n">result</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">to_update</span><span class="o">=</span><span class="n">excess_metadata</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -660,7 +422,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;useless_key&quot;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;useless_key&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -668,7 +430,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>Oh no! We’ve added some useless metadata, let’s remove it.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">to_delete</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;useless_key&quot;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">to_delete</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;useless_key&quot;</span><span class="p">]</span>
 <span class="n">result</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">to_delete</span><span class="o">=</span><span class="n">to_delete</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -677,7 +439,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>And check if the key is in the metadata:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;useless_key&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;useless_key&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -689,21 +451,21 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>If you’ve accidentally pushed some bad metadata you can fix this easily by restoring from backup. Each <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> object stores a backup of the current metadata each time you run <code class="docutils literal notranslate"><span class="pre">update_metadata</span></code>. Let’s add some bad metadata, have a quick look at the backup and then restore it. We’ll start with a fresh <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> object.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bad_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="s2">&quot;neptune&quot;</span><span class="p">}</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bad_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="s2">&quot;neptune&quot;</span><span class="p">}</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">to_update</span><span class="o">=</span><span class="n">bad_metadata</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">to_update</span><span class="o">=</span><span class="n">bad_metadata</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -711,7 +473,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>Let’s check the domain</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -719,7 +481,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>Using <code class="docutils literal notranslate"><span class="pre">view_backup</span></code> we can check the different versions of metadata we have backed up for each <code class="docutils literal notranslate"><span class="pre">Datasource</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">view_backup</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">view_backup</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -727,7 +489,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>To restore the metadata to the previous version we use the <code class="docutils literal notranslate"><span class="pre">restore</span></code> function. This takes the UUID of the datasource and optionally a version string. The default for the version string is <code class="docutils literal notranslate"><span class="pre">&quot;latest&quot;</span></code>, which is the version most recently backed up. We’ll use the default here.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -735,7 +497,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>Now we can check the domain again</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -743,7 +505,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>To really make sure we can force a refresh of all the metadata from the object store and the <code class="docutils literal notranslate"><span class="pre">Datasource</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -751,7 +513,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>Then check again</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -761,7 +523,7 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>The <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> object will store a backup each time you run <code class="docutils literal notranslate"><span class="pre">update_metadata</span></code>. This means you can restore any version of the metadata since you started editing. Do note that the backups, currently, only exist in memory belonging to the <code class="docutils literal notranslate"><span class="pre">DataHandler</span></code> object.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">more_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time_period&quot;</span><span class="p">:</span> <span class="s2">&quot;1m&quot;</span><span class="p">}</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">more_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time_period&quot;</span><span class="p">:</span> <span class="s2">&quot;1m&quot;</span><span class="p">}</span>
 <span class="n">result</span><span class="o">.</span><span class="n">update_metadata</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">to_update</span><span class="o">=</span><span class="n">more_metadata</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -770,14 +532,14 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>We can view a specific metadata backup using the <code class="docutils literal notranslate"><span class="pre">version</span></code> argument. The first version is version 1, here we take a look at the backup made just before we made the update above.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">backup_2</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">view_backup</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">backup_2</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">view_backup</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">backup_2</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">backup_2</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -785,14 +547,14 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>Say we want to keep some of the changes we’ve made to the metadata but undo the last one we can restore the last backup. To do this we can pass “latest” to the version argument when using <code class="docutils literal notranslate"><span class="pre">restore</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;latest&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;latest&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">uuid</span><span class="p">][</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -805,14 +567,14 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>To remove data from the object store we use <code class="docutils literal notranslate"><span class="pre">data_handler_lookup</span></code> again</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span>
 </pre></div>
 </div>
 </div>
@@ -820,14 +582,14 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>Each key of the metadata dictionary is a Datasource UUID. Please make sure that you <strong>double check the UUID</strong> of the Datasource you want to delete, this operation cannot be undone! Also remember to change the UUID below to the one in your version of the metadata.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">uuid</span> <span class="o">=</span> <span class="s2">&quot;13fd70dd-e549-4b06-afdb-9ed495552eed&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">uuid</span> <span class="o">=</span> <span class="s2">&quot;13fd70dd-e549-4b06-afdb-9ed495552eed&quot;</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">delete_datasource</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">delete_datasource</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -835,14 +597,14 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
 <p>To make sure it’s gone let’s run the search again</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">metadata</span>
 </pre></div>
 </div>
 </div>
@@ -865,10 +627,10 @@ UUID of the Datasource returned by the <code class="docutils literal notranslate
           <p class="prev-next-title">Workflow 7: Retrieving data from remote archives</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="../../development/index_devel.html" title="next page">
+  <a class='right-next' id="next-link" href="../../api/index.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Development</p>
+      <p class="prev-next-title">User API</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation &#8212; OpenGHG 0+untagged.1.g0afe976.dirty documentation</title>
+    <title>Installation &#8212; OpenGHG 0+untagged.1.g4aa79ab.dirty documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -50,7 +50,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Tutorials" href="tutorials/index.html" />
-    <link rel="prev" title="Features" href="features.html" />
+    <link rel="prev" title="OpenGHG" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -102,7 +102,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g0afe976.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g4aa79ab.dirty documentation</p>
   
 </a>
     
@@ -119,13 +119,6 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="features.html">
-                        Features
-                    </a>
-                </li>
-                
-
                 <li class="nav-item current active">
                     <a class="nav-link" href="#">
                         Installation
@@ -141,6 +134,13 @@
                 
 
                 <li class="nav-item">
+                    <a class="nav-link" href="api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
                     <a class="nav-link" href="development/index_devel.html">
                         Development
                     </a>
@@ -148,33 +148,11 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="api/index.html">
-                        User API
-                    </a>
-                </li>
-                
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                <li class="nav-item">
                     <a class="nav-link" href="api/index_devapi.html">
                         Developer API
                     </a>
                 </li>
                 
-
-                <li class="nav-item">
-                    <a class="nav-link" href="whatsnew/index.html">
-                        What’s new
-                    </a>
-                </li>
-                
-                </div>
-            </div>
-            
     </ul>
 </nav>
       </div>
@@ -241,13 +219,6 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="features.html">
-                        Features
-                    </a>
-                </li>
-                
-
                 <li class="nav-item current active">
                     <a class="nav-link" href="#">
                         Installation
@@ -263,6 +234,13 @@
                 
 
                 <li class="nav-item">
+                    <a class="nav-link" href="api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
                     <a class="nav-link" href="development/index_devel.html">
                         Development
                     </a>
@@ -270,33 +248,11 @@
                 
 
                 <li class="nav-item">
-                    <a class="nav-link" href="api/index.html">
-                        User API
-                    </a>
-                </li>
-                
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                <li class="nav-item">
                     <a class="nav-link" href="api/index_devapi.html">
                         Developer API
                     </a>
                 </li>
                 
-
-                <li class="nav-item">
-                    <a class="nav-link" href="whatsnew/index.html">
-                        What’s new
-                    </a>
-                </li>
-                
-                </div>
-            </div>
-            
     </ul>
 </nav>
       </div>
@@ -403,15 +359,6 @@ conda activate openghg_env
 </section>
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">#</a></h2>
-<section id="deprecation-of-openghg-path">
-<h3>Deprecation of <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code><a class="headerlink" href="#deprecation-of-openghg-path" title="Permalink to this heading">#</a></h3>
-<p>If you’ve previously used OpenGHG and worked through our tutorials you might have encountered
-the need to set the <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable. Now that we’ve moved to a configuration
-file this is not longer used. If you previously set a custom path using the variable please update
-the configuration file as below.</p>
-</section>
-<section id="updating-the-config-file">
-<h3>Updating the config file<a class="headerlink" href="#updating-the-config-file" title="Permalink to this heading">#</a></h3>
 <p>On the first run on OpenGHG a configuration file will be created in your home folder. On Linux this should be under
 <code class="docutils literal notranslate"><span class="pre">/home/&lt;your</span> <span class="pre">username&gt;/.config/openghg/openghg.conf</span></code> or on macOS
 <code class="docutils literal notranslate"><span class="pre">/Users/&lt;your</span> <span class="pre">username&gt;/.config/openghg/openghg.conf</span></code>. In this file we set the path for the object store.
@@ -422,6 +369,12 @@ To modify this path open the config file with a text editor and change the value
 </pre></div>
 </div>
 <p>Remember to replace <code class="docutils literal notranslate"><span class="pre">&lt;your</span> <span class="pre">username&gt;</span></code> with your username.</p>
+<section id="deprecation-of-openghg-path">
+<h3>Deprecation of <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code><a class="headerlink" href="#deprecation-of-openghg-path" title="Permalink to this heading">#</a></h3>
+<p>If you’ve previously used OpenGHG and worked through our tutorials you might have encountered
+the need to set the <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable. Now that we’ve moved to a configuration
+file this is not longer used. If you previously set a custom path using the variable please update
+the configuration file as below.</p>
 </section>
 </section>
 <section id="developers">
@@ -438,11 +391,11 @@ To modify this path open the config file with a text editor and change the value
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="features.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="index.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Features</p>
+          <p class="prev-next-title">OpenGHG</p>
       </div>
   </a>
   <a class='right-next' id="next-link" href="tutorials/index.html" title="next page">
@@ -503,11 +456,6 @@ To modify this path open the config file with a text editor and change the value
        OPENGHG_PATH
       </span>
      </code>
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#updating-the-config-file">
-     Updating the config file
     </a>
    </li>
   </ul>
