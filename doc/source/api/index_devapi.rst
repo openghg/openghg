@@ -2,8 +2,8 @@
 Developer API
 =============
 
-The functions and methods documented in this section are the internal workings of the OpenGHG library. They are subject to change
-without warning due to the early stages of development of the project.
+The functions and methods documented in this section are the internal workings of the OpenGHG library. They are subject to change, we'll add
+deprecation warnings to functions if we're going to phase them out in the next few releases.
 
 .. warning:: Normal users should not use any of the functions shown here directly as they may be removed or their functionality may change.
 
@@ -16,48 +16,20 @@ Surface measurements
 These functions take surface measurement data and standardise it for storage in the object store. They ensure the correct metadata and attributes
 are recorded with the data, and that the data is `CF compliant <https://cfconventions.org/>`__. They are called by the ``ObsSurface`` class.
 
-:func:`~openghg.standardise.surface.parse_aqmesh`
-    For processing data from the AQMesh network
-:func:`~openghg.standardise.surface.parse_beaco2n`
-    For processing data from the BEACO2N network
-:func:`~openghg.standardise.surface.parse_btt`
-    For processing data from the BT Tower site
-:func:`~openghg.standardise.surface.parse_cranfield`
-    For processing data from Cranfield
-:func:`~openghg.standardise.surface.parse_crds`
-    For processing data from CRDS (cavity ring-down spectroscopy) data from the DECC network.
-:func:`~openghg.standardise.surface.parse_eurocom`
-    For processing data from the EUROCOM network
-:func:`~openghg.standardise.surface.parse_gcwerks`
-    For processing data in the form expected by the GCWERKS package
-:func:`~openghg.standardise.surface.parse_noaa`
-    For processing data from the NOAA network
-:func:`~openghg.standardise.surface.parse_npl`
-    For processing data from NPL
-:func:`~openghg.standardise.surface.parse_tmb`
-    For processing data from the Thames Barrier site
+.. toctree::
+   :maxdepth: 2
 
-Metadata handling
-^^^^^^^^^^^^^^^^^
+   devapi_standardise
 
-These handle the assignment and standardisation of meta`data`.
+Metadata
+^^^^^^^^
 
-Attributes
-**********
+These handle the assignment and checking of metadata.
 
-Ensuring the NetCDF created during standardisation has the correct attributes assigned to it.
+.. toctre::
+    :maxdepth: 2
 
-:func:`~openghg.standardise.meta.assign_attributes`
-    Assign attributes to a number of datasets.
-
-:func:`~openghg.standardise.meta.get_attributes`
-    Assign attributes to a single dataset, called by the above.
-
-Metadata sync
-*************
-
-:func:`~openghg.standardise.meta.sync_surface_metadata`
-    Ensure the required metadata is shared between the metadata and attributes.
+    devapi_metadata
 
 Storage
 =======
@@ -67,7 +39,7 @@ These functions and classes handle the lower level storage and retrieval of data
 .. toctree::
    :maxdepth: 2
 
-   api_store
+   devapi_store
 
 Dataclasses
 ===========
@@ -112,34 +84,14 @@ This module contains all the helper functions used throughout OpenGHG.
 .. toctree::
     :maxdepth: 2
 
+    api_util
+
 Custom Data Types
 =================
 
-Errors
-^^^^^^
+Some customised errors and types for type hinting and keeping ``mypy`` happy.
 
-Customised errors for OpenGHG.
+.. toctree::
+    :maxdepth: 2
 
-:class:`~openghg.util.InvalidSiteError`
-    Raised if an invalid site is given
-
-:class:`~openghg.util.UnknownDataError`
-    Raised if we don't recognize the data passed
-
-:class:`~openghg.util.FunctionError`
-    Raised if there has been an error with a serverless function.
-
-:class:`~openghg.util.ObjectStoreError`
-    Raised if an error accessing an object at a key in the object store occurs
-
-
-Types
-^^^^^
-
-These are used in conjunction with ``mypy`` to make type hinting easier.
-
-:class:`~openghg.util.pathType`
-
-:class:`~openghg.util.multiPathType`
-
-:class:`~openghg.util.resultsType`
+    api_types

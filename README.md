@@ -20,15 +20,11 @@ You can login to our [OpenGHG Cloud JupyterHub](https://hub.openghg.org) and use
 
 To run OpenGHG locally you'll need Python 3.8 or later on Linux or MacOS, we don't currently support Windows.
 
-### Install OpenGHG
-
 You can install OpenGHG using `pip` or `conda`, though `conda` allows the complete functionality to be accessed at once.
 
-If using `pip` or `conda`, we recommend creating a virtual environment first and installing `openghg` into this environment.
+## Using `pip`
 
-#### pip
-
-To use `pip`, first create a virtual environment using the following
+To use `pip`, first create a virtual environment
 
 ```bash
 python -m venv openghg_env
@@ -40,13 +36,45 @@ Then activate the environment
 source openghg_env/bin/activate
 ```
 
-Then install OpenGHG
+It's best to make sure you have the most up to date versions of the packages that `pip` will use behind the scenes when installing OpenGHG.
+
+```bash
+pip install --upgrade pip wheel setuptools
+```
+
+Then we can install OpenGHG itself
 
 ```bash
 pip install openghg
 ```
 
-This will allow the majority of functionality to be accessed but see below for more details on accessing optional regridding (`tranform`) functionality introduced in v.x.x.
+Each time you use OpenGHG please make sure to activate the environment using the `source` step above.
+
+
+> **_NOTE:_**  Some functionality is not completely accessible when OpenGHG is installed with `pip`. This only affects some map regridding functionality. See the Additional Functionality section below for more information.
+
+## Using `conda`
+
+To get OpenGHG installed using `conda` we'll first create a new environment
+
+```bash
+conda create --name openghg_env
+```
+
+Then activate the environment
+
+```bash
+conda activate openghg_env
+```
+
+Then install OpenGHG and its dependencies from our [conda channel](https://anaconda.org/openghg/openghg)
+and conda-forge.
+
+```bash
+conda install --channel conda-forge --channel openghg openghg
+```
+
+Note: the `xesmf` library is already incorporated into the conda install from vx.x onwards and so does not need to be installed separately.
 
 **Additional functionality**
 
@@ -83,29 +111,6 @@ Now the dependencies have all been installed, the `xesmf` library can be install
 ```bash
 pip install xesmf
 ```
-
-#### conda
-
-Create a conda environment called `openghg_env` and enable the use of conda-forge
-
-```bash
-conda create --name openghg_env
-```
-
-Activate the environment
-
-```bash
-conda activate openghg_env
-```
-
-Then install OpenGHG and its dependencies from our [conda channel](https://anaconda.org/openghg/openghg)
-and conda-forge.
-
-```bash
-conda install --channel conda-forge --channel openghg openghg
-```
-
-Note: the `xesmf` library is already incorporated into the conda install from vx.x onwards and so does not need to be installed separately.
 
 ## Setting the object store path
 
@@ -155,11 +160,11 @@ Then install the dependencies
 
 ```bash
 cd openghg
-pip install --upgrade pip wheel
+pip install --upgrade pip wheel setuptools
 pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-Next you Next you can install OpenGHG in editable mode using the `-e` flag. This installs the package from
+Next you can install OpenGHG in editable mode using the `-e` flag. This installs the package from
 the local path and means any changes you make to the code will be immediately available when
 using the package.
 

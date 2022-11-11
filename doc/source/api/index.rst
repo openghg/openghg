@@ -25,7 +25,7 @@ The ``retrieve`` submodule contains the functionality needed to retrieve differe
 
    api_retrieve
 
-plotting
+Plotting
 ========
 
 These are some helper functions to quickly create plots using ObsData objects.
