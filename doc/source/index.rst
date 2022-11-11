@@ -5,9 +5,7 @@ OpenGHG
 ========
 
 OpenGHG is a project to create a platform for collaboration for researchers, stakeholders and the public
-within the realm of greenhouse gases. The platform is built on open source technologies :doc:`technologies <technologies>`
-to create a cloud agnostic platform for simulation and analysis of large datasets.
-
+within the realm of greenhouse gases. The platform is built on open source technologies to create a cloud agnostic platform for simulation and analysis of large datasets.
 
 Installation
 ============
@@ -19,6 +17,9 @@ OpenGHG is easily installed using ``pip`` or ``conda``, to get started quickly f
 
    install
 
+
+
+
 Tutorials
 =========
 
@@ -28,6 +29,11 @@ We've created tutorials to get you started with OpenGHG. They cover searching, r
    :maxdepth: 2
 
    tutorials/index
+
+What's new
+==========
+
+Changes
 
 API Reference
 =============
@@ -45,7 +51,6 @@ Development
 
    development/index_devel
 
-
 Devloper API Reference
 ======================
 
@@ -53,6 +58,8 @@ Devloper API Reference
    :maxdepth: 2
 
    api/index_devapi
+
+
 
 Help
 ====

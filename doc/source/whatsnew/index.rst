@@ -12,6 +12,14 @@ Version 0.3.1
 .. toctree::
    :maxdepth: 2
 
+   v0.4.0
+
+Version 0.3.1
+-------------
+
+.. toctree::
+   :maxdepth: 2
+
    v0.3.1
 
 Version 0.3.0

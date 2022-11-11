@@ -2,6 +2,14 @@
 Data objects
 ============
 
+_BaseData
+=========
+
+The base dataclass inherited by (most of) the dataclasses below.
+
+.. autoclass:: openghg.dataobjects._BaseData
+    :members:
+
 DataHandler
 ===========
 

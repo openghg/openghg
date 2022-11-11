@@ -64,12 +64,12 @@ def get_attributes(
     ds: Dataset,
     species: str,
     site: str,
-    network: str = None,
-    global_attributes: Dict[str, str] = None,
-    units: str = None,
-    scale: str = None,
+    network: Optional[str] = None,
+    global_attributes: Optional[Dict[str, str]] = None,
+    units: Optional[str] = None,
+    scale: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
-    date_range: List[str] = None,
+    date_range: Optional[List[str]] = None,
 ) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
