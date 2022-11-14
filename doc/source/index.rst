@@ -17,9 +17,6 @@ OpenGHG is easily installed using ``pip`` or ``conda``, to get started quickly f
 
    install
 
-
-
-
 Tutorials
 =========
 
@@ -29,9 +26,6 @@ We've created tutorials to get you started with OpenGHG. They cover searching, r
    :maxdepth: 2
 
    tutorials/index
-
-What's new
-==========
 
 Changes
 
@@ -59,7 +53,13 @@ Devloper API Reference
 
    api/index_devapi
 
+What's new
+==========
 
+.. toctree::
+   :maxdepth: 2
+
+   whatsnew/index
 
 Help
 ====
