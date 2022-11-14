@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>openghg.store._segment &#8212; OpenGHG 0+untagged.1.gec16668.dirty documentation</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/store/_segment';</script>
+    <script src="../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">OpenGHG 0+untagged.1.gec16668.dirty documentation</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../features.html">
+                        Features
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../install.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../tutorials/index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../development/index_devel.html">
+                        Development
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api/index_devapi.html">
+                        Developer API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../whatsnew/index.html">
+                        What’s new
+                    </a>
+                </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../features.html">
+                        Features
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../install.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../tutorials/index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../development/index_devel.html">
+                        Development
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api/index_devapi.html">
+                        Developer API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../whatsnew/index.html">
+                        What’s new
+                    </a>
+                </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for openghg.store._segment</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Segment the data into Datasources</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assign_data&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="assign_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.assign_data">[docs]</a><span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">lookup_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Assign data to a Datasource. This will either create a new Datasource</span>
+<span class="sd">    Create or get an existing Datasource for each gas in the file</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_dict: Dictionary containing data and metadata for species</span>
+<span class="sd">            lookup_results: Dictionary of lookup results]</span>
+<span class="sd">            overwrite: If True overwrite current data stored</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
+
+    <span class="n">uuids</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Our lookup results and gas data have the same keys</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">lookup_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="c1"># Add the read metadata to the Dataset attributes being careful</span>
+        <span class="c1"># not to overwrite any attributes that are already there</span>
+        <span class="n">to_add</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">}</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+
+        <span class="c1"># If we have a UUID for this Datasource load the existing object</span>
+        <span class="c1"># from the object store</span>
+        <span class="k">if</span> <span class="n">uuid</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">datasource</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+
+        <span class="c1"># Add the dataframe to the datasource</span>
+        <span class="n">datasource</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="c1"># Save Datasource to object store</span>
+        <span class="n">datasource</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">new_datasource</span> <span class="o">=</span> <span class="n">uuid</span> <span class="ow">is</span> <span class="kc">False</span>
+        <span class="n">uuids</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">datasource</span><span class="o">.</span><span class="n">uuid</span><span class="p">(),</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span> <span class="n">new_datasource</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">uuids</span></div>
+
+
+<span class="c1"># def assign_footprint_data(footprint_data: Dict, lookup_results: Dict, overwrite: bool) -&gt; Dict:</span>
+<span class="c1">#     &quot;&quot;&quot; Create Datasources for the passed footprints data</span>
+
+<span class="c1">#         Args:</span>
+<span class="c1">#             data: xarray Dataset of footprints data</span>
+<span class="c1">#             metadata: Associated metadata</span>
+<span class="c1">#             datasource_uid: The UUID of the datasource if we&#39;ve processed footprints data from this</span>
+<span class="c1">#             source before, otherwise False</span>
+<span class="c1">#         Returns:</span>
+<span class="c1">#             dict: Dictionary containing Datasource UUIDs</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from openghg.modules import Datasource</span>
+
+<span class="c1">#     uuids = {}</span>
+
+<span class="c1">#     # Add in copying of attributes, or add attributes to the metadata at an earlier state.</span>
+<span class="c1">#     for key in footprint_data:</span>
+<span class="c1">#         metadata = footprint_data[key][&quot;metadata&quot;]</span>
+<span class="c1">#         data = footprint_data[key][&quot;data&quot;]</span>
+
+<span class="c1">#         # Our lookup results and gas data have the same keys</span>
+<span class="c1">#         uuid = lookup_results[key]</span>
+
+<span class="c1">#         # TODO - Could this be done somewhere else? It doesn&#39;t feel quite right it</span>
+<span class="c1">#         # being here</span>
+
+<span class="c1">#         # Add the read metadata to the Dataset attributes being careful</span>
+<span class="c1">#         # not to overwrite any attributes that are already there</span>
+<span class="c1">#         to_add = {k: v for k, v in metadata.items() if k not in data.attrs}</span>
+<span class="c1">#         data.attrs.update(to_add)</span>
+
+<span class="c1">#         # If we have a UUID for this Datasource load the existing object</span>
+<span class="c1">#         # from the object store</span>
+<span class="c1">#         if uuid:</span>
+<span class="c1">#             datasource = Datasource.load(uuid=uuid)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             datasource = Datasource()</span>
+
+<span class="c1">#         # TODO - can we just ad</span>
+<span class="c1">#         # Add the dataframe to the datasource</span>
+<span class="c1">#         datasource.add_footprint_data(data=data, metadata=metadata, overwrite=overwrite)</span>
+<span class="c1">#         # Save Datasource to object store</span>
+<span class="c1">#         datasource.save()</span>
+
+<span class="c1">#         uuids[key] = datasource.uuid()</span>
+
+<span class="c1">#     return uuids</span>
+
+<span class="c1"># def assign_emissions_data(data: Dataset, metadata: Dict, datasource_uid: Union[str, bool]) -&gt; str:</span>
+<span class="c1">#     &quot;&quot;&quot; Create Datasources for the passed flux data</span>
+
+<span class="c1">#         Args:</span>
+<span class="c1">#             data: xarray Dataset of footprints data</span>
+<span class="c1">#             metadata: Associated metadata</span>
+<span class="c1">#             datasource_uid: The UUID of the datasource if we&#39;ve processed flux data from this</span>
+<span class="c1">#             source before, otherwise False</span>
+<span class="c1">#         Returns:</span>
+<span class="c1">#             str: UUID of Datasource</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from openghg.modules import Datasource</span>
+
+<span class="c1">#     if datasource_uid is not False:</span>
+<span class="c1">#         datasource = Datasource.load(uuid=datasource_uid)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         datasource = Datasource()</span>
+
+<span class="c1">#     # Add the read metadata to the Dataset attributes being careful</span>
+<span class="c1">#     # not to overwrite any attributes that are already there</span>
+<span class="c1">#     to_add = {k: v for k, v in metadata.items() if k not in data.attrs}</span>
+<span class="c1">#     data.attrs.update(to_add)</span>
+
+<span class="c1">#     datasource.add_emissions_data(data=data, metadata=metadata)</span>
+<span class="c1">#     datasource.save()</span>
+
+<span class="c1">#     return datasource.uuid()</span>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022 OpenGHG development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

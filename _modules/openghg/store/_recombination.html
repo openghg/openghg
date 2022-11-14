@@ -1,0 +1,632 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>openghg.store._recombination &#8212; OpenGHG 0+untagged.1.gec16668.dirty documentation</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/store/_recombination';</script>
+    <script src="../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">OpenGHG 0+untagged.1.gec16668.dirty documentation</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../features.html">
+                        Features
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../install.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../tutorials/index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../development/index_devel.html">
+                        Development
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api/index_devapi.html">
+                        Developer API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../whatsnew/index.html">
+                        What’s new
+                    </a>
+                </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../features.html">
+                        Features
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../install.html">
+                        Installation
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../tutorials/index.html">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../development/index_devel.html">
+                        Development
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api/index.html">
+                        User API
+                    </a>
+                </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../api/index_devapi.html">
+                        Developer API
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../../../whatsnew/index.html">
+                        What’s new
+                    </a>
+                </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <span class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" data-toggle="tooltip">
+    <a class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="fa-regular fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for openghg.store._recombination</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Handles the recombination of dataframes stored in the object store</span>
+<span class="sd">    into the data requested by the user</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">from</span> <span class="nn">xarray.core.coordinates</span> <span class="kn">import</span> <span class="n">DatasetCoordinates</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;recombine_multisite&quot;</span><span class="p">,</span> <span class="s2">&quot;recombine_datasets&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="recombine_multisite"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.recombine_multisite">[docs]</a><span class="k">def</span> <span class="nf">recombine_multisite</span><span class="p">(</span><span class="n">keys</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Recombine the keys from multiple sites into a single Dataset for each site</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        site_keys: A dictionary of lists of keys, keyed by site</span>
+<span class="sd">        sort: Sort the resulting Dataset by the time dimension</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of xarray.Datasets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">key_list</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">recombine_datasets</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">key_list</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="recombine_datasets"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.recombine_datasets">[docs]</a><span class="k">def</span> <span class="nf">recombine_datasets</span><span class="p">(</span>
+    <span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">attrs_to_check</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">elevate_inlet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Combines datasets stored separately in the object store</span>
+<span class="sd">    into a single dataset</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        keys: List of object store keys</span>
+<span class="sd">        sort: Sort the resulting Dataset by the time dimension. Default = True</span>
+<span class="sd">        attrs_to_check: Attributes to check for duplicates. If duplicates are present</span>
+<span class="sd">            a new data variable will be created containing the values from each dataset</span>
+<span class="sd">            If a dictionary is passed, the attribute(s) will be retained and the new value assigned.</span>
+<span class="sd">            If a list/string is passed, the attribute(s) will be removed.</span>
+<span class="sd">        elevate_inlet: Force the elevation of the inlet attribute</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        xarray.Dataset: Combined Dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span>
+    <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
+    <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">concat</span> <span class="k">as</span> <span class="n">xr_concat</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No data keys passed.&quot;</span><span class="p">)</span>
+
+    <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">Datasource</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]</span>
+
+    <span class="c1"># Check if we&#39;ve got multiple inlet heights</span>
+    <span class="n">inlets_to_check</span> <span class="o">=</span> <span class="n">check_inlets</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="n">elevate_inlet</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">attrs_to_check</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">attrs_to_check</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">attrs_to_check</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">inlets_to_check</span><span class="p">)</span>
+
+    <span class="c1"># For specified attributes (e.g. &quot;inlet&quot;)</span>
+    <span class="c1"># elevate duplicates to data variables within each Dataset</span>
+    <span class="k">if</span> <span class="n">attrs_to_check</span><span class="p">:</span>
+        <span class="c1"># if isinstance(attrs_to_check, dict):</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attrs_to_check</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">replace_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attrs_to_check</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="c1"># TODO - GJ - 2022-02-22 - I&#39;m not sure we need to many different ways of passing in inlets to check here?</span>
+        <span class="c1"># elif isinstance(attrs_to_check, str):</span>
+        <span class="c1">#     attributes = [attrs_to_check]</span>
+        <span class="c1">#     replace_values = [&quot;&quot;]</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     attributes = attrs_to_check</span>
+        <span class="c1">#     replace_values = [&quot;&quot;] * len(attributes)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">elevate_duplicate_attrs</span><span class="p">(</span><span class="n">ds_list</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="n">elevate_inlet</span><span class="p">)</span>
+
+    <span class="c1"># Concatenate datasets along time dimension</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">xr_concat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Replace/remove incorrect attributes</span>
+    <span class="c1">#  - xr.concat will only take value from first dataset if duplicated</span>
+    <span class="k">if</span> <span class="n">attrs_to_check</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span> <span class="n">replace_values</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">combined</span><span class="p">:</span>  <span class="c1"># Only update if attr was elevated to a data variable</span>
+                <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="n">combined</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">combined</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+    <span class="c1"># if sort:</span>
+    <span class="c1">#     combined = combined.sortby(&quot;time&quot;)</span>
+
+    <span class="c1"># This is modified from https://stackoverflow.com/a/51077784/1303032</span>
+    <span class="n">unique</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">combined</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">n_dupes</span> <span class="o">=</span> <span class="n">unique</span><span class="p">[</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+    <span class="c1"># dupes = unique[count &gt; 1]</span>
+
+    <span class="k">if</span> <span class="n">n_dupes</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Large number of duplicate timestamps, check data overlap.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># print(f&quot;\n\nNumber of dupes: {n_dupes}&quot;)</span>
+    <span class="c1"># Using isel is a memory hungry operation, there&#39;s no point doing it if we don&#39;t have any dupes</span>
+    <span class="c1"># if n_dupes &gt; 0:</span>
+    <span class="c1">#     combined = combined.isel(time=index)</span>
+
+    <span class="c1"># Only keep the unique values if we have dupes</span>
+    <span class="c1"># if index.size != combined.time.size:</span>
+    <span class="c1">#    combined = combined.isel(time=index)</span>
+
+    <span class="k">return</span> <span class="n">combined</span></div>
+
+
+<span class="k">def</span> <span class="nf">create_array_from_value</span><span class="p">(</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">coords</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">DatasetCoordinates</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DatasetCoordinates</span><span class="p">]],</span>  <span class="c1"># type: ignore</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a new xarray.DataArray object containing a single value repeated</span>
+<span class="sd">    for each coordinate.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: Value to be repeated within the DataArray object</span>
+<span class="sd">        coords: Co-ordinates to use for this new DataArray.</span>
+<span class="sd">        name: Name to give the variable within the DataArray</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        DataArray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">coordinates</span><span class="o">.</span><span class="n">DatasetCoordinates</span><span class="p">):</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">),)</span>
+
+    <span class="n">variable</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+    <span class="n">data_variable</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data_variable</span>
+
+
+<span class="k">def</span> <span class="nf">elevate_duplicate_attrs</span><span class="p">(</span>
+    <span class="n">ds_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span> <span class="n">attributes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">elevate_inlet</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For a list of Datasets, if the specified attributes are being repeated</span>
+<span class="sd">    these will be added as new data variables to each Dataset.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ds_list: List of xarray Datasets</span>
+<span class="sd">        attributes: Attribute values to check within the Datasets. If None is passed</span>
+<span class="sd">        the original dataset list will be returned.</span>
+<span class="sd">        elevate_inlet: Force the elevation of inlet</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of updated Dataset objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="n">attributes</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+        <span class="c1"># Pull the attributes out of the datasets - usually inlet values for ranked data</span>
+        <span class="n">data_attrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">ds_list</span> <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">]</span>
+
+        <span class="c1"># If we have more than one unique value we update the Dataset by adding a new variable</span>
+        <span class="c1"># This is useful with ranked inlets so we can easily know which inlet a measurement was taken from</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data_attrs</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="p">(</span><span class="n">attr</span> <span class="o">==</span> <span class="s2">&quot;inlet&quot;</span> <span class="ow">and</span> <span class="n">elevate_inlet</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ds_list</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+                <span class="n">coords</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">coords</span>
+                <span class="n">new_variable</span> <span class="o">=</span> <span class="n">create_array_from_value</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">attr</span><span class="p">)</span>
+                <span class="n">updated_ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">assign</span><span class="p">({</span><span class="n">attr</span><span class="p">:</span> <span class="n">new_variable</span><span class="p">})</span>
+
+                <span class="n">ds_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">updated_ds</span>
+
+    <span class="k">return</span> <span class="n">ds_list</span>
+
+
+<span class="k">def</span> <span class="nf">check_inlets</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span> <span class="n">elevate_inlet</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Check the inlets of the data to be processed</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: List of Datasets</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary with single or multiple inlet replacement value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inlets</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inlets</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inlets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="s2">&quot;multiple&quot;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">elevate_inlet</span><span class="p">:</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">inlets</span><span class="o">.</span><span class="n">pop</span><span class="p">()}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">return</span> <span class="n">attrs</span>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022 OpenGHG development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>
