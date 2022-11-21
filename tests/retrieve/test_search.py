@@ -3,7 +3,7 @@ from openghg.retrieve import (
     search,
     search_bc,
     search_column,
-    search_emissions,
+    search_flux,
     search_eulerian,
     search_footprints,
     search_surface,
@@ -117,7 +117,7 @@ def test_multi_type_search():
 
     data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    assert data_types == {'surface', 'eulerian_model', 'column'}
+    assert data_types == {"surface", "eulerian_model", "column"}
 
     res = search(species="co2")
     data_types = set([m["data_type"] for m in res.metadata.values()])
@@ -165,6 +165,7 @@ def test_nonsense_terms():
 
     assert not res
 
+
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
     [
@@ -174,15 +175,19 @@ def test_nonsense_terms():
         ("inlet", "10"),
     ],
 )
-def test_search_footprints(inlet_keyword,inlet_value):
+def test_search_footprints(inlet_keyword, inlet_value):
     """
     Test search for footprint data which has been added to the object store.
     This has been stored using one footprint file which represents a year of data.
     """
     if inlet_keyword == "inlet":
-        res = search_footprints(site="TMB", network="LGHG", inlet=inlet_value, domain="EUROPE", model="test_model")
+        res = search_footprints(
+            site="TMB", network="LGHG", inlet=inlet_value, domain="EUROPE", model="test_model"
+        )
     elif inlet_keyword == "height":
-        res = search_footprints(site="TMB", network="LGHG", height=inlet_value, domain="EUROPE", model="test_model")
+        res = search_footprints(
+            site="TMB", network="LGHG", height=inlet_value, domain="EUROPE", model="test_model"
+        )
 
     key = next(iter(res.metadata))
     partial_metadata = {
@@ -237,14 +242,15 @@ def test_search_footprints_select():
     Test limited date range can be searched for footprint source.
     (Same data as previous test)
     """
-    res = search_footprints(site = "TAC",
-                            network = "DECC",
-                            height = "100m",
-                            domain = "TEST",
-                            model = "NAME",
-                            start_date = "2016-01-01",
-                            end_date = "2016-08-01",
-                            )
+    res = search_footprints(
+        site="TAC",
+        network="DECC",
+        height="100m",
+        domain="TEST",
+        model="NAME",
+        start_date="2016-01-01",
+        end_date="2016-08-01",
+    )
 
     # Test retrieved footprint data found from the search contains data
     # spanning the reduced date range
@@ -255,11 +261,10 @@ def test_search_footprints_select():
     assert time[-1] == Timestamp("2016-07-01T02:00:00")
 
 
-def test_search_emissions():
-    res = search_emissions(
+def test_search_flux():
+    res = search_flux(
         species="co2",
         source="gpp-cardamom",
-        date="2012",
         domain="europe",
     )
 
@@ -269,15 +274,53 @@ def test_search_emissions():
         "title": "gross primary productivity co2",
         "author": "openghg cloud",
         "regridder_used": "acrg_grid.regrid.regrid_3d",
-        "comments": "fluxes copied from year 2013. december 2012 values copied from january 2013 values.",
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
-        "date": "2012",
         "data_type": "emissions",
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+    # Test retrieved flux data found from the search contains data spanning
+    # the whole range.
+    flux_data = res.retrieve()
+    data = flux_data.data
+    time = data["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+    assert time[-1] == Timestamp("2013-01-01T00:00:00")
+
+
+def test_search_flux_select():
+    """
+    Test limited date range can be searched for footprint source.
+    (Same data as previous test)
+    """
+    res = search_flux(
+        species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2013-01-01"
+    )
+
+    key = next(iter(res.metadata))
+
+    partial_metadata = {
+        "title": "gross primary productivity co2",
+        "author": "openghg cloud",
+        "regridder_used": "acrg_grid.regrid.regrid_3d",
+        "species": "co2",
+        "domain": "europe",
+        "source": "gpp-cardamom",
+        "data_type": "emissions",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+    # Test retrieved flux data found from the search contains data
+    # spanning the reduced date range
+    flux_data = res.retrieve()
+    data = flux_data.data
+    time = data["time"]
+    assert len(time) == 1
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
 
 
 def test_search_column():
@@ -316,7 +359,6 @@ def test_search_bc():
         "title": "mozart volume mixing ratios at domain edges",
         "time period": "climatology from 200901-201407 mozart output",
         "copied from": "2000",
-        "date": "2012",
         "domain": "europe",
         "bc_input": "mozart",
         "start_date": "2012-01-01 00:00:00+00:00",

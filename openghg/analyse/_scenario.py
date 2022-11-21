@@ -53,7 +53,7 @@ from openghg.retrieve import (
     get_footprint,
     search_surface,
     search_bc,
-    search_emissions,  # TODO: Update to search_flux when available
+    search_flux,
     search_footprints,
 )
 from openghg.util import synonyms
@@ -229,7 +229,7 @@ class ModelScenario:
         search_functions = {
             "obs_surface": search_surface,
             "footprint": search_footprints,
-            "flux": search_emissions,
+            "flux": search_flux,
             "boundary_conditions": search_bc,
         }
 

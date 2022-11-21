@@ -4,12 +4,11 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
-
-from openghg.dataobjects import SearchResults
 from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.util import decompress, running_on_hub
 from tinydb.database import TinyDB
+from openghg.dataobjects import SearchResults
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -176,13 +175,12 @@ def search_eulerian(
     )
 
 
-def search_emissions(
+def search_flux(
     species: Optional[str] = None,
     source: Optional[str] = None,
     domain: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    date: Optional[str] = None,  # May want to remove this?
     high_time_resolution: Optional[bool] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
@@ -193,7 +191,6 @@ def search_emissions(
         species: Species name
         domain: Emissions domain
         source: Emissions source
-        date : Date associated with emissions as a string
         source_format : Type of data being input e.g. openghg (internal format)
         high_time_resolution: If this is a high resolution file
         period: Period of measurements. Only needed if this can not be inferred from the time coords
@@ -217,7 +214,6 @@ def search_emissions(
         domain=domain,
         start_date=start_date,
         end_date=end_date,
-        date=date,
         high_time_resolution=high_time_resolution,
         period=period,
         continuous=continuous,
@@ -466,7 +462,7 @@ def search(**kwargs: Any) -> SearchResults:
 # _base_search()
 # 1.
 # _store_search()
-def local_search(**kwargs):  # type: ignore
+def local_search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
 
@@ -492,6 +488,7 @@ def local_search(**kwargs):  # type: ignore
     import itertools
 
     from openghg.store.base import Datasource
+    from openghg.dataobjects import SearchResults
     from openghg.util import (
         clean_string,
         synonyms,

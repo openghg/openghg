@@ -8,7 +8,6 @@ def parse_openghg(
     source: str,
     domain: str,
     data_type: str,
-    date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -49,7 +48,6 @@ def parse_openghg(
     metadata["species"] = species
     metadata["domain"] = domain
     metadata["source"] = source
-    metadata["date"] = date
     metadata["author"] = author_name
     metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
@@ -67,16 +65,6 @@ def parse_openghg(
         em_time, filepath=filepath, period=period, continuous=continuous
     )
 
-    if date is None:
-        # Check for how granular we should make the date label
-        if "year" in period_str:
-            date = f"{start_date.year}"
-        elif "month" in period_str:
-            date = f"{start_date.year}{start_date.month:02}"
-        else:
-            # date = start_date.astype("datetime64[s]").astype(str)
-            date = str(start_date).replace(" ", "_")
-
     metadata["start_date"] = str(start_date)
     metadata["end_date"] = str(end_date)
 
@@ -88,7 +76,7 @@ def parse_openghg(
     metadata["time_resolution"] = "high" if high_time_resolution else "standard"
     metadata["time_period"] = period_str
 
-    key = "_".join((species, source, domain, date))
+    key = "_".join((species, source, domain))
 
     emissions_data: Dict[str, dict] = {}
     emissions_data[key] = {}
