@@ -145,6 +145,13 @@
       "longitude": 5.632
     }
   },
+  "ASP": {
+    "CSIRO": {
+      "latitude": -38.01,
+      "longitude": 145.01,
+      "long_name": "Aspendale, Australia"
+    }
+  },
   "ATO": {
     "ATTO": {
       "height": ["79m", "53m", "38m", "24m", "4m"],
@@ -631,6 +638,15 @@
       "long_name": "Charles Point, Darwin, Australia",
       "heights": ["6m"],
       "height_name": ["6magl"]
+    }
+  },
+  "CPI": {
+    "ICOS": {
+      "latitude": 52.17,
+      "longitude": -6.35,
+      "height_station_masl": 9.0,
+      "long_name": "Carnsore Point, Ireland",
+      "icos_sitecode": "CSP"
     }
   },
   "CPS": {
