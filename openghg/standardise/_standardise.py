@@ -13,6 +13,7 @@ def standardise_surface(
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
+    calibration_scale: Optional[str] = None,
     overwrite: bool = False,
 ) -> Optional[Dict]:
     """Standardise surface measurements and store the data in the object store.
@@ -285,7 +286,6 @@ def standardise_flux(
     species: str,
     source: str,
     domain: str,
-    date: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -324,7 +324,6 @@ def standardise_flux(
             "continuous": continuous,
             "overwrite": overwrite,
             "chunks": chunks,
-            "date": date,
             "period": period,
         }
 
@@ -343,7 +342,6 @@ def standardise_flux(
             species=species,
             source=source,
             domain=domain,
-            date=date,
             high_time_resolution=high_time_resolution,
             period=period,
             continuous=continuous,

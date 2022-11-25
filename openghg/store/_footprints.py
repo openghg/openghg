@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union
+from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
 
 import numpy as np
 from openghg.store import DataSchema
@@ -186,9 +186,10 @@ class Footprints(BaseStore):
     def read_file(
         filepath: Union[str, Path],
         site: str,
-        height: str,
         domain: str,
         model: str,
+        inlet: Optional[str] = None,
+        height: Optional[str] = None,
         metmodel: Optional[str] = None,
         species: Optional[str] = None,
         network: Optional[str] = None,
@@ -208,9 +209,10 @@ class Footprints(BaseStore):
         Args:
             filepath: Path of file to load
             site: Site name
-            height: Height above ground level in metres
             domain: Domain of footprints
             model: Model used to create footprint (e.g. NAME or FLEXPART)
+            inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
+            height: Alias for inlet. One of height or inlet must be included.
             metmodel: Underlying meteorlogical model used (e.g. UKV)
             species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
             network: Network name
@@ -229,14 +231,25 @@ class Footprints(BaseStore):
         # from xarray import load_dataset
         import xarray as xr
         from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
-        from openghg.util import clean_string, hash_file, species_lifetime, timestamp_now
+        from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
 
         filepath = Path(filepath)
 
         site = clean_string(site)
         network = clean_string(network)
-        height = clean_string(height)
         domain = clean_string(domain)
+
+        # Make sure `inlet` OR the alias `height` is included
+        # Note: from this point only `inlet` variable should be used.
+        if inlet is None and height is None:
+            raise ValueError("One of inlet (or height) must be specified as an input")
+        elif inlet is None:
+            inlet = height
+
+        # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
+        inlet = clean_string(inlet)
+        inlet = format_inlet(inlet)
+        inlet = cast(str, inlet)
 
         fp = Footprints.load()
 
@@ -285,9 +298,12 @@ class Footprints(BaseStore):
 
         metadata["data_type"] = "footprints"
         metadata["site"] = site
-        metadata["height"] = height
         metadata["domain"] = domain
         metadata["model"] = model
+
+        # Include both inlet and height keywords for backwards compatability
+        metadata["inlet"] = inlet
+        metadata["height"] = inlet
 
         if species is not None:
             metadata["species"] = clean_string(species)
@@ -343,7 +359,7 @@ class Footprints(BaseStore):
 
         # This might seem longwinded now but will help when we want to read
         # more than one footprints at a time
-        key = "_".join((site, domain, model, height))
+        key = "_".join((site, domain, model, inlet))
 
         footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
         footprint_data[key]["data"] = fp_data
@@ -352,7 +368,7 @@ class Footprints(BaseStore):
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
-        required = ("site", "model", "height", "domain")
+        required = ("site", "model", "inlet", "domain")
         lookup_results = datasource_lookup(metastore=metastore, data=footprint_data, required_keys=required)
 
         data_type = "footprints"

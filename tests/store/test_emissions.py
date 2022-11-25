@@ -19,7 +19,6 @@ def test_read_binary_data(mocker):
     metadata = {
         "species": "co2",
         "source": "gpp-cardamom",
-        "date": "2012",
         "domain": "europe",
         "high_time_resolution": False,
     }
@@ -31,7 +30,7 @@ def test_read_binary_data(mocker):
 
     results = Emissions.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
 
-    assert results == {"co2_gpp-cardamom_europe_2012": {"uuid": "test-uuid-1", "new": True}}
+    assert results == {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-1", "new": True}}
 
 
 def test_read_file():
@@ -41,16 +40,16 @@ def test_read_file():
         filepath=test_datapath,
         species="co2",
         source="gpp-cardamom",
-        date="2012",
         domain="europe",
         high_time_resolution=False,
         overwrite=True,
     )
 
-    assert "co2_gpp-cardamom_europe_2012" in proc_results
+    assert "co2_gpp-cardamom_europe" in proc_results
 
     search_results = search(
-        species="co2", source="gpp-cardamom", date="2012", domain="europe", data_type="emissions"
+        species="co2", source="gpp-cardamom", domain="europe", data_type="emissions",
+        start_date="2012", end_date="2013",
     )
 
     emissions_obs = search_results.retrieve_all()
@@ -77,7 +76,6 @@ def test_read_file():
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
-        "date": "2012",
         "start_date": "2012-01-01 00:00:00+00:00",
         "end_date": "2012-12-31 23:59:59+00:00",
         "max_longitude": 39.38,

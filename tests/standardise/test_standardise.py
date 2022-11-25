@@ -63,20 +63,19 @@ def test_standardise_footprint():
     assert "tmb_europe_test_model_10m" in results
 
 
-def test_standardise_emissions():
+def test_standardise_flux():
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(
         filepath=test_datapath,
         species="co2",
         source="gpp-cardamom",
-        date="2012",
         domain="europe",
         high_time_resolution=False,
         overwrite=True,
     )
 
-    assert "co2_gpp-cardamom_europe_2012" in proc_results
+    assert "co2_gpp-cardamom_europe" in proc_results
 
 
 def test_standardise(monkeypatch, mocker, tmpdir):

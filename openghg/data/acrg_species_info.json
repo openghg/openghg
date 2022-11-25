@@ -527,12 +527,14 @@
         "lifetime_monthly": ["56.3D", "38.4D", "22.3D", "12.3D", "7.7D", "5.7D","5.9D", "7.4D", "12.4D","23.5D","48.8D","66.1D"],
         "lifetime_reference":"2018 ozone assessment with monthly profile derived from HFO-1234yf from Henne et al., 2012"
     },
-    "HFO1233zde": {"alt": ["HFO-1233zde", "HFO-1233ZDE", "HFO1233ZDE","hfo1233zde","hfo-1233zde"],
+    "HCFO1233zde": {"alt": ["HCFO-1233ZDE", "HCFO1233ZDE","hcfo1233zde","hcfo-1233zde","HFO1233zde", "HFO-1233ZDE", "HFO1233ZDE","hfo1233zde","hfo-1233zde"],
         "group": "HFOs", 
-        "long_name": "HFO-1233zd(E)", 
+        "long_name": "HCFO-1233zd(E)", 
         "mol_mass": "130.49", 
-        "print_string": "HFO-1233ZDE", 
-        "units": "ppt"
+        "print_string": "HCFO-1233ZDE",
+        "units": "ppt",
+        "lifetime_monthly": ["125.6D", "85.7D", "49.8D", "27.5D", "17.1D", "12.8D","13.2D", "16.5D", "27.8D","52.5D","108.9D","147.6D"],
+        "lifetime_reference":"2018 ozone assessment with monthly profile derived from HFO-1234yf from Henne et al., 2012"
     },
     "Isoflurane": {"alt": [],
         "group": "Minor", 

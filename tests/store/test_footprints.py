@@ -14,7 +14,8 @@ def test_read_footprint_co2_from_data(mocker):
 
     metadata = {
         "site": "TAC",
-        "height": "100m",
+        "inlet": "100m",
+        "inlet": "100m",
         "domain": "TEST",
         "model": "NAME",
         "metmodel": "UKV",
@@ -36,26 +37,45 @@ def test_read_footprint_co2_from_data(mocker):
     assert result == {"tac_test_NAME_100m": {"uuid": "test-uuid-1", "new": True}}
 
 
-def test_read_footprint_standard():
+@pytest.mark.parametrize(
+    "keyword,value",
+    [
+        ("inlet", "100m"),
+        ("height", "100m"),
+        ("inlet", "100magl"),
+        ("height", "100magl"),
+        ("inlet", "100"),
+    ],
+)
+def test_read_footprint_standard(keyword, value):
     """
     Test standard footprint which should contain (at least)
      - data variables: "fp"
      - coordinates: "height", "lat", "lev", "lon", "time"
+    Check this for different variants of inlet and height inputs.
     """
     datapath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
 
     site = "TAC"
-    height = "100m"
     domain = "EUROPE"
     model = "NAME"
 
-    Footprints.read_file(
-        filepath=datapath,
-        site=site,
-        model=model,
-        height=height,
-        domain=domain,
-    )
+    if keyword == "inlet":
+        Footprints.read_file(
+            filepath=datapath,
+            site=site,
+            model=model,
+            inlet=value,
+            domain=domain,
+        )
+    elif keyword == "height":
+        Footprints.read_file(
+            filepath=datapath,
+            site=site,
+            model=model,
+            height=value,
+            domain=domain,
+        )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
@@ -76,7 +96,8 @@ def test_read_footprint_standard():
         "author": "OpenGHG Cloud",
         "data_type": "footprints",
         "site": "tac",
-        "height": "100m",
+        "inlet": "100m",
+        "height": "100m",  # Should always be the same as inlet
         "model": "NAME",
         "domain": "europe",
         "start_date": "2012-08-01 00:00:00+00:00",
@@ -107,7 +128,7 @@ def test_read_footprint_high_spatial_res():
 
     site = "TMB"
     network = "LGHG"
-    height = "10m"
+    inlet = "10m"
     domain = "EUROPE"
     model = "test_model"
 
@@ -116,7 +137,7 @@ def test_read_footprint_high_spatial_res():
         site=site,
         model=model,
         network=network,
-        height=height,
+        inlet=inlet,
         domain=domain,
         period="monthly",
         high_spatial_res=True,
@@ -197,7 +218,8 @@ def test_read_footprint_high_spatial_res():
         "data_type": "footprints",
         "site": "tmb",
         "network": "lghg",
-        "height": "10m",
+        "inlet": "10m",
+        "height": "10m",  # Should always be the same as inlet
         "model": "test_model",
         "domain": "europe",
         "start_date": "2020-08-01 00:00:00+00:00",
@@ -226,7 +248,7 @@ def test_read_footprint_high_spatial_res():
 
 
 @pytest.mark.parametrize(
-    "site,height,metmodel,start,end,filename",
+    "site,inlet,metmodel,start,end,filename",
     [
         (
             "TAC",
@@ -246,7 +268,7 @@ def test_read_footprint_high_spatial_res():
         ),
     ],
 )
-def test_read_footprint_co2(site, height, metmodel, start, end, filename):
+def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
     """
     Test high spatial resolution footprint
      - expects additional parameter for `fp_HiTRes`
@@ -272,7 +294,7 @@ def test_read_footprint_co2(site, height, metmodel, start, end, filename):
         site=site,
         model=model,
         metmodel=metmodel,
-        height=height,
+        inlet=inlet,
         species=species,
         domain=domain,
     )
@@ -297,7 +319,8 @@ def test_read_footprint_co2(site, height, metmodel, start, end, filename):
         "author": "OpenGHG Cloud",
         "data_type": "footprints",
         "site": site.lower(),
-        "height": height,
+        "inlet": inlet,
+        "height": inlet,  # Should always be the same as inlet
         "model": "NAME",
         "species": "co2",
         "metmodel": metmodel.lower(),
@@ -321,7 +344,7 @@ def test_read_footprint_short_lived():
     datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
 
     site = "WAO"
-    height = "20m"
+    inlet = "20m"
     domain = "TEST"
     model = "NAME"
     metmodel = "UKV"
@@ -335,7 +358,7 @@ def test_read_footprint_short_lived():
         site=site,
         model=model,
         metmodel=metmodel,
-        height=height,
+        inlet=inlet,
         species=species,
         domain=domain,
     )
@@ -363,7 +386,8 @@ def test_read_footprint_short_lived():
         "author": "OpenGHG Cloud",
         "data_type": "footprints",
         "site": "wao",
-        "height": "20m",
+        "inlet": inlet,
+        "height": inlet,  # Should always be the same value as inlet
         "model": "NAME",
         "species": "rn",  # TODO: May want to see if we can keep this capitalised?
         "metmodel": "ukv",
@@ -393,7 +417,7 @@ def test_datasource_add_lookup():
             "metadata": {
                 "data_type": "footprints",
                 "site": "tmb",
-                "height": "10m",
+                "inlet": "10m",
                 "domain": "europe",
                 "model": "test_model",
                 "network": "lghg",
@@ -405,7 +429,7 @@ def test_datasource_add_lookup():
         f.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
         assert f.datasources() == ["mock-uuid-123456"]
-        required = ["site", "height", "domain", "model"]
+        required = ["site", "inlet", "domain", "model"]
         lookup = datasource_lookup(data=mock_data, metastore=metastore, required_keys=required)
 
         assert lookup["tmb_lghg_10m_europe"] == fake_datasource["tmb_lghg_10m_europe"]["uuid"]

@@ -43,16 +43,11 @@ def parse_openghg(
         data_owner: Name of data owner.
         data_owner_email: Email address for data owner.
         kwargs: Any additional attributes to be associated with the data.
-
     Returns:
-        Dict : Dictionary of source_name : data, metadata, attributes
+        Dict: Dictionary of source_name : data, metadata, attributes
     """
     from openghg.util import clean_string, load_json
-    from openghg.standardise.meta import (
-        metadata_default_keys,
-        define_species_label,
-        assign_attributes
-    )
+    from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
 
     data_filepath = Path(data_filepath)
 
@@ -69,7 +64,6 @@ def parse_openghg(
         "site": site,
         "species": species,
         "network": network,
-        "inlet": inlet,
         "instrument": instrument,
         "sampling_period": sampling_period,
         "calibration_scale": calibration_scale,
@@ -77,13 +71,14 @@ def parse_openghg(
         "data_owner_email": data_owner_email,
     }
 
-    # TODO: Decide if to allow any of these to be missed.
+    # Run some checks on the
+    data_attrs = {k.lower().replace(" ", "_"): v for k, v in data.attrs.items()}
 
     # Populate metadata with values from attributes if inputs have not been passed
     for key, value in metadata_initial.items():
         if value is None:
             try:
-                metadata_initial[key] = attributes[key]
+                metadata_initial[key] = data_attrs[key]
             except KeyError:
                 raise ValueError(f"Input '{key}' must be specified if not included in data attributes.")
         else:
@@ -96,9 +91,23 @@ def parse_openghg(
                         f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
                     )
 
+    # Read the inlet
+    if inlet is None:
+        inlet_val = [v for k, v in data_attrs.items() if "inlet" in k]
+
+        if not inlet_val:
+            raise ValueError("Cannot read inlet from attributes, please pass as argument.")
+        if len(set(inlet_val)) > 1:
+            raise ValueError("More than one inlet value found in attributes, please pass as argument.")
+
+        inlet = inlet_val[0]
+
+    metadata_initial["inlet"] = inlet
+
     metadata = cast(Dict[str, str], metadata_initial)
 
     metadata["inlet_height_magl"] = metadata["inlet"]
+    metadata["data_type"] = "surface"
 
     # Define remaining keys needed for metadata
     metadata_needed = metadata_default_keys()

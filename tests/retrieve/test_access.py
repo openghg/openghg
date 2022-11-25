@@ -12,8 +12,9 @@ from helpers import (
     metadata_checker_obssurface,
 )
 from openghg.dataobjects import ObsData
-from openghg.retrieve import get_flux, get_footprint, get_obs_column, get_obs_surface, search
+from openghg.retrieve import get_flux, get_bc, get_footprint, get_obs_column, get_obs_surface, search
 from openghg.util import compress, compress_str, hash_bytes
+from openghg.types import SearchError
 from pandas import Timedelta, Timestamp
 
 # a = [
@@ -40,8 +41,21 @@ from pandas import Timedelta, Timestamp
 # ]
 
 
-def test_get_obs_surface():
-    obsdata = get_obs_surface(site="bsd", species="co2", inlet="248m")
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "248m"),
+        ("height", "248m"),
+        ("inlet", "248magl"),
+        ("inlet", "248"),
+    ],
+)
+def test_get_obs_surface(inlet_keyword, inlet_value):
+
+    if inlet_keyword == "inlet":
+        obsdata = get_obs_surface(site="bsd", species="co2", inlet=inlet_value)
+    elif inlet_keyword == "height":
+        obsdata = get_obs_surface(site="bsd", species="co2", height=inlet_value)
     co2_data = obsdata.data
 
     assert co2_data.time[0] == Timestamp("2014-01-30T11:12:30")
@@ -62,9 +76,30 @@ def test_get_obs_surface():
     assert not time.equals(averaged_time)
 
 
-# def test_no_inlet_no_ranked_data_raises():
-#     with pytest.raises(ValueError):
-#         get_obs_surface(site="bsd", species="co2")
+def test_ambiguous_no_ranked_data_raises():
+    """
+    Test sensible error message is raised when result is ambiguous for
+    get_obs_surface() function
+    """
+    with pytest.raises(SearchError) as excinfo:
+        get_obs_surface(site="bsd", species="co2")
+        assert "Multiple entries found for input parameters" in excinfo
+
+
+def test_no_data_raises():
+    """
+    Test sensible error message is raised when no data can be found
+    get_obs_surface() function
+    """
+    with pytest.raises(SearchError) as excinfo:
+        site = "bsd"
+        species = "cfc11"
+        get_obs_surface(site=site, species=species)
+
+        assert "Unable to find results for" in excinfo
+        assert f"site='{site}'" in excinfo
+        assert f"species='{species}'" in excinfo
+
 
 
 # def test_get_obs_surface_ranked_data_only():
@@ -278,16 +313,56 @@ def test_get_flux():
     assert float(flux.lon.max()) == pytest.approx(39.38)
     assert float(flux.lon.min()) == pytest.approx(-97.9)
     assert sorted(list(flux.variables)) == ["flux", "lat", "lon", "time"]
-    assert flux.attrs["species"] == "co2"
+
+    # Check whole flux range has been retrieved (2 files)
+    time = flux["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+    assert time[-1] == Timestamp("2013-01-01T00:00:00")
 
 
 def test_get_flux_no_result():
-    with pytest.raises(ValueError):
+    """Test sensible error message is being returned when no results are found 
+    with input keywords for get_flux function"""
+    with pytest.raises(SearchError) as execinfo:
         get_flux(species="co2", source="cinnamon", domain="antarctica")
+        assert "Unable to find results" in execinfo
+        assert "species='co2'" in execinfo
+        assert "source='cinnamon'" in execinfo
+        assert "domain='antarctica'" in execinfo
 
 
-def test_get_footprint():
-    fp_result = get_footprint(site="tmb", domain="europe", height="10m", model="test_model")
+def test_get_bc():
+    bc_data = get_bc(species="n2o", bc_input="mozart", domain="europe")
+
+    bc = bc_data.data
+
+    assert float(bc.lat.max()) == pytest.approx(79.057)
+    assert float(bc.lat.min()) == pytest.approx(10.729)
+    assert float(bc.lon.max()) == pytest.approx(39.38)
+    assert float(bc.lon.min()) == pytest.approx(-97.9)
+
+    bc_variables = ['height', 'lat', 'lon', 'time',
+                    'vmr_e', 'vmr_n', 'vmr_s', 'vmr_w']
+    assert sorted(list(bc.variables)) == bc_variables
+
+    time = bc["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+
+
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "10m"),
+        ("height", "10m"),
+        ("inlet", "10magl"),
+        ("inlet", "10"),
+    ],
+)
+def test_get_footprint(inlet_keyword,inlet_value):
+    if inlet_keyword == "inlet":
+        fp_result = get_footprint(site="tmb", domain="europe", inlet=inlet_value, model="test_model")
+    elif inlet_keyword == "height":
+        fp_result = get_footprint(site="tmb", domain="europe", height=inlet_value, model="test_model")
 
     footprint = fp_result.data
     metadata = fp_result.metadata
@@ -303,5 +378,12 @@ def test_get_footprint():
 
 
 def test_get_footprint_no_result():
-    with pytest.raises(ValueError):
+    """Test sensible error message is being returned when no results are found 
+    with input keywords for get_footprint function"""
+    with pytest.raises(SearchError) as execinfo:
         get_footprint(site="seville", domain="spain", height="10m", model="test_model")
+        assert "Unable to find results" in execinfo
+        assert "site='seville'" in execinfo
+        assert "domain='spain'" in execinfo
+        assert "height='10m'" in execinfo
+        assert "model='test_model'" in execinfo

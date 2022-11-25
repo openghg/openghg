@@ -148,13 +148,6 @@ class BoundaryConditions(BaseStore):
             bc_time, filepath=filepath, period=period, continuous=continuous
         )
 
-        if "year" in period_str:
-            date = f"{start_date.year}"
-        elif "month" in period_str:
-            date = f"{start_date.year}{start_date.month:02}"
-        else:
-            date = start_date.astype("datetime64[s]").astype(str)
-
         # Checking against expected format for boundary conditions
         BoundaryConditions.validate_data(bc_data)
         data_type = "boundary_conditions"
@@ -173,15 +166,14 @@ class BoundaryConditions(BaseStore):
         metadata["input_filename"] = filepath.name
 
         metadata["time_period"] = period_str
-        metadata["date"] = date
 
-        key = "_".join((species, bc_input, domain, date))
+        key = "_".join((species, bc_input, domain))
 
         boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
         boundary_conditions_data[key]["data"] = bc_data
         boundary_conditions_data[key]["metadata"] = metadata
 
-        required_keys = ("species", "bc_input", "domain", "date")
+        required_keys = ("species", "bc_input", "domain")
         lookup_results = datasource_lookup(
             metastore=metastore, data=boundary_conditions_data, required_keys=required_keys
         )

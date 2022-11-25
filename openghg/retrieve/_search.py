@@ -4,12 +4,11 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
-
-from openghg.dataobjects import SearchResults
 from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.util import decompress, running_on_hub
 from tinydb.database import TinyDB
+from openghg.dataobjects import SearchResults
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -107,6 +106,8 @@ def search_bc(
     species: Optional[str] = None,
     bc_input: Optional[str] = None,
     domain: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
 ) -> SearchResults:
@@ -118,6 +119,8 @@ def search_bc(
             - a model name such as "MOZART" or "CAMS"
             - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
         domain: Region for boundary conditions
+        start_date: Start date (inclusive) for boundary conditions
+        end_date: End date (exclusive) for boundary conditions
         period: Period of measurements. Only needed if this can not be inferred from the time coords
                 If specified, should be one of:
                     - "yearly", "monthly"
@@ -127,10 +130,18 @@ def search_bc(
     Returns:
         SearchResults: SearchResults object
     """
+
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
     return search(
         species=species,
         bc_input=bc_input,
         domain=domain,
+        start_date=start_date,
+        end_date=end_date,
         period=period,
         continuous=continuous,
         data_type="boundary_conditions",
@@ -153,16 +164,23 @@ def search_eulerian(
     Returns:
         SearchResults: SearchResults object
     """
+
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
     return search(
         model=model, species=species, start_date=start_date, end_date=end_date, data_type="eulerian_model"
     )
 
 
-def search_emissions(
+def search_flux(
     species: Optional[str] = None,
     source: Optional[str] = None,
     domain: Optional[str] = None,
-    date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
     high_time_resolution: Optional[bool] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
@@ -173,7 +191,6 @@ def search_emissions(
         species: Species name
         domain: Emissions domain
         source: Emissions source
-        date : Date associated with emissions as a string
         source_format : Type of data being input e.g. openghg (internal format)
         high_time_resolution: If this is a high resolution file
         period: Period of measurements. Only needed if this can not be inferred from the time coords
@@ -185,11 +202,18 @@ def search_emissions(
     Returns:
         SearchResults: SearchResults object
     """
+
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
     return search(
         species=species,
         source=source,
         domain=domain,
-        date=date,
+        start_date=start_date,
+        end_date=end_date,
         high_time_resolution=high_time_resolution,
         period=period,
         continuous=continuous,
@@ -199,11 +223,14 @@ def search_emissions(
 
 def search_footprints(
     site: Optional[str] = None,
-    height: Optional[str] = None,
+    inlet: Optional[str] = None,
     domain: Optional[str] = None,
     model: Optional[str] = None,
+    height: Optional[str] = None,
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
@@ -215,9 +242,10 @@ def search_footprints(
 
     Args:
         site: Site name
-        height: Height above ground level in metres
+        inlet: Height above ground level in metres
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
+        height: Alias for inlet
         metmodel: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
@@ -232,14 +260,29 @@ def search_footprints(
     Returns:
         SearchResults: SearchResults object
     """
+    from openghg.util import format_inlet
+
+    if start_date is not None:
+        start_date = str(start_date)
+    if end_date is not None:
+        end_date = str(end_date)
+
+    # Allow inlet or height to be specified, both or either may be included
+    # within the metadata so could use either to search
+    inlet = format_inlet(inlet)
+    height = format_inlet(height)
+
     return search(
         site=site,
+        inlet=inlet,
         height=height,
         domain=domain,
         model=model,
         metmodel=metmodel,
         species=species,
         network=network,
+        start_date=start_date,
+        end_date=end_date,
         period=period,
         continuous=continuous,
         high_spatial_res=high_spatial_res,
@@ -253,6 +296,7 @@ def search_surface(
     species: Union[str, List[str], None] = None,
     site: Union[str, List[str], None] = None,
     inlet: Union[str, List[str], None] = None,
+    height: Union[str, List[str], None] = None,
     instrument: Union[str, List[str], None] = None,
     measurement_type: Union[str, List[str], None] = None,
     source_format: Union[str, List[str], None] = None,
@@ -268,7 +312,8 @@ def search_surface(
     Args:
         species: Species
         site: Three letter site code
-        inlet: Inlet height
+        inlet: Inlet height above ground level in metres
+        height: Alias for inlet
         instrument: Instrument name
         measurement_type: Measurement type
         data_type: Data type e.g. "surface", "column", "emissions"
@@ -282,10 +327,21 @@ def search_surface(
     Returns:
         SearchResults: SearchResults object
     """
+    from openghg.util import format_inlet
+
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
         end_date = str(end_date)
+
+    # Allow height to be an alias for inlet but we do not expect height
+    # to be within the metadata (for now)
+    if inlet is None and height is not None:
+        inlet = height
+    if isinstance(inlet, list):
+        inlet = [format_inlet(value) for value in inlet]
+    else:
+        inlet = format_inlet(inlet)
 
     results = search(
         species=species,
@@ -406,7 +462,7 @@ def search(**kwargs: Any) -> SearchResults:
 # _base_search()
 # 1.
 # _store_search()
-def local_search(**kwargs):  # type: ignore
+def local_search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
 
@@ -432,6 +488,7 @@ def local_search(**kwargs):  # type: ignore
     import itertools
 
     from openghg.store.base import Datasource
+    from openghg.dataobjects import SearchResults
     from openghg.util import (
         clean_string,
         synonyms,

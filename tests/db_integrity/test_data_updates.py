@@ -26,7 +26,6 @@ def flux_data_read():
         filepath=emissions_datapath1,
         species="ch4",
         source=source1,
-        date="2012",
         domain=domain,
         high_time_resolution=False,
     )

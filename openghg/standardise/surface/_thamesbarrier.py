@@ -12,6 +12,7 @@ def parse_tmb(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    **kwargs: Dict,
 ) -> Dict:
     """Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
     the processed data has been assigned to

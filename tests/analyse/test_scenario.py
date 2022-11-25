@@ -197,6 +197,49 @@ def test_scenario_infer_inputs_co2():
     assert flux_time[0] == Timestamp("2014-06-29T18:00:00")  # Test file - reduced time axis
 
 
+def test_scenario_flux_extend_co2():
+    """
+    Check ModelScenario can extract full date range of flux values for a given
+    source.
+    Note: for co2, the start and end date range is not used when grabbing the
+    flux data. This is to ensure all relevant flux data is grabbed for creating
+    modelled observations as this may be outside the date range.
+    """
+
+    start_date = "2014-07-01"
+    end_date = "2014-08-01"
+
+    site = "tac"
+    domain = "TEST"
+    inlet = "100m"
+    network = "DECC"
+
+    species = "co2"
+    source = "ocean"
+
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        inlet=inlet,
+        network=network,
+        domain=domain,
+        sources=source,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    # Check data is being found and stored
+    assert model_scenario.obs is not None
+    assert model_scenario.footprint is not None
+    assert model_scenario.fluxes is not None
+
+    # Check two flux files for the same source have been returned
+    flux_data = model_scenario.fluxes[source].data
+    flux_time = flux_data["time"]
+    assert flux_time[0] == Timestamp("2013-12-01T00:00:00")  # From test file 1 - reduced time axis
+    assert flux_time[1] == Timestamp("2014-07-01T00:00:00")  # From test file 2 - reduced time axis
+
+
 def test_scenario_infer_inlet():
     """
     Test ModelScenario can find underlying data for both observations and
@@ -256,16 +299,10 @@ def test_scenario_too_few_inputs():
 
     site = "tac"
 
-    # Explicitly not including inlet to test this can be inferred.
     model_scenario = ModelScenario(site=site)
 
-    # TODO: This may be updated to be include empty ObsData() class
-    # May need to include:
-    # assert model_scenario.obs.data is None
     assert model_scenario.obs is None
-
-    # TODO: get_footprint() is not currently returning None - check this
-    # assert model_scenario.footprint.data is None
+    assert model_scenario.footprint is None
 
 
 def test_add_data():
