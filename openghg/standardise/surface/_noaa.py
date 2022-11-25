@@ -543,7 +543,7 @@ def _read_raw_data(
     # Read the site code from the Dataframe
     site = str(data["sample_site_code"][0]).upper()
 
-    site_data = load_json("acrg_site_info.json")
+    site_data = load_json("site_info.json")
     # If this isn't a site we recognize try and read it from the filename
     if site not in site_data:
         site = str(data_filepath.name).split("_")[1].upper()

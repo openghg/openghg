@@ -97,16 +97,16 @@ def _extract_site_names(site_codes: list, site_json: Union[str, Path] = "default
 
     Args:
         site_codes: List of site codes
-        site_json: By default this will use the "acrg_site_info.json" file
+        site_json: By default this will use the "site_info.json" file
             but an alternative file which matches to this format may be specified.
 
     Returns:
         Dict: Long names for each site code
     """
 
-    # Uses acrg_site_info file by default.
+    # Uses "site_info.json" file by default.
     if site_json == "default":
-       site_params = load_json("acrg_site_info.json")
+       site_params = load_json("site_info.json")
     else:
         site_json_path = Path(site_json)
         path = site_json_path.parent
@@ -215,12 +215,12 @@ def summary_site_codes() -> pd.DataFrame:
         pandas.DataFrame
 
     TODO: Allow input for site json file to use. Must match to format within
-    acrg_site_info.json file.
+    "site_info.json" file.
     """
 
     from openghg.util import load_json
 
-    site_info = load_json(filename="acrg_site_info.json")
+    site_info = load_json(filename="site_info.json")
 
     site_dict: Dict[str, list] = {}
     site_dict["site"] = []

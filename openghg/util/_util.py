@@ -180,7 +180,7 @@ def multiple_inlets(site: str) -> bool:
     """
     from openghg.util import load_json
 
-    site_data = load_json("acrg_site_info.json")
+    site_data = load_json("site_info.json")
 
     site = site.upper()
     network = next(iter(site_data[site]))

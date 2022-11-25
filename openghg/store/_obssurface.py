@@ -148,7 +148,7 @@ class ObsSurface(BaseStore):
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Test that the passed values are valid
-        # Check validity of site, instrument, inlet etc in acrg_site_info.json
+        # Check validity of site, instrument, inlet etc in 'site_info.json'
         # Clean the strings
         site = verify_site(site=site) if verify_site_code else clean_string(site)
         network = clean_string(network)

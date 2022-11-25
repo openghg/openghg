@@ -279,12 +279,12 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
         raise ValueError(f"Unable to read attributes for site: {site}")
 
     # TODO - we need to combine the metadata
-    acrg_site_metadata = load_json(filename="acrg_site_info.json")
+    full_site_metadata = load_json(filename="site_info.json")
 
     attributes = global_attributes.copy()
 
     try:
-        metadata = acrg_site_metadata[site.upper()]
+        metadata = full_site_metadata[site.upper()]
     except KeyError:
         pass
     else:

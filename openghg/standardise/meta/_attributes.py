@@ -292,7 +292,7 @@ def get_attributes(
 def define_species_label(species: str) -> Tuple[str, str]:
     """
     Define standardised label to use for observation datasets.
-    This is defined using the 'acrg_site_info.json' details with
+    This is defined using the 'site_info.json' details with
     alternative names ('alt') defined within.
 
     Formatting:
@@ -309,7 +309,7 @@ def define_species_label(species: str) -> Tuple[str, str]:
 
     Returns:
         str, str: Both the species label to be used exactly and the original attribute
-                  key needed to extract additional data from the 'acrg_site_info.json'
+                  key needed to extract additional data from the 'site_info.json'
                   attributes file.
 
     Example:
@@ -352,7 +352,7 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     site = site.upper()
 
     # Read site info file
-    data_filename = "acrg_site_info.json"
+    data_filename = "site_info.json"
     site_params = load_json(filename=data_filename)
 
     if network is None:

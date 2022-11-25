@@ -6,13 +6,11 @@ from pathlib import Path
 def sites_in_network(network: str, site_json: Union[str, Path] = "default") -> list:
     """
     Extract details of all the sites within a network.
-    This will use the "acrg_site_info.json" file by default.
-
     Note: this will assume the network is stored in upper case.
 
     Args:
         network: Name of the network
-        site_json: By default this will use the "acrg_site_info.json" file
+        site_json: By default this will use the "site_info.json" file
             but an alternative file which matches to this format may be specified.
     
     Returns:
@@ -20,7 +18,7 @@ def sites_in_network(network: str, site_json: Union[str, Path] = "default") -> l
     """
 
     if site_json == "default":
-        site_data = load_json(filename="acrg_site_info.json")
+        site_data = load_json(filename="site_info.json")
     else:
         site_json_path = Path(site_json)
         path = site_json_path.parent

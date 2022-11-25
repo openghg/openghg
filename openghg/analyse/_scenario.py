@@ -481,7 +481,7 @@ class ModelScenario:
         """
         Find the platform for a site, if present.
 
-        This will access the "acrg_site_info.json" file to find this information.
+        This will access the "site_info.json" file to find this information.
         """
         from openghg.util import load_json
 
@@ -491,7 +491,7 @@ class ModelScenario:
         except AttributeError:
             return None
         else:
-            site_info = load_json(filename="acrg_site_info.json")
+            site_info = load_json(filename="site_info.json")
             try:
                 site_details = site_info[site_upper]
             except KeyError:

@@ -163,7 +163,7 @@ def get_obs_surface_local(
             "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
         )
 
-    site_info = load_json(filename="acrg_site_info.json")
+    site_info = load_json(filename="site_info.json")
     site = site.upper()
 
     if site not in site_info:
