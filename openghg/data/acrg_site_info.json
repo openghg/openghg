@@ -394,7 +394,8 @@
       "height_name": ["185magl"],
       "latitude": 51.5215,
       "long_name": "BT Tower, UK",
-      "longitude": -0.1389
+      "longitude": -0.1389,
+      "status": "current"
     }
   },
   "BWD": {
@@ -1977,7 +1978,8 @@
       "height_station_masl": 0,
       "latitude": 51.4241,
       "long_name": "National Physical Laboratory",
-      "longitude": -0.3487
+      "longitude": -0.3487,
+      "status": "current"
     }
   },
   "NWB": {
@@ -2858,7 +2860,8 @@
       "height_station_masl": 5.0,
       "latitude": 51.496769,
       "long_name": "Thames Barrier, UK",
-      "longitude": 0.036995
+      "longitude": 0.036995,
+      "status": "current"
     }
   },
   "TMD": {
