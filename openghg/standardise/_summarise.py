@@ -1,91 +1,129 @@
-from typing import Dict
+from typing import Dict, Union
 
 import pandas as pd
+from pathlib import Path
 from openghg.types import SurfaceTypes
+from openghg.util import get_datapath, load_json, sites_in_network
 
 # from openghg.types import DataTypes  # Would this be more appropriate?
 # This does include Footprint as well as the input obs data types?
 
 
-def _extract_site_param(source_format: str) -> Dict:
-    """Extract site data for a given data type based on the available data
-    file. If no file is available for source_format input it returns an empty dictionary.
+# def _extract_site_param(source_format: str) -> Dict:
+#     """Extract site data for a given data type based on the available data
+#     file. If no file is available for source_format input it returns an empty dictionary.
 
-    TODO: Create files of site details for other data types and incorporate here.
+#     TODO: Create files of site details for other data types and incorporate here.
 
-    For data types:
-    - "GCWERKS", "CRDS"
-       - "process_gcwerks_parameters.json"
-    - "NPL", "BTT", "THAMESBARRIER"
-       - "lghg_sites.json"
-    - "BEACO2N"
-       - "beaco2n_site_data.json"
-    - Other
-       - none specified
+#     For data types:
+#     - "GCWERKS", "CRDS"
+#        - "process_gcwerks_parameters.json"
+#     - "NPL", "BTT", "THAMESBARRIER"
+#        - "lghg_sites.json"
+#     - "BEACO2N"
+#        - "beaco2n_site_data.json"
+#     - Other
+#        - none specified
+
+#     Args:
+#         source_format: Accepted data type (defined in SurfaceTypes)
+#     Returns:
+#         dict: Details of site params for the data type extracted from json file
+#     """
+#     from openghg.util import load_json
+
+#     source_format = source_format.upper()
+
+#     lghg_sites = {"NPL": "NPL", "BTT": "BTT", "THAMESBARRIER": "TMB"}
+
+#     # TODO: Could create another json / csv which includes links
+#     # between GCWERKS and instruments (with a warning) if needed
+
+#     if source_format == "GCWERKS":
+#         # "process_gcwerks_parameters.json" - ["GCWERKS"]["sites"], sites are keys
+#         params_full = load_json(filename="process_gcwerks_parameters.json")
+#         site_params: Dict = params_full[source_format]["sites"]
+#     elif source_format == "CRDS":
+#         # "process_gcwerks_parameters.json" - ["CRDS"]["sites"], sites are keys
+#         params_full = load_json(filename="process_gcwerks_parameters.json")
+#         crds_params = params_full[source_format]["sites"]
+#         site_params = {key: value for key, value in crds_params.items() if len(key) == 3 and key.isupper()}
+#     elif source_format in lghg_sites.keys():
+#         # TODO: May want to update this now new sites have been added to lghg_data.json
+#         # Do these sites have their own data types?
+#         # "lghg_data.json" - ["sites"], sites are keys
+#         params_full = load_json(filename="lghg_data.json")
+#         site_name = lghg_sites[source_format]
+#         site_params = {}
+#         site_params[site_name] = params_full["sites"][site_name]
+#     elif source_format == "BEACO2N":
+#         # "beaco2n_site_data.json" - sites are keys
+#         params_full = load_json(filename="beaco2n_site_data.json")
+#         site_params = params_full
+#     else:
+#         site_params = {}
+
+#     return site_params
+
+
+# def _extract_site_names(site_params: Dict, source_format: str) -> Dict:
+#     """
+#     Extracts long names from site parameters - expects output to
+#     match format from `_extract_site_param()` function.
+
+#     Args:
+#         site_params (dict) : Dictionary of site data (extracted from
+#         relevant json file)
+#         source_format (str) : Associated data type for this data
+
+#     Returns:
+#         Dict: Long names for each site code
+#     """
+#     if source_format in ("GCWERKS", "CRDS"):
+#         name = "gcwerks_site_name"
+#     else:
+#         name = "long_name"
+
+#     site_names = {}
+#     for site, data in site_params.items():
+#         site_names[site] = data[name]
+
+#     return site_names
+
+
+def _extract_site_names(site_codes: list, site_json: Union[str, Path] = "default"):
+    """
+    Extracts long names for site codes.
 
     Args:
-        source_format: Accepted data type (defined in SurfaceTypes)
-    Returns:
-        dict: Details of site params for the data type extracted from json file
-    """
-    from openghg.util import load_json
-
-    source_format = source_format.upper()
-
-    lghg_sites = {"NPL": "NPL", "BTT": "BTT", "THAMESBARRIER": "TMB"}
-
-    # TODO: Could create another json / csv which includes links
-    # between GCWERKS and instruments (with a warning) if needed
-
-    if source_format == "GCWERKS":
-        # "process_gcwerks_parameters.json" - ["GCWERKS"]["sites"], sites are keys
-        params_full = load_json(filename="process_gcwerks_parameters.json")
-        site_params: Dict = params_full[source_format]["sites"]
-    elif source_format == "CRDS":
-        # "process_gcwerks_parameters.json" - ["CRDS"]["sites"], sites are keys
-        params_full = load_json(filename="process_gcwerks_parameters.json")
-        crds_params = params_full[source_format]["sites"]
-        site_params = {key: value for key, value in crds_params.items() if len(key) == 3 and key.isupper()}
-    elif source_format in lghg_sites.keys():
-        # TODO: May want to update this now new sites have been added to lghg_data.json
-        # Do these sites have their own data types?
-        # "lghg_data.json" - ["sites"], sites are keys
-        params_full = load_json(filename="lghg_data.json")
-        site_name = lghg_sites[source_format]
-        site_params = {}
-        site_params[site_name] = params_full["sites"][site_name]
-    elif source_format == "BEACO2N":
-        # "beaco2n_site_data.json" - sites are keys
-        params_full = load_json(filename="beaco2n_site_data.json")
-        site_params = params_full
-    else:
-        site_params = {}
-
-    return site_params
-
-
-def _extract_site_names(site_params: Dict, source_format: str) -> Dict:
-    """
-    Extracts long names from site parameters - expects output to
-    match format from `_extract_site_param()` function.
-
-    Args:
-        site_params (dict) : Dictionary of site data (extracted from
-        relevant json file)
-        source_format (str) : Associated data type for this data
+        site_codes: List of site codes
+        site_json: By default this will use the "acrg_site_info.json" file
+            but an alternative file which matches to this format may be specified.
 
     Returns:
         Dict: Long names for each site code
     """
-    if source_format in ("GCWERKS", "CRDS"):
-        name = "gcwerks_site_name"
+
+    # Uses acrg_site_info file by default.
+    if site_json == "default":
+       site_params = load_json("acrg_site_info.json")
     else:
-        name = "long_name"
+        site_json_path = Path(site_json)
+        path = site_json_path.parent
+        filename = site_json_path.name
+        site_data = load_json(filename=filename, path=path)
 
-    site_names = {}
-    for site, data in site_params.items():
-        site_names[site] = data[name]
-
+    # Extracts long name from site data
+    site_names = []
+    for site in site_codes:
+        site_data = site_params[site]
+        data0 = list(site_data.values())[0]  # Uses first network entry
+        try:
+            site_name = data0["long_name"]
+        except KeyError:
+            site_name = ""
+        site_names.append(site_name)
+    
     return site_names
 
 
@@ -98,25 +136,56 @@ def summary_source_formats() -> pd.DataFrame:
         pandas.DataFrame
 
     TODO: Add source_format details for mobile / column etc. when added
+    TODO: Consider if we need to / how best to incorporate BEA2CON data
     """
     # Could include input for surface / mobile / column etc.?
     surface_source_formats = list(SurfaceTypes.__members__)
 
     collated_site_data = pd.DataFrame()
 
+    # Get additional data about source formats
+    # - expect details in here to be related to sites where source_format
+    #   does not match to network name.
+    source_format_file = get_datapath("source_format_data.csv")
+    source_format_data = pd.read_csv(source_format_file)
+
     for source_format in surface_source_formats:
-        site_params = _extract_site_param(source_format)
 
-        if site_params:
-            site_codes = list(site_params.keys())
-            site_names_dict = _extract_site_names(site_params, source_format)
-            site_names = [site_names_dict[code] for code in site_codes]
+        source_format_site = source_format_data[source_format_data["source_format"] == source_format]
+        site_codes = source_format_site["Site"].values
+
+        # If no data in source format file, assume source_format may be
+        # applicable to network sites.
+        # TODO: May be a bad assumption, consider this and update as necessary.
+        if len(site_codes) == 0:
+            site_codes = sites_in_network(source_format)
+
+        site_names = _extract_site_names(site_codes)
+
+        # site_params = _extract_site_param(source_format)
+
+        # if site_params:
+        #     site_codes = list(site_params.keys())
+        #     site_names_dict = _extract_site_names(site_params, source_format)
+        #     site_names = [site_names_dict[code] for code in site_codes]
+        # else:
+        #     site_codes = [""]
+        #     site_names = [""]
+
+        # site_names = [site_names_dict[code] for code in site_codes]
+
+        # site_data = pd.DataFrame({"Site code": site_codes, "Long name": site_names})
+        # site_data["Source format"] = source_format
+        # site_data["Platform"] = "surface site"
+
+        if len(source_format_site) > 0:
+            site_data = source_format_site.copy()
         else:
-            site_codes = [""]
-            site_names = [""]
+            site_data = pd.DataFrame({"source_format": source_format, "Site": site_codes})
+            site_data = site_data.reindex(source_format_site.columns, axis=1)
 
-        site_data = pd.DataFrame({"Site code": site_codes, "Long name": site_names})
-        site_data["Source format"] = source_format
+        site_data = site_data.rename(columns={"Site": "Site code", "source_format": "Source format"})
+        site_data["Long name"] = site_names
         site_data["Platform"] = "surface site"
 
         collated_site_data = pd.concat([collated_site_data, site_data], ignore_index=True)
@@ -124,6 +193,12 @@ def summary_source_formats() -> pd.DataFrame:
     # TODO: May want to sort by the site code but removed for now as nice
     # to keep GCWERKS and CRDS first.
     # collated_site_data = collated_site_data.sort_values(by="Site code")
+
+    # Reorder columns to make "Source format" first
+    columns = list(collated_site_data.columns)
+    columns.remove("Source format")
+    columns = ["Source format"] + columns
+    collated_site_data = collated_site_data[columns]
 
     return collated_site_data
 
