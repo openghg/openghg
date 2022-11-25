@@ -2609,7 +2609,7 @@
       "height_name": ["125magl"],
       "height_station_masl": 181.0,
       "latitude": 61.847,
-      "long_name": "Smear/Hyytiala, Finland",
+      "long_name": "Hyytiälä, Finland",
       "longitude": 24.295
     },
     "NOAA": {
@@ -2715,6 +2715,14 @@
     "NOAA": {
       "latitude": 64.256,
       "longitude": 19.775,
+      "height_station_masl": 235.0,
+      "long_name": "Svartberget, Sweden",
+      "heights": ["85m"],
+      "height_name": ["85magl"]
+    },
+    "EUROCOM": {
+      "latitude": 64.14,
+      "longitude": 19.46,
       "height_station_masl": 235.0,
       "long_name": "Svartberget, Sweden",
       "heights": ["85m"],
