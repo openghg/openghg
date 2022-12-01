@@ -6,9 +6,8 @@ dependencies:
   - addict
   - dask
   - h5netcdf
-  - icoscp
   - matplotlib
-  - msgpack
+  - msgpack-python
   - numexpr
   - numpy
   - nc-time-axis
