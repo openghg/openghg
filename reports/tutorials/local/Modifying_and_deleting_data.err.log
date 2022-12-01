@@ -65,7 +65,7 @@ File [0;32m/opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/s
 During handling of the above exception, another exception occurred:
 
 [0;31mAttributeError[0m                            Traceback (most recent call last)
-Cell [0;32mIn [2], line 1[0m
+Cell [0;32mIn[2], line 1[0m
 [0;32m----> 1[0m [43mpopulate_footprint_inert[49m[43m([49m[43m)[49m
 
 File [0;32m/opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/tutorial/_tutorial.py:61[0m, in [0;36mpopulate_footprint_inert[0;34m()[0m
@@ -96,17 +96,17 @@ File [0;32m/opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/o
 [1;32m    280[0m [43m        [49m[43moverwrite[49m[38;5;241;43m=[39;49m[43moverwrite[49m[43m,[49m
 [1;32m    281[0m [43m    [49m[43m)[49m
 
-File [0;32m/opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_footprints.py:380[0m, in [0;36mFootprints.read_file[0;34m(filepath, site, domain, model, inlet, height, metmodel, species, network, period, chunks, continuous, retrieve_met, high_spatial_res, high_time_res, short_lifetime, overwrite)[0m
-[1;32m    377[0m lookup_results [38;5;241m=[39m datasource_lookup(metastore[38;5;241m=[39mmetastore, data[38;5;241m=[39mfootprint_data, required_keys[38;5;241m=[39mrequired)
-[1;32m    379[0m data_type [38;5;241m=[39m [38;5;124m"[39m[38;5;124mfootprints[39m[38;5;124m"[39m
-[0;32m--> 380[0m datasource_uuids: Dict[[38;5;28mstr[39m, Dict] [38;5;241m=[39m [43massign_data[49m[43m([49m
-[1;32m    381[0m [43m    [49m[43mdata_dict[49m[38;5;241;43m=[39;49m[43mfootprint_data[49m[43m,[49m
-[1;32m    382[0m [43m    [49m[43mlookup_results[49m[38;5;241;43m=[39;49m[43mlookup_results[49m[43m,[49m
-[1;32m    383[0m [43m    [49m[43moverwrite[49m[38;5;241;43m=[39;49m[43moverwrite[49m[43m,[49m
-[1;32m    384[0m [43m    [49m[43mdata_type[49m[38;5;241;43m=[39;49m[43mdata_type[49m[43m,[49m
-[1;32m    385[0m [43m[49m[43m)[49m
-[1;32m    387[0m fp[38;5;241m.[39madd_datasources(uuids[38;5;241m=[39mdatasource_uuids, data[38;5;241m=[39mfootprint_data, metastore[38;5;241m=[39mmetastore)
-[1;32m    389[0m [38;5;66;03m# Record the file hash in case we see this file again[39;00m
+File [0;32m/opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_footprints.py:375[0m, in [0;36mFootprints.read_file[0;34m(filepath, site, domain, model, inlet, height, metmodel, species, network, period, chunks, continuous, retrieve_met, high_spatial_res, high_time_res, short_lifetime, overwrite)[0m
+[1;32m    372[0m lookup_results [38;5;241m=[39m datasource_lookup(metastore[38;5;241m=[39mmetastore, data[38;5;241m=[39mfootprint_data, required_keys[38;5;241m=[39mrequired)
+[1;32m    374[0m data_type [38;5;241m=[39m [38;5;124m"[39m[38;5;124mfootprints[39m[38;5;124m"[39m
+[0;32m--> 375[0m datasource_uuids: Dict[[38;5;28mstr[39m, Dict] [38;5;241m=[39m [43massign_data[49m[43m([49m
+[1;32m    376[0m [43m    [49m[43mdata_dict[49m[38;5;241;43m=[39;49m[43mfootprint_data[49m[43m,[49m
+[1;32m    377[0m [43m    [49m[43mlookup_results[49m[38;5;241;43m=[39;49m[43mlookup_results[49m[43m,[49m
+[1;32m    378[0m [43m    [49m[43moverwrite[49m[38;5;241;43m=[39;49m[43moverwrite[49m[43m,[49m
+[1;32m    379[0m [43m    [49m[43mdata_type[49m[38;5;241;43m=[39;49m[43mdata_type[49m[43m,[49m
+[1;32m    380[0m [43m[49m[43m)[49m
+[1;32m    382[0m fp[38;5;241m.[39madd_datasources(uuids[38;5;241m=[39mdatasource_uuids, data[38;5;241m=[39mfootprint_data, metastore[38;5;241m=[39mmetastore)
+[1;32m    384[0m [38;5;66;03m# Record the file hash in case we see this file again[39;00m
 
 File [0;32m/opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_segment.py:51[0m, in [0;36massign_data[0;34m(data_dict, lookup_results, overwrite, data_type)[0m
 [1;32m     49[0m datasource[38;5;241m.[39madd_data(metadata[38;5;241m=[39mmetadata, data[38;5;241m=[39mdata, overwrite[38;5;241m=[39moverwrite, data_type[38;5;241m=[39mdata_type)

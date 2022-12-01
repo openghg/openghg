@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Modifying and deleting data &#8212; OpenGHG 0+untagged.1.gbf04d5e.dirty documentation</title>
+    <title>Modifying and deleting data &#8212; OpenGHG 0+untagged.1.g172a7ca.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gbf04d5e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g172a7ca.dirty documentation</p>
   
 </a>
     
@@ -409,13 +409,13 @@ time if the data standardisation process is quite time consuming. Data can also 
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:   0%|          | 0/70216145 [00:00&lt;?, ?it/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:  39%|███▊      | 25.9M/67.0M [00:00&lt;00:00, 271MB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:  28%|██▊       | 18.5M/67.0M [00:00&lt;00:00, 193MB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:  85%|████████▍ | 56.6M/67.0M [00:00&lt;00:00, 301MB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz:  68%|██████▊   | 45.4M/67.0M [00:00&lt;00:00, 246MB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz: 100%|██████████| 67.0M/67.0M [00:00&lt;00:00, 241MB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz: 100%|██████████| 67.0M/67.0M [00:00&lt;00:00, 204MB/s]
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -469,7 +469,7 @@ time if the data standardisation process is quite time consuming. Data can also 
 <span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
 
 <span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
 <span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">populate_footprint_inert</span><span class="p">()</span>
 
 <span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/tutorial/_tutorial.py:61,</span> in <span class="ni">populate_footprint_inert</span><span class="nt">()</span>
@@ -500,17 +500,17 @@ time if the data standardisation process is quite time consuming. Data can also 
 <span class="g g-Whitespace">    </span><span class="mi">280</span>         <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
 <span class="g g-Whitespace">    </span><span class="mi">281</span>     <span class="p">)</span>
 
-<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_footprints.py:380,</span> in <span class="ni">Footprints.read_file</span><span class="nt">(filepath, site, domain, model, inlet, height, metmodel, species, network, period, chunks, continuous, retrieve_met, high_spatial_res, high_time_res, short_lifetime, overwrite)</span>
-<span class="g g-Whitespace">    </span><span class="mi">377</span> <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">379</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;footprints&quot;</span>
-<span class="ne">--&gt; </span><span class="mi">380</span> <span class="n">datasource_uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">381</span>     <span class="n">data_dict</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">382</span>     <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">383</span>     <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">384</span>     <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">385</span> <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">387</span> <span class="n">fp</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">389</span> <span class="c1"># Record the file hash in case we see this file again</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_footprints.py:375,</span> in <span class="ni">Footprints.read_file</span><span class="nt">(filepath, site, domain, model, inlet, height, metmodel, species, network, period, chunks, continuous, retrieve_met, high_spatial_res, high_time_res, short_lifetime, overwrite)</span>
+<span class="g g-Whitespace">    </span><span class="mi">372</span> <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">374</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;footprints&quot;</span>
+<span class="ne">--&gt; </span><span class="mi">375</span> <span class="n">datasource_uuids</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">376</span>     <span class="n">data_dict</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">377</span>     <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">378</span>     <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">379</span>     <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">380</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">382</span> <span class="n">fp</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">footprint_data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">384</span> <span class="c1"># Record the file hash in case we see this file again</span>
 
 <span class="nn">File /opt/hostedtoolcache/Python/3.9.15/x64/lib/python3.9/site-packages/openghg/store/_segment.py:51,</span> in <span class="ni">assign_data</span><span class="nt">(data_dict, lookup_results, overwrite, data_type)</span>
 <span class="g g-Whitespace">     </span><span class="mi">49</span> <span class="n">datasource</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
