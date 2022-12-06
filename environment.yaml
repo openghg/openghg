@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - python >= 3.8
   - addict
   - dask
   - h5netcdf
@@ -24,3 +25,5 @@ dependencies:
   - urllib3 >= 1.26.3
   - pip
   - xesmf
+  - pip:
+    - icoscp
