@@ -18,6 +18,7 @@ from pandas import Timestamp
         ("height", "50m"),
         ("inlet", "50magl"),
         ("inlet", "50"),
+        ("inlet", 50),   # May remove this later as really we expect a string here
     ],
 )
 def test_search_surface(inlet_keyword, inlet_value):
@@ -50,6 +51,34 @@ def test_search_surface(inlet_keyword, inlet_value):
     assert partial_metdata.items() <= res.metadata[key].items()
 
     assert not search_surface(site="hfd", species="co2", inlet="888m")
+
+
+def test_search_surface_range():
+    # TODO: Work out what's going on here
+
+    res = search_surface(site='TAC',
+                         species='co2',
+                         inlet='185',
+                         # start_date='2013-02-01',
+                         # end_date='2013-03-01'
+                         )
+    
+    assert res is not None
+
+    key = next(iter(res.metadata))
+
+    partial_metdata = {
+        "site": "tac",
+        "instrument": "picarro",
+        "sampling_period": "3600.0",
+        "inlet": "185m",
+        "network": "decc",
+        "species": "co2",
+        "data_type": "surface",
+        "inlet_height_magl": "185",
+    }
+
+    assert res.metadata[key].items() >= partial_metdata.items()
 
 
 def test_search_site():
@@ -137,7 +166,7 @@ def test_multi_type_search():
 
     res = search(species="co2", data_type=["surface", "emissions"])
 
-    assert len(res.metadata) == 7
+    assert len(res.metadata) == 8
 
 
 def test_many_term_search():

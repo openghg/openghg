@@ -8,7 +8,7 @@ from openghg.util import format_inlet
         ("10m", "10m"),
         ("12.2m", "12.2m"),
         ("123", "123m"),
-        ("123.45", "123.45m"),
+        ("123.45", "123.5m"),
         ("10magl", "10m"),
         ("13.3magl", "13.3m"),
         ("multiple", "multiple"),

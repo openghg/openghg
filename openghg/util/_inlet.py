@@ -42,11 +42,14 @@ def format_inlet(inlet: Optional[str], special_keywords: Optional[list] = None) 
     # Check if input inlet just contains numbers and no unit
     # If so assume the units are metres and add this to the end of the string
     try:
-        float(inlet)
+        inlet_float = float(inlet)
     except ValueError:
         pass
     else:
-        inlet = inlet + "m"
+        if inlet_float.is_integer():
+            inlet = f"{inlet_float:.0f}m"
+        else:
+            inlet = f"{inlet_float:.1f}m"
 
     # Check if inlet ends with "magl" rather than just "m"
     # If so remove the end "agl" to just include the "m" value
