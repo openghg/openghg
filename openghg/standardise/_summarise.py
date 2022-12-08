@@ -91,7 +91,8 @@ from openghg.util import get_datapath, load_json, sites_in_network
 #     return site_names
 
 
-def _extract_site_names(site_codes: list, site_json: Union[str, Path] = "default"):
+def _extract_site_names(site_codes: list,
+                        site_json: Union[str, Path] = "default") -> list:
     """
     Extracts long names for site codes.
 
@@ -101,7 +102,7 @@ def _extract_site_names(site_codes: list, site_json: Union[str, Path] = "default
             but an alternative file which matches to this format may be specified.
 
     Returns:
-        Dict: Long names for each site code
+        list: Long names for each site code
     """
 
     # Uses "site_info.json" file by default.
