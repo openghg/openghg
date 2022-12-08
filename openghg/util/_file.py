@@ -1,7 +1,7 @@
 import bz2
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Union
 
 
 def load_parser(data_name: str, module_name: str) -> Callable:

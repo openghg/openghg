@@ -106,7 +106,7 @@ def _extract_site_names(site_codes: list, site_json: Union[str, Path] = "default
 
     # Uses "site_info.json" file by default.
     if site_json == "default":
-       site_params = load_json("site_info.json")
+        site_params = load_json("site_info.json")
     else:
         site_json_path = Path(site_json)
         path = site_json_path.parent
@@ -123,7 +123,7 @@ def _extract_site_names(site_codes: list, site_json: Union[str, Path] = "default
         except KeyError:
             site_name = ""
         site_names.append(site_name)
-    
+
     return site_names
 
 

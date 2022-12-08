@@ -12,7 +12,7 @@ def sites_in_network(network: str, site_json: Union[str, Path] = "default") -> l
         network: Name of the network
         site_json: By default this will use the "site_info.json" file
             but an alternative file which matches to this format may be specified.
-    
+
     Returns:
         list: List of site codes.
     """
