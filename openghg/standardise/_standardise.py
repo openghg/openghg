@@ -189,9 +189,10 @@ def standardise_bc(
 def standardise_footprint(
     filepath: Union[str, Path],
     site: str,
-    height: str,
     domain: str,
     model: str,
+    inlet: Optional[str] = None,
+    height: Optional[str] = None,
     metmodel: Optional[str] = None,
     species: Optional[str] = None,
     network: Optional[str] = None,
@@ -209,9 +210,10 @@ def standardise_footprint(
     Args:
         filepath: Path of file to load
         site: Site name
-        height: Height above ground level in metres
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
+        inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
+        height: Alias for inlet. One of height or inlet must be included.
         metmodel: Underlying meteorlogical model used (e.g. UKV)
         species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
         network: Network name
@@ -237,9 +239,10 @@ def standardise_footprint(
 
         metadata = {
             "site": site,
-            "height": height,
             "domain": domain,
             "model": model,
+            "inlet": inlet,
+            "height": height,
             "continuous": continuous,
             "retrieve_met": retrieve_met,
             "high_spatial_res": high_spatial_res,
@@ -265,9 +268,10 @@ def standardise_footprint(
         return Footprints.read_file(
             filepath=filepath,
             site=site,
-            height=height,
             domain=domain,
             model=model,
+            inlet=inlet,
+            height=height,
             metmodel=metmodel,
             species=species,
             network=network,
