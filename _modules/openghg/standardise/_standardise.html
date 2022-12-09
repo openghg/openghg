@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise._standardise &#8212; OpenGHG 0+untagged.1.g8902772.dirty documentation</title>
+    <title>openghg.standardise._standardise &#8212; OpenGHG 0+untagged.1.g5702d26.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g8902772.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g5702d26.dirty documentation</p>
   
 </a>
     
@@ -548,9 +548,10 @@
 <div class="viewcode-block" id="standardise_footprint"><a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_footprint">[docs]</a><span class="k">def</span> <span class="nf">standardise_footprint</span><span class="p">(</span>
     <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">height</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">metmodel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -568,9 +569,10 @@
 <span class="sd">    Args:</span>
 <span class="sd">        filepath: Path of file to load</span>
 <span class="sd">        site: Site name</span>
-<span class="sd">        height: Height above ground level in metres</span>
 <span class="sd">        domain: Domain of footprints</span>
 <span class="sd">        model: Model used to create footprint (e.g. NAME or FLEXPART)</span>
+<span class="sd">        inlet: Height above ground level in metres. Format &#39;NUMUNIT&#39; e.g. &quot;10m&quot;</span>
+<span class="sd">        height: Alias for inlet. One of height or inlet must be included.</span>
 <span class="sd">        metmodel: Underlying meteorlogical model used (e.g. UKV)</span>
 <span class="sd">        species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)</span>
 <span class="sd">        network: Network name</span>
@@ -596,9 +598,10 @@
 
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
-            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
             <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
             <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+            <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">inlet</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
             <span class="s2">&quot;continuous&quot;</span><span class="p">:</span> <span class="n">continuous</span><span class="p">,</span>
             <span class="s2">&quot;retrieve_met&quot;</span><span class="p">:</span> <span class="n">retrieve_met</span><span class="p">,</span>
             <span class="s2">&quot;high_spatial_res&quot;</span><span class="p">:</span> <span class="n">high_spatial_res</span><span class="p">,</span>
@@ -624,9 +627,10 @@
         <span class="k">return</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
             <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
             <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-            <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
             <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+            <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
             <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span>
             <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
             <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
