@@ -9,7 +9,7 @@ import warnings
 from pathlib import Path
 from typing import List, Union
 
-from openghg.standardise import standardise_footprint, standardise_flux
+from openghg.standardise import standardise_footprint, standardise_flux, standardise_bc
 
 __all__ = ["bilsdale_datapaths"]
 
@@ -54,12 +54,13 @@ def populate_footprint_inert() -> None:
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
                 site = "TAC"
-                height = "100m"
+                # height = "100m"
+                inlet = "100m"
                 domain = "EUROPE"
                 model = "NAME"
 
                 standardise_footprint(
-                    filepath=tac_inert_path, site=site, height=height, domain=domain, model=model
+                    filepath=tac_inert_path, site=site, inlet=inlet, domain=domain, model=model
                 )
 
 
@@ -84,14 +85,15 @@ def populate_footprint_co2() -> None:
                 site = "TAC"
                 domain = "EUROPE"
                 species = "co2"
-                height = "185m"
+                # height = "185m"
+                inlet = "185m"
                 model = "NAME"
                 metmodel = "UKV"
 
                 standardise_footprint(
                     filepath=tac_co2_path,
                     site=site,
-                    height=height,
+                    inlet=inlet,
                     domain=domain,
                     model=model,
                     metmodel=metmodel,
@@ -177,6 +179,42 @@ def populate_flux_ch4() -> None:
                     species=species,
                     source=source_energyprod,
                     domain=domain,
+                )
+
+    print("Done.")
+
+
+def populate_bc() -> None:
+    """
+    """
+    populate_bc_ch4()
+
+
+def populate_bc_ch4() -> None:
+    """Populates the tutorial object store with boundary conditions data from the
+    example data repository.
+
+    Returns:
+        None
+    """
+    use_tutorial_store()
+
+    print("Retrieving data...")
+    eur_2016_bc = "https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz"
+    bc_data_path = retrieve_example_data(url=eur_2016_bc)[0]
+
+    bc_input = "CAMS"
+    domain = "EUROPE"
+    species = "ch4"
+
+    print("Standardising boundary conditions...")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                print("bc_data_path", bc_data_path)
+                standardise_bc(
+                    filepath=bc_data_path, bc_input=bc_input, species=species, domain=domain
                 )
 
     print("Done.")

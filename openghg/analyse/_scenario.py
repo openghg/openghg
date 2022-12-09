@@ -5,15 +5,15 @@ modelled output based on this data. The types of data currently included are:
  - Fixed domain sensitivity maps known as footprints (FootprintData)
  - Fixed domain flux maps (FluxData) - multiple maps can be included and
  referenced by source name
-
-TODO: Also need to incorporate boundary conditions
+ - Fixed domain vertical curtains at each boundary (BoundaryConditionsData)
 
 A ModelScenario instance can be created by searching the object store manually
 and providing these outputs:
->>> obs = get_obs_surface(site, species, ...)
->>> footprint = get_footprint(site, domain, ...)
->>> flux = get_flux(species, source, ...)
->>> model = ModelScenario(obs=obs, footprint=footprint, flux=flux)
+>>> obs = get_obs_surface(site, species, inlet, ...)
+>>> footprint = get_footprint(site, domain, inlet, ...)
+>>> flux = get_flux(species, source, domain, ...)
+>>> bc = get_bc(species, domain, bc_input, ...)
+>>> model = ModelScenario(obs=obs, footprint=footprint, flux=flux, bc=bc)
 
 A ModelScenario instance can also be created using keywords to search the object store:
 >>> model = ModelScenario(site,
@@ -22,6 +22,7 @@ A ModelScenario instance can also be created using keywords to search the object
                           network,
                           domain,
                           sources=sources,
+                          bc_input=bc_input,
                           start_date=start_date,
                           end_date=end_date)
 
@@ -30,11 +31,13 @@ A ModelScenario instance can also be initialised and then populated after creati
 >>> model.add_obs(obs=obs)
 >>> model.add_footprint(site, inlet, domain, ...)
 >>> model.add_flux(species, domain, sources, ...)
+>>> model.add_bc(species, domain, bc_input, ...)
 
 Once created, methods can be called on ModelScenario which will combine these
 data sources and cache the outputs (if requested) to make for quicker calculation.
 
 >>> modelled_obs = model.calc_modelled_obs()
+>>> modelled_baseline = model.calc_modelled_baseline()
 >>> combined_data = model.footprints_data_merge()
 
 If some input types needed for these operations are missing, the user will be alerted
@@ -1026,6 +1029,8 @@ class ModelScenario:
         flux_modelled: DataArray = scenario["fp"] * flux["flux"]
         timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
 
+        # TODO: Add details about units to output
+
         if output_TS and output_fpXflux:
             return timeseries, flux_modelled
         elif output_TS:
@@ -1285,6 +1290,8 @@ class ModelScenario:
                 # work out timeseries by summing over lat, lon (24 hrs)
                 timeseries[tt] = fpXflux_time.sum()
 
+        # TODO: Add details about units to output
+
         if output_fpXflux:
             fpXflux = DataArray(
                 fpXflux,
@@ -1312,6 +1319,7 @@ class ModelScenario:
         self,
         resample_to: str = "coarsest",
         platform: Optional[str] = None,
+        output_units: float = 1e-9,
         cache: bool = True,
         recalculate: bool = False,
     ) -> DataArray:
@@ -1413,14 +1421,22 @@ class ModelScenario:
             loss_s = 1.0
             loss_w = 1.0
 
+        # Check and extract units as float, if present.
+        units_default = 1.0
+        units_n = check_units(bc_data["vmr_n"], default=units_default)
+        units_e = check_units(bc_data["vmr_e"], default=units_default)
+        units_s = check_units(bc_data["vmr_s"], default=units_default)
+        units_w = check_units(bc_data["vmr_w"], default=units_default)
+
         modelled_baseline = (
-            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n).sum(["height", "lon"])
-            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e).sum(["height", "lat"])
-            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s).sum(["height", "lon"])
-            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w).sum(["height", "lat"])
+            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(["height", "lon"])
+            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(["height", "lat"])
+            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(["height", "lon"])
+            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(["height", "lat"])
         )
 
         modelled_baseline.attrs["resample_to"] = resample_to
+        modelled_baseline.attrs["units"] = output_units
         modelled_baseline = modelled_baseline.rename("bc_mod")
 
         # Cache output from calculations
@@ -1578,6 +1594,9 @@ class ModelScenario:
             label = f"Modelled {species.upper()}: {source_str}"
         else:
             label = f"Modelled {species.upper()}"
+
+        # TODO: Check modelled_obs units and ensure these match to modelled_baseline
+        # - currently modelled_baseline outputs in 1e-9 (ppb) by default.
 
         if baseline == "boundary_conditions":
             if self.bc is not None:
@@ -1800,6 +1819,27 @@ def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: metho
             data_stacked += data_match
 
     return data_stacked
+
+
+def check_units(data_var: DataArray, default: float) -> float:
+    """
+    Check "units" attribute within a DataArray. Expect this to be a float
+    or possible to convert to a float.
+    If not present, use default value.
+    """
+
+    attrs = data_var.attrs
+    if "units" in attrs:
+        units_from_attrs = attrs["units"]
+        if not isinstance(units_from_attrs, float):
+            try:
+                units = float(units_from_attrs)
+            except ValueError:
+                raise ValueError(f"Cannot extract {units_from_attrs} value as float")
+    else:
+        units = default
+
+    return units
 
 
 # def footprints_data_merge(data: Union[dict, ObsData],
