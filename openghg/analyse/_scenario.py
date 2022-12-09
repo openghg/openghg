@@ -1827,7 +1827,7 @@ def check_units(data_var: DataArray, default: float) -> float:
     or possible to convert to a float.
     If not present, use default value.
     """
-    
+
     attrs = data_var.attrs
     if "units" in attrs:
         units_from_attrs = attrs["units"]
