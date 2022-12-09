@@ -764,7 +764,7 @@ def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Option
 
 def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4_dummy):
     """Test expected modelled baseline with known dummy data"""
-    modelled_baseline = model_scenario_ch4_dummy.calc_modelled_baseline()
+    modelled_baseline = model_scenario_ch4_dummy.calc_modelled_baseline(output_units=1)
 
     aligned_time = modelled_baseline["time"]
     assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
@@ -1105,7 +1105,7 @@ def model_scenario_radon_dummy(obs_radon_dummy, footprint_radon_dummy, bc_radon_
 
 def test_modelled_baseline_radon(model_scenario_radon_dummy, footprint_radon_dummy, bc_radon_dummy):
     """Test expected modelled baseline for Rn (short-lived species) with known dummy data"""
-    modelled_baseline = model_scenario_radon_dummy.calc_modelled_baseline()
+    modelled_baseline = model_scenario_radon_dummy.calc_modelled_baseline(output_units=1)
 
     aligned_time = modelled_baseline["time"]
     assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
@@ -1180,7 +1180,7 @@ def test_modelled_baseline_short_life(
     model_scenario_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy
 ):
     """Test expected modelled baseline for short-lived species 'HFO-1234zee' with known dummy data"""
-    modelled_baseline = model_scenario_short_life_dummy.calc_modelled_baseline()
+    modelled_baseline = model_scenario_short_life_dummy.calc_modelled_baseline(output_units=1)
 
     aligned_time = modelled_baseline["time"]
     assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
