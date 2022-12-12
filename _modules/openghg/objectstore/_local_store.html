@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.g87961f6.dirty documentation</title>
+    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.g297438d.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g87961f6.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g297438d.dirty documentation</p>
   
 </a>
     
@@ -364,7 +364,6 @@
     <span class="s2">&quot;delete_object&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_local_objectstore_path&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_tutorial_store_path&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;clear_tutorial_store&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_all_object_names&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_object_names&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_object&quot;</span><span class="p">,</span>
@@ -384,17 +383,6 @@
 <span class="sd">        pathlib.Path: Path of tutorial store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">get_local_objectstore_path</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tutorial_store&quot;</span></div>
-
-
-<div class="viewcode-block" id="clear_tutorial_store"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.clear_tutorial_store">[docs]</a><span class="k">def</span> <span class="nf">clear_tutorial_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Delete the contents of the tutorial object store</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">get_tutorial_store_path</span><span class="p">()</span>
-
-    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <span class="c1"># @lru_cache</span>

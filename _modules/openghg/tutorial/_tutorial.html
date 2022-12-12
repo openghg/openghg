@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0+untagged.1.g87961f6.dirty documentation</title>
+    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0+untagged.1.g297438d.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g87961f6.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g297438d.dirty documentation</p>
   
 </a>
     
@@ -530,8 +530,7 @@
 
 
 <span class="k">def</span> <span class="nf">populate_bc</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="n">populate_bc_ch4</span><span class="p">()</span>
 
 
@@ -545,7 +544,9 @@
     <span class="n">use_tutorial_store</span><span class="p">()</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Retrieving data...&quot;</span><span class="p">)</span>
-    <span class="n">eur_2016_bc</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz&quot;</span>
+    <span class="n">eur_2016_bc</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz&quot;</span>
+    <span class="p">)</span>
     <span class="n">bc_data_path</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">eur_2016_bc</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="n">bc_input</span> <span class="o">=</span> <span class="s2">&quot;CAMS&quot;</span>
@@ -558,9 +559,7 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">devnull</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">devnull</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;bc_data_path&quot;</span><span class="p">,</span> <span class="n">bc_data_path</span><span class="p">)</span>
-                <span class="n">standardise_bc</span><span class="p">(</span>
-                    <span class="n">filepath</span><span class="o">=</span><span class="n">bc_data_path</span><span class="p">,</span> <span class="n">bc_input</span><span class="o">=</span><span class="n">bc_input</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span>
-                <span class="p">)</span>
+                <span class="n">standardise_bc</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">bc_data_path</span><span class="p">,</span> <span class="n">bc_input</span><span class="o">=</span><span class="n">bc_input</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
 
@@ -671,6 +670,8 @@
     <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">download_data</span><span class="p">,</span> <span class="n">parse_url_filename</span>
 
+    <span class="n">use_tutorial_store</span><span class="p">()</span>
+
     <span class="c1"># Check we&#39;re getting a tar</span>
     <span class="n">output_filename</span> <span class="o">=</span> <span class="n">parse_url_filename</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
 
@@ -737,6 +738,21 @@
     <span class="n">extracted_filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">extract_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span> <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">extracted_filepaths</span></div>
+
+
+<span class="k">def</span> <span class="nf">clear_tutorial_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Delete the contents of the tutorial object store</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_tutorial_store_path</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">get_tutorial_store_path</span><span class="p">()</span>
+
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tutorial store at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> cleared.&quot;</span><span class="p">)</span>
 </pre></div>
 
             </article>
