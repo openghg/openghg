@@ -22,7 +22,7 @@ Adding new data
 .. toctree::
    :maxdepth: 1
 
-   local/Adding_new_data/Adding_observation_data
+   local/Adding_new_data/Adding_observation_data.md
 
 
 Analysing data
@@ -31,12 +31,12 @@ Analysing data
 .. toctree::
    :maxdepth: 1
 
-   local/Analysing_data/Comparing_with_emissions
+   local/Analysing_data/Comparing_with_emissions.md
 
 .. toctree::
    :maxdepth: 1
 
-   local/Analysing_data/Working_with_co2
+   local/Analysing_data/Working_with_co2.md
 
 Exploring data
 ---------------
@@ -44,17 +44,17 @@ Exploring data
 .. toctree::
    :maxdepth: 1
 
-   local/Exploring_data/Explore_NOAA_ObsPack
+   local/Exploring_data/Explore_NOAA_ObsPack.md
 
 .. toctree::
    :maxdepth: 1
 
-   local/Exploring_data/Retrieving_remote_data
+   local/Exploring_data/Retrieving_remote_data.md
 
 .. toctree::
    :maxdepth: 1
 
-   local/Exploring_data/Searching_and_plotting
+   local/Exploring_data/Searching_and_plotting.md
 
 
 Managing the the object store
@@ -67,4 +67,4 @@ delete or modify already existing data.
 .. toctree::
    :maxdepth: 1
 
-   local/Managing_object_store/Modifying_and_deleting_data
+   local/Managing_object_store/Modifying_and_deleting_data.md
