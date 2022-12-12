@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Fn usage &#8212; OpenGHG 0+untagged.1.g87961f6.dirty documentation</title>
+    <title>Quickstart - developer &#8212; OpenGHG 0+untagged.1.g87961f6.dirty documentation</title>
   
   
   
@@ -46,12 +46,12 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'development/cloud/fn_usage';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/quickstart_devel';</script>
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Developer API" href="../../api/index_devapi.html" />
-    <link rel="prev" title="Fn Development" href="fn_devel.html" />
+    <link rel="next" title="User API" href="../../api/index.html" />
+    <link rel="prev" title="Tutorials" href="../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -131,8 +131,8 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
                         Tutorials
                       </a>
                     </li>
@@ -145,8 +145,8 @@
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../index_devel.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../development/index_devel.html">
                         Development
                       </a>
                     </li>
@@ -250,8 +250,8 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
                         Tutorials
                       </a>
                     </li>
@@ -264,8 +264,8 @@
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="../index_devel.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../development/index_devel.html">
                         Development
                       </a>
                     </li>
@@ -327,16 +327,8 @@
     Section Navigation
   </p>
   <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../python_devel.html">Getting setup</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../specifications/data_spec.html">Data Specification</a></li>
-</ul>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="fn_setup.html">Fn setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fn_devel.html">Fn Development</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Fn usage</a></li>
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Quickstart - developer</a></li>
 </ul>
 
   </div>
@@ -368,9 +360,99 @@
             
             <article class="bd-article" role="main">
               
-  <section id="fn-usage">
-<h1>Fn usage<a class="headerlink" href="#fn-usage" title="Permalink to this heading">#</a></h1>
-<p>Empty</p>
+  <section id="quickstart-developer">
+<h1>Quickstart - developer<a class="headerlink" href="#quickstart-developer" title="Permalink to this heading">#</a></h1>
+<p>This quickstart guide will get you quickly setup with a development environment so you can use and contribute to OpenGHG.
+The main repository for OpenGHG can be found on <a class="reference external" href="https://github.com/openghg/openghg">GitHub</a>.</p>
+<section id="setting-up-your-computer">
+<h2>Setting up your computer<a class="headerlink" href="#setting-up-your-computer" title="Permalink to this heading">#</a></h2>
+<p>You’ll need <a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">git</a> and Python &gt;= 3.8, so please make sure you have both installed before continuing
+further.</p>
+<section id="clone-openghg">
+<h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Permalink to this heading">#</a></h3>
+<p>First we’ll clone the repository and make sure we’re on the <code class="docutils literal notranslate"><span class="pre">devel</span></code> branch. This makes sure we’re on the most up to date version of OpenGHG.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg.git
+<span class="nb">cd</span> openghg
+git checkout devel
+</pre></div>
+</div>
+<p>Next we’ll get a virtual environment setup using either.</p>
+</section>
+<section id="environments">
+<h3>Environments<a class="headerlink" href="#environments" title="Permalink to this heading">#</a></h3>
+<p>Here we cover the creation of an environment and the installation of OpenGHG into it. Installation here means adding OpenGHG to the environment.
+We’ll install it in developer mode so that any changes you make to the code will automatically be available when you run commands. Similarly, if you
+run a <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code> on the <code class="docutils literal notranslate"><span class="pre">devel</span></code> branch all changes made will be available to you straight away, without having to reinstall or update OpenGHG within
+the environment.</p>
+<section id="pip">
+<h4><code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#pip" title="Permalink to this heading">#</a></h4>
+<p>It is recommended that you develop OpenGHG in a Python
+<a class="reference external" href="https://docs.python.org/3/tutorial/venv.html">virtual environment</a>.
+Here we’ll create a new folder called <code class="docutils literal notranslate"><span class="pre">envs</span></code> in our home directory and create
+a new <code class="docutils literal notranslate"><span class="pre">openghg_devel</span></code> environment in it.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p ~/envs/openghg_devel
+python -m venv ~/envs/openghg_devel
+</pre></div>
+</div>
+<p>Virtual environments provide sandboxes which make it easier to develop
+and test code. They also allow you to install Python modules without
+interfering with other Python installations.</p>
+<p>We activate our new environment using</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> ~/envs/openghg_devel/bin/activate
+</pre></div>
+</div>
+<p>Now we can install OpenGHG’s requirements and its developer requirements.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -r requirements.txt -r requirements-dev.txt
+</pre></div>
+</div>
+<p>Finally install OpenGHG itself. The <code class="docutils literal notranslate"><span class="pre">-e</span></code> / <code class="docutils literal notranslate"><span class="pre">--editable</span></code> flag here tells <code class="docutils literal notranslate"><span class="pre">pip</span></code> to install the OpenGHG repo in develop mode.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -e .
+</pre></div>
+</div>
+<p>OpenGHG should now be installed, you can check this by opening <code class="docutils literal notranslate"><span class="pre">ipython</span></code> and running</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">openghg</span>
+</pre></div>
+</div>
+</section>
+<section id="conda">
+<h4><code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#conda" title="Permalink to this heading">#</a></h4>
+<p>Making sure you’re in the <code class="docutils literal notranslate"><span class="pre">openghg</span></code> repository folder run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create -f environment.yaml
+</pre></div>
+</div>
+<p>Once <code class="docutils literal notranslate"><span class="pre">conda</span></code> finishes its installation process you can activate the enironment</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda activate openghg_env
+</pre></div>
+</div>
+<p>Next install <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> which allows us to install packages in develop mode</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install conda-build
+</pre></div>
+</div>
+<p>And finally install OpenGHG</p>
+<p>OpenGHG should now be installed, you can check this by opening <code class="docutils literal notranslate"><span class="pre">ipython</span></code> and running</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">openghg</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="the-object-store">
+<h2>The object store<a class="headerlink" href="#the-object-store" title="Permalink to this heading">#</a></h2>
+<p>The object store is where OpenGHG stores its information. Metadata and binary data are stored with in a key-value setup.
+As you’ll be using OpenGHG locally this means all data will be stored on your local or network file system.</p>
+<p>When you first import OpenGHG it creates a file in your home directory at <code class="docutils literal notranslate"><span class="pre">~/.config/openghg/openghg.conf</span></code>. Open this file with
+your chosen text editor and you’ll see the contents of a <a class="reference external" href="https://toml.io/en/">TOML</a> file like.</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[object_store]</span><span class="w"></span>
+<span class="n">local_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/gareth/openghg_store&quot;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>By default the object store will be created in your home directory, if you want to move it just change that path.</p>
+</section>
+<section id="what-next">
+<h2>What next?<a class="headerlink" href="#what-next" title="Permalink to this heading">#</a></h2>
+<p>Now you’ve got OpenGHG setup please take a look at our <a class="reference internal" href="../index.html#tutorials"><span class="std std-ref">tutorials section</span></a> and if you’d like to start
+contributing to OpenGHG open an issue and submit a pull request!</p>
+</section>
 </section>
 
 
@@ -381,17 +463,17 @@
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="fn_devel.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="../index.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Fn Development</p>
+          <p class="prev-next-title">Tutorials</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="../../api/index_devapi.html" title="next page">
+  <a class='right-next' id="next-link" href="../../api/index.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Developer API</p>
+      <p class="prev-next-title">User API</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -404,6 +486,65 @@
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#setting-up-your-computer">
+   Setting up your computer
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#clone-openghg">
+     Clone OpenGHG
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#environments">
+     Environments
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pip">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         pip
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#conda">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         conda
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#the-object-store">
+   The object store
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#what-next">
+   What next?
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
 <div class="toc-item">
   
 <div id="searchbox"></div>
