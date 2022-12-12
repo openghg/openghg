@@ -1,9 +1,12 @@
+from typing import Optional
 from xarray import Dataset
 
 __all__ = ["plot_footprint"]
 
 
-def plot_footprint(data: Dataset, label: str = None, vmin: float = None, vmax: float = None) -> None:
+def plot_footprint(
+    data: Dataset, label: Optional[str] = None, vmin: Optional[float] = None, vmax: Optional[float] = None
+) -> None:
     """Plot a footprint
 
     Args:
@@ -17,7 +20,7 @@ def plot_footprint(data: Dataset, label: str = None, vmin: float = None, vmax: f
     import matplotlib.colors as colors
     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
 
     # Plot footprints as a 2D colour map
     data_fp = data.fp.isel(time=0)  # First time point

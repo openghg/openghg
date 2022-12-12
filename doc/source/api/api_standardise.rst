@@ -1,6 +1,6 @@
-=========================
-Standardisation functions
-=========================
+===========
+Standardise
+===========
 
 Functions that accept data in specific formats, standardise it to a CF-compliant format and ensure it has the correct metadata attached. The
 data returned from these functions is then stored in the object store.
@@ -31,15 +31,16 @@ Footprints
 .. autofunction:: openghg.standardise.standardise_footprint
 
 
-Behind the scence these functions use parsing functions that are written specifically for each data type.
+Helpers
+=======
+
+Some of the functions above require quite specific arguments as we must ensure all metadata attriuted to data is as correct as possible.
+These functions help you find the correct arguments in each case.
+
+.. autofunction:: summary_source_formats
+
+.. autofunction:: summary_site_codes
+
+
+Behind the scences these functions use parsing functions that are written specifically for each data type.
 Please see the :ref:`Developer API <Developer API>` for these functions.
-
-
-Metadata
-========
-
-.. autofunction:: openghg.standardise.meta.assign_attributes
-
-.. autofunction:: openghg.standardise.meta.get_attributes
-
-.. autofunction:: openghg.standardise.meta.sync_surface_metadata

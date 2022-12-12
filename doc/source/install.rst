@@ -77,17 +77,6 @@ Next install OpenGHG from our conda channel
 Configuration
 =============
 
-Deprecation of ``OPENGHG_PATH``
--------------------------------
-
-If you've previously used OpenGHG and worked through our tutorials you might have encountered
-the need to set the ``OPENGHG_PATH`` environment variable. Now that we've moved to a configuration
-file this is not longer used. If you previously set a custom path using the variable please update
-the configuration file as below.
-
-Updating the config file
-------------------------
-
 On the first run on OpenGHG a configuration file will be created in your home folder. On Linux this should be under
 ``/home/<your username>/.config/openghg/openghg.conf`` or on macOS
 ``/Users/<your username>/.config/openghg/openghg.conf``. In this file we set the path for the object store.
@@ -100,6 +89,14 @@ To modify this path open the config file with a text editor and change the value
     local_store = "/home/<your username>/openghg_store"
 
 Remember to replace ``<your username>`` with your username.
+
+Deprecation of ``OPENGHG_PATH``
+-------------------------------
+
+If you've previously used OpenGHG and worked through our tutorials you might have encountered
+the need to set the ``OPENGHG_PATH`` environment variable. Now that we've moved to a configuration
+file this is not longer used. If you previously set a custom path using the variable please update
+the configuration file as below.
 
 
 Developers

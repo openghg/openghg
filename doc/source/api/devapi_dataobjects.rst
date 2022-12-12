@@ -2,6 +2,14 @@
 Data objects
 ============
 
+_BaseData
+=========
+
+The base dataclass inherited by (most of) the dataclasses below.
+
+.. autoclass:: openghg.dataobjects._BaseData
+    :members:
+
 DataHandler
 ===========
 
@@ -51,12 +59,4 @@ FootprintData
 This ``dataclass`` is used to return observations data from the :ref:`get_footprint<get_footprint>` function
 
 .. autoclass:: openghg.dataobjects.FootprintData
-    :members:
-
-BoundaryConditionsData
-======================
-
-This ``dataclass`` is used to return observations data from the :ref:`get_bc<get_bc>` function
-
-.. autoclass:: openghg.dataobjects.BoundaryConditionsData
     :members:

@@ -1,0 +1,26 @@
+===================
+What's new - v0.4.0
+===================
+
+**Release date: 2022-11-xx**
+
+Features
+========
+
+- A new :ref:`DataHandler<DataHandler>` class for modification and deletion of metadata and added a matching tutorial.
+- Move to a new user configuration file.
+- A new `ObsColumn` class for handing satellite data
+- Documentation overhaul to ensure all functions are visible in either the user or developer documentation
+
+Fixes
+=====
+
+- Quite a few fixes for search parameters such as inlet height, sampling height
+- Removed `date` parameter from Flux data to improve searchability
+- Inlet and height are now aliases for each other for footprints and obs_surface
+- Check for tuple of data and precisions file on processing of GCWERKS data
+
+Deprecations
+============
+
+- The `OPENGHG_PATH` environment variable check has been deprecated in favour of the user config file.
