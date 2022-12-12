@@ -72,7 +72,7 @@ Metadata
 These handle the assignment and checking of metadata.
 
 .. toctree::
-    :maxdepth: 2
+   :maxdepth: 2
 
    devapi_metadata
 
