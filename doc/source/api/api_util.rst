@@ -64,3 +64,16 @@ These perform checks to ensure data processed for each site is correct
 .. autofunction:: openghg.util.verify_site
 
 .. autofunction:: openghg.util.multiple_inlets
+
+
+Domain
+======
+
+.. autofunction:: openghg.util.find_domain
+
+.. autofunction:: openghg.util.convert_longitude
+
+Inlet
+=====
+
+.. autofunction:: openghg.util.format_inlet

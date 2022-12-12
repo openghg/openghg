@@ -6,7 +6,7 @@ This is the list of changes to OpenGHG between each release. For full details,
 see the `commit logs <https://github.com/openghg/openghg/commits/>`_. For install and
 upgrade instructions, see :ref:`Installation`.
 
-Version 0.3.1
+Version 0.4.0
 -------------
 
 .. toctree::

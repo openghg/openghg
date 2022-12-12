@@ -52,3 +52,11 @@ This ``dataclass`` is used to return observations data from the :ref:`get_footpr
 
 .. autoclass:: openghg.dataobjects.FootprintData
     :members:
+
+BoundaryConditionsData
+======================
+
+This ``dataclass`` is used to return observations data from the :ref:`get_bc<get_bc>` function
+
+.. autoclass:: openghg.dataobjects.BoundaryConditionsData
+    :members:

@@ -10,6 +10,8 @@ Functions used in our OpenGHG tutorial notebooks and documentation.
 
 .. autofunction:: openghg.tutorial.populate_surface_data
 
+.. autofunction:: openghg.tutorial.populate_bc_ch4
+
 .. autofunction:: openghg.tutorial.populate_flux_ch4
 
 .. autofunction:: openghg.tutorial.populate_flux_co2

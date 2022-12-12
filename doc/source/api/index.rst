@@ -49,8 +49,8 @@ The ``retrieve`` submodule contains the functionality needed to retrieve differe
 
    api_retrieve
 
-Standardie
-==========
+Standardise
+===========
 
 The ``standardise`` submodule handles the standardisation of different data types to the OpenGHG specification.
 
@@ -62,7 +62,7 @@ The ``standardise`` submodule handles the standardisation of different data type
 Transform
 =========
 
-Functions to help transforming of data, regridding, transform of EDGAR data etc.
+The transform submodule handles creation of data types to OpenGHG specification based on an underlying input such as a database or model output. This usually involves some transformation of the data to e.g. select a region or regrid the data.
 
 .. toctree::
    :maxdepth: 2
