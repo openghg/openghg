@@ -12,7 +12,7 @@ kernelspec:
   name: python3
 ---
 
-# Workflow 4: Working with carbon dioxide
+# Working with carbon dioxide
 
 For carbon dioxide data, the natural diurnal cycle must be taken into account when comparing any expected measurements against our observations.
 

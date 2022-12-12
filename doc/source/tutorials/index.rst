@@ -19,7 +19,7 @@ Adding new data
 .. toctree::
    :maxdepth: 1
 
-   local/Adding_observation_data/Adding_observation_data
+   local/Adding_new_data/Adding_observation_data
 
 
 Analysing data
@@ -28,12 +28,12 @@ Analysing data
 .. toctree::
    :maxdepth: 1
 
-   Analysing_data/Comparing_with_emissions
+   local/Analysing_data/Comparing_with_emissions
 
 .. toctree::
    :maxdepth: 1
 
-   Analysing_data/Working_with_co2
+   local/Analysing_data/Working_with_co2
 
 Exploring data
 ---------------
@@ -41,27 +41,27 @@ Exploring data
 .. toctree::
    :maxdepth: 1
 
-   Exploring_data/Explore_NOAA_ObsPack
+   local/Exploring_data/Explore_NOAA_ObsPack
 
 .. toctree::
    :maxdepth: 1
 
-   Exploring_data/Retrieving_remote_data
+   local/Exploring_data/Retrieving_remote_data
 
 .. toctree::
    :maxdepth: 1
 
-   Exploring_data/Searching_and_plotting
+   local/Exploring_data/Searching_and_plotting
 
 
 Managing the the object store
 -----------------------------
 
 
-These tutorials will help you understand how to add differnet types of data to the OpenGHG object store and how to
+These tutorials will help you understand how to add different types of data to the OpenGHG object store and how to
 delete or modify already existing data.
 
 .. toctree::
    :maxdepth: 1
 
-   Managing_object_store/Modifying_and_deleting_data
+   local/Managing_object_store/Modifying_and_deleting_data

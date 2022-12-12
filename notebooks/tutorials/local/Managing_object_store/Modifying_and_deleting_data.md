@@ -104,7 +104,7 @@ And check if the key is in the metadata:
 "useless_key" in result.metadata[uuid]
 ```
 
-# Restore from backup
+## Restore from backup
 
 If you've accidentally pushed some bad metadata you can fix this easily by restoring from backup. Each `DataHandler` object stores a backup of the current metadata each time you run `update_metadata`. Let's add some bad metadata, have a quick look at the backup and then restore it. We'll start with a fresh `DataHandler` object.
 
@@ -191,7 +191,7 @@ We're now back to where we want to be.
 
 +++
 
-# Deleting data
+## Deleting data
 
 +++
 

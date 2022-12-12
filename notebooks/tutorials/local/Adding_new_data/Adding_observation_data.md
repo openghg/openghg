@@ -37,7 +37,7 @@ Then import `openghg` and print the version string associated with the version y
 ```ipython
 In [1]: import openghg
 In [2]: openghg.__version__
-Out[2]: '0.2.1'
+Out[2]: '0.4.0'
 ```
 
 If you get an ``ImportError`` please go back to the [install section of the documentation](https://docs.openghg.org/install.html).
