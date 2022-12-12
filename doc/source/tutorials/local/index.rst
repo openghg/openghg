@@ -5,6 +5,18 @@ Tutorials - Local
 These tutorials cover the use of OpenGHG when installed locally. They'll help you get started on
 standardising measurement data, searching the object store and exploring the NOAA ObsPack.
 
+Adding new data
+---------------
+
+
+Analysing data
+---------------
+
+Exploring data
+---------------
+
+Managing the the object store
+-----------------------------
 
 
 Tutorial 1 - Adding observation data
