@@ -60,8 +60,6 @@ OpenGHG can retrieve data from the `ICOS Carbon Portal <https://www.icos-cp.eu/o
 
 .. autofunction:: openghg.retrieve.icos.retrieve_atmospheric
 
-.. autofunction:: openghg.retrieve.icos.retrieve
-
 CEDA
 ^^^^
 

@@ -24,6 +24,8 @@ Functions used in our OpenGHG tutorial notebooks and documentation.
 
 .. autofunction:: openghg.tutorial.clear_example_cache
 
+.. autofunction:: openghg.tutorial.clear_tutorial_store
+
 .. autofunction:: openghg.tutorial.example_extract_path
 
 .. autofunction:: openghg.tutorial.bilsdale_datapaths

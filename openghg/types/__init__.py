@@ -8,11 +8,15 @@ from ._enum import (
     DataTypes,
 )
 from ._errors import (
-    DatasourceLookupError,
-    FunctionError,
+    OpenGHGError,
     InvalidSiteError,
-    ObjectStoreError,
     UnknownDataError,
+    FunctionError,
+    ObjectStoreError,
+    DatasourceLookupError,
+    EncodingError,
+    MutexTimeoutError,
+    RequestBucketError,
     SearchError,
 )
 from ._types import multiPathType, pathType, resultsType

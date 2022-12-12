@@ -274,7 +274,7 @@ code into ``/python``. We also copy the services code which form the functions t
 We have also modified ``func.yaml`` to increase the amount of memory available to this function to 2048 MB / 2 GB. If you notice functions failing unexpectedly
 it may be worth trying changing this value.
 
-.. literalinclude:: ../../../docker/func.yaml
+.. literalinclude:: ../../../../docker/func.yaml
     :language: yaml
 
 To build this image we use the ``build_deploy.py`` Python script.

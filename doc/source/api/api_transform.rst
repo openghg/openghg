@@ -16,4 +16,4 @@ Emissions
 
 Transform emissions data
 
-.. autofunction:: openghg.transform.edgar.parse_edgar
+.. autofunction:: openghg.transform.emissions.parse_edgar
