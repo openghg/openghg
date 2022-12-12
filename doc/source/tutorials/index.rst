@@ -2,16 +2,19 @@
 Tutorials
 =========
 
-These tutorials will get you up and running with OpenGHG so you can process, analyse and query data.
-The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
-repository under ``notebooks/tutorials``.
-
-If you've installed OpenGHG locally the tutorials below are available in the `OpenGHG repository <https://github.com/openghg/openghg>`_
-under ``notebooks/tutorials/local``.
-
-
 These tutorials cover the use of OpenGHG when installed locally. They'll help you get started on
 standardising measurement data, searching the object store and exploring the NOAA ObsPack.
+
+Quickstart
+----------
+
+Get started quickly by following our quickstart guide
+
+.. toctree::
+   :maxdepth: 1
+
+   local/quickstart_devel
+
 
 Adding new data
 ---------------

@@ -66,6 +66,7 @@ Now we can install OpenGHG's requirements and its developer requirements.
 Finally install OpenGHG itself. The ``-e`` / ``--editable`` flag here tells ``pip`` to install the OpenGHG repo in develop mode.
 
 .. code-block:: bash
+
    pip install -e .
 
 OpenGHG should now be installed, you can check this by opening ``ipython`` and running

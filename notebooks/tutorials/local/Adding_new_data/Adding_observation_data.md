@@ -18,10 +18,6 @@ This tutorial demonstrates how OpenGHG can be used to process new measurement da
 
 +++
 
-> **_NOTE:_**  This tutorial needs updating and will not currently work
-
-+++
-
 ### Check installation
 
 This tutorial assumes that you have installed `openghg`. To ensure install has been successful you can open an `ipython` console and try to import this module.
