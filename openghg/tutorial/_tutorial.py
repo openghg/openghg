@@ -185,8 +185,7 @@ def populate_flux_ch4() -> None:
 
 
 def populate_bc() -> None:
-    """
-    """
+    """ """
     populate_bc_ch4()
 
 
@@ -200,7 +199,9 @@ def populate_bc_ch4() -> None:
     use_tutorial_store()
 
     print("Retrieving data...")
-    eur_2016_bc = "https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz"
+    eur_2016_bc = (
+        "https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz"
+    )
     bc_data_path = retrieve_example_data(url=eur_2016_bc)[0]
 
     bc_input = "CAMS"
@@ -213,9 +214,7 @@ def populate_bc_ch4() -> None:
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
                 print("bc_data_path", bc_data_path)
-                standardise_bc(
-                    filepath=bc_data_path, bc_input=bc_input, species=species, domain=domain
-                )
+                standardise_bc(filepath=bc_data_path, bc_input=bc_input, species=species, domain=domain)
 
     print("Done.")
 
@@ -392,3 +391,18 @@ def unpack_example_archive(archive_path: Path, extract_dir: Union[str, Path, Non
     extracted_filepaths = [Path(extract_dir, str(fname)) for fname in filenames]
 
     return extracted_filepaths
+
+
+def clear_tutorial_store() -> None:
+    """Delete the contents of the tutorial object store
+
+    Returns:
+        None
+    """
+    from openghg.objectstore import get_tutorial_store_path
+
+    path = get_tutorial_store_path()
+
+    shutil.rmtree(path=path, ignore_errors=True)
+
+    print(f"Tutorial store at {path} cleared.")
