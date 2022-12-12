@@ -12,65 +12,23 @@ kernelspec:
   name: python3
 ---
 
-# Processing, searching and retrieving observations
+# Adding observation data
 
 This tutorial demonstrates how OpenGHG can be used to process new measurement data, search the data present and to retrieve this for analysis and visualisation.
 
 +++
 
-### Check installation
+## 0. Using the tutorial object store
 
-This tutorial assumes that you have installed `openghg`. To ensure install has been successful you can open an `ipython` console and try to import this module.
+To avoid adding the example data we use in this tutorial to your normal object store, we need to tell OpenGHG to use a separate sandboxed object store that we'll call the tutorial store. To do this we use the `use_tutorial_store` function from `openghg.tutorial`. This sets the `OPENGHG_TUT_STORE` environment variable for this session and won't affect your use of OpenGHG outside of this tutorial.
 
-In a terminal type:
+```{code-cell} ipython3
+from openghg.tutorial import use_tutorial_store
 
-```bash
-$ ipython
+use_tutorial_store()
 ```
 
-Then import `openghg` and print the version string associated with the version you have installed. If you get something like the below `openghg` is installed correctly.
-
-```ipython
-In [1]: import openghg
-In [2]: openghg.__version__
-Out[2]: '0.4.0'
-```
-
-If you get an ``ImportError`` please go back to the [install section of the documentation](https://docs.openghg.org/install.html).
-
-### Jupyter notebooks
-
-If you haven't used Jupyter notebooks before please see [this introduction](https://realpython.com/jupyter-notebook-introduction/).
-
-+++
-
-## 1. Setting up an object store
-
-The OpenGHG platform uses what's called an *object store* to save data. Any saved data has been processed into a standardised format, assigned universally unique identifiers (UUIDs) and stored alongside associated metadata (such as site and species details). Storing data in this way allows for fast retrieval and efficient searching.
-
-When you first import openghg it will create a configuration file in your home directory under `~/.config/openghg/openghg.conf`. This is a [TOML](https://toml.io/en/) file that is used by OpenGHG to store user settings and should look like this if you're using Linux:
-
-+++
-
-```toml
-[object_store]
-local_store = "/home/your_username/openghg_store"
-```
-
-+++
-
-Or if you're using macOS
-
-+++
-
-```toml
-[object_store]
-local_store = "/Users/your_username/openghg_store"
-```
-
-+++
-
-## 2. Adding and standardising data
+## 1. Adding and standardising data
 
 +++
 
@@ -83,9 +41,9 @@ When uploading a new data file, the data type must be specified alongside some a
 For the full list of accepted observation inputs and data types, there is a summary function which can be called:
 
 ```{code-cell} ipython3
-from openghg.standardise import summary_data_types
+from openghg.standardise import summary_source_formats
 
-summary = summary_data_types()
+summary = summary_source_formats()
 
 ## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES
 # import pandas as pd; pd.set_option('display.max_rows', None)
@@ -106,7 +64,9 @@ We will start by adding data to the object store from a surface site within the 
 ```{code-cell} ipython3
 from openghg.tutorial import retrieve_example_data
 
-tac_data = retrieve_example_data(url="timeseries/tac_example.tar.gz")
+data_url = "https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz"
+
+tac_data = retrieve_example_data(url=data_url)
 ```
 
 As this data is measured in-situ, this is classed as a surface site and we need to use the `ObsSurface` class to interpret this data. We can pass our list of files to the `read_file` method associated within the `ObsSurface` class, also providing details on:
@@ -141,7 +101,11 @@ Another data type which can be added is data from the AGAGE network. The functio
 We can now retrieve the example data for Capegrim as we did above
 
 ```{code-cell} ipython3
-capegrim_data = retrieve_example_data(path="timeseries/capegrim_example.tar.gz")
+cgo_url = "https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz"
+```
+
+```{code-cell} ipython3
+capegrim_data = retrieve_example_data(url=cgo_url)
 ```
 
 ```{code-cell} ipython3
@@ -193,26 +157,6 @@ Datasources can also handle multiple versions of data from a single site, so if 
 
 +++
 
-### Visualising the object store
-
-Now that we have added data to our created object store, we can view the objects within it in a simple force graph model. To do this we use the `view_store` function from the `objectstore` submodule. Note that the cell may take a few moments to load as the force graph is created.
-
-In the force graph the central blue node is the `ObsSurface` node. Associated with this node are all the data processed by it. The next node in the topology are networks, shown in green. In the graph you will see `DECC` and `AGAGE` nodes from the data files we have added. From these you'll see site nodes in red and then individual datasources in orange.
-
-+++
-
-*Note: The object store visualisation created by this function is commented out here and won't be visible in the documentation but can be uncommented and run when you use the notebook version.*
-
-```{code-cell} ipython3
-from openghg.objectstore import visualise_store
-
-# visualise_store()
-```
-
-Now we know we have this data in the object store we can search it and retrieve data from it.
-
-+++
-
 ### Searching the object store
 
 +++
@@ -224,13 +168,19 @@ For example we can find all sites which have measurements for carbon tetrafluori
 ```{code-cell} ipython3
 from openghg.retrieve import search_surface
 
-search_surface(species="cfc11")
+cfc_results = search_surface(species="cfc11")
+cfc_results
 ```
 
 We could also look for details of all the data measured at the Billsdale ("BSD") site using the `site` keyword:
 
 ```{code-cell} ipython3
-search_surface(site="tac")
+tac_results = search_surface(site="tac")
+tac_results
+```
+
+```{code-cell} ipython3
+tac_results.results
 ```
 
 For this site you can see this contains details of each of the species as well as the inlet heights these were measured at.
@@ -248,7 +198,7 @@ results = search_surface(site="tac", species="co2")
 ```
 
 ```{code-cell} ipython3
-results
+results.results
 ```
 
 We can retrive either some or all of the data easily using the `retrieve` function.
@@ -302,15 +252,3 @@ co2_data.plot_timeseries()
 ```
 
 You can also pass any of `title`, `xlabel`, `ylabel` and `units` to the `plot_timeseries` function to modify the labels.
-
-+++
-
-#### Cleanup
-
-+++
-
-If you used the `tmp_dir` as a location for your object store at the start of the tutorial you can run the cell below to remove any files that were created to make sure any persistant data is refreshed when the notebook is re-run.
-
-```{code-cell} ipython3
-tmp_dir.cleanup()
-```
