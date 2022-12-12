@@ -23,7 +23,7 @@ First we'll clone the repository and make sure we're on the ``devel`` branch. Th
    cd openghg
    git checkout devel
 
-Next we'll get a virtual environment setup using either.
+Next we'll get a virtual environment setup using either ``pip`` or ``conda``.
 
 Environments
 ------------
