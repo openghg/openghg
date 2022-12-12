@@ -1,30 +1,16 @@
-addict
-cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
-cdsapi
-dask
-lazy_import
-matplotlib
-netcdf4
-numexpr
-numpy
-nc-time-axis
-pandas
-paramiko
-pyvis
-rapidfuzz
-requests >= 2.25
-scipy
-tqdm
-xarray >= 0.18.2
-urllib3 >= 1.26.3
 # Required for testing
+cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
 flake8
+pre-commit
 pytest >= 6.2.5
 pytest-tornasync
 pytest-cov
+pytest-mock
 requests-mock
 # For mypy
-mypy==0.930
+mypy==0.982
 types-paramiko
 types-PyYAML
 types-requests
+types-toml
+msgpack-types

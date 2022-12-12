@@ -1,11 +1,10 @@
 import logging
 
-from openghg.standardise.surface import parse_crds, parse_gcwerks
-from openghg.store import ObsSurface
-from openghg.objectstore import get_local_bucket
-from openghg.store import recombine_datasets
+from helpers import get_surface_datapath
+from openghg.objectstore import get_bucket
 from openghg.retrieve import search
-from helpers import get_datapath
+from openghg.standardise.surface import parse_crds, parse_gcwerks
+from openghg.store import ObsSurface, recombine_datasets
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -13,7 +12,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 def test_recombination_CRDS():
     filename = "hfd.picarro.1minute.100m.min.dat"
-    filepath = get_datapath(filename=filename, data_type="CRDS")
+    filepath = get_surface_datapath(filename=filename, source_format="CRDS")
 
     gas_data = parse_crds(data_filepath=filepath, site="HFD", network="AGAGE")
 
@@ -25,13 +24,11 @@ def test_recombination_CRDS():
 
     result = search(species=species, site=site, inlet=inlet)
 
-    keys = result.keys(site=site, species=species, inlet=inlet)
+    uuid = next(iter(result.key_data))
 
-    data_keys = keys["unranked"]
+    keys = result.key_data[uuid]
 
-    assert "ranked" not in keys
-
-    ch4_data_recombined = recombine_datasets(keys=data_keys)
+    ch4_data_recombined = recombine_datasets(keys=keys)
 
     ch4_data_recombined.attrs = {}
 
@@ -40,8 +37,8 @@ def test_recombination_CRDS():
 
 
 def test_recombination_GC():
-    data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-    precision = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+    data = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
+    precision = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
     data = parse_gcwerks(
         data_filepath=data, precision_filepath=precision, site="CGO", instrument="medusa", network="AGAGE"
@@ -54,12 +51,12 @@ def test_recombination_GC():
     inlet = "70m"
 
     result = search(species=species, site=site, inlet=inlet)
-    keys = result.keys(site=site, species=species, inlet=inlet)
 
-    data_keys = keys["unranked"]
-    assert "ranked" not in keys
+    uuid = next(iter(result.key_data))
 
-    toluene_data_recombined = recombine_datasets(keys=data_keys)
+    keys = result.key_data[uuid]
+
+    toluene_data_recombined = recombine_datasets(keys=keys)
 
     toluene_data.attrs = {}
     toluene_data_recombined.attrs = {}

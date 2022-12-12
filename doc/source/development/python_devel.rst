@@ -1,19 +1,42 @@
-===========
-Development
-===========
+=============
+Getting setup
+=============
 
+Here we'll cover getting your development environment setup for contributing to OpenGHG.
 The source code for OpenGHG is available on `GitHub <https://github.com/openghg/openghg>`__.
 
 Setting up your computer
 =========================
 
-OpenGHG requires Python >= 3.7, so please install this before continuing
+You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.8, so please make sure you have both installed before continuing
 further.
 
-Virtual environment
---------------------
 
-It is recommended that you develop OpenGHG in a Python 
+Clone OpenGHG
+-------------
+
+First we'll clone the repository and make sure we're on the ``devel`` branch. This makes sure we're on the most up to date version of OpenGHG.
+
+.. code-block:: bash
+
+   git clone https://github.com/openghg/openghg.git
+   cd openghg
+   git checkout devel
+
+Next we'll get a virtual environment setup using either ``pip`` or ``conda``.
+
+Environments
+------------
+
+Here we cover the creation of an environment and the installation of OpenGHG into it. Installation here means adding OpenGHG to the environment.
+We'll install it in developer mode so that any changes you make to the code will automatically be available when you run commands. Similarly, if you
+run a ``git pull`` on the ``devel`` branch all changes made will be available to you straight away, without having to reinstall or update OpenGHG within
+the environment.
+
+``pip``
+^^^^^^^
+
+It is recommended that you develop OpenGHG in a Python
 `virtual environment <https://docs.python.org/3/tutorial/venv.html>`__.
 Here we'll create a new folder called ``envs`` in our home directory and create
 a new ``openghg_devel`` environment in it.
@@ -22,7 +45,7 @@ a new ``openghg_devel`` environment in it.
 
     mkdir -p ~/envs/openghg_devel
     python -m venv ~/envs/openghg_devel
-    
+
 Virtual environments provide sandboxes which make it easier to develop
 and test code. They also allow you to install Python modules without
 interfering with other Python installations.
@@ -33,38 +56,65 @@ We activate our new environment using
 
     source ~/envs/openghg_devel/bin/activate
 
-This will update your shell so that all python commands (such as
-``python``, ``pip`` etc.) will use the virtual environment. You can
-deactivate the environment and return to your system Python using;
+
+We'll first install and update some installation tools
 
 .. code-block:: bash
 
-   deactivate
+   pip install --upgrade pip wheel setuptools
 
-Clone OpenGHG
--------------
-
-As OpenGHG is currently in its very early stages and is not yet available on ``pip`` we need
-clone the OpenGHG repository and then move into it and install the required dependencies.
+Now, making sure we're in the root of the OpenGHG repository we just cloned, install OpenGHG's requirements and its developer requirements.
 
 .. code-block:: bash
 
-    git clone https://github.com/openghg/openghg.git
-    cd openghg
-    pip install -r requirements.txt
-    pip install -r requirements-dev.txt
+   pip install -r requirements.txt -r requirements-dev.txt
 
-OpenGHG should now be installed within your virtual environment. 
-
-Clone Acquire
--------------
-
-OpenGHG currently relies on Acquire being in the directory about ``OpenGHG`` for tests to be run correctly. To do this 
+Finally install OpenGHG itself. The ``-e`` / ``--editable`` flag here tells ``pip`` to install the OpenGHG repo in develop mode.
 
 .. code-block:: bash
 
-    cd ..
-    git clone https://github.com/openghg/acquire.git
+   pip install -e .
+
+OpenGHG should now be installed, you can check this by opening ``ipython`` and running
+
+.. code-block:: ipython
+
+   In [1]: import openghg
+
+``conda``
+^^^^^^^^^
+
+Making sure you're in the ``openghg`` repository folder run
+
+.. code-block:: bash
+
+   conda env create -f environment.yaml
+
+Once ``conda`` finishes its installation process you can activate the enironment
+
+
+.. code-block:: bash
+
+   conda activate openghg_env
+
+Next install ``conda-build`` which allows us to install packages in develop mode
+
+.. code-block:: bash
+
+   conda install conda-build
+
+And finally install OpenGHG
+
+.. code-block:: bash
+
+   conda develop .
+
+OpenGHG should now be installed, you can check this by opening ``ipython`` and running
+
+.. code-block:: ipython
+
+   In [1]: import openghg
+
 
 Run tests
 ---------
@@ -79,7 +129,7 @@ To ensure everything is working on your system running the tests is a good idea.
 Coding Style
 ============
 
-OpenGHG is written in Python 3 (>= 3.7). We aim as much as possible to follow a
+OpenGHG is written in Python 3 (>= 3.8). We aim as much as possible to follow a
 `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ python coding style and
 recommend that use a linter such as `flake8 <https://flake8.pycqa.org/en/latest/>`__.
 
@@ -110,9 +160,6 @@ Modules
 
 OpenGHG consists of the main module, e.g. ``openghg``, plus
 a ``openghg.submodule`` module.
-
-In addition, there is a ``openghg.scripts`` module which contains the
-code for the various command-line applications.
 
 To make OpenGHG easy for new developers
 to understand, we have a set of rules that will ensure that only
@@ -200,6 +247,20 @@ Now create and switch to a feature branch. This should be prefixed with
 
    git checkout -b feature-process
 
+Pre-commit
+----------
+
+This project uses `pre-commit <https://pre-commit.com/>`__ to ensure code is linted and formatted using tools such as flake8,
+black and others. This ensures errors are caught before the code is checked in the CI pipeline.
+
+To install the hook
+
+.. code-block:: bash
+
+   pre-commit install
+
+The hook should now run each time you make a commit.
+
 Testing
 =======
 
@@ -248,7 +309,7 @@ To get more detailed information about each test, run pytests using the
 
    pytest -v tests/
 
-For more information on the capabilties of ``pytest`` please see the 
+For more information on the capabilties of ``pytest`` please see the
 `pytest documentation <https://docs.pytest.org/en/stable/contents.html>`__.
 
 Continuous integration and delivery
@@ -269,7 +330,7 @@ for details. The documentation is automatically built using `Sphinx <http://sphi
 documentation is automatically rebuilt and updated.
 
 To build the documentation locally you will first need to install some
-additional packages. If you haven't yet installed the developer requirements please do so by running
+additional packages. If you haven't yet installed the documentation requirements please do so by running
 
 .. code-block:: bash
 
@@ -277,14 +338,6 @@ additional packages. If you haven't yet installed the developer requirements ple
 
 Next ensure you have `pandoc <https://pandoc.org/>`__ installed. Installation instructions
 can be `found here <https://pandoc.org/installing.html>`__
-
-.. note::
-    If you haven't installed ``openghg`` to your virtual environment you can add the folder path to your PYTHONPATH.
-    This allows the library to be used easily without the need for reinstallation after changes.
-
-    .. code-block:: bash
-
-        export PYTHONPATH="${PYTHONPATH}:/path/to/cloned/repo"
 
 Then move to the ``doc`` directory and run:
 
@@ -305,17 +358,17 @@ commiting. When happy, commit your changes, e.g.
    git commit openghg/_new_feature.py tests/test_feature \
        -m "Implementation and test for new feature."
 
-If your edits don't change the OpenGHG source code e.g. fixing typos in the documentation, 
+If your edits don't change the OpenGHG source code e.g. fixing typos in the documentation,
 then please add ``[skip ci]`` to your commit message.
 
 .. code-block:: bash
 
-   git commit -a -m "Updating docs [ci skip]"
+   git commit -a -m "Updating docs [skip ci]"
 
 This will avoid unnecessarily running the
 `GitHub Actions <https://github.com/openghg/openghg/actions>`__, e.g. running all the tests
 and rebuilding the documentation of the OpenGHG package etc. GitHub actions are configured in the file
-``.github/workflows/main.yaml``). 
+``.github/workflows/main.yaml``).
 
 Next, push your changes to the remote server:
 

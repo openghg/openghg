@@ -1,0 +1,25 @@
+===================
+What's new - v0.3.0
+===================
+
+**Release date: 2022-08-31**
+
+Features
+========
+
+- Removal of the ``openghg.client`` submodule. All functions now route function calls to the correct place depending on environment.
+- Full ICOS and CEDA archive pulling capabilities in the cloud and locally.
+- Adds logging to logfile, stored at ``~/openghg_log`` when run locally.
+- Improved schema checking for different file formats, including footprint files.
+
+Fixes
+=====
+
+- Fixes the ``clean_string`` function of ``openghg.util`` to allow dashes as these are commonly used in species names.
+- Improves local routing functionality within cloud functions
+
+
+Deprecations
+============
+
+- OpenGHG now only supports Python >= 3.8

@@ -5,28 +5,76 @@ User API
 This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
 OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.
 
-client
-======
+Analyse
+=======
+
+The `analyse` submodule contains functionality to help you analyse data retrieved from the object store.
+The `ModelScenario` class allows users to collate related data sources and calculate
+modelled output based on this data.
+
+.. toctree::
+   :maxdepth: 2
+
+   api_analyse
+
+Data objects
+============
+
+Classes used to return data from the object store, help with manipulation and modification.
+
+.. toctree::
+   :maxdepth: 2
+
+   api_dataobjects
+
+Plotting
+========
+
+These are some helper functions to quickly create plots using ObsData objects.
 
 Classes within the client module are used to interact with OpenGHG, whether it be a cloud or local instance.
 
-:func:`~openghg.client.process_files`
-    Upload data files for standardisation and storage in the object store
+.. toctree::
+   :maxdepth: 2
 
-:func:`~openghg.client.search`
-    Search and retrieve data from the object store
+   api_plotting
 
-:func:`~openghg.client.rank_sources`
-    Rank data sources by date range
-
-:func:`~openghg.client.get_obs_surface`
-    Retrieve data from the object store in a format expected by the ACRG
-
-
-plotting
+Retrieve
 ========
 
-These functions are a work in progress, we hope to soon allow users to easily create timeseries and 2D plots using Plotly.
+The ``retrieve`` submodule contains the functionality needed to retrieve different data types from the OpenGHG store.
 
-:func:`~openghg.plotting.plot_footprint`
-    Take a footprint dataset and return a 2D plot
+.. toctree::
+   :maxdepth: 2
+
+   api_retrieve
+
+Standardise
+===========
+
+The ``standardise`` submodule handles the standardisation of different data types to the OpenGHG specification.
+
+.. toctree::
+   :maxdepth: 2
+
+   api_standardise
+
+Transform
+=========
+
+The transform submodule handles creation of data types to OpenGHG specification based on an underlying input such as a database or model output. This usually involves some transformation of the data to e.g. select a region or regrid the data.
+
+.. toctree::
+   :maxdepth: 2
+
+   api_transform
+
+Tutorial
+========
+
+Functions used in our OpenGHG tutorial notebooks and documentation.
+
+.. toctree::
+   :maxdepth: 2
+
+   api_tutorial

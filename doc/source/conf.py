@@ -1,3 +1,5 @@
+# type: ignore
+# flake8: noqa
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -272,6 +274,10 @@ def setup(app):
 nbsphinx_custom_formats = {
     ".md": ["jupytext.reads", {"fmt": "mystnb"}],
 }
+
+nbsphinx_execute = "never"
+nb_execution_excludepatterns = ["*.md", "*.ipynb"]
+
 
 # Napoleon settings
 napoleon_google_docstring = True

@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import Dict, Optional, Union
-from xarray import Dataset
+from typing import Any, Dict, Hashable, Optional, Union, cast
+
 import numpy as np
+import xarray as xr
 
 
 def parse_noaa(
@@ -12,6 +13,7 @@ def parse_noaa(
     network: str = "NOAA",
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
+    **kwarg: Dict,
 ) -> Dict:
     """Read NOAA data from raw text file or ObsPack NetCDF
 
@@ -74,7 +76,7 @@ def _format_inlet(inlet: Union[str, float, int]) -> str:
     """
     if isinstance(inlet, str):
         try:
-            inlet_value = float(inlet)
+            inlet_value: Union[float, np.floating] = float(inlet)
         except ValueError:
             inlet_values_str = inlet.split("-")
             try:
@@ -94,7 +96,7 @@ def _format_inlet(inlet: Union[str, float, int]) -> str:
     return inlet_str
 
 
-def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
+def _standarise_variables(obspack_ds: xr.Dataset, species: str) -> xr.Dataset:
     """
     Converts data from NOAA ObsPack dataset into our standardised variables to be stored within the object store.
     The species is also needed so this name can be used to label the variables in the new dataset.
@@ -173,7 +175,9 @@ def _standarise_variables(obspack_ds: Dataset, species: str) -> Dataset:
     return processed_ds
 
 
-def _split_inlets(obspack_ds: Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None) -> Dict:
+def _split_inlets(
+    obspack_ds: xr.Dataset, attributes: Dict, metadata: Dict, inlet: Optional[str] = None
+) -> Dict:
     """
     Splits the overall dataset by different inlet values, if present. The expected dataset input should be from the NOAA ObsPack.
 
@@ -310,17 +314,17 @@ def _read_obspack(
     Returns:
         dict: Dictionary of results
     """
-    import xarray as xr
-    from openghg.util import clean_string
     from openghg.standardise.meta import assign_attributes
+    from openghg.util import clean_string
 
     valid_types = ("flask", "insitu", "pfp")
 
     if measurement_type not in valid_types:
         raise ValueError(f"measurement_type must be one of {valid_types}")
 
-    obspack_ds = xr.open_dataset(data_filepath)
-    orig_attrs = obspack_ds.attrs
+    with xr.open_dataset(data_filepath) as temp:
+        obspack_ds = temp
+        orig_attrs = temp.attrs
 
     # Want to find and drop any duplicate time values for the original dataset
     # Using xarray directly we have to do in a slightly convoluted way as this is not well built
@@ -362,20 +366,6 @@ def _read_obspack(
         units = processed_ds["value"].units
     except (KeyError, AttributeError):
         print("Unable to extract units from 'value' within input dataset")
-    else:
-        if units == "mol mol-1":
-            units = "1"
-        elif units == "millimol mol-1":
-            units = "1e-3"
-        elif units == "micromol mol-1":
-            units = "1e-6"
-        elif units in ["nmol mol-1", "nanomol mol-1"]:
-            units = "1e-9"
-        elif units == "pmol mol-1":
-            units = "1e-12"
-        else:
-            print(f"Using unit {units} directly")
-            # raise ValueError(f"Did not recognise input units from file: {units}")
 
     metadata = {}
     metadata["site"] = site
@@ -384,6 +374,7 @@ def _read_obspack(
     metadata["species"] = species
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
+    metadata["data_source"] = "noaa_obspack"
 
     # Add additional sampling_period_estimate if sampling_period is not set
     if sampling_period_estimate >= 0.0:
@@ -405,7 +396,7 @@ def _read_obspack(
     metadata["calibration_scale"] = orig_attrs.get("dataset_calibration_scale", "NOT_SET")
 
     # Create attributes with copy of metadata values
-    attributes = metadata.copy()
+    attributes = cast(Dict[Hashable, Any], metadata.copy())  # Cast to match xarray attributes type
 
     # TODO: At the moment all attributes from the NOAA ObsPack are being copied
     # plus any variables we're adding - decide if we want to reduce this
@@ -498,8 +489,8 @@ def _read_raw_data(
     Returns:
         dict: Dictionary containing attributes, data and metadata keys
     """
-    from openghg.util import clean_string, read_header, load_json
-    from pandas import read_csv, Timestamp
+    from openghg.util import clean_string, load_json, read_header
+    from pandas import Timestamp, read_csv
 
     header = read_header(filepath=data_filepath)
 
@@ -624,6 +615,8 @@ def _read_raw_data(
     metadata["inlet"] = inlet
     metadata["sampling_period"] = sampling_period
     metadata["instrument"] = noaa_params["instrument"][species.upper()]
+    metadata["data_type"] = "surface"
+    metadata["source_format"] = "noaa"
 
     combined_data[species.lower()] = {
         "metadata": metadata,
@@ -634,7 +627,7 @@ def _read_raw_data(
     return combined_data
 
 
-def _estimate_sampling_period(obspack_ds: Dataset, min_estimate: float = 10.0) -> float:
+def _estimate_sampling_period(obspack_ds: xr.Dataset, min_estimate: float = 10.0) -> float:
     """
     Estimate the sampling period for the NOAA data using either the "data_selection_tag"
     attribute (this sometimes contains useful information such as "HourlyData") or by using

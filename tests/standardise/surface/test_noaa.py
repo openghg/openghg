@@ -1,10 +1,14 @@
 import logging
-from pandas import Timestamp
-import pytest
 
-from helpers import get_datapath, parsed_surface_metachecker
+import pytest
+from helpers import (
+    attributes_checker_obssurface,
+    check_cf_compliance,
+    get_surface_datapath,
+    parsed_surface_metachecker,
+)
 from openghg.standardise.surface import parse_noaa
-from helpers import attributes_checker_obssurface, check_cf_compliance
+from pandas import Timestamp
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -15,7 +19,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def scsn06_data():
-    filepath = get_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", data_type="NOAA")
+    filepath = get_surface_datapath(filename="ch4_scsn06_surface-flask_1_ccgg_event.txt", source_format="NOAA")
 
     data = parse_noaa(
         data_filepath=filepath, site="scsn06", inlet="flask", measurement_type="flask", sampling_period="1200"
@@ -26,7 +30,7 @@ def scsn06_data():
 
 def test_read_obspack_2020():
     '''Test inputs from "obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24"'''
-    filepath = get_datapath(filename="ch4_esp_surface-flask_2_representative.nc", data_type="NOAA")
+    filepath = get_surface_datapath(filename="ch4_esp_surface-flask_2_representative.nc", source_format="NOAA")
 
     data = parse_noaa(
         data_filepath=filepath, site="esp", inlet="flask", measurement_type="flask", network="NOAA"
@@ -58,7 +62,7 @@ def test_read_obspack_2020():
 
 def test_read_obspack_flask_2021():
     '''Test inputs from "obspack_multi-species_1_CCGGSurfaceFlask_v2.0_2021-02-09"'''
-    filepath = get_datapath(filename="ch4_spf_surface-flask_1_ccgg_Event.nc", data_type="NOAA")
+    filepath = get_surface_datapath(filename="ch4_spf_surface-flask_1_ccgg_Event.nc", source_format="NOAA")
 
     data = parse_noaa(
         data_filepath=filepath, site="SPF", inlet="flask", measurement_type="flask", network="NOAA"
@@ -74,6 +78,7 @@ def test_read_obspack_flask_2021():
     assert ch4_data.time[-1] == Timestamp("2001-01-15T12:34:56")
     assert ch4_data["ch4"][0] == pytest.approx(921.43)
     assert ch4_data["ch4"][-1] == pytest.approx(1143.27)
+    assert ch4_data["ch4"].attrs["units"] == "1e-9"
     assert ch4_data["ch4_variability"][0] == pytest.approx(2.71)
     assert ch4_data["ch4_variability"][-1] == pytest.approx(1.4)
 
@@ -83,7 +88,7 @@ def test_read_obspack_flask_2021():
     assert attributes["sampling_period"] == "NOT_SET"
     assert "sampling_period_estimate" in attributes
     assert float(attributes["sampling_period_estimate"]) > 0.0
-    assert attributes["units"] == "1e-9"
+    assert attributes["units"] == "nanomol mol-1"
 
     ch4_metadata = data[inlet_key]["metadata"]
 
@@ -98,7 +103,7 @@ def test_read_obspack_tower_multi_height():
     Test inputs from "obspack_multi-species_1_CCGGTowerInsitu_v1.0_2018-02-08".
      - This will contain data at multiple heights (intake_height variable) which should be split.
     """
-    filepath = get_datapath(filename="ch4_bao_tower-insitu_1_ccgg_all.nc", data_type="NOAA")
+    filepath = get_surface_datapath(filename="ch4_bao_tower-insitu_1_ccgg_all.nc", source_format="NOAA")
 
     data = parse_noaa(data_filepath=filepath, site="BAO", measurement_type="insitu", network="NOAA")
 
@@ -145,7 +150,7 @@ def test_read_file_site_filename_read(scsn06_data):
     for key, value in expected_attrs.items():
         assert ch4_data.attrs[key] == value
 
-
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_noaa_site_filename_cf_compliance(scsn06_data):
     ch4_data = scsn06_data["ch4"]["data"]
@@ -155,7 +160,7 @@ def test_noaa_site_filename_cf_compliance(scsn06_data):
 
 def test_read_raw_file():
 
-    filepath = get_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", data_type="NOAA")
+    filepath = get_surface_datapath(filename="co_pocn25_surface-flask_1_ccgg_event.txt", source_format="NOAA")
 
     data = parse_noaa(
         data_filepath=filepath, inlet="flask", site="pocn25", measurement_type="flask", sampling_period=1200
@@ -182,7 +187,7 @@ def test_read_raw_file():
 
 def test_read_incorrect_site_raises():
 
-    filepath = get_datapath(filename="ch4_UNKOWN_surface-flask_1_ccgg_event.txt", data_type="NOAA")
+    filepath = get_surface_datapath(filename="ch4_UNKOWN_surface-flask_1_ccgg_event.txt", source_format="NOAA")
 
     with pytest.raises(ValueError):
         data = parse_noaa(data_filepath=filepath, site="NotASite", inlet="flask", measurement_type="flask")

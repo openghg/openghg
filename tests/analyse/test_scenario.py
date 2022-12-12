@@ -1,13 +1,14 @@
-import pytest
-import numpy as np
-import xarray as xr
-import pandas as pd
-from pandas import Timestamp, Timedelta
-from openghg.analyse import ModelScenario
-from openghg.analyse import match_dataset_dims, calc_dim_resolution, stack_datasets
-from openghg.retrieve import get_obs_surface, get_footprint, get_flux
+from typing import Optional
 
-#%% Test ModelScenario initialisation and update options
+import numpy as np
+import pandas as pd
+import pytest
+import xarray as xr
+from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
+from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
+from pandas import Timedelta, Timestamp
+from xarray import Dataset
+
 
 def test_scenario_direct_objects():
     """
@@ -18,35 +19,38 @@ def test_scenario_direct_objects():
     end_date = "2013-01-01"
 
     site = "tac"
-    domain="EUROPE"
-    species="ch4"
-    network="DECC"
-    inlet="100m"
-    source="anthro"
+    domain = "EUROPE"
+    species = "ch4"
+    network = "DECC"
+    inlet = "100m"
+    source = "anthro"
+    bc_input = "MOZART"
 
-    obs_surface = get_obs_surface(site=site,
-                                  species=species,
-                                  start_date=start_date,
-                                  end_date=end_date,
-                                  inlet=inlet,
-                                  network=network)
+    obs_surface = get_obs_surface(
+        site=site, species=species, start_date=start_date, end_date=end_date, inlet=inlet, network=network
+    )
 
-    footprint = get_footprint(site=site, domain=domain, height=inlet,
-               start_date=start_date, end_date=end_date)
+    footprint = get_footprint(
+        site=site, domain=domain, height=inlet, start_date=start_date, end_date=end_date
+    )
 
     flux = get_flux(species=species, domain=domain, source=source)
 
-    model_scenario = ModelScenario(obs=obs_surface, footprint=footprint, flux=flux)
+    bc = get_bc(species=species, domain=domain, bc_input=bc_input)
+
+    model_scenario = ModelScenario(obs=obs_surface, footprint=footprint, flux=flux, bc=bc)
 
     # Check values have been stored in ModelScenario object correctly
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None
+    assert model_scenario.bc is not None
 
     # Check values stored within model_scenario object match inputs
     xr.testing.assert_equal(model_scenario.obs.data, obs_surface.data)
     xr.testing.assert_equal(model_scenario.footprint.data, footprint.data)
     xr.testing.assert_equal(model_scenario.fluxes[source].data, flux.data)
+    xr.testing.assert_equal(model_scenario.bc.data, bc.data)
 
 
 def test_scenario_infer_inputs_ch4():
@@ -64,19 +68,25 @@ def test_scenario_infer_inputs_ch4():
     species = "ch4"
     source = "anthro"
 
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   inlet=inlet,
-                                   network=network,
-                                   domain=domain,
-                                   sources=source,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    bc_input = "MOZART"
+
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        inlet=inlet,
+        network=network,
+        domain=domain,
+        sources=source,
+        bc_input=bc_input,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     # Check data is being found and stored
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None
+    assert model_scenario.bc is not None
 
     # Check attributes are being assigned correctly
     assert model_scenario.site == site
@@ -113,11 +123,19 @@ def test_scenario_infer_inputs_ch4():
     # Note: flux is allowed to be outside imposed time bounds as this is often
     # of lower frequency than obs and footprint but can be forward-filled
 
+    # Boundary conditions data - time point
+    bc_data = model_scenario.bc.data
+    bc_time = bc_data["time"]
+    assert bc_time[0] == Timestamp("2012-08-01T00:00:00")
+
 
 def test_scenario_infer_inputs_co2():
     """
     Test ModelScenario can find data for co2 including specific co2 footprint.
     """
+
+    # TODO: Incorporate boundary conditions
+    # - need to add appropriate BC file on TEST domain
 
     start_date = "2014-07-01"
     end_date = "2014-08-01"
@@ -130,14 +148,16 @@ def test_scenario_infer_inputs_co2():
     species = "co2"
     source = "natural-rtot"
 
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   inlet=inlet,
-                                   network=network,
-                                   domain=domain,
-                                   sources=source,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        inlet=inlet,
+        network=network,
+        domain=domain,
+        sources=source,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     # Check data is being found and stored
     assert model_scenario.obs is not None
@@ -177,6 +197,49 @@ def test_scenario_infer_inputs_co2():
     assert flux_time[0] == Timestamp("2014-06-29T18:00:00")  # Test file - reduced time axis
 
 
+def test_scenario_flux_extend_co2():
+    """
+    Check ModelScenario can extract full date range of flux values for a given
+    source.
+    Note: for co2, the start and end date range is not used when grabbing the
+    flux data. This is to ensure all relevant flux data is grabbed for creating
+    modelled observations as this may be outside the date range.
+    """
+
+    start_date = "2014-07-01"
+    end_date = "2014-08-01"
+
+    site = "tac"
+    domain = "TEST"
+    inlet = "100m"
+    network = "DECC"
+
+    species = "co2"
+    source = "ocean"
+
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        inlet=inlet,
+        network=network,
+        domain=domain,
+        sources=source,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    # Check data is being found and stored
+    assert model_scenario.obs is not None
+    assert model_scenario.footprint is not None
+    assert model_scenario.fluxes is not None
+
+    # Check two flux files for the same source have been returned
+    flux_data = model_scenario.fluxes[source].data
+    flux_time = flux_data["time"]
+    assert flux_time[0] == Timestamp("2013-12-01T00:00:00")  # From test file 1 - reduced time axis
+    assert flux_time[1] == Timestamp("2014-07-01T00:00:00")  # From test file 2 - reduced time axis
+
+
 def test_scenario_infer_inlet():
     """
     Test ModelScenario can find underlying data for both observations and
@@ -192,12 +255,9 @@ def test_scenario_infer_inlet():
     source = "anthro"
 
     # Explicitly not including inlet to test this can be inferred from obs data.
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   domain=domain,
-                                   sources=source,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    model_scenario = ModelScenario(
+        site=site, species=species, domain=domain, sources=source, start_date=start_date, end_date=end_date
+    )
 
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
@@ -218,13 +278,15 @@ def test_scenario_mult_fluxes():
     species = "ch4"
     sources = ["anthro", "waste"]
 
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   domain=domain,
-                                   inlet=inlet,
-                                   sources=sources,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        domain=domain,
+        inlet=inlet,
+        sources=sources,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     for source in sources:
         assert source in model_scenario.fluxes
@@ -237,16 +299,10 @@ def test_scenario_too_few_inputs():
 
     site = "tac"
 
-    # Explicitly not including inlet to test this can be inferred.
     model_scenario = ModelScenario(site=site)
 
-    # TODO: This may be updated to be include empty ObsData() class
-    # May need to include:
-    # assert model_scenario.obs.data is None
     assert model_scenario.obs is None
-
-    # TODO: get_footprint() is not currently returning None - check this
-    # assert model_scenario.footprint.data is None
+    assert model_scenario.footprint is None
 
 
 def test_add_data():
@@ -265,12 +321,13 @@ def test_add_data():
     model_scenario.add_obs(site=site, species=species, inlet=inlet)
     model_scenario.add_footprint(site=site, inlet=inlet, domain=domain, species=species)
     model_scenario.add_flux(species=species, domain=domain, sources=source)
+    model_scenario.add_bc(species=species, domain=domain)
 
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None
+    assert model_scenario.bc is not None
 
-#%% Test ModelScenario methods with real data
 
 @pytest.fixture(scope="function")
 def model_scenario_1():
@@ -285,15 +342,19 @@ def model_scenario_1():
     inlet = "100m"
     network = "DECC"
     source = "anthro"
+    bc_input = "mozart"
 
-    model_scenario = ModelScenario(site=site,
-                                   species=species,
-                                   inlet=inlet,
-                                   network=network,
-                                   domain=domain,
-                                   sources=source,
-                                   start_date=start_date,
-                                   end_date=end_date)
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        inlet=inlet,
+        network=network,
+        domain=domain,
+        sources=source,
+        bc_input=bc_input,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     return model_scenario
 
@@ -387,6 +448,23 @@ def test_combine_flux_sources(model_scenario_1):
     assert flux_stacked.attrs["sources"] == f"anthro, {source}"
 
 
+def test_calc_modelled_baseline(model_scenario_1):
+    """Test modelled baselin can be calculated from ModelScenario"""
+    modelled_baseline = model_scenario_1.calc_modelled_baseline(resample_to="coarsest")
+    cached_modelled_baseline = model_scenario_1.modelled_baseline
+
+    # Check returned value and cache associated with class
+    data_to_check = [modelled_baseline, cached_modelled_baseline]
+
+    for data in data_to_check:
+        # Check times align with expected values based on resample_to input
+        time = data.time
+        assert time[0] == Timestamp("2012-08-01T00:00:00")
+        assert time[-1] == Timestamp("2012-08-31T22:00:00")
+
+        # Could add more checks here but may be better doing this with mocked data
+
+
 def test_footprints_data_merge(model_scenario_1):
     """Test footprints_data_merge method can be run"""
     combined_dataset = model_scenario_1.footprints_data_merge(resample_to="coarsest")
@@ -398,7 +476,16 @@ def test_footprints_data_merge(model_scenario_1):
     attributes = combined_dataset.attrs
     assert attributes["resample_to"] == "coarsest"
 
+
+# TODO: Dummy tests included below but may want to add checks which use real
+# data for short-lived species (different footprint)
+# - species with single lifetime (e.g. "Rn")
+#    - e.g. WAO-20magl_UKV_rn_EUROPE_201801.nc
+# - species with monthly lifetime (e.g. "HFO-1234zee")
+#    - e.g. MHD-10magl_UKV_hfo-1234zee_EUROPE_201401.nc
+
 #%% Test method functionality with dummy data (CH4)
+
 
 @pytest.fixture
 def obs_ch4_dummy():
@@ -418,14 +505,11 @@ def obs_ch4_dummy():
     species = "ch4"
     site = "TEST_SITE"
     inlet = "10m"
-    sampling_period = "60"
+    sampling_period = "60.0"
 
-    attributes = {"species":species, "site":site, "inlet":inlet, "sampling_period": sampling_period}
+    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
 
-    data = xr.Dataset({"mf":("time", values)},
-                       coords={"time":time},
-                       attrs=attributes
-                       )
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
 
     # Potential metadata:
     # - site, instrument, sampling_period, inlet, port, type, network, species, calibration_scale
@@ -444,34 +528,50 @@ def footprint_dummy():
     Create example FootprintData object with dummy data:
      - Daily frequency from 2011-12-31 to 2012-01-03 (inclusive) (4 time points)
      - Small lat, lon (TEST_DOMAIN)
+     - Small height
      - "fp" values are all 1 **May change**
+     - "particle_locations_*" are 2, 3, 4, 5 for "n", "e", "s", "w"
+     - "INERT" species
     """
     from openghg.dataobjects import FootprintData
 
     time = pd.date_range("2011-12-31", "2012-01-03", freq="D")
     lat = [1.0, 2.0]
     lon = [10.0, 20.0]
+    height = [500, 1500]
 
+    # Add dummy footprint values
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
     values = np.ones(shape)
 
-    data = xr.Dataset({"fp":(("time", "lat", "lon"), values)},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    data_vars = {}
+    data_vars["fp"] = (("time", "lat", "lon"), values)
+
+    # Add dummy particle location values for NESW boundaries of domain
+    nheight = len(height)
+    shape_ns = (ntime, nlon, nheight)
+    shape_ew = (ntime, nlat, nheight)
+    values_n = np.ones(shape_ns) * 2
+    values_e = np.ones(shape_ew) * 3
+    values_s = np.ones(shape_ns) * 4
+    values_w = np.ones(shape_ew) * 5
+
+    data_vars["particle_locations_n"] = (("time", "lon", "height"), values_n)
+    data_vars["particle_locations_e"] = (("time", "lat", "height"), values_e)
+    data_vars["particle_locations_s"] = (("time", "lon", "height"), values_s)
+    data_vars["particle_locations_w"] = (("time", "lat", "height"), values_w)
+
+    coords = {"lat": lat, "lon": lon, "time": time, "height": height}
+
+    data = xr.Dataset(data_vars, coords=coords)
 
     # Potential metadata:
     # - site, height, domain, model, network, start_date, end_date, heights, ...
     # - data_type="footprints"
-    metadata = {"site":"TESTSITE", "height":"10m", "domain":"TESTDOMAIN", "data_type":"footprints"}
+    metadata = {"site": "TESTSITE", "height": "10m", "domain": "TESTDOMAIN", "data_type": "footprints"}
 
-    footprintdata = FootprintData(data=data,
-                                 metadata=metadata,
-                                 flux={},
-                                 bc={},
-                                 species="INERT",
-                                 scales="",
-                                 units="",
-                                 )
+    footprintdata = FootprintData(data=data, metadata=metadata)
 
     return footprintdata
 
@@ -498,33 +598,82 @@ def flux_ch4_dummy():
     values[0, ...] *= 2
     values[1, ...] *= 3
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), values)},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     # Potential metadata:
     # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
     # - data_type?
     species = "ch4"
-    metadata = {"species":species, "source":"TESTSOURCE", "domain":"TESTDOMAIN"}
+    metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
 
-    fluxdata = FluxData(data=flux,
-                        metadata=metadata,
-                        flux={},
-                        bc={},
-                        species=species,
-                        scales="",
-                        units="",
-                        )
+    fluxdata = FluxData(data=flux, metadata=metadata)
 
     return fluxdata
 
 
 @pytest.fixture
-def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy):
+def bc_ch4_dummy():
+    """
+    Create example BoundaryConditionsData object with dummy data
+     - Annual frequency (2011-01-01, 2012-01-01) (2 time points)
+     - Small lat, lon (TEST_DOMAIN); dummy height values
+     - 'vmr_X' values for 'n', 'e', 's', 'w' are:
+       - 2011-01-01 all points - 2, 3, 4, 5 (i.e. 'vmr_n' is 2)
+       - 2012-01-01 all points - 3, 4, 5, 6 (i.e. 'vmr_w' is 6)
+    """
+    from openghg.dataobjects import BoundaryConditionsData
+
+    time = pd.date_range("2011-01-01", "2012-12-31", freq="AS")
+    lat = [1.0, 2.0]
+    lon = [10.0, 20.0]
+    height = [500, 1500]
+
+    nheight, nlat, nlon, ntime = len(height), len(lat), len(lon), len(time)
+
+    shape_ns = (ntime, nlon, nheight)
+    shape_ew = (ntime, nlat, nheight)
+
+    dims_ns = ("time", "lon", "height")
+    dims_ew = ("time", "lat", "height")
+
+    param = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
+    data_vars = {}
+    for i, dv in enumerate(param):
+        direction = dv.split("_")[-1]
+        if direction in ("n", "s"):
+            shape = shape_ns
+            dims = dims_ns
+        elif direction in ("e", "w"):
+            shape = shape_ew
+            dims = dims_ew
+        values = np.ones(shape)
+        values[0, ...] *= 2 + i  # 2, 3, 4, 5
+        values[1, ...] *= 3 + i  # 3, 4, 5, 6
+        data_vars[dv] = (dims, values)
+
+    coords = {"lat": lat, "lon": lon, "time": time, "height": height}
+
+    bc = xr.Dataset(data_vars, coords=coords)
+
+    # Potential metadata:
+    # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
+    # - data_type?
+    species = "ch4"
+    metadata = {"species": species, "bc_input": "TESTINPUT", "domain": "TESTDOMAIN"}
+
+    bc_data = BoundaryConditionsData(data=bc, metadata=metadata)
+
+    return bc_data
+
+
+@pytest.fixture
+def model_scenario_ch4_dummy(obs_ch4_dummy, footprint_dummy, flux_ch4_dummy, bc_ch4_dummy):
     """Create ModelScenario with input dummy data"""
-    model_scenario = ModelScenario(obs=obs_ch4_dummy,
-                                   footprint=footprint_dummy,
-                                   flux=flux_ch4_dummy)
+    model_scenario = ModelScenario(
+        obs=obs_ch4_dummy, footprint=footprint_dummy, flux=flux_ch4_dummy, bc=bc_ch4_dummy
+    )
 
     return model_scenario
 
@@ -552,7 +701,7 @@ def test_model_resample_ch4(model_scenario_ch4_dummy):
 
 
 def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_ch4_dummy):
-    """Test expected modelled observations with known dummy data"""
+    """Test expected modelled observations within footprints_data_merge method with known dummy data"""
     combined_dataset = model_scenario_ch4_dummy.footprints_data_merge()
 
     aligned_time = combined_dataset["time"]
@@ -571,13 +720,72 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
     input_flux_values = flux["flux"].reindex_like(footprint, method="ffill")
     input_fp_values = footprint["fp"]
 
-    expected_modelled_mf = (input_fp_values*input_flux_values).sum(dim=("lat", "lon")).values
+    expected_modelled_mf = (input_fp_values * input_flux_values).sum(dim=("lat", "lon")).values
 
     modelled_mf = combined_dataset["mf_mod"].values
     assert np.allclose(modelled_mf, expected_modelled_mf)
 
 
+def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None):
+
+    fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
+    bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
+
+    # Only relevant if lifetime_hrs input is set
+    mean_age_vars = [
+        "mean_age_particles_n",
+        "mean_age_particles_e",
+        "mean_age_particles_s",
+        "mean_age_particles_w",
+    ]
+
+    dims = {"N": ["height", "lon"], "E": ["height", "lat"], "S": ["height", "lon"], "W": ["height", "lat"]}
+
+    for i, bc_var, fp_var, age_var in zip(range(len(bc_vars)), bc_vars, fp_vars, mean_age_vars):
+        input_bc_values = bc[bc_var].reindex_like(footprint, method="ffill")
+        input_fp_values = footprint[fp_var]
+
+        direction = bc_var.split("_")[-1].upper()
+
+        if lifetime_hrs is not None:
+            input_age_values = footprint[age_var]
+            loss = np.exp(-1 * input_age_values / lifetime_hrs)
+        else:
+            loss = 1.0
+
+        baseline_component = (input_fp_values * input_bc_values * loss).sum(dim=dims[direction]).values
+        if i == 0:
+            expected_modelled_baseline = baseline_component
+        else:
+            expected_modelled_baseline += baseline_component
+
+    return expected_modelled_baseline
+
+
+def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4_dummy):
+    """Test expected modelled baseline with known dummy data"""
+    modelled_baseline = model_scenario_ch4_dummy.calc_modelled_baseline(output_units=1)
+
+    aligned_time = modelled_baseline["time"]
+    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
+    assert aligned_time[-1] == Timestamp("2012-01-02T00:00:00")
+
+    # Create expected value(s) for modelled_mf
+    # In our case:
+    # - dummy particle_locations_* contains 2, 3, 4, 5 for n, e, s, w
+    # - dummy boundary conditions, vmr_* contains 3, 4, 5, 6 at the correct time for n, e, s, w
+    # Expect same modelled baseline for both times 2012/01/01 and 2012/01/02 since bc is annual
+    time_slice = slice(aligned_time[0], aligned_time[-1])
+    footprint = footprint_dummy.data.sel(time=time_slice)
+    bc = bc_ch4_dummy.data.sel(time=time_slice)
+
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=None)
+
+    assert np.allclose(modelled_baseline, expected_modelled_baseline)
+
+
 #%% Test method functionality with dummy data (CO2)
+
 
 @pytest.fixture
 def obs_co2_dummy():
@@ -597,14 +805,11 @@ def obs_co2_dummy():
     species = "co2"
     site = "TEST_SITE"
     inlet = "10m"
-    sampling_period = "60"
+    sampling_period = "60.0"
 
-    attributes = {"species":species, "site":site, "inlet":inlet, "sampling_period": sampling_period}
+    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
 
-    data = xr.Dataset({"mf":("time", values)},
-                       coords={"time": time},
-                       attrs=attributes
-                       )
+    data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
 
     # Potential metadata:
     # - site, instrument, sampling_period, inlet, port, type, network, species, calibration_scale
@@ -623,7 +828,7 @@ def footprint_co2_dummy():
     Create example FootprintData object with dummy data:
      - Carbon dioxide high time resolution footprint
      - Includes two sets of footprint data
-     - Integrated footprint, fp 
+     - Integrated footprint, fp
         - Daily frequency from 2011-12-31T23:00:00 to 2012-01-01T02:00:00 (inclusive) (4 points)
         - "fp" values are all 1 **May change**
      - High time resolution fp, fp_HiTRes
@@ -654,7 +859,7 @@ def footprint_co2_dummy():
     expand_axes = (0, 1, 2)
     for i in expand_axes:
         fp_HiTRes_values = np.repeat(fp_HiTRes_values, shape[i], axis=i)
-    
+
     # Build on this to set distinct values along time dimension as well
     # Add to each array - 0.0-24.0, 1.0-25.0, 2.0-26.0, 3.0-27.0, ... (all inclusive)
     add = 0
@@ -662,26 +867,28 @@ def footprint_co2_dummy():
         fp_HiTRes_values[i, ...] += add
         add += 1
 
-    data = xr.Dataset({"fp":(("time", "lat", "lon"), fp_values),
-                       "fp_HiTRes": (("time", "lat", "lon", "H_back"), fp_HiTRes_values)},
-                       coords={"lat":lat, "lon":lon, "time":time, "H_back":H_back})
+    data = xr.Dataset(
+        {
+            "fp": (("time", "lat", "lon"), fp_values),
+            "fp_HiTRes": (("time", "lat", "lon", "H_back"), fp_HiTRes_values),
+        },
+        coords={"lat": lat, "lon": lon, "time": time, "H_back": H_back},
+    )
 
     # Potential metadata:
     # - site, height, domain, model, network, start_date, end_date, heights, ...
     # - species (if applicable)
     # - data_type="footprints"
     species = "co2"
-    metadata = {"site":"TESTSITE", "height":"10m", "domain":"TESTDOMAIN", 
-                "data_type":"footprints", "species":species}
+    metadata = {
+        "site": "TESTSITE",
+        "height": "10m",
+        "domain": "TESTDOMAIN",
+        "data_type": "footprints",
+        "species": species,
+    }
 
-    footprintdata = FootprintData(data=data,
-                                  metadata=metadata,
-                                  species=species,
-                                  flux={},
-                                  bc={},
-                                  scales="",
-                                  units="",
-                                  )
+    footprintdata = FootprintData(data=data, metadata=metadata)
 
     return footprintdata
 
@@ -703,30 +910,24 @@ def flux_co2_dummy():
 
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
-    values = np.arange(1.0, ntime+1, 1.0)
+    values = np.arange(1.0, ntime + 1, 1.0)
 
     expand_axes = (1, 2)
     values = np.expand_dims(values, axis=expand_axes)
     for j in expand_axes:
         values = np.repeat(values, shape[j], axis=j)
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), values)},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), values)}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     # Potential metadata:
     # - title, author, date_creaed, prior_file_1, species, domain, source, heights, ...
     # - data_type?
     species = "co2"
-    metadata = {"species":species, "source":"TESTSOURCE", "domain":"TESTDOMAIN"}
+    metadata = {"species": species, "source": "TESTSOURCE", "domain": "TESTDOMAIN"}
 
-    fluxdata = FluxData(data=flux,
-                        metadata=metadata,
-                        flux={},
-                        bc={},
-                        species=species,
-                        scales="",
-                        units="",
-                        )
+    fluxdata = FluxData(data=flux, metadata=metadata)
 
     return fluxdata
 
@@ -734,15 +935,13 @@ def flux_co2_dummy():
 @pytest.fixture
 def model_scenario_co2_dummy(obs_co2_dummy, footprint_co2_dummy, flux_co2_dummy):
     """Create ModelScenario with input dummy data for co2"""
-    model_scenario = ModelScenario(obs=obs_co2_dummy,
-                                   footprint=footprint_co2_dummy,
-                                   flux=flux_co2_dummy)
+    model_scenario = ModelScenario(obs=obs_co2_dummy, footprint=footprint_co2_dummy, flux=flux_co2_dummy)
 
     return model_scenario
 
 
 def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, flux_co2_dummy):
-    """Test expected modelled observations with known dummy data for co2"""
+    """Test expected modelled observations within footprints_dat_merge() method with known dummy data for co2"""
     combined_dataset = model_scenario_co2_dummy.footprints_data_merge()
 
     aligned_time = combined_dataset["time"]
@@ -762,27 +961,36 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
         release_time = aligned_time[t].values
         back_time = release_time - Timedelta(max_hours_back, "hours")
         flux_hitres = flux["flux"].sel(time=slice(back_time, release_time))
-        flux_integrated = flux["flux"].resample({"time":"1MS"}).mean().sel(time=aligned_time[0])  # This may need to be updated
+        flux_integrated = (
+            flux["flux"].resample({"time": "1MS"}).mean().sel(time=aligned_time[0])
+        )  # This may need to be updated
 
         # Update footprint data to use number of hours back to derive a time
         footprint_at_release = footprint["fp_HiTRes"].sel(time=release_time)
-        h_back_time = np.array([release_time - Timedelta(hour, "hours") for hour in footprint["H_back"].values], dtype=np.datetime64)
-        footprint_at_release = footprint_at_release.assign_coords({"H_back_time":("H_back", h_back_time)})
-        footprint_at_release = footprint_at_release.swap_dims({"H_back":"H_back_time"})
-        footprint_at_release = footprint_at_release.rename({"time":"release_time"})  # Rename original time parameter
-        footprint_at_release = footprint_at_release.rename({"H_back_time":"time"})  # Set new time parameter based on H_back
+        h_back_time = np.array(
+            [release_time - Timedelta(hour, "hours") for hour in footprint["H_back"].values],
+            dtype=np.datetime64,
+        )
+        footprint_at_release = footprint_at_release.assign_coords({"H_back_time": ("H_back", h_back_time)})
+        footprint_at_release = footprint_at_release.swap_dims({"H_back": "H_back_time"})
+        footprint_at_release = footprint_at_release.rename(
+            {"time": "release_time"}
+        )  # Rename original time parameter
+        footprint_at_release = footprint_at_release.rename(
+            {"H_back_time": "time"}
+        )  # Set new time parameter based on H_back
 
         # Extract footprint data covering correct time period
         back_time_exclude = back_time + Timedelta(1, "s")  # Time to go up to but not include back_time
-        footprint_hitres = footprint_at_release.sel({"time":slice(release_time, back_time_exclude)})
-        footprint_integrated = footprint_at_release.sel({"time":back_time})
-        
+        footprint_hitres = footprint_at_release.sel({"time": slice(release_time, back_time_exclude)})
+        footprint_integrated = footprint_at_release.sel({"time": back_time})
+
         # Align flux to footprint data (flux is 2 hourly, footprint H_back is 1 hourly)
         flux_hitres = flux_hitres.reindex_like(footprint_hitres, method="ffill")
 
         # Calculate high time resolution and residual components of modelled mole fraction
-        modelled_mf_htres = (flux_hitres*footprint_hitres).sum().values
-        modelled_mf_residual = (flux_integrated*footprint_integrated).sum().values
+        modelled_mf_htres = (flux_hitres * footprint_hitres).sum().values
+        modelled_mf_residual = (flux_integrated * footprint_integrated).sum().values
         # Combine to create expected modelled mole fraction
         expected_modelled_mf_hr = modelled_mf_htres + modelled_mf_residual
 
@@ -790,7 +998,214 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
         assert np.isclose(modelled_mf_hr, expected_modelled_mf_hr)
 
 
+#%% Test baseline calculation for short-lived species
+# Radon (Rn) - currently has one lifetime value defined
+# HFO-1234zee - currently has monthly lifetimes defined
+# - see openghg/data/acrg_species_info.json for details
+
+
+def replace_species(data_object, species):
+    """
+    Create new dummy data based on the original but with a new species label
+    """
+    data = data_object  # Can we copy this?
+
+    data.data.attrs["species"] = species
+    data.metadata["species"] = species
+
+    return data
+
+
+@pytest.fixture
+def obs_radon_dummy(obs_ch4_dummy):
+    """
+    Create example ObsData object with dummy data
+     - Values match to obs_ch4_dummy
+     - Species is Radon (rn)
+    Same values as obs_ch4_dummy fixture but updated species to be "Rn"
+    """
+    species = "Rn"
+    return replace_species(obs_ch4_dummy, species)
+
+
+@pytest.fixture
+def footprint_radon_dummy(footprint_dummy):
+    """
+    Create example footprint data for Rn (short-lived species)
+     - Footprint values ('fp') match to footprint_dummy
+     - Additional parameters for short-lived species
+      - mean_age_particles_X for 'n','e','s','w'
+        - time point 0 all points - 10, 11, 12, 13
+        - time point 1 all points - 11, 12, 13, 14
+    """
+    from openghg.dataobjects import FootprintData
+
+    footprint_ds = footprint_dummy.data  # Can we copy this?
+    footprint_metadata = footprint_dummy.metadata  # Can we copy this?
+
+    species = "Rn"
+    footprint_metadata["species"] = species
+    footprint_ds.attrs["species"] = species
+
+    fp_dims = footprint_ds.dims
+    nlat = fp_dims["lat"]
+    nlon = fp_dims["lon"]
+    nheight = fp_dims["height"]
+    ntime = fp_dims["time"]
+
+    shape_ns = (ntime, nlon, nheight)
+    shape_ew = (ntime, nlat, nheight)
+
+    dims_ns = ("time", "lon", "height")
+    dims_ew = ("time", "lat", "height")
+
+    param = ["mean_age_particles_n", "mean_age_particles_e", "mean_age_particles_s", "mean_age_particles_w"]
+    data_vars = {}
+    for i, dv in enumerate(param):
+        direction = dv.split("_")[-1]
+        if direction in ("n", "s"):
+            shape = shape_ns
+            dims = dims_ns
+        elif direction in ("e", "w"):
+            shape = shape_ew
+            dims = dims_ew
+        values = np.ones(shape)
+        # Assuming dim 0 is time and has length 2...
+        values[0, ...] *= 10.0 + i  # 10, 11, 12, 13
+        values[1, ...] *= 11.0 + i  # 11, 12, 13, 14
+        data_vars[dv] = (dims, values)
+
+    footprint_ds = footprint_ds.assign(data_vars)
+
+    footprintdata = FootprintData(data=footprint_ds, metadata=footprint_metadata)
+
+    return footprintdata
+
+
+@pytest.fixture
+def bc_radon_dummy(bc_ch4_dummy):
+    """
+    Create example BoundaryConditionsData object with dummy data
+     - Values match to bc_ch4_dummy
+     - Species is Radon (rn)
+    Same values as bc_ch4_dummy fixture but updated species to be "Rn"
+
+    """
+    species = "Rn"
+    return replace_species(bc_ch4_dummy, species)
+
+
+@pytest.fixture
+def model_scenario_radon_dummy(obs_radon_dummy, footprint_radon_dummy, bc_radon_dummy):
+    """Create ModelScenario with input dummy data for Radon (a short-lived species)"""
+    model_scenario = ModelScenario(obs=obs_radon_dummy, footprint=footprint_radon_dummy, bc=bc_radon_dummy)
+
+    return model_scenario
+
+
+def test_modelled_baseline_radon(model_scenario_radon_dummy, footprint_radon_dummy, bc_radon_dummy):
+    """Test expected modelled baseline for Rn (short-lived species) with known dummy data"""
+    modelled_baseline = model_scenario_radon_dummy.calc_modelled_baseline(output_units=1)
+
+    aligned_time = modelled_baseline["time"]
+    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
+    assert aligned_time[-1] == Timestamp("2012-01-02T00:00:00")
+
+    # Create expected value(s) for modelled_baseline for short-lived species
+    # This includes a loss component vased on mean_age_particles for each direction
+    # In our case:
+    # - dummy particle_locations_* contains 2, 3, 4, 5 for n, e, s, w
+    # - dummy boundary conditions, vmr_* contains 3, 4, 5, 6 at the correct time for n, e, s, w
+    # - dummy mean age, mean_age_particles_* contains 11, 12, 13, 14 at the correct time for n, e, s, w
+    time_slice = slice(aligned_time[0], aligned_time[-1])
+    footprint = footprint_radon_dummy.data.sel(time=time_slice)
+    bc = bc_radon_dummy.data.sel(time=time_slice)
+
+    lifetime_rn_days = 5.5157  # Should match value within acrg_species_info.json file
+    lifetime_rn_hrs = lifetime_rn_days * 24.0
+
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_rn_hrs)
+
+    assert np.allclose(modelled_baseline, expected_modelled_baseline)
+
+
+@pytest.fixture
+def obs_short_life_dummy(obs_ch4_dummy):
+    """
+    Create example ObsData object with dummy data
+     - Values match to obs_ch4_dummy
+     - Species is HFO-1234zee
+    Same values as obs_ch4_dummy fixture but updated species to be "HFO1234zee"
+    """
+    species = "HFO1234zee"
+    return replace_species(obs_ch4_dummy, species)
+
+
+@pytest.fixture
+def footprint_short_life_dummy(footprint_radon_dummy):
+    """
+    Create example FootprintData object with dummy data
+     - Values match to footprint_radon_dummy
+     - Species is HFO1234zee
+    Same values as footprint_radon_dummy fixture but updated species to be "HFO1234zee"
+    """
+    species = "HFO1234zee"
+    return replace_species(footprint_radon_dummy, species)
+
+
+@pytest.fixture
+def bc_short_life_dummy(bc_ch4_dummy):
+    """
+    Create example BoundaryConditionsData object with dummy data
+     - Values match to bc_ch4_dummy
+     - Species is HFO1234zee
+    Same values as bc_ch4_dummy fixture but updated species to be "HFO-1234zee"
+
+    """
+    species = "HFO1234zee"
+    return replace_species(bc_ch4_dummy, species)
+
+
+@pytest.fixture
+def model_scenario_short_life_dummy(obs_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy):
+    """Create ModelScenario with input dummy data for short-lived species 'HFO-1234zee'"""
+    model_scenario = ModelScenario(
+        obs=obs_short_life_dummy, footprint=footprint_short_life_dummy, bc=bc_short_life_dummy
+    )
+
+    return model_scenario
+
+
+def test_modelled_baseline_short_life(
+    model_scenario_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy
+):
+    """Test expected modelled baseline for short-lived species 'HFO-1234zee' with known dummy data"""
+    modelled_baseline = model_scenario_short_life_dummy.calc_modelled_baseline(output_units=1)
+
+    aligned_time = modelled_baseline["time"]
+    assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
+    assert aligned_time[-1] == Timestamp("2012-01-02T00:00:00")
+
+    # Create expected value(s) for modelled_baseline for short-lived species
+    # This includes a loss component vased on mean_age_particles for each direction
+    # In our case:
+    # - dummy particle_locations_* contains 2, 3, 4, 5 for n, e, s, w
+    # - dummy boundary conditions, vmr_* contains 3, 4, 5, 6 at the correct time for n, e, s, w
+    # - dummy mean age, mean_age_particles_* contains 11, 12, 13, 14 at the correct time for n, e, s, w
+    time_slice = slice(aligned_time[0], aligned_time[-1])
+    footprint = footprint_short_life_dummy.data.sel(time=time_slice)
+    bc = bc_short_life_dummy.data.sel(time=time_slice)
+
+    lifetime_days_HFO1234zee_jan = 56.3  # Should match value within acrg_species_info.json file
+    lifetime_HFO1234zee_hrs = lifetime_days_HFO1234zee_jan * 24.0
+
+    expected_modelled_baseline = calc_expected_baseline(footprint, bc, lifetime_hrs=lifetime_HFO1234zee_hrs)
+
+    assert np.allclose(modelled_baseline, expected_modelled_baseline)
+
+
 #%% Test generic dataset functions
+
 
 @pytest.fixture
 def flux_daily():
@@ -803,8 +1218,9 @@ def flux_daily():
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), np.ones(shape))},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), np.ones(shape))}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     return flux
 
@@ -820,8 +1236,9 @@ def flux_single_time():
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), np.ones(shape))},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), np.ones(shape))}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     return flux
 
@@ -832,15 +1249,16 @@ def flux_daily_small_dim_diff():
 
     time = pd.date_range("2012-01-01", "2012-02-01", freq="D")
     small_mismatch = 1e-6
-    lat = [1. + small_mismatch, 2. + small_mismatch]
-    lon = [10. + small_mismatch, 20. + small_mismatch]
+    lat = [1.0 + small_mismatch, 2.0 + small_mismatch]
+    lon = [10.0 + small_mismatch, 20.0 + small_mismatch]
 
     nlat, nlon, ntime = len(lat), len(lon), len(time)
     shape = (ntime, nlat, nlon)
-    flux_values = np.ones(shape) + 10.
+    flux_values = np.ones(shape) + 10.0
 
-    flux = xr.Dataset({"flux":(("time", "lat", "lon"), flux_values)},
-                       coords={"lat":lat, "lon":lon, "time":time})
+    flux = xr.Dataset(
+        {"flux": (("time", "lat", "lon"), flux_values)}, coords={"lat": lat, "lon": lon, "time": time}
+    )
 
     return flux
 
@@ -891,8 +1309,7 @@ def test_match_dataset_dims_diff_time(flux_daily, flux_single_time):
 def test_calc_resolution(flux_daily):
     """Test frequency/resolution can be calculated (daily data)"""
     frequency = calc_dim_resolution(flux_daily, dim="time")
-
-    frequency_d = frequency.astype("timedelta64[D]").astype(int)
+    frequency_d = frequency.astype("timedelta64[D]")
     assert frequency_d == 1
 
 

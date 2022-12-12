@@ -1,27 +1,29 @@
-name: openghg
+name: openghg_env
 channels:
   - conda-forge
   - defaults
 dependencies:
+  - python >= 3.8
   - addict
-  - cdsapi
   - dask
-  - lazy_import
+  - h5netcdf
   - matplotlib
-  - netcdf4
+  - msgpack-python
   - numexpr
   - numpy
   - nc-time-axis
   - pandas
-  - paramiko
+  - plotly
   - pyvis
   - rapidfuzz
-  - requests>=2.25
+  - requests >= 2.25
   - scipy
+  - tinydb
+  - toml
   - tqdm
-  - xarray>=0.18.2
-  - urllib3>=1.26.3
+  - xarray = v2022.09.0
+  - urllib3 >= 1.26.3
   - pip
-
-  
-
+  - xesmf
+  - pip:
+    - icoscp

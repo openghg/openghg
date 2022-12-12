@@ -1,21 +1,5 @@
-addict
-cdsapi
-dask
-lazy_import
-matplotlib
-netcdf4
-numexpr
-numpy
-nc-time-axis
-pandas
-paramiko
-pyvis
-rapidfuzz
-requests >= 2.25
-scipy
-tqdm
-xarray >= 0.18.2
-urllib3 >= 1.26.3
 # Server specific
 fdk
 uvloop
+msgpack
+oci

@@ -1,19 +1,11 @@
-from pathlib import Path
-from openghg.store import EulerianModel
+from helpers import get_eulerian_datapath
 from openghg.retrieve import search
-from openghg.store import recombine_datasets
-from openghg.objectstore import get_local_bucket
+from openghg.store import EulerianModel
 from xarray import open_dataset
 
 
-def get_datapath(filename):
-    return Path(__file__).resolve(strict=True).parent.joinpath(f"../data/eulerian_model/{filename}")
-
-
 def test_read_file():
-    get_local_bucket()
-
-    test_datapath = get_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
+    test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
     proc_results = EulerianModel.read_file(filepath=test_datapath, model="GEOSChem", species="ch4")
 
@@ -23,12 +15,12 @@ def test_read_file():
         species="ch4", model="geoschem", start_date="2015-01-01", data_type="eulerian_model"
     )
 
-    key = list(search_results.keys())[0]
+    euler_obs = search_results.retrieve_all()
 
-    data_keys = search_results[key]["keys"]
-    eulerian_data = recombine_datasets(keys=data_keys, sort=False)
+    assert euler_obs
 
-    metadata = search_results[key]["metadata"]
+    eulerian_data = euler_obs.data
+    metadata = euler_obs.metadata
 
     orig_data = open_dataset(test_datapath)
 

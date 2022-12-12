@@ -1,9 +1,9 @@
 import logging
+
 import pandas as pd
 import pytest
-
+from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
 from openghg.standardise.surface import parse_tmb
-from helpers import get_datapath, parsed_surface_metachecker, check_cf_compliance
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -11,7 +11,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def tmb_data():
-    filepath = get_datapath(filename="thames_test_20190707.csv", data_type="THAMESBARRIER")
+    filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
     data = parse_tmb(data_filepath=filepath)
     return data
 
@@ -35,7 +35,7 @@ def test_read_file(tmb_data):
     assert co_data["co"][0] == pytest.approx(0.08788712)
     assert co_data["co_variability"][0] == 0
 
-
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_tmb_cf_compliance(tmb_data):
     co_data = tmb_data["CO"]["data"]

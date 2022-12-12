@@ -2,18 +2,17 @@ import datetime
 import os
 import uuid
 from pathlib import Path
-from addict import Dict as aDict
 
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-
-from openghg.store.base import Datasource
+from addict import Dict as aDict
+from helpers import get_surface_datapath
+from openghg.objectstore import get_bucket, get_object_names
 from openghg.standardise.surface import parse_crds
-from openghg.objectstore import get_local_bucket, get_object_names
-from openghg.util import create_daterange_str, timestamp_tzaware
-from helpers import get_datapath
+from openghg.store.base import Datasource
+from openghg.util import create_daterange_str, daterange_overlap, pairwise, timestamp_tzaware
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
@@ -25,7 +24,7 @@ mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
 @pytest.fixture(scope="session")
 def data():
     filename = "bsd.picarro.1minute.248m.min.dat"
-    filepath = get_datapath(filename=filename, data_type="CRDS")
+    filepath = get_surface_datapath(filename=filename, source_format="CRDS")
 
     return parse_crds(data_filepath=filepath, site="bsd", network="DECC")
 
@@ -61,9 +60,9 @@ def test_add_data(data):
     assert ch4_data["ch4_variability"][0] == pytest.approx(0.79)
     assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
     d.save()
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     data_chunks = [Datasource.load_dataset(bucket=bucket, key=k) for k in d.data_keys()]
 
@@ -75,7 +74,7 @@ def test_add_data(data):
     expected_metadata = {
         "site": "bsd",
         "instrument": "picarro",
-        "sampling_period": "60",
+        "sampling_period": "60.0",
         "inlet": "248m",
         "port": "9",
         "type": "air",
@@ -83,21 +82,27 @@ def test_add_data(data):
         "species": "ch4",
         "calibration_scale": "wmo-x2004a",
         "long_name": "bilsdale",
-        "calibration_scale": "wmo-x2004a",
+        "inlet_height_magl": "248m",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "station_longitude": -1.15033,
         "station_latitude": 54.35858,
         "station_long_name": "bilsdale, uk",
         "station_height_masl": 380.0,
-        "inlet_height_magl": "248m",
-        "data_type": "timeseries",
+        "data_type": "surface",
+        "start_date": "2014-01-30 11:12:30+00:00",
+        "end_date": "2020-12-01 22:32:29+00:00",
     }
 
     assert d.metadata() == expected_metadata
 
 
-def test_versioning(data):
+def test_versioning(capfd):
+    min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
+    detailed_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
+
+    min_data = parse_crds(data_filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
+
     # Take head of data
     # Then add the full data, check versioning works correctly
     metadata = {"foo": "bar"}
@@ -106,44 +111,51 @@ def test_versioning(data):
     # Fix the UUID for the tests
     d._uuid = "4b91f73e-3d57-47e4-aa13-cb28c35d3b3d"
 
-    ch4_data = data["ch4"]["data"]
+    min_ch4_data = min_data["ch4"]["data"]
 
-    v1 = ch4_data.head(20)
-    v2 = ch4_data.head(30)
-    v3 = ch4_data.head(40)
-
-    d.add_data(metadata=metadata, data=v1, data_type="timeseries")
+    d.add_data(metadata=metadata, data=min_ch4_data, data_type="surface")
 
     d.save()
 
-    d.add_data(metadata=metadata, data=v2, data_type="timeseries")
+    min_keys = d.versions()
+
+    expected_v1 = {
+        "2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00",
+        "2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00",
+        "2014-07-26-13:51:30+00:00_2014-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-07-26-13:51:30+00:00_2014-07-28-13:02:30+00:00",
+        "2015-07-26-13:51:30+00:00_2015-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2015-07-26-13:51:30+00:00_2015-07-28-13:02:30+00:00",
+        "2016-07-26-13:51:30+00:00_2016-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2016-07-26-13:51:30+00:00_2016-07-28-13:02:30+00:00",
+        "2017-07-26-13:51:30+00:00_2017-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2017-07-26-13:51:30+00:00_2017-07-28-13:02:30+00:00",
+        "2018-07-26-13:51:30+00:00_2018-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2018-07-26-13:51:30+00:00_2018-07-28-13:02:30+00:00",
+        "2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00",
+        "2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00",
+    }
+
+    assert min_keys["v1"]["keys"] == expected_v1
+
+    detailed_data = parse_crds(data_filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
+
+    detailed_ch4_data = detailed_data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="surface")
 
     d.save()
 
-    d.add_data(metadata=metadata, data=v3, data_type="timeseries")
+    detailed_keys = d.versions()
 
-    d.save()
-
-    keys = d.versions()
-
-    assert keys["v1"]["keys"] == {
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00",
-    }
-    assert keys["v2"]["keys"] == {
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00",
-    }
-    assert keys["v3"]["keys"] == {
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2015-01-30-11:12:30+00:00_2015-01-30-11:19:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2015-01-30-11:12:30+00:00_2015-11-30-11:17:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
-        "2016-04-02-06:52:30+00:00_2016-04-02-06:55:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v3/2016-04-02-06:52:30+00:00_2016-04-02-06:55:30+00:00",
+    expected_v2 = {
+        "2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00",
+        "2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00",
+        "2015-07-26-13:51:30+00:00_2015-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2015-07-26-13:51:30+00:00_2015-07-28-13:02:30+00:00",
+        "2016-07-26-13:51:30+00:00_2016-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2016-07-26-13:51:30+00:00_2016-07-28-13:02:30+00:00",
+        "2017-07-26-13:51:30+00:00_2017-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2017-07-26-13:51:30+00:00_2017-07-28-13:02:30+00:00",
+        "2018-07-26-13:51:30+00:00_2018-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2018-07-26-13:51:30+00:00_2018-07-28-13:02:30+00:00",
+        "2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00",
+        "2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00",
+        "2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v2/2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00",
     }
 
-    assert keys["v3"]["keys"] == keys["latest"]["keys"]
+    assert detailed_keys["v2"]["keys"] == expected_v2
 
 
 def test_get_dataframe_daterange():
@@ -164,10 +176,10 @@ def test_get_dataframe_daterange():
 
 
 def test_save(mock_uuid2):
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     datasource = Datasource()
-    datasource.add_metadata_key(key="data_type", value="timeseries")
+    datasource.add_metadata_key(key="data_type", value="surface")
     datasource.save(bucket)
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
@@ -178,7 +190,7 @@ def test_save(mock_uuid2):
 
 
 def test_save_footprint():
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     metadata = {"test": "testing123", "start_date": "2013-06-02", "end_date": "2013-06-30"}
 
@@ -250,16 +262,16 @@ def test_to_data(data):
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
     obj_data = d.to_data()
 
     metadata = obj_data["metadata"]
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
-    assert metadata["sampling_period"] == "60"
+    assert metadata["sampling_period"] == "60.0"
     assert metadata["inlet"] == "248m"
-    assert metadata["data_type"] == "timeseries"
+    assert metadata["data_type"] == "surface"
     assert len(obj_data["data_keys"]) == 0
 
 
@@ -269,12 +281,12 @@ def test_from_data(data):
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
     d.save()
 
     obj_data = d.to_data()
 
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     # Create a new object with the data from d
     d_2 = Datasource.from_data(bucket=bucket, data=obj_data, shallow=False)
@@ -282,7 +294,7 @@ def test_from_data(data):
     metadata = d_2.metadata()
     assert metadata["site"] == "bsd"
     assert metadata["instrument"] == "picarro"
-    assert metadata["sampling_period"] == "60"
+    assert metadata["sampling_period"] == "60.0"
     assert metadata["inlet"] == "248m"
 
     assert sorted(d_2.data_keys()) == sorted(d.data_keys())
@@ -306,7 +318,7 @@ def test_update_daterange_replacement(data):
 
     ch4_data = data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
     assert d._start_date == pd.Timestamp("2014-01-30 11:12:30+00:00")
     assert d._end_date == pd.Timestamp("2020-12-01 22:31:30+00:00")
@@ -315,7 +327,7 @@ def test_update_daterange_replacement(data):
 
     d._data = None
 
-    d.add_data(metadata=metadata, data=ch4_short, data_type="timeseries")
+    d.add_data(metadata=metadata, data=ch4_short, data_type="surface")
 
     assert d._start_date == pd.Timestamp("2014-01-30 11:12:30+00:00")
     assert d._end_date == pd.Timestamp("2016-04-02 06:55:30+00:00")
@@ -341,7 +353,7 @@ def test_load_dataset():
 
     key = list(keys.values())[0]
 
-    bucket = get_local_bucket()
+    bucket = get_bucket()
 
     loaded_ds = Datasource.load_dataset(bucket=bucket, key=key)
 
@@ -432,17 +444,17 @@ def test_in_daterange(data):
 
     d = Datasource()
     d._uuid = "test-id-123"
-    d.add_data(metadata=metadata, data=data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=data, data_type="surface")
     d.save()
 
     expected_keys = [
-        "data/uuid/test-id-123/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "data/uuid/test-id-123/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
-        "data/uuid/test-id-123/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
-        "data/uuid/test-id-123/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
-        "data/uuid/test-id-123/v1/2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
-        "data/uuid/test-id-123/v1/2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
-        "data/uuid/test-id-123/v1/2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
+        "data/uuid/test-id-123/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
+        "data/uuid/test-id-123/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:24:29+00:00",
+        "data/uuid/test-id-123/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:55:29+00:00",
+        "data/uuid/test-id-123/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:42:29+00:00",
+        "data/uuid/test-id-123/v1/2018-02-18-15:42:30+00:00_2018-12-18-15:43:29+00:00",
+        "data/uuid/test-id-123/v1/2019-02-03-17:38:30+00:00_2019-12-09-10:48:29+00:00",
+        "data/uuid/test-id-123/v1/2020-02-01-18:08:30+00:00_2020-12-01-22:32:29+00:00",
     ]
 
     assert d.data_keys() == expected_keys
@@ -453,7 +465,7 @@ def test_in_daterange(data):
 
     dated_keys = d.keys_in_daterange_str(daterange=daterange)
 
-    assert dated_keys[0].split("/")[-1] == "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"
+    assert dated_keys[0].split("/")[-1] == "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"
 
 
 def test_shallow_then_load_data(data):
@@ -461,7 +473,7 @@ def test_shallow_then_load_data(data):
     data = data["ch4"]["data"]
 
     d = Datasource()
-    d.add_data(metadata=metadata, data=data, data_type="timeseries")
+    d.add_data(metadata=metadata, data=data, data_type="surface")
     d.save()
 
     new_d = Datasource.load(uuid=d.uuid(), shallow=True)
@@ -472,7 +484,7 @@ def test_shallow_then_load_data(data):
 
     assert ds_data
 
-    ch4_data = ds_data["2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00"]
+    ch4_data = ds_data["2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"]
 
     assert ch4_data.time[0] == pd.Timestamp("2014-01-30-11:12:30")
 

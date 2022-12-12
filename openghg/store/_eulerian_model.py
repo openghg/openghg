@@ -1,6 +1,7 @@
-from openghg.store.base import BaseStore
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
+
+from openghg.store.base import BaseStore
 from xarray import Dataset
 
 __all__ = ["EulerianModel"]
@@ -19,23 +20,7 @@ class EulerianModel(BaseStore):
 
     _root = "EulerianModel"
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
-
-    def save(self) -> None:
-        """Save the object to the object store
-
-        Args:
-            bucket: Bucket for data
-        Returns:
-            None
-        """
-        from openghg.objectstore import get_bucket, set_object_from_json
-
-        bucket = get_bucket()
-
-        obs_key = f"{EulerianModel._root}/uuid/{EulerianModel._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
+    _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     @staticmethod
     def read_file(
@@ -62,15 +47,11 @@ class EulerianModel(BaseStore):
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
         from collections import defaultdict
-        from openghg.util import (
-            clean_string,
-            hash_file,
-            timestamp_now,
-            timestamp_tzaware,
-        )
-        from openghg.store import assign_data
-        from xarray import open_dataset
+
+        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from pandas import Timestamp as pd_Timestamp
+        from xarray import open_dataset
 
         model = clean_string(model)
         species = clean_string(species)
@@ -81,6 +62,7 @@ class EulerianModel(BaseStore):
         filepath = Path(filepath)
 
         em_store = EulerianModel.load()
+        metastore = load_metastore(key=em_store._metakey)
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in em_store._file_hashes and not overwrite:
@@ -118,6 +100,7 @@ class EulerianModel(BaseStore):
         metadata["model"] = model
         metadata["species"] = species
         metadata["processed"] = str(timestamp_now())
+        metadata["data_type"] = "eulerian_model"
 
         if start_date is None:
             if len(em_data["time"]) > 1:
@@ -165,9 +148,8 @@ class EulerianModel(BaseStore):
         model_data[key]["data"] = em_data
         model_data[key]["metadata"] = metadata
 
-        keyed_metadata = {key: metadata}
-
-        lookup_results = em_store.datasource_lookup(metadata=keyed_metadata)
+        required = ("model", "species", "date")
+        lookup_results = datasource_lookup(metastore=metastore, data=model_data, required_keys=required)
 
         data_type = "eulerian_model"
         datasource_uuids = assign_data(
@@ -177,83 +159,12 @@ class EulerianModel(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(datasource_uuids=datasource_uuids, metadata=keyed_metadata)
+        em_store.add_datasources(uuids=datasource_uuids, data=model_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
 
         em_store.save()
+        metastore.close()
 
         return datasource_uuids
-
-    def lookup_uuid(self, model: str, species: str, date: str) -> Union[str, bool]:
-        """Perform a lookup for the UUID of a Datasource
-
-        Args:
-            model: Eulerian model name
-            species: Species name
-            date: Start date associated with model run
-        Returns:
-            str or bool: UUID or False if no entry
-        """
-        uuid = self._datasource_table[model][species][date]
-
-        return uuid if uuid else False
-
-    def set_uuid(self, model: str, species: str, date: str, uuid: str) -> None:
-        """Record a UUID of a Datasource in the datasource table
-
-        Args:
-            model: Eulerian model name
-            species: Species name
-            date: Start date associated with model run
-            uuid: UUID of Datasource
-        Returns:
-            None
-        """
-        self._datasource_table[model][species][date] = uuid
-
-    def datasource_lookup(self, metadata: Dict) -> Dict[str, Union[str, bool]]:
-        """Find the Datasource we should assign the data to
-
-        Args:
-            metadata: Dictionary of metadata
-        Returns:
-            dict: Dictionary of datasource information
-        """
-        # TODO - I'll leave this as a function for now as the way we read footprints may
-        # change in the near future
-        # GJ - 2021-04-20 (added by RT on 2021-06-11)
-        lookup_results = {}
-
-        for key, data in metadata.items():
-            model = data["model"]
-            species = data["species"]
-            date = data["date"]
-
-            lookup_results[key] = self.lookup_uuid(model=model, species=species, date=date)
-
-        return lookup_results
-
-    def add_datasources(self, datasource_uuids: Dict, metadata: Dict) -> None:
-        """Add the passed list of Datasources to the current list
-
-        Args:
-            datasource_uuids: Datasource UUIDs
-            metadata: Metadata for each species
-        Returns:
-            None
-        """
-        for key, uid in datasource_uuids.items():
-            md = metadata[key]
-            model = md["model"]
-            species = md["species"]
-            date = md["date"]
-
-            result = self.lookup_uuid(model=model, species=species, date=date)
-
-            if result and result != uid:
-                raise ValueError("Mismatch between assigned uuid and stored Datasource uuid.")
-            else:
-                self.set_uuid(model=model, species=species, date=date, uuid=uid)
-                self._datasource_uuids[uid] = key

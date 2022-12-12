@@ -1,22 +1,32 @@
-import pytest
+from multiprocessing.sharedctypes import Value
+
 import numpy as np
-from pandas import Timestamp
+import pandas as pd
+import pytest
 from openghg.util import (
+    check_date,
+    check_nan,
+    closest_daterange,
+    combine_dateranges,
     create_daterange,
+    create_daterange_str,
+    create_frequency_str,
+    daterange_contains,
     daterange_from_str,
     daterange_overlap,
-    create_daterange_str,
-    closest_daterange,
     find_daterange_gaps,
-    timestamp_tzaware,
-    combine_dateranges,
+    find_duplicate_timestamps,
+    in_daterange,
+    parse_period,
+    relative_time_offset,
     split_daterange_str,
-    trim_daterange,
     split_encompassed_daterange,
-    daterange_contains,
-    check_nan,
-    check_date,
+    time_offset,
+    timestamp_tzaware,
+    trim_daterange,
 )
+from pandas import DateOffset, Timedelta, Timestamp
+from xarray import Dataset
 
 
 def test_create_daterange():
@@ -338,3 +348,111 @@ def test_check_nan():
     with pytest.raises(TypeError):
         check_nan(data="123") == "123"
         assert check_nan(data=None)
+
+
+def test_check_duplicate_timestamps():
+    dr = pd.date_range("2021-1-1", "2021-1-15").tolist()
+    with_dupes = dr + dr
+    df_dupes = pd.DataFrame(with_dupes, columns=["dates"], index=with_dupes)
+    dupes = find_duplicate_timestamps(df_dupes)
+
+    assert dupes
+
+    df_nodupes = pd.DataFrame(dr, columns=["dates"], index=dr)
+    dupes = find_duplicate_timestamps(df_nodupes)
+
+    assert not dupes
+
+    empty_ds = Dataset()
+
+    with pytest.raises(ValueError):
+        find_duplicate_timestamps(empty_ds)
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("12H", (12, "hours")),
+        ("yearly", (1, "years")),
+        ("monthly", (1, "months")),
+        ((1, "minute"), (1, "minutes")),
+        ("1.5H", (1.5, "hours")),
+    ],
+)
+def test_parse_period(test_input, expected):
+    """
+    Testing known inputs and expected outputs for parse_period function
+    This function reads in different "period" inputs and converts them
+    to something which can be used to create a Timedelta or DateOffset object
+    """
+    assert parse_period(test_input) == expected
+
+
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    [
+        ({"value": 1, "unit": "hour"}, "1 hour"),
+        ({"period": "3MS"}, "3 months"),
+        ({"period": "yearly"}, "1 year"),
+    ],
+)
+def test_create_frequency_str(kwargs, expected):
+    """
+    Testing known inputs and expected outputs for create_frequency_str function
+    """
+    assert create_frequency_str(**kwargs) == expected
+
+
+def test_create_frequency_str_needs_unit():
+    """
+    Testing ValueError raised when value is specified but unit is omitted.
+    """
+    with pytest.raises(ValueError):
+        create_frequency_str(value=1)
+
+
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    [
+        ({"value": 1, "unit": "hour"}, Timedelta(hours=1)),
+        ({"value": 1.5, "unit": "hours"}, Timedelta(hours=1.5)),
+        ({"period": "3D"}, Timedelta(days=3)),
+        ({"period": "7.5D"}, Timedelta(days=7.5)),
+    ],
+)
+def test_time_offset(kwargs, expected):
+    """
+    Testing known inputs and expected outputs for time_offset function
+    """
+    assert time_offset(**kwargs) == expected
+
+
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    [
+        ({"value": 1, "unit": "hour"}, Timedelta(hours=1)),
+        ({"value": 1.5, "unit": "hours"}, Timedelta(hours=1.5)),
+        ({"value": 3, "unit": "months"}, DateOffset(months=3)),
+        ({"period": "yearly"}, DateOffset(years=1)),
+    ],
+)
+def test_relative_time_offset(kwargs, expected):
+    """
+    Testing known inputs and expected outputs for relative_time_offset function
+    """
+    assert relative_time_offset(**kwargs) == expected
+
+
+def test_in_daterange():
+    start_a = timestamp_tzaware("2021-01-01")
+    end_a = timestamp_tzaware("2021-06-01")
+
+    start_b = timestamp_tzaware("2021-02-02")
+    end_b = timestamp_tzaware("2021-12-31")
+
+    assert in_daterange(start_a=start_a, end_a=end_a, start_b=start_b, end_b=end_b)
+
+    start_b = timestamp_tzaware("1970-01-01")
+    end_b = timestamp_tzaware("1980-01-01")
+
+    assert not in_daterange(start_a=start_a, end_a=end_a, start_b=start_b, end_b=end_b)

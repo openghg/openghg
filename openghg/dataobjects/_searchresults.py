@@ -1,65 +1,71 @@
-from dataclasses import dataclass
-from typing import Dict, Iterator, List, Optional, Type, TypeVar, Union
+import json
+from io import BytesIO
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
-from addict import Dict as aDict
 from openghg.dataobjects import ObsData
 from openghg.store import recombine_datasets
-from openghg.util import (
-    clean_string,
-    find_daterange_gaps,
-    first_last_dates,
-    split_daterange_str,
-    create_daterange_str,
-)
+from openghg.util import running_on_hub
+from pandas import DataFrame
+from xarray import Dataset, open_dataset
 
 __all__ = ["SearchResults"]
 
+T = TypeVar("T", bound="SearchResults")
 
-@dataclass
+
 class SearchResults:
-    """This class is used to return data from the search function
+    """This class is used to return data from the search function. It
+    has member functions to retrieve data from the object store.
 
     Args:
-        results: Search results
-        ranked_data: True if results are ranked, else False
+        keys: Dictionary of keys keyed by Datasource UUID
+        metadata: Dictionary of metadata keyed by Datasource UUID
     """
 
-    T = TypeVar("T", bound="SearchResults")
+    def __init__(self, keys: Optional[Dict] = None,
+                 metadata: Optional[Dict] = None,
+                 start_result: Optional[str] = None):
+        if metadata is not None:
+            self.metadata = metadata
+        else:
+            self.metadata = {}
 
-    results: Dict
-    ranked_data: bool
-    # Local or cloud service to be used
-    cloud: bool = False
+        if start_result is not None and metadata is not None:
+            for uuid_key, uuid_metadata in metadata.items():
+                if start_result in uuid_metadata:
+                    other_keys = list(uuid_metadata.keys())
+                    other_keys.remove(start_result)
+                    reorder = [start_result] + other_keys
+                    metadata[uuid_key] = {key: uuid_metadata[key] for key in reorder}
+
+        if metadata is not None:
+            self.results = (
+                DataFrame.from_dict(data=metadata, orient="index").reset_index().drop(columns="index")
+            )
+        else:
+            self.results = {}
+
+        if keys is not None:
+            self.key_data = keys
+        else:
+            self.key_data = {}
+
+        self.hub = running_on_hub()
 
     def __str__(self) -> str:
-        if not self.results:
-            return "No results"
-
-        print_strs = []
-        for site, species in self.results.items():
-            if self.ranked_data:
-                print_strs.append(
-                    f"Site: {site.upper()} \nSpecies found: {', '.join(self.results[site].keys())}"
-                )
-            else:
-                print_strs.append(f"Site: {site.upper()}")
-                print_strs.append("---------")
-                print_strs.extend([f"{sp} at {', '.join(self.results[site][sp].keys())}" for sp in species])
-            print_strs.append("\n")
-
-        return "\n".join(print_strs)
+        return f"Found {len(self.results)} results.\nView the results DataFrame using the results property."
 
     def __repr__(self) -> str:
         return self.__str__()
 
     def __bool__(self) -> bool:
-        return bool(self.results)
+        return bool(self.metadata)
 
     def __len__(self) -> int:
-        return len(self.results)
+        return len(self.metadata)
 
-    def __iter__(self) -> Iterator:
-        yield from self.results
+    # def __iter__(self) -> Iterator:
+    #     yield from self.results.iterrows()
 
     def to_data(self) -> Dict:
         """Convert this object to a dictionary for JSON serialisation
@@ -68,327 +74,178 @@ class SearchResults:
             dict: Dictionary of data
         """
         return {
-            "results": self.results,
-            "ranked_data": self.ranked_data,
-            "cloud": self.cloud,
+            "metadata": self.metadata,
+            "keys": self.key_data,
+            "hub": self.hub,
         }
 
+    def to_json(self) -> str:
+        """Serialises the object to JSON
+
+        Returns:
+            str: JSON str
+        """
+        return json.dumps(self.to_data())
+
     @classmethod
-    def from_data(cls: Type[T], data: Dict) -> T:
+    def from_json(cls: Type[T], data: Union[bytes, str]) -> T:
         """Create a SearchResults object from a dictionary
 
         Args:
-            data: Dictionary created by SearchResults.to_data
+            data: Serialised object
         Returns:
             SearchResults: SearchResults object
         """
-        return cls(
-            results=data["results"],
-            ranked_data=data["ranked_data"],
-            cloud=data["cloud"],
-        )
+        loaded = json.loads(data)
 
-    def rankings(self) -> Dict:
-        if not self.ranked_data:
-            print("No rank data")
-
-        rank_result = aDict()
-
-        for site, species_data in self.results.items():
-            for species, data in species_data.items():
-                rank_result[site][species] = data["rank_metadata"]
-
-        to_return: Dict = rank_result.to_dict()
-
-        return to_return
-
-    def raw(self) -> Dict:
-        """Returns the raw results data
-
-        Returns:
-            dict: Dictionary of results returned from search function
-        """
-        return self.results
-
-    def keys(self, site: str, species: str, inlet: Optional[str] = None) -> List[str]:
-        """Return the data keys for the specified site and species.
-        This is intended mainly for use in the search function when filling
-        gaps of unranked dateranges.
-
-            Args:
-                site: Three letter site code
-                species: Species name
-                inlet: Inlet height, required for unranked data
-            Returns:
-                list: List of keys
-        """
-        site = site.lower()
-        species = species.lower()
-
-        if inlet is not None:
-            inlet = inlet.lower()
-
-        try:
-            if self.ranked_data:
-                keys: List = self.results[site][species]["keys"]
-            else:
-                keys = self.results[site][species][inlet]["keys"]
-        except KeyError:
-            raise ValueError(f"No keys found for {species} at {site}")
-
-        return keys
-
-    def metadata(self, site: str, species: str, inlet: Optional[str] = None) -> Dict:
-        """Return the metadata for the specified site and species
-
-        Args:
-            site: Three letter site code
-            species: Species name
-            inlet: Inlet height, required for unranked data
-        Returns:
-            dict: Dictionary of metadata
-        """
-        site = site.lower()
-        species = species.lower()
-
-        if inlet is None and not self.ranked_data:
-            raise ValueError("Please pass an inlet height.")
-
-        if inlet is not None:
-            inlet = inlet.lower()
-
-        try:
-            if self.ranked_data:
-                metadata: Dict = self.results[site][species]["metadata"]
-            else:
-                metadata = self.results[site][species][inlet]["metadata"]
-        except KeyError:
-            raise KeyError(f"No metadata found for {species} at {site}")
-
-        return metadata
-
-    def retrieve_all(self) -> Dict:
-        """Retrieve all the data found during the serch
-
-        Returns:
-            dict: Dictionary of all data
-        """
-        data = aDict()
-
-        # Can we just traverse the dict without looping?
-        for site, species_data in self.results.items():
-            for species, inlet_data in species_data.items():
-                for inlet, keys in inlet_data.items():
-                    data[site][species][inlet] = self._create_obsdata(site=site, species=species, inlet=inlet)
-
-        # TODO - update this once addict is stubbed
-        data_dict: Dict = data.to_dict()
-        return data_dict
+        return cls(keys=loaded["keys"], metadata=loaded["metadata"])
 
     def retrieve(
-        self, site: str = None, species: str = None, inlet: str = None
-    ) -> Union[Dict[str, ObsData], ObsData]:
-        """Retrieve some or all of the data found in the object store.
+        self,
+        dataframe: Optional[DataFrame] = None,
+        sort: bool = False,
+        elevate_inlet: bool = False,
+        **kwargs: Any,
+    ) -> Union[ObsData, List[ObsData]]:
+        """Retrieve data from object store using a filtered pandas DataFrame
 
         Args:
-            site: Three letter site code
-            species: Species name
+            dataframe: pandas DataFrame
+            sort: Sort data by date in retrieved Dataset
+            elevate_inlet: Elevate inlet to a variable within the Dataset, useful
+            for ranked data.
         Returns:
-            ObsData or dict
+            ObsData / List[ObsData]: ObsData object(s)
         """
-        site = clean_string(site)
-        species = clean_string(species)
-        inlet = clean_string(inlet)
+        if dataframe is not None:
+            uuids = dataframe["uuid"].to_list()
+            return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
+        else:
+            return self._retrieve_by_term(sort=sort, elevate_inlet=elevate_inlet, **kwargs)
 
-        # If inlet is not specified, check if this is unambiguous
-        # If so, set inlet to be the only value and continue.
-        if inlet is None:
-            try:
-                potential_inlets = self.results[site][species].keys()
-            except KeyError:
-                pass
-            else:
-                if len(potential_inlets) == 1:
-                    inlet = list(potential_inlets)[0]
+    def retrieve_all(self, sort: bool = False, elevate_inlet: bool = False) -> Union[ObsData, List[ObsData]]:
+        """Retrieves all data found during the search
 
-        if self.ranked_data:
-            if all((site, species, inlet)):
-                # TODO - how to do this in a cleaner way?
-                site = str(site)
-                species = str(species)
-                inlet = str(inlet)
-                return self._create_obsdata(site=site, species=species, inlet=inlet)
+        Args:
+            sort: Sort by time. Note that this may be very memory hungry for large Datasets.
+            elevate_inlet: Elevate inlet to a variable within the Dataset, useful
+            for ranked data.
 
-            results = {}
-            if site is not None and species is not None:
+        Returns:
+            ObsData / List[ObsData]: ObsData object(s)
+        """
+        uuids = list(self.key_data.keys())
+        return self._retrieve_by_uuid(uuids=uuids, sort=sort, elevate_inlet=elevate_inlet)
+
+    def uuids(self) -> List:
+        """Return the UUIDs of the found data
+
+        Returns:
+            list: List of UUIDs
+        """
+        return list(self.metadata.keys())
+
+    def _retrieve_by_term(
+        self, sort: bool, elevate_inlet: bool, **kwargs: Any
+    ) -> Union[ObsData, List[ObsData]]:
+        """Retrieve data from the object store by search term. This function scans the
+        metadata of the retrieved results, retrieves the UUID associated with that data,
+        pulls it from the object store, recombines it into an xarray Dataset and returns
+        ObsData object(s).
+
+        Args:
+            sort: Pass the sort argument to the recombination function
+            (sorts by time)
+            elevate_inlet: Elevate the inlet variable in the Dataset to
+            a variable (used for ranked data)
+            kwargs: Metadata values to search for
+        """
+        uuids = set()
+        # Make sure we don't have any Nones
+        clean_kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        for uid, metadata in self.metadata.items():
+            n_required = len(clean_kwargs)
+            n_matched = 0
+            for key, value in clean_kwargs.items():
                 try:
-                    _ = self.results[site][species]["keys"]
+                    # Here we want to check if it's a list and if so iterate over it
+                    if isinstance(value, (list, tuple)):
+                        for val in value:
+                            val = str(val).lower()
+                            if metadata[key.lower()] == val:
+                                n_matched += 1
+                                break
+                    else:
+                        value = str(value).lower()
+                        if metadata[key.lower()] == value:
+                            n_matched += 1
                 except KeyError:
-                    raise KeyError(f"Unable to find data keys for {species} at {site}.")
+                    pass
 
-                return self._create_obsdata(site=site, species=species)
+            if n_matched == n_required:
+                uuids.add(uid)
 
-            # Get the data for all the species at that site
-            if site is not None and species is None:
-                for sp in self.results[site]:
-                    key = "_".join((site, sp))
-                    results[key] = self._create_obsdata(site=site, species=sp)
+        # Now we can retrieve the data using the UUIDs
+        return self._retrieve_by_uuid(uuids=list(uuids), sort=sort, elevate_inlet=elevate_inlet)
 
-                return results
-
-            # Get the data for all the species at that site
-            if site is None and species is not None:
-                for a_site in self.results:
-                    key = "_".join((a_site, species))
-
-                    try:
-                        results[key] = self._create_obsdata(site=a_site, species=species)
-                    except KeyError:
-                        pass
-
-                return results
-
-            for a_site, species_list in self.results.items():
-                for sp in species_list:
-                    key = "_".join((a_site, sp))
-                    results[key] = self._create_obsdata(site=a_site, species=sp)
-
-            return results
-        else:
-            # if len(self.results) == 1 and not all((species, inlet)):
-            #     raise ValueError("Please pass species and inlet")
-            if not all((species, site, inlet)):
-                raise ValueError("Please pass site, species and inlet")
-
-            # TODO - how to do this in a cleaner way for mypy?
-            site = str(site)
-            species = str(species)
-            inlet = str(inlet)
-            return self._create_obsdata(site=site, species=species, inlet=inlet)
-
-    def _create_obsdata(self, site: str, species: str, inlet: str = None) -> ObsData:
-        """Creates an ObsData object for return to the user
+    def _retrieve_by_uuid(
+        self, uuids: List, sort: bool, elevate_inlet: bool
+    ) -> Union[ObsData, List[ObsData]]:
+        """Internal retrieval function that uses the passed in UUIDs to retrieve
+        the keys from the key_data dictionary, pull the data from the object store,
+        create ObsData object(s) and return the result.
 
         Args:
-            site: Site code
-            species: Species name
+            uuids: UUIDs of Datasources in the object store
         Returns:
-            ObsData: ObsData object
+            ObsData / List[ObsData]: ObsData object(s)
         """
-        from xarray import concat
+        results = []
+        # For uid in uuids
+        for uid in uuids:
+            keys = self.key_data[uid]
+            dataset = self._retrieve_dataset(keys, sort=sort, elevate_inlet=elevate_inlet)
+            metadata = self.metadata[uid]
 
-        if self.ranked_data:
-            specific_source = self.results[site][species]
+            results.append(ObsData(data=dataset, metadata=metadata))
+
+        if len(results) == 1:
+            return results[0]
         else:
-            specific_source = self.results[site][species][inlet]
+            return results
 
-        data_keys = specific_source["keys"]
-        metadata = specific_source["metadata"]
+    def _retrieve_dataset(
+        self, keys: List, sort: bool, elevate_inlet: bool = True, attrs_to_check: Optional[Dict] = None
+    ) -> Dataset:
+        """Retrieves datasets from either cloud or local object store
 
-        # If cloud use the Retrieve object
-        if self.cloud:
-            raise NotImplementedError
-            # from Acquire.Client import Wallet
-            # from xarray import open_dataset
+        Args:
+            keys: List of object store keys
+            sort: Sort data on recombination
+            elevate_inlet: Elevate inlet from attribute to variable
+        Returns:
+            Dataset:
+        """
+        from openghg.cloud import call_function
 
-            # wallet = Wallet()
-            # self._service_url = "https://fn.openghg.org/t"
-            # self._service = wallet.get_service(service_url=f"{self._service_url}/openghg")
+        if self.hub:
+            to_post: Dict[str, Union[Dict, List, bool, str]] = {}
+            to_post["keys"] = keys
+            to_post["sort"] = sort
+            to_post["elevate_inlet"] = elevate_inlet
+            to_post["function"] = "retrieve"
 
-            # key = f"{site}_{species}"
-            # keys_to_retrieve = {key: data_keys}
+            if attrs_to_check is not None:
+                to_post["attrs_to_check"] = attrs_to_check
 
-            # args = {"keys": keys_to_retrieve}
-
-            # response: Dict = self._service.call_function(function="retrieve.retrieve", args=args)
-
-            # response_data = response["results"]
-
-            # data = open_dataset(response_data[key])
+            result = call_function(data=to_post)
+            binary_netcdf = result["content"]["data"]
+            buf = BytesIO(binary_netcdf)
+            # TODO - remove this ignore once xarray have updated their type hints
+            ds: Dataset = open_dataset(buf).load()  # type: ignore
+            return ds
         else:
-            if not self.ranked_data:
-                keys = data_keys["unranked"]
-                final_dataset = recombine_datasets(keys, sort=True)
-            else:
-                dataset_slices = []
-
-                inlet_ranges = specific_source["rank_metadata"]
-
-                metadata["rank_metadata"] = {}
-
-                ranked_keys = data_keys["ranked"]
-                ranked_slices = []
-
-                inlets = set()
-
-                for daterange, keys in ranked_keys.items():
-                    data_slice = recombine_datasets(keys=keys, sort=True, elevate_inlet=True)
-
-                    slice_start, slice_end = split_daterange_str(daterange_str=daterange, date_only=True)
-
-                    # We convert to str here as xarray has some weird behaviour that means
-                    # "2018-01-01" - "2018-06-01"
-                    # gets treated differently to
-                    # datetime.date(2018, 1, 1) - datetime.date(2018, 6, 1)
-                    ranked_slice = data_slice.sel(time=slice(str(slice_start), str(slice_end)))
-
-                    if ranked_slice.time.size > 0:
-                        inlet = inlet_ranges[daterange]
-                        inlets.add(inlet)
-
-                        ranked_slices.append(ranked_slice)
-
-                    ranked_metadata = specific_source["rank_metadata"]
-                    metadata["rank_metadata"]["ranked"] = ranked_metadata
-
-                dataset_slices.extend(ranked_slices)
-
-                unranked_keys = data_keys["unranked"]
-
-                if unranked_keys:
-                    unranked_data = recombine_datasets(keys=unranked_keys, sort=True, elevate_inlet=True)
-
-                    first_date, last_date = first_last_dates(keys=unranked_keys)
-
-                    ranked_dateranges = list(ranked_keys.keys())
-                    unranked_dateranges = find_daterange_gaps(
-                        start_search=first_date, end_search=last_date, dateranges=ranked_dateranges
-                    )
-
-                    unranked_metadata = {}
-                    if unranked_dateranges:
-                        unranked_slices = []
-                        for dr in unranked_dateranges:
-                            slice_start, slice_end = split_daterange_str(daterange_str=dr, date_only=True)
-                            unranked_slice = unranked_data.sel(time=slice(str(slice_start), str(slice_end)))
-
-                            if unranked_slice.time.size > 0:
-                                inlet = unranked_slice["inlet"].values[0]
-                                inlets.add(inlet)
-                                unranked_metadata[dr] = inlet
-                                unranked_slices.append(unranked_slice)
-
-                        dataset_slices.extend(unranked_slices)
-                    else:
-                        daterange_str = create_daterange_str(start=first_date, end=last_date)
-                        inlet = unranked_data["inlet"].values[0]
-                        inlets.add(inlet)
-                        unranked_metadata[daterange_str] = inlet
-
-                        dataset_slices.extend(unranked_data)
-
-                    metadata["rank_metadata"]["unranked"] = unranked_metadata
-
-                final_dataset = concat(objs=dataset_slices, dim="time").sortby("time")
-
-                if len(inlets) == 1:
-                    inlet_tag = str(inlets.pop())
-                else:
-                    inlet_tag = "multiple"
-
-                # Update the attributes for single / multiple inlet heights
-                final_dataset.attrs["inlet"] = inlet_tag
-
-        metadata = specific_source["metadata"]
-
-        return ObsData(data=final_dataset, metadata=metadata)
+            return recombine_datasets(
+                keys=keys, sort=sort, elevate_inlet=elevate_inlet, attrs_to_check=attrs_to_check
+            )

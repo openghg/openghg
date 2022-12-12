@@ -1,5 +1,8 @@
+from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
+
+import numpy as np
+from openghg.store.spec import define_data_types
 from pandas import DataFrame, Timestamp
-from typing import DefaultDict, Dict, List, Optional, Tuple, Union, TypeVar, Type
 from xarray import Dataset
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
@@ -15,13 +18,13 @@ class Datasource:
     """
 
     _datasource_root = "datasource"
-    _datavalues_root = "values"
     _data_root = "data"
 
     def __init__(self) -> None:
-        from openghg.util import timestamp_now
         from collections import defaultdict
         from uuid import uuid4
+
+        from openghg.util import timestamp_now
 
         self._uuid: str = str(uuid4())
         self._creation_datetime = timestamp_now()
@@ -36,7 +39,7 @@ class Datasource:
         # This dictionary stored the keys for each version of data uploaded
         # data_key = d._data_keys["latest"]["keys"][date_key]
         self._data_keys: dataKeyType = defaultdict(dict)
-        self._data_type: str = "timeseries"
+        self._data_type: str = ""
         # Hold information regarding the versions of the data
         # Currently unused
         self._latest_version: str = "latest"
@@ -84,18 +87,12 @@ class Datasource:
         Args:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
-            data_type: Type of data, one of ["timeseries", "emissions", "met", "footprints", "eulerian_model"].
+            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
             overwrite: Overwrite existing data
         Returns:
             None
         """
-        expected_data_types = (
-            "timeseries",
-            "emissions",
-            "met",
-            "footprints",
-            "eulerian_model",
-        )
+        expected_data_types = define_data_types()
 
         data_type = data_type.lower()
         if data_type not in expected_data_types:
@@ -103,61 +100,161 @@ class Datasource:
 
         self.add_metadata(metadata=metadata)
 
-        if data_type == "timeseries":
-            return self.add_timeseries_data(data=data)
-        elif data_type == "footprints":
-            return self.add_footprint_data(data=data, metadata=metadata)
-        elif data_type == "emissions":
-            return self.add_emissions_data(data=data, metadata=metadata)
-        elif data_type == "met":
+        if "time" in data.coords:
+            return self.add_timed_data(data=data, data_type=data_type)
+        else:
             raise NotImplementedError()
-        elif data_type == "eulerian_model":
-            return self.add_eulerian_model_data(data=data, metadata=metadata)
 
-    def add_timeseries_data(self, data: Dataset) -> None:
-        """Add timeseries data to this Datasource
+    def add_timed_data(self, data: Dataset, data_type: str) -> None:
+        """Add data to this Datasource, splitting along the time axis
 
         Args:
             data: An xarray.Dataset
         Returns:
             None
         """
+        from numpy import unique as np_unique
         from openghg.util import daterange_overlap
+        from xarray import concat as xr_concat
 
+        # For now we'll only group timeseries data.
+        # This is to a
+        # if data_type != "timeseries"
         # Group by year
-        year_group = data.groupby("time.year")
-        year_data = [data for _, data in year_group if data]
+        # year_group = data.groupby("time.year")
+        # Extract period associated with data from metadata
+        # TODO: May want to add period as a potential data variable so would need to extract from there if needed
+        period = self.get_period()
+
+        new_data = {
+            self.get_representative_daterange_str(year_data, period=period): year_data
+            for _, year_data in data.groupby("time.year")
+        }
 
         # Use a dictionary keyed with the daterange covered by each segment of data
-        additional_data = {}
+        # new_data = {}
 
-        for year in year_data:
-            daterange_str = self.get_dataset_daterange_str(dataset=year)
-            additional_data[daterange_str] = year
+        # for _, data in year_group:
+        #     daterange_str = self.get_representative_daterange_str(data, period=period)
+        #     new_data[daterange_str] = data
 
         if self._data:
-            # We don't want the same data twice, this will be stored in previous versions
-            # Check for overlap between exisiting and new dateranges
-            to_keep = []
-            for current_daterange in self._data:
-                for new_daterange in additional_data:
-                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
-                        to_keep.append(current_daterange)
+            # We need to remove them from the curre
+            # pop the current daterange from
+            overlapping = []
+            for existing_daterange in self._data:
+                for new_daterange in new_data:
+                    if daterange_overlap(daterange_a=existing_daterange, daterange_b=new_daterange):
+                        overlapping.append((existing_daterange, new_daterange))
 
-            updated_data = {}
-            for k in to_keep:
-                updated_data[k] = self._data[k]
-            # Add in the additional new data
-            updated_data.update(additional_data)
+            # If we have overlapping data, we print a warning and then combine the datasets
+            # if we have duplicate timestamps, we first check if the data is just the same
+            # or if it's not, we keep the first value and drop the others, we also
+            # print that we've done this
+            if overlapping:
+                combined_datasets = {}
+                for existing_daterange, new_daterange in overlapping:
+                    ex = self._data.pop(existing_daterange)
+                    new = new_data.pop(new_daterange)
 
-            self._data = updated_data
+                    print("NOTE: Combining overlapping data dateranges")
+                    # Concatenate datasets along time dimension
+                    try:
+                        combined = xr_concat((ex, new), dim="time")
+                    except (ValueError, KeyError):
+                        # If data variables in the two datasets are not identical,
+                        # xr_concat will raise an error
+                        dv_ex = set(ex.data_vars.keys())
+                        dv_new = set(new.data_vars.keys())
+
+                        # Check difference between datasets and fill any
+                        # missing variables with NaN values.
+                        dv_not_in_new = dv_ex - dv_new
+                        for dv in dv_not_in_new:
+                            fill_values = np.zeros(len(new["time"])) * np.nan
+                            new = new.assign({dv: ("time", fill_values)})
+
+                        dv_not_in_ex = dv_new - dv_ex
+                        for dv in dv_not_in_ex:
+                            fill_values = np.zeros(len(ex["time"])) * np.nan
+                            ex = ex.assign({dv: ("time", fill_values)})
+
+                        # Should now be able to concatenate successfully
+                        combined = xr_concat((ex, new), dim="time")
+
+                    combined = combined.sortby("time")
+
+                    unique, index, count = np_unique(combined.time, return_counts=True, return_index=True)
+
+                    # We may have overlapping dates but not duplicate times
+                    if unique[count > 1].size > 0:
+                        print("NOTE: Dropping measurements at duplicate timestamps")
+                        combined = combined.isel(time=index)
+
+                    # TODO: May need to find a way to find period for *last point* rather than *current point*
+                    # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
+                    combined_daterange = self.get_representative_daterange_str(
+                        dataset=combined, period=period
+                    )
+                    combined_datasets[combined_daterange] = combined
+
+                self._data.update(combined_datasets)
+            else:
+                self._data.update(new_data)
         else:
-            self._data = additional_data
+            self._data = new_data
 
-        data_type = "timeseries"
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
         self.update_daterange()
+        # Store the start and end date of the most recent data
+        start, end = self.daterange()
+        self.add_metadata_key(key="start_date", value=str(start))
+        self.add_metadata_key(key="end_date", value=str(end))
+
+    def delete_all_data(self) -> None:
+        """Delete the data associated with this Datasource
+
+        Returns:
+            None
+        """
+        from openghg.objectstore import delete_object, get_bucket
+
+        bucket = get_bucket()
+
+        to_delete = []
+        for key_data in self._data_keys.values():
+            keys = list(key_data["keys"].values())
+            to_delete.extend(keys)
+
+        for key in set(to_delete):
+            delete_object(bucket=bucket, key=key)
+
+    def delete_data(self, keys: List) -> None:
+        """Delete specific keys
+
+        Args:
+            keys: List of keys to delete
+        """
+        from openghg.objectstore import delete_object, get_bucket
+
+        bucket = get_bucket()
+
+        for key in set(keys):
+            delete_object(bucket=bucket, key=key)
+
+    # def delete_version(self, version: str) -> None:
+    #     """Delete a specific version of data.
+
+    #     Args:
+    #         version: Version string
+    #     Returns:
+    #         None
+    #     """
+    #     if version not in self._data_keys:
+    #         raise KeyError("Invalid version.")
+
+    #     # keys =
 
     def add_metadata(self, metadata: Dict) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -172,91 +269,6 @@ class Datasource:
         lowercased: Dict = to_lowercase(metadata)
         self._metadata.update(lowercased)
 
-    def add_emissions_data(self, data: Dataset, metadata: Dict) -> None:
-        """Add flux data to this Datasource
-
-        Args:
-            data: Flux data as an xarray.Dataset
-            metadata: Metadata
-        Returns:
-            None
-        """
-        self.add_field_data(data=data, metadata=metadata, data_type="emissions")
-
-    def add_footprint_data(self, data: Dataset, metadata: Dict) -> None:
-        """Add footprints data to this Datasource
-
-        Args:
-            data: Footprint data in an xarray.Dataset
-            metadata: Metadata
-        Returns:
-            None
-        """
-        self.add_field_data(data=data, metadata=metadata, data_type="footprints")
-
-    def add_field_data(self, data: Dataset, metadata: Dict, data_type: str) -> None:
-        """Add footprints data to this Datasource
-
-        TODO - unsure if add_field_data is the best name for this function
-        Could add a more general function that allows toggle of chunking
-
-        Args:
-            data: Footprint data in an xarray.Dataset
-            metadata: Metadata
-            data_type: Type of data (footprints, flux, met)
-        Returns:
-            None
-        """
-        from openghg.util import daterange_overlap, create_daterange_str
-
-        # Use a dictionary keyed with the daterange covered by each segment of data
-        new_data = {}
-        # This daterange string covers the whole of the Dataset
-        # For the moment we're not going to chunk footprints
-
-        # As data is stored diffrently for footprint / emissions files we'll
-        # take the daterange from the metadata
-        start_date = metadata["start_date"]
-        end_date = metadata["end_date"]
-
-        daterange_str = create_daterange_str(start=start_date, end=end_date)
-
-        new_data[daterange_str] = data
-
-        if self._data:
-            # We don't want the same data twice, this will be stored in previous versions
-            # Check for overlap between exisiting and new dateranges
-            to_keep = []
-            for current_daterange in self._data:
-                for new_daterange in new_data:
-                    if not daterange_overlap(daterange_a=current_daterange, daterange_b=new_daterange):
-                        to_keep.append(current_daterange)
-
-            updated_data = {}
-            for k in to_keep:
-                updated_data[k] = self._data[k]
-            # Add in the additional new data
-            updated_data.update(new_data)
-
-            self._data = updated_data
-        else:
-            self._data = new_data
-
-        self._data_type = data_type
-        self.add_metadata_key(key="data_type", value=data_type)
-        self.update_daterange()
-
-    def add_eulerian_model_data(self, data: Dataset, metadata: Dict) -> None:
-        """Add Eulerian model data to this Datasource
-
-        Args:
-            data: Eulerian model data as an xarray.Dataset
-            metadata: Metadata
-        Returns:
-            None
-        """
-        self.add_field_data(data=data, metadata=metadata, data_type="eulerian_model")
-
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
 
@@ -265,8 +277,8 @@ class Datasource:
         Returns:
             tuple (Timestamp, Timestamp): Start and end Timestamps for data
         """
-        from pandas import DatetimeIndex
         from openghg.util import timestamp_tzaware
+        from pandas import DatetimeIndex
 
         if not isinstance(dataframe.index, DatetimeIndex):
             raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
@@ -289,8 +301,8 @@ class Datasource:
         from openghg.util import timestamp_tzaware
 
         try:
-            start = timestamp_tzaware(dataset.time[0].values)
-            end = timestamp_tzaware(dataset.time[-1].values)
+            start = timestamp_tzaware(dataset.time.min().values)
+            end = timestamp_tzaware(dataset.time.max().values)
 
             return start, end
         except AttributeError:
@@ -306,6 +318,89 @@ class Datasource:
         daterange_str: str = start + "_" + end
 
         return daterange_str
+
+    def get_representative_daterange_str(self, dataset: Dataset, period: Optional[str] = None) -> str:
+        """
+        Get representative daterange which incorporates any period the data covers.
+
+        A representative daterange covers the start - end time + any additional period that is covered
+        by each time point. The start and end times can be extracted from the input dataset and
+        any supplied period used to extend the end of the date range to cover the representative period.
+
+        If there is only one time point (i.e. start and end datetimes are the same) and no period is
+        supplied 1 additional second will be added to ensure these values are not identical.
+
+        Args:
+            dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.
+            period: Value representing a time period e.g. "12H", "1AS" "3MS". Should be suitable for
+                creation of a pandas Timedelta or DataOffset object.
+
+        Returns:
+            str : Date string covering representative date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
+        """
+        from openghg.util import create_daterange_str, relative_time_offset
+        from pandas import Timedelta
+
+        # Extract start and end dates from grouped data
+        start_date, end_date = self.get_dataset_daterange(dataset)
+
+        # If period is defined add this to the end date
+        # This ensure start-end range includes time period covered by data
+        if period is not None:
+            period_td = relative_time_offset(period=period)
+            end_date = (
+                end_date + period_td - Timedelta(seconds=1)
+            )  # Subtract 1 second to make this exclusive end.
+
+        # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
+        if start_date == end_date:
+            end_date += Timedelta(seconds=1)
+
+        daterange_str = create_daterange_str(start=start_date, end=end_date)
+
+        return daterange_str
+
+    def get_period(self) -> Optional[str]:
+        """
+        Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or
+        "time_period" (derived or ancillary data). If neither keyword is found, None is returned.
+
+        This is a suitable format to use to create a pandas Timedelta or DataOffset object.
+
+        Returns:
+            str : time period in the form of number and time unit e.g. "12s"
+        """
+        # Extract period associated with data from metadata
+        # This will be the "sampling_period" for obs and "time_period" for other
+        metadata = self._metadata
+
+        time_period_attrs = ["sampling_period", "time_period"]
+        for attr in time_period_attrs:
+            value = metadata.get(attr)
+            if value is not None:
+                # For sampling period data, expect this to be in seconds
+                if attr == "sampling_period":
+                    if value.endswith("s"):  # Check if str includes "s"
+                        period: Optional[str] = value
+                    else:
+                        try:
+                            value_num: Optional[int] = int(value)
+                        except ValueError:
+                            try:
+                                value_num = int(float(value))
+                            except ValueError:
+                                value_num = None
+                                continue
+                        period = f"{value_num}s"
+                else:
+                    # Expect period data to include value and time unit
+                    period = value
+
+                break
+        else:
+            period = None
+
+        return period
 
     @staticmethod
     def exists(datasource_id: str, bucket: Optional[str] = None) -> bool:
@@ -362,23 +457,22 @@ class Datasource:
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
+        import io
         from openghg.objectstore import get_object
         from xarray import load_dataset
-        import tempfile
-        from pathlib import Path
 
-        data = get_object(bucket, key)
+        return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
 
-        # TODO - is there a cleaner way of doing this?
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp_path = Path(tmpdir).joinpath("tmp.nc")
+        # # TODO - is there a cleaner way of doing this?
+        # with tempfile.TemporaryDirectory() as tmpdir:
+        #     tmp_path = Path(tmpdir).joinpath("tmp.nc")
 
-            with open(tmp_path, "wb") as f:
-                f.write(data)
+        #     with open(tmp_path, "wb") as f:
+        #         f.write(data)
 
-            ds: Dataset = load_dataset(tmp_path)
+        #     ds: Dataset = xr_load_dataset(tmp_path)
 
-            return ds
+        #     return ds
 
     @classmethod
     def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:
@@ -422,15 +516,11 @@ class Datasource:
         Returns:
             None
         """
-        import tempfile
         from copy import deepcopy
+        from pathlib import Path
 
+        from openghg.objectstore import get_bucket, set_object_from_json
         from openghg.util import timestamp_now
-        from openghg.objectstore import (
-            get_bucket,
-            set_object_from_file,
-            set_object_from_json,
-        )
 
         if bucket is None:
             bucket = get_bucket()
@@ -452,12 +542,21 @@ class Datasource:
                 new_keys[daterange] = data_key
                 data = self._data[daterange]
 
+                filepath = Path(f"{bucket}/{data_key}._data")
+                parent_folder = filepath.parent
+                if not parent_folder.exists():
+                    parent_folder.mkdir(parents=True, exist_ok=True)
+
+                data.to_netcdf(filepath)
+
+                # Can we just take the bytes from the data here and then write then straight?
                 # TODO - for now just create a temporary directory - will have to update Acquire
                 # or work on a PR for xarray to allow returning a NetCDF as bytes
-                with tempfile.TemporaryDirectory() as tmpdir:
-                    filepath = f"{tmpdir}/temp.nc"
-                    data.to_netcdf(filepath)
-                    set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
+                # with tempfile.TemporaryDirectory() as tmpdir:
+                #     filepath = f"{tmpdir}/temp.nc"
+                #     data.to_netcdf(filepath)
+                #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
+                # path = f"{bucket_path}/data"
 
             # Copy the last version
             if "latest" in self._data_keys:
@@ -475,6 +574,14 @@ class Datasource:
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
         set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
+
+    def key(self) -> str:
+        """Returns the Datasource's key
+
+        Returns:
+            str: Key for Datasource in object store
+        """
+        return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
     @classmethod
     def load(
@@ -682,15 +789,15 @@ class Datasource:
         Returns:
             bool: True if overlap
         """
+        from openghg.util import in_daterange as _in_daterange
         from openghg.util import timestamp_tzaware
-
-        # if self._start_date is None or self._end_date is None:
-        #     self.update_daterange()
 
         start_date = timestamp_tzaware(start_date)
         end_date = timestamp_tzaware(end_date)
 
-        return bool((start_date <= self._end_date) and (end_date >= self._start_date))
+        return _in_daterange(
+            start_a=start_date, end_a=end_date, start_b=self._start_date, end_b=self._end_date
+        )
 
     def keys_in_daterange(
         self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]

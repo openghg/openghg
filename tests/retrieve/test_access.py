@@ -1,21 +1,21 @@
-import pytest
-from pandas import Timestamp, Timedelta
+import datetime
+
 import numpy as np
-
-from openghg.retrieve import get_obs_surface, get_flux, get_footprint, search
-from openghg.objectstore import get_local_bucket
-
+import pandas as pd
 import pytest
-from openghg.objectstore import get_local_bucket
-from openghg.store import ObsSurface, Emissions, Footprints
 from helpers import (
-    get_datapath,
+    attributes_checker_get_obs,
+    call_function_packager,
     get_emissions_datapath,
     get_footprint_datapath,
+    get_surface_datapath,
     metadata_checker_obssurface,
-    attributes_checker_get_obs,
 )
-
+from openghg.dataobjects import ObsData
+from openghg.retrieve import get_flux, get_bc, get_footprint, get_obs_column, get_obs_surface, search
+from openghg.util import compress, compress_str, hash_bytes
+from openghg.types import SearchError
+from pandas import Timedelta, Timestamp
 
 # a = [
 #     "1970-01-01-00:00:00+00:00_2011-12-31-00:00:00+00:00",
@@ -41,8 +41,21 @@ from helpers import (
 # ]
 
 
-def test_get_obs_surface():
-    obsdata = get_obs_surface(site="bsd", species="co2", inlet="248m")
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "248m"),
+        ("height", "248m"),
+        ("inlet", "248magl"),
+        ("inlet", "248"),
+    ],
+)
+def test_get_obs_surface(inlet_keyword, inlet_value):
+
+    if inlet_keyword == "inlet":
+        obsdata = get_obs_surface(site="bsd", species="co2", inlet=inlet_value)
+    elif inlet_keyword == "height":
+        obsdata = get_obs_surface(site="bsd", species="co2", height=inlet_value)
     co2_data = obsdata.data
 
     assert co2_data.time[0] == Timestamp("2014-01-30T11:12:30")
@@ -63,129 +76,150 @@ def test_get_obs_surface():
     assert not time.equals(averaged_time)
 
 
-def test_no_inlet_no_ranked_data_raises():
-    with pytest.raises(ValueError):
+def test_ambiguous_no_ranked_data_raises():
+    """
+    Test sensible error message is raised when result is ambiguous for
+    get_obs_surface() function
+    """
+    with pytest.raises(SearchError) as excinfo:
         get_obs_surface(site="bsd", species="co2")
+        assert "Multiple entries found for input parameters" in excinfo
 
 
-def test_get_obs_surface_ranked_data_only():
-    obsdata = get_obs_surface(site="bsd", species="ch4", start_date="2014-02-01", end_date="2014-12-31")
-    metadata = obsdata.metadata
-
-    assert metadata["rank_metadata"] == {
-        "ranked": {"2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m"}
-    }
-
-
-def test_get_obs_surface_no_ranked_data_raises_until_search_narrowed():
-    with pytest.raises(ValueError):
-        get_obs_surface(site="bsd", species="ch4", start_date="2018-02-01", end_date="2018-12-31")
-
-    obsdata = get_obs_surface(
-        site="bsd", species="ch4", inlet="42m", start_date="2018-02-01", end_date="2018-12-31"
-    )
-
-    attrs = obsdata.data.attrs
-    metadata = obsdata.metadata
-
-    metadata_checker_obssurface(metadata=metadata, species="ch4")
-    attributes_checker_get_obs(attrs=attrs, species="ch4")
-
-
-def test_get_obs_surface_ranking_single():
+def test_no_data_raises():
     """
-    Test data returned from get_obs_surface data
-     - ranking data is set
-     - inlet is not specified
-     - date range should only include date for one inlet
+    Test sensible error message is raised when no data can be found
+    get_obs_surface() function
     """
-    obsdata = get_obs_surface(site="bsd", species="ch4", start_date="2015-01-10", end_date="2015-11-01")
+    with pytest.raises(SearchError) as excinfo:
+        site = "bsd"
+        species = "cfc11"
+        get_obs_surface(site=site, species=species)
 
-    data = obsdata.data
-    metadata = obsdata.metadata
-
-    assert data
-    assert data.attrs["inlet"] == "108m"
-    assert metadata["inlet"] == "108m"
-
-    assert metadata["rank_metadata"] == {
-        "ranked": {"2015-01-02-00:00:00+00:00_2015-11-01-00:00:00+00:00": "108m"}
-    }
-
-    # Make sure we don't have duplicate timestamps
-    data_at_one_time = data["mf"].sel(time="2015-01-30T11:12:30")
-    assert data_at_one_time.size == 1
+        assert "Unable to find results for" in excinfo
+        assert f"site='{site}'" in excinfo
+        assert f"species='{species}'" in excinfo
 
 
-def test_get_obs_surface_ranking_unique():
-    """
-    Test data returned from get_obs_surface data
-     - ranking data is set
-     - inlet is not specified
-     - date range covers multiple inlets
 
-    Covers tests not included in `test_get_obs_surface_no_inlet_ranking`
-    TODO: At the moment this fails - unique data is not returned and there are multiple
-    entries for some time stamps. This is a bug which will need to be fixed.
-    """
-    res = search(site="bsd", species="ch4")
+# def test_get_obs_surface_ranked_data_only():
+#     obsdata = get_obs_surface(site="bsd", species="ch4", start_date="2014-02-01", end_date="2014-12-31")
+#     metadata = obsdata.metadata
 
-    data = res.retrieve(site="bsd", species="ch4")
-
-    metadata = data.metadata
-
-    expected_rank_metadata = {
-        "ranked": {
-            "2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m",
-            "2016-04-01-00:00:00+00:00_2017-11-01-00:00:00+00:00": "248m",
-            "2015-01-02-00:00:00+00:00_2015-11-01-00:00:00+00:00": "108m",
-            "2019-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
-        },
-        "unranked": {
-            "2015-11-01-01:00:00+00:00_2016-03-31-23:00:00+00:00": "248m",
-            "2017-11-01-01:00:00+00:00_2018-12-31-23:00:00+00:00": "248m",
-        },
-    }
-
-    assert metadata["rank_metadata"] == expected_rank_metadata
+#     assert metadata["rank_metadata"] == {
+#         "ranked": {"2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m"}
+#     }
 
 
-def test_get_obs_surface_no_inlet_ranking():
-    """
-    Test metadata and attributes returned from get_obs_surface
-     - ranking data is set
-     - inlet is not specified
-     - date range not specified (all dates returned)
+# def test_get_obs_surface_no_ranked_data_raises_until_search_narrowed():
+#     with pytest.raises(ValueError):
+#         get_obs_surface(site="bsd", species="ch4", start_date="2018-02-01", end_date="2018-12-31")
 
-    Checks
-     - metadata includes expected "rank_metadata" attribute
-     - check inlet details have been appropriately updated
-    """
-    obsdata = get_obs_surface(site="bsd", species="ch4")
+#     obsdata = get_obs_surface(
+#         site="bsd", species="ch4", inlet="42m", start_date="2018-02-01", end_date="2018-12-31"
+#     )
 
-    data = obsdata.data
-    metadata = obsdata.metadata
+#     attrs = obsdata.data.attrs
+#     metadata = obsdata.metadata
 
-    assert data
+#     metadata_checker_obssurface(metadata=metadata, species="ch4")
+#     attributes_checker_get_obs(attrs=attrs, species="ch4")
 
-    expeced_rank_metadata = {
-        "ranked": {
-            "2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m",
-            "2016-04-01-00:00:00+00:00_2017-11-01-00:00:00+00:00": "248m",
-            "2015-01-02-00:00:00+00:00_2015-11-01-00:00:00+00:00": "108m",
-            "2019-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
-        },
-        "unranked": {
-            "2015-11-01-01:00:00+00:00_2016-03-31-23:00:00+00:00": "248m",
-            "2017-11-01-01:00:00+00:00_2018-12-31-23:00:00+00:00": "248m",
-        },
-    }
 
-    assert metadata["rank_metadata"] == expeced_rank_metadata
+# def test_get_obs_surface_ranking_single():
+#     """
+#     Test data returned from get_obs_surface data
+#      - ranking data is set
+#      - inlet is not specified
+#      - date range should only include date for one inlet
+#     """
+#     obsdata = get_obs_surface(site="bsd", species="ch4", start_date="2015-01-10", end_date="2015-11-01")
 
-    assert "inlet" in data
-    assert data.attrs["inlet"] == "multiple"
-    assert metadata["inlet"] == "multiple"
+#     data = obsdata.data
+#     metadata = obsdata.metadata
+
+#     assert data
+#     assert data.attrs["inlet"] == "108m"
+#     assert metadata["inlet"] == "108m"
+
+#     assert metadata["rank_metadata"] == {
+#         "ranked": {"2015-01-02-00:00:00+00:00_2015-11-01-00:00:00+00:00": "108m"}
+#     }
+
+#     # Make sure we don't have duplicate timestamps
+#     data_at_one_time = data["mf"].sel(time="2015-01-30T11:12:30")
+#     assert data_at_one_time.size == 1
+
+
+# def test_get_obs_surface_ranking_unique():
+#     """
+#     Test data returned from get_obs_surface data
+#      - ranking data is set
+#      - inlet is not specified
+#      - date range covers multiple inlets
+
+#     Covers tests not included in `test_get_obs_surface_no_inlet_ranking`
+#     TODO: At the moment this fails - unique data is not returned and there are multiple
+#     entries for some time stamps. This is a bug which will need to be fixed.
+#     """
+#     res = search(site="bsd", species="ch4")
+
+#     data = res.retrieve(site="bsd", species="ch4")
+
+#     metadata = data.metadata
+
+#     expected_rank_metadata = {
+#         "ranked": {
+#             "2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m",
+#             "2016-04-01-00:00:00+00:00_2017-11-01-00:00:00+00:00": "248m",
+#             "2015-01-02-00:00:00+00:00_2015-11-01-00:00:00+00:00": "108m",
+#             "2019-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
+#         },
+#         "unranked": {
+#             "2015-11-01-01:00:00+00:00_2016-03-31-23:00:00+00:00": "248m",
+#             "2017-11-01-01:00:00+00:00_2018-12-31-23:00:00+00:00": "248m",
+#         },
+#     }
+
+#     assert metadata["rank_metadata"] == expected_rank_metadata
+
+
+# def test_get_obs_surface_no_inlet_ranking():
+#     """
+#     Test metadata and attributes returned from get_obs_surface
+#      - ranking data is set
+#      - inlet is not specified
+#      - date range not specified (all dates returned)
+
+#     Checks
+#      - metadata includes expected "rank_metadata" attribute
+#      - check inlet details have been appropriately updated
+#     """
+#     obsdata = get_obs_surface(site="bsd", species="ch4")
+
+#     data = obsdata.data
+#     metadata = obsdata.metadata
+
+#     assert data
+
+#     expeced_rank_metadata = {
+#         "ranked": {
+#             "2014-01-30-00:00:00+00:00_2015-01-01-00:00:00+00:00": "248m",
+#             "2016-04-01-00:00:00+00:00_2017-11-01-00:00:00+00:00": "248m",
+#             "2015-01-02-00:00:00+00:00_2015-11-01-00:00:00+00:00": "108m",
+#             "2019-01-01-00:00:00+00:00_2021-01-01-00:00:00+00:00": "42m",
+#         },
+#         "unranked": {
+#             "2015-11-01-01:00:00+00:00_2016-03-31-23:00:00+00:00": "248m",
+#             "2017-11-01-01:00:00+00:00_2018-12-31-23:00:00+00:00": "248m",
+#         },
+#     }
+
+#     assert metadata["rank_metadata"] == expeced_rank_metadata
+
+#     assert "inlet" in data
+#     assert data.attrs["inlet"] == "multiple"
+#     assert metadata["inlet"] == "multiple"
 
 
 def test_averaging_incorrect_period_raises():
@@ -221,6 +255,54 @@ def test_timeslice_slices_correctly_exclusive():
     assert sliced_mhd_data.mf[-1] == 1891.094
 
 
+def test_get_obs_surface_cloud(mocker, monkeypatch):
+    monkeypatch.setenv("OPENGHG_HUB", "1")
+
+    n_days = 100
+    epoch = datetime.datetime(1970, 1, 1, 1, 1)
+
+    mock_dataset = pd.DataFrame(
+        data={"A": range(0, n_days)},
+        index=pd.date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D"),
+    ).to_xarray()
+
+    mock_meta = {"some": "metadata"}
+    mock_obs = ObsData(data=mock_dataset, metadata=mock_meta)
+
+    for_transfer = mock_obs.to_data()
+
+    sha1_hash = hash_bytes(data=for_transfer["data"])
+
+    to_return = {
+        "found": True,
+        "data": compress(data=for_transfer["data"]),
+        "metadata": compress_str(s=for_transfer["metadata"]),
+        "file_metadata": {
+            "data": {"sha1_hash": sha1_hash, "compression_type": "gzip"},
+            "metadata": {"sha1_hash": False, "compression_type": "bz2"},
+        },
+    }
+
+    to_return = call_function_packager(status=200, headers={}, content=to_return)
+
+    mocker.patch("openghg.cloud.call_function", return_value=to_return)
+
+    result = get_obs_surface(site="london", species="hawk")
+
+    assert result == mock_obs
+
+
+def test_get_obs_column():
+    column_data = get_obs_column(species="ch4", satellite="gosat")
+
+    obscolumn = column_data.data
+
+    assert "xch4" in obscolumn
+    assert obscolumn.time[0] == Timestamp("2017-03-18T15:32:54")
+    assert np.isclose(obscolumn["xch4"][0], 1844.2019)
+    assert obscolumn.attrs["species"] == "ch4"
+
+
 def test_get_flux():
     flux_data = get_flux(species="co2", source="gpp-cardamom", domain="europe")
 
@@ -231,16 +313,56 @@ def test_get_flux():
     assert float(flux.lon.max()) == pytest.approx(39.38)
     assert float(flux.lon.min()) == pytest.approx(-97.9)
     assert sorted(list(flux.variables)) == ["flux", "lat", "lon", "time"]
-    assert flux.attrs["species"] == "co2"
+
+    # Check whole flux range has been retrieved (2 files)
+    time = flux["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+    assert time[-1] == Timestamp("2013-01-01T00:00:00")
 
 
 def test_get_flux_no_result():
-    with pytest.raises(ValueError):
+    """Test sensible error message is being returned when no results are found 
+    with input keywords for get_flux function"""
+    with pytest.raises(SearchError) as execinfo:
         get_flux(species="co2", source="cinnamon", domain="antarctica")
+        assert "Unable to find results" in execinfo
+        assert "species='co2'" in execinfo
+        assert "source='cinnamon'" in execinfo
+        assert "domain='antarctica'" in execinfo
 
 
-def test_get_footprint():
-    fp_result = get_footprint(site="tmb", domain="europe", height="10m", model="test_model")
+def test_get_bc():
+    bc_data = get_bc(species="n2o", bc_input="mozart", domain="europe")
+
+    bc = bc_data.data
+
+    assert float(bc.lat.max()) == pytest.approx(79.057)
+    assert float(bc.lat.min()) == pytest.approx(10.729)
+    assert float(bc.lon.max()) == pytest.approx(39.38)
+    assert float(bc.lon.min()) == pytest.approx(-97.9)
+
+    bc_variables = ['height', 'lat', 'lon', 'time',
+                    'vmr_e', 'vmr_n', 'vmr_s', 'vmr_w']
+    assert sorted(list(bc.variables)) == bc_variables
+
+    time = bc["time"]
+    assert time[0] == Timestamp("2012-01-01T00:00:00")
+
+
+@pytest.mark.parametrize(
+    "inlet_keyword,inlet_value",
+    [
+        ("inlet", "10m"),
+        ("height", "10m"),
+        ("inlet", "10magl"),
+        ("inlet", "10"),
+    ],
+)
+def test_get_footprint(inlet_keyword,inlet_value):
+    if inlet_keyword == "inlet":
+        fp_result = get_footprint(site="tmb", domain="europe", inlet=inlet_value, model="test_model")
+    elif inlet_keyword == "height":
+        fp_result = get_footprint(site="tmb", domain="europe", height=inlet_value, model="test_model")
 
     footprint = fp_result.data
     metadata = fp_result.metadata
@@ -256,5 +378,12 @@ def test_get_footprint():
 
 
 def test_get_footprint_no_result():
-    with pytest.raises(ValueError):
+    """Test sensible error message is being returned when no results are found 
+    with input keywords for get_footprint function"""
+    with pytest.raises(SearchError) as execinfo:
         get_footprint(site="seville", domain="spain", height="10m", model="test_model")
+        assert "Unable to find results" in execinfo
+        assert "site='seville'" in execinfo
+        assert "domain='spain'" in execinfo
+        assert "height='10m'" in execinfo
+        assert "model='test_model'" in execinfo

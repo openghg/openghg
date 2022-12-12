@@ -1,22 +1,26 @@
 import glob
 import json
 import os
-from pathlib import Path
 import threading
-from openghg.types import ObjectStoreError
-import pyvis
-from uuid import uuid4
+import warnings
+
+# from functools import lru_cache
+from pathlib import Path
+import shutil
 from typing import Dict, List, Optional, Union
+from uuid import uuid4
+
+import pyvis
+from openghg.types import ObjectStoreError
 
 rlock = threading.RLock()
 
 __all__ = [
     "delete_object",
-    "get_openghg_local_path",
+    "get_local_objectstore_path",
+    "get_tutorial_store_path",
     "get_all_object_names",
     "get_object_names",
-    "get_bucket",
-    "get_local_bucket",
     "get_object",
     "set_object",
     "set_object_from_json",
@@ -27,20 +31,28 @@ __all__ = [
 ]
 
 
-def get_openghg_local_path() -> Path:
-    """Returns the path to the local OpenGHG object store bucket
+def get_tutorial_store_path() -> Path:
+    """Get the path to the local tutorial store
+
+    Returns:
+        pathlib.Path: Path of tutorial store
+    """
+    return get_local_objectstore_path() / "tutorial_store"
+
+
+# @lru_cache
+def get_local_objectstore_path() -> Path:
+    """Read
 
     Returns:
         pathlib.Path: Path of object store
     """
-    env_path = os.getenv("OPENGHG_PATH")
+    from openghg.util import read_local_config
 
-    if env_path is not None:
-        return Path(env_path)
-    else:
-        raise ValueError(
-            "No environment variable OPENGHG_PATH found, please set to use the local object store"
-        )
+    config = read_local_config()
+    object_store_path = Path(config["object_store"]["local_store"])
+
+    return object_store_path
 
 
 def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_prefix: bool = False) -> List:
@@ -110,7 +122,7 @@ def delete_object(bucket: str, key: str) -> None:
         pass
 
 
-def get_object_names(bucket: str, prefix: str = None) -> List[str]:
+def get_object_names(bucket: str, prefix: Optional[str] = None) -> List[str]:
     """List all the keys in the object store
 
     Args:
@@ -128,7 +140,7 @@ def get_object(bucket: str, key: str) -> bytes:
         bucket: Bucket containing data
         key: Key for data in bucket
     Returns:
-        Object: Object from store
+        bytes: Binary data from the store
     """
     with rlock:
         filepath = Path(f"{bucket}/{key}._data")
@@ -192,8 +204,7 @@ def set_object_from_file(bucket: str, key: str, filename: Union[str, Path]) -> N
 
 
 def get_object_from_json(bucket: str, key: str) -> Dict[str, Union[str, Dict]]:
-    """Removes the daterange from the passed key and uses the reduced
-    key to get an object from the object store.
+    """Return an object constructed from JSON stored at key.
 
     Args:
         bucket: Bucket containing data
@@ -221,40 +232,59 @@ def exists(bucket: str, key: str) -> bool:
     return len(names) > 0
 
 
-def get_bucket() -> str:
+def get_bucket(empty: bool = False) -> str:
     """Find and return a new bucket in the object store called
     'bucket_name'. If 'create_if_needed' is True
     then the bucket will be created if it doesn't exist. Otherwise,
     if the bucket does not exist then an exception will be raised.
     """
-    bucket_path = get_openghg_local_path()
-
-    if not bucket_path.exists():
-        bucket_path.mkdir(parents=True)
-
-    return str(bucket_path)
-
-
-def get_local_bucket(empty: bool = False) -> str:
-    """Creates and returns a local bucket
-
-    Args:
-        empty: If True return an empty bucket
-    Returns:
-        str: Path to local bucket
-    """
     import shutil
+    import os
 
-    local_buckets_dir = get_openghg_local_path()
+    tutorial_store = os.getenv("OPENGHG_TMP_STORE")
+    if tutorial_store is not None:
+        return str(get_tutorial_store_path())
 
-    if local_buckets_dir.exists():
+    openghg_env = os.getenv("OPENGHG_PATH")
+    if openghg_env is not None:
+        warnings.warn(
+            "Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object"
+            + " store path please use the configuration file. See docs.openghg.org/install",
+            category=DeprecationWarning,
+        )
+
         if empty is True:
-            shutil.rmtree(local_buckets_dir)
-            local_buckets_dir.mkdir(parents=True)
-    else:
-        local_buckets_dir.mkdir(parents=True)
+            shutil.rmtree(openghg_env)
+            Path(openghg_env).mkdir(parents=True)
 
-    return str(local_buckets_dir)
+        return openghg_env
+
+    local_store = get_local_objectstore_path()
+
+    if empty is True:
+        raise NotImplementedError(
+            "You cannot delete the object store using get_bucket any long"
+            + "please check you really want to delete the whole store and use openghg.object_store.clear_store."
+        )
+
+    return str(local_store)
+
+
+def clear_object_store() -> None:
+    """Delete the object store. This will only delete a local object store and not
+    a group level or other store. You will be asked for input to confirm the path.
+
+    Returns:
+        None
+    """
+    local_store = str(get_local_objectstore_path())
+    print(f"You have requested to delete {local_store}.")
+
+    confirmed_path = input("Please enter the full path of the store: ")
+    if confirmed_path == local_store:
+        shutil.rmtree(local_store, ignore_errors=True)
+    else:
+        print("Cannot delete object store.")
 
 
 def query_store() -> Dict:
@@ -263,8 +293,8 @@ def query_store() -> Dict:
     Returns:
         dict: Dictionary for data to be shown in force graph
     """
-    from openghg.store.base import Datasource
     from openghg.store import ObsSurface
+    from openghg.store.base import Datasource
 
     obs = ObsSurface.load()
 
@@ -295,6 +325,7 @@ def visualise_store() -> pyvis.network.Network:
     Returns:
         pyvis.network.Network
     """
+    raise NotImplementedError
     from addict import Dict as aDict
 
     data = query_store()

@@ -1,0 +1,148 @@
+name: OpenGHG tests
+
+on:
+  push:
+    branches: [master, devel]
+    tags:
+    - '*'
+  pull_request:
+    branches: [master, devel]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.operating-system }}
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    strategy:
+      max-parallel: 4
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-latest]
+        python-version: ["3.8", "3.9", "3.10"]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Lint with flake8
+      run: |
+        python -m pip install --upgrade pip wheel flake8
+        flake8 openghg/ --count --statistics
+    - name: Install openghg
+      run: |
+        pip install -r requirements-dev.txt
+        pip install .
+    - name: Run mypy
+      run: |
+        mypy --python-version ${{ matrix.python-version }} openghg/
+    - name: Create mock cdsapi config file
+      run: |
+        echo $'url: https://www.openghg.org\nkey: 00000:f5690ad7-test-test-test-6fb0573991ca\n' > ~/.cdsapirc
+    - name: Install udunits package for CF compliance checks
+      run: |
+        sudo apt-get install libudunits2-0
+    - name: Test with pytest
+      run: |
+        pip install --upgrade pytest
+        pytest --run-cfchecks --cov=./ --cov-report=xml
+    - name: Upload coverage to Codecov
+      run: |
+        curl -s https://codecov.io/bash > codecov;
+        VERSION=$(grep -o 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
+        for i in 1 256 512
+        do
+          shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
+          shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM")
+        done
+        bash codecov || echo "Codecov did not collect coverage reports"
+      if: matrix.python-version == 3.9 && matrix.operating-system == 'ubuntu-latest'
+  docs:
+    name: Run checks on tutorial notebooks and build docs
+    runs-on: ubuntu-latest
+    env:
+      OPENGHG_PATH: "/tmp/openghg_store"
+    needs: ["test"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+      - name: Install openghg
+        run: |
+          pip install -r requirements.txt
+          pip install .
+      - name: Install pandoc and build the documentation
+        run: |
+          sudo apt-get install -yq pandoc
+          pip install -r requirements-doc.txt
+      - name: Ensure .md files are synced with notebooks
+        run: |
+          jupytext --sync notebooks/tutorials/local/*.ipynb
+          jupytext --sync notebooks/tutorials/cloud/*.ipynb
+      - name: Build documentation
+        run: |
+          cd doc
+          make
+      - name: Deploy to GitHub pages
+        uses: JamesIves/github-pages-deploy-action@v4.4.0
+        with:
+          branch: gh-pages
+          folder: "doc/build/html"
+          clean: true
+  release_pypi:
+    name: Build and publish Python distributions 📦 to PyPI and TestPyPI
+    runs-on: ubuntu-latest
+    needs: ["test", "docs"]
+    if: startsWith(github.ref, 'refs/tags')
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+      - name: Install pypa/build
+        run: |
+          pip install --upgrade build
+      - name: Build a binary wheel and a source tarball
+        run: |
+          python -m build --sdist --wheel --outdir dist/
+      - name: Publish distribution 📦 to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+  release_conda:
+    name: Build and publish conda package
+    runs-on: ubuntu-latest
+    needs: ["test", "docs"]
+    if: startsWith(github.ref, 'refs/tags')
+    steps:
+      - uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: 3.9
+          channels: conda-forge
+          activate-environment: openghg-build
+      - name: Install build tools
+        run: |
+          conda install -y conda-build conda-verify anaconda-client
+      - name: Make build folder and build package
+        run: |
+          mkdir ${{ github.workspace }}/build
+          conda build --croot ${{ github.workspace }}/build recipes -c conda-forge
+        env:
+          OPENGHG_PATH: "/tmp/openghg_store"
+      - name: Upload to conda
+        run: |
+          BUILD_DIR=${GITHUB_WORKSPACE}/build
+          BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
+          anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
+        env:
+          ACCESS_TOKEN: ${{ secrets.ANACONDA_TOKEN }}

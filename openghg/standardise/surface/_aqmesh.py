@@ -1,6 +1,5 @@
-from typing import Dict, Union, Optional
 from pathlib import Path
-
+from typing import Dict, Optional, Union
 
 pathType = Union[str, Path]
 
@@ -9,6 +8,7 @@ def parse_aqmesh(
     data_filepath: pathType,
     metadata_filepath: pathType,
     sampling_period: Optional[str] = None,
+    **kwargs: Dict,
 ) -> Dict:
     """Read AQMesh data files
 
@@ -81,8 +81,8 @@ def _parse_metadata(filepath: pathType) -> Dict:
         dict: Dictionary of metadata
     """
     from addict import Dict as aDict
-    from pandas import read_csv
     from openghg.util import check_date
+    from pandas import read_csv
 
     filepath = Path(filepath)
     raw_metadata = read_csv(filepath)
@@ -107,6 +107,8 @@ def _parse_metadata(filepath: pathType) -> Dict:
         site_data["inlet"] = row["Height"]
         site_data["network"] = "aqmesh_glasgow"
         site_data["sampling_period"] = "NA"
+        site_data["data_type"] = "surface"
+        site_data["source_format"] = "aqmesh"
 
     # TODO - I feel this is a bit clunky
     dict_metadata: Dict = site_metadata.to_dict()

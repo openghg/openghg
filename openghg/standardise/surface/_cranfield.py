@@ -1,5 +1,5 @@
-from typing import Dict, List, Optional, Union
 from pathlib import Path
+from typing import Dict, List, Optional, Union
 
 
 def parse_cranfield(
@@ -10,6 +10,7 @@ def parse_cranfield(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    **kwargs: Dict,
 ) -> Dict:
     """Creates a CRDS object holding data stored within Datasources
 
@@ -21,8 +22,8 @@ def parse_cranfield(
     Returns:
         dict: Dictionary of gas data
     """
-    from pandas import read_csv
     from openghg.util import clean_string
+    from pandas import read_csv
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
@@ -55,6 +56,7 @@ def parse_cranfield(
     metadata["height"] = "10magl"
     metadata["inlet"] = "10magl"
     metadata["network"] = "CRANFIELD"
+    metadata["data_type"] = "surface"
 
     # TODO - this feels fragile
     species: List[str] = [col for col in data.columns if " " not in col]

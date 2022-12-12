@@ -1,6 +1,8 @@
 from datetime import date
-from pandas import Timestamp, DatetimeIndex
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
+
+from pandas import DataFrame, DateOffset, DatetimeIndex, Timedelta, Timestamp
+from xarray import Dataset
 
 __all__ = [
     "timestamp_tzaware",
@@ -23,7 +25,40 @@ __all__ = [
     "check_nan",
     "check_date",
     "first_last_dates",
+    "time_offset_definition",
+    "parse_period",
+    "create_frequency_str",
+    "time_offset",
+    "relative_time_offset",
+    "find_duplicate_timestamps",
+    "in_daterange",
 ]
+
+TupleTimeType = Tuple[Union[int, float], str]
+
+
+def find_duplicate_timestamps(data: Union[Dataset, DataFrame]) -> List:
+    """Check for duplicates
+
+    Args:
+        data: Data object to check. Should have a time attribute or index
+    Returns:
+        list: A list of duplicates
+    """
+    from numpy import unique
+
+    try:
+        time_data = data.time
+    except AttributeError:
+        try:
+            time_data = data.index
+        except AttributeError:
+            raise ValueError("Unable to read time data")
+
+    uniq, count = unique(time_data, return_counts=True)
+    dupes = uniq[count > 1]
+
+    return list(dupes)
 
 
 def timestamp_tzaware(timestamp: Union[str, Timestamp]) -> Timestamp:
@@ -35,7 +70,6 @@ def timestamp_tzaware(timestamp: Union[str, Timestamp]) -> Timestamp:
     Returns:
         pandas.Timestamp: Timezone aware
     """
-    from pandas import Timestamp
 
     if not isinstance(timestamp, Timestamp):
         timestamp = Timestamp(timestamp)
@@ -331,8 +365,8 @@ def find_daterange_gaps(start_search: Timestamp, end_search: Timestamp, daterang
     Returns:
         list: List of dateranges
     """
-    from pandas import Timedelta
     from openghg.util import pairwise
+    from pandas import Timedelta
 
     if not dateranges:
         return []
@@ -453,7 +487,6 @@ def split_encompassed_daterange(container: str, contained: str) -> Dict:
     Returns:
         dict: Dictionary of results
     """
-    from pandas import Timedelta
 
     container_start, container_end = split_daterange_str(daterange_str=container)
     contained_start, contained_end = split_daterange_str(daterange_str=contained)
@@ -590,3 +623,238 @@ def first_last_dates(keys: List) -> Tuple[Timestamp, Timestamp]:
     last = timestamp_tzaware(last_date)
 
     return first, last
+
+
+def time_offset_definition() -> Dict[str, List]:
+    """
+    Returns synonym definition for time offset inputs.
+
+    Accepted inputs are as follows:
+        - "months": "monthly", "months", "month", "MS"
+        - "years": "yearly", "years", "annual", "year", "AS", "YS"
+        - "weeks": "weekly", "weeks", "week", "W"
+        - "days": "daily", "days", "day", "D"
+        - "hours": "hourly", "hours", "hour", "hr", "h", "H"
+        - "minutes": "minutely", "minutes", "minute", "min", "m", "T"
+        - "seconds": "secondly", "seconds", "second", "sec", "s", "S"
+
+    This is to ensure the correct keyword for using the DataOffset and TimeDelta
+    functions can be supplied (want this to be "years", "months" etc.)
+
+    Returns:
+        dict: containing list of values of synonym values
+    """
+    offset_naming = {
+        "months": ["monthly", "months", "month", "MS"],
+        "years": ["yearly", "years", "annual", "year", "AS", "YS"],
+        "weeks": ["weekly", "weeks", "week", "W"],
+        "days": ["daily", "days", "day", "D"],
+        "hours": ["hourly", "hours", "hour", "hr", "h", "H"],
+        "minutes": ["minutely", "minutes", "minute", "min", "m", "T"],
+        "seconds": ["secondly", "seconds", "second", "sec", "s", "S"],
+    }
+
+    return offset_naming
+
+
+def parse_period(period: Union[str, tuple]) -> TupleTimeType:
+    """
+    Parses period input and converts to a value, unit pair.
+
+    Check time_offset_definition() for accepted input units.
+
+    Args:
+        period: Period of measurements.
+                Should be one of:
+                    - "yearly", "monthly"
+                    - suitable pandas Offset Alias
+                    - tuple of (value, unit) as would be passed to pandas.Timedelta function
+
+    Returns:
+        int, str: value and associated time period
+
+        Examples:
+        >>> parse_period("12H")
+            (12, "hours")
+        >>> parse_period("yearly")
+            (1, "years")
+        >>> parse_period("monthly")
+            (1, "months")
+        >>> parse_period((1, "minute"))
+            (1, "minutes")
+    """
+    import re
+
+    if isinstance(period, tuple):
+        if len(period) != 2:
+            raise ValueError(
+                "Input for period not recognised: {period}. For tuple input requires (value, unit)."
+            )
+        else:
+            value_in = period[0]
+            if isinstance(value_in, str):
+                try:
+                    value: Union[int, float] = int(value_in)
+                except ValueError:
+                    value = float(value_in)
+            else:
+                value = int(value_in)
+            unit = str(period[1])
+    else:
+        match = re.match(r"\d+[.]?\d*", period)
+        if match is not None:
+            try:
+                value_str = match.group()
+                value = int(value_str)
+            except ValueError:
+                value = float(value_str)
+            unit = period.lstrip(value_str).strip()  # Strip found value and any whitespace.
+        else:
+            value = 1
+            unit = period
+
+    offset_naming = time_offset_definition()
+
+    for key, values in offset_naming.items():
+        if unit in values:
+            unit = key
+            break
+
+    return value, unit
+
+
+def create_frequency_str(
+    value: Optional[Union[int, float]] = None,
+    unit: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+) -> str:
+    """
+    Create a suitable frequency string based either a value and unit pair
+    or a period value. The unit will be made singular if the value is 1.
+
+    Check time_offset_definition() for accepted input units.
+
+    Args:
+        value, unit: Value and unit pair to use
+        period: Suitable input for period (see parse_period() for more details)
+
+    Returns:
+        str : Formatted string
+
+        Examples:
+        >>> create_frequency_str(unit=1, value="hour")
+            "1 hour"
+        >>> create_frequency(period="3MS")
+            "3 months"
+        >>> create_frequency(period="yearly")
+            "1 year"
+    """
+    if period is not None:
+        value, unit = parse_period(period)
+    elif value is None or unit is None:
+        raise ValueError("If period is not included, both value and unit must be specified.")
+
+    if value == 1:
+        frequency_str = f"{value} {unit.rstrip('s')}"
+    else:
+        frequency_str = f"{value} {unit}"
+
+    return frequency_str
+
+
+def time_offset(
+    value: Optional[Union[int, float]] = None,
+    unit: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+) -> Timedelta:
+    """
+    Create time offset based on inputs. This will return a Timedelta object
+    and cannot create relative offsets (this includes "weeks", "months", "years").
+
+    Args:
+        value, unit: Value and unit pair to use
+        period: Suitable input for period (see parse_period() for more details)
+
+    Returns:
+        Timedelta : Time offset object
+    """
+
+    if period is not None:
+        value, unit = parse_period(period)
+    elif value is None or unit is None:
+        raise ValueError("If period is not included, both value and unit must be specified.")
+
+    if unit in ("weeks", "months", "years"):
+        raise ValueError(
+            "Unable to calculate time offset with unit of {unit}. Try relative_time_offset() function instead"
+        )
+
+    time_delta = Timedelta(value, unit)
+
+    return time_delta
+
+
+def relative_time_offset(
+    value: Optional[Union[int, float]] = None,
+    unit: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+) -> Union[DateOffset, Timedelta]:
+    """
+    Create relative time offset based on inputs. This is based on the pandas
+    DateOffset and Timedelta functions.
+
+    Check time_offset_definition() for accepted input units.
+
+    If the input is "years" or "months" a relative offset (DateOffset) will
+    be created since these are variable units. For example:
+     - "2013-01-01" + 1 year relative offset = "2014-01-01"
+     - "2012-05-01" + 2 months relative offset = "2012-07-01"
+
+    Otherwise the Timedelta function will be used.
+
+    Args:
+        value, unit: Value and unit pair to use
+        period: Suitable input for period (see parse_period() for more details)
+
+    Returns:
+        DateOffset/Timedelta : Time offset object, appropriate for the period type
+    """
+
+    if period is not None:
+        value, unit = parse_period(period)
+    elif value is None or unit is None:
+        raise ValueError("If period is not included, both value and unit must be specified.")
+
+    relative_units = ("weeks", "months", "years")
+
+    if unit in relative_units:
+        time_delta = DateOffset(**{unit: value})
+    else:
+        time_delta = time_offset(value, unit)
+
+    return time_delta
+
+
+def in_daterange(
+    start_a: Union[str, Timestamp],
+    end_a: Union[str, Timestamp],
+    start_b: Union[str, Timestamp],
+    end_b: Union[str, Timestamp],
+) -> bool:
+    """Check if two dateranges overlap.
+
+    Args:
+        start: Start datetime
+        end: End datetime
+    Returns:
+        bool: True if overlap
+    """
+    from openghg.util import timestamp_tzaware
+
+    start_a = timestamp_tzaware(start_a)
+    end_a = timestamp_tzaware(end_a)
+
+    start_b = timestamp_tzaware(start_b)
+    end_b = timestamp_tzaware(end_b)
+
+    return bool((start_a <= end_b) and (end_a >= start_b))

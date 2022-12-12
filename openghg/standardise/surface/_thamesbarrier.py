@@ -1,5 +1,6 @@
-from typing import Dict, Optional
 from pathlib import Path
+from typing import Dict, Optional
+
 from openghg.types import pathType
 
 
@@ -11,6 +12,7 @@ def parse_tmb(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    **kwargs: Dict,
 ) -> Dict:
     """Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
     the processed data has been assigned to
@@ -22,8 +24,8 @@ def parse_tmb(
         list: UUIDs of Datasources data has been assigned to
     """
     from openghg.standardise.meta import assign_attributes
-    from pandas import read_csv as pd_read_csv
     from openghg.util import clean_string, load_json
+    from pandas import read_csv as pd_read_csv
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
@@ -72,7 +74,10 @@ def parse_tmb(
             "inlet": clean_string(tb_params["inlet"]),
             "network": "LGHG",
             "sampling_period": sampling_period,
+            "data_type": "surface",
+            "source_format": "tmb",
         }
+
         metadata.update(site_attributes)
 
         gas_data[species] = {

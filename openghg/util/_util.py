@@ -1,17 +1,8 @@
 """ Utility functions that are used by multiple modules
 
 """
-from typing import Any, Dict, Tuple, Iterator
 from collections.abc import Iterable
-
-
-__all__ = [
-    "unanimous",
-    "verify_site",
-    "pairwise",
-    "multiple_inlets",
-    "running_in_cloud",
-]
+from typing import Any, Dict, Iterator, Optional, Tuple
 
 
 def running_in_cloud() -> bool:
@@ -24,9 +15,33 @@ def running_in_cloud() -> bool:
     """
     from os import environ
 
-    cloud_env = environ.get("OPENGHG_CLOUD")
+    cloud_env = environ.get("OPENGHG_CLOUD", "0")
 
-    return cloud_env is not None
+    return bool(int(cloud_env))
+
+
+def running_on_hub() -> bool:
+    """Are we running on the OpenGHG Hub?
+
+    Checks for the OPENGHG_CLOUD environment variable being set
+
+    Returns:
+        bool: True if running in cloud
+    """
+    from os import environ
+
+    hub_env = environ.get("OPENGHG_HUB", "0")
+
+    return bool(int(hub_env))
+
+
+def running_locally() -> bool:
+    """Are we running OpenGHG locally?
+
+    Returns:
+        bool: True if running locally
+    """
+    return not (running_on_hub() or running_in_cloud())
 
 
 def unanimous(seq: Dict) -> bool:
@@ -65,6 +80,33 @@ def pairwise(iterable: Iterable) -> Iterator[Tuple[Any, Any]]:
     return zip(a, b)
 
 
+def site_code_finder(site_name: str) -> Optional[str]:
+    """Find the site code for a given site name.
+
+    Args:
+        site_name: Site long name
+    Returns:
+        str or None: Three letter site code if found
+    """
+    from openghg.util import load_json
+    from rapidfuzz import process  # type: ignore
+
+    sites = load_json("site_lookup.json")
+
+    inverted = {s["short_name"]: c for c, s in sites.items()}
+
+    matches = process.extract(query=site_name, choices=inverted.keys())
+    highest_score = matches[0][1]
+
+    if highest_score < 90:
+        return None
+
+    matched_site = matches[0][0]
+    site_code: str = inverted[matched_site]
+
+    return site_code
+
+
 def find_matching_site(site_name: str, possible_sites: Dict) -> str:
     """Try and find a similar name to site_name in site_list and return a suggestion or
     error string.
@@ -90,7 +132,7 @@ def find_matching_site(site_name: str, possible_sites: Dict) -> str:
         return f"No suggestion for {site_name}."
     elif scores[0] > cutoff_score and scores[0] > scores[1]:
         best_match = matches[0][0]
-        return f"Did you mean {best_match.title()}, code: {possible_sites[best_match]} ?"
+        return f"Did you mean {best_match.upper()}, code: {possible_sites[best_match]} ?"
     elif scores[0] == scores[1]:
         suggestions = [f"{match.title()}, code: {possible_sites[match]}" for match, _, _ in matches]
         nl_char = "\n"
@@ -109,8 +151,8 @@ def verify_site(site: str) -> str:
     Returns:
         str: Verified three letter site code if valid site
     """
-    from openghg.util import load_json, remove_punctuation
     from openghg.types import InvalidSiteError
+    from openghg.util import load_json, remove_punctuation
 
     site_data = load_json("site_lookup.json")
 

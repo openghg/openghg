@@ -1,9 +1,9 @@
 import logging
+
 import pandas as pd
 import pytest
-
+from helpers import check_cf_compliance, get_surface_datapath, parsed_surface_metachecker
 from openghg.standardise.surface import parse_gcwerks
-from helpers import get_datapath, parsed_surface_metachecker, check_cf_compliance
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)
@@ -11,8 +11,8 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def thd_data():
-    thd_path = get_datapath(filename="trinidadhead.01.C", data_type="GC")
-    thd_prec_path = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
+    thd_path = get_surface_datapath(filename="trinidadhead.01.C", source_format="GC")
+    thd_prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     gas_data = parse_gcwerks(
         data_filepath=thd_path,
@@ -27,8 +27,8 @@ def thd_data():
 
 @pytest.fixture(scope="session")
 def cgo_data():
-    cgo_data = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-    cgo_prec = get_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")
+    cgo_data = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
+    cgo_prec = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
     gas_data = parse_gcwerks(
         data_filepath=cgo_data,
@@ -65,8 +65,8 @@ def test_read_file_capegrim(cgo_data):
 
 
 def test_read_file_thd():
-    thd_path = get_datapath(filename="trinidadhead.01.C", data_type="GC")
-    thd_prec_path = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
+    thd_path = get_surface_datapath(filename="trinidadhead.01.C", source_format="GC")
+    thd_prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     gas_data = parse_gcwerks(
         data_filepath=thd_path,
@@ -99,7 +99,7 @@ def test_read_file_thd():
     assert meas_data["ch3ccl3"][0] == 41.537
     assert meas_data["ch3ccl3"][-1] == 34.649
 
-
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_gc_thd_cf_compliance(thd_data):
     meas_data = thd_data["ch3ccl3_10m"]["data"]
@@ -107,8 +107,8 @@ def test_gc_thd_cf_compliance(thd_data):
 
 
 def test_read_invalid_instrument_raises():
-    thd_path = get_datapath(filename="trinidadhead.01.C", data_type="GC")
-    thd_prec_path = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
+    thd_path = get_surface_datapath(filename="trinidadhead.01.C", source_format="GC")
+    thd_prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     with pytest.raises(ValueError):
         parse_gcwerks(
@@ -121,8 +121,8 @@ def test_read_invalid_instrument_raises():
 
 
 def test_no_precisions_species_raises():
-    cgo_path = get_datapath(filename="capegrim-medusa.18.C", data_type="GC")
-    missing_species_prec = get_datapath(filename="capegrim-medusa.18.precisions.broke.C", data_type="GC")
+    cgo_path = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
+    missing_species_prec = get_surface_datapath(filename="capegrim-medusa.18.precisions.broke.C", source_format="GC")
 
     with pytest.raises(ValueError):
         parse_gcwerks(
@@ -131,8 +131,8 @@ def test_no_precisions_species_raises():
 
 
 def test_read_ridgehill_window_inlet_all_NaNs():
-    data_path = get_datapath(filename="ridgehill-md.11.C", data_type="GC")
-    prec_path = get_datapath(filename="ridgehill-md.11.precisions.C", data_type="GC")
+    data_path = get_surface_datapath(filename="ridgehill-md.11.C", source_format="GC")
+    prec_path = get_surface_datapath(filename="ridgehill-md.11.precisions.C", source_format="GC")
 
     res = parse_gcwerks(
         data_filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="gcmd", network="agage"
@@ -142,8 +142,8 @@ def test_read_ridgehill_window_inlet_all_NaNs():
 
 
 def test_read_thd_window_inlet():
-    data_path = get_datapath(filename="trinidadhead.01.window-inlet.C", data_type="GC")
-    prec_path = get_datapath(filename="trinidadhead.01.precisions.C", data_type="GC")
+    data_path = get_surface_datapath(filename="trinidadhead.01.window-inlet.C", source_format="GC")
+    prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
 
     res = parse_gcwerks(
         data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
@@ -158,7 +158,7 @@ def test_read_thd_window_inlet():
     assert data["ch4"][0] == pytest.approx(1818.62)
     assert data["ch4"][-1] == pytest.approx(1840.432)
 
-
+@pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_thd_cf_compliance(thd_data):
     meas_data = thd_data["ch4_10m"]["data"]
@@ -166,8 +166,8 @@ def test_thd_cf_compliance(thd_data):
 
 
 def test_read_shangdianzi_ASM_inlet():
-    data_path = get_datapath(filename="shangdianzi-medusa.18.C", data_type="GC")
-    prec_path = get_datapath(filename="shangdianzi-medusa.18.precisions.C", data_type="GC")
+    data_path = get_surface_datapath(filename="shangdianzi-medusa.18.C", source_format="GC")
+    prec_path = get_surface_datapath(filename="shangdianzi-medusa.18.precisions.C", source_format="GC")
 
     res = parse_gcwerks(
         data_filepath=data_path,

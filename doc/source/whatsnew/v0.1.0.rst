@@ -1,0 +1,18 @@
+===================
+What's new - v0.1.0
+===================
+
+**Release date: 2022-05-18**
+
+We're happy to announce the first release of OpenGHG to both PyPI and conda.
+
+Features
+--------
+
+- Standardise measuremnts taken from many different sources - Tutorial 1 - Adding observation data
+- Rank observations to ensure use of the best measurements - Tutorial 2 - Ranking observations
+- Compare observations with emissions - Tutorial 3 - Comparing observations to emissions
+- Create workflows using high time resolution CO2 data - Tutorial 4 - Working with high time resolution CO2
+- Search for data in the OpenGHG data store and create plots to compare measurements - Tutorial 5 - Searching and plotting
+- Retrieve and explore NOAA ObsPack data - Tutorial 6 - Exploring the NOAA ObsPack data
+- Pull data from the ICOS Carbon Portal and the CEDA archive - Tutorial 7 - Retrieving data from ICOS and CEDA

@@ -1,0 +1,49 @@
+---
+jupytext:
+  formats: ipynb,md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.14.1
+kernelspec:
+  display_name: Python 3 (ipykernel)
+  language: python
+  name: python3
+---
+
+# Workflow 5: Explore NOAA ObsPack
+
++++
+
+The NOAA ObsPack products are collections of observation data from many sites which have been collated and standardised. ObsPack data products are prepared by NOAA in consultation with data providers. If you're using the OpenGHG Hub we cache the NOAA ObsPack data to make retrieval quick and easy. Below we will demonstrate how NOAA ObsPack data can can be explored and plotted.
+
++++
+
+## 1. Search, retrieve and plot
+
+Ww can query the object store and find all the flask data for example
+
+```{code-cell} ipython3
+from openghg.retrieve import search_surface
+
+search_surface(species="ch4", measurement_type="flask", data_source="noaa_obspack", network="NOAA")
+```
+
+Or we can do an all in one search and retrieve using `get_obs_surface`. Here we find CH4 data from Estevan Point, British Columbia, retrieve it and plot it.
+
+```{code-cell} ipython3
+from openghg.retrieve import get_obs_surface
+
+data = get_obs_surface(site="HPB", species="ch4", network="NOAA")
+```
+
+As there isn't any ranking data set (see tutorial 2) `get_obs_surface` doesn't know which inlet to select, we need to tell it.
+
+```{code-cell} ipython3
+data = get_obs_surface(site="HPB", species="ch4", inlet="93m", data_type="NOAA")
+```
+
+```{code-cell} ipython3
+data.plot_timeseries()
+```

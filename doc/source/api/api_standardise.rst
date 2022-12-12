@@ -1,50 +1,46 @@
-=========================
-Standardisation functions
-=========================
+===========
+Standardise
+===========
 
 Functions that accept data in specific formats, standardise it to a CF-compliant format and ensure it has the correct metadata attached. The
 data returned from these functions is then stored in the object store.
 
-Surface
+Measurement Standardisation
+===========================
+
+These functions cover the four types of measurement we currently support.
+
+Surface measurements
+^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: openghg.standardise.standardise_surface
+
+Boundary Conditions
+^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: openghg.standardise.standardise_bc
+
+Emissions / Flux
+^^^^^^^^^^^^^^^^
+
+.. autofunction:: openghg.standardise.standardise_flux
+
+Footprints
+^^^^^^^^^^
+
+.. autofunction:: openghg.standardise.standardise_footprint
+
+
+Helpers
 =======
 
-These functions take surface measurement data, they are called by the ``ObsSurface`` class.
+Some of the functions above require quite specific arguments as we must ensure all metadata attriuted to data is as correct as possible.
+These functions help you find the correct arguments in each case.
+
+.. autofunction:: summary_source_formats
+
+.. autofunction:: summary_site_codes
 
 
-.. autofunction:: openghg.standardise.surface.parse_aqmesh
-
-
-.. autofunction:: openghg.standardise.surface.parse_beaco2n
-
-
-.. autofunction:: openghg.standardise.surface.parse_btt
-
-
-.. autofunction:: openghg.standardise.surface.parse_cranfield
-
-
-.. autofunction:: openghg.standardise.surface.parse_crds
-
-
-.. autofunction:: openghg.standardise.surface.parse_eurocom
-
-
-.. autofunction:: openghg.standardise.surface.parse_gcwerks
-
-
-.. autofunction:: openghg.standardise.surface.parse_noaa
-
-
-.. autofunction:: openghg.standardise.surface.parse_npl
-
-
-.. autofunction:: openghg.standardise.surface.parse_tmb
-
-Metadata
-========
-
-.. autofunction:: openghg.standardise.meta.assign_attributes
-
-.. autofunction:: openghg.standardise.meta.get_attributes
-
-.. autofunction:: openghg.standardise.meta.surface_standardise
+Behind the scences these functions use parsing functions that are written specifically for each data type.
+Please see the :ref:`Developer API <Developer API>` for these functions.

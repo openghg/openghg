@@ -69,9 +69,8 @@ Now push this change back to GitHub, using;
 
    git push
 
-This will trigger a CI/CD run which will build and test everything on
-Windows, Mac and Linux for Python 3.7 and 3.8. Everything should work,
-as "devel" should have been in a release-ready state.
+This will trigger a CI/CD run which will build and test everything on Linux for Python 3.8 - 3.10.
+Everything should work, as "devel" should have been in a release-ready state.
 
 Testing the packages
 --------------------

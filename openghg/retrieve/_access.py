@@ -1,15 +1,199 @@
-from xarray import Dataset
-from typing import Dict, List, Optional, Union
-from pandas import Timestamp
-from openghg.dataobjects import ObsData, FootprintData, FluxData
+import json
+import logging
+from io import BytesIO
+from typing import Any, Dict, List, Optional, Union, cast
+from openghg.types import SearchError
 
-__all__ = ["get_obs_surface", "get_footprint", "get_flux"]
+from openghg.dataobjects import (
+    BoundaryConditionsData,
+    FluxData,
+    FootprintData,
+    ObsColumnData,
+    ObsData,
+)
+from openghg.util import decompress, decompress_str, hash_bytes, running_on_hub
+from pandas import Timestamp
+from xarray import Dataset, load_dataset
+
+logger = logging.getLogger("openghg.retrieve")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+DataTypes = Union[BoundaryConditionsData, FluxData, FootprintData, ObsColumnData, ObsData]
+multDataTypes = Union[List[BoundaryConditionsData], List[FluxData], List[FootprintData], List[ObsColumnData], List[ObsData]]
+
+
+def _get_generic(
+    sort: bool = True,
+    elevate_inlets: bool = False,
+    ambig_check_params: Optional[list] = None,
+    **kwargs: Any,
+) -> Any:
+    """Perform a search and create a dataclass object with the results if any are found.
+
+    Args:
+        data_class: Type of dataobject to create
+        sort: Sort Dataset during recombination
+        elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset
+        ambig_check_params: Parameters to check and print if result is ambiguous.
+        kwargs: Search terms
+    Returns:
+        dataclass
+    """
+    from openghg.retrieve import search
+    from openghg.store.spec import define_data_type_classes
+
+    results = search(**kwargs)
+
+    keyword_string = _create_keyword_string(**kwargs)
+    if not results:
+        err_msg = f"Unable to find results for {keyword_string}"
+        logger.exception(err_msg)
+        raise SearchError(err_msg)
+
+    # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
+    retrieved_data: Any = results.retrieve_all(sort=sort, elevate_inlet=elevate_inlets)
+
+    if retrieved_data is None:
+        err_msg = f"Unable to retrieve results for {keyword_string}"
+        logger.exception(err_msg)
+        raise SearchError(err_msg)
+    elif isinstance(retrieved_data, list) and len(retrieved_data) > 1:
+        param_diff_formatted = _metadata_difference_formatted(data=retrieved_data, params=ambig_check_params)
+        err_msg = f"""
+        Multiple entries found for input parameters for {keyword_string}.
+        Parameter differences:
+        {param_diff_formatted}
+        Please supply additional parameters or set ranking.
+        """
+        logger.exception(err_msg)
+        raise SearchError(err_msg)
+    elif isinstance(retrieved_data, list):
+        retrieved_data = retrieved_data[0]
+
+    # TODO: Included output of this as Any for now because we there are many
+    # options for types returned but can update this
+
+    # We can only get a single data object back here but mypy doesn't understand that
+    # retrieved_data = cast(ObsData, retrieved_data)
+
+    return retrieved_data
 
 
 def get_obs_surface(
     site: str,
     species: str,
     inlet: str = None,
+    height: str = None,
+    start_date: Union[str, Timestamp] = None,
+    end_date: Union[str, Timestamp] = None,
+    average: str = None,
+    network: str = None,
+    instrument: str = None,
+    calibration_scale: str = None,
+    keep_missing: bool = False,
+    skip_ranking: bool = False,
+) -> Optional[ObsData]:
+    """This is the equivalent of the get_obs function from the ACRG repository.
+
+    Usage and return values are the same whilst implementation may differ.
+
+    Args:
+        site: Site of interest e.g. MHD for the Mace Head site.
+        species: Species identifier e.g. ch4 for methane.
+        start_date: Output start date in a format that Pandas can interpret
+        end_date: Output end date in a format that Pandas can interpret
+        inlet: Inlet height above ground level in metres
+        height: Alias for inlet
+        average: Averaging period for each dataset. Each value should be a string of
+        the form e.g. "2H", "30min" (should match pandas offset aliases format).
+        keep_missing: Keep missing data points or drop them.
+        network: Network for the site/instrument (must match number of sites).
+        instrument: Specific instrument for the sipte (must match number of sites).
+        calibration_scale: Convert to this calibration scale
+    Returns:
+        ObsData or None: ObsData object if data found, else None
+    """
+    from openghg.cloud import call_function
+    from openghg.util import format_inlet
+
+    # Allow height to be an alias for inlet but we do not expect height
+    # to be within the metadata (for now)
+    if inlet is None and height is not None:
+        inlet = height
+    inlet = format_inlet(inlet)
+
+    if running_on_hub():
+        to_post: Dict[str, Union[str, Dict]] = {}
+
+        to_post["function"] = "get_obs_surface"
+
+        search_terms = {
+            "site": site,
+            "species": species,
+            "keep_missing": keep_missing,
+            "skip_ranking": skip_ranking,
+        }
+
+        if inlet is not None:
+            search_terms["inlet"] = inlet
+        if start_date is not None:
+            search_terms["start_date"] = start_date
+        if end_date is not None:
+            search_terms["end_date"] = end_date
+        if average is not None:
+            search_terms["average"] = average
+        if network is not None:
+            search_terms["network"] = network
+        if instrument is not None:
+            search_terms["instrument"] = instrument
+        if calibration_scale is not None:
+            search_terms["calibration_scale"] = calibration_scale
+
+        to_post["search_terms"] = search_terms
+
+        result = call_function(data=to_post)
+
+        content = result["content"]
+        found = content["found"]
+
+        if found:
+            binary_data = decompress(data=content["data"])
+
+            file_metadata = content["file_metadata"]
+            sha1_hash_data = file_metadata["data"]["sha1_hash"]
+
+            if sha1_hash_data != hash_bytes(data=binary_data):
+                raise ValueError("Hash mismatch between local SHA1 and remote SHA1.")
+
+            buf = BytesIO(binary_data)
+            json_str = decompress_str(data=content["metadata"])
+            metadata = json.loads(json_str)
+            dataset = load_dataset(buf)
+
+            return ObsData(data=dataset, metadata=metadata)
+        else:
+            return None
+    else:
+        return get_obs_surface_local(
+            site=site,
+            species=species,
+            start_date=start_date,
+            end_date=end_date,
+            inlet=inlet,
+            average=average,
+            network=network,
+            instrument=instrument,
+            calibration_scale=calibration_scale,
+            keep_missing=keep_missing,
+            skip_ranking=skip_ranking,
+        )
+
+
+def get_obs_surface_local(
+    site: str,
+    species: str,
+    inlet: Optional[str] = None,
+    height: Optional[str] = None,
     start_date: Optional[Union[str, Timestamp]] = None,
     end_date: Optional[Union[str, Timestamp]] = None,
     average: Optional[str] = None,
@@ -18,56 +202,70 @@ def get_obs_surface(
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
     skip_ranking: Optional[bool] = False,
-) -> ObsData:
-    """Get measurements from one site.
+) -> Optional[ObsData]:
+    """This is the equivalent of the get_obs function from the ACRG repository.
+
+    Usage and return values are the same whilst implementation may differ.
+
+    This function should not be used on the OpenGHG Hub.
 
     Args:
         site: Site of interest e.g. MHD for the Mace Head site.
         species: Species identifier e.g. ch4 for methane.
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
-        inlet: Inlet label
+        inlet: Inlet height above ground level in metres
+        height: Alias for inlet
         average: Averaging period for each dataset. Each value should be a string of
         the form e.g. "2H", "30min" (should match pandas offset aliases format).
         keep_missing: Keep missing data points or drop them.
         network: Network for the site/instrument (must match number of sites).
-        instrument: Specific instrument for the site (must match number of sites).
+        instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
     Returns:
-        ObsData: ObsData object
+        ObsData or None: ObsData object if data found, else None
     """
-    from pandas import Timestamp, Timedelta
     import numpy as np
-    from xarray import concat as xr_concat
-    from openghg.retrieve import search
-    from openghg.store import recombine_datasets
-    from openghg.util import clean_string, load_json, timestamp_tzaware
+    from openghg.retrieve import search_surface
+    from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware
+    from pandas import Timedelta
+
+    if running_on_hub():
+        raise ValueError(
+            "This function cannot be used on the OpenGHG Hub. Please use openghg.retrieve.get_obs_surface instead."
+        )
+
+    data_type = "surface"
+
+    # Allow height to be an alias for inlet but we do not expect height
+    # to be within the metadata (for now)
+    if inlet is None and height is not None:
+        inlet = height
+    inlet = format_inlet(inlet)    
 
     site_info = load_json(filename="acrg_site_info.json")
     site = site.upper()
 
+    # TODO: Evaluate this constraint - how do we want to handle and incorporate new sites?
     if site not in site_info:
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
-    # Find the correct synonym for the passed species
-    species = clean_string(_synonyms(species))
+    surface_keywords = {
+        "site":site,
+        "species":species,
+        "inlet":inlet,
+        "start_date":start_date,
+        "end_date":end_date,
+        "network":network,
+        "instrument":instrument,
+        "data_type":data_type,
+    }
 
-    # Get the observation data
-    obs_results = search(
-        site=site,
-        species=species,
-        inlet=inlet,
-        start_date=start_date,
-        end_date=end_date,
-        instrument=instrument,
-        find_all=True,
-        skip_ranking=skip_ranking,
-    )
+    # # Get the observation data
+    # obs_results = search_surface(**surface_keywords)
+    retrieved_data = _get_generic(ambig_check_params=["inlet", "network", "instrument"],
+                                  **surface_keywords)  # type:ignore
 
-    if not obs_results:
-        raise ValueError(f"Unable to find results for {species} at {site}")
-
-    retrieved_data: ObsData = obs_results.retrieve(site=site, species=species, inlet=inlet)  # type: ignore
     data = retrieved_data.data
 
     if data.attrs["inlet"] == "multiple":
@@ -90,7 +288,7 @@ def get_obs_surface(
     except AttributeError:
         raise AttributeError("This dataset does not have a time attribute, unable to read date range")
     except IndexError:
-        return ObsData(data=Dataset(), metadata={})
+        return None
 
     if average is not None:
         # GJ - 2021-03-09
@@ -225,6 +423,49 @@ def get_obs_surface(
     return obs_data
 
 
+def get_obs_column(
+    species: str,
+    satellite: Optional[str] = None,
+    domain: Optional[str] = None,
+    selection: Optional[str] = None,
+    site: Optional[str] = None,
+    network: Optional[str] = None,
+    instrument: Optional[str] = None,
+    platform: str = "satellite",
+    start_date: Optional[Timestamp] = None,
+    end_date: Optional[Timestamp] = None,
+) -> ObsColumnData:
+    """
+    Extract available column data from the object store using keywords.
+
+    Args:
+        species: Species name
+        source: Source name
+        domain: Domain e.g. EUROPE
+        start_date: Start date
+        end_date: End date
+        time_resolution: One of ["standard", "high"]
+    Returns:
+        ObsColumnData: ObsColumnData object
+    """
+    obs_data = _get_generic(
+        sort=False,
+        species=species,
+        satellite=satellite,
+        domain=domain,
+        selection=selection,
+        site=site,
+        network=network,
+        instrument=instrument,
+        platform=platform,
+        start_date=start_date,
+        end_date=end_date,
+        data_type="column",
+    )
+
+    return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
+
+
 def get_flux(
     species: str,
     source: str,
@@ -248,16 +489,8 @@ def get_flux(
     Returns:
         FluxData: FluxData object
     """
-    from openghg.retrieve import search
-    from openghg.store import recombine_datasets
-    from openghg.util import timestamp_epoch, timestamp_now
-
-    if start_date is None:
-        start_date = timestamp_epoch()
-    if end_date is None:
-        end_date = timestamp_now()
-
-    results: Dict = search(
+    em_data = _get_generic(
+        sort=False,
         species=species,
         source=source,
         domain=domain,
@@ -265,21 +498,9 @@ def get_flux(
         start_date=start_date,
         end_date=end_date,
         data_type="emissions",
-    )  # type: ignore
+    )
 
-    if not results:
-        raise ValueError(f"Unable to find flux data for {species} from {source}")
-
-    try:
-        em_key = list(results.keys())[0]
-    except IndexError:
-        raise ValueError(f"Unable to find any footprints data for {domain} for {species}.")
-
-    data_keys = results[em_key]["keys"]
-    metadata = results[em_key]["metadata"]
-
-    em_ds = recombine_datasets(keys=data_keys, sort=False)
-
+    em_ds = em_data.data
     # Check for level coordinate. If one level, assume surface and drop
     if "lev" in em_ds.coords:
         if len(em_ds.lev) > 1:
@@ -287,24 +508,48 @@ def get_flux(
 
         em_ds = em_ds.drop_vars(names="lev")
 
-    if species is None:
-        species = metadata.get("species", "NA")
+    return FluxData(data=em_data.data, metadata=em_data.metadata)
 
-    return FluxData(
-        data=em_ds,
-        metadata=metadata,
-        flux={},
-        bc={},
+
+def get_bc(
+    species: str,
+    domain: str,
+    bc_input: Optional[str] = None,
+    start_date: Optional[Timestamp] = None,
+    end_date: Optional[Timestamp] = None,
+) -> BoundaryConditionsData:
+    """
+    Get boundary conditions for a given species, domain and bc_input name.
+
+    Args:
+        species: Species name
+        bc_input: Input used to create boundary conditions. For example:
+            - a model name such as "MOZART" or "CAMS"
+            - a description such as "UniformAGAGE" (uniform values based on AGAGE average)
+        domain: Region for boundary conditions e.g. EUROPE
+        start_date: Start date
+        end_date: End date
+    Returns:
+        BoundaryConditionsData: BoundaryConditionsData object
+    """
+    bc_data = _get_generic(
+        sort=False,
         species=species,
-        scales="FIXME",
-        units="FIXME",
+        bc_input=bc_input,
+        domain=domain,
+        start_date=start_date,
+        end_date=end_date,
+        data_type="boundary_conditions",
     )
+
+    return BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
 
 
 def get_footprint(
     site: str,
     domain: str,
-    height: str,
+    inlet: str = None,
+    height: str = None,
     model: str = None,
     start_date: Timestamp = None,
     end_date: Timestamp = None,
@@ -320,7 +565,8 @@ def get_footprint(
               file. E.g. site="DJI", site_modifier = "DJI-SAM" -
               station called DJI, footprints site called DJI-SAM
         domain : Domain name for the footprints
-        height: Height of inlet in metres
+        inlet: Height above ground level in metres
+        height: Alias for inlet
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
         species: Species identifier e.g. "co2" for carbon dioxide. Only needed
@@ -330,99 +576,36 @@ def get_footprint(
     Returns:
         FootprintData: FootprintData dataclass
     """
-    from openghg.store import recombine_datasets
     from openghg.retrieve import search
-    from openghg.dataobjects import FootprintData
+    from openghg.store import recombine_datasets
+    from openghg.util import clean_string, synonyms, format_inlet
 
-    results = search(
+    # Find the correct synonym for the passed species
+    if species is not None:
+        species = clean_string(synonyms(species))
+
+    # Allow inlet or height to be specified, both or either may be included
+    # within the metadata so could use either to search
+    inlet = format_inlet(inlet)
+    height = format_inlet(height)
+
+    fp_data = _get_generic(
         site=site,
         domain=domain,
+        inlet=inlet,
         height=height,
+        model=model,
         start_date=start_date,
         end_date=end_date,
         species=species,
         data_type="footprints",
-    )  # type: ignore
-    # Get the footprints data
-    # if species is not None:
-    # else:
-    #     results = search(
-    #         site=site,
-    #         domain=domain,
-    #         domain=domain,
-    #         height=height,
-    #         start_date=start_date,
-    #         end_date=end_date,
-    #         data_type="footprints",
-    #     )  # type: ignore
-
-    try:
-        fp_site_key = list(results.keys())[0]
-    except IndexError:
-        if species is not None:
-            raise ValueError(
-                f"Unable to find any footprints data for {site} at a height of {height} for species {species}."
-            )
-        else:
-            raise ValueError(f"Unable to find any footprints data for {site} at a height of {height}.")
-
-    keys = results[fp_site_key]["keys"]
-    metadata = results[fp_site_key]["metadata"]
-    # fp_ds = recombine_datasets(keys=keys, sort=False) # Why did this have sort=False before?
-    fp_ds = recombine_datasets(keys=keys, sort=True)
-
-    if species is None:
-        species = metadata.get("species", "NA")
-
-    return FootprintData(
-        data=fp_ds,
-        metadata=metadata,
-        flux={},
-        bc={},
-        species=species,
-        scales="FIXME",
-        units="FIXME",
     )
 
+    return FootprintData(data=fp_data.data, metadata=fp_data.metadata)
 
-def _synonyms(species: str) -> str:
-    """
-    Check to see if there are other names that we should be using for
-    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc-11,
-    as this is used in species_info.json
-
-    Args:
-        species (str): Input string that you're trying to match
-    Returns:
-        str: Matched species string
-    """
-
-    from openghg.util import load_json
-
-    # Load in the species data
-    species_data = load_json(filename="acrg_species_info.json")
-
-    # First test whether site matches keys (case insensitive)
-    matched_strings = [k for k in species_data if k.upper() == species.upper()]
-
-    # Used to access the alternative names in species_data
-    alt_label = "alt"
-
-    # If not found, search synonyms
-    if not matched_strings:
-        for key in species_data:
-            # Iterate over the alternative labels and check for a match
-            matched_strings = [s for s in species_data[key][alt_label] if s.upper() == species.upper()]
-
-            if matched_strings:
-                matched_strings = [key]
-                break
-
-    if matched_strings:
-        updated_species = str(matched_strings[0])
-        return updated_species
-    else:
-        raise ValueError(f"Unable to find synonym for species {species}")
+    # TODO: Could incorporate this somewhere? Setting species to INERT?
+    # if species is None:
+    #     species = metadata.get("species", "INERT")
 
 
 def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
@@ -435,9 +618,9 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     Returns:
         xarray.Dataset: Dataset with mole fraction data scaled
     """
-    from pandas import read_csv
     from numexpr import evaluate
     from openghg.util import get_datapath
+    from pandas import read_csv
 
     # If scale is already correct, return
     ds_scale = data.attrs["scale"]
@@ -456,7 +639,7 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
             f"Scales {ds_scale} and {to_scale} are not both in any one row in acrg_obs_scale_convert.csv for species {species}"
         )
     elif len(scale_converter_scales) > 1:
-        raise ValueError(f"Duplicate rows in acrg_obs_scale_convert.csv?")
+        raise ValueError("Duplicate rows in acrg_obs_scale_convert.csv?")
     else:
         row = scale_converter_scales.index[0]
 
@@ -476,3 +659,109 @@ def _scale_convert(data: Dataset, species: str, to_scale: str) -> Dataset:
     data.attrs["scale"] = to_scale
 
     return data
+
+
+def _create_keyword_string(**kwargs: Any) -> str:
+    """
+    Create a formatted string for supplied keyword values. This will ignore
+    keywords where the value is None.
+    This is used for printing details of keywords passed to the search functions.
+    """
+    used_keywords = {key: value for key, value in kwargs.items() if value is not None}
+    keyword_string = ', '.join([f"{key}='{value}'" for key, value in used_keywords.items()])
+
+    return keyword_string
+
+
+def _metadata_difference(
+    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+) -> Dict[str, list]:
+    """
+    Check differences between metadata for returned data objects. Note this will
+    only look at differences between values which are strings (not lists, floats etc.)
+
+    Args:
+        data : Multiple data objects e.g. multiple ObsData as a list
+        params : Specific metadata parameters to check. If None all parameters will be checked
+        print_output : Summarise and print output to screen.
+
+    Returns:
+        Dict[str, list] : Keys and lists of values from the metadata with differences.
+    """
+    # Extract metadata dictionaries from each data object in list
+    metadata = [d.metadata for d in data]
+
+    if not metadata:
+        err_msg = "Unable to read metadata."
+        logger.exception(err_msg)
+        raise ValueError(err_msg)
+
+    if params is not None:
+        metadata = [{param: m[param] for param in params} for m in metadata]
+
+    ignore_params = ["uuid", "data_owner", "data_owner_email"]
+    if ignore_params is not None:
+        metadata = [{key: value for key, value in m.items() if key not in ignore_params} for m in metadata]
+
+    metadata = [{key: value for key, value in m.items() if isinstance(value, str)} for m in metadata]
+
+    metadata0 = metadata[0]
+    difference = []
+    for metadata_compare in metadata[1:]:
+        try:
+            metadata_diff = set(metadata0.items()) - set(metadata_compare.items())
+        except TypeError:
+            logger.warning("Unable to compare metadata between ambiguous results")
+            return {}
+        else:
+            difference.extend(list(metadata_diff))
+    param_difference = list(set([d[0] for d in difference]))
+
+    # ignore_params = ["data_owner", "data_owner_email"]
+    # for iparam in ignore_params:
+    #     try:
+    #         param_difference.remove(iparam)
+    #     except ValueError:
+    #         continue
+
+    summary_difference: Dict[str, list] = {}
+    for param in param_difference:
+        summary_difference[param] = []
+        if print_output:
+            print(f" {param}: ", end="")
+        for m in metadata:
+            summary_difference[param].append(m[param])
+            if print_output:
+                print(f" '{m[param]}', ", end="")
+        if print_output:
+            print()  # print new line
+
+    # if print_output:
+    #     print("Datasets contain:")
+    #     for param in param_difference:
+    #         print(f" {param}: ", end="")
+    #         for m in metadata:
+    #             print(f" '{m[param]}', ", end="")
+    #         print()  # print new line
+
+    return summary_difference
+
+
+def _metadata_difference_formatted(data: multDataTypes,
+                                   params: Optional[list] = None,
+                                   print_output: bool = True) -> str:
+    """
+    Create formatted string for the difference in metadata between input objects.
+
+    Args:
+        data : Multiple data objects e.g. multiple ObsData as a list
+        params : Specific metadata parameters to check. If None all parameters will be checked
+        print_output : Summarise and print output to screen.
+
+    Returns:
+        str : Formatted string summarising differences in keys and sets of values
+              from the metadata.
+    """
+    param_difference = _metadata_difference(data, params, print_output)
+    formatted = "\n".join([f" - {key}: {', '.join(values)}" for key, values in param_difference.items()])
+    return formatted

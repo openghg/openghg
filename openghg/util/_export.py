@@ -1,15 +1,18 @@
-from addict import Dict as aDict
-from typing import Dict, List, Union
-from json import loads, dump
+from json import dump, loads
 from pathlib import Path
-from openghg.dataobjects import ObsData
+from typing import Dict, List, Union
 
+from addict import Dict as aDict
+from openghg.dataobjects import ObsData
 
 __all__ = ["to_dashboard", "to_dashboard_mobile"]
 
 
 def to_dashboard(
-    data: Dict, selected_vars: List, downsample_n: int = 3, filename: str = None
+    data: Union[ObsData, List[ObsData]],
+    selected_vars: List,
+    downsample_n: int = 3,
+    filename: str = None,
 ) -> Union[Dict, None]:
     """Takes a Dataset produced by OpenGHG and outputs it into a JSON
     format readable by the OpenGHG dashboard or a related project.
@@ -35,47 +38,60 @@ def to_dashboard(
 
     selected_vars = [str(c).lower() for c in selected_vars]
 
-    for site, species_data in data.items():
-        for species, inlet_data in species_data.items():
-            measurement_data: ObsData
-            for inlet, measurement_data in inlet_data.items():
-                dataset = measurement_data.data
-                metadata = measurement_data.metadata
-                attributes = dataset.attrs
+    if not isinstance(data, list):
+        data = [data]
 
-                df = dataset.to_dataframe()
+    for obs in data:
+        measurement_data = obs.data
+        attributes = measurement_data.attrs
+        metadata = obs.metadata
 
-                rename_lower = {c: str(c).lower() for c in df.columns}
-                df = df.rename(columns=rename_lower)
-                # We just want the selected variables
-                to_extract = [c for c in df.columns if c in selected_vars]
+        df = measurement_data.to_dataframe()
 
-                if not to_extract:
-                    continue
+        rename_lower = {c: str(c).lower() for c in df.columns}
+        df = df.rename(columns=rename_lower)
+        # We just want the selected variables
+        to_extract = [c for c in df.columns if c in selected_vars]
 
-                df = df[to_extract]
+        if not to_extract:
+            continue
 
-                # Downsample the data
-                if downsample_n > 1:
-                    df = df.iloc[::downsample_n]
+        df = df[to_extract]
 
-                network = metadata["network"]
-                instrument = metadata["instrument"]
+        # Downsample the data
+        if downsample_n > 1:
+            df = df.iloc[::downsample_n]
 
-                # TODO - remove this if we add site location to standard metadata
-                location = {
-                    "latitude": attributes["station_latitude"],
-                    "longitude": attributes["station_longitude"],
-                }
-                metadata.update(location)
+        network = metadata["network"]
+        instrument = metadata["instrument"]
 
-                json_data = loads(df.to_json())
-                metadata = measurement_data.metadata
+        try:
+            latitude = attributes["latitude"]
+        except KeyError:
+            latitude = metadata["latitude"]
 
-                to_export[species][network][site][inlet][instrument] = {
-                    "data": json_data,
-                    "metadata": metadata,
-                }
+        try:
+            longitude = attributes["longitude"]
+        except KeyError:
+            longitude = metadata["longitude"]
+
+        # TODO - remove this if we add site location to standard metadata
+        location = {
+            "latitude": latitude,
+            "longitude": longitude,
+        }
+        metadata.update(location)
+
+        json_data = loads(df.to_json())
+
+        species = metadata["species"]
+        site = metadata["site"]
+        inlet = metadata["inlet"]
+
+        to_export[species][network][site][inlet][instrument] = {
+            "data": json_data,
+            "metadata": metadata,
+        }
 
     if filename is not None:
         with open(filename, "w") as f:

@@ -2,39 +2,69 @@
 Tutorials
 =========
 
-These tutorials will get you up and running with OpenGHG so you can process, analyse and query data from the cloud
-or a local object store.
+These tutorials cover the use of OpenGHG when installed locally. They'll help you get started on
+standardising measurement data, searching the object store and exploring the NOAA ObsPack.
 
+Quickstart
+----------
 
-Tutorial 1 - Adding observation data
-------------------------------------
-
-This tutorial covers adding data to the object store using the standardisation functions.
-
-.. toctree::
-   :maxdepth: 1
-
-   beginner_workflow/1_Adding_observation_data
-
-Tutorial 2 - Ranking observations
----------------------------------
-
-This tutorial covers ranking the data available in the object store. This ensures users always find the correct data when using the search
-functions.
+Get started quickly by following our quickstart guide
 
 .. toctree::
    :maxdepth: 1
 
-   beginner_workflow/2_Ranking_for_observations
+   local/quickstart_devel
 
-Tutorial 3 - Comparing observations to emissions
-------------------------------------------------
 
-This tutorial covers the workflow comparing observations data to emissions using the new ``ModelScenario`` class. 
-This replaces the ``footprint_data_merge`` function with an object that can be used to retrieve and manipulate observations,
-emissions and footprint data (with boundary conditions in the pipeline).
+Adding new data
+---------------
 
 .. toctree::
    :maxdepth: 1
 
-   beginner_workflow/3_Comparing_with_emissions
+   local/Adding_new_data/Adding_observation_data
+
+
+Analysing data
+---------------
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Analysing_data/Comparing_with_emissions
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Analysing_data/Working_with_co2
+
+Exploring data
+---------------
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Exploring_data/Explore_NOAA_ObsPack
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Exploring_data/Retrieving_remote_data
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Exploring_data/Searching_and_plotting
+
+
+Managing the the object store
+-----------------------------
+
+
+These tutorials will help you understand how to add different types of data to the OpenGHG object store and how to
+delete or modify already existing data.
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Managing_object_store/Modifying_and_deleting_data

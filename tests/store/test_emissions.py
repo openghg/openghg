@@ -1,37 +1,60 @@
 import pytest
-
-from openghg.store import Emissions
-from openghg.retrieve import search
-from openghg.store import recombine_datasets
-from openghg.objectstore import get_local_bucket
-from xarray import open_dataset
 from helpers import get_emissions_datapath
+from openghg.objectstore import get_bucket
+from openghg.retrieve import search
+from openghg.store import Emissions, datasource_lookup, load_metastore, recombine_datasets
+from openghg.util import hash_bytes
+from xarray import open_dataset
+
+
+def test_read_binary_data(mocker):
+    get_bucket(empty=True)
+    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
+
+    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+
+    binary_data = test_datapath.read_bytes()
+
+    metadata = {
+        "species": "co2",
+        "source": "gpp-cardamom",
+        "domain": "europe",
+        "high_time_resolution": False,
+    }
+
+    sha1_hash = hash_bytes(data=binary_data)
+    filename = test_datapath.name
+
+    file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": False}
+
+    results = Emissions.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+
+    assert results == {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-1", "new": True}}
 
 
 def test_read_file():
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom-mth_EUROPE_2012.nc")
+    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = Emissions.read_file(
         filepath=test_datapath,
         species="co2",
         source="gpp-cardamom",
-        date="2012",
         domain="europe",
         high_time_resolution=False,
+        overwrite=True,
     )
 
-    assert "co2_gppcardamom_europe_2012" in proc_results
+    assert "co2_gpp-cardamom_europe" in proc_results
 
     search_results = search(
-        species="co2", source="gpp-cardamom", date="2012", domain="europe", data_type="emissions"
+        species="co2", source="gpp-cardamom", domain="europe", data_type="emissions",
+        start_date="2012", end_date="2013",
     )
 
-    key = list(search_results.keys())[0]
-
-    data_keys = search_results[key]["keys"]
-    emissions_data = recombine_datasets(keys=data_keys, sort=False)
-
-    metadata = search_results[key]["metadata"]
+    emissions_obs = search_results.retrieve_all()
+    emissions_data = emissions_obs.data
+    metadata = emissions_obs.metadata
 
     orig_data = open_dataset(test_datapath)
 
@@ -52,8 +75,7 @@ def test_read_file():
         "comments": "fluxes copied from year 2013. december 2012 values copied from january 2013 values.",
         "species": "co2",
         "domain": "europe",
-        "source": "gppcardamom",
-        "date": "2012",
+        "source": "gpp-cardamom",
         "start_date": "2012-01-01 00:00:00+00:00",
         "end_date": "2012-12-31 23:59:59+00:00",
         "max_longitude": 39.38,
@@ -62,74 +84,173 @@ def test_read_file():
         "min_latitude": 10.729,
         "time_resolution": "standard",
         "data_type": "emissions",
-        "frequency": "annual",
+        "time_period": "1 year",
     }
 
     del metadata["processed"]
     del metadata["prior_file_1_version"]
 
-    assert metadata == expected_metadata
+    assert metadata.items() >= expected_metadata.items()
 
 
-def test_set_lookup_uuids():
-    e = Emissions()
+def test_add_edgar_database():
+    """Test edgar can be added to object store (default domain)"""
+    folder = "v6.0_CH4"
+    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
 
-    fake_uuid = "123456789"
+    database = "EDGAR"
+    date = "2015"
 
-    species = "test_species"
-    source = "test_source"
-    domain = "test_domain"
-    date = "test_date"
+    proc_results = Emissions.transform_data(
+        datapath=test_datapath,
+        database=database,
+        date=date,
+    )
 
-    e.set_uuid(species=species, source=source, domain=domain, date=date, uuid=fake_uuid)
+    default_domain = "globaledgar"
 
-    found_uid = e.lookup_uuid(species=species, source=source, domain=domain, date=date)
+    version = "v6.0"
+    species = "ch4"
+    default_source = "anthro"
 
-    assert e._datasource_table[species][source][domain][date] == found_uid == fake_uuid
+    output_key = f"{species}_{default_source}_{default_domain}_{date}"
+    assert output_key in proc_results
+
+    search_results = search(
+        species=species,
+        date=date,
+        database=database,  # would searching for lowercase not work?
+        database_version=version,
+        data_type="emissions",
+    )
+
+    assert search_results
+
+    edgar_obs = search_results.retrieve_all()
+    metadata = edgar_obs.metadata
+
+    expected_metadata = {
+        "species": species,
+        "domain": default_domain,
+        "source": default_source,
+        "database": database.lower(),
+        "database_version": version.replace(".", ""),
+        "date": "2015",
+        "author": "OpenGHG Cloud".lower(),
+        "start_date": "2015-01-01 00:00:00+00:00",
+        "end_date": "2015-12-31 23:59:59+00:00",
+        "min_longitude": -174.85857,
+        "max_longitude": 180.0,
+        "min_latitude": -89.95,
+        "max_latitude": 89.95,
+        "time_resolution": "standard",
+        "time_period": "1 year",
+    }
+
+    assert metadata.items() >= expected_metadata.items()
+
+
+def test_transform_and_add_edgar_database():
+    """
+    Test EDGAR database can be transformed (regridded) and added to the object store.
+    """
+    # Regridding to a new domain will use the xesmf importer - so skip this test
+    # if module is not present.
+    xesmf = pytest.importorskip("xesmf")
+
+    folder = "v6.0_CH4"
+    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+
+    database = "EDGAR"
+    date = "2015"
+    domain = "EUROPE"
+
+    proc_results = Emissions.transform_data(
+        datapath=test_datapath,
+        database=database,
+        date=date,
+        domain=domain,
+    )
+
+    version = "v6.0"
+    species = "ch4"
+    default_source = "anthro"
+
+    output_key = f"{species}_{default_source}_{domain}_{date}"
+    assert output_key in proc_results
+
+    search_results = search(
+        species=species,
+        date=date,
+        domain=domain,
+        database=database,  # would searching for lowercase not work?
+        database_version=version,
+        data_type="emissions",
+    )
+
+    edgar_data = search_results.retrieve_all()
+    metadata = edgar_data.metadata
+
+    # TODO: Add tests for data as well?
+    # data_keys = search_results[key]["keys"]
+
+    expected_metadata = {
+        "species": species,
+        "domain": domain.lower(),
+        "source": "anthro",
+        "database": "edgar",
+        "database_version": version.replace(".", ""),
+        "date": "2015",
+        "author": "openghg cloud",
+        "start_date": "2015-01-01 00:00:00+00:00",
+        "end_date": "2015-12-31 23:59:59+00:00",
+        "min_longitude": -97.9,
+        "max_longitude": 39.38,
+        "min_latitude": 10.729,
+        "max_latitude": 79.057,
+        "time_resolution": "standard",
+        "time_period": "1 year",
+    }
+
+    assert metadata.items() >= expected_metadata.items()
 
 
 def test_datasource_add_lookup():
     e = Emissions()
 
-    fake_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-123456"}
+    fake_datasource = {"co2_gppcardamom_europe_2012": {"uuid": "mock-uuid-123456", "new": True}}
 
-    fake_metadata = {
+    mock_data = {
         "co2_gppcardamom_europe_2012": {
-            "species": "co2",
-            "domain": "europe",
-            "source": "gppcardamom",
-            "date": "2012",
+            "metadata": {
+                "species": "co2",
+                "domain": "europe",
+                "source": "gppcardamom",
+                "date": "2012",
+            }
         }
     }
 
-    e.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
+    with load_metastore(key="test-key-123") as metastore:
+        e.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
 
-    assert e.datasources() == ["mock-uuid-123456"]
+        assert e.datasources() == ["mock-uuid-123456"]
 
-    lookup = e.datasource_lookup(fake_metadata)
+        required = ["species", "domain", "source", "date"]
+        lookup = datasource_lookup(metastore=metastore, data=mock_data, required_keys=required)
 
-    assert lookup == fake_datasource
+        assert lookup["co2_gppcardamom_europe_2012"] == fake_datasource["co2_gppcardamom_europe_2012"]["uuid"]
 
 
-def test_wrong_uuid_raises():
-    e = Emissions()
+def test_flux_schema():
+    """Check expected data variables are being included for default Emissions schema"""
+    data_schema = Emissions.schema()
 
-    fake_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-123456"}
+    data_vars = data_schema.data_vars
+    assert "flux" in data_vars
 
-    fake_metadata = {
-        "co2_gppcardamom_europe_2012": {
-            "species": "co2",
-            "domain": "europe",
-            "source": "gppcardamom",
-            "date": "2012",
-        }
-    }
+    assert "time" in data_vars["flux"]
+    assert "lat" in data_vars["flux"]
+    assert "lon" in data_vars["flux"]
 
-    e.add_datasources(datasource_uuids=fake_datasource, metadata=fake_metadata)
-
-    assert e.datasources() == ["mock-uuid-123456"]
-
-    changed_datasource = {"co2_gppcardamom_europe_2012": "mock-uuid-8888888"}
-
-    with pytest.raises(ValueError):
-        e.add_datasources(datasource_uuids=changed_datasource, metadata=fake_metadata)
+    # TODO: Could also add checks for dims and dtypes?

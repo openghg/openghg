@@ -1,5 +1,5 @@
-from typing import Dict, Optional, Union
 from pathlib import Path
+from typing import Dict, Optional, Union
 
 
 def parse_btt(
@@ -18,10 +18,10 @@ def parse_btt(
     Returns:
         dict: Dictionary of gas data
     """
-    from openghg.standardise.meta import assign_attributes
-    from pandas import read_csv, Timestamp, to_timedelta, isnull
     from numpy import nan as np_nan
+    from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, load_json
+    from pandas import Timestamp, isnull, read_csv, to_timedelta
 
     # TODO: Decide what to do about inputs which aren't use anywhere
     # at present - inlet, instrument, sampling_period, measurement_type
@@ -55,6 +55,8 @@ def parse_btt(
     metadata["station_longitude"] = site_info["longitude"]
     metadata["station_latitude"] = site_info["latitude"]
     metadata["station_long_name"] = site_info["long_name"]
+    metadata["data_type"] = "surface"
+    metadata["source_format"] = "btt"
 
     attributes = network_params["global_attributes"]
     attributes["inlet_height_magl"] = network_params["inlet"].strip("m")
