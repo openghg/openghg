@@ -325,6 +325,8 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
     from openghg.objectstore import get_tutorial_store_path
     from openghg.util import download_data, parse_url_filename
 
+    use_tutorial_store()
+
     # Check we're getting a tar
     output_filename = parse_url_filename(url=url)
 

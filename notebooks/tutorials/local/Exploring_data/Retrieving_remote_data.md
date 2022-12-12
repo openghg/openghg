@@ -12,19 +12,13 @@ kernelspec:
   name: python3
 ---
 
-# Workflow 7: Retrieving data from remote archives
+# Retrieving data from remote archives
 
 +++
 
 This tutorial covers the retrieval of data from the ICOS Carbon Portal and the CEDA archives.
 
-```{code-cell} ipython3
-import os
-import tempfile
-
-tmp_dir = tempfile.TemporaryDirectory()
-os.environ["OPENGHG_PATH"] = tmp_dir.name   # temporary directory
-```
++++
 
 ## ICOS
 

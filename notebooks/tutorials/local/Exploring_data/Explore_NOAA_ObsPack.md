@@ -12,7 +12,7 @@ kernelspec:
   name: python3
 ---
 
-# Workflow 6: Explore NOAA ObsPack
+# Explore NOAA ObsPack
 
 +++
 
