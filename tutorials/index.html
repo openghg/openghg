@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Tutorials &#8212; OpenGHG 0+untagged.1.g267e41e.dirty documentation</title>
+    <title>Tutorials &#8212; OpenGHG 0+untagged.1.g32f1824.dirty documentation</title>
   
   
   
@@ -50,7 +50,7 @@
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Tutorials - Local" href="local/index.html" />
+    <link rel="next" title="User API" href="../api/index.html" />
     <link rel="prev" title="Installation" href="../install.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g267e41e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g32f1824.dirty documentation</p>
   
 </a>
     
@@ -228,7 +228,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -321,23 +321,6 @@
   </div>
 
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
-<li class="toctree-l1 has-children"><a class="reference internal" href="local/index.html">Tutorials - Local</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="simple">
-</ul>
-</li>
-</ul>
-
-  </div>
-</nav>
-    </div>
-  </div>
-  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -367,14 +350,36 @@
 <p>These tutorials will get you up and running with OpenGHG so you can process, analyse and query data.
 The pages linked to below are created from Jupyter Notebooks that are available in the OpenGHG
 repository under <code class="docutils literal notranslate"><span class="pre">notebooks/tutorials</span></code>.</p>
-<section id="local">
-<h2>Local<a class="headerlink" href="#local" title="Permalink to this heading">#</a></h2>
 <p>If you’ve installed OpenGHG locally the tutorials below are available in the <a class="reference external" href="https://github.com/openghg/openghg">OpenGHG repository</a>
 under <code class="docutils literal notranslate"><span class="pre">notebooks/tutorials/local</span></code>.</p>
+<p>These tutorials cover the use of OpenGHG when installed locally. They’ll help you get started on
+standardising measurement data, searching the object store and exploring the NOAA ObsPack.</p>
+<section id="adding-new-data">
+<h2>Adding new data<a class="headerlink" href="#adding-new-data" title="Permalink to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="local/index.html">Tutorials - Local</a></li>
-</ul>
+</div>
+</section>
+<section id="analysing-data">
+<h2>Analysing data<a class="headerlink" href="#analysing-data" title="Permalink to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="exploring-data">
+<h2>Exploring data<a class="headerlink" href="#exploring-data" title="Permalink to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="managing-the-the-object-store">
+<h2>Managing the the object store<a class="headerlink" href="#managing-the-the-object-store" title="Permalink to this heading">#</a></h2>
+<p>These tutorials will help you understand how to add different types of data to the OpenGHG object store and how to
+delete or modify already existing data.</p>
+<div class="toctree-wrapper compound">
 </div>
 </section>
 </section>
@@ -394,10 +399,10 @@ under <code class="docutils literal notranslate"><span class="pre">notebooks/tut
           <p class="prev-next-title">Installation</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="local/index.html" title="next page">
+  <a class='right-next' id="next-link" href="../api/index.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Tutorials - Local</p>
+      <p class="prev-next-title">User API</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -418,8 +423,27 @@ under <code class="docutils literal notranslate"><span class="pre">notebooks/tut
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#local">
-   Local
+  <a class="reference internal nav-link" href="#adding-new-data">
+   Adding new data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#analysing-data">
+   Analysing data
+  </a>
+  <ul class="nav section-nav flex-column">
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#exploring-data">
+   Exploring data
+  </a>
+  <ul class="nav section-nav flex-column">
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#managing-the-the-object-store">
+   Managing the the object store
   </a>
  </li>
 </ul>

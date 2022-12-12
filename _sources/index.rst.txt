@@ -27,7 +27,6 @@ We've created tutorials to get you started with OpenGHG. They cover searching, r
 
    tutorials/index
 
-Changes
 
 API Reference
 =============

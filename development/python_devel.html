@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Development &#8212; OpenGHG 0+untagged.1.g267e41e.dirty documentation</title>
+    <title>Getting setup &#8212; OpenGHG 0+untagged.1.g32f1824.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g267e41e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g32f1824.dirty documentation</p>
   
 </a>
     
@@ -328,7 +328,7 @@
   </p>
   <div class="bd-toc-item navbar-nav">
     <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Development</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Getting setup</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="specifications/data_spec.html">Data Specification</a></li>
@@ -368,15 +368,32 @@
             
             <article class="bd-article" role="main">
               
-  <section id="development">
-<h1>Development<a class="headerlink" href="#development" title="Permalink to this heading">#</a></h1>
-<p>The source code for OpenGHG is available on <a class="reference external" href="https://github.com/openghg/openghg">GitHub</a>.</p>
+  <section id="getting-setup">
+<h1>Getting setup<a class="headerlink" href="#getting-setup" title="Permalink to this heading">#</a></h1>
+<p>Here we’ll cover getting your development environment setup for contributing to OpenGHG.
+The source code for OpenGHG is available on <a class="reference external" href="https://github.com/openghg/openghg">GitHub</a>.</p>
 <section id="setting-up-your-computer">
 <h2>Setting up your computer<a class="headerlink" href="#setting-up-your-computer" title="Permalink to this heading">#</a></h2>
-<p>OpenGHG requires Python &gt;= 3.8, so please install this before continuing
+<p>You’ll need <a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">git</a> and Python &gt;= 3.8, so please make sure you have both installed before continuing
 further.</p>
-<section id="virtual-environment">
-<h3>Virtual environment<a class="headerlink" href="#virtual-environment" title="Permalink to this heading">#</a></h3>
+<section id="clone-openghg">
+<h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Permalink to this heading">#</a></h3>
+<p>First we’ll clone the repository and make sure we’re on the <code class="docutils literal notranslate"><span class="pre">devel</span></code> branch. This makes sure we’re on the most up to date version of OpenGHG.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg.git
+<span class="nb">cd</span> openghg
+git checkout devel
+</pre></div>
+</div>
+<p>Next we’ll get a virtual environment setup using either.</p>
+</section>
+<section id="environments">
+<h3>Environments<a class="headerlink" href="#environments" title="Permalink to this heading">#</a></h3>
+<p>Here we cover the creation of an environment and the installation of OpenGHG into it. Installation here means adding OpenGHG to the environment.
+We’ll install it in developer mode so that any changes you make to the code will automatically be available when you run commands. Similarly, if you
+run a <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code> on the <code class="docutils literal notranslate"><span class="pre">devel</span></code> branch all changes made will be available to you straight away, without having to reinstall or update OpenGHG within
+the environment.</p>
+<section id="pip">
+<h4><code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#pip" title="Permalink to this heading">#</a></h4>
 <p>It is recommended that you develop OpenGHG in a Python
 <a class="reference external" href="https://docs.python.org/3/tutorial/venv.html">virtual environment</a>.
 Here we’ll create a new folder called <code class="docutils literal notranslate"><span class="pre">envs</span></code> in our home directory and create
@@ -392,28 +409,36 @@ interfering with other Python installations.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> ~/envs/openghg_devel/bin/activate
 </pre></div>
 </div>
-<p>This will update your shell so that all python commands (such as
-<code class="docutils literal notranslate"><span class="pre">python</span></code>, <code class="docutils literal notranslate"><span class="pre">pip</span></code> etc.) will use the virtual environment. You can
-deactivate the environment and return to your system Python using;</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>deactivate
+<p>Now we can install OpenGHG’s requirements and its developer requirements.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -r requirements.txt -r requirements-dev.txt
+</pre></div>
+</div>
+<p>Finally install OpenGHG itself. The <code class="docutils literal notranslate"><span class="pre">-e</span></code> / <code class="docutils literal notranslate"><span class="pre">--editable</span></code> flag here tells <code class="docutils literal notranslate"><span class="pre">pip</span></code> to install the OpenGHG repo in develop mode.</p>
+<p>OpenGHG should now be installed, you can check this by opening <code class="docutils literal notranslate"><span class="pre">ipython</span></code> and running</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">openghg</span>
 </pre></div>
 </div>
 </section>
-<section id="clone-openghg">
-<h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Permalink to this heading">#</a></h3>
-<p>To get a copy of the repo and ensure you have all the required depdencies for development run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg.git
-<span class="nb">cd</span> openghg
-pip install -r requirements.txt -r requirements-dev.txt
+<section id="conda">
+<h4><code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#conda" title="Permalink to this heading">#</a></h4>
+<p>Making sure you’re in the <code class="docutils literal notranslate"><span class="pre">openghg</span></code> repository folder run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create -f environment.yaml
 </pre></div>
 </div>
-<p>Next you can install OpenGHG in editable mode using the <em class="xref py py-obj">-e</em> flag. This installs the package from
-the local path and means any changes you make to the code will be immediately available when
-using the package.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -e .
+<p>Once <code class="docutils literal notranslate"><span class="pre">conda</span></code> finishes its installation process you can activate the enironment</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda activate openghg_env
 </pre></div>
 </div>
-<p>OpenGHG should now be installed within your virtual environment.</p>
+<p>Next install <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> which allows us to install packages in develop mode</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install conda-build
+</pre></div>
+</div>
+<p>And finally install OpenGHG</p>
+<p>OpenGHG should now be installed, you can check this by opening <code class="docutils literal notranslate"><span class="pre">ipython</span></code> and running</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">openghg</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="run-tests">
 <h3>Run tests<a class="headerlink" href="#run-tests" title="Permalink to this heading">#</a></h3>
@@ -596,14 +621,6 @@ additional packages. If you haven’t yet installed the documentation requiremen
 </div>
 <p>Next ensure you have <a class="reference external" href="https://pandoc.org/">pandoc</a> installed. Installation instructions
 can be <a class="reference external" href="https://pandoc.org/installing.html">found here</a></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you haven’t installed <code class="docutils literal notranslate"><span class="pre">openghg</span></code> to your virtual environment you can add the folder path to your PYTHONPATH.
-This allows the library to be used easily without the need for reinstallation after changes.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHONPATH</span><span class="si">}</span><span class="s2">:/path/to/cloned/repo&quot;</span>
-</pre></div>
-</div>
-</div>
 <p>Then move to the <code class="docutils literal notranslate"><span class="pre">doc</span></code> directory and run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make
 </pre></div>
@@ -620,7 +637,7 @@ commiting. When happy, commit your changes, e.g.</p>
 </div>
 <p>If your edits don’t change the OpenGHG source code e.g. fixing typos in the documentation,
 then please add <code class="docutils literal notranslate"><span class="pre">[skip</span> <span class="pre">ci]</span></code> to your commit message.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git commit -a -m <span class="s2">&quot;Updating docs [ci skip]&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git commit -a -m <span class="s2">&quot;Updating docs [skip ci]&quot;</span>
 </pre></div>
 </div>
 <p>This will avoid unnecessarily running the
@@ -686,14 +703,34 @@ For information, see the documentation
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#virtual-environment">
-     Virtual environment
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#clone-openghg">
      Clone OpenGHG
     </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#environments">
+     Environments
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#pip">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         pip
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#conda">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         conda
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
    </li>
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#run-tests">

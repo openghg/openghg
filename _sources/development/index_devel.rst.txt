@@ -9,7 +9,7 @@ with a development environment.
 Python development
 ------------------
 
-Covers how we develop OpenGHG and the standards we hope to adhere to
+Covers how we develop OpenGHG and the standards we adhere to
 
 .. toctree::
    :maxdepth: 1
