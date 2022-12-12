@@ -252,3 +252,19 @@ co2_data.plot_timeseries()
 ```
 
 You can also pass any of `title`, `xlabel`, `ylabel` and `units` to the `plot_timeseries` function to modify the labels.
+
++++
+
+## 5. Cleanup
+
++++
+
+If you're finished with the data in this tutorial you can cleanup the tutorial object store using the `clear_tutorial_store` function.
+
+```{code-cell} ipython3
+from openghg.tutorial import clear_tutorial_store
+```
+
+```{code-cell} ipython3
+clear_tutorial_store()
+```

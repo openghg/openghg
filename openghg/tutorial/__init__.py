@@ -1,4 +1,5 @@
 from ._tutorial import (
+    clear_tutorial_store,
     populate_flux_data,
     populate_footprint_data,
     populate_surface_data,

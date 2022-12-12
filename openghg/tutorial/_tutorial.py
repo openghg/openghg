@@ -393,3 +393,18 @@ def unpack_example_archive(archive_path: Path, extract_dir: Union[str, Path, Non
     extracted_filepaths = [Path(extract_dir, str(fname)) for fname in filenames]
 
     return extracted_filepaths
+
+
+def clear_tutorial_store() -> None:
+    """Delete the contents of the tutorial object store
+
+    Returns:
+        None
+    """
+    from openghg.objectstore import get_tutorial_store_path
+
+    path = get_tutorial_store_path()
+
+    shutil.rmtree(path=path, ignore_errors=True)
+
+    print(f"Tutorial store at {path} cleared.")

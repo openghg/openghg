@@ -23,7 +23,6 @@ else:
     from ._local_store import (
         delete_object,
         exists,
-        clear_tutorial_store,
         get_all_object_names,
         get_bucket,
         get_object,

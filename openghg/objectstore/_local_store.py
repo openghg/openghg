@@ -19,7 +19,6 @@ __all__ = [
     "delete_object",
     "get_local_objectstore_path",
     "get_tutorial_store_path",
-    "clear_tutorial_store",
     "get_all_object_names",
     "get_object_names",
     "get_object",
@@ -39,17 +38,6 @@ def get_tutorial_store_path() -> Path:
         pathlib.Path: Path of tutorial store
     """
     return get_local_objectstore_path() / "tutorial_store"
-
-
-def clear_tutorial_store() -> None:
-    """Delete the contents of the tutorial object store
-
-    Returns:
-        None
-    """
-    path = get_tutorial_store_path()
-
-    shutil.rmtree(path=path, ignore_errors=True)
 
 
 # @lru_cache
