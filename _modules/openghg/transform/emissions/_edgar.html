@@ -1,0 +1,1493 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>openghg.transform.emissions._edgar &#8212; OpenGHG 0+untagged.1.gc218260.dirty documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/transform/emissions/_edgar';</script>
+    <script src="../../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">OpenGHG 0+untagged.1.gc218260.dirty documentation</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tutorials/index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../whatsnew/index.html">
+                        What’s new
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tutorials/index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../whatsnew/index.html">
+                        What’s new
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for openghg.transform.emissions._edgar</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">zipfile</span> <span class="kn">import</span> <span class="n">ZipFile</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
+
+<span class="n">ArrayType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="parse_edgar"><a class="viewcode-back" href="../../../../api/api_transform.html#openghg.transform.emissions.parse_edgar">[docs]</a><span class="k">def</span> <span class="nf">parse_edgar</span><span class="p">(</span>
+    <span class="n">datapath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lat_out</span><span class="p">:</span> <span class="n">ArrayType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lon_out</span><span class="p">:</span> <span class="n">ArrayType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># sector: Optional[str] = None,</span>
+    <span class="c1"># period: Optional[Union[str, tuple]] = None,</span>
+    <span class="n">edgar_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read and parse input EDGAR data.</span>
+<span class="sd">    Notes: Only accepts annual 2D grid maps in netcdf (.nc) format for now.</span>
+<span class="sd">           Does not accept monthly data yet.</span>
+
+<span class="sd">    EDGAR data is global on a 0.1 x 0.1 grid. This function allows products</span>
+<span class="sd">    to be created for a given year which cover specific regions (and matches</span>
+<span class="sd">    to the OpenGHG data schema, including units and coordinate names).</span>
+
+<span class="sd">    Region information can be specified as follows:</span>
+<span class="sd">     - To use a pre-defined domain use the domain keyword only.</span>
+<span class="sd">     - To define a new domain use the domain, lat_out, lon_out keywords</span>
+<span class="sd">     - If no domain or lat_out, lon_out data is supplied, the global EDGAR</span>
+<span class="sd">    data will be added labelled as &quot;globaledgar&quot; domain.</span>
+
+<span class="sd">    Pre-exisiting domains are defined within the &#39;domain_info.json&#39; file.</span>
+
+<span class="sd">    Metadata will also be added to the stored data including:</span>
+<span class="sd">     - &quot;domain&quot;: domain (e.g. &quot;europe&quot;) OR &quot;globaledgar&quot;</span>
+<span class="sd">     - &quot;source&quot;: &quot;anthro&quot; (for &quot;TOTAL&quot;), source name from file otherwise</span>
+<span class="sd">     - &quot;database&quot;: &quot;EDGAR&quot;</span>
+<span class="sd">     - &quot;database_version&quot;: edgar_version (e.g. &quot;v60&quot;, &quot;v50&quot;, &quot;v432&quot;)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        datapath: Path to data folder or zip archive for EDGAR data</span>
+<span class="sd">        date: Year to extract. Expect a string of the form &quot;YYYY&quot;</span>
+<span class="sd">        species: Species name being extracted</span>
+<span class="sd">        domain: Domain name for new or pre-existing domain</span>
+<span class="sd">        lat_out: Latitude values for new domain</span>
+<span class="sd">        lon_out: Longitude values for new domain</span>
+<span class="sd">        edgar_version: EDGAR version in file. Will be inferred otherwise.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of data</span>
+
+<span class="sd">    TODO: Allow date range to be extracted rather than year?</span>
+<span class="sd">    TODO: Add monthly parsing and sector stacking options</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">tempfile</span>
+
+    <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">assign_flux_attributes</span><span class="p">,</span> <span class="n">define_species_label</span>
+    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">infer_date_range</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">convert_longitude</span><span class="p">,</span> <span class="n">molar_mass</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">timestamp_now</span>
+
+    <span class="c1"># Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()</span>
+    <span class="c1"># Additional edgar functions which could be incorporated.</span>
+    <span class="c1"># - getedgarv5annualsectors</span>
+    <span class="c1"># - getedgarv432annualsectors</span>
+    <span class="c1"># - (monthly sectors?)</span>
+    <span class="c1"># TODO: Work out how to select frequency</span>
+    <span class="c1"># - could try and relate to period e.g. &quot;monthly&quot; versus &quot;yearly&quot; etc.</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">raw_edgar_domain</span> <span class="o">=</span> <span class="s2">&quot;globaledgar&quot;</span>
+
+    <span class="n">lat_out</span><span class="p">,</span> <span class="n">lon_out</span> <span class="o">=</span> <span class="n">_check_lat_lon</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">lat_out</span><span class="p">,</span> <span class="n">lon_out</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">domain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="n">raw_edgar_domain</span>
+
+    <span class="c1"># TODO: Add check for period? Only monthly or yearly (or equivalent inputs)</span>
+
+    <span class="c1"># Check if input is a zip file</span>
+    <span class="k">if</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">is_zipfile</span><span class="p">(</span><span class="n">datapath</span><span class="p">):</span>
+        <span class="n">zipped</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">zip_folder</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">datapath</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">zipped</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">known_version</span> <span class="o">=</span> <span class="n">_edgar_known_versions</span><span class="p">()</span>
+
+    <span class="c1"># Check readme file for edgar version (if not specified)</span>
+    <span class="k">if</span> <span class="n">zipped</span> <span class="ow">and</span> <span class="n">edgar_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">edgar_version</span> <span class="o">=</span> <span class="n">_check_readme_version</span><span class="p">(</span><span class="n">zippath</span><span class="o">=</span><span class="n">zip_folder</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">edgar_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">edgar_version</span> <span class="o">=</span> <span class="n">_check_readme_version</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">datapath</span><span class="p">)</span>
+
+    <span class="c1"># Extract list of data files</span>
+    <span class="k">if</span> <span class="n">zipped</span><span class="p">:</span>
+        <span class="n">zip_filelist</span> <span class="o">=</span> <span class="n">zip_folder</span><span class="o">.</span><span class="n">infolist</span><span class="p">()</span>
+        <span class="c1"># folder_filelist = list(zip_folder.namelist())</span>
+        <span class="n">folder_filelist</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">zip_filelist</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">folder_filelist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">datapath</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Extract netcdf files (only, for now) - &quot;.txt&quot; is also an option (not implemented)</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="s2">&quot;.nc&quot;</span>
+    <span class="n">data_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">folder_filelist</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="n">suffix</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data_files</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expect EDGAR &#39;.nc&#39; files.&quot;</span> <span class="sa">f</span><span class="s2">&quot;No suitable files found within datapath: </span><span class="si">{</span><span class="n">datapath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">data_files</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">db_info</span> <span class="o">=</span> <span class="n">_extract_file_info</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">db_info</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">continue</span>
+
+    <span class="c1"># Extract species from filename if not specified</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">species_from_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">db_info</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">species_from_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">species_from_file</span>
+
+    <span class="c1"># Check synonyms and compare against filename value</span>
+    <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">species_label</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># species_label = synonyms(species).lower()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to retrieve species from database filenames.&quot;</span> <span class="s2">&quot; Please specify&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">species_from_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">species_label</span> <span class="o">!=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species_from_file</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;WARNING: Input species does not match species extracted from&quot;</span><span class="p">,</span>
+            <span class="s2">&quot; database filenames. Please check.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># If version not yet found, extract version from file naming scheme</span>
+    <span class="k">if</span> <span class="n">edgar_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">possible_version</span> <span class="o">=</span> <span class="n">db_info</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">possible_version</span> <span class="ow">in</span> <span class="n">known_version</span><span class="p">:</span>
+            <span class="n">edgar_version</span> <span class="o">=</span> <span class="n">possible_version</span>
+
+    <span class="k">if</span> <span class="n">edgar_version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_version</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to infer EDGAR version (</span><span class="si">{</span><span class="n">edgar_version</span><span class="si">}</span><span class="s2">).&quot;</span> <span class="s2">&quot; Please pass as an argument&quot;</span><span class="p">)</span>
+
+    <span class="c1"># TODO: May want to split out into a separate function, so we can use this for</span>
+    <span class="c1"># - yearly - &quot;v6.0_CH4_2015_TOTALS.0.1x0.1.nc&quot;</span>
+    <span class="c1"># - sectoral - &quot;v6.0_CH4_2015_ENE.0.1x0.1.nc&quot;</span>
+    <span class="c1"># - monthly sectoral - &quot;v6.0_CH4_2015_1_ENE.0.1x0.1.nc&quot;, &quot;v6.0_CH4_2015_2_ENE.0.1x0.1.nc&quot;, ...</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">date</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Do no accept date which does not represent a year yet: </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">files_by_year</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">data_files</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">file_info</span> <span class="o">=</span> <span class="n">_extract_file_info</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Check if data is actually monthly &quot;...2015_1&quot; etc. - can&#39;t parse yet</span>
+        <span class="k">if</span> <span class="s2">&quot;month&quot;</span> <span class="ow">in</span> <span class="n">file_info</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Unable to parse monthly EDGAR data at present.&quot;</span><span class="p">)</span>
+
+        <span class="n">year_from_file</span> <span class="o">=</span> <span class="n">file_info</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">]</span>
+
+        <span class="n">files_by_year</span><span class="p">[</span><span class="n">year_from_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">file</span>
+
+        <span class="k">if</span> <span class="n">year_from_file</span> <span class="o">==</span> <span class="n">year</span><span class="p">:</span>
+            <span class="n">edgar_file</span> <span class="o">=</span> <span class="n">file</span>
+            <span class="n">edgar_file_info</span> <span class="o">=</span> <span class="n">file_info</span>
+            <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">all_years</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">files_by_year</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">all_years</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">start_year</span><span class="p">,</span> <span class="n">end_year</span> <span class="o">=</span> <span class="n">all_years</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">all_years</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">year</span> <span class="o">&lt;</span> <span class="n">start_year</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;EDGAR </span><span class="si">{</span><span class="n">edgar_version</span><span class="si">}</span><span class="s2"> range: </span><span class="si">{</span><span class="n">start_year</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">end_year</span><span class="si">}</span><span class="s2">.&quot;</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2"> is before this period.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="n">end_year</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using last available year from EDGAR </span><span class="si">{</span><span class="n">edgar_version</span><span class="si">}</span><span class="s2"> range:&quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">start_year</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">end_year</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="n">edgar_file</span> <span class="o">=</span> <span class="n">files_by_year</span><span class="p">[</span><span class="n">end_year</span><span class="p">]</span>
+            <span class="n">edgar_file_info</span> <span class="o">=</span> <span class="n">_extract_file_info</span><span class="p">(</span><span class="n">edgar_file</span><span class="p">)</span>
+
+    <span class="c1"># For a zipped archive need to unzip the netcdf file and place in a</span>
+    <span class="c1"># temporary directory.</span>
+    <span class="k">if</span> <span class="n">zipped</span><span class="p">:</span>
+        <span class="n">temp_extract_folder</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">zipinfo</span> <span class="ow">in</span> <span class="n">zip_filelist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">zipinfo</span><span class="o">.</span><span class="n">filename</span> <span class="o">==</span> <span class="n">edgar_file</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">zip_folder</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">zipinfo</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">temp_extract_folder</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">edgar_file</span> <span class="o">=</span> <span class="n">temp_extract_folder</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="n">edgar_file</span>
+                <span class="k">break</span>
+
+    <span class="c1"># Dimension - (lat, lon) - no time dimension</span>
+    <span class="c1"># time is not included in the file just in the filename *sigh*!</span>
+
+    <span class="c1"># v432_CH4_1978.0.1x0.1.nc (or .zip)</span>
+    <span class="c1"># v50_CH4_1978.0.1x0.1.nc (or .zip)</span>
+    <span class="c1"># v6.0_CH4_1978_TOTALS.0.1x0.1.nc</span>
+
+    <span class="c1"># v50_CO2_excl_short-cycle_org_C_1978.0.1x0.1.nc (or .zip)</span>
+    <span class="c1"># v50_CO2_org_short-cycle_C_1978.0.1x0.1.nc (or .zip)</span>
+    <span class="c1"># v50_N2O_1978.0.1x0.1.zip (or .zip)</span>
+
+    <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">edgar_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp</span><span class="p">:</span>
+        <span class="n">edgar_ds</span> <span class="o">=</span> <span class="n">temp</span>
+
+    <span class="c1"># Expected name e.g. &quot;emi_ch4&quot;, &quot;emi_co2&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;emi_</span><span class="si">{</span><span class="n">species_label</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># For reference, from &quot;_readme.html&quot; from v6.0 data:</span>
+    <span class="c1"># &#39;Yearly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / year</span>
+    <span class="c1">#  for the .txt files with longitude and latitude coordinates referring to</span>
+    <span class="c1">#  the low-left corner of each grid-cell.&#39;</span>
+    <span class="c1"># &#39;Monthly Emissions gridmaps in ton substance / 0.1degree x 0.1degree / month</span>
+    <span class="c1">#  for the .txt files with longitude and latitude coordinates referring to</span>
+    <span class="c1">#  the low-left corner of each grid-cell.&#39;</span>
+    <span class="c1"># &#39;Emissions gridmaps in kg substance /m2 /s for the .nc files with longitude</span>
+    <span class="c1"># and latitude coordinates referring to the cell center of each grid-cell.&#39;</span>
+
+    <span class="c1"># Convert from kg/m2/s to mol/m2/s</span>
+    <span class="n">species_molar_mass</span> <span class="o">=</span> <span class="n">molar_mass</span><span class="p">(</span><span class="n">species_label</span><span class="p">)</span>
+    <span class="n">kg_to_g</span> <span class="o">=</span> <span class="mf">1e3</span>
+
+    <span class="n">flux_da</span> <span class="o">=</span> <span class="n">edgar_ds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="n">flux_values</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">flux_da</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">kg_to_g</span> <span class="o">/</span> <span class="n">species_molar_mass</span>
+    <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;mol/m2/s&quot;</span>
+
+    <span class="n">lat_name</span> <span class="o">=</span> <span class="s2">&quot;lat&quot;</span>
+    <span class="n">lon_name</span> <span class="o">=</span> <span class="s2">&quot;lon&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lat_in</span> <span class="o">=</span> <span class="n">edgar_ds</span><span class="p">[</span><span class="n">lat_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">lon_in</span> <span class="o">=</span> <span class="n">edgar_ds</span><span class="p">[</span><span class="n">lon_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Could not find &#39;</span><span class="si">{</span><span class="n">lat_name</span><span class="si">}</span><span class="s2">&#39; or &#39;</span><span class="si">{</span><span class="n">lon_name</span><span class="si">}</span><span class="s2">&#39; in EDGAR file.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot; Please check this is a 2D grid map.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Check range of longitude values and convert to -180 - +180</span>
+    <span class="n">lon_in</span><span class="p">,</span> <span class="n">ordinds</span> <span class="o">=</span> <span class="n">convert_longitude</span><span class="p">(</span><span class="n">lon_in</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">flux_values</span> <span class="o">=</span> <span class="n">flux_values</span><span class="p">[:,</span> <span class="n">ordinds</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">lat_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lon_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Will produce import error if xesmf has not been installed.</span>
+        <span class="kn">from</span> <span class="nn">openghg.transform</span> <span class="kn">import</span> <span class="n">regrid_uniform_cc</span>
+
+        <span class="c1"># regrid2d() used within acrg code for equivalent regrid function</span>
+        <span class="c1"># but switched to using xesmf (rather than iris) here instead.</span>
+        <span class="n">flux_values</span> <span class="o">=</span> <span class="n">regrid_uniform_cc</span><span class="p">(</span><span class="n">flux_values</span><span class="p">,</span> <span class="n">lat_out</span><span class="p">,</span> <span class="n">lon_out</span><span class="p">,</span> <span class="n">lat_in</span><span class="p">,</span> <span class="n">lon_in</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lat_out</span> <span class="o">=</span> <span class="n">lat_in</span>
+        <span class="n">lon_out</span> <span class="o">=</span> <span class="n">lon_in</span>
+
+    <span class="n">edgar_attrs</span> <span class="o">=</span> <span class="n">edgar_ds</span><span class="o">.</span><span class="n">attrs</span>
+
+    <span class="c1"># After the data has been extracted and used from the unzipped netcdf</span>
+    <span class="c1"># file clean up and remove temporary directory and file.</span>
+    <span class="k">if</span> <span class="n">zipped</span><span class="p">:</span>
+        <span class="n">temp_extract_folder</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+
+    <span class="c1"># Check for &quot;time&quot; dimension and add if missing.</span>
+    <span class="n">flux_ndim</span> <span class="o">=</span> <span class="n">flux_values</span><span class="o">.</span><span class="n">ndim</span>
+    <span class="n">time_name</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
+    <span class="k">if</span> <span class="n">time_name</span> <span class="ow">in</span> <span class="n">flux_da</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">flux_da</span><span class="p">[</span><span class="n">time_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">elif</span> <span class="n">time_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flux_da</span> <span class="ow">and</span> <span class="n">flux_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">-01-01&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;datetime64[ns]&quot;</span><span class="p">)</span>
+        <span class="n">flux</span> <span class="o">=</span> <span class="n">flux_values</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">flux_ndim</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; to contain 2 or 3 dimensions. Actually: </span><span class="si">{</span><span class="n">flux_ndim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">dims</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">)</span>
+
+    <span class="n">em_data</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">flux</span><span class="p">)},</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">lat_out</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">lon_out</span><span class="p">},</span> <span class="n">attrs</span><span class="o">=</span><span class="n">edgar_attrs</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Some attributes are numpy types we can&#39;t serialise to JSON so convert them</span>
+    <span class="c1"># to their native types here</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">em_data</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="n">author_name</span> <span class="o">=</span> <span class="s2">&quot;OpenGHG Cloud&quot;</span>
+    <span class="n">em_data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">author_name</span>
+
+    <span class="n">source_from_file</span> <span class="o">=</span> <span class="n">edgar_file_info</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">source_from_file</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;TOTALS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;anthro&quot;</span>
+    <span class="k">elif</span> <span class="n">species_label</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span> <span class="ow">and</span> <span class="s2">&quot;TOTALS&quot;</span> <span class="ow">in</span> <span class="n">source_from_file</span><span class="p">:</span>
+        <span class="n">co2_source</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source_from_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">co2_source</span><span class="si">}</span><span class="s2">_anthro&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">source_from_file</span><span class="p">)</span>
+    <span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;EDGAR&quot;</span>
+    <span class="n">database_version</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">edgar_version</span><span class="p">)</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_label</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;domain&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">date</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">database</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;database_version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">database_version</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">author_name</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_now</span><span class="p">())</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;emissions&quot;</span>
+
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">],</span> <span class="s2">&quot;processed&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">]}</span>
+
+    <span class="c1"># Infer the date range associated with the flux data</span>
+    <span class="n">em_time</span> <span class="o">=</span> <span class="n">em_data</span><span class="o">.</span><span class="n">time</span>
+    <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">period_str</span> <span class="o">=</span> <span class="n">infer_date_range</span><span class="p">(</span><span class="n">em_time</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">edgar_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+
+    <span class="n">prior_info_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;EDGAR&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;EDGAR </span><span class="si">{</span><span class="n">edgar_version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">edgar_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;raw_resolution&quot;</span><span class="p">:</span> <span class="s2">&quot;0.1 degrees x 0.1 degrees&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;reference&quot;</span><span class="p">:</span> <span class="n">edgar_ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">em_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">em_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;min_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">em_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;max_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">em_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_resolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;standard&quot;</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;time_period&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">period_str</span>
+
+    <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">species_label</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">date</span><span class="p">))</span>
+
+    <span class="n">emissions_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">emissions_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">emissions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">em_data</span>
+    <span class="n">emissions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
+    <span class="n">emissions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrs</span>
+
+    <span class="n">emissions_data</span> <span class="o">=</span> <span class="n">assign_flux_attributes</span><span class="p">(</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span> <span class="n">prior_info_dict</span><span class="o">=</span><span class="n">prior_info_dict</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">emissions_data</span></div>
+
+
+<span class="k">def</span> <span class="nf">_check_lat_lon</span><span class="p">(</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lat_out</span><span class="p">:</span> <span class="n">ArrayType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lon_out</span><span class="p">:</span> <span class="n">ArrayType</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Define and check latitude and longitude values for a domain.</span>
+
+<span class="sd">    The domain can be used in one of two ways:</span>
+<span class="sd">        1. To specify a pre-exisiting lat, lon extent which can be extracted</span>
+<span class="sd">        2. To supply a name for a new lat, lon extent which must be specified</span>
+
+<span class="sd">    For case 1, only domain needs to be specified (lat_out and lon_out can</span>
+<span class="sd">    be specified but they must already exactly match the domain definition).</span>
+<span class="sd">    The details will be extracted from &#39;domain_info.json&#39;.</span>
+
+<span class="sd">    For case 2, the domain, lat_out and lon_out must all be specified.</span>
+
+<span class="sd">    If none of these values are specified, (None, None) will be returned. This</span>
+<span class="sd">    is valid behaviour.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        domain: Domain name for a pre-existing domain or a new domain</span>
+<span class="sd">        lat_out: Latitude values (only needed if domain is new)</span>
+<span class="sd">        lon_out: Longitude values (only needed if domain is new)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ndarray, ndarray: Latitude and longitude arrays</span>
+<span class="sd">        None, None: if all inputs are None, a tuple of Nones will be returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">convert_longitude</span><span class="p">,</span> <span class="n">find_domain</span>
+
+    <span class="k">if</span> <span class="n">lat_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">lon_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">domain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Please specify new &#39;domain&#39; name if selecting new&quot;</span> <span class="s2">&quot; latitude, longitude values&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lat_out</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+        <span class="n">lat_out</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lat_out</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lon_out</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+        <span class="n">lon_out</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">lon_out</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">domain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># If domain is specified, attempt to extract lat/lon values from</span>
+        <span class="c1"># pre-defined definitions.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lat_domain</span><span class="p">,</span> <span class="n">lon_domain</span> <span class="o">=</span> <span class="n">find_domain</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c1"># If domain cannot be found and lat, lon values have not been</span>
+            <span class="c1"># defined raise an error.</span>
+            <span class="k">if</span> <span class="n">lat_out</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">lon_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;To create new domain please input&quot;</span> <span class="s2">&quot; &#39;lat_out&#39; and &#39;lon_out&#39; values.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Check domain latitude and longitude values against any</span>
+            <span class="c1"># lat_out and lon_out values specified to check they match.</span>
+            <span class="k">if</span> <span class="n">lat_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">lat_domain</span><span class="p">,</span> <span class="n">lat_out</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;Latitude values should not be specified&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot; when using pre-defined domain </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="s2">&quot; (values don&#39;t match).&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lat_out</span> <span class="o">=</span> <span class="n">lat_domain</span>
+
+            <span class="k">if</span> <span class="n">lon_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">lon_domain</span><span class="p">,</span> <span class="n">lon_out</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;Longitude values should not be specified&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot; when using pre-defined domain </span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="s2">&quot; (values don&#39;t match).&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lon_out</span> <span class="o">=</span> <span class="n">lon_domain</span>
+
+            <span class="k">if</span> <span class="n">lon_out</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">180</span> <span class="ow">or</span> <span class="n">lon_out</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">180</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Invalid domain definition.&quot;</span>
+                    <span class="s2">&quot; Expected longitude in range: -180 - 180.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Current longitude: </span><span class="si">{</span><span class="n">lon_out</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">lon_out</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">lon_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">lon_out</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">180</span> <span class="ow">or</span> <span class="n">lon_out</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">180</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting longitude to stay within -180 - 180 bounds&quot;</span><span class="p">)</span>
+        <span class="n">lon_converted</span> <span class="o">=</span> <span class="n">convert_longitude</span><span class="p">(</span><span class="n">lon_out</span><span class="p">)</span>
+        <span class="n">lon_out</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">lon_converted</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lat_out</span><span class="p">,</span> <span class="n">lon_out</span>
+
+
+<span class="k">def</span> <span class="nf">_edgar_known_versions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Define list of known versions for the EDGAR database&quot;&quot;&quot;</span>
+    <span class="n">known_version</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;v432&quot;</span><span class="p">,</span> <span class="s2">&quot;v50&quot;</span><span class="p">,</span> <span class="s2">&quot;v6.0&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">known_version</span>
+
+
+<span class="k">def</span> <span class="nf">_check_readme_version</span><span class="p">(</span>
+    <span class="n">datapath</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">zippath</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ZipFile</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attempts to extract the edgar version from the associated &quot;_readme.html&quot;</span>
+<span class="sd">    file, if present.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        datapath : Path to the folder containing the downloaded EDGAR files</span>
+<span class="sd">        zippath: Path to zipped archive file (direct from EDGAR)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str : edgar version if found (None otherwise)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Work out version if possible from readme</span>
+    <span class="c1"># All database versions so far may contain &quot;_readme.html&quot; file</span>
+    <span class="c1"># &quot;v6.0&quot;</span>
+    <span class="c1">#  - &quot;TOTALS_nc.zip&quot; is what is downloaded from website</span>
+    <span class="c1">#  - &quot;_readme.html&quot; title line: &quot;&lt;title&gt;EDGAR v6.0_GHG (2021)&lt;/title&gt;&quot;</span>
+    <span class="c1"># &quot;v5.0&quot;</span>
+    <span class="c1">#  - &quot;v50_CH4_1970_2015.zip&quot; can be downloaded</span>
+    <span class="c1">#  - &quot;_readme.html&quot; title line: &quot;&lt;title&gt;EDGAR v5.0 (2019)&lt;/title&gt;&quot;</span>
+    <span class="c1"># &quot;v4.3.2&quot;</span>
+    <span class="c1">#  - &quot;v432_CH4_1970_2012.zip&quot; can be downloaded</span>
+    <span class="c1">#  - &quot;_readme.html&quot; title line: &quot;&lt;title&gt;EDGAR v4.3.2 (2017)&lt;/title&gt;&quot;</span>
+
+    <span class="c1"># Check for readme html file and, if present, extract version</span>
+    <span class="n">readme_filename</span> <span class="o">=</span> <span class="s2">&quot;_readme.html&quot;</span>
+    <span class="k">if</span> <span class="n">zippath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Cast extracted bytes to a str object</span>
+            <span class="n">readme_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">zippath</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">readme_filename</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">readme_data</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">datapath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">readme_filepath</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">readme_filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">readme_filepath</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">readme_data</span> <span class="o">=</span> <span class="n">readme_filepath</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">readme_data</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;One of datapath or zippath must be specified.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">readme_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Ignoring types as issues caught by try-except statement</span>
+            <span class="c1"># Find and extract title line from html file</span>
+            <span class="n">title_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;&lt;title.*?&gt;(.+?)&lt;/title&gt;&quot;</span><span class="p">,</span> <span class="n">readme_data</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+            <span class="c1"># Extract version e.g. &quot;v6.0&quot; or &quot;v4.3.2&quot;</span>
+            <span class="n">edgar_version</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;v\d[.]\d[.]?\d*&quot;</span><span class="p">,</span> <span class="n">title_line</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Check against known versions and remove &#39;.&#39; if these don&#39;t match.</span>
+            <span class="n">known_version</span> <span class="o">=</span> <span class="n">_edgar_known_versions</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">edgar_version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_version</span><span class="p">:</span>
+                <span class="n">edgar_version</span> <span class="o">=</span> <span class="n">edgar_version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">edgar_version</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">edgar_version</span>
+
+
+<span class="k">def</span> <span class="nf">_extract_file_info</span><span class="p">(</span><span class="n">edgar_file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract details from EDGAR filename.</span>
+
+<span class="sd">    Expected filenames roughly of the form:</span>
+<span class="sd">        - {version}_{species}_{year}.{resolution}.nc</span>
+<span class="sd">        - {version}_{species}_{year}_{source}.{resolution}.nc</span>
+<span class="sd">        - {version}_{species}_{year}_{month}.._{source..}.{resolution}.nc</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        edgar_file: Filename for an EDGAR database file</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict : Elements of the filename as a dictionary</span>
+
+<span class="sd">        &gt;&gt;&gt; _extract_file_info(&quot;v6.0_CH4_2015_TOTALS.0.1x0.1.nc&quot;)</span>
+<span class="sd">            {&quot;version&quot;: &quot;v6.0&quot;, &quot;species&quot;: &quot;CH4&quot;, &quot;year&quot;: 2015,</span>
+<span class="sd">            &quot;source&quot;: &quot;TOTALS&quot;, &quot;resolution&quot;: &quot;0.1x0.1&quot;}</span>
+<span class="sd">        &gt;&gt;&gt; _extract_file_info(&quot;v50_CH4_2015.0.1x0.1.nc&quot;)</span>
+<span class="sd">            {&quot;version&quot;: &quot;v50&quot;, &quot;species&quot;: &quot;CH4&quot;, &quot;year&quot;: 2015,</span>
+<span class="sd">            &quot;source&quot;: &quot;&quot;, &quot;resolution&quot;: &quot;0.1x0.1&quot;}</span>
+<span class="sd">        &gt;&gt;&gt; _extract_file_info(&quot;v432_CH4_2010_9_IPCC_6A_6D.0.1x0.1.nc&quot;)</span>
+<span class="sd">            {&quot;version&quot;: &quot;v432&quot;, &quot;species&quot;: &quot;CH4&quot;, &quot;year&quot;: 2010, &quot;month&quot;: 9,</span>
+<span class="sd">            &quot;source&quot;: &quot;IPCC-6A-6D&quot;, &quot;resolution&quot;: &quot;0.1x0.1&quot;}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Can extract details about files from the filename itself.</span>
+    <span class="c1"># e.g. &quot;v6.0_CH4_2015_TOTALS.0.1x0.1.nc&quot;</span>
+
+    <span class="c1"># Extract filename stem (name without extension) and split</span>
+    <span class="n">edgar_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">edgar_file</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">edgar_file</span><span class="o">.</span><span class="n">stem</span>
+    <span class="n">filename_split</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if we can extract the known components from the filename</span>
+    <span class="c1"># - version, species (upper), year</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">filename_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">filename_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Did not recognise input file format: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">index_remaining</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="c1"># CO2 input has 2 options e.g.</span>
+    <span class="c1"># - &quot;v6.0_CO2_excl_short-cycle_org_C_2015_TOTALS.0.1x0.1.nc&quot;</span>
+    <span class="c1"># - &quot;v6.0_CO2_org_short-cycle_C_1970_TOTALS.0.1x0.1.nc&quot;</span>
+    <span class="k">if</span> <span class="n">species</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
+        <span class="n">co2_options</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;excl_short-cycle_org_C&quot;</span><span class="p">,</span> <span class="s2">&quot;org_short-cycle_C&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">co2_options</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+                <span class="n">option_split</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                <span class="n">extra_sections</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">option_split</span><span class="p">)</span>
+                <span class="n">index_remaining</span> <span class="o">+=</span> <span class="n">extra_sections</span>
+
+                <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">option_split</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># Check if year can be cast to integer to check this is a valid value</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">year_str</span> <span class="o">=</span> <span class="n">filename_split</span><span class="p">[</span><span class="n">index_remaining</span><span class="p">]</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">year_str</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to cast year extracted from file format to an integer: </span><span class="si">{</span><span class="n">year_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># In some files there is no source specified so</span>
+        <span class="c1"># filename_split[2] contains the year and resolution</span>
+        <span class="c1"># e.g. &quot;v50_CH4_2015.0.1x0.1.nc&quot; --&gt; &quot;2015.0.1x0.1&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">year_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find valid year value from file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">index_remaining</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Check whether month is included in filename</span>
+    <span class="c1"># e.g. &quot;v6.0_CH4_2015_1_ENE.0.1x0.1.nc&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">month</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">filename_split</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">month</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">index_remaining</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Attempt to extract source(s) and resolution from filename stem</span>
+    <span class="c1"># e.g. &quot;v6.0_CH4_2015_TOTALS.0.1x0.1.nc&quot; --&gt; &quot;TOTALS.0.1x0.1&quot;</span>
+    <span class="c1"># e.g. &quot;v50_CH4_2015.0.1x0.1.nc&quot; --&gt; &quot;2015.0.1x0.1&quot; (note no source in filename)</span>
+    <span class="c1"># e.g. &quot;v432_CH4_2010_9_IPCC_6A_6D.0.1x0.1.nc&quot; --&gt; &quot;IPCC_6A_6D.0.1x0.1&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">source_resolution</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename_split</span><span class="p">[</span><span class="n">index_remaining</span><span class="p">:])</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to extract source: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># e.g. &quot;TOTALS.0.1x0.1&quot; --&gt; &quot;TOTALS&quot;, &quot;0.1x0.1&quot;</span>
+        <span class="c1"># e.g. &quot;2015.0.1x0.1&quot; --&gt; &quot;2015&quot;, &quot;0.1x0.1&quot; --&gt; &quot;&quot;, &quot;0.1x0.1&quot;</span>
+        <span class="c1"># e.g. &quot;IPCC_6A_6D.0.1x0.1&quot; --&gt; &quot;IPCC-6A-6D&quot;, &quot;0.1x0.1&quot;</span>
+        <span class="n">em_source</span> <span class="o">=</span> <span class="n">source_resolution</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">source_resolution</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="n">em_source</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="c1"># Check source was actually contained in filename and not just the year</span>
+        <span class="c1"># If so, set source to contain empty string</span>
+        <span class="k">if</span> <span class="n">em_source</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">year</span><span class="p">):</span>
+            <span class="n">source</span> <span class="o">+=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">source</span> <span class="o">+=</span> <span class="n">em_source</span>
+
+    <span class="n">file_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+        <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+        <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="n">year</span><span class="p">,</span>
+        <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+        <span class="s2">&quot;resolution&quot;</span><span class="p">:</span> <span class="n">resolution</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">month</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file_info</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">month</span>
+
+    <span class="k">return</span> <span class="n">file_info</span>
+
+
+<span class="c1"># def getedgarv5annualsectors(year, lon_out, lat_out, edgar_sectors, species=&#39;CH4&#39;):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Get annual emission totals for species of interest from EDGAR v5.0 data</span>
+<span class="c1">#     for sector or sectors.</span>
+<span class="c1">#     Regrids to the desired lats and lons.</span>
+
+<span class="c1">#     CURRENTLY ONLY 2012 AND 2015 ANNUAL SECTORS IN SHARED DIRECTORY. OTHER YEARS NEED DOWNLOADING.</span>
+
+<span class="c1">#     Args:</span>
+<span class="c1">#         year (int):</span>
+<span class="c1">#             Year of interest</span>
+<span class="c1">#         lon_out (array):</span>
+<span class="c1">#             Longitudes to output the data on</span>
+<span class="c1">#         lat_out (array):</span>
+<span class="c1">#             Latitudes to output the data on</span>
+<span class="c1">#         edgar_sectors (list of str) (optional):</span>
+<span class="c1">#             EDGAR sectors to include. If list of values, the sum of these will be used.</span>
+<span class="c1">#             See below for list of possible sectors and full names.</span>
+<span class="c1">#         species (str):</span>
+<span class="c1">#             Which species you want to look at.</span>
+<span class="c1">#             e.g. species = &#39;CH4&#39;</span>
+<span class="c1">#             Default = &#39;CH4&#39;</span>
+<span class="c1">#             Currently only works for CH4.</span>
+
+<span class="c1">#     Returns:</span>
+<span class="c1">#         narr (array):</span>
+<span class="c1">#             Array of regridded emissions in mol/m2/s.</span>
+<span class="c1">#             Dimensions are [lat, lon]</span>
+
+<span class="c1">#     If there is no data for the species you are looking at you may have to</span>
+<span class="c1">#     download it from:</span>
+<span class="c1">#     https://edgar.jrc.ec.europa.eu/overview.php?v=50_GHG</span>
+<span class="c1">#     and place in:</span>
+<span class="c1">#     /data/shared/Gridded_fluxes/&lt;species&gt;/EDGAR_v5.0/yearly_sectoral/</span>
+
+<span class="c1">#     Note:</span>
+<span class="c1">#         EDGAR sector names:</span>
+<span class="c1">#         &quot;AGS&quot; = Agricultural soils</span>
+<span class="c1">#         &quot;AWB&quot; = Agricultural waste burning</span>
+<span class="c1">#         &quot;CHE&quot; = Chemical processes</span>
+<span class="c1">#         &quot;ENE&quot; = Power industry</span>
+<span class="c1">#         &quot;ENF&quot; = Enteric fermentation</span>
+<span class="c1">#         &quot;FFF&quot; = Fossil fuel fires</span>
+<span class="c1">#         &quot;IND&quot; = Combustion for manufacturing</span>
+<span class="c1">#         &quot;IRO&quot; = Iron and steel production</span>
+<span class="c1">#         &quot;MNM&quot; = Maure management</span>
+<span class="c1">#         &quot;PRO_COAL&quot; = Fuel exploitation - coal</span>
+<span class="c1">#         &quot;PRO_GAS&quot; = Fuel exploitation - gas</span>
+<span class="c1">#         &quot;PRO_OIL&quot; = Fuel expoitation - oil</span>
+<span class="c1">#         &quot;PRO&quot; = Fuel exploitation - contains coal, oil, gas</span>
+<span class="c1">#         &quot;RCO&quot; = Energy for buildings</span>
+<span class="c1">#         &quot;REF_TRF&quot; = Oil refineries and transformational industries</span>
+<span class="c1">#         &quot;SWD_INC&quot; = Solid waste disposal - incineration</span>
+<span class="c1">#         &quot;SWD_LDF&quot; = Solid waste disposal - landfill</span>
+<span class="c1">#         &quot;TNR_Aviation_CDS&quot; = Aviation - climbing and descent</span>
+<span class="c1">#         &quot;TNR_Aviation_CRS&quot; = Aviation - cruise</span>
+<span class="c1">#         &quot;TNR_Aviation_LTO&quot; = Aviation - landing and takeoff</span>
+<span class="c1">#         &quot;TNR_Other&quot; = Railways, pipelines and off-road transport</span>
+<span class="c1">#         &quot;TNR_Ship&quot; = Shipping</span>
+<span class="c1">#         &quot;TRO&quot; = Road transportation</span>
+<span class="c1">#         &quot;WWT&quot; = Waste water treatment</span>
+
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+<span class="c1">#     edgarfp = os.path.join(data_path,&quot;Gridded_fluxes&quot;,species.upper(),&quot;EDGAR_v5.0/yearly_sectoral&quot;)</span>
+
+<span class="c1">#     EDGARsectorlist = [&quot;AGS&quot;,&quot;AWB&quot;,&quot;CHE&quot;,&quot;ENE&quot;,&quot;ENF&quot;,&quot;FFF&quot;,&quot;IND&quot;,&quot;IRO&quot;,&quot;MNM&quot;,</span>
+<span class="c1">#                        &quot;PRO_COAL&quot;,&quot;PRO_GAS&quot;,&quot;PRO_OIL&quot;,&quot;PRO&quot;,&quot;RCO&quot;,&quot;REF_TRF&quot;,&quot;SWD_INC&quot;,</span>
+<span class="c1">#                        &quot;SWD_LDF&quot;,&quot;TNR_Aviation_CDS&quot;,&quot;TNR_Aviation_CRS&quot;,</span>
+<span class="c1">#                        &quot;TNR_Aviation_LTO&quot;,&quot;TNR_Other&quot;,&quot;TNR_Ship&quot;,&quot;TRO&quot;,&quot;WWT&quot;]</span>
+
+<span class="c1">#     if edgar_sectors is not None:</span>
+<span class="c1">#         print(&#39;Including EDGAR sectors.&#39;)</span>
+
+<span class="c1">#         for EDGARsector in edgar_sectors:</span>
+<span class="c1">#             if EDGARsector not in EDGARsectorlist:</span>
+<span class="c1">#                 print(&#39;EDGAR sector {0} not one of: \n {1}&#39;.format(EDGARsector,EDGARsectorlist))</span>
+<span class="c1">#                 print(&#39;Returning None&#39;)</span>
+<span class="c1">#                 return None</span>
+
+<span class="c1">#         #edgar flux in kg/m2/s</span>
+<span class="c1">#         for i,sector in enumerate(edgar_sectors):</span>
+
+<span class="c1">#             edgarfn = &quot;v50_&quot; + species.upper() + &quot;_&quot; + str(year) + &quot;_&quot; + sector + &quot;.0.1x0.1.nc&quot;</span>
+
+<span class="c1">#             with xr.open_dataset(os.path.join(edgarfp,edgarfn)) as edgar_file:</span>
+<span class="c1">#                 edgar_flux = np.nan_to_num(edgar_file[&#39;emi_&#39;+species.lower()].values,0.)</span>
+<span class="c1">#                 edgar_lat = edgar_file.lat.values</span>
+<span class="c1">#                 edgar_lon = edgar_file.lon.values</span>
+
+<span class="c1">#             if i == 0:</span>
+<span class="c1">#                 edgar_total = edgar_flux</span>
+<span class="c1">#             else:</span>
+<span class="c1">#                 edgar_total = np.add(edgar_total,edgar_flux)</span>
+
+<span class="c1">#         edgar_regrid_kg,arr = regrid2d(edgar_total,edgar_lat,edgar_lon,lat_out,lon_out)</span>
+
+<span class="c1">#         #edgar flux in mol/m2/s</span>
+<span class="c1">#         speciesmm = molar_mass(species)</span>
+<span class="c1">#         edgar_regrid = (edgar_regrid_kg.data*1e3) / speciesmm</span>
+
+<span class="c1">#     return(edgar_regrid)</span>
+
+<span class="c1"># def getedgarv432annualsectors(year, lon_out, lat_out, edgar_sectors, species=&#39;CH4&#39;):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Get annual emission totals for species of interest from EDGAR v4.3.2 data</span>
+<span class="c1">#     for sector or sectors.</span>
+<span class="c1">#     Regrids to the desired lats and lons.</span>
+
+<span class="c1">#     If there is no data for the species you are looking at you may have to</span>
+<span class="c1">#     download it from:</span>
+<span class="c1">#     http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG&amp;SECURE=123</span>
+<span class="c1">#     and placed in:</span>
+<span class="c1">#     /data/shared/Gridded_fluxes/&lt;species&gt;/EDGAR_v4.3.2/&lt;species&gt;_sector_yearly/</span>
+
+<span class="c1">#     Args:</span>
+<span class="c1">#         year (int):</span>
+<span class="c1">#             Year of interest</span>
+<span class="c1">#         lon_out (array):</span>
+<span class="c1">#             Longitudes to output the data on</span>
+<span class="c1">#         lat_out (array):</span>
+<span class="c1">#             Latitudes to output the data on</span>
+<span class="c1">#         edgar_sectors (list):</span>
+<span class="c1">#             List of strings of EDGAR sectors to get emissions for.</span>
+<span class="c1">#             These will be combined to make one array.</span>
+<span class="c1">#             See &#39;Notes&#39; for names of sectors</span>
+<span class="c1">#         species (str):</span>
+<span class="c1">#             Which species you want to look at.</span>
+<span class="c1">#             e.g. species = &#39;CH4&#39;</span>
+<span class="c1">#             Default = &#39;CH4&#39;</span>
+
+<span class="c1">#     Returns:</span>
+<span class="c1">#         narr (array):</span>
+<span class="c1">#             Array of regridded emissions in mol/m2/s.</span>
+<span class="c1">#             Dimensions are [lat, lon]</span>
+
+<span class="c1">#     Notes:</span>
+<span class="c1">#         Names of EDGAR sectors:</span>
+<span class="c1">#            &#39;powerindustry&#39;;</span>
+<span class="c1">#            &#39;oilrefineriesandtransformationindustry&#39;;</span>
+<span class="c1">#            &#39;combustionformanufacturing&#39;;</span>
+<span class="c1">#            &#39;aviationclimbinganddescent&#39;;</span>
+<span class="c1">#            &#39;aviationcruise&#39;;</span>
+<span class="c1">#            &#39;aviationlandingandtakeoff&#39;;</span>
+<span class="c1">#            &#39;aviationsupersonic&#39;;</span>
+<span class="c1">#            &#39;roadtransport&#39;;</span>
+<span class="c1">#            &#39;railwayspipelinesandoffroadtransport&#39;;</span>
+<span class="c1">#            &#39;shipping&#39;;</span>
+<span class="c1">#            &#39;energyforbuildings&#39;;</span>
+<span class="c1">#            &#39;fuelexploitation&#39;;</span>
+<span class="c1">#            &#39;nonmetallicmineralsproduction&#39;;</span>
+<span class="c1">#            &#39;chemicalprocesses&#39;;</span>
+<span class="c1">#            &#39;ironandsteelproduction&#39;;</span>
+<span class="c1">#            &#39;nonferrousmetalsproduction&#39;;</span>
+<span class="c1">#            &#39;nonenergyuseoffuels&#39;;</span>
+<span class="c1">#            &#39;solventsandproductsuse&#39;;</span>
+<span class="c1">#            &#39;entericfermentation&#39;;</span>
+<span class="c1">#            &#39;manuremanagement&#39;;</span>
+<span class="c1">#            &#39;agriculturalsoils&#39;;</span>
+<span class="c1">#            &#39;indirectN2Oemissionsfromagriculture&#39;;</span>
+<span class="c1">#            &#39;agriculturalwasteburning&#39;;</span>
+<span class="c1">#            &#39;solidwastelandfills&#39;;</span>
+<span class="c1">#            &#39;wastewaterhandling&#39;;</span>
+<span class="c1">#            &#39;Solid waste incineration&#39;;</span>
+<span class="c1">#            &#39;fossilfuelfires&#39;;</span>
+<span class="c1">#            &#39;indirectemissionsfromNOxandNH3&#39;;</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     species = species.upper() #Make sure species is uppercase</span>
+
+<span class="c1"># #Path to EDGAR files</span>
+<span class="c1">#     edpath = os.path.join(data_path,&#39;Gridded_fluxes/&#39;+species+&#39;/EDGAR_v4.3.2/&#39;+species+&#39;_sector_yearly/&#39;)</span>
+
+<span class="c1">#     #Dictionary of codes for sectors</span>
+<span class="c1">#     secdict = {&#39;powerindustry&#39; : &#39;1A1a&#39;,</span>
+<span class="c1">#                &#39;oilrefineriesandtransformationindustry&#39; : &#39;1A1b_1A1c_1A5b1_1B1b_1B2a5_1B2a6_1B2b5_2C1b&#39;,</span>
+<span class="c1">#                &#39;combustionformanufacturing&#39; : &#39;1A2&#39;,</span>
+<span class="c1">#                &#39;aviationclimbinganddescent&#39; : &#39;1A3a_CDS&#39;,</span>
+<span class="c1">#                &#39;aviationcruise&#39; : &#39;1A3a_CRS&#39;,</span>
+<span class="c1">#                &#39;aviationlandingandtakeoff&#39; : &#39;1A3a_LTO&#39;,</span>
+<span class="c1">#                &#39;aviationsupersonic&#39; : &#39;1A3a_SPS&#39;,</span>
+<span class="c1">#                &#39;roadtransport&#39; : &#39;1A3b&#39;,</span>
+<span class="c1">#                &#39;railwayspipelinesandoffroadtransport&#39; : &#39;1A3c_1A3e&#39;,</span>
+<span class="c1">#                &#39;shipping&#39; : &#39;1A3d_1C2&#39;,</span>
+<span class="c1">#                &#39;energyforbuildings&#39; : &#39;1A4&#39;,</span>
+<span class="c1">#                &#39;fuelexploitation&#39; : &#39;1B1a_1B2a1_1B2a2_1B2a3_1B2a4_1B2c&#39;,</span>
+<span class="c1">#                &#39;nonmetallicmineralsproduction&#39; : &#39;2A&#39;,</span>
+<span class="c1">#                &#39;chemicalprocesses&#39;: &#39;2B&#39;,</span>
+<span class="c1">#                &#39;ironandsteelproduction&#39; : &#39;2C1a_2C1c_2C1d_2C1e_2C1f_2C2&#39;,</span>
+<span class="c1">#                &#39;nonferrousmetalsproduction&#39; : &#39;2C3_2C4_2C5&#39;,</span>
+<span class="c1">#                &#39;nonenergyuseoffuels&#39; : &#39;2G&#39;,</span>
+<span class="c1">#                &#39;solventsandproductsuse&#39; :  &#39;3&#39;,</span>
+<span class="c1">#                &#39;entericfermentation&#39; : &#39;4A&#39;,</span>
+<span class="c1">#                &#39;manuremanagement&#39; : &#39;4B&#39;,</span>
+<span class="c1">#                &#39;agriculturalsoils&#39; : &#39;4C_4D&#39;,</span>
+<span class="c1">#                &#39;indirectN2Oemissionsfromagriculture&#39; : &#39;4D3&#39;,</span>
+<span class="c1">#                &#39;agriculturalwasteburning&#39; : &#39;4F&#39;,</span>
+<span class="c1">#                &#39;solidwastelandfills&#39; : &#39;6A_6D&#39;,</span>
+<span class="c1">#                &#39;wastewaterhandling&#39; : &#39;6B&#39;,</span>
+<span class="c1">#                &#39;Solid waste incineration&#39; : &#39;6C&#39;,</span>
+<span class="c1">#                &#39;fossilfuelfires&#39; : &#39;7A&#39;,</span>
+<span class="c1">#                &#39;indirectemissionsfromNOxandNH3&#39; : &#39;7B_7C&#39;</span>
+<span class="c1">#     }</span>
+
+<span class="c1">#     #Check to see range of years. If desired year falls outside of this range</span>
+<span class="c1">#     #then take closest year</span>
+<span class="c1">#     possyears = np.empty(shape=[0,0],dtype=int)</span>
+<span class="c1">#     for f in glob.glob(edpath+&#39;v432_&#39;+species+&#39;_*&#39;):</span>
+<span class="c1">#         fname = f.split(&#39;/&#39;)[-1]</span>
+<span class="c1">#         fyear = fname[9:13]      #Extract year from filename</span>
+<span class="c1">#         possyears = np.append(possyears, int(fyear))</span>
+<span class="c1">#     if year &gt; max(possyears):</span>
+<span class="c1">#         print(&quot;%s is later than max year in EDGAR database&quot; % str(year))</span>
+<span class="c1">#         print(&quot;Using %s as the closest year&quot; % str(max((possyears))))</span>
+<span class="c1">#         year = max(possyears)</span>
+<span class="c1">#     if year &lt; min(possyears):</span>
+<span class="c1">#         print(&quot;%s is earlier than min year in EDGAR database&quot; % str(year))</span>
+<span class="c1">#         print(&quot;Using %s as the closest year&quot; % str(min((possyears))))</span>
+<span class="c1">#         year = min(possyears)</span>
+
+
+<span class="c1">#     #Species molar mass</span>
+<span class="c1">#     speciesmm = molar_mass(species)</span>
+<span class="c1"># #    if species == &#39;CH4&#39;:</span>
+<span class="c1"># #        #speciesmm = 16.0425</span>
+<span class="c1"># #        speciesmm = molar_mass(species)</span>
+<span class="c1"># #    elif species == &#39;N2O&#39;:</span>
+<span class="c1"># #        speciesmm = 44.013</span>
+<span class="c1"># #    else:</span>
+<span class="c1"># #        print &quot;No molar mass for species %s.&quot; % species</span>
+<span class="c1"># #        print &quot;Please add this and rerun the script&quot;</span>
+<span class="c1"># #        print &quot;Returning None&quot;</span>
+<span class="c1"># #        return(None)</span>
+
+
+<span class="c1">#     #Read in EDGAR data of annual mean CH4 emissions for each sector</span>
+<span class="c1">#     #These are summed together</span>
+<span class="c1">#     #units are in kg/m2/s</span>
+<span class="c1">#     tot = None</span>
+<span class="c1">#     for sec in edgar_sectors:</span>
+<span class="c1">#         edgar = edpath+&#39;v432_&#39;+species+&#39;_&#39;+str(year)+&#39;_IPCC_&#39;+secdict[sec]+&#39;.0.1x0.1.nc&#39;</span>
+<span class="c1">#         if os.path.isfile(edgar):</span>
+<span class="c1">#             ds = xr.open_dataset(edgar)</span>
+<span class="c1">#             soiname = &#39;emi_&#39;+species.lower()</span>
+<span class="c1">#             if tot is None:</span>
+<span class="c1">#                 tot = ds[soiname].values*1e3 / speciesmm</span>
+<span class="c1">#             else:</span>
+<span class="c1">#                 tot += ds[soiname].values*1e3 / speciesmm</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             print(&#39;No annual file for sector %s and %s&#39; % (sec, species))</span>
+
+<span class="c1">#     lat_in = ds.lat.values</span>
+<span class="c1">#     lon_in = ds.lon.values</span>
+
+<span class="c1">#     nlat = len(lat_out)</span>
+<span class="c1">#     nlon = len(lon_out)</span>
+
+<span class="c1">#     narr = np.zeros((nlat, nlon))</span>
+<span class="c1">#     narr, reg = regrid2d(tot, lat_in, lon_in,</span>
+<span class="c1">#                              lat_out, lon_out)</span>
+
+<span class="c1">#     return(narr)</span>
+
+<span class="c1"># def getedgarmonthlysectors(lon_out, lat_out, edgar_sectors, months=[1,2,3,4,5,6,7,8,9,10,11,12],</span>
+<span class="c1">#                            species=&#39;CH4&#39;):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Get 2010 monthly emissions for species of interest from EDGAR v4.3.2 data</span>
+<span class="c1">#     for sector or sectors.</span>
+<span class="c1">#     Regrids to the desired lats and lons.</span>
+<span class="c1">#     If there is no data for the species you are looking at you may have to</span>
+<span class="c1">#     download it from:</span>
+<span class="c1">#     http://edgar.jrc.ec.europa.eu/overview.php?v=432_GHG&amp;SECURE=123</span>
+<span class="c1">#     and place it in:</span>
+<span class="c1">#     /data/shared/Gridded_fluxes/&lt;species&gt;/EDGAR_v4.3.2/&lt;species&gt;_sector_monthly/</span>
+
+<span class="c1">#     Args:</span>
+<span class="c1">#         lon_out (array):</span>
+<span class="c1">#             Longitudes to output the data on</span>
+<span class="c1">#         lat_out (array):</span>
+<span class="c1">#             Latitudes to output the data on</span>
+<span class="c1">#         edgar_sectors (list):</span>
+<span class="c1">#             List of strings of EDGAR sectors to get emissions for.</span>
+<span class="c1">#             These will be combined to make one array.</span>
+<span class="c1">#             See &#39;Notes&#39; for names of sectors</span>
+<span class="c1">#         months (list of int; optional):</span>
+<span class="c1">#             Desired months.</span>
+<span class="c1">#         species (str, optional):</span>
+<span class="c1">#             Which species you want to look at.</span>
+<span class="c1">#             e.g. species = &#39;CH4&#39;</span>
+<span class="c1">#             Default = &#39;CH4&#39;</span>
+
+<span class="c1">#     Returns:</span>
+<span class="c1">#         narr (array):</span>
+<span class="c1">#             Array of regridded emissions in mol/m2/s.</span>
+<span class="c1">#             Dimensions are [no of months, lat, lon]</span>
+
+<span class="c1">#     Notes:</span>
+<span class="c1">#         Names of EDGAR sectors:</span>
+<span class="c1">#            &#39;powerindustry&#39;;</span>
+<span class="c1">#            &#39;oilrefineriesandtransformationindustry&#39;;</span>
+<span class="c1">#            &#39;combustionformanufacturing&#39;;</span>
+<span class="c1">#            &#39;aviationclimbinganddescent&#39;;</span>
+<span class="c1">#            &#39;aviationcruise&#39;;</span>
+<span class="c1">#            &#39;aviationlandingandtakeoff&#39;;</span>
+<span class="c1">#            &#39;aviationsupersonic&#39;;</span>
+<span class="c1">#            &#39;roadtransport&#39;;</span>
+<span class="c1">#            &#39;railwayspipelinesandoffroadtransport&#39;;</span>
+<span class="c1">#            &#39;shipping&#39;;</span>
+<span class="c1">#            &#39;energyforbuildings&#39;;</span>
+<span class="c1">#            &#39;fuelexploitation&#39;;</span>
+<span class="c1">#            &#39;nonmetallicmineralsproduction&#39;;</span>
+<span class="c1">#            &#39;chemicalprocesses&#39;;</span>
+<span class="c1">#            &#39;ironandsteelproduction&#39;;</span>
+<span class="c1">#            &#39;nonferrousmetalsproduction&#39;;</span>
+<span class="c1">#            &#39;nonenergyuseoffuels&#39;;</span>
+<span class="c1">#            &#39;solventsandproductsuse&#39;;</span>
+<span class="c1">#            &#39;entericfermentation&#39;;</span>
+<span class="c1">#            &#39;manuremanagement&#39;;</span>
+<span class="c1">#            &#39;agriculturalsoils&#39;;</span>
+<span class="c1">#            &#39;indirectN2Oemissionsfromagriculture&#39;;</span>
+<span class="c1">#            &#39;agriculturalwasteburning&#39;;</span>
+<span class="c1">#            &#39;solidwastelandfills&#39;;</span>
+<span class="c1">#            &#39;wastewaterhandling&#39;;</span>
+<span class="c1">#            &#39;Solid waste incineration&#39;;</span>
+<span class="c1">#            &#39;fossilfuelfires&#39;;</span>
+<span class="c1">#            &#39;indirectemissionsfromNOxandNH3&#39;;</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     species = species.upper() #Make sure species is uppercase</span>
+<span class="c1">#     #Path to EDGAR files</span>
+<span class="c1">#     edpath = os.path.join(data_path,&#39;Gridded_fluxes/&#39;+species+&#39;/EDGAR_v4.3.2/&#39;+species+&#39;_sector_monthly/&#39;)</span>
+
+<span class="c1">#     #Dictionary of codes for sectors</span>
+<span class="c1">#     secdict = {&#39;powerindustry&#39; : &#39;1A1a&#39;,</span>
+<span class="c1">#                &#39;oilrefineriesandtransformationindustry&#39; : &#39;1A1b_1A1c_1A5b1_1B1b_1B2a5_1B2a6_1B2b5_2C1b&#39;,</span>
+<span class="c1">#                &#39;combustionformanufacturing&#39; : &#39;1A2&#39;,</span>
+<span class="c1">#                &#39;aviationclimbinganddescent&#39; : &#39;1A3a_CDS&#39;,</span>
+<span class="c1">#                &#39;aviationcruise&#39; : &#39;1A3a_CRS&#39;,</span>
+<span class="c1">#                &#39;aviationlandingandtakeoff&#39; : &#39;1A3a_LTO&#39;,</span>
+<span class="c1">#                &#39;aviationsupersonic&#39; : &#39;1A3a_SPS&#39;,</span>
+<span class="c1">#                &#39;roadtransport&#39; : &#39;1A3b&#39;,</span>
+<span class="c1">#                &#39;railwayspipelinesandoffroadtransport&#39; : &#39;1A3c_1A3e&#39;,</span>
+<span class="c1">#                &#39;shipping&#39; : &#39;1A3d_1C2&#39;,</span>
+<span class="c1">#                &#39;energyforbuildings&#39; : &#39;1A4&#39;,</span>
+<span class="c1">#                &#39;fuelexploitation&#39; : &#39;1B1a_1B2a1_1B2a2_1B2a3_1B2a4_1B2c&#39;,</span>
+<span class="c1">#                &#39;nonmetallicmineralsproduction&#39; : &#39;2A&#39;,</span>
+<span class="c1">#                &#39;chemicalprocesses&#39;: &#39;2B&#39;,</span>
+<span class="c1">#                &#39;ironandsteelproduction&#39; : &#39;2C1a_2C1c_2C1d_2C1e_2C1f_2C2&#39;,</span>
+<span class="c1">#                &#39;nonferrousmetalsproduction&#39; : &#39;2C3_2C4_2C5&#39;,</span>
+<span class="c1">#                &#39;nonenergyuseoffuels&#39; : &#39;2G&#39;,</span>
+<span class="c1">#                &#39;solventsandproductsuse&#39; :  &#39;3&#39;,</span>
+<span class="c1">#                &#39;entericfermentation&#39; : &#39;4A&#39;,</span>
+<span class="c1">#                &#39;manuremanagement&#39; : &#39;4B&#39;,</span>
+<span class="c1">#                &#39;agriculturalsoils&#39; : &#39;4C_4D&#39;,</span>
+<span class="c1">#                &#39;indirectN2Oemissionsfromagriculture&#39; : &#39;4D3&#39;,</span>
+<span class="c1">#                &#39;agriculturalwasteburning&#39; : &#39;4F&#39;,</span>
+<span class="c1">#                &#39;solidwastelandfills&#39; : &#39;6A_6D&#39;,</span>
+<span class="c1">#                &#39;wastewaterhandling&#39; : &#39;6B&#39;,</span>
+<span class="c1">#                &#39;Solid waste incineration&#39; : &#39;6C&#39;,</span>
+<span class="c1">#                &#39;fossilfuelfires&#39; : &#39;7A&#39;,</span>
+<span class="c1">#                &#39;indirectemissionsfromNOxandNH3&#39; : &#39;7B_7C&#39;</span>
+<span class="c1">#     }</span>
+
+<span class="c1">#     print(&#39;Note that the only year for monthly emissions is 2010 so using that.&#39;)</span>
+
+<span class="c1">#     #Species molar mass</span>
+<span class="c1">#     speciesmm = molar_mass(species)</span>
+<span class="c1"># #    if species == &#39;CH4&#39;:</span>
+<span class="c1"># #        speciesmm = 16.0425</span>
+<span class="c1"># #    elif species == &#39;N2O&#39;:</span>
+<span class="c1"># #        speciesmm = 44.013</span>
+<span class="c1"># #    else:</span>
+<span class="c1"># #        print &quot;No molar mass for species %s.&quot; % species</span>
+<span class="c1"># #        print &quot;Please add this and rerun the script&quot;</span>
+<span class="c1"># #        print &quot;Returning None&quot;</span>
+<span class="c1"># #        return(None)</span>
+
+
+<span class="c1">#     #Read in EDGAR data of annual mean CH4 emissions for each sector</span>
+<span class="c1">#     #These are summed together</span>
+<span class="c1">#     #units are in kg/m2/s</span>
+<span class="c1">#     warnings = []</span>
+<span class="c1">#     first = 0</span>
+<span class="c1">#     for month in months:</span>
+<span class="c1">#         tot = np.array(None)</span>
+<span class="c1">#         for sec in edgar_sectors:</span>
+<span class="c1">#             edgar = edpath+&#39;v432_&#39;+species+&#39;_2010_&#39;+str(month)+&#39;_IPCC_&#39;+secdict[sec]+&#39;.0.1x0.1.nc&#39;</span>
+<span class="c1">#             if os.path.isfile(edgar):</span>
+<span class="c1">#                 ds = xr.open_dataset(edgar)</span>
+<span class="c1">#                 soiname = &#39;emi_&#39;+species.lower()</span>
+<span class="c1">#                 if tot.any() == None:</span>
+<span class="c1">#                     tot = ds[soiname].values*1e3 / speciesmm</span>
+<span class="c1">#                 else:</span>
+<span class="c1">#                     tot += ds[soiname].values*1e3 / speciesmm</span>
+<span class="c1">#             else:</span>
+<span class="c1">#                 warnings.append(&#39;No monthly file for sector %s&#39; % sec)</span>
+<span class="c1">#                 #print &#39;No monthly file for sector %s&#39; % sec</span>
+
+<span class="c1">#             if first == 0:</span>
+<span class="c1">#                 emissions = np.zeros((len(months), tot.shape[0], tot.shape[1]))</span>
+<span class="c1">#                 emissions[0,:,:] = tot</span>
+<span class="c1">#             else:</span>
+<span class="c1">#                 first += 1</span>
+<span class="c1">#                 emissions[first,:,:] = tot</span>
+
+<span class="c1">#     for warning in np.unique(warnings):</span>
+<span class="c1">#         print(warning)</span>
+
+<span class="c1">#     lat_in = ds.lat.values</span>
+<span class="c1">#     lon_in = ds.lon.values</span>
+
+<span class="c1">#     nlat = len(lat_out)</span>
+<span class="c1">#     nlon = len(lon_out)</span>
+
+<span class="c1">#     narr = np.zeros((nlat, nlon, len(months)))</span>
+
+<span class="c1">#     for i in range(len(months)):</span>
+<span class="c1">#        narr[:,:,i], reg = regrid2d(emissions[i,:,:], lat_in, lon_in,</span>
+<span class="c1">#                              lat_out, lon_out)</span>
+<span class="c1">#     return(narr)</span>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022 OpenGHG development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

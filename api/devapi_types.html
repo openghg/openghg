@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Types &#8212; OpenGHG 0+untagged.1.g6e32cea.dirty documentation</title>
+    <title>Types &#8212; OpenGHG 0+untagged.1.gc218260.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g6e32cea.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gc218260.dirty documentation</p>
   
 </a>
     
@@ -391,6 +391,12 @@
 <section id="custom-errors">
 <h2>Custom errors<a class="headerlink" href="#custom-errors" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
+<dt class="sig sig-object py" id="openghg.types.OpenGHGError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">OpenGHGError</span></span><a class="reference internal" href="../_modules/openghg/types/_errors.html#OpenGHGError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.types.OpenGHGError" title="Permalink to this definition">#</a></dt>
+<dd><p>Top level OpenGHG error</p>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="openghg.types.InvalidSiteError">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">InvalidSiteError</span></span><a class="reference internal" href="../_modules/openghg/types/_errors.html#InvalidSiteError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.types.InvalidSiteError" title="Permalink to this definition">#</a></dt>
 <dd><p>Raised if an invalid site is passed</p>
@@ -419,6 +425,21 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">DatasourceLookupError</span></span><a class="reference internal" href="../_modules/openghg/types/_errors.html#DatasourceLookupError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.types.DatasourceLookupError" title="Permalink to this definition">#</a></dt>
 <dd><p>Raised if Datasource lookup fails</p>
 </dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openghg.types.EncodingError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">EncodingError</span></span><a class="reference internal" href="../_modules/openghg/types/_errors.html#EncodingError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.types.EncodingError" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openghg.types.MutexTimeoutError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">MutexTimeoutError</span></span><a class="reference internal" href="../_modules/openghg/types/_errors.html#MutexTimeoutError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.types.MutexTimeoutError" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="openghg.types.RequestBucketError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.types.</span></span><span class="sig-name descname"><span class="pre">RequestBucketError</span></span><a class="reference internal" href="../_modules/openghg/types/_errors.html#RequestBucketError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.types.RequestBucketError" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.types.SearchError">
@@ -495,6 +516,15 @@
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.types.OpenGHGError">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       OpenGHGError
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.types.InvalidSiteError">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -535,6 +565,33 @@
      <code class="docutils literal notranslate">
       <span class="pre">
        DatasourceLookupError
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.types.EncodingError">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       EncodingError
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.types.MutexTimeoutError">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       MutexTimeoutError
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.types.RequestBucketError">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       RequestBucketError
       </span>
      </code>
     </a>

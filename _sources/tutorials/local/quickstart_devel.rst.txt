@@ -55,8 +55,13 @@ We activate our new environment using
 
     source ~/envs/openghg_devel/bin/activate
 
+We'll first install and update some of the installation tools
 
-Now we can install OpenGHG's requirements and its developer requirements.
+.. code-block:: bash
+
+   pip install --upgrade pip wheel setuptools
+
+Now, making sure we're in the root of the OpenGHG repository we just cloned, install OpenGHG's requirements and its developer requirements.
 
 .. code-block:: bash
 
@@ -98,7 +103,7 @@ Next install ``conda-build`` which allows us to install packages in develop mode
 
 And finally install OpenGHG
 
-.. code-block::bash
+.. code-block:: bash
 
    conda develop .
 
@@ -116,8 +121,7 @@ The object store is where OpenGHG stores its information. Metadata and binary da
 As you'll be using OpenGHG locally this means all data will be stored on your local or network file system.
 
 When you first import OpenGHG it creates a file in your home directory at ``~/.config/openghg/openghg.conf``. Open this file with
-your chosen text editor and you'll see the contents of a `TOML <https://toml.io/en/>`_ file like.
-
+your chosen text editor and you'll see the contents of a `TOML <https://toml.io/en/>`_ file that looks like this
 
 .. code-block:: toml
 
@@ -127,8 +131,19 @@ your chosen text editor and you'll see the contents of a `TOML <https://toml.io/
 By default the object store will be created in your home directory, if you want to move it just change that path.
 
 
+Jupyter
+=======
+
+If you want to use Jupyter notebooks to interact with OpenGHG, you can install ``jupyterlab``.
+
+.. code-block:: bash
+
+   pip install jupyterlab
+
+Then just run ``jupyter notebook`` to get started.
+
 What next?
 ==========
 
 Now you've got OpenGHG setup please take a look at our :ref:`tutorials section<Tutorials>` and if you'd like to start
-contributing to OpenGHG open an issue and submit a pull request!
+contributing to OpenGHG `open an issue <https://github.com/openghg/openghg/issues>`_ and submit a pull request!

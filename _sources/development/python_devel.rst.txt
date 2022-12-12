@@ -57,7 +57,13 @@ We activate our new environment using
     source ~/envs/openghg_devel/bin/activate
 
 
-Now we can install OpenGHG's requirements and its developer requirements.
+We'll first install and update some installation tools
+
+.. code-block:: bash
+
+   pip install --upgrade pip wheel setuptools
+
+Now, making sure we're in the root of the OpenGHG repository we just cloned, install OpenGHG's requirements and its developer requirements.
 
 .. code-block:: bash
 
@@ -99,7 +105,7 @@ Next install ``conda-build`` which allows us to install packages in develop mode
 
 And finally install OpenGHG
 
-.. code-block::bash
+.. code-block:: bash
 
    conda develop .
 

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Analyse &#8212; OpenGHG 0+untagged.1.g6e32cea.dirty documentation</title>
+    <title>Analyse &#8212; OpenGHG 0+untagged.1.gc218260.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g6e32cea.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gc218260.dirty documentation</p>
   
 </a>
     
@@ -381,15 +381,11 @@
   <section id="analyse">
 <h1>Analyse<a class="headerlink" href="#analyse" title="Permalink to this heading">#</a></h1>
 <p>The ModelScenario class allows users to collate related data sources and calculate
-modelled output based on this data. The types of data currently included are:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>Timeseries observation data (<a class="reference internal" href="devapi_dataobjects.html#obsdata"><span class="std std-ref">ObsData</span></a>)</p></li>
-<li><p>Fixed domain sensitivity maps known as footprints (<a class="reference internal" href="devapi_dataobjects.html#footprintdata"><span class="std std-ref">FootprintData</span></a>)</p></li>
-<li><p>Fixed domain flux maps (<a class="reference internal" href="devapi_dataobjects.html#fluxdata"><span class="std std-ref">FluxData</span></a>) - multiple maps can be included and referenced by source name</p></li>
-<li><p>Fixed domain vertical curtains at the boundaries referred to as boundary conditions (<a class="reference internal" href="api_dataobjects.html#boundaryconditionsdata"><span class="std std-ref">BoundaryConditionsData</span></a>)</p></li>
-</ul>
-</div></blockquote>
+modelled output based on this data. The types of data currently included are:
+- Timeseries observation data (<a class="reference internal" href="devapi_dataobjects.html#obsdata"><span class="std std-ref">ObsData</span></a>)
+- Fixed domain sensitivity maps known as footprints (<a class="reference internal" href="devapi_dataobjects.html#footprintdata"><span class="std std-ref">FootprintData</span></a>)
+- Fixed domain flux maps (<a class="reference internal" href="devapi_dataobjects.html#fluxdata"><span class="std std-ref">FluxData</span></a>) - multiple maps can be included and referenced by source name
+- Fixed domain vertical curtains at the boundaries referred to as boundary conditions (<a class="reference internal" href="api_dataobjects.html#boundaryconditionsdata"><span class="std std-ref">BoundaryConditionsData</span></a>)</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="openghg.analyse.ModelScenario">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openghg.analyse.</span></span><span class="sig-name descname"><span class="pre">ModelScenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metmodel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">footprint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/analyse/_scenario.html#ModelScenario"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.analyse.ModelScenario" title="Permalink to this definition">#</a></dt>

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Fn Development &#8212; OpenGHG 0+untagged.1.g6e32cea.dirty documentation</title>
+    <title>Fn Development &#8212; OpenGHG 0+untagged.1.gc218260.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g6e32cea.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gc218260.dirty documentation</p>
   
 </a>
     
@@ -618,6 +618,17 @@ code into <code class="docutils literal notranslate"><span class="pre">/python</
 </div>
 <p>We have also modified <code class="docutils literal notranslate"><span class="pre">func.yaml</span></code> to increase the amount of memory available to this function to 2048 MB / 2 GB. If you notice functions failing unexpectedly
 it may be worth trying changing this value.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20180708</span><span class="w"></span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openghg</span><span class="w"></span>
+<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.100</span><span class="w"></span>
+<span class="nt">runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker</span><span class="w"></span>
+<span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span><span class="w"></span>
+<span class="nt">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">route</span><span class="w"></span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
+<span class="w">  </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span><span class="w"></span>
+</pre></div>
+</div>
 <p>To build this image we use the <code class="docutils literal notranslate"><span class="pre">build_deploy.py</span></code> Python script.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer docker<span class="o">]</span>$ python build_deploy.py -h
 usage: build_deploy.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--tag TAG<span class="o">]</span> <span class="o">[</span>--push<span class="o">]</span> <span class="o">[</span>--build<span class="o">]</span> <span class="o">[</span>--deploy<span class="o">]</span> <span class="o">[</span>--build-base<span class="o">]</span>

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Transform &#8212; OpenGHG 0+untagged.1.g6e32cea.dirty documentation</title>
+    <title>Transform &#8212; OpenGHG 0+untagged.1.gc218260.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g6e32cea.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gc218260.dirty documentation</p>
   
 </a>
     
@@ -424,6 +424,59 @@ See xesmf documentation for full list of options.</p></li>
 <section id="emissions">
 <h2>Emissions<a class="headerlink" href="#emissions" title="Permalink to this heading">#</a></h2>
 <p>Transform emissions data</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.transform.emissions.parse_edgar">
+<span class="sig-prename descclassname"><span class="pre">openghg.transform.emissions.</span></span><span class="sig-name descname"><span class="pre">parse_edgar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datapath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgar_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/transform/emissions/_edgar.html#parse_edgar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.transform.emissions.parse_edgar" title="Permalink to this definition">#</a></dt>
+<dd><p>Read and parse input EDGAR data.
+Notes: Only accepts annual 2D grid maps in netcdf (.nc) format for now.</p>
+<blockquote>
+<div><p>Does not accept monthly data yet.</p>
+</div></blockquote>
+<p>EDGAR data is global on a 0.1 x 0.1 grid. This function allows products
+to be created for a given year which cover specific regions (and matches
+to the OpenGHG data schema, including units and coordinate names).</p>
+<dl class="simple">
+<dt>Region information can be specified as follows:</dt><dd><ul class="simple">
+<li><p>To use a pre-defined domain use the domain keyword only.</p></li>
+<li><p>To define a new domain use the domain, lat_out, lon_out keywords</p></li>
+<li><p>If no domain or lat_out, lon_out data is supplied, the global EDGAR</p></li>
+</ul>
+</dd>
+</dl>
+<p>data will be added labelled as “globaledgar” domain.</p>
+<p>Pre-exisiting domains are defined within the ‘domain_info.json’ file.</p>
+<dl class="simple">
+<dt>Metadata will also be added to the stored data including:</dt><dd><ul class="simple">
+<li><p>“domain”: domain (e.g. “europe”) OR “globaledgar”</p></li>
+<li><p>“source”: “anthro” (for “TOTAL”), source name from file otherwise</p></li>
+<li><p>“database”: “EDGAR”</p></li>
+<li><p>“database_version”: edgar_version (e.g. “v60”, “v50”, “v432”)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datapath</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – Path to data folder or zip archive for EDGAR data</p></li>
+<li><p><strong>date</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Year to extract. Expect a string of the form “YYYY”</p></li>
+<li><p><strong>species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Species name being extracted</p></li>
+<li><p><strong>domain</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Domain name for new or pre-existing domain</p></li>
+<li><p><strong>lat_out</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Latitude values for new domain</p></li>
+<li><p><strong>lon_out</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Longitude values for new domain</p></li>
+<li><p><strong>edgar_version</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – EDGAR version in file. Will be inferred otherwise.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary of data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p>TODO: Allow date range to be extracted rather than year?
+TODO: Add monthly parsing and sector stacking options</p>
+</dd></dl>
+
 </section>
 </section>
 
@@ -485,6 +538,17 @@ See xesmf documentation for full list of options.</p></li>
   <a class="reference internal nav-link" href="#emissions">
    Emissions
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.transform.emissions.parse_edgar">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       parse_edgar()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
 </ul>
 

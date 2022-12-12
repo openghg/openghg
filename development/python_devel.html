@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Getting setup &#8212; OpenGHG 0+untagged.1.g6e32cea.dirty documentation</title>
+    <title>Getting setup &#8212; OpenGHG 0+untagged.1.gc218260.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g6e32cea.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gc218260.dirty documentation</p>
   
 </a>
     
@@ -409,7 +409,11 @@ interfering with other Python installations.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> ~/envs/openghg_devel/bin/activate
 </pre></div>
 </div>
-<p>Now we can install OpenGHG’s requirements and its developer requirements.</p>
+<p>We’ll first install and update some installation tools</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pip wheel setuptools
+</pre></div>
+</div>
+<p>Now, making sure we’re in the root of the OpenGHG repository we just cloned, install OpenGHG’s requirements and its developer requirements.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -r requirements.txt -r requirements-dev.txt
 </pre></div>
 </div>
@@ -437,6 +441,9 @@ interfering with other Python installations.</p>
 </pre></div>
 </div>
 <p>And finally install OpenGHG</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda develop .
+</pre></div>
+</div>
 <p>OpenGHG should now be installed, you can check this by opening <code class="docutils literal notranslate"><span class="pre">ipython</span></code> and running</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">openghg</span>
 </pre></div>

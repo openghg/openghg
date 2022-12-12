@@ -15,8 +15,6 @@ These functions handle data storage on disk.
 
 .. autofunction:: openghg.objectstore.exists
 
-.. autofunction:: openghg.objectstore.clear_tutorial_store
-
 .. autofunction:: openghg.objectstore.get_all_object_names
 
 .. autofunction:: openghg.objectstore.get_bucket

@@ -5,22 +5,22 @@ Types
 Custom errors
 =============
 
-.. autoclass:: OpenGHGError
+.. autoclass:: openghg.types.OpenGHGError
 
-.. autoclass:: InvalidSiteError
+.. autoclass:: openghg.types.InvalidSiteError
 
-.. autoclass:: UnknownDataError
+.. autoclass:: openghg.types.UnknownDataError
 
-.. autoclass:: FunctionError
+.. autoclass:: openghg.types.FunctionError
 
-.. autoclass:: ObjectStoreError
+.. autoclass:: openghg.types.ObjectStoreError
 
-.. autoclass:: DatasourceLookupError
+.. autoclass:: openghg.types.DatasourceLookupError
 
-.. autoclass:: EncodingError
+.. autoclass:: openghg.types.EncodingError
 
-.. autoclass:: MutexTimeoutError
+.. autoclass:: openghg.types.MutexTimeoutError
 
-.. autoclass:: RequestBucketError
+.. autoclass:: openghg.types.RequestBucketError
 
-.. autoclass:: SearchError
+.. autoclass:: openghg.types.SearchError

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Quickstart - developer &#8212; OpenGHG 0+untagged.1.g6e32cea.dirty documentation</title>
+    <title>Quickstart - developer &#8212; OpenGHG 0+untagged.1.gc218260.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g6e32cea.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gc218260.dirty documentation</p>
   
 </a>
     
@@ -401,7 +401,11 @@ interfering with other Python installations.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> ~/envs/openghg_devel/bin/activate
 </pre></div>
 </div>
-<p>Now we can install OpenGHG’s requirements and its developer requirements.</p>
+<p>We’ll first install and update some of the installation tools</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pip wheel setuptools
+</pre></div>
+</div>
+<p>Now, making sure we’re in the root of the OpenGHG repository we just cloned, install OpenGHG’s requirements and its developer requirements.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -r requirements.txt -r requirements-dev.txt
 </pre></div>
 </div>
@@ -429,6 +433,9 @@ interfering with other Python installations.</p>
 </pre></div>
 </div>
 <p>And finally install OpenGHG</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda develop .
+</pre></div>
+</div>
 <p>OpenGHG should now be installed, you can check this by opening <code class="docutils literal notranslate"><span class="pre">ipython</span></code> and running</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">openghg</span>
 </pre></div>
@@ -441,17 +448,25 @@ interfering with other Python installations.</p>
 <p>The object store is where OpenGHG stores its information. Metadata and binary data are stored with in a key-value setup.
 As you’ll be using OpenGHG locally this means all data will be stored on your local or network file system.</p>
 <p>When you first import OpenGHG it creates a file in your home directory at <code class="docutils literal notranslate"><span class="pre">~/.config/openghg/openghg.conf</span></code>. Open this file with
-your chosen text editor and you’ll see the contents of a <a class="reference external" href="https://toml.io/en/">TOML</a> file like.</p>
+your chosen text editor and you’ll see the contents of a <a class="reference external" href="https://toml.io/en/">TOML</a> file that looks like this</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[object_store]</span><span class="w"></span>
 <span class="n">local_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/gareth/openghg_store&quot;</span><span class="w"></span>
 </pre></div>
 </div>
 <p>By default the object store will be created in your home directory, if you want to move it just change that path.</p>
 </section>
+<section id="jupyter">
+<h2>Jupyter<a class="headerlink" href="#jupyter" title="Permalink to this heading">#</a></h2>
+<p>If you want to use Jupyter notebooks to interact with OpenGHG, you can install <code class="docutils literal notranslate"><span class="pre">jupyterlab</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install jupyterlab
+</pre></div>
+</div>
+<p>Then just run <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">notebook</span></code> to get started.</p>
+</section>
 <section id="what-next">
 <h2>What next?<a class="headerlink" href="#what-next" title="Permalink to this heading">#</a></h2>
 <p>Now you’ve got OpenGHG setup please take a look at our <a class="reference internal" href="../index.html#tutorials"><span class="std std-ref">tutorials section</span></a> and if you’d like to start
-contributing to OpenGHG open an issue and submit a pull request!</p>
+contributing to OpenGHG <a class="reference external" href="https://github.com/openghg/openghg/issues">open an issue</a> and submit a pull request!</p>
 </section>
 </section>
 
@@ -533,6 +548,11 @@ contributing to OpenGHG open an issue and submit a pull request!</p>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#the-object-store">
    The object store
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#jupyter">
+   Jupyter
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
