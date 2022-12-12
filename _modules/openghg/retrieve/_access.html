@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g267e41e.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g267e41e.dirty documentation</p>
   
 </a>
     
@@ -122,13 +122,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../install.html">
                         Installation
                       </a>
@@ -143,6 +136,13 @@
                 
 
                     <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../development/index_devel.html">
                         Development
                       </a>
@@ -150,8 +150,8 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -161,13 +161,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
                         What’s new
@@ -248,13 +241,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../install.html">
                         Installation
                       </a>
@@ -269,6 +255,13 @@
                 
 
                     <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../development/index_devel.html">
                         Development
                       </a>
@@ -276,8 +269,8 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -287,13 +280,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
                         What’s new
@@ -438,7 +424,7 @@
     <span class="k">return</span> <span class="n">retrieved_data</span>
 
 
-<div class="viewcode-block" id="get_obs_surface"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_obs_surface">[docs]</a><span class="k">def</span> <span class="nf">get_obs_surface</span><span class="p">(</span>
+<div class="viewcode-block" id="get_obs_surface"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.get_obs_surface">[docs]</a><span class="k">def</span> <span class="nf">get_obs_surface</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -825,7 +811,7 @@
     <span class="k">return</span> <span class="n">ObsColumnData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_flux"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_flux">[docs]</a><span class="k">def</span> <span class="nf">get_flux</span><span class="p">(</span>
+<div class="viewcode-block" id="get_flux"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.get_flux">[docs]</a><span class="k">def</span> <span class="nf">get_flux</span><span class="p">(</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -870,7 +856,7 @@
     <span class="k">return</span> <span class="n">FluxData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">em_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">em_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_bc"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_bc">[docs]</a><span class="k">def</span> <span class="nf">get_bc</span><span class="p">(</span>
+<div class="viewcode-block" id="get_bc"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.get_bc">[docs]</a><span class="k">def</span> <span class="nf">get_bc</span><span class="p">(</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bc_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -904,7 +890,7 @@
     <span class="k">return</span> <span class="n">BoundaryConditionsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">bc_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">bc_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_footprint"><a class="viewcode-back" href="../../../api/api_retrieve.html#openghg.retrieve.get_footprint">[docs]</a><span class="k">def</span> <span class="nf">get_footprint</span><span class="p">(</span>
+<div class="viewcode-block" id="get_footprint"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.get_footprint">[docs]</a><span class="k">def</span> <span class="nf">get_footprint</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

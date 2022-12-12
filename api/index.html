@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>User API &#8212; OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</title>
+    <title>User API &#8212; OpenGHG 0+untagged.1.g267e41e.dirty documentation</title>
   
   
   
@@ -50,8 +50,8 @@
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Standardisation functions" href="api_standardise.html" />
-    <link rel="prev" title="Fn usage" href="../development/cloud/fn_usage.html" />
+    <link rel="next" title="Analyse" href="api_analyse.html" />
+    <link rel="prev" title="Tutorials - Local" href="../tutorials/local/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g267e41e.dirty documentation</p>
   
 </a>
     
@@ -125,13 +125,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../install.html">
                         Installation
                       </a>
@@ -145,6 +138,13 @@
                     </li>
                 
 
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        User API
+                      </a>
+                    </li>
+                
+
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../development/index_devel.html">
                         Development
@@ -152,9 +152,9 @@
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="#">
-                        User API
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -164,13 +164,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../whatsnew/index.html">
                         What’s new
@@ -251,13 +244,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../install.html">
                         Installation
                       </a>
@@ -271,6 +257,13 @@
                     </li>
                 
 
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        User API
+                      </a>
+                    </li>
+                
+
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../development/index_devel.html">
                         Development
@@ -278,9 +271,9 @@
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="#">
-                        User API
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -290,13 +283,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../whatsnew/index.html">
                         What’s new
@@ -342,13 +328,25 @@
   </p>
   <div class="bd-toc-item navbar-nav">
     <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="api_standardise.html">Standardisation functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_analyse.html">Analyse</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="api_retrieve.html">Retrieval functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_dataobjects.html">Data objects</a></li>
 </ul>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="api_plotting.html">Plotting functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_plotting.html">Plotting</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api_retrieve.html">Retrieve</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api_standardise.html">Standardise</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api_transform.html">Transform</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api_tutorial.html">Tutorial</a></li>
 </ul>
 
   </div>
@@ -384,51 +382,112 @@
 <h1>User API<a class="headerlink" href="#user-api" title="Permalink to this heading">#</a></h1>
 <p>This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
 OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.</p>
-<section id="data-standardisation">
-<h2>Data standardisation<a class="headerlink" href="#data-standardisation" title="Permalink to this heading">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">standardisation</span></code> submodule handles the standardisation of different data types to the OpenGHG specification.</p>
+<section id="analyse">
+<h2>Analyse<a class="headerlink" href="#analyse" title="Permalink to this heading">#</a></h2>
+<p>The <em class="xref py py-obj">analyse</em> submodule contains functionality to help you analyse data retrieved from the object store.
+The <em class="xref py py-obj">ModelScenario</em> class allows users to collate related data sources and calculate
+modelled output based on this data.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api_standardise.html">Standardisation functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api_standardise.html#measurement-standardisation">Measurement Standardisation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api_standardise.html#metadata">Metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_analyse.html">Analyse</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_analyse.html#openghg.analyse.ModelScenario"><code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code></a></li>
 </ul>
 </li>
 </ul>
 </div>
 </section>
-<section id="retrieval">
-<h2>Retrieval<a class="headerlink" href="#retrieval" title="Permalink to this heading">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">retrieve</span></code> submodule contains the functionality needed to retrieve different data types from the OpenGHG store.</p>
+<section id="data-objects">
+<h2>Data objects<a class="headerlink" href="#data-objects" title="Permalink to this heading">#</a></h2>
+<p>Classes used to return data from the object store, help with manipulation and modification.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api_retrieve.html">Retrieval functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api_retrieve.html#search-functions">Search functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api_retrieve.html#openghg.retrieve.search_surface"><code class="docutils literal notranslate"><span class="pre">search_surface()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api_retrieve.html#openghg.retrieve.search"><code class="docutils literal notranslate"><span class="pre">search()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="api_retrieve.html#specific-retrieval-functions">Specific retrieval functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="api_retrieve.html#openghg.retrieve.get_obs_surface"><code class="docutils literal notranslate"><span class="pre">get_obs_surface()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api_retrieve.html#openghg.retrieve.get_flux"><code class="docutils literal notranslate"><span class="pre">get_flux()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api_retrieve.html#openghg.retrieve.get_footprint"><code class="docutils literal notranslate"><span class="pre">get_footprint()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api_retrieve.html#openghg.retrieve.get_bc"><code class="docutils literal notranslate"><span class="pre">get_bc()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="api_dataobjects.html">Data objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#datahandler">DataHandler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#searchresults">SearchResults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#obsdata">ObsData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#fluxdata">FluxData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#obscolumndata">ObsColumnData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#footprintdata">FootprintData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_dataobjects.html#boundaryconditionsdata">BoundaryConditionsData</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </section>
 <section id="plotting">
-<h2>plotting<a class="headerlink" href="#plotting" title="Permalink to this heading">#</a></h2>
+<h2>Plotting<a class="headerlink" href="#plotting" title="Permalink to this heading">#</a></h2>
 <p>These are some helper functions to quickly create plots using ObsData objects.</p>
 <p>Classes within the client module are used to interact with OpenGHG, whether it be a cloud or local instance.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api_plotting.html">Plotting functions</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="api_plotting.html">Plotting</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api_plotting.html#openghg.plotting.plot_timeseries"><code class="docutils literal notranslate"><span class="pre">plot_timeseries()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_plotting.html#openghg.plotting.plot_footprint"><code class="docutils literal notranslate"><span class="pre">plot_footprint()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="retrieve">
+<h2>Retrieve<a class="headerlink" href="#retrieve" title="Permalink to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">retrieve</span></code> submodule contains the functionality needed to retrieve different data types from the OpenGHG store.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_retrieve.html">Retrieve</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_retrieve.html#search-functions">Search functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_retrieve.html#retrieving-from-other-data-sources">Retrieving from other data sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_retrieve.html#specific-retrieval-functions">Specific retrieval functions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="standardise">
+<h2>Standardise<a class="headerlink" href="#standardise" title="Permalink to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">standardise</span></code> submodule handles the standardisation of different data types to the OpenGHG specification.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_standardise.html">Standardise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_standardise.html#measurement-standardisation">Measurement Standardisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_standardise.html#helpers">Helpers</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="transform">
+<h2>Transform<a class="headerlink" href="#transform" title="Permalink to this heading">#</a></h2>
+<p>The transform submodule handles creation of data types to OpenGHG specification based on an underlying input such as a database or model output. This usually involves some transformation of the data to e.g. select a region or regrid the data.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_transform.html">Transform</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_transform.html#regridding">Regridding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_transform.html#emissions">Emissions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="tutorial">
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this heading">#</a></h2>
+<p>Functions used in our OpenGHG tutorial notebooks and documentation.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.populate_flux_data"><code class="docutils literal notranslate"><span class="pre">populate_flux_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.populate_footprint_data"><code class="docutils literal notranslate"><span class="pre">populate_footprint_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.populate_surface_data"><code class="docutils literal notranslate"><span class="pre">populate_surface_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.populate_bc_ch4"><code class="docutils literal notranslate"><span class="pre">populate_bc_ch4()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.populate_flux_ch4"><code class="docutils literal notranslate"><span class="pre">populate_flux_ch4()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.populate_flux_co2"><code class="docutils literal notranslate"><span class="pre">populate_flux_co2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.populate_footprint_co2"><code class="docutils literal notranslate"><span class="pre">populate_footprint_co2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.populate_footprint_inert"><code class="docutils literal notranslate"><span class="pre">populate_footprint_inert()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.retrieve_example_data"><code class="docutils literal notranslate"><span class="pre">retrieve_example_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.clear_example_cache"><code class="docutils literal notranslate"><span class="pre">clear_example_cache()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.example_extract_path"><code class="docutils literal notranslate"><span class="pre">example_extract_path()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.bilsdale_datapaths"><code class="docutils literal notranslate"><span class="pre">bilsdale_datapaths()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.use_tutorial_store"><code class="docutils literal notranslate"><span class="pre">use_tutorial_store()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tutorial.html#openghg.tutorial.unpack_example_archive"><code class="docutils literal notranslate"><span class="pre">unpack_example_archive()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -444,17 +503,17 @@ OpenGHG hub. For developers documentation of the internal workings of the librar
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../development/cloud/fn_usage.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="../tutorials/local/index.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Fn usage</p>
+          <p class="prev-next-title">Tutorials - Local</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="api_standardise.html" title="next page">
+  <a class='right-next' id="next-link" href="api_analyse.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Standardisation functions</p>
+      <p class="prev-next-title">Analyse</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -475,18 +534,38 @@ OpenGHG hub. For developers documentation of the internal workings of the librar
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#data-standardisation">
-   Data standardisation
+  <a class="reference internal nav-link" href="#analyse">
+   Analyse
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#retrieval">
-   Retrieval
+  <a class="reference internal nav-link" href="#data-objects">
+   Data objects
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#plotting">
-   plotting
+   Plotting
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#retrieve">
+   Retrieve
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#standardise">
+   Standardise
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#transform">
+   Transform
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#tutorial">
+   Tutorial
   </a>
  </li>
 </ul>

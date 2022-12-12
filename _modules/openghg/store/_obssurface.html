@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g267e41e.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g267e41e.dirty documentation</p>
   
 </a>
     
@@ -122,13 +122,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../install.html">
                         Installation
                       </a>
@@ -143,6 +136,13 @@
                 
 
                     <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../development/index_devel.html">
                         Development
                       </a>
@@ -150,8 +150,8 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -161,13 +161,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
                         What’s new
@@ -248,13 +241,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../install.html">
                         Installation
                       </a>
@@ -269,6 +255,13 @@
                 
 
                     <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../development/index_devel.html">
                         Development
                       </a>
@@ -276,8 +269,8 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -287,13 +280,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
                         What’s new
@@ -373,7 +359,7 @@
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
-<div class="viewcode-block" id="ObsSurface"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface">[docs]</a><span class="k">class</span> <span class="nc">ObsSurface</span><span class="p">(</span><span class="n">BaseStore</span><span class="p">):</span>
+<div class="viewcode-block" id="ObsSurface"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface">[docs]</a><span class="k">class</span> <span class="nc">ObsSurface</span><span class="p">(</span><span class="n">BaseStore</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This class is used to process surface observation data&quot;&quot;&quot;</span>
 
     <span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;ObsSurface&quot;</span>
@@ -388,7 +374,7 @@
     <span class="c1">#         TinyDB: TinyDB object</span>
     <span class="c1">#     &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ObsSurface.read_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.read_data">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ObsSurface.read_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.read_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span>
         <span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">precision_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
@@ -454,7 +440,7 @@
 
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="ObsSurface.read_file"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.read_file">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ObsSurface.read_file"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.read_file">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
         <span class="n">filepath</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span>
         <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -683,7 +669,7 @@
 
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ObsSurface.read_multisite_aqmesh"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.read_multisite_aqmesh">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ObsSurface.read_multisite_aqmesh"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.read_multisite_aqmesh">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">read_multisite_aqmesh</span><span class="p">(</span>
         <span class="n">data_filepath</span><span class="p">:</span> <span class="n">pathType</span><span class="p">,</span>
         <span class="n">metadata_filepath</span><span class="p">:</span> <span class="n">pathType</span><span class="p">,</span>
@@ -777,7 +763,7 @@
 
         <span class="k">return</span> <span class="n">results</span></div>
 
-<div class="viewcode-block" id="ObsSurface.schema"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.schema">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ObsSurface.schema"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.schema">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define schema for surface observations Dataset.</span>
@@ -805,7 +791,7 @@
 
         <span class="k">return</span> <span class="n">source_format</span></div>
 
-<div class="viewcode-block" id="ObsSurface.validate_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.validate_data">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ObsSurface.validate_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.validate_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate input data against ObsSurface schema - definition from</span>
@@ -824,7 +810,7 @@
         <span class="n">data_schema</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
         <span class="n">data_schema</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ObsSurface.store_data"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.store_data">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ObsSurface.store_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.store_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">required_metakeys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -902,7 +888,7 @@
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 
-<div class="viewcode-block" id="ObsSurface.store_hashes"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.store_hashes">[docs]</a>    <span class="k">def</span> <span class="nf">store_hashes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hashes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="ObsSurface.store_hashes"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.store_hashes">[docs]</a>    <span class="k">def</span> <span class="nf">store_hashes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hashes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Store hashes of data retrieved from a remote data source such as</span>
 <span class="sd">        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we&#39;ve</span>
 <span class="sd">        seen before and adds the new.</span>
@@ -915,7 +901,7 @@
         <span class="n">new</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ObsSurface.delete"><a class="viewcode-back" href="../../../api/api_store.html#openghg.store.ObsSurface.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="ObsSurface.delete"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Delete a Datasource with the given UUID</span>
 
 <span class="sd">        This function deletes both the record of the object store in he</span>

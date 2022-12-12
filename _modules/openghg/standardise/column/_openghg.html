@@ -1,0 +1,752 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>openghg.standardise.column._openghg &#8212; OpenGHG 0+untagged.1.g267e41e.dirty documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/standardise/column/_openghg';</script>
+    <script src="../../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">OpenGHG 0+untagged.1.g267e41e.dirty documentation</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tutorials/index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../whatsnew/index.html">
+                        What’s new
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../tutorials/index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../../whatsnew/index.html">
+                        What’s new
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <h1>Source code for openghg.standardise.column._openghg</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">MutableMapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+
+<div class="viewcode-block" id="parse_openghg"><a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.column.parse_openghg">[docs]</a><span class="k">def</span> <span class="nf">parse_openghg</span><span class="p">(</span>
+    <span class="n">data_filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">satellite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">selection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse and extract data from pre-formatted netcdf file which already</span>
+<span class="sd">    matches expected OpenGHG format.</span>
+
+<span class="sd">    The arguments specified below are the metadata needed to store this</span>
+<span class="sd">    surface observation file within the object store. If these keywords are</span>
+<span class="sd">    not included within the attributes of the netcdf file being passed then</span>
+<span class="sd">    these arguments must be specified.</span>
+
+<span class="sd">    For column data this can either be a satellite (e.g. satellite=&quot;GOSAT&quot;) or a</span>
+<span class="sd">    site (site=&quot;RUN&quot;, network=&quot;TCCON&quot;). Either can be specified or this function</span>
+<span class="sd">    will attempt to extract this from the data file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_filepath: Path of observation file</span>
+<span class="sd">        satellite: Name of satellite (if relevant)</span>
+<span class="sd">        domain: For satellite only. If data has been selected on an area include the</span>
+<span class="sd">            identifier name for domain covered. This can map to previously defined domains</span>
+<span class="sd">            (see domain_info.json) or a newly defined domain.</span>
+<span class="sd">        selection: For satellite only, identifier for any data selection which has been</span>
+<span class="sd">            performed on satellite data. This can be based on any form of filtering, binning etc.</span>
+<span class="sd">            but should be unique compared to other selections made e.g. &quot;land&quot;, &quot;glint&quot;, &quot;upperlimit&quot;.</span>
+<span class="sd">            If not specified, domain will be used.</span>
+<span class="sd">        site : Site code/name (if relevant). Can include satellite OR site.</span>
+<span class="sd">        species: Species name or synonym e.g. &quot;ch4&quot;</span>
+<span class="sd">        instrument: Instrument name e.g. &quot;TANSO-FTS&quot;</span>
+<span class="sd">        network: Name of in-situ or satellite network e.g. &quot;TCCON&quot;, &quot;GOSAT&quot;</span>
+<span class="sd">        platform: Type of platform. Should be one of:</span>
+<span class="sd">            - &quot;satellite&quot;</span>
+<span class="sd">            - &quot;site&quot;</span>
+<span class="sd">            Note: this will be superceded if site or satellite keywords are specified.</span>
+<span class="sd">        kwargs: Any additional attributes to be associated with the data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict : Dictionary of source_name : data, metadata, attributes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">define_species_label</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span>
+
+    <span class="c1"># from openghg.standardise.meta import metadata_default_keys, assign_attributes</span>
+
+    <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s2">&quot;.nc&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input file must be a .nc (netcdf) file.&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">temp</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">temp</span>
+
+    <span class="c1"># Extract current attributes from input data</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">satellite</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;satellite&quot;</span><span class="p">:</span>
+        <span class="n">metadata_required</span> <span class="o">=</span> <span class="n">metadata_default_satellite_column</span><span class="p">()</span>
+        <span class="n">metadata_required</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;selection&quot;</span><span class="p">)</span>
+        <span class="n">platform</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span>
+    <span class="k">elif</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;site&quot;</span><span class="p">:</span>
+        <span class="n">metadata_required</span> <span class="o">=</span> <span class="n">metadata_default_site_column</span><span class="p">()</span>
+        <span class="n">platform</span> <span class="o">=</span> <span class="s2">&quot;site&quot;</span>
+
+    <span class="k">if</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;satellite&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">domain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;For satellite data, please specify selected domain.&quot;</span>
+                <span class="s2">&quot;This can be &#39;global&#39; if no selection has been made.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Define metadata based on input arguments.</span>
+    <span class="n">metadata_initial</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+        <span class="s2">&quot;satellite&quot;</span><span class="p">:</span> <span class="n">satellite</span><span class="p">,</span>
+        <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">instrument</span><span class="p">,</span>
+        <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+        <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
+        <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
+        <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">platform</span><span class="p">,</span>
+        <span class="s2">&quot;data_type&quot;</span><span class="p">:</span> <span class="s2">&quot;column&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;source_format&quot;</span><span class="p">:</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># TODO: Tidy this up a bit (maybe split some into a separate function?)</span>
+    <span class="c1"># and incorporate kwargs</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">key_translation</span> <span class="o">=</span> <span class="n">satellite_attribute_translation</span><span class="p">()</span>
+    <span class="c1"># Populate metadata with values from attributes if inputs have not been passed</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">metadata_initial</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">metadata_required</span><span class="p">:</span>
+            <span class="c1"># Extract equivalent key from passed file if present using translation</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">attr_keys</span> <span class="o">=</span> <span class="n">key_translation</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">attr_keys</span> <span class="o">=</span> <span class="n">key</span>
+
+            <span class="c1"># Make sure this is a list for cases with multiple options</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr_keys</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">attr_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr_keys</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Extract value from attributes if this has not been specified</span>
+                <span class="k">for</span> <span class="n">attr_key</span> <span class="ow">in</span> <span class="n">attr_keys</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="n">attr_key</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; must be specified if not included in data attributes.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If attributes are present, check these match to inputs passed</span>
+                <span class="k">for</span> <span class="n">attr_key</span> <span class="ow">in</span> <span class="n">attr_keys</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">attr_key</span> <span class="ow">in</span> <span class="n">key_translation</span> <span class="ow">and</span> <span class="n">attr_key</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+                        <span class="n">attributes_value</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="n">attr_key</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">attributes_value</span><span class="p">:</span>
+                            <span class="c1"># If inputs do not match attribute values, raise a ValueError</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;Input for &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> does not match value in file attributes: </span><span class="si">{</span><span class="n">attributes_value</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="p">)</span>
+                <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># metadata = cast(Dict[str, str], metadata_initial)</span>
+
+    <span class="k">if</span> <span class="n">selection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;selection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">selection</span>
+    <span class="k">elif</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;satellite&quot;</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;selection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain</span>
+
+    <span class="c1"># TODO: Add loose domain checking? If known domain is specified, make sure points</span>
+    <span class="c1"># are within this for example.</span>
+
+    <span class="n">species</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+
+    <span class="k">if</span> <span class="s2">&quot;site&quot;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Add data type to metadata</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;column&quot;</span>
+
+    <span class="c1"># Define remaining keys needed for metadata</span>
+    <span class="n">metadata_needed</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">metadata_required</span> <span class="k">if</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">metadata_needed</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">attr_keys</span> <span class="o">=</span> <span class="n">key_translation</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">attr_keys</span> <span class="o">=</span> <span class="n">key</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr_keys</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">attr_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr_keys</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">attr_key</span> <span class="ow">in</span> <span class="n">attr_keys</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">attr_key</span> <span class="ow">in</span> <span class="n">attr_keys</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="n">attr_key</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; must be specified if not included in data attributes.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># In GOSAT UoL files (and copied into our files)</span>
+    <span class="c1">#  - platform = &quot;GOSAT&quot;; sensor = &quot;TANSO-FTS&quot;</span>
+    <span class="c1"># In TROPOMI S5P_OFFL_...nc files</span>
+    <span class="c1">#  - platform = &#39;S5P&#39;; sensor = &quot;TROPOMI&quot;</span>
+    <span class="c1"># Could &quot;platform&quot; --&gt; &quot;satellite&quot; perhaps?</span>
+
+    <span class="c1"># site = metadata[&quot;site&quot;]</span>
+    <span class="c1"># network = metadata[&quot;network&quot;]</span>
+    <span class="c1"># species = metadata[&quot;species&quot;]</span>
+
+    <span class="c1"># # Allow site and network data to be treated in a case insensitive way</span>
+    <span class="c1"># site_case_options = [site, site.upper(), site.lower()]</span>
+    <span class="c1"># network_case_options = [network, network.upper(), network.lower()]</span>
+
+    <span class="c1"># # Extract centralised data for site (if present)</span>
+    <span class="c1"># site_data = load_json(filename=&quot;acrg_site_info.json&quot;)</span>
+    <span class="c1"># for site_value in site_case_options:</span>
+    <span class="c1">#     if site_value in site_data:</span>
+    <span class="c1">#         site_info_all = site_data[site_value]</span>
+    <span class="c1">#         break</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     print(&quot;Unknown site. Will attempt to extract metadata from dataset attributes or input keywords&quot;)</span>
+    <span class="c1">#     site_info_all = {}</span>
+
+    <span class="c1"># for network_value in network_case_options:</span>
+    <span class="c1">#     if network_value in site_info_all:</span>
+    <span class="c1">#         site_info = site_info_all[network_value]</span>
+    <span class="c1">#         break</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     print(</span>
+    <span class="c1">#         &quot;Network {network} does not match with site {site}. Will attempt to extract metadata from dataset attributes or input keywords&quot;</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     site_info = {}</span>
+
+    <span class="c1"># if site_info:</span>
+    <span class="c1">#     # Ensure keywords match to metadata names for station values</span>
+    <span class="c1">#     # e.g. &quot;station_longitude&quot; derived from &quot;longitude&quot;</span>
+    <span class="c1">#     for key in metadata_needed:</span>
+    <span class="c1">#         prefix = &quot;station_&quot;</span>
+    <span class="c1">#         if key.startswith(prefix):</span>
+    <span class="c1">#             split_key = key.split(&quot;_&quot;)[1:]</span>
+    <span class="c1">#             short_key_option1 = &quot;_&quot;.join(split_key)</span>
+
+    <span class="c1">#             split_key.insert(1, &quot;station&quot;)  # to catch &quot;height_station_masl&quot;</span>
+    <span class="c1">#             short_key_option2 = &quot;_&quot;.join(split_key)</span>
+
+    <span class="c1">#             short_key_options = [short_key_option1, short_key_option2]</span>
+    <span class="c1">#             for short_key in short_key_options:</span>
+    <span class="c1">#                 if short_key in site_info:</span>
+    <span class="c1">#                     site_info[key] = site_info[short_key]</span>
+    <span class="c1">#                     break</span>
+
+    <span class="c1"># # Load attributes data for network if present</span>
+    <span class="c1"># param_data = load_json(filename=&quot;attributes.json&quot;)</span>
+    <span class="c1"># for network_value in network_case_options:</span>
+    <span class="c1">#     if network_value in param_data:</span>
+    <span class="c1">#         network_params = param_data[network_value]</span>
+    <span class="c1">#         site_attributes = network_params[&quot;global_attributes&quot;]</span>
+    <span class="c1">#         break</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     site_attributes = {}</span>
+
+    <span class="c1"># # Define sources of attributes to use when defining metadata</span>
+    <span class="c1"># # The order here influences the hierarchy if keys appear multiple times.</span>
+    <span class="c1"># # kwargs allow additional variables such as &quot;station_longitude&quot; to be included if needed.</span>
+    <span class="c1"># attribute_sources = [attributes, kwargs, site_info, site_attributes]</span>
+
+    <span class="c1"># # Search attributes sources (in order) and populate metadata</span>
+    <span class="c1"># for param in metadata_needed:</span>
+    <span class="c1">#     for source in attribute_sources:</span>
+    <span class="c1">#         if param in source:</span>
+    <span class="c1">#             metadata[param] = source[param]</span>
+    <span class="c1">#             break</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         raise ValueError(</span>
+    <span class="c1">#             f&quot;Cannot extract or infer &#39;{param}&#39; parameter needed for metadata from stored data, attributes or keywords&quot;</span>
+    <span class="c1">#         )</span>
+
+    <span class="c1"># Update attributes to match metadata after cleaning</span>
+    <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">species</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">}}</span>
+
+    <span class="c1"># gas_data = assign_attributes(data=gas_data, site=site, network=network)</span>
+
+    <span class="k">return</span> <span class="n">gas_data</span></div>
+
+
+<span class="k">def</span> <span class="nf">metadata_default_satellite_column</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Define default keys for satellite column data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;species&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;network&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;platform&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;domain&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;selection&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data_owner&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data_owner_email&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">default_keys</span>
+
+
+<span class="k">def</span> <span class="nf">metadata_default_site_column</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Define default keys for site column data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;site&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;species&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;network&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;platform&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data_owner&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data_owner_email&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">default_keys</span>
+
+
+<span class="n">TranslationDict</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span>
+
+
+<span class="k">def</span> <span class="nf">satellite_attribute_translation</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">TranslationDict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Define translation between openghg keyword and input files.</span>
+<span class="sd">    Currently includes:</span>
+<span class="sd">     - GOSAT (University of Leicester product)</span>
+<span class="sd">     - TROPOMI</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Current values within (at least) GOSAT, TROPOMI files</span>
+    <span class="c1"># - values can contain lists as well as single string values</span>
+    <span class="n">keywords</span><span class="p">:</span> <span class="n">TranslationDict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="s2">&quot;sensor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;satellite&quot;</span><span class="p">:</span> <span class="s2">&quot;platform&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;platform&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data_owner&quot;</span><span class="p">:</span> <span class="s2">&quot;creator_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data_owner_email&quot;</span><span class="p">:</span> <span class="s2">&quot;creator_email&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">keywords</span>
+</pre></div>
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022 OpenGHG development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

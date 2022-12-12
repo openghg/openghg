@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Exporting &#8212; OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</title>
+    <title>Util &#8212; OpenGHG 0+untagged.1.g267e41e.dirty documentation</title>
   
   
   
@@ -105,7 +105,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g267e41e.dirty documentation</p>
   
 </a>
     
@@ -123,13 +123,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../install.html">
                         Installation
                       </a>
@@ -144,6 +137,13 @@
                 
 
                     <li class="nav-item">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../development/index_devel.html">
                         Development
                       </a>
@@ -151,8 +151,8 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index.html">
-                        User API
+                      <a class="nav-link nav-internal" href="index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -162,13 +162,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../whatsnew/index.html">
                         What’s new
@@ -249,13 +242,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../install.html">
                         Installation
                       </a>
@@ -270,6 +256,13 @@
                 
 
                     <li class="nav-item">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../development/index_devel.html">
                         Development
                       </a>
@@ -277,8 +270,8 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index.html">
-                        User API
+                      <a class="nav-link nav-internal" href="index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -288,13 +281,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../whatsnew/index.html">
                         What’s new
@@ -357,8 +343,10 @@
             
             <article class="bd-article" role="main">
               
-  <section id="exporting">
-<h1>Exporting<a class="headerlink" href="#exporting" title="Permalink to this heading">#</a></h1>
+  <section id="util">
+<h1>Util<a class="headerlink" href="#util" title="Permalink to this heading">#</a></h1>
+<section id="exporting">
+<h2>Exporting<a class="headerlink" href="#exporting" title="Permalink to this heading">#</a></h2>
 <p>These are used to export data to a format readable by the <a class="reference external" href="https://github.com/openghg/dashboard">OpenGHG data dashboard</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.to_dashboard">
@@ -372,7 +360,7 @@ inlets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="api_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>]]) – Dictionary of retrieved data</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>]]) – Dictionary of retrieved data</p></li>
 <li><p><strong>selected_vars</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>) – The variables to want to export</p></li>
 <li><p><strong>downsample_n</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Take every nth value from the data</p></li>
 <li><p><strong>filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – filename to write output to</p></li>
@@ -409,7 +397,7 @@ inlets.</p>
 
 </section>
 <section id="hashing">
-<h1>Hashing<a class="headerlink" href="#hashing" title="Permalink to this heading">#</a></h1>
+<h2>Hashing<a class="headerlink" href="#hashing" title="Permalink to this heading">#</a></h2>
 <p>These handle hashing of data (usually with SHA1)</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.hash_file">
@@ -448,7 +436,7 @@ inlets.</p>
 
 </section>
 <section id="string-manipulation">
-<h1>String manipulation<a class="headerlink" href="#string-manipulation" title="Permalink to this heading">#</a></h1>
+<h2>String manipulation<a class="headerlink" href="#string-manipulation" title="Permalink to this heading">#</a></h2>
 <p>String cleaning and formatting functions</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.clean_string">
@@ -521,7 +509,7 @@ to lowercase</p>
 
 </section>
 <section id="time">
-<h1>Time<a class="headerlink" href="#time" title="Permalink to this heading">#</a></h1>
+<h2>Time<a class="headerlink" href="#time" title="Permalink to this heading">#</a></h2>
 <p>Helpers to deal with all things datetime.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.timestamp_tzaware">
@@ -651,224 +639,6 @@ for use in searches and Datasource interactions</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.daterange_overlap">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daterange_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_overlap" title="Permalink to this definition">#</a></dt>
-<dd><p>Check if daterange_a is within daterange_b.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>daterange_a</strong> (<em>str</em>) – Timezone aware daterange string. Example:</p></li>
-<li><p><strong>2014-01-30-10</strong> – 52:30+00:00_2014-01-30-13:22:30+00:00</p></li>
-<li><p><strong>daterange_b</strong> (<em>str</em>) – As daterange_a</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>True if daterange included</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.combine_dateranges">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">combine_dateranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dateranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#combine_dateranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.combine_dateranges" title="Permalink to this definition">#</a></dt>
-<dd><p>Combine dateranges</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dateranges</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Daterange strings</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>List of combined dateranges</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-<p>Modified from
-<a class="reference external" href="https://codereview.stackexchange.com/a/69249">https://codereview.stackexchange.com/a/69249</a></p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.split_daterange_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">split_daterange_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#split_daterange_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.split_daterange_str" title="Permalink to this definition">#</a></dt>
-<dd><p>Split a daterange string to the component start and end
-Timestamps</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>daterange_str</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Daterange string of the form</p></li>
-<li><p><strong>date_only</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Return only the date portion of the Timestamp, removing</p></li>
-<li><p><strong>component</strong> (<em>the hours / seconds</em>) – </p></li>
-<li><p><strong>2019-01-01T00</strong> – 00:00_2019-12-31T00:00:00</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Tuple of start, end timestamps / dates</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple (Timestamp / datetime.date, Timestamp / datetime.date)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.closest_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">closest_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_compare</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dateranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#closest_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.closest_daterange" title="Permalink to this definition">#</a></dt>
-<dd><p>Finds the closest daterange in a list of dateranges</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>to_compare</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Daterange (as a string) to compare</p></li>
-<li><p><strong>dateranges</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – List of dateranges</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Daterange from dateranges that’s the closest in time to to_compare</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.valid_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">valid_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#valid_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.valid_daterange" title="Permalink to this definition">#</a></dt>
-<dd><p>Check if the passed daterange is valid</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>daterange</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Daterange string</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>True if valid</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.find_daterange_gaps">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_daterange_gaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_search</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_search</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dateranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#find_daterange_gaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_daterange_gaps" title="Permalink to this definition">#</a></dt>
-<dd><p>Given a start and end date and a list of dateranges find the gaps.</p>
-<p>For example given a list of dateranges</p>
-<p>example = [‘2014-09-02_2014-11-01’, ‘2016-09-02_2018-11-01’]</p>
-<p>start = timestamp_tzaware(“2012-01-01”)
-end = timestamp_tzaware(“2019-09-01”)</p>
-<p>gaps = find_daterange_gaps(start, end, example)</p>
-<dl class="simple">
-<dt>gaps == [‘2012-01-01-00:00:00+00:00_2014-09-01-00:00:00+00:00’,</dt><dd><p>‘2014-11-02-00:00:00+00:00_2016-09-01-00:00:00+00:00’,
-‘2018-11-02-00:00:00+00:00_2019-09-01-00:00:00+00:00’]</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>start_search</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>) – Start timestamp</p></li>
-<li><p><strong>end_search</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>) – End timestamp</p></li>
-<li><p><strong>dateranges</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – List of daterange strings</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>List of dateranges</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.trim_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">trim_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_trim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#trim_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.trim_daterange" title="Permalink to this definition">#</a></dt>
-<dd><p>Removes overlapping dates from to_trim</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>to_trim</strong> (<em>from</em>) – Daterange to trim down. Dates that overlap</p></li>
-<li><p><strong>to_trim</strong> – </p></li>
-<li><p><strong>overlap_daterange</strong> – Daterange containing dates we want to trim</p></li>
-<li><p><strong>to_trim</strong> – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Trimmed daterange</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.split_encompassed_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">split_encompassed_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contained</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#split_encompassed_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.split_encompassed_daterange" title="Permalink to this definition">#</a></dt>
-<dd><p>Checks if one of the passed dateranges contains the other, if so, then
-split the larger daterange into three sections.</p>
-<blockquote>
-<div><p>&lt;—a—&gt;</p>
-</div></blockquote>
-<p>&lt;———b———–&gt;</p>
-<p>Here b is split into three and we end up with:</p>
-<p>&lt;-dr1-&gt;&lt;—a—&gt;&lt;-dr2-&gt;</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>daterange_a</strong> – Daterange</p></li>
-<li><p><strong>daterange_b</strong> – Daterange</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of results</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.daterange_contains">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contained</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_contains" title="Permalink to this definition">#</a></dt>
-<dd><p>Check if the daterange container contains the daterange contained</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>container</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Daterange</p></li>
-<li><p><strong>contained</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Daterange</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.sanitise_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">sanitise_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#sanitise_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.sanitise_daterange" title="Permalink to this definition">#</a></dt>
-<dd><p>Make sure the daterange is correct and return
-tzaware daterange.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>daterange</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Daterange str</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Timezone aware daterange str</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.check_nan">
 <span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_nan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#check_nan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_nan" title="Permalink to this definition">#</a></dt>
 <dd><p>Check if a number is Nan.</p>
@@ -906,51 +676,8 @@ and returns NA if not.</p>
 </dd></dl>
 
 </section>
-<section id="iteration">
-<h1>Iteration<a class="headerlink" href="#iteration" title="Permalink to this heading">#</a></h1>
-<p>Our own personal <code class="xref py py-obj docutils literal notranslate"><span class="pre">itertools</span></code></p>
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.pairwise">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">pairwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#pairwise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.pairwise" title="Permalink to this definition">#</a></dt>
-<dd><p>Return a zip of an iterable where a is the iterable
-and b is the iterable advanced one step.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>iterable</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>) – Any iterable type</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Tuple of iterables</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.unanimous">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">unanimous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#unanimous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.unanimous" title="Permalink to this definition">#</a></dt>
-<dd><p>Checks that all values in an iterable object
-are the same</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>seq</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>) – Iterable object</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Returns</dt><dd><p>bool: True if all values are the same</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
 <section id="site-checks">
-<h1>Site Checks<a class="headerlink" href="#site-checks" title="Permalink to this heading">#</a></h1>
+<h2>Site Checks<a class="headerlink" href="#site-checks" title="Permalink to this heading">#</a></h2>
 <p>These perform checks to ensure data processed for each site is correct</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.verify_site">
@@ -989,31 +716,78 @@ sites with similar names.</p>
 </dd></dl>
 
 </section>
-<section id="cloud">
-<h1>Cloud<a class="headerlink" href="#cloud" title="Permalink to this heading">#</a></h1>
-<p>These handle checks on cloud based functionality</p>
+<section id="domain">
+<h2>Domain<a class="headerlink" href="#domain" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="openghg.util.running_in_cloud">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">running_in_cloud</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#running_in_cloud"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.running_in_cloud" title="Permalink to this definition">#</a></dt>
-<dd><p>Are we running in the cloud?</p>
-<p>Checks for the OPENGHG_CLOUD environment variable being set</p>
+<dt class="sig sig-object py" id="openghg.util.find_domain">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Permalink to this definition">#</a></dt>
+<dd><p>Finds the latitude and longitude values in degrees associated
+with a given domain name.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>True if running in cloud</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Pre-defined domain name (see ‘domain_info.json’)</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>bool</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Latitude and longitude values for the domain in degrees.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array, array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.util.convert_longitude">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">convert_longitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#convert_longitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.convert_longitude" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert longitude extent to -180 - 180 and reorder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>longitude</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Array of valid longitude values in degrees.</p></li>
+<li><p><strong>return_index</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Return re-ordering index as well as updated longitude</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Updated longitude values and new indices if requested.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray(, ndarray)</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
-<section id="errors">
-<h1>Errors<a class="headerlink" href="#errors" title="Permalink to this heading">#</a></h1>
-<p>Customised errors for OpenGHG</p>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidSiteError</span></code></p>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownDataError</span></code></p>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">FunctionError</span></code></p>
+<section id="inlet">
+<h2>Inlet<a class="headerlink" href="#inlet" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="openghg.util.format_inlet">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openghg/util/_inlet.html#format_inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.format_inlet" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>Make sure inlet name conforms to standard of number followed by unit
+(or is one of the special keywords).
+If the string just contains numbers, it is assumed this is in metres and
+units of “m” will be added.</p>
+<p>e.g. “10m” not “10” or “10magl”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Height above ground level</p></li>
+<li><p><strong>special_keywords</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>]) – Specify special keywords inlet could be set to
+If so do not apply any formatting.
+If this is not set a special keyword of “multiple” and “column” will still be allowed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>formatted inlet string / None</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -1040,12 +814,12 @@ sites with similar names.</p>
 </div>
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#exporting">
    Exporting
   </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.to_dashboard">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1054,7 +828,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.to_dashboard_mobile">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1065,12 +839,12 @@ sites with similar names.</p>
    </li>
   </ul>
  </li>
- <li class="toc-h1 nav-item toc-entry">
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#hashing">
    Hashing
   </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.hash_file">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1079,7 +853,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.hash_string">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1090,12 +864,12 @@ sites with similar names.</p>
    </li>
   </ul>
  </li>
- <li class="toc-h1 nav-item toc-entry">
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#string-manipulation">
    String manipulation
   </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.clean_string">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1104,7 +878,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.to_lowercase">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1113,7 +887,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.remove_punctuation">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1124,12 +898,12 @@ sites with similar names.</p>
    </li>
   </ul>
  </li>
- <li class="toc-h1 nav-item toc-entry">
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#time">
    Time
   </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.timestamp_tzaware">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1138,7 +912,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.timestamp_now">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1147,7 +921,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.timestamp_epoch">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1156,7 +930,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.daterange_from_str">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1165,7 +939,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.daterange_to_str">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1174,7 +948,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.create_daterange_str">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1183,7 +957,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.create_daterange">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1192,97 +966,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.daterange_overlap">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       daterange_overlap()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.combine_dateranges">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       combine_dateranges()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.split_daterange_str">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       split_daterange_str()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.closest_daterange">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       closest_daterange()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.valid_daterange">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       valid_daterange()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.find_daterange_gaps">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       find_daterange_gaps()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.trim_daterange">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       trim_daterange()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.split_encompassed_daterange">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       split_encompassed_daterange()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.daterange_contains">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       daterange_contains()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.sanitise_daterange">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       sanitise_daterange()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.check_nan">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1291,7 +975,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.check_date">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1302,37 +986,12 @@ sites with similar names.</p>
    </li>
   </ul>
  </li>
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#iteration">
-   Iteration
-  </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.pairwise">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       pairwise()
-      </span>
-     </code>
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.unanimous">
-     <code class="docutils literal notranslate">
-      <span class="pre">
-       unanimous()
-      </span>
-     </code>
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h1 nav-item toc-entry">
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#site-checks">
    Site Checks
   </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.verify_site">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1341,7 +1000,7 @@ sites with similar names.</p>
      </code>
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#openghg.util.multiple_inlets">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -1352,26 +1011,46 @@ sites with similar names.</p>
    </li>
   </ul>
  </li>
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#cloud">
-   Cloud
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#domain">
+   Domain
   </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#openghg.util.running_in_cloud">
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.find_domain">
      <code class="docutils literal notranslate">
       <span class="pre">
-       running_in_cloud()
+       find_domain()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.convert_longitude">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       convert_longitude()
       </span>
      </code>
     </a>
    </li>
   </ul>
  </li>
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#errors">
-   Errors
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#inlet">
+   Inlet
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#openghg.util.format_inlet">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       format_inlet()
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
  </li>
 </ul>
 

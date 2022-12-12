@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._hashing &#8212; OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</title>
+    <title>openghg.util._hashing &#8212; OpenGHG 0+untagged.1.g267e41e.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g75d1fa5.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g267e41e.dirty documentation</p>
   
 </a>
     
@@ -122,13 +122,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../install.html">
                         Installation
                       </a>
@@ -143,6 +136,13 @@
                 
 
                     <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../development/index_devel.html">
                         Development
                       </a>
@@ -150,8 +150,8 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -161,13 +161,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
                         What’s new
@@ -248,13 +241,6 @@
     <ul id="navbar-main-elements" class="navbar-nav">
         
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../features.html">
-                        Features
-                      </a>
-                    </li>
-                
-
-                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../install.html">
                         Installation
                       </a>
@@ -269,6 +255,13 @@
                 
 
                     <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../development/index_devel.html">
                         Development
                       </a>
@@ -276,8 +269,8 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index.html">
-                        User API
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
                       </a>
                     </li>
                 
@@ -287,13 +280,6 @@
                 </button>
                 <div class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
-                        Developer API
-                      </a>
-                    </li>
-                
-
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
                         What’s new
@@ -365,7 +351,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
 
-<div class="viewcode-block" id="hash_string"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.hash_string">[docs]</a><span class="k">def</span> <span class="nf">hash_string</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="hash_string"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_string">[docs]</a><span class="k">def</span> <span class="nf">hash_string</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Return the SHA-1 hash of a string</span>
 
 <span class="sd">    Args:</span>
@@ -376,7 +362,7 @@
     <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">to_hash</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="hash_file"><a class="viewcode-back" href="../../../api/api_util.html#openghg.util.hash_file">[docs]</a><span class="k">def</span> <span class="nf">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="hash_file"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_file">[docs]</a><span class="k">def</span> <span class="nf">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Opens the file at filepath and calculates its SHA1 hash</span>
 
 <span class="sd">    Taken from https://stackoverflow.com/a/22058673</span>
@@ -400,7 +386,7 @@
     <span class="k">return</span> <span class="n">sha1</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
 
-<span class="k">def</span> <span class="nf">hash_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="hash_bytes"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_bytes">[docs]</a><span class="k">def</span> <span class="nf">hash_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Calculate the SHA1 sum of some data</span>
 
 <span class="sd">    Args:</span>
@@ -408,10 +394,10 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        str: SHA1 hash</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
 
-<span class="k">def</span> <span class="nf">hash_retrieved_data</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="hash_retrieved_data"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_retrieved_data">[docs]</a><span class="k">def</span> <span class="nf">hash_retrieved_data</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Hash data retrieved from a data platform. This calculates the SHA1 of the metadata</span>
 <span class="sd">    and the start date, end date and the number of timestamps in the Dataset.</span>
 
@@ -453,7 +439,7 @@
 
         <span class="n">hashes</span><span class="p">[</span><span class="n">combo_hash</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">current_timestamp</span><span class="p">}</span>
 
-    <span class="k">return</span> <span class="n">hashes</span>
+    <span class="k">return</span> <span class="n">hashes</span></div>
 </pre></div>
 
             </article>
