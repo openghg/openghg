@@ -78,4 +78,5 @@ logger.addHandler(consoleHandler)
 del logfile_path, hub_env, cloud_env, create_default_config
 
 from . import _version
-__version__ = _version.get_versions()['version']
+
+__version__ = _version.get_versions()["version"]
