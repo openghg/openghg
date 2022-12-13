@@ -1,1 +1,1 @@
-/Users/gar/Documents/Devel/openghg/notebooks/tutorials/local/Analysing_data/Working_with_co2.md
+../../../../../notebooks/tutorials/local/Analysing_data/Working_with_co2.md

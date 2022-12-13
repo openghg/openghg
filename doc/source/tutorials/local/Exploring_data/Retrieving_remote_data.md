@@ -1,1 +1,1 @@
-/Users/gar/Documents/Devel/openghg/notebooks/tutorials/local/Exploring_data/Retrieving_remote_data.md
+../../../../../notebooks/tutorials/local/Exploring_data/Retrieving_remote_data.md
