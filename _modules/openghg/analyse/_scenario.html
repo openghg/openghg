@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0+untagged.1.g01ae97e.dirty documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0+untagged.1.g5e8eb6c.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g01ae97e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g5e8eb6c.dirty documentation</p>
   
 </a>
     
@@ -864,7 +864,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the platform for a site, if present.</span>
 
-<span class="sd">        This will access the &quot;acrg_site_info.json&quot; file to find this information.</span>
+<span class="sd">        This will access the &quot;site_info.json&quot; file to find this information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
 
@@ -874,7 +874,7 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span>
+            <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;site_info.json&quot;</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">site_details</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="n">site_upper</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>

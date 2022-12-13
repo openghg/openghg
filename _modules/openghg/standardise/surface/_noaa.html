@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.g01ae97e.dirty documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.g5e8eb6c.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g01ae97e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g5e8eb6c.dirty documentation</p>
   
 </a>
     
@@ -889,7 +889,7 @@
     <span class="c1"># Read the site code from the Dataframe</span>
     <span class="n">site</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sample_site_code&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
-    <span class="n">site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;acrg_site_info.json&quot;</span><span class="p">)</span>
+    <span class="n">site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_info.json&quot;</span><span class="p">)</span>
     <span class="c1"># If this isn&#39;t a site we recognize try and read it from the filename</span>
     <span class="k">if</span> <span class="n">site</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">site_data</span><span class="p">:</span>
         <span class="n">site</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
