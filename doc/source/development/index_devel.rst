@@ -6,6 +6,15 @@ Here we'll explain the tools we used to create OpenGHG, some of the best practic
 As everything used to build OpenGHG is open-source we've documented our use of these technologies in a way that should get you up and running
 with a development environment.
 
+Quickstart
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   quickstart_devel.rst
+
+
 Python development
 ------------------
 
