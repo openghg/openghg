@@ -35,7 +35,7 @@ a short time to download depending on your internet connection.
     from openghg.tutorial import retrieve_example_data
     from openghg.store import add_noaa_obspack
 
-    url = "https://github.com/openghg/example_data/blob/main/obspack/obspack_ch4_example.tar.gz"
+    url = "https://github.com/openghg/example_data/raw/main/obspack/obspack_ch4_example.tar.gz"
     noaa_obspack_directory = retrieve_example_data(url=url)
 
 Process and store the data
