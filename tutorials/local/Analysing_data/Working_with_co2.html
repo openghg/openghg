@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.gb4cfd12.dirty documentation</title>
+    <title>Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.geedd511.dirty documentation</title>
   
   
   
@@ -46,7 +46,6 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Analysing_data/Working_with_co2';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -108,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb4cfd12.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.geedd511.dirty documentation</p>
   
 </a>
     
@@ -381,53 +380,53 @@
               
   <section id="working-with-carbon-dioxide">
 <h1>Working with carbon dioxide<a class="headerlink" href="#working-with-carbon-dioxide" title="Permalink to this heading">#</a></h1>
-<p>For carbon dioxide data, the natural diurnal cycle must be taken into
-account when comparing any expected measurements against our
-observations.</p>
-<p>In order to compare our measurements to modelled data for carbon dioxide
-(<span class="math notranslate nohighlight">\(\mathrm{CO_2}\)</span>), we need high frequency inputs for both the
-footprint and flux files. For NAME footprints these should contain an
-additional “H_back” dimension to store hourly footprints overall an
-initial time period for each release time. For any natural flux data to
-compare against, this should have a frequency of less than 24 hours.</p>
-<p><em>Operations around :math:`CO_2` and high resolution data may run slow at
-the moment, the plan is to profile this so we can optimise performance.</em></p>
+<p>For carbon dioxide data, the natural diurnal cycle must be taken into account when comparing any expected measurements against our observations.</p>
+<p>In order to compare our measurements to modelled data for carbon dioxide ($\mathrm{CO_2}$), we need high frequency inputs for both the footprint and flux files. For NAME footprints these should contain an additional “H_back” dimension to store hourly footprints overall an initial time period for each release time. For any natural flux data to compare against, this should have a frequency of less than 24 hours.</p>
+<p><em>Operations around $CO_2$ and high resolution data may run slow at the moment, the plan is to profile this so we can optimise performance.</em></p>
 <blockquote>
-<div><p><strong>NOTE:</strong> Plots created within this tutorial may not show up on the
-online documentation version of this notebook.</p>
+<div><p><strong><em>NOTE:</em></strong>  Plots created within this tutorial may not show up on the online documentation version of this notebook.</p>
 </div></blockquote>
 <section id="loading-data-sources-into-the-object-store">
 <h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Permalink to this heading">#</a></h2>
-<p>For this tutorial we will again use a helper function from the
-<code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule to add some data to your local object
-store. As we’re going to be comparing CO2 emissions with flux data here,
-we’ll add surface, flux and footprint data to the object store. Don’t
-worry if you get a message telling you the file has already been added,
-this might happen if you’ve been through one of the other tutorials
-previously.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_flux_data</span><span class="p">,</span> <span class="n">populate_surface_data</span><span class="p">,</span> <span class="n">populate_footprint_data</span>
+<p>For this tutorial we will again use a helper function from the <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule to add some data to your local object store. As we’re going to be comparing CO2 emissions with flux data here, we’ll add surface, flux and footprint data to the object store. Don’t worry if you get a message telling you the file has already been added, this might happen if you’ve been through one of the other tutorials previously.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_flux_data</span><span class="p">,</span> <span class="n">populate_surface_data</span><span class="p">,</span> <span class="n">populate_footprint_data</span>
 </pre></div>
+</div>
+</div>
 </div>
 <p>First we’ll add some surface measurment data</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
 </pre></div>
+</div>
+</div>
 </div>
 <p>Next we’ll add some flux data.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_flux_data</span><span class="p">()</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_flux_data</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+</div>
 <p>And finally some footprint data</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_footprint_data</span><span class="p">()</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_footprint_data</span><span class="p">()</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="creating-a-model-scenario">
 <h2>2. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Permalink to this heading">#</a></h2>
-<p>To link together our observations to our ancillary data we can create a
-<code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object, as shown in the previous tutorial
-<a class="reference external" href="3_Comparing_with_emissions.ipynb">3_Comparing_with_emissions.ipynb</a>,
-using suitable keywords to grab the data from the object store.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.analyse</span> <span class="kn">import</span> <span class="n">ModelScenario</span>
+<p>To link together our observations to our ancillary data we can create a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object, as shown in the previous tutorial <span class="xref myst">3_Comparing_with_emissions.ipynb</span>, using suitable keywords to grab the data from the object store.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.analyse</span> <span class="kn">import</span> <span class="n">ModelScenario</span>
 
 <span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;TAC&quot;</span>
 <span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;EUROPE&quot;</span>
@@ -446,48 +445,64 @@ using suitable keywords to grab the data from the object store.</p>
                          <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>We can plot our observation timeseries using the
-<code class="docutils literal notranslate"><span class="pre">ModelScenario.plot_timeseries()</span></code> method as before:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+</div>
+</div>
+<p>We can plot our observation timeseries using the <code class="docutils literal notranslate"><span class="pre">ModelScenario.plot_timeseries()</span></code> method as before:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>We can also check trace details of the extracted data by checking the
-available metadata. For instance for our footprint data we would expect
-this to have an associated species and for this to be labelled as “co2”:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">footprint_metadata</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span>
+</div>
+</div>
+<p>We can also check trace details of the extracted data by checking the available metadata. For instance for our footprint data we would expect this to have an associated species and for this to be labelled as “co2”:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">footprint_metadata</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span>
 <span class="n">footprint_species</span> <span class="o">=</span> <span class="n">footprint_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Our linked footprint has an associated species of &#39;</span><span class="si">{</span><span class="n">footprint_species</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+</div>
 </section>
 <section id="comparing-data-sources">
 <h2>3. Comparing data sources<a class="headerlink" href="#comparing-data-sources" title="Permalink to this heading">#</a></h2>
-<p>Once the correct high frequency emissions and footprints have been
-linked for our carbon dioxide data, we can start to plot comparisons
-between the sources and our measurement data.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_comparison</span><span class="p">(</span><span class="n">baseline</span><span class="o">=</span><span class="s2">&quot;percentile&quot;</span><span class="p">)</span>
+<p>Once the correct high frequency emissions and footprints have been linked for our carbon dioxide data, we can start to plot comparisons between the sources and our measurement data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_comparison</span><span class="p">(</span><span class="n">baseline</span><span class="o">=</span><span class="s2">&quot;percentile&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>As in the previous tutorial, multiple fluxes can be linked to your
-<code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object if required. This can include additional high
-frequency (&lt;24 hourly) or low frequency flux data. In this case we have
-added monthly “fossil fuel” emissions:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">source_fossil</span> <span class="o">=</span> <span class="s2">&quot;ff-edgar-bp&quot;</span>
+</div>
+</div>
+<p>As in the previous tutorial, multiple fluxes can be linked to your <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object if required. This can include additional high frequency (&lt;24 hourly) or low frequency flux data. In this case we have added monthly “fossil fuel” emissions:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">source_fossil</span> <span class="o">=</span> <span class="s2">&quot;ff-edgar-bp&quot;</span>
 
 <span class="n">scenario</span><span class="o">.</span><span class="n">add_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
                   <span class="n">source</span><span class="o">=</span><span class="n">source_fossil</span><span class="p">,</span>
                   <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fossil_flux</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="n">source_fossil</span><span class="p">]</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fossil_flux</span> <span class="o">=</span> <span class="n">scenario</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="n">source_fossil</span><span class="p">]</span>
 <span class="n">fossil_flux</span>
 </pre></div>
 </div>
-<p>If we plot the modelled measurement comparison, this will stack the
-natural and fossil fuel flux sources and combine with the footprint data
-in an appropriate way:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># scenario.plot_comparison(baseline=&quot;percentile&quot;, recalculate=True)</span>
+</div>
+</div>
+<p>If we plot the modelled measurement comparison, this will stack the natural and fossil fuel flux sources and combine with the footprint data in an appropriate way:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># scenario.plot_comparison(baseline=&quot;percentile&quot;, recalculate=True)</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 </section>
