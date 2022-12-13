@@ -194,7 +194,7 @@ def parse_openghg(
     # network_case_options = [network, network.upper(), network.lower()]
 
     # # Extract centralised data for site (if present)
-    # site_data = load_json(filename="acrg_site_info.json")
+    # site_data = load_json(filename="site_info.json")
     # for site_value in site_case_options:
     #     if site_value in site_data:
     #         site_info_all = site_data[site_value]

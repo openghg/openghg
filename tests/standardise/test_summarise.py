@@ -1,3 +1,4 @@
+import numpy as np
 from openghg.standardise import summary_source_formats, summary_site_codes
 
 
@@ -11,11 +12,11 @@ def test_summarise_format():
         assert col in summary_df
 
     # Check expected source format is returned for specific value
-    name = "mtecimone"
-    expected_data_type = "GCWERKS"
+    name = "Gosan, Korea"
+    expected_source_format = "GCWERKS"
 
     selection = summary_df[summary_df["Long name"] == name]
-    assert selection["Source format"].values == expected_data_type
+    assert selection["Source format"].values == expected_source_format
 
 
 def test_summarise_site():

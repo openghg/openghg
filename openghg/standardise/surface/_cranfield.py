@@ -55,6 +55,7 @@ def parse_cranfield(
     metadata["sampling_period"] = str(sampling_period)
     metadata["height"] = "10magl"
     metadata["inlet"] = "10magl"
+    metadata["inlet_height_magl"] = "10"
     metadata["network"] = "CRANFIELD"
     metadata["data_type"] = "surface"
 

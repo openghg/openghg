@@ -37,7 +37,7 @@ def parse_btt(
     # Take std-dev measurements from these columns for these species
     species_sd = {"CO2": "co2.sd.ppm", "CH4": "ch4.sd.ppb"}
 
-    site_data = load_json(filename="acrg_site_info.json")
+    site_data = load_json(filename="site_info.json")
     site_info = site_data[site][network]
 
     param_data = load_json(filename="attributes.json")
