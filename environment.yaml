@@ -9,6 +9,7 @@ dependencies:
   - h5netcdf
   - matplotlib
   - msgpack-python
+  - netcdf4
   - numexpr
   - numpy
   - nc-time-axis
@@ -21,7 +22,7 @@ dependencies:
   - tinydb
   - toml
   - tqdm
-  - xarray = 2022.09.0
+  - xarray
   - urllib3 >= 1.26.3
   - pip
   - xesmf
