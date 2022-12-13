@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Adding observation data &#8212; OpenGHG 0+untagged.1.g5e8eb6c.dirty documentation</title>
+    <title>Adding observation data &#8212; OpenGHG 0+untagged.1.gb4cfd12.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g5e8eb6c.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gb4cfd12.dirty documentation</p>
   
 </a>
     
@@ -380,30 +380,38 @@
               
   <section id="adding-observation-data">
 <h1>Adding observation data<a class="headerlink" href="#adding-observation-data" title="Permalink to this heading">#</a></h1>
-<p>This tutorial demonstrates how OpenGHG can be used to process new measurement data, search the data present and to retrieve this for analysis and visualisation.</p>
+<p>This tutorial demonstrates how OpenGHG can be used to process new
+measurement data, search the data present and to retrieve this for
+analysis and visualisation.</p>
 <section id="using-the-tutorial-object-store">
 <h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Permalink to this heading">#</a></h2>
-<p>To avoid adding the example data we use in this tutorial to your normal object store, we need to tell OpenGHG to use a separate sandboxed object store that we’ll call the tutorial store. To do this we use the <code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the <code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t affect your use of OpenGHG outside of this tutorial.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+<p>To avoid adding the example data we use in this tutorial to your normal
+object store, we need to tell OpenGHG to use a separate sandboxed object
+store that we’ll call the tutorial store. To do this we use the
+<code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
+<code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
+affect your use of OpenGHG outside of this tutorial.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
 <span class="n">use_tutorial_store</span><span class="p">()</span>
 </pre></div>
-</div>
-</div>
 </div>
 </section>
 <section id="adding-and-standardising-data">
 <h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Permalink to this heading">#</a></h2>
 <section id="data-types">
 <h3>Data types<a class="headerlink" href="#data-types" title="Permalink to this heading">#</a></h3>
-<p>Within OpenGHG there are several data types which can be processed and stored within the object store. This includes data from the AGAGE, DECC, NOAA, LondonGHG, BEAC2ON networks.</p>
-<p>When uploading a new data file, the data type must be specified alongside some additional details so OpenGHG can recognise the format and the correct standardisation can occur. The details needed will vary by the type of data being uploaded but will often include the measurement reference (e.g. a site code) and the name of any network.</p>
-<p>For the full list of accepted observation inputs and data types, there is a summary function which can be called:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_source_formats</span>
+<p>Within OpenGHG there are several data types which can be processed and
+stored within the object store. This includes data from the AGAGE, DECC,
+NOAA, LondonGHG, BEAC2ON networks.</p>
+<p>When uploading a new data file, the data type must be specified
+alongside some additional details so OpenGHG can recognise the format
+and the correct standardisation can occur. The details needed will vary
+by the type of data being uploaded but will often include the
+measurement reference (e.g. a site code) and the name of any network.</p>
+<p>For the full list of accepted observation inputs and data types, there
+is a summary function which can be called:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_source_formats</span>
 
 <span class="n">summary</span> <span class="o">=</span> <span class="n">summary_source_formats</span><span class="p">()</span>
 
@@ -413,122 +421,105 @@
 <span class="n">summary</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>Note: there may be multiple data types applicable for a give site. This is can be dependent on various factors including the instrument type used to measure the data e.g. for Tacolneston (“TAC”):</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">summary</span><span class="p">[</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Site code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;TAC&quot;</span><span class="p">]</span>
+<p>Note: there may be multiple data types applicable for a give site. This
+is can be dependent on various factors including the instrument type
+used to measure the data e.g. for Tacolneston (“TAC”):</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary</span><span class="p">[</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Site code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;TAC&quot;</span><span class="p">]</span>
 </pre></div>
-</div>
-</div>
 </div>
 </section>
 <section id="decc-network">
 <h3>DECC network<a class="headerlink" href="#decc-network" title="Permalink to this heading">#</a></h3>
-<p>We will start by adding data to the object store from a surface site within the DECC network. Here we have accessed a subset of data from the Tacolneston site (site code “TAC”) in the UK.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+<p>We will start by adding data to the object store from a surface site
+within the DECC network. Here we have accessed a subset of data from the
+Tacolneston site (site code “TAC”) in the UK.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz&quot;</span>
 
 <span class="n">tac_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">data_url</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>As this data is measured in-situ, this is classed as a surface site and we need to use the <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class to interpret this data. We can pass our list of files to the <code class="docutils literal notranslate"><span class="pre">read_file</span></code> method associated within the <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class, also providing details on:</p>
-<ul class="simple">
-<li><p>site code - <code class="docutils literal notranslate"><span class="pre">&quot;TAC&quot;</span></code> for Tacolneston</p></li>
-<li><p>type of data we want to process, known as the data type - <code class="docutils literal notranslate"><span class="pre">&quot;CRDS&quot;</span></code></p></li>
-<li><p>network - <code class="docutils literal notranslate"><span class="pre">&quot;DECC&quot;</span></code></p></li>
-</ul>
+<p>As this data is measured in-situ, this is classed as a surface site and
+we need to use the <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class to interpret this data. We can
+pass our list of files to the <code class="docutils literal notranslate"><span class="pre">read_file</span></code> method associated within the
+<code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class, also providing details on: - site code - <code class="docutils literal notranslate"><span class="pre">&quot;TAC&quot;</span></code>
+for Tacolneston - type of data we want to process, known as the data
+type - <code class="docutils literal notranslate"><span class="pre">&quot;CRDS&quot;</span></code> - network - <code class="docutils literal notranslate"><span class="pre">&quot;DECC&quot;</span></code></p>
 <p>This is shown below:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
 
 <span class="n">decc_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">decc_results</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">decc_results</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>Here this extracts the data (and metadata) from the supplied files, standardises them and adds these to our created object store.</p>
-<p>The returned <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> will give us a dictionary of how the data has been stored. The data itself may have been split into different entries, each one stored with a unique ID (UUID). Each entry is known as a <em>Datasource</em> (see below for a note on Datasources). The <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> output includes details of the processed data and tells us that the data has been stored correctly. This will also tell us if any errors have been encountered when trying to access and standardise this data.</p>
+<p>Here this extracts the data (and metadata) from the supplied files,
+standardises them and adds these to our created object store.</p>
+<p>The returned <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> will give us a dictionary of how the data
+has been stored. The data itself may have been split into different
+entries, each one stored with a unique ID (UUID). Each entry is known as
+a <em>Datasource</em> (see below for a note on Datasources). The
+<code class="docutils literal notranslate"><span class="pre">decc_results</span></code> output includes details of the processed data and tells
+us that the data has been stored correctly. This will also tell us if
+any errors have been encountered when trying to access and standardise
+this data.</p>
 </section>
 <section id="agage-data">
 <h3>AGAGE data<a class="headerlink" href="#agage-data" title="Permalink to this heading">#</a></h3>
-<p>Another data type which can be added is data from the AGAGE network. The functions that process the AGAGE data expect data to have an accompanying precisions file. For each data file we create a tuple with the data filename and the precisions filename. <em>Note: A simpler method of uploading these file types is planned.</em></p>
+<p>Another data type which can be added is data from the AGAGE network. The
+functions that process the AGAGE data expect data to have an
+accompanying precisions file. For each data file we create a tuple with
+the data filename and the precisions filename. <em>Note: A simpler method
+of uploading these file types is planned.</em></p>
 <p>We can now retrieve the example data for Capegrim as we did above</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cgo_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cgo_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz&quot;</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">cgo_url</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">cgo_url</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_data</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>We must create a <code class="docutils literal notranslate"><span class="pre">tuple</span></code> associated with each data file to link this to a precision file:</p>
+<p>We must create a <code class="docutils literal notranslate"><span class="pre">tuple</span></code> associated with each data file to link this
+to a precision file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">list_of_tuples</span> <span class="o">=</span> <span class="p">[(</span><span class="n">data1_filepath</span><span class="p">,</span> <span class="n">precision1_filepath</span><span class="p">),</span> <span class="p">(</span><span class="n">data2_filepath</span><span class="p">,</span> <span class="n">precision2_filepath</span><span class="p">),</span> <span class="o">...</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_data</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_data</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 <span class="n">capegrim_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">capegrim_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">capegrim_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>The data being uploaded here is from the Cape Grim station in Australia, site code “CGO”.</p>
-<p>We can add these files to the object store in the same way as the DECC data by including the right keywords:</p>
-<ul class="simple">
-<li><p>site code - <code class="docutils literal notranslate"><span class="pre">&quot;CGO&quot;</span></code> for Cape Grim</p></li>
-<li><p>data type - <code class="docutils literal notranslate"><span class="pre">&quot;GCWERKS&quot;</span></code></p></li>
-<li><p>network - <code class="docutils literal notranslate"><span class="pre">&quot;AGAGE&quot;</span></code></p></li>
-</ul>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">agage_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">capegrim_tuple</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;CGO&quot;</span><span class="p">,</span>
+<p>The data being uploaded here is from the Cape Grim station in Australia,
+site code “CGO”.</p>
+<p>We can add these files to the object store in the same way as the DECC
+data by including the right keywords: - site code - <code class="docutils literal notranslate"><span class="pre">&quot;CGO&quot;</span></code> for Cape
+Grim - data type - <code class="docutils literal notranslate"><span class="pre">&quot;GCWERKS&quot;</span></code> - network - <code class="docutils literal notranslate"><span class="pre">&quot;AGAGE&quot;</span></code></p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">agage_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">capegrim_tuple</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;CGO&quot;</span><span class="p">,</span>
                               <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">,</span> <span class="n">instrument</span><span class="o">=</span><span class="s2">&quot;medusa&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>When viewing <code class="docutils literal notranslate"><span class="pre">agage_results</span></code> there will be a large number of Datasource UUIDs shown due to the large number of gases in each data file</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">agage_results</span>
+<p>When viewing <code class="docutils literal notranslate"><span class="pre">agage_results</span></code> there will be a large number of
+Datasource UUIDs shown due to the large number of gases in each data
+file</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">agage_results</span>
 </pre></div>
-</div>
-</div>
 </div>
 <section id="a-note-on-datasources">
 <h4>A note on Datasources<a class="headerlink" href="#a-note-on-datasources" title="Permalink to this heading">#</a></h4>
-<p>Datasources are objects that are stored in the object store (++add link to object store notes++) that hold the data and metadata associated with each measurement we upload to the platform.</p>
-<p>For example, if we upload a file that contains readings for three gas species from a single site at a specific inlet height OpenGHG    will assign this data to three different Datasources, one for each species. Metadata such as the site, inlet height, species, network etc are stored alongside the measurements for easy searching.</p>
-<p>Datasources can also handle multiple versions of data from a single site, so if scales or other factors change multiple versions may be stored for easy future comparison.</p>
+<p>Datasources are objects that are stored in the object store (++add link
+to object store notes++) that hold the data and metadata associated with
+each measurement we upload to the platform.</p>
+<p>For example, if we upload a file that contains readings for three gas
+species from a single site at a specific inlet height OpenGHG will
+assign this data to three different Datasources, one for each species.
+Metadata such as the site, inlet height, species, network etc are stored
+alongside the measurements for easy searching.</p>
+<p>Datasources can also handle multiple versions of data from a single
+site, so if scales or other factors change multiple versions may be
+stored for easy future comparison.</p>
 </section>
 </section>
 </section>
@@ -536,134 +527,103 @@
 <h2>3. Searching for data<a class="headerlink" href="#searching-for-data" title="Permalink to this heading">#</a></h2>
 <section id="searching-the-object-store">
 <h3>Searching the object store<a class="headerlink" href="#searching-the-object-store" title="Permalink to this heading">#</a></h3>
-<p>We can search the object store by property using the <code class="docutils literal notranslate"><span class="pre">search_surface(...)</span></code> function.</p>
-<p>For example we can find all sites which have measurements for carbon tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><span class="pre">species</span></code> keyword:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<p>We can search the object store by property using the
+<code class="docutils literal notranslate"><span class="pre">search_surface(...)</span></code> function.</p>
+<p>For example we can find all sites which have measurements for carbon
+tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><span class="pre">species</span></code> keyword:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">cfc_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;cfc11&quot;</span><span class="p">)</span>
 <span class="n">cfc_results</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>We could also look for details of all the data measured at the Billsdale (“BSD”) site using the <code class="docutils literal notranslate"><span class="pre">site</span></code> keyword:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tac_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">)</span>
+<p>We could also look for details of all the data measured at the Billsdale
+(“BSD”) site using the <code class="docutils literal notranslate"><span class="pre">site</span></code> keyword:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tac_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">)</span>
 <span class="n">tac_results</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tac_results</span><span class="o">.</span><span class="n">results</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tac_results</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>For this site you can see this contains details of each of the species as well as the inlet heights these were measured at.</p>
+<p>For this site you can see this contains details of each of the species
+as well as the inlet heights these were measured at.</p>
 </section>
 <section id="quickly-retrieve-data">
 <h3>Quickly retrieve data<a class="headerlink" href="#quickly-retrieve-data" title="Permalink to this heading">#</a></h3>
-<p>Say we want to retrieve all the <code class="docutils literal notranslate"><span class="pre">co2</span></code> data from Tacolneston, we can perform perform a search and expect a <a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult"><code class="docutils literal notranslate"><span class="pre">SearchResults</span></code></a> object to be returned. If no results are found <code class="docutils literal notranslate"><span class="pre">None</span></code> is returned.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">)</span>
+<p>Say we want to retrieve all the <code class="docutils literal notranslate"><span class="pre">co2</span></code> data from Tacolneston, we can
+perform perform a search and expect a
+<code class="docutils literal notranslate"><span class="pre">`SearchResults</span></code> &lt;<a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult">https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult</a>&gt;`__
+object to be returned. If no results are found <code class="docutils literal notranslate"><span class="pre">None</span></code> is returned.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span><span class="o">.</span><span class="n">results</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>We can retrive either some or all of the data easily using the <code class="docutils literal notranslate"><span class="pre">retrieve</span></code> function.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inlet_54m_data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;54m&quot;</span><span class="p">)</span>
+<p>We can retrive either some or all of the data easily using the
+<code class="docutils literal notranslate"><span class="pre">retrieve</span></code> function.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inlet_54m_data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;54m&quot;</span><span class="p">)</span>
 <span class="n">inlet_54m_data</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>Or we can retrieve all of the data and get a list of <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> objects.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">all_co2_data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
+<p>Or we can retrieve all of the data and get a list of <code class="docutils literal notranslate"><span class="pre">ObsData</span></code>
+objects.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">all_co2_data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">all_co2_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">all_co2_data</span>
 </pre></div>
-</div>
-</div>
 </div>
 </section>
 </section>
 <section id="retrieving-data">
 <h2>4. Retrieving data<a class="headerlink" href="#retrieving-data" title="Permalink to this heading">#</a></h2>
-<p>To retrieve the standardised data from the object store there are several functions we can use which depend on the type of data we want to access.</p>
-<p>To access the surface data we have added so far we can use the <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> function and pass keywords for the site code, species and inlet height to retrieve our data.</p>
-<p>In this case we want to extract the carbon dioxide (“co2”) data from the Tacolneston data (“TAC”) site measured at the “185m” inlet:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
+<p>To retrieve the standardised data from the object store there are
+several functions we can use which depend on the type of data we want to
+access.</p>
+<p>To access the surface data we have added so far we can use the
+<code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code> function and pass keywords for the site code,
+species and inlet height to retrieve our data.</p>
+<p>In this case we want to extract the carbon dioxide (“co2”) data from the
+Tacolneston data (“TAC”) site measured at the “185m” inlet:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
 
 <span class="n">co2_data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;185m&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
 <p>If we view our returned <code class="docutils literal notranslate"><span class="pre">obs_data</span></code> variable this will contain:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">data</span></code> - The standardised data (accessed using e.g. <code class="docutils literal notranslate"><span class="pre">obs_data.data</span></code>). This is returned as an <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html">xarray Dataset</a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">metadata</span></code> - The associated metadata (accessed using e.g. <code class="docutils literal notranslate"><span class="pre">obs_data.metadata</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data</span></code> - The standardised data (accessed using
+e.g. <code class="docutils literal notranslate"><span class="pre">obs_data.data</span></code>). This is returned as an <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html">xarray
+Dataset</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">metadata</span></code> - The associated metadata (accessed using
+e.g. <code class="docutils literal notranslate"><span class="pre">obs_data.metadata</span></code>).</p></li>
 </ul>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">co2_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">co2_data</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>We can now make a simple plot using the <code class="docutils literal notranslate"><span class="pre">plot_timeseries</span></code> method of the <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object.</p>
+<p>We can now make a simple plot using the <code class="docutils literal notranslate"><span class="pre">plot_timeseries</span></code> method of
+the <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object.</p>
 <blockquote>
-<div><p><strong><em>NOTE:</em></strong>  the plot created below may not show up on the online documentation version of this notebook.</p>
+<div><p><strong>NOTE:</strong> the plot created below may not show up on the online
+documentation version of this notebook.</p>
 </div></blockquote>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">co2_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">co2_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-</div>
-<p>You can also pass any of <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">xlabel</span></code>, <code class="docutils literal notranslate"><span class="pre">ylabel</span></code> and <code class="docutils literal notranslate"><span class="pre">units</span></code> to the <code class="docutils literal notranslate"><span class="pre">plot_timeseries</span></code> function to modify the labels.</p>
+<p>You can also pass any of <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">xlabel</span></code>, <code class="docutils literal notranslate"><span class="pre">ylabel</span></code> and <code class="docutils literal notranslate"><span class="pre">units</span></code>
+to the <code class="docutils literal notranslate"><span class="pre">plot_timeseries</span></code> function to modify the labels.</p>
 </section>
 <section id="cleanup">
 <h2>5. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
-<p>If you’re finished with the data in this tutorial you can cleanup the tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+<p>If you’re finished with the data in this tutorial you can cleanup the
+tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
 </pre></div>
-</div>
-</div>
 </div>
 </section>
 </section>
