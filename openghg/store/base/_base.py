@@ -5,7 +5,6 @@ from typing import Dict, List, Optional, Type, TypeVar, Union
 
 from pandas import Timestamp
 from tinydb import TinyDB
-from openghg.util import to_lowercase
 
 __all__ = ["BaseStore"]
 
@@ -177,6 +176,8 @@ class BaseStore:
         Returns:
             None
         """
+        from openghg.util import to_lowercase
+
         for key, uuid_data in uuids.items():
             new = uuid_data["new"]
             # Only add if this is a new Datasource
