@@ -18,5 +18,5 @@ scipy
 tinydb
 toml
 tqdm
-xarray==2022.9.0
+xarray
 urllib3 >= 1.26.3
