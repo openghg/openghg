@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Retrieving data from remote archives &#8212; OpenGHG 0+untagged.1.gb975f82.dirty documentation</title>
+    <title>Retrieving data from remote archives &#8212; OpenGHG 0+untagged.1.g86b7d7f.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb975f82.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g86b7d7f.dirty documentation</p>
   
 </a>
     
@@ -380,79 +380,86 @@
               
   <section id="retrieving-data-from-remote-archives">
 <h1>Retrieving data from remote archives<a class="headerlink" href="#retrieving-data-from-remote-archives" title="Permalink to this heading">#</a></h1>
-<p>This tutorial covers the retrieval of data from the ICOS Carbon Portal
-and the CEDA archives.</p>
+<p>This tutorial covers the retrieval of data from the ICOS Carbon Portal and the CEDA archives.</p>
 <section id="icos">
 <h2>ICOS<a class="headerlink" href="#icos" title="Permalink to this heading">#</a></h2>
-<p>It’s easy to retrieve atmospheric gas measurements from the <a class="reference external" href="https://www.icos-cp.eu/observations/carbon-portal">ICOS Carbon
-Portal</a> using
-OpenGHG. To do so we’ll use the <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> function from
-<code class="docutils literal notranslate"><span class="pre">openghg.client</span></code>.</p>
+<p>It’s easy to retrieve atmospheric gas measurements from the <a class="reference external" href="https://www.icos-cp.eu/observations/carbon-portal">ICOS Carbon Portal</a> using OpenGHG. To do so we’ll use the <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.client</span></code>.</p>
 <section id="checking-available-data">
 <h3>Checking available data<a class="headerlink" href="#checking-available-data" title="Permalink to this heading">#</a></h3>
-<p>You can find the stations available in ICOS using <a class="reference external" href="https://data.icos-cp.eu/portal/#%7B%22filterCategories%22%3A%7B%22project%22%3A%5B%22icos%22%5D%2C%22level%22%3A%5B1%2C2%5D%2C%22stationclass%22%3A%5B%22ICOS%22%5D%2C%22theme%22%3A%5B%22atmosphere%22%5D%7D%2C%22tabs%22%3A%7B%22resultTab%22%3A2%7D%7D">their map
-interface</a>.
-Click on a site to see it’s information, then use it’s three letter site
-code to retrieve data. You can also use the <a class="reference external" href="https://data.icos-cp.eu/portal/#%7B%22filterCategories%22:%7B%22project%22:%5B%22icos%22%5D,%22level%22:%5B1,2%5D,%22stationclass%22:%5B%22ICOS%22%5D%7D%7D">search
-page</a>
-to find available data at a given site.</p>
-</section>
+<p>You can find the stations available in ICOS using <a class="reference external" href="https://data.icos-cp.eu/portal/#%7B%22filterCategories%22%3A%7B%22project%22%3A%5B%22icos%22%5D%2C%22level%22%3A%5B1%2C2%5D%2C%22stationclass%22%3A%5B%22ICOS%22%5D%2C%22theme%22%3A%5B%22atmosphere%22%5D%7D%2C%22tabs%22%3A%7B%22resultTab%22%3A2%7D%7D">their map interface</a>. Click on a site to see it’s information, then use it’s three letter site code to retrieve data. You can also use the <a class="reference external" href="https://data.icos-cp.eu/portal/#%7B%22filterCategories%22:%7B%22project%22:%5B%22icos%22%5D,%22level%22:%5B1,2%5D,%22stationclass%22:%5B%22ICOS%22%5D%7D%7D">search page</a> to find available data at a given site.</p>
+<div>
+<img src="images/icos_map.jpg" width="50%"/>
+</div></section>
 <section id="using-retrieve-icos">
 <h3>Using <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code><a class="headerlink" href="#using-retrieve-icos" title="Permalink to this heading">#</a></h3>
-<p>First we’ll import <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> from the <code class="docutils literal notranslate"><span class="pre">client</span></code> submodule, then
-we’ll retrieve some data from Weybourne (<strong>WAO</strong>). The function will
-first check for any data from <strong>WAO</strong> already stored in the object
-store, if any is found it is returned, otherwise it’ll retrieve the data
-from the ICOS Carbon Portal, this may take a bit longer.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve.icos</span> <span class="kn">import</span> <span class="n">retrieve_atmospheric</span>
+<p>First we’ll import <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> from the <code class="docutils literal notranslate"><span class="pre">client</span></code> submodule, then we’ll retrieve some data from Weybourne (<strong>WAO</strong>). The function will first check for any data from <strong>WAO</strong> already stored in the object store, if any is found it is returned, otherwise it’ll retrieve the data from the ICOS Carbon Portal, this may take a bit longer.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve.icos</span> <span class="kn">import</span> <span class="n">retrieve_atmospheric</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Now we can inspect <code class="docutils literal notranslate"><span class="pre">wao_data</span></code>, an <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object to see what was
-retrieved.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data</span>
+</div>
+</div>
+<p>Now we can inspect <code class="docutils literal notranslate"><span class="pre">wao_data</span></code>, an <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object to see what was retrieved.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data</span>
 </pre></div>
 </div>
-<p>We can see that we’ve retrieved <code class="docutils literal notranslate"><span class="pre">ch4</span></code> data that covers 2013-04-01 -
-2015-07-31. Quite a lot of metadata is saved during the retrieval
-process, including where the data was retrieved from (<code class="docutils literal notranslate"><span class="pre">dobj_pid</span></code> in
-the metadata), the instruments and their associated metadata and a
-citation string.</p>
-<p>You can see more information about the instruments by going to the link
-in the <code class="docutils literal notranslate"><span class="pre">instrument_data</span></code> section of the metadata</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="n">wao_data</span><span class="o">.</span><span class="n">metadata</span>
+</div>
+</div>
+<p>We can see that we’ve retrieved <code class="docutils literal notranslate"><span class="pre">ch4</span></code> data that covers 2013-04-01 - 2015-07-31. Quite a lot of metadata is saved during the retrieval process, including where the data was retrieved from (<code class="docutils literal notranslate"><span class="pre">dobj_pid</span></code> in the metadata), the instruments and their associated metadata and a citation string.</p>
+<p>You can see more information about the instruments by going to the link in the <code class="docutils literal notranslate"><span class="pre">instrument_data</span></code> section of the metadata</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="n">wao_data</span><span class="o">.</span><span class="n">metadata</span>
 <span class="n">instrument_data</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span>
 <span class="n">citation_string</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;citation_string&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Here we get the instrument name and a link to the instrument data on the
-ICOS Carbon Portal.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">instrument_data</span>
+</div>
+</div>
+<p>Here we get the instrument name and a link to the instrument data on the ICOS Carbon Portal.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">instrument_data</span>
 </pre></div>
 </div>
+</div>
+</div>
 <p>And we can easily get the citation string for the data</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">citation_string</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">citation_string</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="viewing-the-data">
 <h3>Viewing the data<a class="headerlink" href="#viewing-the-data" title="Permalink to this heading">#</a></h3>
 <p>As with any <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object we can quickly plot it to have a look.</p>
 <blockquote>
-<div><p><strong>NOTE:</strong> the plot created below may not show up on the online
-documentation version of this notebook.</p>
+<div><p><strong><em>NOTE:</em></strong>  the plot created below may not show up on the online documentation version of this notebook.</p>
 </div></blockquote>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="data-levels">
 <h3>Data levels<a class="headerlink" href="#data-levels" title="Permalink to this heading">#</a></h3>
-<p>Data available on the ICOS Carbon Portal is made available under three
-different levels (<a class="reference external" href="https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone">see
-docs</a>).</p>
+<p>Data available on the ICOS Carbon Portal is made available under three different levels (<a class="reference external" href="https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone">see docs</a>).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">Data</span> <span class="n">level</span> <span class="mi">1</span><span class="p">:</span> <span class="n">Near</span> <span class="n">Real</span> <span class="n">Time</span> <span class="n">Data</span> <span class="p">(</span><span class="n">NRT</span><span class="p">)</span> <span class="ow">or</span> <span class="n">Internal</span> <span class="n">Work</span> <span class="n">data</span> <span class="p">(</span><span class="n">IW</span><span class="p">)</span><span class="o">.</span>
 <span class="o">-</span> <span class="n">Data</span> <span class="n">level</span> <span class="mi">2</span><span class="p">:</span> <span class="n">The</span> <span class="n">final</span> <span class="n">quality</span> <span class="n">checked</span> <span class="n">ICOS</span> <span class="n">RI</span> <span class="n">data</span> <span class="nb">set</span><span class="p">,</span> <span class="n">published</span> <span class="n">by</span> <span class="n">the</span> <span class="n">CFs</span><span class="p">,</span>
                 <span class="n">to</span> <span class="n">be</span> <span class="n">distributed</span> <span class="n">through</span> <span class="n">the</span> <span class="n">Carbon</span> <span class="n">Portal</span><span class="o">.</span>
@@ -461,95 +468,111 @@ docs</a>).</p>
                 <span class="n">that</span> <span class="n">rely</span> <span class="n">on</span> <span class="n">ICOS</span> <span class="n">data</span> <span class="n">products</span> <span class="n">are</span> <span class="n">called</span> <span class="n">Level</span> <span class="mi">3</span> <span class="n">data</span><span class="o">.</span>
 </pre></div>
 </div>
-<p>By default level 2 data is retrieved but this can be changed by passing
-<code class="docutils literal notranslate"><span class="pre">data_level</span></code> to <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code>. Below we’ll retrieve some more
-recent data from <strong>WAO</strong>.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<p>By default level 2 data is retrieved but this can be changed by passing <code class="docutils literal notranslate"><span class="pre">data_level</span></code> to <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code>. Below we’ll retrieve some more recent data from <strong>WAO</strong>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span>
 </pre></div>
 </div>
-<p>You can see that we’ve now got data from 2021-07-01 - 2022-04-24. The
-ability to retrieve different level data has been added for convenienve,
-choose the best option for your workflow.</p>
+</div>
+</div>
+<p>You can see that we’ve now got data from 2021-07-01 - 2022-04-24. The ability to retrieve different level data has been added for convenienve, choose the best option for your workflow.</p>
 <blockquote>
-<div><p><strong>NOTE:</strong> level 1 data may not have been quality checked.</p>
+<div><p><strong><em>NOTE:</em></strong>  level 1 data may not have been quality checked.</p>
 </div></blockquote>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;WAO - Level 1 data&quot;</span><span class="p">)</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;WAO - Level 1 data&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="forcing-retrieval">
 <h3>Forcing retrieval<a class="headerlink" href="#forcing-retrieval" title="Permalink to this heading">#</a></h3>
-<p>As ICOS data is cached by OpenGHG you may sometimes need to force a
-retrieval from the ICOS Carbon Portal.</p>
-<p>If you retrieve data using <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> and notice that it does not
-return the most up to date data (compare the dates with those on the
-portal) you can force a retrieval using <code class="docutils literal notranslate"><span class="pre">force_retrieval</span></code>.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">new_data</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">force_retrieval</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<p>As ICOS data is cached by OpenGHG you may sometimes need to force a retrieval from the ICOS Carbon Portal.</p>
+<p>If you retrieve data using <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> and notice that it does not return the most up to date data (compare the dates with those on the portal) you can force a retrieval using <code class="docutils literal notranslate"><span class="pre">force_retrieval</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">new_data</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">force_retrieval</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here you may notice we get a message telling us there is no new data to
-process, if you force a retrieval and there is no newer data you’ll see
-this message.</p>
+</div>
+</div>
+<p>Here you may notice we get a message telling us there is no new data to process, if you force a retrieval and there is no newer data you’ll see this message.</p>
 </section>
 </section>
 <section id="ceda">
 <h2>CEDA<a class="headerlink" href="#ceda" title="Permalink to this heading">#</a></h2>
-<p>To retrieve data from CEDA you can use the <code class="docutils literal notranslate"><span class="pre">retrieve_ceda</span></code> function
-from <code class="docutils literal notranslate"><span class="pre">openghg.client</span></code>. This lets you pull down data from CEDA, process
-it and store it in the object store. Once the data has been stored
-successive calls will retrieve the data from the object store.</p>
+<p>To retrieve data from CEDA you can use the <code class="docutils literal notranslate"><span class="pre">retrieve_ceda</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.client</span></code>. This lets you pull down data from CEDA, process it and store it in the object store. Once the data has been stored successive calls will retrieve the data from the object store.</p>
 <blockquote>
-<div><p><strong>NOTE:</strong> For the moment only surface observations can be retrieved
-and it is expected that these are already in a NetCDF file. If you
-find a file that can’t be processed by the function please <a class="reference external" href="https://github.com/openghg/openghg/issues/new/choose">open an
-issue on
-GitHub</a> and
-we’ll do our best to add support that file type.</p>
+<div><p><strong><em>NOTE:</em></strong>  For the moment only surface observations can be retrieved and it is expected that these are already in a NetCDF file. If you find a file that can’t be processed by the function please <a class="reference external" href="https://github.com/openghg/openghg/issues/new/choose">open an issue on GitHub</a> and we’ll do our best to add support that file type.</p>
 </div></blockquote>
-<p>To pull data from CEDA you’ll first need to find the URL of the data. To
-do this use the <a class="reference external" href="https://data.ceda.ac.uk/badc">CEDA data browser</a> and
-copy the link to the file (right click on the download button and click
-copy link / copy link address). You can then pass that URL to
-<code class="docutils literal notranslate"><span class="pre">retrieve_ceda</span></code>, it will then download the data, do some
-standardisation and checks and store it in the object store.</p>
-<p>We don’t currently support downloading restricted data that requires a
-login to access. If you’d find this useful please open an issue at the
-link given above.</p>
+<p>To pull data from CEDA you’ll first need to find the URL of the data. To do this use the <a class="reference external" href="https://data.ceda.ac.uk/badc">CEDA data browser</a> and copy the link to the file (right click on the download button and click copy link / copy link address). You can then pass that URL to <code class="docutils literal notranslate"><span class="pre">retrieve_ceda</span></code>, it will then download the data, do some standardisation and checks and store it in the object store.</p>
+<p>We don’t currently support downloading restricted data that requires a login to access. If you’d find this useful please open an issue at the link given above.</p>
 <p>Now we’re ready to retrieve the data.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve.ceda</span> <span class="kn">import</span> <span class="n">retrieve_surface</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve.ceda</span> <span class="kn">import</span> <span class="n">retrieve_surface</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-crds_heathfield_20130101_co2-100m.nc?download=1&quot;</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-crds_heathfield_20130101_co2-100m.nc?download=1&quot;</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data</span> <span class="o">=</span> <span class="n">retrieve_surface</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data</span> <span class="o">=</span> <span class="n">retrieve_surface</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Now we’ve got the data, we can use it as any other <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object,
-using <code class="docutils literal notranslate"><span class="pre">data</span></code> and <code class="docutils literal notranslate"><span class="pre">metadata</span></code>.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+</div>
+</div>
+<p>Now we’ve got the data, we can use it as any other <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object, using <code class="docutils literal notranslate"><span class="pre">data</span></code> and <code class="docutils literal notranslate"><span class="pre">metadata</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
+</div>
+</div>
 </div>
 <section id="retrieving-a-second-time">
 <h3>Retrieving a second time<a class="headerlink" href="#retrieving-a-second-time" title="Permalink to this heading">#</a></h3>
-<p>The second time we (or another use) retrieves the data it will be pulled
-from the object store, this should be faster than retrieving from CEDA.
-To get the same data again use the <code class="docutils literal notranslate"><span class="pre">site</span></code>, <code class="docutils literal notranslate"><span class="pre">species</span></code> and <code class="docutils literal notranslate"><span class="pre">inlet</span></code>
-arguments.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data2</span> <span class="o">=</span> <span class="n">retrieve_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;hfd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">)</span>
+<p>The second time we (or another use) retrieves the data it will be pulled from the object store, this should be faster than retrieving from CEDA. To get the same data again use the <code class="docutils literal notranslate"><span class="pre">site</span></code>, <code class="docutils literal notranslate"><span class="pre">species</span></code> and <code class="docutils literal notranslate"><span class="pre">inlet</span></code> arguments.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data2</span> <span class="o">=</span> <span class="n">retrieve_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;hfd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data2</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data2</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="cleanup-the-temporary-object-store">
 <h3>Cleanup the temporary object store<a class="headerlink" href="#cleanup-the-temporary-object-store" title="Permalink to this heading">#</a></h3>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tmp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tmp_dir</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 </section>
