@@ -145,6 +145,13 @@
       "longitude": 5.632
     }
   },
+  "ASP": {
+    "CSIRO": {
+      "latitude": -38.01,
+      "longitude": 145.01,
+      "long_name": "Aspendale, Australia"
+    }
+  },
   "ATO": {
     "ATTO": {
       "height": ["79m", "53m", "38m", "24m", "4m"],
@@ -233,7 +240,7 @@
       "height_name": ["300magl"],
       "height_station_masl": 150.0,
       "latitude": 53.23,
-      "long_name": "Bialystok",
+      "long_name": "Bialystok, Poland",
       "longitude": 23.03
     }
   },
@@ -243,7 +250,7 @@
       "height_name": ["10magl"],
       "height_station_masl": 190.0,
       "latitude": 58.39,
-      "long_name": "Birkenes",
+      "long_name": "Birkenes Observatory, Norway",
       "longitude": 8.25
     }
   },
@@ -253,7 +260,7 @@
       "height_name": ["47magl"],
       "height_station_masl": 73.0,
       "latitude": 44.38,
-      "long_name": "Biscarosse",
+      "long_name": "Biscarosse, France",
       "longitude": -1.23
     }
   },
@@ -387,7 +394,8 @@
       "height_name": ["185magl"],
       "latitude": 51.5215,
       "long_name": "BT Tower, UK",
-      "longitude": -0.1389
+      "longitude": -0.1389,
+      "status": "current"
     }
   },
   "BWD": {
@@ -633,6 +641,15 @@
       "height_name": ["6magl"]
     }
   },
+  "CPI": {
+    "ICOS": {
+      "latitude": 52.17,
+      "longitude": -6.35,
+      "height_station_masl": 9.0,
+      "long_name": "Carnsore Point, Ireland",
+      "icos_sitecode": "CSP"
+    }
+  },
   "CPS": {
     "EC": {
       "height": ["8m"],
@@ -694,7 +711,7 @@
   },
   "CRZ": {
     "NOAA": {
-      "height": ["Variable"],
+      "height": ["10m"],
       "height_station_masl": 197.0,
       "latitude": -46.434,
       "long_name": "Crozet Island, France",
@@ -1557,9 +1574,9 @@
       "height": ["10m"],
       "height_name": ["10magl"],
       "height_station_masl": 3.0,
-      "latitude": 19.7371,
+      "latitude": 19.5608,
       "long_name": "Cape Kumukahi, Hawaii",
-      "longitude": -155.0116
+      "longitude": -154.8883
     }
   },
   "KVH": {
@@ -1961,7 +1978,8 @@
       "height_station_masl": 0,
       "latitude": 51.4241,
       "long_name": "National Physical Laboratory",
-      "longitude": -0.3487
+      "longitude": -0.3487,
+      "status": "current"
     }
   },
   "NWB": {
@@ -2076,6 +2094,8 @@
   },
   "OXK": {
     "NOAA": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 1022.0,
       "latitude": 50.0301,
       "long_name": "Ochsenkopf, Germany",
@@ -2270,8 +2290,8 @@
       "height_name": ["10magl"],
       "height_station_masl": 3480.0,
       "latitude": 45.93,
-      "long_name": "Plateau Rosa",
-      "longitude": 7.7
+      "long_name": "Plateau Rosa, Italy",
+      "longitude": 7.707
     }
   },
   "PSA": {
@@ -2591,7 +2611,7 @@
       "height_name": ["125magl"],
       "height_station_masl": 181.0,
       "latitude": 61.847,
-      "long_name": "Smear/Hyytiala, Finland",
+      "long_name": "Hyytiälä, Finland",
       "longitude": 24.295
     },
     "NOAA": {
@@ -2669,7 +2689,7 @@
       "height_name": ["10magl"],
       "height_station_masl": 0.0,
       "latitude": 66.0,
-      "long_name": "Ocean Station M",
+      "long_name": "Ocean Station M, Norway",
       "longitude": 2.0
     }
   },
@@ -2697,6 +2717,14 @@
     "NOAA": {
       "latitude": 64.256,
       "longitude": 19.775,
+      "height_station_masl": 235.0,
+      "long_name": "Svartberget, Sweden",
+      "heights": ["85m"],
+      "height_name": ["85magl"]
+    },
+    "EUROCOM": {
+      "latitude": 64.14,
+      "longitude": 19.46,
       "height_station_masl": 235.0,
       "long_name": "Svartberget, Sweden",
       "heights": ["85m"],
@@ -2822,17 +2850,18 @@
       "height": ["5m"],
       "height_name": ["5magl"],
       "height_station_masl": 5.0,
-      "latitude": 51.497,
+      "latitude": 51.496769,
       "long_name": "Thames Barrier, UK",
-      "longitude": 0.037
+      "longitude": 0.036995
     },
     "LGHG": {
       "height": ["5m"],
       "height_name": ["5magl"],
       "height_station_masl": 5.0,
-      "latitude": 51.497,
+      "latitude": 51.496769,
       "long_name": "Thames Barrier, UK",
-      "longitude": 0.037
+      "longitude": 0.036995,
+      "status": "current"
     }
   },
   "TMD": {

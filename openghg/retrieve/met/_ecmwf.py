@@ -167,7 +167,7 @@ def retrieve_met(
 #     network = network.upper()
 #     site = site.upper()
 
-#     site_info = load_json("acrg_site_info.json")
+#     site_info = load_json("site_info.json")
 
 #     try:
 #         site_data = site_info[site][network]

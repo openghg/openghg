@@ -1,0 +1,68 @@
+{
+    "BIK": {
+        "EUROCOM": {
+          "height": ["300m"],
+          "height_name": ["300magl"],
+          "height_station_masl": 150.0,
+          "latitude": 53.23,
+          "long_name": "Bialystok, Poland",
+          "longitude": 23.03
+        }
+      },
+    "MHD": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 5.0,
+      "latitude": 53.32611,
+      "long_name": "Mace Head, Ireland",
+      "longitude": -9.90389
+    },
+    "EUROCOM": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 5.0,
+      "latitude": 53.32611,
+      "long_name": "Mace Head, Ireland",
+      "longitude": -9.90389
+    },
+    "ICOS": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 5.0,
+      "latitude": 53.32611,
+      "long_name": "Mace Head, Ireland",
+      "longitude": -9.90389
+    },
+    "NOAA": {
+      "height_station_masl": 5.0,
+      "latitude": 53.326,
+      "long_name": "Mace Head, County Galway, Ireland",
+      "longitude": -9.899
+    }
+  },
+  "TAC": {
+    "DECC": {
+      "height": ["185m", "54m", "100m"],
+      "height_name": ["185magl", "50magl", "100magl"],
+      "height_station_masl": 50.0,
+      "latitude": 52.51775,
+      "long_name": "Tacolneston Tower, UK",
+      "longitude": 1.13872
+    },
+    "EUROCOM": {
+      "height": ["100m", "54m", "185m"],
+      "height_name": ["100magl", "50magl", "185magl"],
+      "height_station_masl": 50.0,
+      "latitude": 52.51775,
+      "long_name": "Tacolneston Tower, UK",
+      "longitude": 1.13872
+    },
+    "NOAA": {
+      "height_station_masl": 56.0,
+      "latitude": 52.5177,
+      "long_name": "Tacolneston, United Kingdom",
+      "longitude": 1.1386
+    }
+  }
+}

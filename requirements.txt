@@ -5,6 +5,7 @@ icoscp
 matplotlib
 msgpack
 netcdf4
+nbformat
 numexpr
 numpy
 nc-time-axis

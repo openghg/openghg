@@ -9,6 +9,7 @@ from .helpers import (
     get_footprint_datapath,
     get_mobile_datapath,
     get_retrieval_datapath,
+    get_info_datapath,
     get_surface_datapath,
     glob_files,
     key_to_local_filepath,

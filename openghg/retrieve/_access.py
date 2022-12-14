@@ -243,7 +243,7 @@ def get_obs_surface_local(
         inlet = height
     inlet = format_inlet(inlet)    
 
-    site_info = load_json(filename="acrg_site_info.json")
+    site_info = load_json(filename="site_info.json")
     site = site.upper()
 
     # TODO: Evaluate this constraint - how do we want to handle and incorporate new sites?

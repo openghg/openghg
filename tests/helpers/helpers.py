@@ -80,6 +80,10 @@ def get_retrieval_datapath(filename: str):
     return Path(__file__).parent.parent.joinpath(f"data/retrieve/{filename}").resolve()
 
 
+def get_info_datapath(filename: str):
+    return Path(__file__).parent.parent.joinpath(f"data/info/{filename}").resolve()
+
+
 def glob_files(search_str: str, data_type: str) -> List:
     """Returns the list of files
 
