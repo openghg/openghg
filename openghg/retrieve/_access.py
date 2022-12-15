@@ -227,7 +227,14 @@ def get_obs_surface_local(
     """
     import numpy as np
     from openghg.retrieve import search_surface
-    from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware
+    from openghg.util import (
+        clean_string,
+        format_inlet,
+        load_json,
+        synonyms,
+        timestamp_tzaware,
+        get_site_info
+    )
     from pandas import Timedelta
 
     if running_on_hub():
@@ -243,11 +250,11 @@ def get_obs_surface_local(
         inlet = height
     inlet = format_inlet(inlet)    
 
-    site_info = load_json(filename="site_info.json")
+    site_data = get_site_info()
     site = site.upper()
 
     # TODO: Evaluate this constraint - how do we want to handle and incorporate new sites?
-    if site not in site_info:
+    if site not in site_data:
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     surface_keywords = {

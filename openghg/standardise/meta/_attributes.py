@@ -97,7 +97,7 @@ def get_attributes(
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
     """
-    from openghg.util import load_json, timestamp_now
+    from openghg.util import load_json, timestamp_now, get_species_info
     from pandas import Timestamp as pd_Timestamp
 
     if not isinstance(ds, Dataset):
@@ -125,8 +125,8 @@ def get_attributes(
         raise NameError(f"Cannot find species {species_search} in Dataset variables")
 
     # Load attributes files
-    species_attrs = load_json(filename="acrg_species_info.json")
-    attributes_data = load_json("attributes.json")
+    species_attrs = get_species_info()
+    attributes_data = load_json("attributes.json", internal_data=True)
 
     unit_interpret = attributes_data["unit_interpret"]
     unit_mol_fraction = attributes_data["unit_mol_fraction"]
@@ -347,16 +347,15 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     Returns:
         dict: Dictionary of site attributes
     """
-    from openghg.util import load_json
+    from openghg.util import load_json, get_site_info
 
     site = site.upper()
 
     # Read site info file
-    data_filename = "site_info.json"
-    site_params = load_json(filename=data_filename)
+    site_data = get_site_info()
 
     if network is None:
-        network = next(iter(site_params[site]))
+        network = next(iter(site_data[site]))
     else:
         network = network.upper()
 
@@ -368,13 +367,13 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     }
 
     attributes = {}
-    if site in site_params:
+    if site in site_data:
         for attr in attributes_dict:
             try:
-                if attr in site_params[site][network]:
+                if attr in site_data[site][network]:
                     attr_key = attributes_dict[attr]
 
-                    attributes[attr_key] = site_params[site][network][attr]
+                    attributes[attr_key] = site_data[site][network][attr]
             except KeyError:
                 pass
     else:

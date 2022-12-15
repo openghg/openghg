@@ -103,11 +103,11 @@ def load_emissions_database_parser(database: str) -> Callable:
     return fn
 
 
-def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
+def get_datapath(filename: Union[str, Path], directory: Optional[str] = None) -> Path:
     """Returns the correct path to data files used for assigning attributes
 
     Args:
-        filename (str): Name of file to be accessed
+        filename: Name of file to be accessed
     Returns:
         pathlib.Path: Path of file
     """
@@ -121,7 +121,7 @@ def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(filename: Union[str, Path]) -> Dict:
+def load_json(filename: Union[str, Path], internal_data: bool = False) -> Dict:
     """Returns a dictionary deserialised from JSON.
 
     Args:
@@ -130,6 +130,9 @@ def load_json(filename: Union[str, Path]) -> Dict:
         dict: Dictionary created from JSON
     """
     from json import load
+
+    if internal_data:
+        filename = get_datapath(filename)
 
     with open(filename, "r") as f:
         data: Dict[str, Any] = load(f)

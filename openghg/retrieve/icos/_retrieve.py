@@ -263,7 +263,7 @@ def _retrieve_remote(
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
 
-    site_metadata = load_json("icos_atmos_site_metadata.json")
+    site_metadata = load_json("icos_atmos_site_metadata.json", internal_data=True)
 
     standardised_data: Dict[str, Dict] = {}
 

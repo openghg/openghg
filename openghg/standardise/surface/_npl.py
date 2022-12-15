@@ -34,7 +34,7 @@ def parse_npl(
 
     site = "NPL"
 
-    attributes_data = load_json(filename="attributes.json")
+    attributes_data = load_json(filename="attributes.json", internal_data=True)
     npl_params = attributes_data["NPL"]
 
     # mypy doesn't like NaT or NaNs - look into this

@@ -519,9 +519,10 @@ class ModelScenario:
         """
         Find the platform for a site, if present.
 
-        This will access the "site_info.json" file to find this information.
+        This will access the "site_info.json" file from openghg_defs dependency to 
+        find this information.
         """
-        from openghg.util import load_json
+        from openghg.util import get_site_info
 
         try:
             site = self.site
@@ -529,9 +530,9 @@ class ModelScenario:
         except AttributeError:
             return None
         else:
-            site_info = load_json(filename="site_info.json")
+            site_data = get_site_info()
             try:
-                site_details = site_info[site_upper]
+                site_details = site_data[site_upper]
             except KeyError:
                 return None
             else:
