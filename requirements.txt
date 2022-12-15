@@ -18,3 +18,4 @@ toml
 tqdm
 xarray==2022.9.0
 urllib3 >= 1.26.3
+git+https://github.com/openghg/supplementary_data
