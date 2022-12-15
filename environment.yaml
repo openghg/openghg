@@ -27,4 +27,4 @@ dependencies:
   - xesmf
   - pip:
     - icoscp
-    - git+https://github.com/openghg/supplementary_data
+    - openghg_defs @ git+https://github.com/openghg/supplementary_data
