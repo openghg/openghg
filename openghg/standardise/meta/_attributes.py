@@ -347,7 +347,7 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     Returns:
         dict: Dictionary of site attributes
     """
-    from openghg.util import load_json, get_site_info
+    from openghg.util import get_site_info
 
     site = site.upper()
 

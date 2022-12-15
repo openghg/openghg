@@ -105,7 +105,7 @@ def species_lifetime(species: Union[str, None],
     """
     species_data = get_species_info(species_filename)
 
-    ## ADD in synonyms check here - synonyms()
+    # ADD in synonyms check here - synonyms()
 
     if species is not None:
         try:
