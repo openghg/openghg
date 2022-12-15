@@ -1,23 +1,53 @@
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Tuple, Union, Optional
 
+from pathlib import Path
 import numpy as np
 from numpy import ndarray
 
+__all__ = ["find_domain", "convert_longitude"]
 
-def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
+
+FilePathType = Optional[Union[str, Path]]
+
+
+def get_domain_info(domain_filename: FilePathType = None) -> Dict[str, Any]:
+    """
+    Extract data from domain info JSON file as a dictionary.
+
+    This uses the data stored within openghg_defs/domain_info JSON file by default.
+
+    Args:
+        domain_filename: Alternative domain info file.
+
+    Returns:
+        dict: Data from domain JSON file
+    """
+    from openghg_defs import domain_info_file
+    from openghg.util import load_json
+
+    if domain_filename is None:
+        domain_info_json = load_json(domain_info_file)
+    else:
+        domain_info_json = load_json(domain_info_file)
+
+    return domain_info_json
+
+
+def find_domain(domain: str,
+                domain_filename: FilePathType = None) -> Tuple[ndarray, ndarray]:
     """
     Finds the latitude and longitude values in degrees associated
     with a given domain name.
 
     Args:
-        domain: Pre-defined domain name (see 'domain_info.json')
+        domain: Pre-defined domain name
+        domain_filename: Alternative domain info file. Defaults to openghg_defs input.
 
     Returns:
         array, array : Latitude and longitude values for the domain in degrees.
     """
-    from openghg.util import load_json
 
-    domain_info = load_json(filename="domain_info.json")
+    domain_info = get_domain_info(domain_filename)
 
     # Look for domain in domain_info file
     if domain in domain_info:
@@ -59,13 +89,13 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     Returns:
         array: Extracted or derived coordinate values
     """
-    from openghg.util import get_datapath
+    from openghg_defs import data_path
 
     # Look for explicit file keyword in data e.g. "latitude_file"
     # Extract data from file if found and return
     filename_str = f"{coord}_file"
     if filename_str in data:
-        full_filename = get_datapath(data[filename_str])
+        full_filename = data_path / data[filename_str]
         coord_data: ndarray = np.loadtxt(full_filename)
         return coord_data
 
@@ -73,7 +103,7 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     # if data is present by looking for file of form "domain/{domain}_{coord}.csv"
     # e.g. "domain/EUROPE_latitude.csv" (within "openghg/openghg/data" folder)
     try:
-        full_filename = get_datapath(f"{domain}_{coord}.dat", "domain")
+        full_filename = data_path / "domain" / f"{domain}_{coord}.dat"
         coord_data = np.loadtxt(full_filename)
     except OSError:
         pass

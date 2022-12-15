@@ -2,7 +2,7 @@
     Utility functions for OpenGHG
 """
 
-from ._domain import convert_longitude, find_domain
+from ._domain import get_domain_info, convert_longitude, find_domain
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import (
