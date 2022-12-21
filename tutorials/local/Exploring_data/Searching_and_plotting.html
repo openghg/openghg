@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Searching and plotting &#8212; OpenGHG 0+untagged.1.g5c41ca7.dirty documentation</title>
+    <title>Searching and plotting &#8212; OpenGHG 0+untagged.1.g438491d.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g5c41ca7.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g438491d.dirty documentation</p>
   
 </a>
     
@@ -380,116 +380,182 @@
               
   <section id="searching-and-plotting">
 <h1>Searching and plotting<a class="headerlink" href="#searching-and-plotting" title="Permalink to this heading">#</a></h1>
-<p>In this short tutorial we’ll show how to retrieve some data and create a
-simple plot using one of our plotting functions.</p>
-<p>As in the <a class="reference external" href="Adding_observation_data.ipynb">previous tutorial</a>, we will
-start by setting up our temporary object store for our data. If you’ve
-already create your own local object store you can skip the next few
-steps and move onto the <strong>Searching</strong> section.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_surface_data</span>
+<p>In this short tutorial we’ll show how to retrieve some data and create a simple plot using one of our plotting functions.</p>
+<p>As in the <span class="xref myst">previous tutorial</span>, we will start by setting up our temporary object store for our data. If you’ve already create your own local object store you can skip the next few steps and move onto the <strong>Searching</strong> section.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_surface_data</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
 </pre></div>
+</div>
+</div>
 </div>
 <section id="searching">
 <h2>Searching<a class="headerlink" href="#searching" title="Permalink to this heading">#</a></h2>
 <p>Let’s search for all the methane data from Tacolneston</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
 
 <span class="n">ch4_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
 <span class="n">ch4_results</span>
 </pre></div>
 </div>
-<p>Let’s take a look at the results property which is a pandas DataFrame
-object.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_results</span><span class="o">.</span><span class="n">results</span>
+</div>
+</div>
+<p>Let’s take a look at the results property which is a pandas DataFrame object.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_results</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
-<p>If we want to take a look at the data from the 185m inlet we can first
-retrieve the data from the object store and then create a quick
-timeseries plot. See the
-<code class="docutils literal notranslate"><span class="pre">`SearchResults</span></code> &lt;<a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults">https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults</a>&gt;`__
-object documentation for more information.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span> <span class="n">data_185m</span> <span class="o">=</span> <span class="n">ch4_results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;185m&quot;</span><span class="p">)</span>
-
-<span class="o">**</span><span class="n">NOTE</span><span class="p">:</span><span class="o">**</span> <span class="n">the</span> <span class="n">plots</span> <span class="n">created</span> <span class="n">below</span> <span class="n">may</span> <span class="ow">not</span> <span class="n">show</span> <span class="n">up</span> <span class="n">on</span> <span class="n">the</span> <span class="n">online</span>
-<span class="n">documentation</span> <span class="n">version</span> <span class="n">of</span> <span class="n">this</span> <span class="n">notebook</span><span class="o">.</span>
+</div>
+</div>
+<p>If we want to take a look at the data from the 185m inlet we can first retrieve the data from the object store and then create a quick timeseries plot. See the <a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults"><code class="docutils literal notranslate"><span class="pre">SearchResults</span></code></a> object documentation for more information.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span> <span class="o">=</span> <span class="n">ch4_results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;185m&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+</div>
+</div>
+<blockquote>
+<div><p><strong><em>NOTE:</em></strong>  the plots created below may not show up on the online documentation version of this notebook.</p>
+</div></blockquote>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
+</div>
+</div>
 </div>
 <p>You can make some simple changes to the plot using arguments</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Methane at Tacolneston&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Conc.&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppm&quot;</span><span class="p">)</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Methane at Tacolneston&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Conc.&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppm&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="plot-all-the-data">
 <h2>Plot all the data<a class="headerlink" href="#plot-all-the-data" title="Permalink to this heading">#</a></h2>
-<p>We can also retrieve all the data, get a <code class="docutils literal notranslate"><span class="pre">list</span></code> of
-<code class="docutils literal notranslate"><span class="pre">`ObsData</span></code> &lt;<a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData">https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData</a>&gt;`__
-objects.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">all_ch4_tac</span> <span class="o">=</span> <span class="n">ch4_results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
+<p>We can also retrieve all the data, get a <code class="docutils literal notranslate"><span class="pre">list</span></code> of <a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData"><code class="docutils literal notranslate"><span class="pre">ObsData</span></code></a> objects.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">all_ch4_tac</span> <span class="o">=</span> <span class="n">ch4_results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Then we can use the <code class="docutils literal notranslate"><span class="pre">plot_timeseries</span></code> function from the <code class="docutils literal notranslate"><span class="pre">plotting</span></code>
-submodule to compare measurements from different inlets. This creates a
-<a class="reference external" href="https://plotly.com/python/">Plotly</a> plot that should be interactive
-and and responsive, even with relatively large amounts of data.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.plotting</span> <span class="kn">import</span> <span class="n">plot_timeseries</span>
+</div>
+</div>
+<p>Then we can use the <code class="docutils literal notranslate"><span class="pre">plot_timeseries</span></code> function from the <code class="docutils literal notranslate"><span class="pre">plotting</span></code> submodule to compare measurements from different inlets. This creates a <a class="reference external" href="https://plotly.com/python/">Plotly</a> plot that should be interactive and and responsive, even with relatively large amounts of data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.plotting</span> <span class="kn">import</span> <span class="n">plot_timeseries</span>
 
 <span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">all_ch4_tac</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppb&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+</div>
 </section>
 <section id="compare-different-sites">
 <h2>Compare different sites<a class="headerlink" href="#compare-different-sites" title="Permalink to this heading">#</a></h2>
-<p>We can easily compare data from different sites by doing a quick search
-to see what’s available</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+<p>We can easily compare data from different sites by doing a quick search to see what’s available</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span>
 </pre></div>
+</div>
+</div>
 </div>
 <p>Then we refine our search to only retrieve the inlets we want</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span><span class="o">.</span><span class="n">results</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlets</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;42m&quot;</span><span class="p">,</span> <span class="s2">&quot;54m&quot;</span><span class="p">])</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlets</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;42m&quot;</span><span class="p">,</span> <span class="s2">&quot;54m&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlets</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlets</span>
 </pre></div>
+</div>
+</div>
 </div>
 <p>Then we can retrieve all the data and make a plot.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlet_data</span> <span class="o">=</span> <span class="n">lower_inlets</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lower_inlet_data</span> <span class="o">=</span> <span class="n">lower_inlets</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">lower_inlet_data</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Comparing CH4 measurements at Tacolneston and Bilsdale&quot;</span><span class="p">)</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">lower_inlet_data</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Comparing CH4 measurements at Tacolneston and Bilsdale&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>You can also search for different data types, say we want to find
-surface measurement data and emissions data at the same time. We can do
-that with the more generic <code class="docutils literal notranslate"><span class="pre">search</span></code> function.</p>
+</div>
+</div>
+<p>You can also search for different data types, say we want to find surface measurement data and emissions data at the same time. We can do that with the more generic <code class="docutils literal notranslate"><span class="pre">search</span></code> function.</p>
 <p>We need to first load in some emissions data</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_flux_data</span>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_flux_data</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_flux_data</span><span class="p">()</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">populate_flux_data</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>To search across different types we can use the more generic <code class="docutils literal notranslate"><span class="pre">search</span></code>
-function.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+</div>
+</div>
+<p>To search across different types we can use the more generic <code class="docutils literal notranslate"><span class="pre">search</span></code> function.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;surface&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">])</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;surface&quot;</span><span class="p">,</span> <span class="s2">&quot;emissions&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span><span class="o">.</span><span class="n">results</span>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
+</div>
+</div>
 </div>
 </section>
 </section>
