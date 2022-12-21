@@ -10,6 +10,7 @@ dependencies:
   - h5netcdf
   - matplotlib
   - msgpack-python
+  - netcdf4
   - nbformat
   - numexpr
   - numpy
@@ -23,7 +24,7 @@ dependencies:
   - tinydb
   - toml
   - tqdm
-  - xarray = v2022.09.0
+  - xarray
   - urllib3 >= 1.26.3
   - pip
   - xesmf
