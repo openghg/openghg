@@ -2,7 +2,7 @@ import json
 
 import pytest
 import xarray as xr
-from helpers import attributes_checker_obssurface, get_surface_datapath
+from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_store
 from openghg.objectstore import exists, get_bucket
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
@@ -60,7 +60,7 @@ def test_same_source_data_same_datasource():
 
 def test_read_data(mocker):
     get_bucket(empty=True)
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    fake_uuids = [f"test-uuid-{i}" for i in range(1, 101)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     # Get some bytes
@@ -81,8 +81,8 @@ def test_read_data(mocker):
         "processed": {
             "bsd.picarro.1minute.248m.min.dat": {
                 "ch4": {"uuid": "test-uuid-1", "new": True},
-                "co2": {"uuid": "test-uuid-2", "new": True},
-                "co": {"uuid": "test-uuid-3", "new": True},
+                "co2": {"uuid": "test-uuid-9", "new": True},
+                "co": {"uuid": "test-uuid-17", "new": True},
             }
         }
     }
@@ -771,7 +771,7 @@ def test_store_icos_carbonportal_data(mocker):
 
     first_result = ObsSurface.store_data(data=data)
 
-    assert first_result == {"co2": {"uuid": "test-uuid-1", "new": True}}
+    assert first_result == {"co2": {"uuid": "test-uuid-2", "new": True}}
 
     second_result = ObsSurface.store_data(data=data)
 
