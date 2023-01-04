@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import platform
@@ -25,30 +24,16 @@ def get_user_id() -> str:
     return uid
 
 
-def quickstart() -> None:
-    """Get the user setup with a configuration file
+def default_objectstore_path() -> Path:
+    """Returns the default object store path in the user's home directory
 
     Returns:
-        None
+        Path: Object store path in ~/openghg_store
     """
-    print("\nOpenGHG quickstart")
-    config_path: Union[str, Path] = input(
-        "Path for configuration file (default: ~/config/openghg/openghg.conf): "
-    )
-
-    if not config_path:
-        config_path = get_user_config_path()
-    else:
-        config_path = Path(config_path)
-
-    object_store_path: Union[str, None] = input("Path for object store (default: ~/openghg_store): ")
-
-    if not object_store_path:
-        object_store_path = None
-
-    create_config(user_config_path=config_path, object_store_path=object_store_path)
+    return Path.home().joinpath("openghg_store").absolute()
 
 
+# @lru_cache
 def get_user_config_path() -> Path:
     """Checks if a config file has already been create for
     OpenGHG to use. This file is created in the user's home directory
@@ -76,47 +61,63 @@ def get_user_config_path() -> Path:
     return config_path
 
 
-def create_config(
-    user_config_path: Union[Path, str, None] = None, object_store_path: Union[Path, str, None] = None
-) -> None:
+def create_config() -> None:
     """Creates a user config.
 
     Returns:
         None
     """
-    if user_config_path is None:
-        user_config_path = get_user_config_path()
+    default_objstore_path = default_objectstore_path()
+
+    object_store_path: Union[str, Path] = input(
+        f"\nPath for object store (default: {default_objstore_path}): "
+    )
+
+    if object_store_path:
+        object_store_path = Path(object_store_path)
     else:
-        user_config_path = Path(user_config_path)
+        object_store_path = default_objstore_path
+
+    user_config_path = get_user_config_path()
 
     # If the config file exists we might need to update it due to the introduction
     # of the user ID
     if user_config_path.exists():
-        logger.info(f"User config exists at {str(user_config_path)}, checking..")
+        print(f"User config exists at {str(user_config_path)}, checking...")
 
         config = toml.loads(user_config_path.read_text())
 
-        object_store_path = Path(config["object_store"]["local_store"])
+        objstore_path_config = Path(config["object_store"]["local_store"])
+
+        if objstore_path_config != object_store_path:
+            config_input = input(
+                "Would you like to update the object store path from:"
+                + f"\n{objstore_path_config}\n"
+                + "to"
+                + f"\n{object_store_path}?"
+            )
+
+            if config_input.lower() in ("y", "yes"):
+                config["object_store"]["local_store"] = object_store_path
+        else:
+            print("Matching object store path, nothing to do.\n")
 
         # Some users may not have a user ID if they've used previous versions of OpenGHG
         try:
             user_id = config["user_id"]
         except KeyError:
-            config["user_id"] = uuid.uuid4()
+            config["user_id"] = str(uuid.uuid4())
     else:
         logger.info(f"Creating config at {str(user_config_path)}")
 
-        try:
-            user_config_path.parent.mkdir(parents=True)
-        except FileExistsError:
-            pass
+        user_config_path.parent.mkdir(parents=True, exist_ok=True)
 
         if object_store_path is None:
-            object_store_path = Path.home().joinpath("openghg_store").absolute()
+            object_store_path = default_objectstore_path()
         else:
             object_store_path = Path(object_store_path)
 
-        user_id = uuid.uuid4()
+        user_id = str(uuid.uuid4())
         config = {"object_store": {"local_store": str(object_store_path)}, "user_id": user_id}
 
     object_store_path.mkdir(exist_ok=True)
@@ -133,52 +134,3 @@ def read_local_config() -> Dict:
     config_path = get_user_config_path()
     config: Dict = toml.loads(config_path.read_text())
     return config
-
-
-def create_user_config() -> None:
-    """Guides the user through setting up a config file for local users
-
-    Returns:
-        None
-    """
-    raise NotImplementedError
-    main_store = input("Please enter the path to the main object store: ")
-    main_store = Path(main_store).resolve()
-
-    if not main_store.exists():
-        print("Cannot find object store, please ensure path is correct.")
-
-    user_store = input("Please enter a path to your own object store: ")
-    user_store = Path(user_store).resolve()
-
-    if not user_store.exists():
-        create_obj_store = input(f"Create {str(user_store)} (y/n)?: ")
-        if create_obj_store.lower() in ("y", "yes"):
-            user_store.mkdir()
-        else:
-            print(f"Unable to proceed, please create the {str(user_store)} folder.")
-
-    user_config = {}
-    user_config["main_store"] = str(main_store)
-    user_config["user_store"] = str(user_store)
-
-    openghg_config_filename = "openghg.conf"
-
-    _platform = platform.system()
-
-    if _platform == "Windows":
-        config_path = Path(os.getenv("LOCALAPPDATA")).joinpath(openghg_config_filename)
-    elif _platform in ("Linux", "Darwin"):
-        config_folder = Path.home().joinpath(".config")
-        if not config_folder.exists():
-            config_folder.mkdir()
-
-        config_path = config_folder.joinpath(openghg_config_filename)
-
-    write_config = input(f"Write config file to {str(config_path)}? (y/n): ")
-    if write_config.lower() in ("y", "yes"):
-        config_path.write_text(json.dumps(user_config))
-    else:
-        print("No config file written.")
-
-    return None

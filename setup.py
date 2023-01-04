@@ -34,5 +34,10 @@ setuptools.setup(
         "Operating System :: POSIX :: Linux",
         "Operating System :: MacOS",
     ],
+    entry_points={
+        "console_scripts": [
+            "openghg-quickstart = openghg.util:create_config",
+        ]
+    },
     python_requires=">=3.8",
 )
