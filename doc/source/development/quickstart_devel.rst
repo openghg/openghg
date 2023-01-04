@@ -107,7 +107,7 @@ And finally install OpenGHG
 
    conda develop .
 
-OpenGHG should now be installed, you can check this by opening ``ipython`` and running
+OpenGHG should now be installed and you need to import this once to generate the file ``~/.config/openghg/openghg.conf``
 
 .. code-block:: ipython
 

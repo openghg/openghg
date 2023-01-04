@@ -5,12 +5,48 @@ import platform
 
 # from functools import lru_cache
 from pathlib import Path
-from typing import Dict
-
+from typing import Dict, Union
+import uuid
 import toml
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+# @lru_cache
+def get_user_id() -> str:
+    """Return the user's ID
+
+    Returns:
+        str: User ID
+    """
+    config = read_local_config()
+    uid = str(config.get("user_id", "NA"))
+    return uid
+
+
+def quickstart() -> None:
+    """Get the user setup with a configuration file
+
+    Returns:
+        None
+    """
+    print("\nOpenGHG quickstart")
+    config_path: Union[str, Path] = input(
+        "Path for configuration file (default: ~/config/openghg/openghg.conf): "
+    )
+
+    if not config_path:
+        config_path = get_user_config_path()
+    else:
+        config_path = Path(config_path)
+
+    object_store_path: Union[str, None] = input("Path for object store (default: ~/openghg_store): ")
+
+    if not object_store_path:
+        object_store_path = None
+
+    create_config(user_config_path=config_path, object_store_path=object_store_path)
 
 
 def get_user_config_path() -> Path:
@@ -40,37 +76,51 @@ def get_user_config_path() -> Path:
     return config_path
 
 
-def create_default_config() -> None:
-    """Creates a default user config in the user's home directory.
+def create_config(
+    user_config_path: Union[Path, str, None] = None, object_store_path: Union[Path, str, None] = None
+) -> None:
+    """Creates a user config.
 
     Returns:
         None
     """
-    user_config_path = get_user_config_path()
-
-    if user_config_path.exists():
-        logger.info(f"User config already exists at {str(user_config_path)}")
-        return None
+    if user_config_path is None:
+        user_config_path = get_user_config_path()
     else:
-        logger.info(f"Creating config file at {str(user_config_path)}")
+        user_config_path = Path(user_config_path)
+
+    # If the config file exists we might need to update it due to the introduction
+    # of the user ID
+    if user_config_path.exists():
+        logger.info(f"User config exists at {str(user_config_path)}, checking..")
+
+        config = toml.loads(user_config_path.read_text())
+
+        object_store_path = Path(config["object_store"]["local_store"])
+
+        # Some users may not have a user ID if they've used previous versions of OpenGHG
+        try:
+            user_id = config["user_id"]
+        except KeyError:
+            config["user_id"] = uuid.uuid4()
+    else:
+        logger.info(f"Creating config at {str(user_config_path)}")
 
         try:
             user_config_path.parent.mkdir(parents=True)
         except FileExistsError:
             pass
 
-        object_store_path = Path.home().joinpath("openghg_store").absolute()
+        if object_store_path is None:
+            object_store_path = Path.home().joinpath("openghg_store").absolute()
+        else:
+            object_store_path = Path(object_store_path)
 
-        try:
-            object_store_path.mkdir()
-        except FileExistsError:
-            pass
+        user_id = uuid.uuid4()
+        config = {"object_store": {"local_store": str(object_store_path)}, "user_id": user_id}
 
-        config = {"object_store": {"local_store": str(object_store_path)}}
-
-        toml_str = toml.dumps(config)
-
-        user_config_path.write_text(toml_str)
+    object_store_path.mkdir(exist_ok=True)
+    user_config_path.write_text(toml.dumps(config))
 
 
 # @lru_cache

@@ -56,7 +56,7 @@ from ._time import (
     trim_daterange,
     valid_daterange,
 )
-from ._user import create_default_config, get_user_config_path, read_local_config
+from ._user import create_config, get_user_config_path, read_local_config, quickstart
 from ._util import (
     find_matching_site,
     multiple_inlets,
