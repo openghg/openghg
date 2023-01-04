@@ -70,7 +70,7 @@ def create_config() -> None:
     default_objstore_path = default_objectstore_path()
 
     object_store_path: Union[str, Path] = input(
-        f"\nPath for object store (default: {default_objstore_path}): "
+        f"\nPlease enter a path for the object store (default: {default_objstore_path}): "
     )
 
     if object_store_path:
@@ -108,7 +108,7 @@ def create_config() -> None:
         except KeyError:
             config["user_id"] = str(uuid.uuid4())
     else:
-        logger.info(f"Creating config at {str(user_config_path)}")
+        print(f"Creating config at {str(user_config_path)}")
 
         user_config_path.parent.mkdir(parents=True, exist_ok=True)
 
