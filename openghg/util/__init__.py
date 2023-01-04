@@ -21,6 +21,8 @@ from ._file import (
     load_json,
     load_surface_parser,
     read_header,
+    FilePathType,
+    FilePathOpt,
 )
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
 from ._inlet import format_inlet

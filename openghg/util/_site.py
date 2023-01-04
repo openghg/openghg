@@ -1,18 +1,14 @@
-from openghg.util import load_json
-from typing import Union, Optional, Dict, Any
-from pathlib import Path
+from openghg.util import load_json, FilePathOpt
+from typing import Optional, Dict, Any
 
 __all__ = ["get_site_info", "sites_in_network"]
 
 
-FilePathType = Optional[Union[str, Path]]
-
-
-def get_site_info(site_filename: FilePathType = None) -> Dict[str, Any]:
+def get_site_info(site_filename: FilePathOpt = None) -> Dict[str, Any]:
     """
     Extract data from site info JSON file as a dictionary.
 
-    This uses the data stored within openghg_defs/site_info JSON file by default.
+    This uses the data stored within openghg_defs/data/site_info JSON file by default.
 
     Args:
         site_filename: Alternative site info file.
@@ -30,7 +26,7 @@ def get_site_info(site_filename: FilePathType = None) -> Dict[str, Any]:
     return site_info_json
 
 
-def sites_in_network(network: str, site_filename: FilePathType = None) -> list:
+def sites_in_network(network: str, site_filename: FilePathOpt = None) -> list:
     """
     Extract details of all the sites within a network.
     Note: this will assume the network is stored in upper case.

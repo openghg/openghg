@@ -2,6 +2,10 @@ import bz2
 import json
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
+from typing_extensions import TypeAlias 
+
+FilePathType: TypeAlias = Union[str, Path]
+FilePathOpt: TypeAlias = Optional[FilePathType]
 
 
 def load_parser(data_name: str, module_name: str) -> Callable:
@@ -103,7 +107,7 @@ def load_emissions_database_parser(database: str) -> Callable:
     return fn
 
 
-def get_datapath(filename: Union[str, Path], directory: Optional[str] = None) -> Path:
+def get_datapath(filename: FilePathType, directory: Optional[str] = None) -> Path:
     """Returns the correct path to data files used for assigning attributes
 
     Args:
@@ -121,7 +125,7 @@ def get_datapath(filename: Union[str, Path], directory: Optional[str] = None) ->
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(filename: Union[str, Path], internal_data: bool = False) -> Dict:
+def load_json(filename: FilePathType, internal_data: bool = False) -> Dict:
     """Returns a dictionary deserialised from JSON.
 
     Args:
@@ -140,7 +144,7 @@ def load_json(filename: Union[str, Path], internal_data: bool = False) -> Dict:
     return data
 
 
-def read_header(filepath: Union[str, Path], comment_char: str = "#") -> List:
+def read_header(filepath: FilePathType, comment_char: str = "#") -> List:
     """Reads the header lines denoted by the comment_char
 
     Args:
