@@ -1,6 +1,7 @@
 from typing import Any, Dict, Hashable, List, Optional, Tuple, Union, cast
-
+from pathlib import Path
 from xarray import Dataset
+from openghg.util import FilePathOpt
 
 
 def assign_attributes(
@@ -8,10 +9,15 @@ def assign_attributes(
     site: Optional[str] = None,
     network: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
+    site_filename: FilePathOpt = None,
+    species_filename: FilePathOpt = None    
 ) -> Dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
     are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
     to the Datasource allowing more detailed searching of data.
+
+    If accessing underlying stored site or species definitions, this will
+    be accessed from the openghg/supplementary_data repository by default.
 
     Args:
         data: Dictionary containing data, metadata and attributes
@@ -19,6 +25,9 @@ def assign_attributes(
         sampling_period: Number of seconds for which air
                          sample is taken. Only for time variable attribute
         network: Network name
+        site_filename: Alternative site info file
+        species_filename: Alternative species info file
+
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
@@ -48,6 +57,8 @@ def assign_attributes(
             scale=scale,
             global_attributes=site_attributes,
             sampling_period=sampling_period,
+            site_filename=site_filename,
+            species_filename=species_filename
         )
 
         measurement_data = gas_data["data"]
@@ -70,12 +81,16 @@ def get_attributes(
     scale: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
     date_range: Optional[List[str]] = None,
-) -> Dataset:
+    site_filename: FilePathOpt = None,
+    species_filename: FilePathOpt = None) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
     the CF Convention v1.6
 
     Attributes of the xarray DataSet are modified, and variable names are changed
+
+    If accessing underlying stored site or species definitions, this will
+    be accessed from the openghg/supplementary_data repository by default.
 
     Variable naming related to species name will be defined using
     define_species_label() function.
@@ -96,6 +111,8 @@ def get_attributes(
         date_range: Start and end date for output
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
+        site_filename: Alternative site info file
+        species_filename: Alternative species info file
     """
     from openghg.util import load_json, timestamp_now, get_species_info
     from pandas import Timestamp as pd_Timestamp
@@ -134,7 +151,7 @@ def get_attributes(
 
     # Extract both label to use for species and key for attributes
     # Typically species_label will be the lower case version of species_key
-    species_label, species_key = define_species_label(species)
+    species_label, species_key = define_species_label(species, species_filename)
 
     species_rename = {}
     for var in matched_keys:
@@ -174,7 +191,7 @@ def get_attributes(
     ds.attrs.update(global_attributes)  # type: ignore
 
     # Add some site attributes
-    site_attributes = _site_info_attributes(site.upper(), network)
+    site_attributes = _site_info_attributes(site.upper(), network, site_filename)
     ds.attrs.update(site_attributes)
 
     # Species-specific attributes
@@ -289,11 +306,12 @@ def get_attributes(
     return ds
 
 
-def define_species_label(species: str) -> Tuple[str, str]:
+def define_species_label(species: str,
+                         species_filename: FilePathOpt = None) -> Tuple[str, str]:
     """
     Define standardised label to use for observation datasets.
-    This is defined using the 'site_info.json' details with
-    alternative names ('alt') defined within.
+    This uses the data stored within openghg_defs/data/site_info JSON file
+    by default with alternative names ('alt') defined within.
 
     Formatting:
      - species label will be all lower case
@@ -306,6 +324,7 @@ def define_species_label(species: str) -> Tuple[str, str]:
 
     Args:
         species : Species name.
+        species_filename : Alternative species info file.
 
     Returns:
         str, str: Both the species label to be used exactly and the original attribute
@@ -327,7 +346,10 @@ def define_species_label(species: str) -> Tuple[str, str]:
 
     # Extract species label using synonyms function
     try:
-        species_label = synonyms(species, lower=False, allow_new_species=False)
+        species_label = synonyms(species,
+                                 lower=False,
+                                 allow_new_species=False,
+                                 species_filename=species_filename)
     except ValueError:
         species_underscore = species.replace(" ", "_")
         species_remove_dash = species_underscore.replace("-", "")
@@ -338,12 +360,17 @@ def define_species_label(species: str) -> Tuple[str, str]:
     return species_label_lower, species_label
 
 
-def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
+def _site_info_attributes(site: str,
+                          network: Optional[str] = None,
+                          site_filename: FilePathOpt = None) -> Dict:
     """Reads site attributes from JSON
+
+    This uses the data stored within openghg_defs/data/site_info JSON file by default.
 
     Args:
         site: Site code
         network: Network name
+        site_filename: Alternative site info file
     Returns:
         dict: Dictionary of site attributes
     """
@@ -352,7 +379,7 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     site = site.upper()
 
     # Read site info file
-    site_data = get_site_info()
+    site_data = get_site_info(site_filename)
 
     if network is None:
         network = next(iter(site_data[site]))
@@ -379,7 +406,7 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
     else:
         print(
             f"We haven't seen site {site} before, please let us know so we can update our records."
-            + "\nYou can help us by opening an issue on GitHub: https://github.com/openghg/openghg/issues"
+            + "\nYou can help us by opening an issue on GitHub for our supplementary data: https://github.com/openghg/supplementary_data"
         )
         # TODO - log not seen site message here
         # raise ValueError(f"Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale")
