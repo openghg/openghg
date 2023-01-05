@@ -9,6 +9,7 @@ from openghg.util import is_number
 logger = logging.getLogger("openghg.standardise.metadata")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+
 def metadata_default_keys() -> List:
     """
     Define default values expected within ObsSurface metadata

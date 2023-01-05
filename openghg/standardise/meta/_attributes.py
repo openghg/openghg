@@ -86,7 +86,8 @@ def get_attributes(
     sampling_period: Optional[Union[str, float, int]] = None,
     date_range: Optional[List[str]] = None,
     site_filename: FilePathOpt = None,
-    species_filename: FilePathOpt = None) -> Dataset:
+    species_filename: FilePathOpt = None
+) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
     the CF Convention v1.6

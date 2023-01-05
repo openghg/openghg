@@ -1,5 +1,5 @@
 from openghg.util import load_json, FilePathOpt
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 __all__ = ["get_site_info", "sites_in_network"]
 
