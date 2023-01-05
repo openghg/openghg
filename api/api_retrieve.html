@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Retrieve &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
+    <title>Retrieve &#8212; OpenGHG 0+untagged.1.gaa4994d.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gaa4994d.dirty documentation</p>
   
 </a>
     
@@ -534,7 +534,7 @@ If specified, should be one of:</p>
 <li><p><strong>satellite</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Name of satellite (if relevant)</p></li>
 <li><p><strong>domain</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – For satellite only. If data has been selected on an area include the
 identifier name for domain covered. This can map to previously defined domains
-(see domain_info.json) or a newly defined domain.</p></li>
+(see openghg_defs “domain_info.json” file) or a newly defined domain.</p></li>
 <li><p><strong>selection</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – For satellite only, identifier for any data selection which has been
 performed on satellite data. This can be based on any form of filtering, binning etc.
 but should be unique compared to other selections made e.g. “land”, “glint”, “upperlimit”.
@@ -639,7 +639,7 @@ to either the cloud or local search function.</p>
 <p>OpenGHG can retrieve data from the <a class="reference external" href="https://www.icos-cp.eu/observations/carbon-portal">ICOS Carbon Portal</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.retrieve.icos.retrieve_atmospheric">
-<span class="sig-prename descclassname"><span class="pre">openghg.retrieve.icos.</span></span><span class="sig-name descname"><span class="pre">retrieve_atmospheric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_retrieval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/retrieve/icos/_retrieve.html#retrieve_atmospheric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.retrieve.icos.retrieve_atmospheric" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.retrieve.icos.</span></span><span class="sig-name descname"><span class="pre">retrieve_atmospheric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_retrieval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_metadata_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/retrieve/icos/_retrieve.html#retrieve_atmospheric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.retrieve.icos.retrieve_atmospheric" title="Permalink to this definition">#</a></dt>
 <dd><p>Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
 data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
 If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects
@@ -660,6 +660,9 @@ This level is the ICOS-data product and free available for users.</p></li>
 <li><p><strong>https</strong> (<em>See</em>) – //icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</p></li>
 <li><p><strong>bypass_call</strong> – Bypass the remote function call, used to shortcut calls within a the serverless</p></li>
 <li><p><strong>environment.</strong> (<em>function call</em>) – </p></li>
+<li><p><strong>update_metadata_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If metadata derived from ICOS Header does not match
+to derived attributes, update metadata to match to attributes.
+Otherwise a AttrMismatchError will be raised.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
