@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import platform
@@ -7,6 +8,7 @@ from pathlib import Path
 from typing import Dict, Union
 import uuid
 import toml
+from openghg.util import versions
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -61,12 +63,13 @@ def get_user_config_path() -> Path:
     return config_path
 
 
-def create_config() -> None:
+def create_config(silent: bool = False) -> None:
     """Creates a user config.
 
     Returns:
         None
     """
+
     default_objstore_path = default_objectstore_path()
 
     object_store_path: Union[str, Path] = input(
@@ -132,5 +135,11 @@ def read_local_config() -> Dict:
         dict: OpenGHG configurations
     """
     config_path = get_user_config_path()
+
+    if not config_path.exists():
+        raise FileNotFoundError(
+            "Unable to read configuration file, please see the installation instructions or run openghg --quickstart"
+        )
+
     config: Dict = toml.loads(config_path.read_text())
     return config

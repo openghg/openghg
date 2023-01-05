@@ -59,9 +59,9 @@ if cloud_env or hub_env:
     logfile_path = "/tmp/openghg.log"
 else:
     logfile_path = str(_Path.home().joinpath("openghg.log"))
-    conf_path = get_user_config_path()
-    if not conf_path.exists():
-        print("\nNo configuration file found, please see installation instructions.")
+    # conf_path = get_user_config_path()
+    # if not conf_path.exists():
+    #     print("\nNo configuration file found, please see installation instructions.")
 
 # Create file handler for log file - set to DEBUG (maximum detail)
 fileHandler = logging.FileHandler(logfile_path)  # May want to update this to user area

@@ -36,7 +36,7 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "openghg-quickstart = openghg.util:create_config",
+            "openghg = openghg.util:cli",
         ]
     },
     python_requires=">=3.8",
