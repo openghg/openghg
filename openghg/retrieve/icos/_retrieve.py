@@ -152,7 +152,6 @@ def local_retrieve(
     Returns:
         ObsData, list[ObsData] or None
     """
-    from openghg.dataobjects import ObsData
     from openghg.retrieve import search_surface
     from openghg.store import ObsSurface
     from openghg.util import to_lowercase

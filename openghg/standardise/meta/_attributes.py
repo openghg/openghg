@@ -1,5 +1,4 @@
 from typing import Any, Dict, Hashable, List, Optional, Tuple, Union, cast
-from pathlib import Path
 from xarray import Dataset
 from openghg.util import FilePathOpt
 
@@ -11,7 +10,7 @@ def assign_attributes(
     sampling_period: Optional[Union[str, float, int]] = None,
     update_metadata_mismatch: bool = False,
     site_filename: FilePathOpt = None,
-    species_filename: FilePathOpt = None    
+    species_filename: FilePathOpt = None   
 ) -> Dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
     are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
