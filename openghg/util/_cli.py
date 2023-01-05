@@ -1,8 +1,9 @@
 import argparse
-from openghg.util import create_config, show_versions
 
 
 def cli():
+    from openghg.util import create_config, show_versions
+
     parser = argparse.ArgumentParser(
         prog="OpenGHG CLI",
         description="The OpenGHG Command Line Interface helps you get OpenGHG setup on your local machine.",
@@ -20,7 +21,7 @@ def cli():
         create_config(silent=True)
     elif args.quickstart:
         create_config()
-    elif args.verison:
+    elif args.version:
         show_versions()
     else:
         parser.print_help()

@@ -1,14 +1,13 @@
-import argparse
 import logging
 import os
 import platform
 
 # from functools import lru_cache
 from pathlib import Path
+import pprint
 from typing import Dict, Union
 import uuid
 import toml
-from openghg.util import versions
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -26,7 +25,7 @@ def get_user_id() -> str:
     return uid
 
 
-def default_objectstore_path() -> Path:
+def get_default_objectstore_path() -> Path:
     """Returns the default object store path in the user's home directory
 
     Returns:
@@ -69,39 +68,33 @@ def create_config(silent: bool = False) -> None:
     Returns:
         None
     """
-
-    default_objstore_path = default_objectstore_path()
-
-    object_store_path: Union[str, Path] = input(
-        f"\nPlease enter a path for the object store (default: {default_objstore_path}): "
-    )
-
-    if object_store_path:
-        object_store_path = Path(object_store_path)
-    else:
-        object_store_path = default_objstore_path
+    print("\nOpenGHG configuration")
+    print("---------------------\n")
 
     user_config_path = get_user_config_path()
 
+    updated = False
     # If the config file exists we might need to update it due to the introduction
     # of the user ID
     if user_config_path.exists():
+        if silent:
+            print("Error: cannot overwrite an existing configuration. Please run quickstart.")
+            return
+
         print(f"User config exists at {str(user_config_path)}, checking...")
 
         config = toml.loads(user_config_path.read_text())
 
         objstore_path_config = Path(config["object_store"]["local_store"])
 
-        if objstore_path_config != object_store_path:
-            config_input = input(
-                "Would you like to update the object store path from:"
-                + f"\n{objstore_path_config}\n"
-                + "to"
-                + f"\n{object_store_path}?"
-            )
+        print(f"Current object store path: {objstore_path_config}")
+        update_input = input("Would you like to update the path? (y/n): ")
+        if update_input.lower() in ("y", "yes"):
+            new_path = input("Enter new path for object store: ")
+            new_path = Path(new_path).expanduser().resolve()
 
-            if config_input.lower() in ("y", "yes"):
-                config["object_store"]["local_store"] = object_store_path
+            config["object_store"]["local_store"] = str(new_path)
+            updated = True
         else:
             print("Matching object store path, nothing to do.\n")
 
@@ -110,21 +103,40 @@ def create_config(silent: bool = False) -> None:
             user_id = config["user_id"]
         except KeyError:
             config["user_id"] = str(uuid.uuid4())
+            updated = True
+
+        if updated:
+            print("Updated configuration saved.\n")
     else:
-        print(f"Creating config at {str(user_config_path)}")
+        default_objstore_path = get_default_objectstore_path()
+
+        if silent:
+            obj_store_path = default_objstore_path
+        else:
+            obj_store_path = input(f"Enter path for object store (default {default_objstore_path}): ")
+            obj_store_path = Path(obj_store_path).expanduser().resolve()
 
         user_config_path.parent.mkdir(parents=True, exist_ok=True)
 
-        if object_store_path is None:
-            object_store_path = default_objectstore_path()
-        else:
-            object_store_path = Path(object_store_path)
+        if not obj_store_path:
+            obj_store_path = default_objstore_path
 
         user_id = str(uuid.uuid4())
-        config = {"object_store": {"local_store": str(object_store_path)}, "user_id": user_id}
+        config = {"object_store": {"local_store": str(obj_store_path)}, "user_id": user_id}
 
-    object_store_path.mkdir(exist_ok=True)
-    user_config_path.write_text(toml.dumps(config))
+        obj_store_path.mkdir(exist_ok=True)
+
+        print(f"Creating config at {str(user_config_path)}\n")
+
+    if updated:
+        pp = pprint.PrettyPrinter(width=50, compact=True)
+        print("Writing configuration:\n")
+        pp.pprint(config)
+        print("\n")
+
+        user_config_path.write_text(toml.dumps(config))
+    else:
+        print("Configuration unchanged.")
 
 
 # @lru_cache

@@ -13,7 +13,7 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import List
+from typing import List, IO
 
 
 def get_sys_info() -> List:
@@ -70,7 +70,12 @@ def get_sys_info() -> List:
     return blob
 
 
-def netcdf_and_hdf5_versions():
+def netcdf_and_hdf5_versions() -> List:
+    """Returns the versions of NetCDF and HDF5 libraries installed.
+
+    Returns:
+        list: List of versions
+    """
     libhdf5_version = None
     libnetcdf_version = None
     try:
@@ -88,13 +93,12 @@ def netcdf_and_hdf5_versions():
     return [("libhdf5", libhdf5_version), ("libnetcdf", libnetcdf_version)]
 
 
-def show_versions(file=sys.stdout):
+def show_versions(file: IO = sys.stdout) -> None:
     """print the versions of xarray and its dependencies
 
-    Parameters
-    ----------
-    file : file-like, optional
-        print to the given file-like object. Defaults to sys.stdout.
+    Args:
+        file : file-like, optional
+            print to the given file-like object. Defaults to sys.stdout.
     """
     sys_info = get_sys_info()
 
@@ -105,42 +109,33 @@ def show_versions(file=sys.stdout):
 
     deps = [
         # (MODULE_NAME, f(mod) -> mod version)
-        ("xarray", lambda mod: mod.__version__),
-        ("pandas", lambda mod: mod.__version__),
-        ("numpy", lambda mod: mod.__version__),
-        ("scipy", lambda mod: mod.__version__),
-        # xarray optionals
-        ("netCDF4", lambda mod: mod.__version__),
-        ("pydap", lambda mod: mod.__version__),
-        ("h5netcdf", lambda mod: mod.__version__),
-        ("h5py", lambda mod: mod.__version__),
-        ("Nio", lambda mod: mod.__version__),
-        ("zarr", lambda mod: mod.__version__),
-        ("cftime", lambda mod: mod.__version__),
-        ("nc_time_axis", lambda mod: mod.__version__),
-        ("PseudoNetCDF", lambda mod: mod.__version__),
-        ("rasterio", lambda mod: mod.__version__),
-        ("cfgrib", lambda mod: mod.__version__),
-        ("iris", lambda mod: mod.__version__),
-        ("bottleneck", lambda mod: mod.__version__),
+        ("addict", lambda mod: mod.__version__),
         ("dask", lambda mod: mod.__version__),
-        ("distributed", lambda mod: mod.__version__),
+        ("h5netcdf", lambda mod: mod.__version__),
+        ("icoscp", lambda mod: mod.__version__),
         ("matplotlib", lambda mod: mod.__version__),
-        ("cartopy", lambda mod: mod.__version__),
-        ("seaborn", lambda mod: mod.__version__),
-        ("numbagg", lambda mod: mod.__version__),
-        ("fsspec", lambda mod: mod.__version__),
-        ("cupy", lambda mod: mod.__version__),
-        ("pint", lambda mod: mod.__version__),
-        ("sparse", lambda mod: mod.__version__),
-        ("flox", lambda mod: mod.__version__),
-        ("numpy_groupies", lambda mod: mod.__version__),
-        # xarray setup/test
+        ("msgpack", lambda mod: mod.__version__),
+        ("netcdf4", lambda mod: mod.__version__),
+        ("nbformat", lambda mod: mod.__version__),
+        ("numexpr", lambda mod: mod.__version__),
+        ("numpy", lambda mod: mod.__version__),
+        ("nc-time-axis", lambda mod: mod.__version__),
+        ("pandas", lambda mod: mod.__version__),
+        ("plotly", lambda mod: mod.__version__),
+        ("pyvis", lambda mod: mod.__version__),
+        ("rapidfuzz", lambda mod: mod.__version__),
+        ("requests", lambda mod: mod.__version__),
+        ("scipy", lambda mod: mod.__version__),
+        ("tinydb", lambda mod: mod.__version__),
+        ("toml", lambda mod: mod.__version__),
+        ("tqdm", lambda mod: mod.__version__),
+        ("xarray", lambda mod: mod.__version__),
+        ("urllib3", lambda mod: mod.__version__),
+        # openghg setup/test/doc
         ("setuptools", lambda mod: mod.__version__),
         ("pip", lambda mod: mod.__version__),
         ("conda", lambda mod: mod.__version__),
         ("pytest", lambda mod: mod.__version__),
-        # Misc.
         ("IPython", lambda mod: mod.__version__),
         ("sphinx", lambda mod: mod.__version__),
     ]

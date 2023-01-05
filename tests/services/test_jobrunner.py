@@ -23,7 +23,7 @@
 
 # @pytest.fixture(autouse=True)
 # def run_before_tests():
-#     _ = get_bucket(empty=True)
+#     _ = clear_test_store()
 
 
 # @pytest.yield_fixture()
