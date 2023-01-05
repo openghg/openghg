@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Fn Development &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>Fn Development &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -50,8 +50,6 @@
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Fn usage" href="fn_usage.html" />
-    <link rel="prev" title="Fn setup" href="fn_setup.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -107,7 +105,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -145,7 +143,7 @@
                     </li>
                 
 
-                    <li class="nav-item current active">
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../index_devel.html">
                         Development
                       </a>
@@ -228,7 +226,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -264,7 +262,7 @@
                     </li>
                 
 
-                    <li class="nav-item current active">
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../index_devel.html">
                         Development
                       </a>
@@ -321,32 +319,6 @@
   </div>
 
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../quickstart_devel.html">Quickstart - developer</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../python_devel.html">Getting setup</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../specifications/data_spec.html">Data Specification</a></li>
-</ul>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="fn_setup.html">Fn setup</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Fn Development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fn_usage.html">Fn usage</a></li>
-</ul>
-
-  </div>
-</nav>
-    </div>
-  </div>
-  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -388,11 +360,11 @@ we build. During development setting the log level of <code class="docutils lite
 within the containers to the terminal. Without setting the log level the only error reporting shown is a less helpful
 <code class="docutils literal notranslate"><span class="pre">Error</span> <span class="pre">invoking</span> <span class="pre">function.</span> <span class="pre">status:</span> <span class="pre">502</span> <span class="pre">message:</span> <span class="pre">function</span> <span class="pre">failed</span></code> message.</p>
 <p>So, open a terminal and run (and leave running)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn start --log-level DEBUG
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn<span class="w"> </span>start<span class="w"> </span>--log-level<span class="w"> </span>DEBUG
 </pre></div>
 </div>
 <p>If you don’t want extra debug information from each invocation just run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn start
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn<span class="w"> </span>start
 </pre></div>
 </div>
 </section>
@@ -400,14 +372,14 @@ within the containers to the terminal. Without setting the log level the only er
 <h2>First function<a class="headerlink" href="#first-function" title="Permalink to this heading">#</a></h2>
 <p>To call functions within OpenGHG we use a routing function with Fn. This function (link to route.py) routes calls made to
 our Fn triggers (more on triggers later). To setup a function we first need to create an app. To do this we use</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn init --runtime python openghg_fn
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn<span class="w"> </span>init<span class="w"> </span>--runtime<span class="w"> </span>python<span class="w"> </span>openghg_fn
 </pre></div>
 </div>
 <p>This will create a folder called <code class="docutils literal notranslate"><span class="pre">openghg_fn</span></code> with some boilerplate code inside. These can form a template
 for creation of your own functions. If we look inside this directory we’ll see three files</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> openghg_fn/
-$ ls
-func.py  func.yaml  requirements.txt
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>openghg_fn/
+$<span class="w"> </span>ls
+func.py<span class="w">  </span>func.yaml<span class="w">  </span>requirements.txt
 </pre></div>
 </div>
 <p>Here <code class="docutils literal notranslate"><span class="pre">func.py</span></code> is the function we’re going to call, <code class="docutils literal notranslate"><span class="pre">func.yaml</span></code> tells Fn how to setup and run the function and <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>
@@ -435,19 +407,19 @@ contains the Python requirements and is used when a Docker image is built for th
 <section id="function-parameters">
 <h3>Function parameters<a class="headerlink" href="#function-parameters" title="Permalink to this heading">#</a></h3>
 <p>Next we’ll modify <code class="docutils literal notranslate"><span class="pre">func.yaml</span></code> to contain</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20180708</span><span class="w"></span>
-<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openghg_fn</span><span class="w"></span>
-<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.1</span><span class="w"></span>
-<span class="nt">runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python</span><span class="w"></span>
-<span class="nt">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/python/bin/fdk /function/func.py route</span><span class="w"></span>
-<span class="c1"># Memory limit for function in MB</span><span class="w"></span>
-<span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20180708</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openghg_fn</span>
+<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.1</span>
+<span class="nt">runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python</span>
+<span class="nt">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/python/bin/fdk /function/func.py route</span>
+<span class="c1"># Memory limit for function in MB</span>
+<span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
 </pre></div>
 </div>
 <p>Here note the change of <code class="docutils literal notranslate"><span class="pre">handler</span></code> to <code class="docutils literal notranslate"><span class="pre">route</span></code> for the entrypoint.</p>
 <p>Seeing as we’re just using a bare Fn function here we can leave <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> as it is with our only requirement being <code class="docutils literal notranslate"><span class="pre">fdk</span></code>.
 As each function needs to be part of an app we create an app called <code class="docutils literal notranslate"><span class="pre">openghg</span></code>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn create app openghg
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn<span class="w"> </span>create<span class="w"> </span>app<span class="w"> </span>openghg
 </pre></div>
 </div>
 <p>We’re now ready to deploy our function and call it.</p>
@@ -455,16 +427,16 @@ As each function needs to be part of an app we create an app called <code class=
 <section id="deployment">
 <h3>Deployment<a class="headerlink" href="#deployment" title="Permalink to this heading">#</a></h3>
 <p>To deploy the app we can run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn --verbose deploy --local
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn<span class="w"> </span>--verbose<span class="w"> </span>deploy<span class="w"> </span>--local
 </pre></div>
 </div>
 <p>This tells Fn give us verbose output and <code class="docutils literal notranslate"><span class="pre">--local</span></code> tells it not to push our Docker image to DockerHub. After you run this command
 you’ll see a lot of output as Fn builds a Docker. Hopefully at the end of the output you’ll have something similar to</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Successfully built 22ed08c1f99e
-Successfully tagged openghg_fn:0.0.2
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Successfully<span class="w"> </span>built<span class="w"> </span>22ed08c1f99e
+Successfully<span class="w"> </span>tagged<span class="w"> </span>openghg_fn:0.0.2
 
-Updating <span class="k">function</span> openghg_fn using image openghg_fn:0.0.2...
-Successfully created <span class="k">function</span>: openghg_fn with openghg_fn:0.0.2
+Updating<span class="w"> </span><span class="k">function</span><span class="w"> </span>openghg_fn<span class="w"> </span>using<span class="w"> </span>image<span class="w"> </span>openghg_fn:0.0.2...
+Successfully<span class="w"> </span>created<span class="w"> </span><span class="k">function</span>:<span class="w"> </span>openghg_fn<span class="w"> </span>with<span class="w"> </span>openghg_fn:0.0.2
 </pre></div>
 </div>
 <p>Don’t worry if some values are slightly different here.</p>
@@ -472,32 +444,32 @@ Successfully created <span class="k">function</span>: openghg_fn with openghg_fn
 <section id="call">
 <h3>Call<a class="headerlink" href="#call" title="Permalink to this heading">#</a></h3>
 <p>You should then be able to invoke / call the function using</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ fn invoke openghg openghg_fn
-<span class="o">{</span><span class="s2">&quot;message&quot;</span>: <span class="s2">&quot;Hello from OpenGHG&quot;</span><span class="o">}</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer<span class="w"> </span>openghg_fn<span class="o">]</span>$<span class="w"> </span>fn<span class="w"> </span>invoke<span class="w"> </span>openghg<span class="w"> </span>openghg_fn
+<span class="o">{</span><span class="s2">&quot;message&quot;</span>:<span class="w"> </span><span class="s2">&quot;Hello from OpenGHG&quot;</span><span class="o">}</span>
 </pre></div>
 </div>
 <p>We can also use <code class="docutils literal notranslate"><span class="pre">curl</span></code> to trigger the function. If we do</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ fn inspect <span class="k">function</span> openghg openghg_fn
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer<span class="w"> </span>openghg_fn<span class="o">]</span>$<span class="w"> </span>fn<span class="w"> </span>inspect<span class="w"> </span><span class="k">function</span><span class="w"> </span>openghg<span class="w"> </span>openghg_fn
 <span class="o">{</span>
-    <span class="s2">&quot;annotations&quot;</span>: <span class="o">{</span>
-        <span class="s2">&quot;fnproject.io/fn/invokeEndpoint&quot;</span>: <span class="s2">&quot;http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009&quot;</span>
-    <span class="o">}</span>,
-    <span class="s2">&quot;app_id&quot;</span>: <span class="s2">&quot;01ES9D6T23NG8G00GZJ0000008&quot;</span>,
-    <span class="s2">&quot;created_at&quot;</span>: <span class="s2">&quot;2020-12-11T17:22:35.461Z&quot;</span>,
-    <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;01ES9D6TA5NG8G00GZJ0000009&quot;</span>,
-    <span class="s2">&quot;idle_timeout&quot;</span>: <span class="m">30</span>,
-    <span class="s2">&quot;image&quot;</span>: <span class="s2">&quot;openghg:0.0.82&quot;</span>,
-    <span class="s2">&quot;memory&quot;</span>: <span class="m">2048</span>,
-    <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;openghg&quot;</span>,
-    <span class="s2">&quot;timeout&quot;</span>: <span class="m">30</span>,
-    <span class="s2">&quot;updated_at&quot;</span>: <span class="s2">&quot;2021-06-08T13:26:48.066Z&quot;</span>
+<span class="w">    </span><span class="s2">&quot;annotations&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;fnproject.io/fn/invokeEndpoint&quot;</span>:<span class="w"> </span><span class="s2">&quot;http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009&quot;</span>
+<span class="w">    </span><span class="o">}</span>,
+<span class="w">    </span><span class="s2">&quot;app_id&quot;</span>:<span class="w"> </span><span class="s2">&quot;01ES9D6T23NG8G00GZJ0000008&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;created_at&quot;</span>:<span class="w"> </span><span class="s2">&quot;2020-12-11T17:22:35.461Z&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="s2">&quot;01ES9D6TA5NG8G00GZJ0000009&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;idle_timeout&quot;</span>:<span class="w"> </span><span class="m">30</span>,
+<span class="w">    </span><span class="s2">&quot;image&quot;</span>:<span class="w"> </span><span class="s2">&quot;openghg:0.0.82&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;memory&quot;</span>:<span class="w"> </span><span class="m">2048</span>,
+<span class="w">    </span><span class="s2">&quot;name&quot;</span>:<span class="w"> </span><span class="s2">&quot;openghg&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;timeout&quot;</span>:<span class="w"> </span><span class="m">30</span>,
+<span class="w">    </span><span class="s2">&quot;updated_at&quot;</span>:<span class="w"> </span><span class="s2">&quot;2021-06-08T13:26:48.066Z&quot;</span>
 <span class="o">}</span>
 </pre></div>
 </div>
 <p>We can see that there is an invocation endpoint at <code class="docutils literal notranslate"><span class="pre">http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009</span></code>, using curl we can
 call the function like so</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ curl -X POST http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009
-<span class="o">{</span><span class="s2">&quot;message&quot;</span>: <span class="s2">&quot;Hello from OpenGHG&quot;</span><span class="o">}</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer<span class="w"> </span>openghg_fn<span class="o">]</span>$<span class="w"> </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009
+<span class="o">{</span><span class="s2">&quot;message&quot;</span>:<span class="w"> </span><span class="s2">&quot;Hello from OpenGHG&quot;</span><span class="o">}</span>
 </pre></div>
 </div>
 <p>Note that your invocation endpoint may differ slightly from the one shown above.</p>
@@ -510,12 +482,12 @@ To create our own Docker image for the function we’ve created above create a <
 that contains the following:</p>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">fnproject/python:3.8.5</span>
 
-<span class="k">ADD</span><span class="w"> </span>requirements.txt func.py <span class="k">function</span>/
+<span class="k">ADD</span><span class="w"> </span>requirements.txt<span class="w"> </span>func.py<span class="w"> </span><span class="k">function</span>/
 <span class="k">WORKDIR</span><span class="w"> </span><span class="s">/function</span>
 
-<span class="k">RUN</span><span class="w"> </span>pip3 install <span class="nv">pip</span><span class="o">==</span><span class="m">20</span>.2.4 wheel setuptools
-<span class="k">RUN</span><span class="w"> </span>pip3 install --target /python/ -r requirements.txt
-<span class="k">RUN</span><span class="w"> </span>rm -rf requirements.txt
+<span class="k">RUN</span><span class="w"> </span>pip3<span class="w"> </span>install<span class="w"> </span><span class="nv">pip</span><span class="o">==</span><span class="m">20</span>.2.4<span class="w"> </span>wheel<span class="w"> </span>setuptools
+<span class="k">RUN</span><span class="w"> </span>pip3<span class="w"> </span>install<span class="w"> </span>--target<span class="w"> </span>/python/<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+<span class="k">RUN</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>requirements.txt
 
 <span class="k">ENV</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span>/python
 
@@ -524,30 +496,30 @@ that contains the following:</p>
 </div>
 <p>Here we’ve installed a specific <code class="docutils literal notranslate"><span class="pre">pip</span></code> version 20.2.4 as this was the last version before the new resolver was introduced.</p>
 <p>After creating our <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> we must also update <code class="docutils literal notranslate"><span class="pre">func.yaml</span></code> to create tell Fn that we’re now using our own customer Docker container</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20180708</span><span class="w"></span>
-<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openghg_fn</span><span class="w"></span>
-<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.4</span><span class="w"></span>
-<span class="nt">runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker</span><span class="w"></span>
-<span class="nt">triggers</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">route</span><span class="w"></span>
-<span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
-<span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/openghg_fn</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20180708</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openghg_fn</span>
+<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.4</span>
+<span class="nt">runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker</span>
+<span class="nt">triggers</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">route</span>
+<span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/openghg_fn</span>
 </pre></div>
 </div>
 <p>We can then tell Fn to deploy the image again. This will build the container using our custom Dockerfile.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn --verbose deploy --local
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn<span class="w"> </span>--verbose<span class="w"> </span>deploy<span class="w"> </span>--local
 </pre></div>
 </div>
 <p>Hopefully at the end of the build you’ll see something like:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Updating <span class="k">function</span> openghg_fn using image openghg_fn:0.0.4...
-Successfully created trigger: route
-Trigger Endpoint: http://localhost:8080/t/openghg/openghg_fn
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Updating<span class="w"> </span><span class="k">function</span><span class="w"> </span>openghg_fn<span class="w"> </span>using<span class="w"> </span>image<span class="w"> </span>openghg_fn:0.0.4...
+Successfully<span class="w"> </span>created<span class="w"> </span>trigger:<span class="w"> </span>route
+Trigger<span class="w"> </span>Endpoint:<span class="w"> </span>http://localhost:8080/t/openghg/openghg_fn
 </pre></div>
 </div>
 <p>We now have a much cleaner endpoint we can use to trigger the function. Using <code class="docutils literal notranslate"><span class="pre">curl</span></code> again to trigger the function. Note that
 trigger/invoke/call are all used interchangeably here.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ curl -X POST http://localhost:8080/t/openghg/openghg_fn
-<span class="o">{</span><span class="s2">&quot;message&quot;</span>: <span class="s2">&quot;Hello from OpenGHG&quot;</span><span class="o">}</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer<span class="w"> </span>openghg_fn<span class="o">]</span>$<span class="w"> </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/t/openghg/openghg_fn
+<span class="o">{</span><span class="s2">&quot;message&quot;</span>:<span class="w"> </span><span class="s2">&quot;Hello from OpenGHG&quot;</span><span class="o">}</span>
 </pre></div>
 </div>
 <p>Now we have an understanding of how Fn works and how to create functions and call them we will cover the functions available in OpenGHG.</p>
@@ -565,16 +537,16 @@ to create a second image, called <code class="docutils literal notranslate"><spa
 that makes building the image easier and a Dockerfile.</p>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">fnproject/python:3.8.5-dev</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="s">build-stage</span>
 
-<span class="k">ADD</span><span class="w"> </span>requirements-server.txt ./
+<span class="k">ADD</span><span class="w"> </span>requirements-server.txt<span class="w"> </span>./
 
-<span class="k">RUN</span><span class="w"> </span>apt-get update <span class="o">&amp;&amp;</span> apt-get install git -y
+<span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>git<span class="w"> </span>-y
 <span class="c"># pip 20.2.4 is the version before the new resolver was introduced</span>
-<span class="k">RUN</span><span class="w"> </span>pip3 install <span class="nv">pip</span><span class="o">==</span><span class="m">20</span>.2.4 wheel setuptools <span class="o">&amp;&amp;</span> <span class="se">\</span>
-    pip3 install --target /python/ -r requirements-server.txt
+<span class="k">RUN</span><span class="w"> </span>pip3<span class="w"> </span>install<span class="w"> </span><span class="nv">pip</span><span class="o">==</span><span class="m">20</span>.2.4<span class="w"> </span>wheel<span class="w"> </span>setuptools<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>pip3<span class="w"> </span>install<span class="w"> </span>--target<span class="w"> </span>/python/<span class="w"> </span>-r<span class="w"> </span>requirements-server.txt
 
 <span class="k">FROM</span><span class="w"> </span><span class="s">fnproject/python:3.8.5</span>
 
-<span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>build-stage /python/ /python/
+<span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>build-stage<span class="w"> </span>/python/<span class="w"> </span>/python/
 <span class="k">ENV</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span>/python
 
 <span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;bash&quot;</span><span class="p">]</span>
@@ -585,7 +557,7 @@ and install <code class="docutils literal notranslate"><span class="pre">git</sp
 the <code class="docutils literal notranslate"><span class="pre">fnproject/python:3.8.5-dev</span> <span class="pre">as</span> <span class="pre">build-stage</span></code>. After cloning Acquire and installing all the packages into <code class="docutils literal notranslate"><span class="pre">/python</span></code> we start
 with a fresh image and copy only the contents of <code class="docutils literal notranslate"><span class="pre">/python</span></code> into this image. This helps limit the size of the image.</p>
 <p>To build this image run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python build.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>build.py
 </pre></div>
 </div>
 <p>This will build a Docker image with the tag <code class="docutils literal notranslate"><span class="pre">openghg/openghg-base:latest</span></code>. To see the available options when building the image
@@ -599,17 +571,17 @@ the <code class="docutils literal notranslate"><span class="pre">openghg-base</s
 code into <code class="docutils literal notranslate"><span class="pre">/python</span></code>. We also copy the services code which form the functions that calls are routed to by <code class="docutils literal notranslate"><span class="pre">route.py</span></code>.</p>
 <div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">openghg/openghg-base:latest</span>
 
-<span class="k">ADD</span><span class="w"> </span>openghg_services/route.py /function/
+<span class="k">ADD</span><span class="w"> </span>openghg_services/route.py<span class="w"> </span>/function/
 <span class="k">WORKDIR</span><span class="w"> </span><span class="s">/function</span>
 
 <span class="c"># Copy in openghg</span>
-<span class="k">ADD</span><span class="w"> </span>openghg /python/openghg
-<span class="k">RUN</span><span class="w"> </span>python3 -m compileall /python/openghg/*
+<span class="k">ADD</span><span class="w"> </span>openghg<span class="w"> </span>/python/openghg
+<span class="k">RUN</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>compileall<span class="w"> </span>/python/openghg/*
 
 <span class="c"># Copy in the service files</span>
-<span class="k">RUN</span><span class="w"> </span>mkdir /python/openghg_services
-<span class="k">ADD</span><span class="w"> </span>openghg_services /python/openghg_services
-<span class="k">RUN</span><span class="w"> </span>python3 -m compileall /python/openghg_services/*.py
+<span class="k">RUN</span><span class="w"> </span>mkdir<span class="w"> </span>/python/openghg_services
+<span class="k">ADD</span><span class="w"> </span>openghg_services<span class="w"> </span>/python/openghg_services
+<span class="k">RUN</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>compileall<span class="w"> </span>/python/openghg_services/*.py
 
 <span class="k">ENV</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span>/python
 <span class="k">ENV</span><span class="w"> </span><span class="nv">OPENGHG_CLOUD</span><span class="o">=</span><span class="m">1</span>
@@ -621,39 +593,39 @@ code into <code class="docutils literal notranslate"><span class="pre">/python</
 </div>
 <p>We have also modified <code class="docutils literal notranslate"><span class="pre">func.yaml</span></code> to increase the amount of memory available to this function to 2048 MB / 2 GB. If you notice functions failing unexpectedly
 it may be worth trying changing this value.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20180708</span><span class="w"></span>
-<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openghg</span><span class="w"></span>
-<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.100</span><span class="w"></span>
-<span class="nt">runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker</span><span class="w"></span>
-<span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span><span class="w"></span>
-<span class="nt">triggers</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">route</span><span class="w"></span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"></span>
-<span class="w">  </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">schema_version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20180708</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openghg</span>
+<span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.100</span>
+<span class="nt">runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker</span>
+<span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2048</span>
+<span class="nt">triggers</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">route</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">  </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
 </pre></div>
 </div>
 <p>To build this image we use the <code class="docutils literal notranslate"><span class="pre">build_deploy.py</span></code> Python script.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer docker<span class="o">]</span>$ python build_deploy.py -h
-usage: build_deploy.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--tag TAG<span class="o">]</span> <span class="o">[</span>--push<span class="o">]</span> <span class="o">[</span>--build<span class="o">]</span> <span class="o">[</span>--deploy<span class="o">]</span> <span class="o">[</span>--build-base<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer<span class="w"> </span>docker<span class="o">]</span>$<span class="w"> </span>python<span class="w"> </span>build_deploy.py<span class="w"> </span>-h
+usage:<span class="w"> </span>build_deploy.py<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">[</span>--tag<span class="w"> </span>TAG<span class="o">]</span><span class="w"> </span><span class="o">[</span>--push<span class="o">]</span><span class="w"> </span><span class="o">[</span>--build<span class="o">]</span><span class="w"> </span><span class="o">[</span>--deploy<span class="o">]</span><span class="w"> </span><span class="o">[</span>--build-base<span class="o">]</span>
 
-Build the base Docker image and optionally push to DockerHub
+Build<span class="w"> </span>the<span class="w"> </span>base<span class="w"> </span>Docker<span class="w"> </span>image<span class="w"> </span>and<span class="w"> </span>optionally<span class="w"> </span>push<span class="w"> </span>to<span class="w"> </span>DockerHub
 
-optional arguments:
--h, --help    show this <span class="nb">help</span> message and <span class="nb">exit</span>
---tag TAG     tag name/number, examples: <span class="m">1</span>.0 or latest. Not full tag name such as openghg/openghg-complete:latest. Default: latest
---push        push the image to DockerHub
---build       build the docker image. Disables Fn deploy.
---deploy      buid image and deploy the Fn functions
---build-base  build the base docker image before building the <span class="nb">complete</span> image
+optional<span class="w"> </span>arguments:
+-h,<span class="w"> </span>--help<span class="w">    </span>show<span class="w"> </span>this<span class="w"> </span><span class="nb">help</span><span class="w"> </span>message<span class="w"> </span>and<span class="w"> </span><span class="nb">exit</span>
+--tag<span class="w"> </span>TAG<span class="w">     </span>tag<span class="w"> </span>name/number,<span class="w"> </span>examples:<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span>or<span class="w"> </span>latest.<span class="w"> </span>Not<span class="w"> </span>full<span class="w"> </span>tag<span class="w"> </span>name<span class="w"> </span>such<span class="w"> </span>as<span class="w"> </span>openghg/openghg-complete:latest.<span class="w"> </span>Default:<span class="w"> </span>latest
+--push<span class="w">        </span>push<span class="w"> </span>the<span class="w"> </span>image<span class="w"> </span>to<span class="w"> </span>DockerHub
+--build<span class="w">       </span>build<span class="w"> </span>the<span class="w"> </span>docker<span class="w"> </span>image.<span class="w"> </span>Disables<span class="w"> </span>Fn<span class="w"> </span>deploy.
+--deploy<span class="w">      </span>buid<span class="w"> </span>image<span class="w"> </span>and<span class="w"> </span>deploy<span class="w"> </span>the<span class="w"> </span>Fn<span class="w"> </span>functions
+--build-base<span class="w">  </span>build<span class="w"> </span>the<span class="w"> </span>base<span class="w"> </span>docker<span class="w"> </span>image<span class="w"> </span>before<span class="w"> </span>building<span class="w"> </span>the<span class="w"> </span><span class="nb">complete</span><span class="w"> </span>image
 </pre></div>
 </div>
 <p>This script takes care of building the base image as well if you want it to. To build both the base and complete image and deploy the
 functions to Fn run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python build.py --build-base
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>build.py<span class="w"> </span>--build-base
 </pre></div>
 </div>
 <p>If you have the base image built and have only made changes to the OpenGHG code you can just run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python build.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>build.py
 </pre></div>
 </div>
 <p><strong>Note</strong> - if you’ve made changes to either <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> or <code class="docutils literal notranslate"><span class="pre">requirements-server.txt</span></code> you’ll need to do a rebuild of the base
@@ -665,25 +637,25 @@ image. This ensures all dependencies are installed in the base image.</p>
 <p>Say we want to test a function such as the <code class="docutils literal notranslate"><span class="pre">testconnection</span></code> function that is a part of OpenGHG. This simple function returns a simple
 string of the timestamp at which the function was called to the user.</p>
 <p>As above we inspect the funtion and find its endpoint.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer openghg_fn<span class="o">]</span>$ fn inspect <span class="k">function</span> openghg openghg
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>user@computer<span class="w"> </span>openghg_fn<span class="o">]</span>$<span class="w"> </span>fn<span class="w"> </span>inspect<span class="w"> </span><span class="k">function</span><span class="w"> </span>openghg<span class="w"> </span>openghg
 <span class="o">{</span>
-    <span class="s2">&quot;annotations&quot;</span>: <span class="o">{</span>
-        <span class="s2">&quot;fnproject.io/fn/invokeEndpoint&quot;</span>: <span class="s2">&quot;http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009&quot;</span>
-    <span class="o">}</span>,
-    <span class="s2">&quot;app_id&quot;</span>: <span class="s2">&quot;01ES9D6T23NG8G00GZJ0000008&quot;</span>,
-    <span class="s2">&quot;created_at&quot;</span>: <span class="s2">&quot;2020-12-11T17:22:35.461Z&quot;</span>,
-    <span class="s2">&quot;id&quot;</span>: <span class="s2">&quot;01ES9D6TA5NG8G00GZJ0000009&quot;</span>,
-    <span class="s2">&quot;idle_timeout&quot;</span>: <span class="m">30</span>,
-    <span class="s2">&quot;image&quot;</span>: <span class="s2">&quot;openghg:0.0.82&quot;</span>,
-    <span class="s2">&quot;memory&quot;</span>: <span class="m">2048</span>,
-    <span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;openghg&quot;</span>,
-    <span class="s2">&quot;timeout&quot;</span>: <span class="m">30</span>,
-    <span class="s2">&quot;updated_at&quot;</span>: <span class="s2">&quot;2021-06-08T13:26:48.066Z&quot;</span>
+<span class="w">    </span><span class="s2">&quot;annotations&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;fnproject.io/fn/invokeEndpoint&quot;</span>:<span class="w"> </span><span class="s2">&quot;http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009&quot;</span>
+<span class="w">    </span><span class="o">}</span>,
+<span class="w">    </span><span class="s2">&quot;app_id&quot;</span>:<span class="w"> </span><span class="s2">&quot;01ES9D6T23NG8G00GZJ0000008&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;created_at&quot;</span>:<span class="w"> </span><span class="s2">&quot;2020-12-11T17:22:35.461Z&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="s2">&quot;01ES9D6TA5NG8G00GZJ0000009&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;idle_timeout&quot;</span>:<span class="w"> </span><span class="m">30</span>,
+<span class="w">    </span><span class="s2">&quot;image&quot;</span>:<span class="w"> </span><span class="s2">&quot;openghg:0.0.82&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;memory&quot;</span>:<span class="w"> </span><span class="m">2048</span>,
+<span class="w">    </span><span class="s2">&quot;name&quot;</span>:<span class="w"> </span><span class="s2">&quot;openghg&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;timeout&quot;</span>:<span class="w"> </span><span class="m">30</span>,
+<span class="w">    </span><span class="s2">&quot;updated_at&quot;</span>:<span class="w"> </span><span class="s2">&quot;2021-06-08T13:26:48.066Z&quot;</span>
 <span class="o">}</span>
 </pre></div>
 </div>
 <p>We can then call the function using</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -X POST -d <span class="s1">&#39;{&quot;function&quot; : &quot;testconnection&quot;, &quot;args&quot;: {}}&#39;</span> http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;function&quot; : &quot;testconnection&quot;, &quot;args&quot;: {}}&#39;</span><span class="w"> </span>http://localhost:8080/invoke/01ES9D6TA5NG8G00GZJ0000009
 </pre></div>
 </div>
 <div class="admonition note">
@@ -691,7 +663,7 @@ string of the timestamp at which the function was called to the user.</p>
 <p>Your endpoint URL will differ from the one above.</p>
 </div>
 <p>And we should recieve a response such as</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span><span class="s1">&#39;results&#39;</span>: <span class="s1">&#39;Function run at 2021-06-08 13:34:17.095579+00:00&#39;</span><span class="o">}</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span><span class="s1">&#39;results&#39;</span>:<span class="w"> </span><span class="s1">&#39;Function run at 2021-06-08 13:34:17.095579+00:00&#39;</span><span class="o">}</span>
 </pre></div>
 </div>
 <p>Now we know our Dockerised function can be called and works correctly.</p>
@@ -710,20 +682,6 @@ string of the timestamp at which the function was called to the user.</p>
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="fn_setup.html" title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-          <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Fn setup</p>
-      </div>
-  </a>
-  <a class='right-next' id="next-link" href="fn_usage.html" title="next page">
-  <div class="prev-next-info">
-      <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Fn usage</p>
-  </div>
-  <i class="fa-solid fa-angle-right"></i>
-  </a>
 </div>
             </footer>
             

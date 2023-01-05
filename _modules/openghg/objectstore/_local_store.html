@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -377,7 +377,7 @@
 
 
 <div class="viewcode-block" id="get_tutorial_store_path"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_tutorial_store_path">[docs]</a><span class="k">def</span> <span class="nf">get_tutorial_store_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get the path to the local tutorial store</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to the local tutorial store</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        pathlib.Path: Path of tutorial store</span>
@@ -387,7 +387,7 @@
 
 <span class="c1"># @lru_cache</span>
 <div class="viewcode-block" id="get_local_objectstore_path"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_local_objectstore_path">[docs]</a><span class="k">def</span> <span class="nf">get_local_objectstore_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Read</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        pathlib.Path: Path of object store</span>
@@ -401,7 +401,7 @@
 
 
 <div class="viewcode-block" id="get_all_object_names"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_all_object_names">[docs]</a><span class="k">def</span> <span class="nf">get_all_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">without_prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns the names of all objects in the passed bucket</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the names of all objects in the passed bucket</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket path</span>
@@ -452,7 +452,7 @@
 
 
 <div class="viewcode-block" id="delete_object"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.delete_object">[docs]</a><span class="k">def</span> <span class="nf">delete_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Remove object at key in bucket</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove object at key in bucket</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket path</span>
@@ -468,7 +468,7 @@
 
 
 <div class="viewcode-block" id="get_object_names"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_object_names">[docs]</a><span class="k">def</span> <span class="nf">get_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;List all the keys in the object store</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List all the keys in the object store</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket containing data</span>
@@ -479,7 +479,7 @@
 
 
 <div class="viewcode-block" id="get_object"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_object">[docs]</a><span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Gets the object at key in the passed bucket</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets the object at key in the passed bucket</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket containing data</span>
@@ -497,7 +497,7 @@
 
 
 <div class="viewcode-block" id="set_object"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.set_object">[docs]</a><span class="k">def</span> <span class="nf">set_object</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Store data in bucket at key</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Store data in bucket at key</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket path</span>
@@ -521,7 +521,7 @@
 
 
 <div class="viewcode-block" id="set_object_from_json"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.set_object_from_json">[docs]</a><span class="k">def</span> <span class="nf">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Set JSON data in the object store</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set JSON data in the object store</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket for data storage</span>
@@ -536,7 +536,7 @@
 
 
 <div class="viewcode-block" id="set_object_from_file"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.set_object_from_file">[docs]</a><span class="k">def</span> <span class="nf">set_object_from_file</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Set the contents of file at filename to key in bucket</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the contents of file at filename to key in bucket</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket path</span>
@@ -549,7 +549,7 @@
 
 
 <div class="viewcode-block" id="get_object_from_json"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_object_from_json">[docs]</a><span class="k">def</span> <span class="nf">get_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;Return an object constructed from JSON stored at key.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an object constructed from JSON stored at key.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket containing data</span>
@@ -564,7 +564,7 @@
 
 
 <div class="viewcode-block" id="exists"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.exists">[docs]</a><span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Checks if there is an object in the object store with the given key</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if there is an object in the object store with the given key</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bucket: Bucket containing data</span>
@@ -577,13 +577,12 @@
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">(</span><span class="n">empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Find and return a new bucket in the object store called</span>
-<span class="sd">    &#39;bucket_name&#39;. If &#39;create_if_needed&#39; is True</span>
-<span class="sd">    then the bucket will be created if it doesn&#39;t exist. Otherwise,</span>
-<span class="sd">    if the bucket does not exist then an exception will be raised.</span>
+<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find and return the local object store path (bucket)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Path to object store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">shutil</span>
     <span class="kn">import</span> <span class="nn">os</span>
 
     <span class="n">tutorial_store</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_TMP_STORE&quot;</span><span class="p">)</span>
@@ -593,30 +592,21 @@
     <span class="n">openghg_env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">openghg_env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object&quot;</span>
+            <span class="s2">&quot;Use of the OPENGHG_PATH environment variable is deprecated and will be ignored in coming versions.&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;If you want to set a specific object&quot;</span>
             <span class="o">+</span> <span class="s2">&quot; store path please use the configuration file. See docs.openghg.org/install&quot;</span><span class="p">,</span>
             <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
         <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">openghg_env</span><span class="p">)</span>
-            <span class="n">Path</span><span class="p">(</span><span class="n">openghg_env</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">openghg_env</span>
 
     <span class="n">local_store</span> <span class="o">=</span> <span class="n">get_local_objectstore_path</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;You cannot delete the object store using get_bucket any long&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;please check you really want to delete the whole store and use openghg.object_store.clear_store.&quot;</span>
-        <span class="p">)</span>
-
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">local_store</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">clear_object_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Delete the object store. This will only delete a local object store and not</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete the object store. This will only delete a local object store and not</span>
 <span class="sd">    a group level or other store. You will be asked for input to confirm the path.</span>
 
 <span class="sd">    Returns:</span>
@@ -633,7 +623,7 @@
 
 
 <div class="viewcode-block" id="query_store"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.query_store">[docs]</a><span class="k">def</span> <span class="nf">query_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Create a dictionary that can be used to visualise the object store</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a dictionary that can be used to visualise the object store</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary for data to be shown in force graph</span>
@@ -663,7 +653,7 @@
 
 
 <div class="viewcode-block" id="visualise_store"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.visualise_store">[docs]</a><span class="k">def</span> <span class="nf">visualise_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pyvis</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">Network</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;View the object store using a pyvis force graph.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;View the object store using a pyvis force graph.</span>
 
 <span class="sd">    This function should only be called from within a notebook</span>
 

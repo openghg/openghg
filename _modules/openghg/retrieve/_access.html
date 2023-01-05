@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -373,7 +373,7 @@
     <span class="n">ambig_check_params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Perform a search and create a dataclass object with the results if any are found.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform a search and create a dataclass object with the results if any are found.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data_class: Type of dataobject to create</span>
@@ -407,7 +407,7 @@
         <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">        Multiple entries found for input parameters for </span><span class="si">{</span><span class="n">keyword_string</span><span class="si">}</span><span class="s2">.</span>
 <span class="s2">        Parameter differences:</span>
-<span class="s2">        </span><span class="si">{</span><span class="n">param_diff_formatted</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">        </span><span class="si">{</span><span class="n">param_diff_formatted</span><span class="si">}</span>
 <span class="s2">        Please supply additional parameters or set ranking.</span>
 <span class="s2">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
@@ -438,7 +438,7 @@
     <span class="n">keep_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">skip_ranking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
 
 <span class="sd">    Usage and return values are the same whilst implementation may differ.</span>
 
@@ -548,7 +548,7 @@
     <span class="n">keep_missing</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">skip_ranking</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
 
 <span class="sd">    Usage and return values are the same whilst implementation may differ.</span>
 
@@ -780,7 +780,7 @@
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsColumnData</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract available column data from the object store using keywords.</span>
 
 <span class="sd">    Args:</span>
@@ -819,7 +819,7 @@
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FluxData</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The flux function reads in all flux files for the domain and species as an xarray Dataset.</span>
 <span class="sd">    Note that at present ALL flux data is read in per species per domain or by emissions name.</span>
 <span class="sd">    To be consistent with the footprints, fluxes should be in mol/m2/s.</span>
@@ -863,7 +863,7 @@
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryConditionsData</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get boundary conditions for a given species, domain and bc_input name.</span>
 
 <span class="sd">    Args:</span>
@@ -900,7 +900,7 @@
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FootprintData</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get footprints from one site.</span>
 
 <span class="sd">    Args:</span>
@@ -954,7 +954,7 @@
 
 
 <span class="k">def</span> <span class="nf">_scale_convert</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">to_scale</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Convert to a new calibration scale</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert to a new calibration scale</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: Must contain an mf variable (mole fraction), and scale must be in global attributes</span>
@@ -1007,7 +1007,7 @@
 
 
 <span class="k">def</span> <span class="nf">_create_keyword_string</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a formatted string for supplied keyword values. This will ignore</span>
 <span class="sd">    keywords where the value is None.</span>
 <span class="sd">    This is used for printing details of keywords passed to the search functions.</span>
@@ -1021,7 +1021,7 @@
 <span class="k">def</span> <span class="nf">_metadata_difference</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">multDataTypes</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">print_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check differences between metadata for returned data objects. Note this will</span>
 <span class="sd">    only look at differences between values which are strings (not lists, floats etc.)</span>
 
@@ -1095,7 +1095,7 @@
 <span class="k">def</span> <span class="nf">_metadata_difference_formatted</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">multDataTypes</span><span class="p">,</span>
                                    <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                    <span class="n">print_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create formatted string for the difference in metadata between input objects.</span>
 
 <span class="sd">    Args:</span>

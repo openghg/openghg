@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.transform.emissions._edgar &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.transform.emissions._edgar &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -367,7 +367,7 @@
     <span class="c1"># period: Optional[Union[str, tuple]] = None,</span>
     <span class="n">edgar_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read and parse input EDGAR data.</span>
 <span class="sd">    Notes: Only accepts annual 2D grid maps in netcdf (.nc) format for now.</span>
 <span class="sd">           Does not accept monthly data yet.</span>
@@ -713,7 +713,7 @@
 <span class="k">def</span> <span class="nf">_check_lat_lon</span><span class="p">(</span>
     <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lat_out</span><span class="p">:</span> <span class="n">ArrayType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lon_out</span><span class="p">:</span> <span class="n">ArrayType</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Define and check latitude and longitude values for a domain.</span>
 
 <span class="sd">    The domain can be used in one of two ways:</span>
@@ -801,7 +801,7 @@
 
 
 <span class="k">def</span> <span class="nf">_edgar_known_versions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Define list of known versions for the EDGAR database&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define list of known versions for the EDGAR database&quot;&quot;&quot;</span>
     <span class="n">known_version</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;v432&quot;</span><span class="p">,</span> <span class="s2">&quot;v50&quot;</span><span class="p">,</span> <span class="s2">&quot;v6.0&quot;</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">known_version</span>
 
@@ -809,7 +809,7 @@
 <span class="k">def</span> <span class="nf">_check_readme_version</span><span class="p">(</span>
     <span class="n">datapath</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">zippath</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ZipFile</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempts to extract the edgar version from the associated &quot;_readme.html&quot;</span>
 <span class="sd">    file, if present.</span>
 
@@ -871,7 +871,7 @@
 
 
 <span class="k">def</span> <span class="nf">_extract_file_info</span><span class="p">(</span><span class="n">edgar_file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract details from EDGAR filename.</span>
 
 <span class="sd">    Expected filenames roughly of the form:</span>

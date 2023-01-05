@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Getting setup &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>Getting setup &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -336,11 +336,6 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="specifications/data_spec.html">Data Specification</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="cloud/fn_setup.html">Fn setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud/fn_devel.html">Fn Development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cloud/fn_usage.html">Fn usage</a></li>
-</ul>
 
   </div>
 </nav>
@@ -382,9 +377,9 @@ further.</p>
 <section id="clone-openghg">
 <h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Permalink to this heading">#</a></h3>
 <p>First we’ll clone the repository and make sure we’re on the <code class="docutils literal notranslate"><span class="pre">devel</span></code> branch. This makes sure we’re on the most up to date version of OpenGHG.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg.git
-<span class="nb">cd</span> openghg
-git checkout devel
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/openghg/openghg.git
+<span class="nb">cd</span><span class="w"> </span>openghg
+git<span class="w"> </span>checkout<span class="w"> </span>devel
 </pre></div>
 </div>
 <p>Next we’ll get a virtual environment setup using either <code class="docutils literal notranslate"><span class="pre">pip</span></code> or <code class="docutils literal notranslate"><span class="pre">conda</span></code>.</p>
@@ -401,27 +396,27 @@ the environment.</p>
 <a class="reference external" href="https://docs.python.org/3/tutorial/venv.html">virtual environment</a>.
 Here we’ll create a new folder called <code class="docutils literal notranslate"><span class="pre">envs</span></code> in our home directory and create
 a new <code class="docutils literal notranslate"><span class="pre">openghg_devel</span></code> environment in it.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p ~/envs/openghg_devel
-python -m venv ~/envs/openghg_devel
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/envs/openghg_devel
+python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/envs/openghg_devel
 </pre></div>
 </div>
 <p>Virtual environments provide sandboxes which make it easier to develop
 and test code. They also allow you to install Python modules without
 interfering with other Python installations.</p>
 <p>We activate our new environment using</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span> ~/envs/openghg_devel/bin/activate
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/envs/openghg_devel/bin/activate
 </pre></div>
 </div>
 <p>We’ll first install and update some installation tools</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pip wheel setuptools
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip<span class="w"> </span>wheel<span class="w"> </span>setuptools
 </pre></div>
 </div>
 <p>Now, making sure we’re in the root of the OpenGHG repository we just cloned, install OpenGHG’s requirements and its developer requirements.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -r requirements.txt -r requirements-dev.txt
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w"> </span>-r<span class="w"> </span>requirements-dev.txt
 </pre></div>
 </div>
 <p>Finally install OpenGHG itself. The <code class="docutils literal notranslate"><span class="pre">-e</span></code> / <code class="docutils literal notranslate"><span class="pre">--editable</span></code> flag here tells <code class="docutils literal notranslate"><span class="pre">pip</span></code> to install the OpenGHG repo in develop mode.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -e .
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
 <p>OpenGHG should now be installed, you can check this by opening <code class="docutils literal notranslate"><span class="pre">ipython</span></code> and running</p>
@@ -432,19 +427,19 @@ interfering with other Python installations.</p>
 <section id="conda">
 <h4><code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#conda" title="Permalink to this heading">#</a></h4>
 <p>Making sure you’re in the <code class="docutils literal notranslate"><span class="pre">openghg</span></code> repository folder run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create -f environment.yaml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yaml
 </pre></div>
 </div>
 <p>Once <code class="docutils literal notranslate"><span class="pre">conda</span></code> finishes its installation process you can activate the enironment</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda activate openghg_env
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>openghg_env
 </pre></div>
 </div>
 <p>Next install <code class="docutils literal notranslate"><span class="pre">conda-build</span></code> which allows us to install packages in develop mode</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install conda-build
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>conda-build
 </pre></div>
 </div>
 <p>And finally install OpenGHG</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda develop .
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>develop<span class="w"> </span>.
 </pre></div>
 </div>
 <p>OpenGHG should now be installed, you can check this by opening <code class="docutils literal notranslate"><span class="pre">ipython</span></code> and running</p>
@@ -456,7 +451,7 @@ interfering with other Python installations.</p>
 <section id="run-tests">
 <h3>Run tests<a class="headerlink" href="#run-tests" title="Permalink to this heading">#</a></h3>
 <p>To ensure everything is working on your system running the tests is a good idea. To do this run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest -v tests
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>-v<span class="w"> </span>tests
 </pre></div>
 </div>
 </section>
@@ -524,7 +519,7 @@ and when used in conjunction with tools like <a class="reference external" href=
 catch bugs.</p>
 <p>If we are writing a function that accepts takes a string and returns a string we can add the types like so</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">greeter</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Greets the user</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Greets the user</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name: Name of user</span>
@@ -536,7 +531,7 @@ catch bugs.</p>
 </div>
 <p>For a function that takes either a string or a list as its argument and returns a list we can write it as</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">search_terms</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; A function that searches</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; A function that searches</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            search_terms: Search terms</span>
@@ -553,12 +548,12 @@ catch bugs.</p>
 <section id="feature-branches">
 <h3>Feature branches<a class="headerlink" href="#feature-branches" title="Permalink to this heading">#</a></h3>
 <p>First make sure that you are on the development branch of OpenGHG:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout devel
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>devel
 </pre></div>
 </div>
 <p>Now create and switch to a feature branch. This should be prefixed with
 <em>feature</em>, e.g.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout -b feature-process
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature-process
 </pre></div>
 </div>
 </section>
@@ -567,7 +562,7 @@ catch bugs.</p>
 <p>This project uses <a class="reference external" href="https://pre-commit.com/">pre-commit</a> to ensure code is linted and formatted using tools such as flake8,
 black and others. This ensures errors are caught before the code is checked in the CI pipeline.</p>
 <p>To install the hook</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit install
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install
 </pre></div>
 </div>
 <p>The hook should now run each time you make a commit.</p>
@@ -601,12 +596,12 @@ or end with <em>test</em>, e.g.:</p>
 <section id="running-tests">
 <h3>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this heading">#</a></h3>
 <p>To run the full test suite, simply type:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest tests/
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>tests/
 </pre></div>
 </div>
 <p>To get more detailed information about each test, run pytests using the
 <em>verbose</em> flag, e.g.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest -v tests/
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>-v<span class="w"> </span>tests/
 </pre></div>
 </div>
 <p>For more information on the capabilties of <code class="docutils literal notranslate"><span class="pre">pytest</span></code> please see the
@@ -629,7 +624,7 @@ for details. The documentation is automatically built using <a class="reference 
 documentation is automatically rebuilt and updated.</p>
 <p>To build the documentation locally you will first need to install some
 additional packages. If you haven’t yet installed the documentation requirements please do so by running</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -r requirements-doc.txt
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements-doc.txt
 </pre></div>
 </div>
 <p>Next ensure you have <a class="reference external" href="https://pandoc.org/">pandoc</a> installed. Installation instructions
@@ -644,13 +639,13 @@ can be <a class="reference external" href="https://pandoc.org/installing.html">f
 <h2>Committing<a class="headerlink" href="#committing" title="Permalink to this heading">#</a></h2>
 <p>If you create new tests, please make sure that they pass locally before
 commiting. When happy, commit your changes, e.g.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git commit openghg/_new_feature.py tests/test_feature <span class="se">\</span>
-    -m <span class="s2">&quot;Implementation and test for new feature.&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>commit<span class="w"> </span>openghg/_new_feature.py<span class="w"> </span>tests/test_feature<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-m<span class="w"> </span><span class="s2">&quot;Implementation and test for new feature.&quot;</span>
 </pre></div>
 </div>
 <p>If your edits don’t change the OpenGHG source code e.g. fixing typos in the documentation,
 then please add <code class="docutils literal notranslate"><span class="pre">[skip</span> <span class="pre">ci]</span></code> to your commit message.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git commit -a -m <span class="s2">&quot;Updating docs [skip ci]&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>commit<span class="w"> </span>-a<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Updating docs [skip ci]&quot;</span>
 </pre></div>
 </div>
 <p>This will avoid unnecessarily running the
@@ -659,10 +654,10 @@ and rebuilding the documentation of the OpenGHG package etc. GitHub actions are 
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/main.yaml</span></code>).</p>
 <p>Next, push your changes to the remote server:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Push to the feature branch on the main OpenGHG repo, if you have access.</span>
-git push origin feature
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature
 
 <span class="c1"># Push to the feature branch your own fork.</span>
-git push fork feature
+git<span class="w"> </span>push<span class="w"> </span>fork<span class="w"> </span>feature
 </pre></div>
 </div>
 <p>When the feature is complete, create a <em>pull request</em> on GitHub so that the

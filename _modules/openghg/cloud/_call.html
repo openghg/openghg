@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.cloud._call &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.cloud._call &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -357,7 +357,7 @@
 
 
 <div class="viewcode-block" id="create_file_package"><a class="viewcode-back" href="../../../api/devapi_cloud.html#openghg.cloud.create_file_package">[docs]</a><span class="k">def</span> <span class="nf">create_file_package</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">obs_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Reads file metadata and compresses data to be sent to the serverless function</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads file metadata and compresses data to be sent to the serverless function</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filepath: Path of data</span>
@@ -398,7 +398,7 @@
     <span class="n">precision_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">precision_file_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Create the dictionary to POST to the remote function</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create the dictionary to POST to the remote function</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        function: Function name</span>
@@ -429,7 +429,7 @@
 
 
 <div class="viewcode-block" id="call_function"><a class="viewcode-back" href="../../../api/devapi_cloud.html#openghg.cloud.call_function">[docs]</a><span class="k">def</span> <span class="nf">call_function</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Calls an OpenGHG serverless function and returns its response</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calls an OpenGHG serverless function and returns its response</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: Data to POST. Must be a dictionary created using the create_post_dict function.</span>
@@ -457,7 +457,7 @@
 
 
 <span class="k">def</span> <span class="nf">_get_function_url</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get the URl for the required service</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the URl for the required service</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        service_name: Service name</span>
@@ -471,7 +471,7 @@
 
 
 <span class="k">def</span> <span class="nf">_get_auth_key</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get the authentication key from the local environmen</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the authentication key from the local environmen</span>
 
 <span class="sd">    This offers very limited control over calling of the functions for now.</span>
 <span class="sd">    It will be replaced by whatever user authentication system we end up using.</span>

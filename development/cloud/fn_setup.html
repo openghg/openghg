@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Fn setup &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>Fn setup &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -50,8 +50,6 @@
     <script src="../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Fn Development" href="fn_devel.html" />
-    <link rel="prev" title="Data Specification" href="../specifications/data_spec.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -107,7 +105,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -145,7 +143,7 @@
                     </li>
                 
 
-                    <li class="nav-item current active">
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../index_devel.html">
                         Development
                       </a>
@@ -228,7 +226,7 @@
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
   
   <div class="sidebar-header-items sidebar-primary__section">
@@ -264,7 +262,7 @@
                     </li>
                 
 
-                    <li class="nav-item current active">
+                    <li class="nav-item">
                       <a class="nav-link nav-internal" href="../index_devel.html">
                         Development
                       </a>
@@ -321,32 +319,6 @@
   </div>
 
   
-  <div class="sidebar-start-items sidebar-primary__section">
-    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
-  <p class="bd-links__title" role="heading" aria-level="1">
-    Section Navigation
-  </p>
-  <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../quickstart_devel.html">Quickstart - developer</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../python_devel.html">Getting setup</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../specifications/data_spec.html">Data Specification</a></li>
-</ul>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Fn setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fn_devel.html">Fn Development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fn_usage.html">Fn usage</a></li>
-</ul>
-
-  </div>
-</nav>
-    </div>
-  </div>
-  
 
   
   <div class="sidebar-end-items sidebar-primary__section">
@@ -387,46 +359,46 @@ from those given here.</p>
 installation instructions please see the <a class="reference external" href="https://docs.docker.com/engine/install/centos/">Docker documentation</a>
 but we will summarise the steps below.</p>
 <p>First set up the repository</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum install -y yum-utils
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>yum-utils
 
-sudo yum-config-manager --add-repo <span class="se">\</span>
-    https://download.docker.com/linux/centos/docker-ce.repo
+sudo<span class="w"> </span>yum-config-manager<span class="w"> </span>--add-repo<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://download.docker.com/linux/centos/docker-ce.repo
 </pre></div>
 </div>
 <p>Then we can install Docker Engine and containerd</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum install -y docker-ce docker-ce-cli containerd.io
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>docker-ce<span class="w"> </span>docker-ce-cli<span class="w"> </span>containerd.io
 </pre></div>
 </div>
 <p>Note that you may have to accept the GPG key, please check that it matches the one given in the
 <a class="reference external" href="https://docs.docker.com/engine/install/centos/">installation instructions</a>.</p>
 <p>Next we must start the docker services</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl start docker
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>docker
 </pre></div>
 </div>
 <p>Then check Docker is working correctly</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo docker run hello-world
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>hello-world
 </pre></div>
 </div>
 <p>As Fn does not currently work with rootless docker we need to add our current user to the <code class="docutils literal notranslate"><span class="pre">docker</span></code> group.
 Note that this does come with security implications which
 are <em class="xref py py-obj">outlined here</em>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo usermod -aG docker &lt;username&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>docker<span class="w"> </span>&lt;username&gt;
 </pre></div>
 </div>
 </section>
 <section id="install-fn">
 <h2>Install Fn<a class="headerlink" href="#install-fn" title="Permalink to this heading">#</a></h2>
 <p>We can now install Fn</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget -O install_fn.sh https://raw.githubusercontent.com/fnproject/cli/master/install
-<span class="nb">echo</span> a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13 install_fn.sh <span class="p">|</span> sha256sum -c
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget<span class="w"> </span>-O<span class="w"> </span>install_fn.sh<span class="w"> </span>https://raw.githubusercontent.com/fnproject/cli/master/install
+<span class="nb">echo</span><span class="w"> </span>a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13<span class="w"> </span>install_fn.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sha256sum<span class="w"> </span>-c
 <span class="c1"># This should have returned install_fn.sh: OK</span>
 <span class="c1"># If not carefully check the bash script</span>
-bash install_fn.sh
+bash<span class="w"> </span>install_fn.sh
 </pre></div>
 </div>
 <p>Note: if</p>
 <p>Then start Fn to make sure everything runs correctly. On first start some images will be downloaded.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn start
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>fn<span class="w"> </span>start
 </pre></div>
 </div>
 </section>
@@ -434,104 +406,104 @@ bash install_fn.sh
 <h2>Setup NGINX proxy<a class="headerlink" href="#setup-nginx-proxy" title="Permalink to this heading">#</a></h2>
 <p>So that we’re not exposing Fn directly to the internet we’ll use nginx as a reverse-proxy. First install nginx
 using</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum -y install nginx
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>nginx
 </pre></div>
 </div>
 <p>Next we create a server config file for our reverse proxy in <code class="docutils literal notranslate"><span class="pre">/etc/nginx/conf.d/fn_proxy.conf</span></code>.</p>
-<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">    </span><span class="k">server</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="w">        </span><span class="kn">listen</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="s">default_server</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 3</span><span class="w">        </span><span class="kn">listen</span><span class="w"> </span><span class="s">[::]:80</span><span class="w"> </span><span class="s">default_server</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">        </span><span class="kn">server_name</span><span class="w"> </span><span class="s">fn.openghg.org</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">    </span><span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 2</span><span class="w">        </span><span class="kn">listen</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="s">default_server</span><span class="p">;</span>
+<span class="linenos"> 3</span><span class="w">        </span><span class="kn">listen</span><span class="w"> </span><span class="s">[::]:80</span><span class="w"> </span><span class="s">default_server</span><span class="p">;</span>
+<span class="linenos"> 4</span><span class="w">        </span><span class="kn">server_name</span><span class="w"> </span><span class="s">fn.openghg.org</span><span class="p">;</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="w">        </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">        </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{}</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="w">        </span><span class="kn">location</span><span class="w"> </span><span class="s">/t</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 9</span><span class="w">                </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://localhost:8080/t/openghg</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">10</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">11</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">12</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">13</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="s">https</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">14</span><span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="linenos">15</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">        </span><span class="kn">location</span><span class="w"> </span><span class="s">/t</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 9</span><span class="w">                </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://localhost:8080/t/openghg</span><span class="p">;</span>
+<span class="linenos">10</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<span class="linenos">11</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+<span class="linenos">12</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<span class="linenos">13</span><span class="w">                </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="s">https</span><span class="p">;</span>
+<span class="linenos">14</span><span class="w">        </span><span class="p">}</span>
+<span class="linenos">15</span><span class="w">    </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>Then we want to disable the default config by setting <code class="docutils literal notranslate"><span class="pre">/etc/nginx/nginx.conf</span></code>.
 It might be worth copying up your default <code class="docutils literal notranslate"><span class="pre">nginx.conf</span></code> to <code class="docutils literal notranslate"><span class="pre">nginx.conf.bak</span></code> before editing
 for easy roll-back and comparison.</p>
-<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">    </span><span class="k">user</span><span class="w"> </span><span class="s">nginx</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="w">    </span><span class="k">worker_processes</span><span class="w"> </span><span class="s">auto</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 3</span><span class="w">    </span><span class="k">error_log</span><span class="w"> </span><span class="s">/var/log/nginx/error.log</span><span class="p">;</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">    </span><span class="k">pid</span><span class="w"> </span><span class="s">/run/nginx.pid</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="w">    </span><span class="k">user</span><span class="w"> </span><span class="s">nginx</span><span class="p">;</span>
+<span class="linenos"> 2</span><span class="w">    </span><span class="k">worker_processes</span><span class="w"> </span><span class="s">auto</span><span class="p">;</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="k">error_log</span><span class="w"> </span><span class="s">/var/log/nginx/error.log</span><span class="p">;</span>
+<span class="linenos"> 4</span><span class="w">    </span><span class="k">pid</span><span class="w"> </span><span class="s">/run/nginx.pid</span><span class="p">;</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="w">    </span><span class="k">include</span><span class="w"> </span><span class="n">/usr/share/nginx/modules/*.conf</span>;<span class="w"></span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="k">include</span><span class="w"> </span><span class="n">/usr/share/nginx/modules/*.conf</span>;
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="w">    </span><span class="k">events</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos"> 9</span><span class="w">        </span><span class="kn">worker_connections</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">10</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="k">events</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 9</span><span class="w">        </span><span class="kn">worker_connections</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="p">}</span>
 <span class="linenos">11</span>
-<span class="linenos">12</span><span class="w">    </span><span class="k">http</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="linenos">13</span><span class="w">        </span><span class="kn">log_format</span><span class="w">  </span><span class="s">main</span><span class="w">  </span><span class="s">&#39;</span><span class="nv">$remote_addr</span><span class="w"> </span><span class="s">-</span><span class="w"> </span><span class="nv">$remote_user</span><span class="w"> </span><span class="s">[</span><span class="nv">$time_local]</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$request&quot;</span><span class="w"> </span><span class="s">&#39;</span><span class="w"></span>
-<span class="linenos">14</span><span class="w">                        </span><span class="s">&#39;</span><span class="nv">$status</span><span class="w"> </span><span class="nv">$body_bytes_sent</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$http_referer&quot;</span><span class="w"> </span><span class="s">&#39;</span><span class="w"></span>
-<span class="linenos">15</span><span class="w">                        </span><span class="s">&#39;&quot;</span><span class="nv">$http_user_agent&quot;</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$http_x_forwarded_for&quot;&#39;</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">    </span><span class="k">http</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">13</span><span class="w">        </span><span class="kn">log_format</span><span class="w">  </span><span class="s">main</span><span class="w">  </span><span class="s">&#39;</span><span class="nv">$remote_addr</span><span class="w"> </span><span class="s">-</span><span class="w"> </span><span class="nv">$remote_user</span><span class="w"> </span><span class="s">[</span><span class="nv">$time_local]</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$request&quot;</span><span class="w"> </span><span class="s">&#39;</span>
+<span class="linenos">14</span><span class="w">                        </span><span class="s">&#39;</span><span class="nv">$status</span><span class="w"> </span><span class="nv">$body_bytes_sent</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$http_referer&quot;</span><span class="w"> </span><span class="s">&#39;</span>
+<span class="linenos">15</span><span class="w">                        </span><span class="s">&#39;&quot;</span><span class="nv">$http_user_agent&quot;</span><span class="w"> </span><span class="s">&quot;</span><span class="nv">$http_x_forwarded_for&quot;&#39;</span><span class="p">;</span>
 <span class="linenos">16</span>
-<span class="linenos">17</span><span class="w">        </span><span class="kn">access_log</span><span class="w">  </span><span class="s">/var/log/nginx/access.log</span><span class="w">  </span><span class="s">main</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">17</span><span class="w">        </span><span class="kn">access_log</span><span class="w">  </span><span class="s">/var/log/nginx/access.log</span><span class="w">  </span><span class="s">main</span><span class="p">;</span>
 <span class="linenos">18</span>
-<span class="linenos">19</span><span class="w">        </span><span class="kn">sendfile</span><span class="w">            </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">20</span><span class="w">        </span><span class="kn">tcp_nopush</span><span class="w">          </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">21</span><span class="w">        </span><span class="kn">tcp_nodelay</span><span class="w">         </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">22</span><span class="w">        </span><span class="kn">keepalive_timeout</span><span class="w">   </span><span class="mi">65</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">23</span><span class="w">        </span><span class="kn">types_hash_max_size</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">19</span><span class="w">        </span><span class="kn">sendfile</span><span class="w">            </span><span class="no">on</span><span class="p">;</span>
+<span class="linenos">20</span><span class="w">        </span><span class="kn">tcp_nopush</span><span class="w">          </span><span class="no">on</span><span class="p">;</span>
+<span class="linenos">21</span><span class="w">        </span><span class="kn">tcp_nodelay</span><span class="w">         </span><span class="no">on</span><span class="p">;</span>
+<span class="linenos">22</span><span class="w">        </span><span class="kn">keepalive_timeout</span><span class="w">   </span><span class="mi">65</span><span class="p">;</span>
+<span class="linenos">23</span><span class="w">        </span><span class="kn">types_hash_max_size</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span>
 <span class="linenos">24</span>
-<span class="linenos">25</span><span class="w">        </span><span class="kn">include</span><span class="w">             </span><span class="s">/etc/nginx/mime.types</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">26</span><span class="w">        </span><span class="kn">default_type</span><span class="w">        </span><span class="s">application/octet-stream</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">27</span><span class="w">        </span><span class="kn">include</span><span class="w"> </span><span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">28</span><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">        </span><span class="kn">include</span><span class="w">             </span><span class="s">/etc/nginx/mime.types</span><span class="p">;</span>
+<span class="linenos">26</span><span class="w">        </span><span class="kn">default_type</span><span class="w">        </span><span class="s">application/octet-stream</span><span class="p">;</span>
+<span class="linenos">27</span><span class="w">        </span><span class="kn">include</span><span class="w"> </span><span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span>
+<span class="linenos">28</span><span class="w">    </span><span class="p">}</span>
 </pre></div>
 </div>
 <p>Then we can check that our configuration setup is valid by doing</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo nginx -t
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>nginx<span class="w"> </span>-t
 </pre></div>
 </div>
 <p>Then we start and enable nginx</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl start nginx
-sudo systemctl <span class="nb">enable</span> nginx
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>nginx
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>nginx
 </pre></div>
 </div>
 </section>
 <section id="setup-firewall-rules">
 <h2>Setup Firewall Rules<a class="headerlink" href="#setup-firewall-rules" title="Permalink to this heading">#</a></h2>
 <p>First we enable and then start the <code class="docutils literal notranslate"><span class="pre">firewalld</span></code></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl <span class="nb">enable</span> firewalld
-sudo systemctl start firewalld
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>firewalld
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>firewalld
 </pre></div>
 </div>
 <p>To allow access from the outside world we need to setup rules to allow <code class="docutils literal notranslate"><span class="pre">ssh</span></code>, <code class="docutils literal notranslate"><span class="pre">http</span></code> and <code class="docutils literal notranslate"><span class="pre">https</span></code> traffic.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>ssh --permanent
-sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>https --permanent
-sudo firewall-cmd --zone<span class="o">=</span>public --add-service<span class="o">=</span>http --permanent
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>firewall-cmd<span class="w"> </span>--zone<span class="o">=</span>public<span class="w"> </span>--add-service<span class="o">=</span>ssh<span class="w"> </span>--permanent
+sudo<span class="w"> </span>firewall-cmd<span class="w"> </span>--zone<span class="o">=</span>public<span class="w"> </span>--add-service<span class="o">=</span>https<span class="w"> </span>--permanent
+sudo<span class="w"> </span>firewall-cmd<span class="w"> </span>--zone<span class="o">=</span>public<span class="w"> </span>--add-service<span class="o">=</span>http<span class="w"> </span>--permanent
 </pre></div>
 </div>
 <p>Note that we perform the command and then the same command again with the <code class="docutils literal notranslate"><span class="pre">--permanent</span></code> argument to add
 the rule first to the current session and then to the permanent rule-set.</p>
 <p>We also need to tell SELinux to allow HTTP worker_connections</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo setsebool -P httpd_can_network_connect <span class="m">1</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>setsebool<span class="w"> </span>-P<span class="w"> </span>httpd_can_network_connect<span class="w"> </span><span class="m">1</span>
 </pre></div>
 </div>
 <p>On a CentOS 8 VM on the Oracle Cloud you may need to modify some <em class="xref py py-obj">iptables</em> rules to allow any connections to be made to your
 server.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo iptables -L INPUT --line-numbers
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>iptables<span class="w"> </span>-L<span class="w"> </span>INPUT<span class="w"> </span>--line-numbers
 
-Chain INPUT <span class="o">(</span>policy ACCEPT<span class="o">)</span>
-num  target     prot opt <span class="nb">source</span>               destination
-<span class="m">1</span>    ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
-<span class="m">2</span>    ACCEPT     icmp --  anywhere             anywhere
-<span class="m">3</span>    ACCEPT     all  --  anywhere             anywhere
-<span class="m">4</span>    ACCEPT     tcp  --  anywhere             anywhere             state NEW tcp dpt:ssh
-<span class="m">5</span>    REJECT     all  --  anywhere             anywhere             reject-with icmp-host-prohibited
+Chain<span class="w"> </span>INPUT<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="o">)</span>
+num<span class="w">  </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="nb">source</span><span class="w">               </span>destination
+<span class="m">1</span><span class="w">    </span>ACCEPT<span class="w">     </span>all<span class="w">  </span>--<span class="w">  </span>anywhere<span class="w">             </span>anywhere<span class="w">             </span>state<span class="w"> </span>RELATED,ESTABLISHED
+<span class="m">2</span><span class="w">    </span>ACCEPT<span class="w">     </span>icmp<span class="w"> </span>--<span class="w">  </span>anywhere<span class="w">             </span>anywhere
+<span class="m">3</span><span class="w">    </span>ACCEPT<span class="w">     </span>all<span class="w">  </span>--<span class="w">  </span>anywhere<span class="w">             </span>anywhere
+<span class="m">4</span><span class="w">    </span>ACCEPT<span class="w">     </span>tcp<span class="w">  </span>--<span class="w">  </span>anywhere<span class="w">             </span>anywhere<span class="w">             </span>state<span class="w"> </span>NEW<span class="w"> </span>tcp<span class="w"> </span>dpt:ssh
+<span class="m">5</span><span class="w">    </span>REJECT<span class="w">     </span>all<span class="w">  </span>--<span class="w">  </span>anywhere<span class="w">             </span>anywhere<span class="w">             </span>reject-with<span class="w"> </span>icmp-host-prohibited
 </pre></div>
 </div>
 <p>You may need to remove the 5th rule in this set</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo iptables -D INPUT <span class="m">5</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>iptables<span class="w"> </span>-D<span class="w"> </span>INPUT<span class="w"> </span><span class="m">5</span>
 </pre></div>
 </div>
 </section>
@@ -539,20 +511,20 @@ num  target     prot opt <span class="nb">source</span>               destinatio
 <h2>Get a LetsEncrypt certificate with Certbot<a class="headerlink" href="#get-a-letsencrypt-certificate-with-certbot" title="Permalink to this heading">#</a></h2>
 <p>To get a LetsEncrypt certificate for https we’ll use Certbot. First, make sure you’ve setup the subdomain for the
 server and pointed it at the IP address of the server. Then follow the commands below.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo dnf install epel-release
-sudo dnf install certbot python3-certbot-nginx
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>epel-release
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>certbot<span class="w"> </span>python3-certbot-nginx
 </pre></div>
 </div>
 <p>Then we can setup get the certificate using <code class="docutils literal notranslate"><span class="pre">certbot</span></code></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo certbot --nginx -d fn.openghg.org
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>certbot<span class="w"> </span>--nginx<span class="w"> </span>-d<span class="w"> </span>fn.openghg.org
 </pre></div>
 </div>
 <p>As <code class="docutils literal notranslate"><span class="pre">certbot</span></code> will update our our <em class="xref py py-obj">nginx</em> configuration files we need to do</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo systemctl restart nginx
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nginx
 </pre></div>
 </div>
 <p>We can also set <code class="docutils literal notranslate"><span class="pre">certbot</span></code> to renew our certificates automatically using the following command</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">SLEEPTIME</span><span class="o">=</span><span class="k">$(</span>awk <span class="s1">&#39;BEGIN{srand(); print int(rand()*(3600+1))}&#39;</span><span class="k">)</span><span class="p">;</span> <span class="nb">echo</span> <span class="s2">&quot;0 0,12 * * * root sleep </span><span class="nv">$SLEEPTIME</span><span class="s2"> &amp;&amp; certbot renew -q&quot;</span> <span class="p">|</span> sudo tee -a /etc/crontab &gt; /dev/null
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">SLEEPTIME</span><span class="o">=</span><span class="k">$(</span>awk<span class="w"> </span><span class="s1">&#39;BEGIN{srand(); print int(rand()*(3600+1))}&#39;</span><span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;0 0,12 * * * root sleep </span><span class="nv">$SLEEPTIME</span><span class="s2"> &amp;&amp; certbot renew -q&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/crontab<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
 </pre></div>
 </div>
 <p>This adds a cron job to <code class="docutils literal notranslate"><span class="pre">/etc/crontab</span></code>.</p>
@@ -560,21 +532,21 @@ sudo dnf install certbot python3-certbot-nginx
 <section id="deploy-fn-functions">
 <h2>Deploy Fn Functions<a class="headerlink" href="#deploy-fn-functions" title="Permalink to this heading">#</a></h2>
 <p>We now want to deploy our functions. We’ll first need to make sure we’ve got <code class="docutils literal notranslate"><span class="pre">git</span></code> and <code class="docutils literal notranslate"><span class="pre">python</span></code> installed.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo yum install python38 git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>python38<span class="w"> </span>git
 </pre></div>
 </div>
 <p>Next clone the <code class="docutils literal notranslate"><span class="pre">openghg</span></code> repository</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/openghg/openghg.git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/openghg/openghg.git
 </pre></div>
 </div>
 <p>Then move into the <code class="docutils literal notranslate"><span class="pre">openghg/docker</span></code> folder and run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 build_deploy.py --build-base
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>build_deploy.py<span class="w"> </span>--build-base
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">--build-base</span></code> argument tells the build script to build the base image. In subsequent deployments we won’t need to run this
 step unless our dependencies change.</p>
 <p>If you want to build the Docker images without using the cache you can pass the <code class="docutils literal notranslate"><span class="pre">--nocache</span></code> argument to <code class="docutils literal notranslate"><span class="pre">build_deploy.py</span></code> like so:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 build_deploy.py --build-base --nocache
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>build_deploy.py<span class="w"> </span>--build-base<span class="w"> </span>--nocache
 </pre></div>
 </div>
 </section>
@@ -591,20 +563,6 @@ step unless our dependencies change.</p>
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../specifications/data_spec.html" title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-          <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Data Specification</p>
-      </div>
-  </a>
-  <a class='right-next' id="next-link" href="fn_devel.html" title="next page">
-  <div class="prev-next-info">
-      <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Fn Development</p>
-  </div>
-  <i class="fa-solid fa-angle-right"></i>
-  </a>
 </div>
             </footer>
             

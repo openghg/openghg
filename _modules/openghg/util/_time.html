@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._time &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.util._time &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -383,7 +383,7 @@
 
 
 <div class="viewcode-block" id="find_duplicate_timestamps"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_duplicate_timestamps">[docs]</a><span class="k">def</span> <span class="nf">find_duplicate_timestamps</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check for duplicates</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check for duplicates</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: Data object to check. Should have a time attribute or index</span>
@@ -407,7 +407,7 @@
 
 
 <div class="viewcode-block" id="timestamp_tzaware"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.timestamp_tzaware">[docs]</a><span class="k">def</span> <span class="nf">timestamp_tzaware</span><span class="p">(</span><span class="n">timestamp</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns the pandas Timestamp passed as a timezone (UTC) aware</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the pandas Timestamp passed as a timezone (UTC) aware</span>
 <span class="sd">    Timestamp.</span>
 
 <span class="sd">    Args:</span>
@@ -426,7 +426,7 @@
 
 
 <div class="viewcode-block" id="timestamp_now"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.timestamp_now">[docs]</a><span class="k">def</span> <span class="nf">timestamp_now</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns a pandas timezone (UTC) aware Timestamp for the current time.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a pandas timezone (UTC) aware Timestamp for the current time.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        pandas.Timestamp: Timestamp at current time</span>
@@ -437,7 +437,7 @@
 
 
 <div class="viewcode-block" id="timestamp_epoch"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.timestamp_epoch">[docs]</a><span class="k">def</span> <span class="nf">timestamp_epoch</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns the UNIX epoch time</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the UNIX epoch time</span>
 <span class="sd">    1st of January 1970</span>
 
 <span class="sd">    Returns:</span>
@@ -449,7 +449,7 @@
 
 
 <div class="viewcode-block" id="daterange_overlap"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.daterange_overlap">[docs]</a><span class="k">def</span> <span class="nf">daterange_overlap</span><span class="p">(</span><span class="n">daterange_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">daterange_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check if daterange_a is within daterange_b.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if daterange_a is within daterange_b.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        daterange_a (str): Timezone aware daterange string. Example:</span>
@@ -475,7 +475,7 @@
 
 
 <div class="viewcode-block" id="create_daterange"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.create_daterange">[docs]</a><span class="k">def</span> <span class="nf">create_daterange</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;D&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatetimeIndex</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Create a minute aligned daterange</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a minute aligned daterange</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        start: Start date</span>
@@ -495,7 +495,7 @@
 
 
 <div class="viewcode-block" id="create_daterange_str"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.create_daterange_str">[docs]</a><span class="k">def</span> <span class="nf">create_daterange_str</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">],</span> <span class="n">end</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Convert the passed datetimes into a daterange string</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the passed datetimes into a daterange string</span>
 <span class="sd">    for use in searches and Datasource interactions</span>
 
 <span class="sd">    Args:</span>
@@ -517,7 +517,7 @@
 
 
 <div class="viewcode-block" id="daterange_from_str"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.daterange_from_str">[docs]</a><span class="k">def</span> <span class="nf">daterange_from_str</span><span class="p">(</span><span class="n">daterange_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;D&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatetimeIndex</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get a Pandas DatetimeIndex from a string. The created</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a Pandas DatetimeIndex from a string. The created</span>
 <span class="sd">    DatetimeIndex has minute frequency.</span>
 
 <span class="sd">    Args:</span>
@@ -538,7 +538,7 @@
 
 
 <div class="viewcode-block" id="daterange_to_str"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.daterange_to_str">[docs]</a><span class="k">def</span> <span class="nf">daterange_to_str</span><span class="p">(</span><span class="n">daterange</span><span class="p">:</span> <span class="n">DatetimeIndex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Takes a pandas DatetimeIndex created by pandas date_range converts it to a</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes a pandas DatetimeIndex created by pandas date_range converts it to a</span>
 <span class="sd">    string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00</span>
 
 <span class="sd">    Args:</span>
@@ -553,7 +553,7 @@
 
 
 <div class="viewcode-block" id="combine_dateranges"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.combine_dateranges">[docs]</a><span class="k">def</span> <span class="nf">combine_dateranges</span><span class="p">(</span><span class="n">dateranges</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Combine dateranges</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine dateranges</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dateranges: Daterange strings</span>
@@ -596,7 +596,7 @@
 <div class="viewcode-block" id="split_daterange_str"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.split_daterange_str">[docs]</a><span class="k">def</span> <span class="nf">split_daterange_str</span><span class="p">(</span>
     <span class="n">daterange_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">date_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">date</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">date</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;Split a daterange string to the component start and end</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split a daterange string to the component start and end</span>
 <span class="sd">    Timestamps</span>
 
 <span class="sd">    Args:</span>
@@ -621,7 +621,7 @@
 
 
 <div class="viewcode-block" id="valid_daterange"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.valid_daterange">[docs]</a><span class="k">def</span> <span class="nf">valid_daterange</span><span class="p">(</span><span class="n">daterange</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check if the passed daterange is valid</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the passed daterange is valid</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        daterange: Daterange string</span>
@@ -639,7 +639,7 @@
 
 
 <div class="viewcode-block" id="closest_daterange"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.closest_daterange">[docs]</a><span class="k">def</span> <span class="nf">closest_daterange</span><span class="p">(</span><span class="n">to_compare</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dateranges</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Finds the closest daterange in a list of dateranges</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the closest daterange in a list of dateranges</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        to_compare: Daterange (as a string) to compare</span>
@@ -688,7 +688,7 @@
 
 
 <div class="viewcode-block" id="find_daterange_gaps"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_daterange_gaps">[docs]</a><span class="k">def</span> <span class="nf">find_daterange_gaps</span><span class="p">(</span><span class="n">start_search</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">end_search</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">dateranges</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Given a start and end date and a list of dateranges find the gaps.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a start and end date and a list of dateranges find the gaps.</span>
 
 <span class="sd">    For example given a list of dateranges</span>
 
@@ -770,7 +770,7 @@
 
 
 <div class="viewcode-block" id="daterange_contains"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.daterange_contains">[docs]</a><span class="k">def</span> <span class="nf">daterange_contains</span><span class="p">(</span><span class="n">container</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">contained</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check if the daterange container contains the daterange contained</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the daterange container contains the daterange contained</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        container: Daterange</span>
@@ -785,7 +785,7 @@
 
 
 <div class="viewcode-block" id="trim_daterange"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.trim_daterange">[docs]</a><span class="k">def</span> <span class="nf">trim_daterange</span><span class="p">(</span><span class="n">to_trim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">overlapping</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Removes overlapping dates from to_trim</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes overlapping dates from to_trim</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        to_trim: Daterange to trim down. Dates that overlap</span>
@@ -816,7 +816,7 @@
 
 
 <div class="viewcode-block" id="split_encompassed_daterange"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.split_encompassed_daterange">[docs]</a><span class="k">def</span> <span class="nf">split_encompassed_daterange</span><span class="p">(</span><span class="n">container</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">contained</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Checks if one of the passed dateranges contains the other, if so, then</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if one of the passed dateranges contains the other, if so, then</span>
 <span class="sd">    split the larger daterange into three sections.</span>
 
 <span class="sd">          &lt;---a---&gt;</span>
@@ -887,7 +887,7 @@
 
 
 <div class="viewcode-block" id="sanitise_daterange"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.sanitise_daterange">[docs]</a><span class="k">def</span> <span class="nf">sanitise_daterange</span><span class="p">(</span><span class="n">daterange</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Make sure the daterange is correct and return</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make sure the daterange is correct and return</span>
 <span class="sd">    tzaware daterange.</span>
 
 <span class="sd">    Args:</span>
@@ -904,7 +904,7 @@
 
 
 <div class="viewcode-block" id="check_date"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.check_date">[docs]</a><span class="k">def</span> <span class="nf">check_date</span><span class="p">(</span><span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check if a date string can be converted to a pd.Timestamp</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a date string can be converted to a pd.Timestamp</span>
 <span class="sd">    and returns NA if not.</span>
 
 <span class="sd">    Returns a string that can be JSON serialised.</span>
@@ -927,7 +927,7 @@
 
 
 <div class="viewcode-block" id="check_nan"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.check_nan">[docs]</a><span class="k">def</span> <span class="nf">check_nan</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Check if a number is Nan.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a number is Nan.</span>
 
 <span class="sd">    Returns a string that can be JSON serialised.</span>
 
@@ -945,7 +945,7 @@
 
 
 <div class="viewcode-block" id="first_last_dates"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.first_last_dates">[docs]</a><span class="k">def</span> <span class="nf">first_last_dates</span><span class="p">(</span><span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Find the first and last timestamp from a list of keys</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the first and last timestamp from a list of keys</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        keys: List of keys</span>
@@ -971,7 +971,7 @@
 
 
 <div class="viewcode-block" id="time_offset_definition"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.time_offset_definition">[docs]</a><span class="k">def</span> <span class="nf">time_offset_definition</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns synonym definition for time offset inputs.</span>
 
 <span class="sd">    Accepted inputs are as follows:</span>
@@ -1003,7 +1003,7 @@
 
 
 <div class="viewcode-block" id="parse_period"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.parse_period">[docs]</a><span class="k">def</span> <span class="nf">parse_period</span><span class="p">(</span><span class="n">period</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TupleTimeType</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parses period input and converts to a value, unit pair.</span>
 
 <span class="sd">    Check time_offset_definition() for accepted input units.</span>
@@ -1073,7 +1073,7 @@
     <span class="n">unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a suitable frequency string based either a value and unit pair</span>
 <span class="sd">    or a period value. The unit will be made singular if the value is 1.</span>
 
@@ -1112,7 +1112,7 @@
     <span class="n">unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Timedelta</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create time offset based on inputs. This will return a Timedelta object</span>
 <span class="sd">    and cannot create relative offsets (this includes &quot;weeks&quot;, &quot;months&quot;, &quot;years&quot;).</span>
 
@@ -1144,7 +1144,7 @@
     <span class="n">unit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DateOffset</span><span class="p">,</span> <span class="n">Timedelta</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create relative time offset based on inputs. This is based on the pandas</span>
 <span class="sd">    DateOffset and Timedelta functions.</span>
 
@@ -1186,7 +1186,7 @@
     <span class="n">start_b</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">],</span>
     <span class="n">end_b</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check if two dateranges overlap.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if two dateranges overlap.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        start: Start datetime</span>

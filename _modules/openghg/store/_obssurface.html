@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -360,7 +360,7 @@
 
 
 <div class="viewcode-block" id="ObsSurface"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface">[docs]</a><span class="k">class</span> <span class="nc">ObsSurface</span><span class="p">(</span><span class="n">BaseStore</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;This class is used to process surface observation data&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class is used to process surface observation data&quot;&quot;&quot;</span>
 
     <span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;ObsSurface&quot;</span>
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1&quot;</span>
@@ -378,7 +378,7 @@
     <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span>
         <span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">precision_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Reads binary data passed in by serverless function.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads binary data passed in by serverless function.</span>
 <span class="sd">        The data dictionary should contain sub-dictionaries that contain</span>
 <span class="sd">        data and metadata keys.</span>
 
@@ -455,7 +455,7 @@
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">verify_site_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Process files and store in the object store. This function</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process files and store in the object store. This function</span>
 <span class="sd">            utilises the process functions of the other classes in this submodule</span>
 <span class="sd">            to handle each data type.</span>
 
@@ -679,7 +679,7 @@
         <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;insitu&quot;</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DefaultDict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read AQMesh data for the Glasgow network</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read AQMesh data for the Glasgow network</span>
 
 <span class="sd">        NOTE - temporary function until we know what kind of AQMesh data</span>
 <span class="sd">        we&#39;ll be retrieve in the future.</span>
@@ -765,7 +765,7 @@
 
 <div class="viewcode-block" id="ObsSurface.schema"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.schema">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">schema</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define schema for surface observations Dataset.</span>
 
 <span class="sd">        Only includes mandatory variables</span>
@@ -793,7 +793,7 @@
 
 <div class="viewcode-block" id="ObsSurface.validate_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.validate_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate input data against ObsSurface schema - definition from</span>
 <span class="sd">        ObsSurface.schema() method.</span>
 
@@ -814,7 +814,7 @@
     <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">required_metakeys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;This expects already standardised data such as ICOS / CEDA</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This expects already standardised data such as ICOS / CEDA</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Dictionary of data in standard format, see the data spec under</span>
@@ -889,7 +889,7 @@
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 
 <div class="viewcode-block" id="ObsSurface.store_hashes"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.store_hashes">[docs]</a>    <span class="k">def</span> <span class="nf">store_hashes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hashes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Store hashes of data retrieved from a remote data source such as</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store hashes of data retrieved from a remote data source such as</span>
 <span class="sd">        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we&#39;ve</span>
 <span class="sd">        seen before and adds the new.</span>
 
@@ -902,7 +902,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObsSurface.delete"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Delete a Datasource with the given UUID</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete a Datasource with the given UUID</span>
 
 <span class="sd">        This function deletes both the record of the object store in he</span>
 

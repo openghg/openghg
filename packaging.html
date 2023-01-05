@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Packaging releases &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>Packaging releases &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -105,7 +105,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -372,12 +372,12 @@ not to cause breaking changes in the public API.</p>
 <section id="creating-a-release">
 <h2>Creating a release<a class="headerlink" href="#creating-a-release" title="Permalink to this heading">#</a></h2>
 <p>To create a release first checkout the “main” branch.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout main
-git pull
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>main
+git<span class="w"> </span>pull
 </pre></div>
 </div>
 <p>Next, merge in all changes from the “devel” branch.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git pull origin devel
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>devel
 </pre></div>
 </div>
 <p>Next, update the <span class="xref std std-doc">changelog</span> with details about this release. This
@@ -393,7 +393,7 @@ release and updated, e.g.</p>
 </div>
 <p>when moving from the 0.11.2 to 0.12.0 release.</p>
 <p>Now push this change back to GitHub, using;</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git push
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push
 </pre></div>
 </div>
 <p>This will trigger a CI/CD run which will build and test everything on Linux for Python 3.8 - 3.10.
@@ -407,8 +407,8 @@ platforms. This will be in an artifact called <code class="docutils literal notr
 download and unpack.</p>
 <img alt="Image of the GitHub Actions interface showing the dist artifact" src="images/github_artifacts.jpg" />
 <p>You should unpack these into the <code class="docutils literal notranslate"><span class="pre">dist</span></code> directory, e.g.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> dist
-unzip ~/Downloads/dist.zip
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>dist
+unzip<span class="w"> </span>~/Downloads/dist.zip
 </pre></div>
 </div>
 <p>This should result in six binary wheels and once source package, e.g.</p>
@@ -423,13 +423,13 @@ unzip ~/Downloads/dist.zip
 </div>
 <p>Try to install the package related to you machine, just to double-check
 that it is working, e.g.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install ./metawards-0.11.1+7.g52b3671-cp37-cp37m-macosx_10_14_x86_64.whl
-<span class="nb">cd</span> ..
-pytest tests
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>./metawards-0.11.1+7.g52b3671-cp37-cp37m-macosx_10_14_x86_64.whl
+<span class="nb">cd</span><span class="w"> </span>..
+pytest<span class="w"> </span>tests
 </pre></div>
 </div>
 <p>Once it is working, remove these temporary packages from your <code class="docutils literal notranslate"><span class="pre">dist</span></code> folder,</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rm dist/*
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rm<span class="w"> </span>dist/*
 </pre></div>
 </div>
 </section>
@@ -437,16 +437,16 @@ pytest tests
 <h2>Tagging a new release<a class="headerlink" href="#tagging-a-new-release" title="Permalink to this heading">#</a></h2>
 <p>Now that you are happy that the release is ready, you can tag the new
 version. Do this using the <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">tag</span></code> command, e.g.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git tag -a <span class="o">{</span>VERSION<span class="o">}</span> -m <span class="s2">&quot;{VERSION} release&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span><span class="o">{</span>VERSION<span class="o">}</span><span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;{VERSION} release&quot;</span>
 </pre></div>
 </div>
 <p>replacing <code class="docutils literal notranslate"><span class="pre">{VERSION}</span></code> with the version number. For this 0.12.0 release
 the command would be;</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git tag -a <span class="m">0</span>.12.0 -m <span class="s2">&quot;0.12.0 release&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span><span class="m">0</span>.12.0<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;0.12.0 release&quot;</span>
 </pre></div>
 </div>
 <p>Next, push your tag to GitHub;</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git push --tags
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>--tags
 </pre></div>
 </div>
 <p>The tag will be used by automatic versioning script to generate
@@ -461,7 +461,7 @@ Again, it should work as this tag was taken from your fully-tested
 <h2>Uploading packages to pypi<a class="headerlink" href="#uploading-packages-to-pypi" title="Permalink to this heading">#</a></h2>
 <p>While you are waiting for the CI/CD GitHub Actions to complete, make sure
 that your version of twine is fully up to date;</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade twine
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>twine
 </pre></div>
 </div>
 <p>Once GitHub actions is complete, you will see that another build artifact
@@ -469,18 +469,18 @@ is ready for download. Download this and unpack it into your <code class="docuti
 directory as before. You should now have a <code class="docutils literal notranslate"><span class="pre">dist</span></code> directory that
 contains six binary wheels and one source package, named according to
 the release version. For example, for the 0.11.2 release we had;</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ls dist
- metawards-0.11.2-cp37-cp37m-macosx_10_14_x86_64.whl
- metawards-0.11.2-cp37-cp37m-manylinux1_x86_64.whl
- metawards-0.11.2-cp37-cp37m-win_amd64.whl
- metawards-0.11.2-cp38-cp38-macosx_10_14_x86_64.whl
- metawards-0.11.2-cp38-cp38-manylinux1_x86_64.whl
- metawards-0.11.2-cp38-cp38-win_amd64.whl
- metawards-0.11.2.tar.gz
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>ls<span class="w"> </span>dist
+<span class="w"> </span>metawards-0.11.2-cp37-cp37m-macosx_10_14_x86_64.whl
+<span class="w"> </span>metawards-0.11.2-cp37-cp37m-manylinux1_x86_64.whl
+<span class="w"> </span>metawards-0.11.2-cp37-cp37m-win_amd64.whl
+<span class="w"> </span>metawards-0.11.2-cp38-cp38-macosx_10_14_x86_64.whl
+<span class="w"> </span>metawards-0.11.2-cp38-cp38-manylinux1_x86_64.whl
+<span class="w"> </span>metawards-0.11.2-cp38-cp38-win_amd64.whl
+<span class="w"> </span>metawards-0.11.2.tar.gz
 </pre></div>
 </div>
 <p>Now you can upload to pypi using the command;</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m twine upload dist/*
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </span>upload<span class="w"> </span>dist/*
 </pre></div>
 </div>
 <div class="admonition note">
@@ -495,11 +495,11 @@ join the release management team then please get in touch.</p>
 <h2>Testing the final release<a class="headerlink" href="#testing-the-final-release" title="Permalink to this heading">#</a></h2>
 <p>Finally(!) test the release on a range of different machines by logging
 in and typing;</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="nv">metawards</span><span class="o">=={</span>VERSION<span class="o">}</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">metawards</span><span class="o">=={</span>VERSION<span class="o">}</span>
 </pre></div>
 </div>
 <p>replacing <code class="docutils literal notranslate"><span class="pre">{VERSION}</span></code> with the version number, e.g. for 0.11.2</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="nv">metawards</span><span class="o">==</span><span class="m">0</span>.11.2
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">metawards</span><span class="o">==</span><span class="m">0</span>.11.2
 </pre></div>
 </div>
 <p>Play with the code, run the tests and run some examples. Everything should

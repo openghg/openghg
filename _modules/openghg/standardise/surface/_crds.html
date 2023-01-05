@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -361,7 +361,7 @@
     <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Parses a CRDS data file and creates a dictionary of xarray Datasets</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parses a CRDS data file and creates a dictionary of xarray Datasets</span>
 <span class="sd">    ready for storage in the object store.</span>
 
 <span class="sd">    Args:</span>
@@ -412,7 +412,7 @@
     <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Read the datafile passed in and extract the data we require.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the datafile passed in and extract the data we require.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data_filepath: Path to file</span>
@@ -564,7 +564,7 @@
 
 
 <span class="k">def</span> <span class="nf">_read_metadata</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Parse CRDS files and create a metadata dict</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse CRDS files and create a metadata dict</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filepath: Data filepath</span>
@@ -609,7 +609,7 @@
 
 
 <span class="k">def</span> <span class="nf">_get_site_attributes</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">crds_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Gets the site specific attributes for writing to Datsets</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets the site specific attributes for writing to Datsets</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        site: Site name</span>
@@ -649,7 +649,7 @@
 
 
 <span class="k">def</span> <span class="nf">_gas_info</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Returns the number of columns of data for each gas</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the number of columns of data for each gas</span>
 <span class="sd">    that is present in the dataframe</span>
 
 <span class="sd">    Args:</span>

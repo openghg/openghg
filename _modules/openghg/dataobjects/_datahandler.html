@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._datahandler &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.dataobjects._datahandler &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -366,7 +366,7 @@
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_check_datatypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Check the UUIDs are correct and ensure they all</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the UUIDs are correct and ensure they all</span>
 <span class="sd">        belong to a single data type</span>
 
 <span class="sd">        Args:</span>
@@ -396,7 +396,7 @@
         <span class="k">return</span> <span class="n">data_types</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
 <div class="viewcode-block" id="DataHandler.refresh"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Force refresh the internal metadata store with data from the object store.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Force refresh the internal metadata store with data from the object store.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None</span>
@@ -409,7 +409,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">metadata</span></div>
 
 <div class="viewcode-block" id="DataHandler.restore"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.restore">[docs]</a>    <span class="k">def</span> <span class="nf">restore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Restore a backed-up version of a Datasource&#39;s metadata.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore a backed-up version of a Datasource&#39;s metadata.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            uuid: UUID of Datasource to retrieve</span>
@@ -438,7 +438,7 @@
             <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">backup</span></div>
 
 <div class="viewcode-block" id="DataHandler.view_backup"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.view_backup">[docs]</a>    <span class="k">def</span> <span class="nf">view_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;View backed-up metadata for all Datasources</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;View backed-up metadata for all Datasources</span>
 <span class="sd">        or a single Datasource if a UUID is passed in.</span>
 
 <span class="sd">        Args:</span>
@@ -461,7 +461,7 @@
         <span class="n">to_update</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">to_delete</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Update the metadata associated with data. This takes UUIDs of Datasources and updates</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the metadata associated with data. This takes UUIDs of Datasources and updates</span>
 <span class="sd">        the associated metadata. If you want to delete some metadata</span>
 
 <span class="sd">        Args:</span>
@@ -539,7 +539,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified metadata for </span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataHandler.delete_datasource"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.delete_datasource">[docs]</a>    <span class="k">def</span> <span class="nf">delete_datasource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Delete a Datasource in the object store.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete a Datasource in the object store.</span>
 <span class="sd">        At the moment we only support deleting the complete Datasource.</span>
 
 <span class="sd">        NOTE: Make sure you really want to delete the Datasource(s)</span>

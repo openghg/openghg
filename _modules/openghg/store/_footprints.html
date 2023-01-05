@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -360,7 +360,7 @@
 
 
 <div class="viewcode-block" id="Footprints"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Footprints">[docs]</a><span class="k">class</span> <span class="nc">Footprints</span><span class="p">(</span><span class="n">BaseStore</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;This class is used to process footprints model output&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class is used to process footprints model output&quot;&quot;&quot;</span>
 
     <span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;Footprints&quot;</span>
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;62db5bdf-c88d-4e56-97f4-40336d37f18c&quot;</span>
@@ -368,7 +368,7 @@
 
 <div class="viewcode-block" id="Footprints.read_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Footprints.read_data">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Ready a footprint from binary data</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ready a footprint from binary data</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            binary_data: Footprint data</span>
@@ -548,7 +548,7 @@
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="c1"># model_params: Optional[Dict] = None,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Reads footprints data files and returns the UUIDS of the Datasources</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads footprints data files and returns the UUIDS of the Datasources</span>
 <span class="sd">        the processed data has been assigned to</span>
 
 <span class="sd">        Args:</span>
@@ -743,7 +743,7 @@
         <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSchema</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Define schema for footprint Dataset.</span>
 
 <span class="sd">        The returned schema depends on what the footprint represents,</span>
@@ -839,7 +839,7 @@
         <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">short_lifetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Validate data against Footprint schema - definition from</span>
 <span class="sd">        Footprints.schema(...) method.</span>
 

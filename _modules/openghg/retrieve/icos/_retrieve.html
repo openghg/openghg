@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -358,7 +358,7 @@
     <span class="n">force_retrieval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">data_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise</span>
 <span class="sd">    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.</span>
 <span class="sd">    If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects</span>
 <span class="sd">    if returned, if nothing then None.</span>
@@ -392,7 +392,7 @@
 
 
 <span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Retrieve data from the ICOS Carbon Portal. If data is found in the local object store</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve data from the ICOS Carbon Portal. If data is found in the local object store</span>
 <span class="sd">    it will be retrieved from there first.</span>
 
 <span class="sd">    This function detects the running environment and routes the call</span>
@@ -465,7 +465,7 @@
     <span class="n">data_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise</span>
 <span class="sd">    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.</span>
 <span class="sd">    If only a single data source is found an ObsData object is returned, if multiple a list of ObsData objects</span>
 <span class="sd">    if returned, if nothing then None.</span>
@@ -537,7 +537,7 @@
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Retrieve ICOS data from the ICOS Carbon Portal and standardise it into</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS data from the ICOS Carbon Portal and standardise it into</span>
 <span class="sd">    a format expected by OpenGHG. A dictionary of metadata and Datasets</span>
 
 <span class="sd">    Args:</span>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.transform._regrid &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.transform._regrid &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -362,7 +362,7 @@
 
 
 <span class="k">def</span> <span class="nf">_getGridCC</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a cell centered meshgrid for from 1D arrays of lon, lat</span>
 <span class="sd">    This meshgrid defines the bounds of each cell.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -379,7 +379,7 @@
 
 
 <span class="k">def</span> <span class="nf">_create_xesmf_grid_uniform_cc</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a Dataset ready to be used by the xesmf regridder from 1D arrays</span>
 <span class="sd">    of latitude and longitude values.</span>
 
@@ -402,7 +402,7 @@
 
 
 <span class="k">def</span> <span class="nf">convert_to_ndarray</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check and extract underlying numpy array from DataArray as necessary&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check and extract underlying numpy array from DataArray as necessary&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
         <span class="n">values</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">values</span>
@@ -427,7 +427,7 @@
     <span class="n">latlon</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;conservative&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLikeMatch</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Regrid data between two uniform, cell centered grids.</span>
 <span class="sd">    All coordinates (lat_out, lon_out, lat_in, lon_in) should be for the centre</span>
 <span class="sd">    of the representative cell and in degrees.</span>

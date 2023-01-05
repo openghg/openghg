@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._gcwerks &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.standardise.surface._gcwerks &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -352,7 +352,7 @@
 <span class="k">def</span> <span class="nf">find_files</span><span class="p">(</span>
     <span class="n">data_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">skip_str</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;sf6&quot;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;A helper file to find GCWERKS data and precisions file in a given folder.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A helper file to find GCWERKS data and precisions file in a given folder.</span>
 <span class="sd">    It searches for .C files of the format macehead.19.C, looks for a precisions file</span>
 <span class="sd">    named macehead.19.precions.C and if it exists creates a tuple for these files.</span>
 
@@ -406,7 +406,7 @@
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Reads a GC data file by creating a GC object and associated datasources</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads a GC data file by creating a GC object and associated datasources</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data_filepath: Path of data file</span>
@@ -475,7 +475,7 @@
 
 
 <span class="k">def</span> <span class="nf">_check_site</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">site_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">gc_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check if the site passed in matches that in the filename</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the site passed in matches that in the filename</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filepath: Path to data file</span>
@@ -509,7 +509,7 @@
 
 
 <span class="k">def</span> <span class="nf">_check_instrument</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">gc_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">should_raise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Ensure we have the correct instrument or translate an instrument</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure we have the correct instrument or translate an instrument</span>
 <span class="sd">    suffix to an instrument name.</span>
 
 <span class="sd">    Args:</span>
@@ -551,7 +551,7 @@
     <span class="n">gc_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Read data from the data and precision files</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read data from the data and precision files</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data_filepath: Path of data file</span>
@@ -680,7 +680,7 @@
 
 
 <span class="k">def</span> <span class="nf">_read_precision</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Read GC precision file</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read GC precision file</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filepath: Path of precision file</span>
@@ -728,7 +728,7 @@
     <span class="n">scale</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">gc_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Splits the species into separate dataframe into sections to be stored within individual Datasources</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Splits the species into separate dataframe into sections to be stored within individual Datasources</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: DataFrame of raw data</span>
@@ -873,7 +873,7 @@
 
 
 <span class="k">def</span> <span class="nf">_get_sampling_period</span><span class="p">(</span><span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">gc_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Process the suffix from the filename to get the correct instrument name</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process the suffix from the filename to get the correct instrument name</span>
 <span class="sd">    then retrieve the sampling period of that instrument from metadata.</span>
 
 <span class="sd">    Args:</span>
@@ -893,7 +893,7 @@
 
 
 <span class="k">def</span> <span class="nf">_get_inlets</span><span class="p">(</span><span class="n">site_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">gc_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get the inlets we expect to be at this site and create a</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the inlets we expect to be at this site and create a</span>
 <span class="sd">    mapping dictionary so we get consistent labelling.</span>
 
 <span class="sd">    Args:</span>
@@ -918,7 +918,7 @@
 
 
 <span class="k">def</span> <span class="nf">_get_site_attributes</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">instrument</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">gc_params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Gets the site specific attributes for writing to Datsets</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets the site specific attributes for writing to Datsets</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        site: Site code</span>

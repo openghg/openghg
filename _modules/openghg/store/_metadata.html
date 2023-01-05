@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._metadata &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.store._metadata &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -355,7 +355,7 @@
 
 
 <span class="k">def</span> <span class="nf">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TinyDB</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Load the metastore. This can be used as a context manager</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the metastore. This can be used as a context manager</span>
 <span class="sd">    otherwise the database must be closed using the close method</span>
 <span class="sd">    otherwise records are not written to file.</span>
 
@@ -399,7 +399,7 @@
 <span class="k">def</span> <span class="nf">datasource_lookup</span><span class="p">(</span>
     <span class="n">metastore</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">required_keys</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">min_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys</span>
 <span class="sd">    to be present and will require at leas min_keys of these to be present when searching.</span>
 
 <span class="sd">    As some metadata value might change (such as data owners etc) we don&#39;t want to do an exact</span>
@@ -435,7 +435,7 @@
 
 
 <div class="viewcode-block" id="data_handler_lookup"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.data_handler_lookup">[docs]</a><span class="k">def</span> <span class="nf">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
-    <span class="sd">&quot;&quot;&quot;Lookup the data / metadata you&#39;d like to modify.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Lookup the data / metadata you&#39;d like to modify.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data_type: Type of data, for example surface, flux, footprint</span>

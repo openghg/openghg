@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._util &#8212; OpenGHG 0+untagged.1.gb3f232d.dirty documentation</title>
+    <title>openghg.util._util &#8212; OpenGHG 0+untagged.1.g05d21a5.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gb3f232d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g05d21a5.dirty documentation</p>
   
 </a>
     
@@ -351,7 +351,7 @@
 
 
 <div class="viewcode-block" id="running_in_cloud"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_in_cloud">[docs]</a><span class="k">def</span> <span class="nf">running_in_cloud</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Are we running in the cloud?</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Are we running in the cloud?</span>
 
 <span class="sd">    Checks for the OPENGHG_CLOUD environment variable being set</span>
 
@@ -366,7 +366,7 @@
 
 
 <div class="viewcode-block" id="running_on_hub"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_on_hub">[docs]</a><span class="k">def</span> <span class="nf">running_on_hub</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Are we running on the OpenGHG Hub?</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Are we running on the OpenGHG Hub?</span>
 
 <span class="sd">    Checks for the OPENGHG_CLOUD environment variable being set</span>
 
@@ -381,7 +381,7 @@
 
 
 <div class="viewcode-block" id="running_locally"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_locally">[docs]</a><span class="k">def</span> <span class="nf">running_locally</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Are we running OpenGHG locally?</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Are we running OpenGHG locally?</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if running locally</span>
@@ -390,7 +390,7 @@
 
 
 <div class="viewcode-block" id="unanimous"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.unanimous">[docs]</a><span class="k">def</span> <span class="nf">unanimous</span><span class="p">(</span><span class="n">seq</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Checks that all values in an iterable object</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks that all values in an iterable object</span>
 <span class="sd">    are the same</span>
 
 <span class="sd">    Args:</span>
@@ -409,7 +409,7 @@
 
 
 <div class="viewcode-block" id="pairwise"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.pairwise">[docs]</a><span class="k">def</span> <span class="nf">pairwise</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;Return a zip of an iterable where a is the iterable</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a zip of an iterable where a is the iterable</span>
 <span class="sd">    and b is the iterable advanced one step.</span>
 
 <span class="sd">    Args:</span>
@@ -426,7 +426,7 @@
 
 
 <div class="viewcode-block" id="site_code_finder"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.site_code_finder">[docs]</a><span class="k">def</span> <span class="nf">site_code_finder</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Find the site code for a given site name.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the site code for a given site name.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        site_name: Site long name</span>
@@ -453,7 +453,7 @@
 
 
 <div class="viewcode-block" id="find_matching_site"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_matching_site">[docs]</a><span class="k">def</span> <span class="nf">find_matching_site</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_sites</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Try and find a similar name to site_name in site_list and return a suggestion or</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try and find a similar name to site_name in site_list and return a suggestion or</span>
 <span class="sd">    error string.</span>
 
 <span class="sd">    Args:</span>
@@ -487,7 +487,7 @@
 
 
 <div class="viewcode-block" id="verify_site"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.verify_site">[docs]</a><span class="k">def</span> <span class="nf">verify_site</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check if the passed site is a valid one and returns the three</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the passed site is a valid one and returns the three</span>
 <span class="sd">    letter site code if found. Otherwise we use fuzzy text matching to suggest</span>
 <span class="sd">    sites with similar names.</span>
 
@@ -516,7 +516,7 @@
 
 
 <div class="viewcode-block" id="multiple_inlets"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.multiple_inlets">[docs]</a><span class="k">def</span> <span class="nf">multiple_inlets</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check if the passed site has more than one inlet</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the passed site has more than one inlet</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        site: Three letter site code</span>
