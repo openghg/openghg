@@ -9,6 +9,7 @@ def assign_attributes(
     site: Optional[str] = None,
     network: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
+    update_metadata_mismatch: bool = False,
     site_filename: FilePathOpt = None,
     species_filename: FilePathOpt = None    
 ) -> Dict:
@@ -25,6 +26,8 @@ def assign_attributes(
         sampling_period: Number of seconds for which air
                          sample is taken. Only for time variable attribute
         network: Network name
+        update_metadata_mismatch: If current metadata does not match to attributes
+            update metadata.
         site_filename: Alternative site info file
         species_filename: Alternative species info file
 
@@ -66,7 +69,9 @@ def assign_attributes(
 
         attrs = measurement_data.attrs
 
-        gas_data["metadata"] = sync_surface_metadata(metadata=metadata, attributes=attrs)
+        gas_data["metadata"] = sync_surface_metadata(metadata=metadata,
+                                                     attributes=attrs,
+                                                     update_mismatch=update_metadata_mismatch)
 
     return data
 
@@ -552,9 +557,7 @@ def get_flux_attributes(
     if "process_by" not in global_attributes:
         global_attributes["processed_by"] = "OpenGHG_Cloud"
 
-    # TODO: Update when we have access to species label definition (from 'obs_data_type' branch)
-    # species_label = define_species_label(species)
-    species_label = species
+    species_label = define_species_label(species)
 
     global_attributes["species"] = species_label
     global_attributes["source"] = source
