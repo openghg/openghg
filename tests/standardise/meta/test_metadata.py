@@ -101,7 +101,7 @@ def test_metadata_latlon_tolerance():
         "station_latitude": 72.8,
     }
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttrMismatchError):
         sync_surface_metadata(metadata, attrs)
 
     attrs = {
@@ -109,7 +109,7 @@ def test_metadata_latlon_tolerance():
         "station_latitude": -72.8,
     }
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttrMismatchError):
         sync_surface_metadata(metadata, attrs)
 
     attrs = {
@@ -134,3 +134,25 @@ def test_ensure_mismatch_raises():
 
     with pytest.raises(AttrMismatchError):
         sync_surface_metadata(metadata, attrs)
+
+
+def test_ensure_mismatch_replaced():
+    """
+    Check mismatch in metadata from the attributes can be replaced
+    when the update_mismatch flag is set to True.
+    """
+    metadata = {
+        "site": "sum",
+        "network": "NOAA",
+        "measurement_type": "flask",
+    }
+
+    attrs = {
+        "site": "sum",
+        "network": "NOAA",
+        "measurement_type": "swallow-carrying-a-flask"}
+
+    meta_new = sync_surface_metadata(metadata, attrs, update_mismatch=True)
+
+    assert meta_new["measurement_type"] == "swallow-carrying-a-flask"
+
