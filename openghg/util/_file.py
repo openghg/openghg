@@ -129,7 +129,10 @@ def load_json(filename: FilePathType, internal_data: bool = False) -> Dict:
     """Returns a dictionary deserialised from JSON.
 
     Args:
-        filename (str): Name of JSON file
+        filename: Name of JSON file
+        internal_data: Whether to use data internal to OpenGHG. This refers
+            to JSON files stored within the openghg/data/ folder.
+            If this is set to False, the full path to the file needs to be included.
     Returns:
         dict: Dictionary created from JSON
     """

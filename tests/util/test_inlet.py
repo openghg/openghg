@@ -36,6 +36,7 @@ def test_format_inlet(test_input, expected):
         ("10magl", "10", "inlet_magl"),
         ("31m", "31", "station_height_masl"),
         ("31masl", "31", "station_height_masl"),
+        ("31m", "31m", "m_height"),  # Won't recognise "m" unit not at end of string
     ],
 )
 def test_format_inlet_keyname(test_input, expected, key_name):

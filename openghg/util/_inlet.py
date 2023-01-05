@@ -48,6 +48,7 @@ def format_inlet(inlet: Optional[str],
     Returns:
         str: formatted inlet string / None
 
+    Usage:
         >>> format_inlet("10")
             "10m"
         >>> format_inlet("10m")
