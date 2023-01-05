@@ -1,20 +1,26 @@
-from typing import Optional, overload
+from typing import Optional, cast, overload
 
 __all__ = ["format_inlet"]
 
 
 @overload
-def format_inlet(inlet: str, special_keywords: Optional[list] = None) -> str:
+def format_inlet(inlet: str,
+                 units: str = "m",
+                 key_name: Optional[str] = None,
+                 special_keywords: Optional[list] = None) -> str:
     ...
 
 
 @overload
-def format_inlet(inlet: None, special_keywords: Optional[list] = None) -> None:
+def format_inlet(inlet: None,
+                 units: str = "m",
+                 key_name: Optional[str] = None,
+                 special_keywords: Optional[list] = None) -> None:
     ...
 
 
 def format_inlet(inlet: Optional[str],
-                 units: Optional[str] = "m",
+                 units: str = "m",
                  key_name: Optional[str] = None,
                  special_keywords: Optional[list] = None) -> Optional[str]:
     """
@@ -76,7 +82,7 @@ def format_inlet(inlet: Optional[str],
     if units == "m":
         unit_options = ["m", "magl", "masl"]
     else:
-        unit_options = [units]
+        unit_options = [cast(str, units)]
 
     # Check whether unit is needed in string output.
     # This is dependent on whether the key name itself contains the unit value
