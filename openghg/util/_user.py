@@ -1,11 +1,9 @@
 import logging
 import os
 import platform
-
-# from functools import lru_cache
 from pathlib import Path
 import pprint
-from typing import Dict, Union
+from typing import Dict
 import uuid
 import toml
 
@@ -90,8 +88,8 @@ def create_config(silent: bool = False) -> None:
         print(f"Current object store path: {objstore_path_config}")
         update_input = input("Would you like to update the path? (y/n): ")
         if update_input.lower() in ("y", "yes"):
-            new_path = input("Enter new path for object store: ")
-            new_path = Path(new_path).expanduser().resolve()
+            new_path_input = input("Enter new path for object store: ")
+            new_path = Path(new_path_input).expanduser().resolve()
 
             config["object_store"]["local_store"] = str(new_path)
             updated = True
@@ -113,8 +111,8 @@ def create_config(silent: bool = False) -> None:
         if silent:
             obj_store_path = default_objstore_path
         else:
-            obj_store_path = input(f"Enter path for object store (default {default_objstore_path}): ")
-            obj_store_path = Path(obj_store_path).expanduser().resolve()
+            obj_store_input = input(f"Enter path for object store (default {default_objstore_path}): ")
+            obj_store_path = Path(obj_store_input).expanduser().resolve()
 
         user_config_path.parent.mkdir(parents=True, exist_ok=True)
 

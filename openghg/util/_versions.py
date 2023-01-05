@@ -13,7 +13,7 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import List, IO
+from typing import List, IO, Union, Tuple
 
 
 def get_sys_info() -> List:
@@ -22,10 +22,10 @@ def get_sys_info() -> List:
     Returns:
         list: List of system information
     """
-    blob = []
+    blob: List[Tuple] = []
 
     # get full commit hash
-    commit = None
+    commit: Union[str, bytes, None] = None
     if os.path.isdir(".git") and os.path.isdir("openghg"):
         try:
             pipe = subprocess.Popen(
@@ -43,12 +43,13 @@ def get_sys_info() -> List:
                     commit = so.decode("utf-8")
                 except ValueError:
                     pass
-                commit = commit.strip().strip('"')
+
+                commit = commit.strip().strip('"')  # type: ignore
 
     blob.append(("commit", commit))
 
     try:
-        (sysname, _nodename, release, _version, machine, processor) = platform.uname()
+        (sysname, _, release, _, machine, processor) = platform.uname()
         blob.extend(
             [
                 ("python", sys.version),
@@ -84,12 +85,8 @@ def netcdf_and_hdf5_versions() -> List:
         libhdf5_version = netCDF4.__hdf5libversion__
         libnetcdf_version = netCDF4.__netcdf4libversion__
     except ImportError:
-        try:
-            import h5py
+        pass
 
-            libhdf5_version = h5py.version.hdf5_version
-        except ImportError:
-            pass
     return [("libhdf5", libhdf5_version), ("libnetcdf", libnetcdf_version)]
 
 
@@ -140,7 +137,7 @@ def show_versions(file: IO = sys.stdout) -> None:
         ("sphinx", lambda mod: mod.__version__),
     ]
 
-    deps_blob = []
+    deps_blob: List[Tuple] = []
     for (modname, ver_f) in deps:
         try:
             if modname in sys.modules:

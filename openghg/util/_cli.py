@@ -1,7 +1,7 @@
 import argparse
 
 
-def cli():
+def cli() -> None:
     from openghg.util import create_config, show_versions
 
     parser = argparse.ArgumentParser(
