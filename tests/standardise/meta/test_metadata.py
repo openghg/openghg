@@ -1,5 +1,6 @@
 import pytest
 from openghg.standardise.meta import sync_surface_metadata
+from openghg.types import AttrMismatchError
 
 
 def test_sync_surface_metadata():
@@ -126,7 +127,10 @@ def test_ensure_mismatch_raises():
         "measurement_type": "flask",
     }
 
-    attrs = {"site": "sum", "network": "NOAA", "measurement_type": "swallow-carrying-a-flask"}
+    attrs = {
+        "site": "sum",
+        "network": "NOAA",
+        "measurement_type": "swallow-carrying-a-flask"}
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttrMismatchError):
         sync_surface_metadata(metadata, attrs)

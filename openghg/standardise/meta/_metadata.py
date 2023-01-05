@@ -1,6 +1,7 @@
 import math
 from copy import deepcopy
 from typing import Dict, List, Optional
+from openghg.types import AttrMismatchError
 
 from openghg.util import is_number
 
@@ -65,7 +66,7 @@ def sync_surface_metadata(
                 # Here we don't care about case. Within the Datasource we'll store the
                 # metadata as all lowercase, within the attributes we'll keep the case.
                 if str(value).lower() != str(attr_value).lower():
-                    raise ValueError(
+                    raise AttrMismatchError(
                         f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}"
                     )
         except KeyError:

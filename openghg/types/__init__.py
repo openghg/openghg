@@ -18,5 +18,6 @@ from ._errors import (
     MutexTimeoutError,
     RequestBucketError,
     SearchError,
+    AttrMismatchError,
 )
 from ._types import multiPathType, pathType, resultsType
