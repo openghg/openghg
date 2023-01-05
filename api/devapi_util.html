@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Util &#8212; OpenGHG 0+untagged.1.gaa4994d.dirty documentation</title>
+    <title>Util &#8212; OpenGHG 0+untagged.1.g1d1dc93.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gaa4994d.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g1d1dc93.dirty documentation</p>
   
 </a>
     
@@ -691,7 +691,12 @@ Used with <code class="xref py py-obj docutils literal notranslate"><span class=
 <dd><p>Returns a dictionary deserialised from JSON.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – Name of JSON file</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Name of JSON file</p></li>
+<li><p><strong>internal_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to use data internal to OpenGHG. This refers
+to JSON files stored within the openghg/data/ folder.
+If this is set to False, the full path to the file needs to be included.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Dictionary created from JSON</p>
@@ -878,8 +883,14 @@ If this is not set a special keyword of “multiple” and “column” will sti
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><p>formatted inlet string / None</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10&quot;</span><span class="p">)</span>
+<dd class="field-even"><p>formatted inlet string / None</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<dl>
+<dt>Usage:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10&quot;</span><span class="p">)</span>
 <span class="go">    &quot;10m&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10m&quot;</span><span class="p">)</span>
 <span class="go">    &quot;10m&quot;</span>
@@ -897,10 +908,6 @@ If this is not set a special keyword of “multiple” and “column” will sti
 <span class="go">    &quot;10&quot;</span>
 </pre></div>
 </div>
-</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
