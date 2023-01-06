@@ -112,6 +112,7 @@ def get_attributes(
     # Is this better?
     variable_names = cast(Dict[str, Any], ds.variables)
     to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
+    to_underscores.pop("time")  # Added to remove warning around resetting time index.
     ds = ds.rename(to_underscores)  # type: ignore
 
     species_lower = species.lower()
