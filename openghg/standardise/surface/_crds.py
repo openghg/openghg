@@ -34,9 +34,12 @@ def parse_crds(
     from pathlib import Path
 
     from openghg.standardise.meta import assign_attributes
+    from openghg.util import format_inlet
 
     if not isinstance(data_filepath, Path):
         data_filepath = Path(data_filepath)
+
+    inlet = format_inlet(inlet)
 
     # This may seem like an almost pointless function as this is all we do
     # but it makes it a lot easier to test assign_attributes
@@ -83,7 +86,7 @@ def _read_data(
     """
     import warnings
 
-    from openghg.util import clean_string, find_duplicate_timestamps
+    from openghg.util import clean_string, find_duplicate_timestamps, format_inlet
     from pandas import RangeIndex, read_csv, to_datetime
 
     split_fname = data_filepath.stem.split(".")
@@ -201,7 +204,7 @@ def _read_data(
         # Create a copy of the metadata dict
         species_metadata = metadata.copy()
         species_metadata["species"] = clean_string(species)
-        species_metadata["inlet"] = inlet
+        species_metadata["inlet"] = format_inlet(inlet, key_name="inlet")
         species_metadata["calibration_scale"] = scale
         species_metadata["long_name"] = site_attributes["long_name"]
         species_metadata["data_type"] = "surface"
@@ -227,6 +230,8 @@ def _read_metadata(filepath: Path, data: DataFrame) -> Dict:
     Returns:
         dict: Dictionary containing metadata
     """
+    from openghg.util import format_inlet
+
     # Find gas measured and port used
     type_meas = data[2][2]
     port = data[3][2]
@@ -256,7 +261,7 @@ def _read_metadata(filepath: Path, data: DataFrame) -> Dict:
     metadata["site"] = site
     metadata["instrument"] = instrument
     metadata["sampling_period"] = str(sampling_period)
-    metadata["inlet"] = inlet
+    metadata["inlet"] = format_inlet(inlet, key_name="inlet")
     metadata["port"] = port
     metadata["type"] = type_meas
 
@@ -273,7 +278,7 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
     Returns:
         dict: Dictionary of attributes
     """
-    from openghg.util import get_site_info
+    from openghg.util import get_site_info, format_inlet
 
     try:
         site_attributes: Dict = crds_metadata["sites"][site.upper()]
@@ -298,7 +303,7 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
         attributes["station_long_name"] = site_metadata["long_name"]
         attributes["station_height_masl"] = site_metadata["height_station_masl"]
 
-    attributes["inlet_height_magl"] = inlet
+    attributes["inlet_height_magl"] = format_inlet(inlet, key_name="inlet_height_magl")
     attributes["comment"] = crds_metadata["comment"]
     attributes["long_name"] = site_attributes["gcwerks_site_name"]
 
