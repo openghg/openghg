@@ -23,7 +23,7 @@ def parse_eurocom(
         dict: Dictionary of measurement data
     """
     from openghg.standardise.meta import assign_attributes, get_attributes
-    from openghg.util import load_json, read_header
+    from openghg.util import load_json, read_header, format_inlet
     from pandas import Timestamp, read_csv
 
     data_filepath = Path(data_filepath)
@@ -104,7 +104,7 @@ def parse_eurocom(
     if inlet_height == "NA":
         try:
             inlet = eurocom_attributes["intake_height"][site]
-            global_attributes["inlet_height_m"] = inlet
+            global_attributes["inlet_height_m"] = format_inlet(inlet, key_name="inlet_height_m")
             calibration_scale = eurocom_attributes["calibration"][site]
         except KeyError:
             calibration_scale = {}
@@ -122,7 +122,7 @@ def parse_eurocom(
     metadata = {}
     metadata["site"] = site
     metadata["species"] = species
-    metadata["inlet_height"] = global_attributes["inlet_height_m"]
+    metadata["inlet"] = format_inlet(global_attributes["inlet_height_m"], key_name="inlet")
     metadata["calibration_scale"] = calibration_scale
     metadata["network"] = "EUROCOM"
     metadata["sampling_period"] = str(sampling_period)
