@@ -547,7 +547,7 @@ class Datasource:
                 if not parent_folder.exists():
                     parent_folder.mkdir(parents=True, exist_ok=True)
 
-                data.to_netcdf(filepath)
+                data.to_netcdf(filepath, engine="netcdf4")
 
                 # Can we just take the bytes from the data here and then write then straight?
                 # TODO - for now just create a temporary directory - will have to update Acquire
