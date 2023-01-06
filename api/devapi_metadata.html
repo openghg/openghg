@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Standardise - metadata &#8212; OpenGHG 0+untagged.1.g1d1dc93.dirty documentation</title>
+    <title>Standardise - metadata &#8212; OpenGHG 0+untagged.1.ga0b3563.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g1d1dc93.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ga0b3563.dirty documentation</p>
   
 </a>
     
@@ -391,12 +391,10 @@
 <p>These handle the assignment and standardisation of metadata and ensure the NetCDF created during standardisation has the correct attributes assigned to it.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.meta.assign_attributes">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">assign_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_metadata_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_attributes.html#assign_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.assign_attributes" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">assign_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_attributes.html#assign_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.assign_attributes" title="Permalink to this definition">#</a></dt>
 <dd><p>Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
 are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
 to the Datasource allowing more detailed searching of data.</p>
-<p>If accessing underlying stored site or species definitions, this will
-be accessed from the openghg/supplementary_data repository by default.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -405,10 +403,6 @@ be accessed from the openghg/supplementary_data repository by default.</p>
 <li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Number of seconds for which air
 sample is taken. Only for time variable attribute</p></li>
 <li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Network name</p></li>
-<li><p><strong>update_metadata_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If current metadata does not match to attributes
-update metadata.</p></li>
-<li><p><strong>site_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative site info file</p></li>
-<li><p><strong>species_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative species info file</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -422,12 +416,10 @@ update metadata.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.meta.get_attributes">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">get_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_attributes.html#get_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.get_attributes" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">get_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_attributes.html#get_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.get_attributes" title="Permalink to this definition">#</a></dt>
 <dd><p>This function writes attributes to an xarray.Dataset so that they conform with
 the CF Convention v1.6</p>
 <p>Attributes of the xarray DataSet are modified, and variable names are changed</p>
-<p>If accessing underlying stored site or species definitions, this will
-be accessed from the openghg/supplementary_data repository by default.</p>
 <p>Variable naming related to species name will be defined using
 define_species_label() function.</p>
 <dl class="field-list simple">
@@ -448,8 +440,6 @@ sample is taken. Only for time variable attribute</p></li>
 <li><p><strong>date_range</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – Start and end date for output
 If you only want an end date, just put a very early start date
 (e.g. [“1900-01-01”, “2010-01-01”])</p></li>
-<li><p><strong>site_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative site info file</p></li>
-<li><p><strong>species_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative species info file</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -460,7 +450,7 @@ If you only want an end date, just put a very early start date
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.meta.sync_surface_metadata">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">sync_surface_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_to_add</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_metadata.html#sync_surface_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.sync_surface_metadata" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">sync_surface_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_to_add</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_metadata.html#sync_surface_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.sync_surface_metadata" title="Permalink to this definition">#</a></dt>
 <dd><p>Makes sure any duplicated keys between the metadata and attributes
 dictionaries match and that certain keys are present in the metadata.</p>
 <dl class="field-list simple">
@@ -471,9 +461,6 @@ dictionaries match and that certain keys are present in the metadata.</p>
 <li><p><strong>keys_to_add</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>]) – Add these keys to the metadata, if not present, based on</p></li>
 <li><p><strong>Note</strong> (<em>the attribute values.</em>) – this skips any keys which can’t be</p></li>
 <li><p><strong>values.</strong> (<em>copied from the attribute</em>) – </p></li>
-<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If case insensitive mismatch is found between an
-attribute and a metadata value, update the metadata to contain
-the attribute value. By default this will raise an AttrMismatchError.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

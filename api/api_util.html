@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Util &#8212; OpenGHG 0+untagged.1.g1d1dc93.dirty documentation</title>
+    <title>Util &#8212; OpenGHG 0+untagged.1.ga0b3563.dirty documentation</title>
   
   
   
@@ -105,7 +105,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g1d1dc93.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ga0b3563.dirty documentation</p>
   
 </a>
     
@@ -720,15 +720,12 @@ sites with similar names.</p>
 <h2>Domain<a class="headerlink" href="#domain" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.find_domain">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Permalink to this definition">#</a></dt>
 <dd><p>Finds the latitude and longitude values in degrees associated
 with a given domain name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Pre-defined domain name</p></li>
-<li><p><strong>domain_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative domain info file. Defaults to openghg_defs input.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Pre-defined domain name (see ‘domain_info.json’)</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Latitude and longitude values for the domain in degrees.</p>
@@ -764,32 +761,18 @@ with a given domain name.</p>
 <h2>Inlet<a class="headerlink" href="#inlet" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.format_inlet">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openghg/util/_inlet.html#format_inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.format_inlet" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openghg/util/_inlet.html#format_inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.format_inlet" title="Permalink to this definition">#</a></dt>
 <dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
-<dd><p>Make sure inlet / height name conforms to standard. The standard
-imposed can depend on the associated key_name itself (can
-be supplied as an option to check).</p>
-<dl class="simple">
-<dt>This standard is as follows:</dt><dd><ul class="simple">
-<li><p>number followed by unit</p></li>
-<li><p>number alone if unit / derviative is specified at the end of key_name (e.g. station_height_masl)</p></li>
-<li><p>unchanged if this is one of the special keywords (by default “multiple” or “various”)</p></li>
-</ul>
-</dd>
-<dt>Other considerations:</dt><dd><ul class="simple">
-<li><p>For units of “m”, we will also look for “magl” and “masl” (metres above ground and sea level)</p></li>
-<li><p>If the input string just contains numbers, it is assumed this is already within the correct unit.</p></li>
-</ul>
-</dd>
-</dl>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>Make sure inlet name conforms to standard of number followed by unit
+(or is one of the special keywords).
+If the string just contains numbers, it is assumed this is in metres and
+units of “m” will be added.</p>
+<p>e.g. “10m” not “10” or “10magl”</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet / Height value in the specified units</p></li>
-<li><p><strong>units</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Units for the inlet value (“m” by default)</p></li>
-<li><p><strong>key_name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Name of the associated key. This is optional but will be used to
-determine whether the unit value should be added to the output string.</p></li>
+<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Height above ground level</p></li>
 <li><p><strong>special_keywords</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>]) – Specify special keywords inlet could be set to
 If so do not apply any formatting.
 If this is not set a special keyword of “multiple” and “column” will still be allowed.</p></li>
@@ -800,27 +783,6 @@ If this is not set a special keyword of “multiple” and “column” will sti
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-<dl>
-<dt>Usage:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10&quot;</span><span class="p">)</span>
-<span class="go">    &quot;10m&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10m&quot;</span><span class="p">)</span>
-<span class="go">    &quot;10m&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10magl&quot;</span><span class="p">)</span>
-<span class="go">    &quot;10m&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10.111&quot;</span><span class="p">)</span>
-<span class="go">    &quot;10.1m&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;multiple&quot;</span><span class="p">)</span>
-<span class="go">    &quot;multiple&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10m&quot;</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet&quot;</span><span class="p">)</span>
-<span class="go">    &quot;10m&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10m&quot;</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet_magl&quot;</span><span class="p">)</span>
-<span class="go">    &quot;10&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10m&quot;</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">)</span>
-<span class="go">    &quot;10&quot;</span>
-</pre></div>
-</div>
 </dd>
 </dl>
 </dd></dl>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.1.g1d1dc93.dirty documentation</title>
+    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.1.ga0b3563.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g1d1dc93.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ga0b3563.dirty documentation</p>
   
 </a>
     
@@ -344,8 +344,8 @@
               
   <h1>Source code for openghg.standardise.meta._attributes</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
-<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">FilePathOpt</span>
 
 
 <div class="viewcode-block" id="assign_attributes"><a class="viewcode-back" href="../../../../api/devapi_metadata.html#openghg.standardise.meta.assign_attributes">[docs]</a><span class="k">def</span> <span class="nf">assign_attributes</span><span class="p">(</span>
@@ -353,16 +353,10 @@
     <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">update_metadata_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">site_filename</span><span class="p">:</span> <span class="n">FilePathOpt</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">species_filename</span><span class="p">:</span> <span class="n">FilePathOpt</span> <span class="o">=</span> <span class="kc">None</span>   
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced</span>
 <span class="sd">    are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata</span>
 <span class="sd">    to the Datasource allowing more detailed searching of data.</span>
-
-<span class="sd">    If accessing underlying stored site or species definitions, this will</span>
-<span class="sd">    be accessed from the openghg/supplementary_data repository by default.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: Dictionary containing data, metadata and attributes</span>
@@ -370,11 +364,6 @@
 <span class="sd">        sampling_period: Number of seconds for which air</span>
 <span class="sd">                         sample is taken. Only for time variable attribute</span>
 <span class="sd">        network: Network name</span>
-<span class="sd">        update_metadata_mismatch: If current metadata does not match to attributes</span>
-<span class="sd">            update metadata.</span>
-<span class="sd">        site_filename: Alternative site info file</span>
-<span class="sd">        species_filename: Alternative species info file</span>
-
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of combined data with correct attributes assigned to Datasets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -404,8 +393,6 @@
             <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
             <span class="n">global_attributes</span><span class="o">=</span><span class="n">site_attributes</span><span class="p">,</span>
             <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
-            <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">,</span>
-            <span class="n">species_filename</span><span class="o">=</span><span class="n">species_filename</span>
         <span class="p">)</span>
 
         <span class="n">measurement_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
@@ -413,9 +400,7 @@
 
         <span class="n">attrs</span> <span class="o">=</span> <span class="n">measurement_data</span><span class="o">.</span><span class="n">attrs</span>
 
-        <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sync_surface_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
-                                                     <span class="n">attributes</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span>
-                                                     <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_metadata_mismatch</span><span class="p">)</span>
+        <span class="n">gas_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sync_surface_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
 
@@ -430,17 +415,12 @@
     <span class="n">scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">date_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">site_filename</span><span class="p">:</span> <span class="n">FilePathOpt</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">species_filename</span><span class="p">:</span> <span class="n">FilePathOpt</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function writes attributes to an xarray.Dataset so that they conform with</span>
 <span class="sd">    the CF Convention v1.6</span>
 
 <span class="sd">    Attributes of the xarray DataSet are modified, and variable names are changed</span>
-
-<span class="sd">    If accessing underlying stored site or species definitions, this will</span>
-<span class="sd">    be accessed from the openghg/supplementary_data repository by default.</span>
 
 <span class="sd">    Variable naming related to species name will be defined using</span>
 <span class="sd">    define_species_label() function.</span>
@@ -461,10 +441,8 @@
 <span class="sd">        date_range: Start and end date for output</span>
 <span class="sd">            If you only want an end date, just put a very early start date</span>
 <span class="sd">            (e.g. [&quot;1900-01-01&quot;, &quot;2010-01-01&quot;])</span>
-<span class="sd">        site_filename: Alternative site info file</span>
-<span class="sd">        species_filename: Alternative species info file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">timestamp_now</span><span class="p">,</span> <span class="n">get_species_info</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">timestamp_now</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span> <span class="k">as</span> <span class="n">pd_Timestamp</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
@@ -492,8 +470,8 @@
         <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot find species </span><span class="si">{</span><span class="n">species_search</span><span class="si">}</span><span class="s2"> in Dataset variables&quot;</span><span class="p">)</span>
 
     <span class="c1"># Load attributes files</span>
-    <span class="n">species_attrs</span> <span class="o">=</span> <span class="n">get_species_info</span><span class="p">()</span>
-    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">species_attrs</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;acrg_species_info.json&quot;</span><span class="p">)</span>
+    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
 
     <span class="n">unit_interpret</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_interpret&quot;</span><span class="p">]</span>
     <span class="n">unit_mol_fraction</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_mol_fraction&quot;</span><span class="p">]</span>
@@ -501,7 +479,7 @@
 
     <span class="c1"># Extract both label to use for species and key for attributes</span>
     <span class="c1"># Typically species_label will be the lower case version of species_key</span>
-    <span class="n">species_label</span><span class="p">,</span> <span class="n">species_key</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">species_filename</span><span class="p">)</span>
+    <span class="n">species_label</span><span class="p">,</span> <span class="n">species_key</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
 
     <span class="n">species_rename</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">matched_keys</span><span class="p">:</span>
@@ -541,7 +519,7 @@
     <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">global_attributes</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># Add some site attributes</span>
-    <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">_site_info_attributes</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">network</span><span class="p">,</span> <span class="n">site_filename</span><span class="p">)</span>
+    <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">_site_info_attributes</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">network</span><span class="p">)</span>
     <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">site_attributes</span><span class="p">)</span>
 
     <span class="c1"># Species-specific attributes</span>
@@ -656,12 +634,11 @@
     <span class="k">return</span> <span class="n">ds</span></div>
 
 
-<span class="k">def</span> <span class="nf">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                         <span class="n">species_filename</span><span class="p">:</span> <span class="n">FilePathOpt</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Define standardised label to use for observation datasets.</span>
-<span class="sd">    This uses the data stored within openghg_defs/data/site_info JSON file</span>
-<span class="sd">    by default with alternative names (&#39;alt&#39;) defined within.</span>
+<span class="sd">    This is defined using the &#39;site_info.json&#39; details with</span>
+<span class="sd">    alternative names (&#39;alt&#39;) defined within.</span>
 
 <span class="sd">    Formatting:</span>
 <span class="sd">     - species label will be all lower case</span>
@@ -674,7 +651,6 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        species : Species name.</span>
-<span class="sd">        species_filename : Alternative species info file.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str, str: Both the species label to be used exactly and the original attribute</span>
@@ -696,10 +672,7 @@
 
     <span class="c1"># Extract species label using synonyms function</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">species_label</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">,</span>
-                                 <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                 <span class="n">allow_new_species</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                 <span class="n">species_filename</span><span class="o">=</span><span class="n">species_filename</span><span class="p">)</span>
+        <span class="n">species_label</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_new_species</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="n">species_underscore</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
         <span class="n">species_remove_dash</span> <span class="o">=</span> <span class="n">species_underscore</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
@@ -710,29 +683,25 @@
     <span class="k">return</span> <span class="n">species_label_lower</span><span class="p">,</span> <span class="n">species_label</span>
 
 
-<span class="k">def</span> <span class="nf">_site_info_attributes</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                          <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">site_filename</span><span class="p">:</span> <span class="n">FilePathOpt</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_site_info_attributes</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads site attributes from JSON</span>
-
-<span class="sd">    This uses the data stored within openghg_defs/data/site_info JSON file by default.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        site: Site code</span>
 <span class="sd">        network: Network name</span>
-<span class="sd">        site_filename: Alternative site info file</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of site attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_site_info</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
 
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
     <span class="c1"># Read site info file</span>
-    <span class="n">site_data</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">(</span><span class="n">site_filename</span><span class="p">)</span>
+    <span class="n">data_filename</span> <span class="o">=</span> <span class="s2">&quot;site_info.json&quot;</span>
+    <span class="n">site_params</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">data_filename</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">network</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">site_data</span><span class="p">[</span><span class="n">site</span><span class="p">]))</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">site_params</span><span class="p">[</span><span class="n">site</span><span class="p">]))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">network</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
@@ -744,19 +713,19 @@
     <span class="p">}</span>
 
     <span class="n">attributes</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">site_data</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">site_params</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes_dict</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">site_data</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">site_params</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">]:</span>
                     <span class="n">attr_key</span> <span class="o">=</span> <span class="n">attributes_dict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
 
-                    <span class="n">attributes</span><span class="p">[</span><span class="n">attr_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_data</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span>
+                    <span class="n">attributes</span><span class="p">[</span><span class="n">attr_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_params</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">pass</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;We haven&#39;t seen site </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> before, please let us know so we can update our records.&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">You can help us by opening an issue on GitHub for our supplementary data: https://github.com/openghg/supplementary_data&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">You can help us by opening an issue on GitHub: https://github.com/openghg/openghg/issues&quot;</span>
         <span class="p">)</span>
         <span class="c1"># TODO - log not seen site message here</span>
         <span class="c1"># raise ValueError(f&quot;Invalid site {site} passed. Please use a valid site code such as BSD for Bilsdale&quot;)</span>
@@ -902,7 +871,9 @@
     <span class="k">if</span> <span class="s2">&quot;process_by&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">global_attributes</span><span class="p">:</span>
         <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;processed_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;OpenGHG_Cloud&quot;</span>
 
-    <span class="n">species_label</span> <span class="o">=</span> <span class="n">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+    <span class="c1"># TODO: Update when we have access to species label definition (from &#39;obs_data_type&#39; branch)</span>
+    <span class="c1"># species_label = define_species_label(species)</span>
+    <span class="n">species_label</span> <span class="o">=</span> <span class="n">species</span>
 
     <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species_label</span>
     <span class="n">global_attributes</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
