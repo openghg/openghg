@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._inlet &#8212; OpenGHG 0+untagged.1.gbe7699e.dirty documentation</title>
+    <title>openghg.util._inlet &#8212; OpenGHG 0+untagged.1.ge239067.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gbe7699e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge239067.dirty documentation</p>
   
 </a>
     
@@ -343,34 +343,73 @@
             <article class="bd-article" role="main">
               
   <h1>Source code for openghg.util._inlet</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">overload</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;format_inlet&quot;</span><span class="p">]</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+                 <span class="n">key_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+                 <span class="n">key_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="o">...</span>
 
 
-<div class="viewcode-block" id="format_inlet"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.format_inlet">[docs]</a><span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make sure inlet name conforms to standard of number followed by unit</span>
-<span class="sd">    (or is one of the special keywords).</span>
-<span class="sd">    If the string just contains numbers, it is assumed this is in metres and</span>
-<span class="sd">    units of &quot;m&quot; will be added.</span>
+<div class="viewcode-block" id="format_inlet"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.format_inlet">[docs]</a><span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+                 <span class="n">key_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make sure inlet / height name conforms to standard. The standard</span>
+<span class="sd">    imposed can depend on the associated key_name itself (can</span>
+<span class="sd">    be supplied as an option to check).</span>
 
-<span class="sd">    e.g. &quot;10m&quot; not &quot;10&quot; or &quot;10magl&quot;</span>
+<span class="sd">    This standard is as follows:</span>
+<span class="sd">     - number followed by unit</span>
+<span class="sd">     - number alone if unit / derviative is specified at the end of key_name (e.g. station_height_masl)</span>
+<span class="sd">     - unchanged if this is one of the special keywords (by default &quot;multiple&quot; or &quot;various&quot;)</span>
+
+<span class="sd">    Other considerations:</span>
+<span class="sd">     - For units of &quot;m&quot;, we will also look for &quot;magl&quot; and &quot;masl&quot; (metres above ground and sea level)</span>
+<span class="sd">     - If the input string just contains numbers, it is assumed this is already within the correct unit.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        inlet: Height above ground level</span>
+<span class="sd">        inlet: Inlet / Height value in the specified units</span>
+<span class="sd">        units: Units for the inlet value (&quot;m&quot; by default)</span>
+<span class="sd">        key_name: Name of the associated key. This is optional but will be used to</span>
+<span class="sd">            determine whether the unit value should be added to the output string.</span>
 <span class="sd">        special_keywords: Specify special keywords inlet could be set to</span>
 <span class="sd">            If so do not apply any formatting.</span>
 <span class="sd">            If this is not set a special keyword of &quot;multiple&quot; and &quot;column&quot; will still be allowed.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        str: formatted inlet string / None</span>
+
+<span class="sd">    Usage:</span>
+<span class="sd">        &gt;&gt;&gt; format_inlet(&quot;10&quot;)</span>
+<span class="sd">            &quot;10m&quot;</span>
+<span class="sd">        &gt;&gt;&gt; format_inlet(&quot;10m&quot;)</span>
+<span class="sd">            &quot;10m&quot;</span>
+<span class="sd">        &gt;&gt;&gt; format_inlet(&quot;10magl&quot;)</span>
+<span class="sd">            &quot;10m&quot;</span>
+<span class="sd">        &gt;&gt;&gt; format_inlet(&quot;10.111&quot;)</span>
+<span class="sd">            &quot;10.1m&quot;</span>
+<span class="sd">        &gt;&gt;&gt; format_inlet(&quot;multiple&quot;)</span>
+<span class="sd">            &quot;multiple&quot;</span>
+<span class="sd">        &gt;&gt;&gt; format_inlet(&quot;10m&quot;, key_name=&quot;inlet&quot;)</span>
+<span class="sd">            &quot;10m&quot;</span>
+<span class="sd">        &gt;&gt;&gt; format_inlet(&quot;10m&quot;, key_name=&quot;inlet_magl&quot;)</span>
+<span class="sd">            &quot;10&quot;</span>
+<span class="sd">        &gt;&gt;&gt; format_inlet(&quot;10m&quot;, key_name=&quot;station_height_masl&quot;)</span>
+<span class="sd">            &quot;10&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -384,6 +423,22 @@
     <span class="k">if</span> <span class="n">inlet</span> <span class="ow">in</span> <span class="n">special_keywords</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">inlet</span>
 
+    <span class="c1"># Define set of options associated with units. For &quot;m&quot; this include</span>
+    <span class="c1"># &quot;magl&quot; and &quot;masl&quot; (metres above ground and sea level).</span>
+    <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span>
+        <span class="n">unit_options</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;magl&quot;</span><span class="p">,</span> <span class="s2">&quot;masl&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">unit_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">units</span><span class="p">)]</span>
+
+    <span class="c1"># Check whether unit is needed in string output.</span>
+    <span class="c1"># This is dependent on whether the key name itself contains the unit value</span>
+    <span class="c1"># (or derivative). If so, the unit itself is not needed in the value.</span>
+    <span class="n">unit_needed</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">key_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">unit_options</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">unit_needed</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="c1"># Check if input inlet just contains numbers and no unit</span>
     <span class="c1"># If so assume the units are metres and add this to the end of the string</span>
     <span class="k">try</span><span class="p">:</span>
@@ -392,14 +447,30 @@
         <span class="k">pass</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">inlet_float</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
-            <span class="n">inlet</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_float</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">m&quot;</span>
+            <span class="k">if</span> <span class="n">unit_needed</span><span class="p">:</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_float</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_float</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">inlet</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_float</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">m&quot;</span>
+            <span class="k">if</span> <span class="n">unit_needed</span><span class="p">:</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_float</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_float</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span>
 
-    <span class="c1"># Check if inlet ends with &quot;magl&quot; rather than just &quot;m&quot;</span>
-    <span class="c1"># If so remove the end &quot;agl&quot; to just include the &quot;m&quot; value</span>
-    <span class="k">if</span> <span class="n">inlet</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;magl&quot;</span><span class="p">):</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;lga&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+
+    <span class="c1"># If we were unable to cast inlet as a float</span>
+    <span class="c1"># check if inlet ends with unit or unit derivative</span>
+    <span class="c1"># e.g. &quot;magl&quot; and &quot;masl&quot; would need to replaced with &quot;m&quot; or be removed</span>
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">unit_options</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inlet</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">unit_needed</span><span class="p">:</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">units</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">break</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     raise ValueError(f&quot;Did not recognise input for inlet: {inlet}&quot;)</span>
 
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span></div>
 </pre></div>

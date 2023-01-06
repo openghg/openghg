@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.gbe7699e.dirty documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.ge239067.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gbe7699e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge239067.dirty documentation</p>
   
 </a>
     
@@ -834,7 +834,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary containing attributes, data and metadata keys</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">read_header</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">read_header</span><span class="p">,</span> <span class="n">get_site_info</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">read_csv</span>
 
     <span class="n">header</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
@@ -889,7 +889,7 @@
     <span class="c1"># Read the site code from the Dataframe</span>
     <span class="n">site</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sample_site_code&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
-    <span class="n">site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_info.json&quot;</span><span class="p">)</span>
+    <span class="n">site_data</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">()</span>
     <span class="c1"># If this isn&#39;t a site we recognize try and read it from the filename</span>
     <span class="k">if</span> <span class="n">site</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">site_data</span><span class="p">:</span>
         <span class="n">site</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -945,7 +945,7 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
 
     <span class="c1"># TODO  - this could do with a better name</span>
-    <span class="n">noaa_params</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)[</span><span class="s2">&quot;NOAA&quot;</span><span class="p">]</span>
+    <span class="n">noaa_params</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s2">&quot;NOAA&quot;</span><span class="p">]</span>
 
     <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">noaa_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
     <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>

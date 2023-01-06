@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._beaco2n &#8212; OpenGHG 0+untagged.1.gbe7699e.dirty documentation</title>
+    <title>openghg.standardise.surface._beaco2n &#8212; OpenGHG 0+untagged.1.ge239067.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gbe7699e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge239067.dirty documentation</p>
   
 </a>
     
@@ -400,7 +400,7 @@
             <span class="sa">f</span><span class="s2">&quot;Unable to read data file, please make sure it is in the standard BEACO2N format.</span><span class="se">\n</span><span class="s2">Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
-    <span class="n">beaco2n_site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;beaco2n_site_data.json&quot;</span><span class="p">)</span>
+    <span class="n">beaco2n_site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;beaco2n_site_data.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">site_metadata</span> <span class="o">=</span> <span class="n">beaco2n_site_data</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>

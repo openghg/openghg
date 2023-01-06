@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._util &#8212; OpenGHG 0+untagged.1.gbe7699e.dirty documentation</title>
+    <title>openghg.util._util &#8212; OpenGHG 0+untagged.1.ge239067.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gbe7699e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge239067.dirty documentation</p>
   
 </a>
     
@@ -436,7 +436,7 @@
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
     <span class="kn">from</span> <span class="nn">rapidfuzz</span> <span class="kn">import</span> <span class="n">process</span>  <span class="c1"># type: ignore</span>
 
-    <span class="n">sites</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_lookup.json&quot;</span><span class="p">)</span>
+    <span class="n">sites</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_lookup.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">inverted</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;short_name&quot;</span><span class="p">]:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sites</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
@@ -499,18 +499,18 @@
     <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">InvalidSiteError</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">remove_punctuation</span>
 
-    <span class="n">site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_lookup.json&quot;</span><span class="p">)</span>
+    <span class="n">site_lookup</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_lookup.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">site_data</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">site_lookup</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">site</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">site</span> <span class="o">=</span> <span class="n">remove_punctuation</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
-        <span class="n">name_lookup</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;short_name&quot;</span><span class="p">]:</span> <span class="n">code</span> <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">site_data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">name_lookup</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;short_name&quot;</span><span class="p">]:</span> <span class="n">code</span> <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">site_lookup</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">name_lookup</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">long_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]:</span> <span class="n">code</span> <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">site_data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+            <span class="n">long_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]:</span> <span class="n">code</span> <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">site_lookup</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
             <span class="n">message</span> <span class="o">=</span> <span class="n">find_matching_site</span><span class="p">(</span><span class="n">site_name</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">possible_sites</span><span class="o">=</span><span class="n">long_names</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">InvalidSiteError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
 
@@ -523,9 +523,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if multiple inlets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_site_info</span>
 
-    <span class="n">site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_info.json&quot;</span><span class="p">)</span>
+    <span class="n">site_data</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">()</span>
 
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="n">network</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">site_data</span><span class="p">[</span><span class="n">site</span><span class="p">]))</span>

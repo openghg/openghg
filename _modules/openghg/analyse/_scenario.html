@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0+untagged.1.gbe7699e.dirty documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0+untagged.1.ge239067.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.gbe7699e.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.ge239067.dirty documentation</p>
   
 </a>
     
@@ -595,15 +595,17 @@
                 <span class="n">num</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">num</span> <span class="o">==</span> <span class="n">num_checks</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to add </span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> data based on keywords supplied.&quot;</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Inputs -&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Inputs - </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">keyword_set</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">search_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">data_search</span> <span class="o">=</span> <span class="n">search_fn</span><span class="p">(</span><span class="o">**</span><span class="n">keyword_set</span><span class="p">)</span>  <span class="c1"># type:ignore</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---- Search results ---&quot;</span><span class="p">)</span>
                         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of results returned: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_search</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="n">data_search</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">data_search</span><span class="p">)</span>
+                        <span class="c1"># TODO: If we can determine how many results are returned from search</span>
+                        <span class="c1"># we can use this to give better information about why no data has</span>
+                        <span class="c1"># been found for these inputs.</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Adding </span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> to model scenario&quot;</span><span class="p">)</span>
@@ -862,9 +864,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the platform for a site, if present.</span>
 
-<span class="sd">        This will access the &quot;site_info.json&quot; file to find this information.</span>
+<span class="sd">        This will access the &quot;site_info.json&quot; file from openghg_defs dependency to </span>
+<span class="sd">        find this information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_site_info</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span>
@@ -872,9 +875,9 @@
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;site_info.json&quot;</span><span class="p">)</span>
+            <span class="n">site_data</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">()</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">site_details</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="n">site_upper</span><span class="p">]</span>
+                <span class="n">site_details</span> <span class="o">=</span> <span class="n">site_data</span><span class="p">[</span><span class="n">site_upper</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1521,7 +1524,7 @@
 
         <span class="c1"># Create times for matching to the flux</span>
         <span class="n">full_dates</span> <span class="o">=</span> <span class="n">date_range</span><span class="p">(</span>
-            <span class="n">date_start_back</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">date_end</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">highest_resolution</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="s2">&quot;left&quot;</span>
+            <span class="n">date_start_back</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">date_end</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">highest_resolution</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;left&quot;</span>
         <span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
 
         <span class="c1"># Create low frequency flux data (monthly)</span>
