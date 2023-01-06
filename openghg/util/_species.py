@@ -105,14 +105,9 @@ def species_lifetime(species: Union[str, None],
     """
     species_data = get_species_info(species_filename)
 
-    # ADD in synonyms check here - synonyms()
-
     if species is not None:
-        try:
-            species_data = species_data[species]
-        except KeyError:
-            species_upper = species.upper()
-            species_data = species_data[species_upper]
+        species_label = synonyms(species, lower=False, allow_new_species=False)
+        species_data = species_data[species_label]
     else:
         return None
 
@@ -166,10 +161,7 @@ def molar_mass(species: str, species_filename: FilePathType = None) -> float:
     """
     species_data = get_species_info(species_filename)
 
-    # TODO: Add when this functionality has made it into develop
-    # species_label = synonyms(species, lower=False, allow_new_species=False)
-    # molmass = float(species_data[species_label]['mol_mass'])
-    species = species.upper()
+    species_label = synonyms(species, lower=False, allow_new_species=False)
+    molmass = float(species_data[species_label]['mol_mass'])
 
-    molmass = float(species_data[species]["mol_mass"])
     return molmass
