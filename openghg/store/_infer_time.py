@@ -107,7 +107,7 @@ def infer_date_range(
                 time_value, time_unit = inferred_freq
 
         # Check input period against inferred period
-        if inferred_freq != freq:
+        if inferred_freq != freq and period is not None:
             print(
                 f"Warning: Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})"
             )
