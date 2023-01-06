@@ -30,7 +30,7 @@ def parse_beaco2n(
     from collections import defaultdict
 
     import pandas as pd
-    from openghg.util import clean_string, load_json
+    from openghg.util import clean_string, load_json, format_inlet
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
@@ -95,11 +95,14 @@ def parse_beaco2n(
 
         m_data = m_data.to_xarray()
 
+        inlet = clean_string(inlet)
+        inlet = format_inlet(inlet, key_name="inlet")
+
         species_metadata = {
             "units": units[mt],
             "site": site,
             "species": clean_string(mt),
-            "inlet": clean_string(inlet),
+            "inlet": inlet,
             "network": "beaco2n",
             "sampling_period": str(sampling_period),
             "instrument": instrument,
