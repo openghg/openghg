@@ -14,6 +14,9 @@ from openghg.util import format_inlet
         ("multiple", "multiple"),
         ("column", "column"),
         (None, None),
+        (10, "10m"),
+        (10.0, "10m"),
+        (20.23456, "20.2m")
     ],
 )
 def test_format_inlet(test_input, expected):
@@ -36,7 +39,7 @@ def test_format_inlet(test_input, expected):
         ("10magl", "10", "inlet_magl"),
         ("31m", "31", "station_height_masl"),
         ("31masl", "31", "station_height_masl"),
-        ("31m", "31m", "m_height"),  # Won't recognise "m" unit not at end of string
+        ("31m", "31m", "m_height"),  # Correctly won't recognise "m" unit in key_name as not at end of string
     ],
 )
 def test_format_inlet_keyname(test_input, expected, key_name):
