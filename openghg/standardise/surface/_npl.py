@@ -26,6 +26,7 @@ def parse_npl(
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
+    from openghg.util import get_site_info, format_inlet, synonyms
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
@@ -35,7 +36,10 @@ def parse_npl(
     site = "NPL"
 
     attributes_data = load_json(filename="attributes.json", internal_data=True)
-    npl_params = attributes_data["NPL"]
+    npl_params = attributes_data[site]
+
+    site_data = get_site_info()
+    site_info = site_data[site][network]
 
     # mypy doesn't like NaT or NaNs - look into this
     def parser(date: str):  # type: ignore
@@ -55,27 +59,43 @@ def parse_npl(
     data = data.rename(columns=rename_dict)
     data.index.name = "time"
 
+    try:
+        site_inlet_values = site_info["height"]
+    except KeyError:
+        raise ValueError(f"Unable to extract inlet height details for site '{site}'. Please input inlet value.")
+
+    inlet = format_inlet(inlet)
     if inlet is None:
-        inlet = "NA"
+        inlet = site_inlet_values[0]  # Use first entry
+        inlet = format_inlet(inlet)
+    elif inlet not in site_inlet_values:
+        print(f"WARNING: inlet value of '{inlet}' does not match to known inlet values")
 
     gas_data = {}
-    for species in data.columns:
-        processed_data = data.loc[:, [species]].sort_index().to_xarray()
+    for species_column in data.columns:
+        processed_data = data.loc[:, [species_column]].sort_index().to_xarray()
 
         # Convert methane to ppb
-        if species == "CH4":
-            processed_data[species] *= 1000
+        if species_column == "CH4":
+            processed_data[species_column] *= 1000
+
+        species = clean_string(species_column)
+        species = synonyms(species, allow_new_species=True)
 
         # No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate
         # when averaging
-        processed_data["{} variability".format(species)] = processed_data[species] * 0.0
+        processed_data["{} variability".format(species)] = processed_data[species_column] * 0.0
 
         site_attributes = npl_params["global_attributes"]
-        site_attributes["inlet_height_magl"] = npl_params["inlet"]
+        site_attributes["inlet"] = inlet
+        site_attributes["inlet_height_magl"] = format_inlet(inlet, key_name="inlet_height_magl")
         site_attributes["instrument"] = npl_params["instrument"]
 
+        attributes = site_attributes
+        attributes["species"] = species
+
         metadata = {
-            "species": clean_string(species),
+            "species": species,
             "sampling_period": str(sampling_period),
             "site": "NPL",
             "network": "LGHG",
@@ -88,7 +108,7 @@ def parse_npl(
         gas_data[species] = {
             "metadata": metadata,
             "data": processed_data,
-            "attributes": site_attributes,
+            "attributes": attributes,
         }
 
     gas_data = assign_attributes(data=gas_data, site=site, network=network)
