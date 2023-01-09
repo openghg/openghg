@@ -66,7 +66,8 @@ def test_get_obs_surface(inlet_keyword, inlet_value):
     metadata = obsdata.metadata
 
     assert metadata["data_owner"] == "Simon O'Doherty"
-    assert metadata["inlet_height_magl"] == "248m"
+    assert metadata["inlet"] == "248m"
+    assert metadata["inlet_height_magl"] == "248"
 
     averaged_data = get_obs_surface(site="bsd", species="co2", inlet="248m", average="2h")
 
