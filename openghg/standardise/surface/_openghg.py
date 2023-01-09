@@ -107,7 +107,7 @@ def parse_openghg(
 
     metadata = cast(Dict[str, str], metadata_initial)
 
-    metadata["inlet_height_magl"] = str(metadata["inlet"]).strip("m")
+    metadata["inlet_height_magl"] = format_inlet(str(metadata["inlet"]), key_name="inlet_height_magl")
     metadata["data_type"] = "surface"
 
     # Define remaining keys needed for metadata
