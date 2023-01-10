@@ -51,11 +51,14 @@ def parse_tmb(
     data = data.rename(columns=rename_dict)
     data.index.name = "time"
 
+    site_upper = site.upper()
+    network_upper = network.upper()
+
     attributes_data = load_json(filename="attributes.json", internal_data=True)
-    tb_params = attributes_data[site]
+    tb_params = attributes_data[site_upper]
 
     site_data = get_site_info()
-    site_info = site_data[site][network]    
+    site_info = site_data[site_upper][network_upper]    
 
     try:
         site_inlet_values = site_info["height"]

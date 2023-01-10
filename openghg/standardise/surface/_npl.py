@@ -33,13 +33,14 @@ def parse_npl(
 
     data_filepath = Path(data_filepath)
 
-    site = "NPL"
+    site_upper = site.upper()
+    network_upper = network.upper()
 
     attributes_data = load_json(filename="attributes.json", internal_data=True)
-    npl_params = attributes_data[site]
+    npl_params = attributes_data[site_upper]
 
     site_data = get_site_info()
-    site_info = site_data[site][network]
+    site_info = site_data[site_upper][network_upper]
 
     # mypy doesn't like NaT or NaNs - look into this
     def parser(date: str):  # type: ignore
