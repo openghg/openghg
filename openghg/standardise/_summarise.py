@@ -1,19 +1,15 @@
-from typing import Dict, Union, Optional
+from typing import Dict
 
 import pandas as pd
-from pathlib import Path
-from openghg.types import SurfaceTypes
+from openghg.types import SurfaceTypes, optionalPathType
 from openghg.util import get_datapath, get_site_info, sites_in_network 
 
 # from openghg.types import DataTypes  # Would this be more appropriate?
 # This does include Footprint as well as the input obs data types?
 
 
-FilePathType = Optional[Union[str, Path]]
-
-
 def _extract_site_names(site_codes: list,
-                        site_filename: FilePathType = None) -> list:
+                        site_filename: optionalPathType = None) -> list:
     """
     Extracts long names for site codes.
 
@@ -104,7 +100,7 @@ def summary_source_formats() -> pd.DataFrame:
     return collated_site_data
 
 
-def summary_site_codes(site_filename: FilePathType = None) -> pd.DataFrame:
+def summary_site_codes(site_filename: optionalPathType = None) -> pd.DataFrame:
     """
     Create summary DataFrame of site codes. This includes details of the network,
     longitude, latitude, height above sea level and stored heights.
