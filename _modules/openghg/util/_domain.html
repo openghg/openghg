@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._domain &#8212; OpenGHG 0+untagged.1.g8606ba3.dirty documentation</title>
+    <title>openghg.util._domain &#8212; OpenGHG 0+untagged.1.gaa4208b.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g8606ba3.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.gaa4208b.dirty documentation</p>
   
 </a>
     
@@ -343,19 +343,17 @@
             <article class="bd-article" role="main">
               
   <h1>Source code for openghg.util._domain</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;find_domain&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_longitude&quot;</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_domain_info&quot;</span><span class="p">,</span> <span class="s2">&quot;find_domain&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_longitude&quot;</span><span class="p">]</span>
 
 
-<span class="n">FilePathType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span>
-
-
-<span class="k">def</span> <span class="nf">get_domain_info</span><span class="p">(</span><span class="n">domain_filename</span><span class="p">:</span> <span class="n">FilePathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">get_domain_info</span><span class="p">(</span><span class="n">domain_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract data from domain info JSON file as a dictionary.</span>
 
@@ -379,7 +377,7 @@
 
 
 <div class="viewcode-block" id="find_domain"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_domain">[docs]</a><span class="k">def</span> <span class="nf">find_domain</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                <span class="n">domain_filename</span><span class="p">:</span> <span class="n">FilePathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
+                <span class="n">domain_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds the latitude and longitude values in degrees associated</span>
 <span class="sd">    with a given domain name.</span>
