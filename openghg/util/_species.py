@@ -1,5 +1,4 @@
 from typing import List, Optional, Union, Dict, Any
-from pathlib import Path
 
 from openghg.util import load_json
 from openghg.types import optionalPathType

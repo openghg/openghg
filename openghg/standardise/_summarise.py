@@ -1,7 +1,6 @@
-from typing import Dict, Union, Optional
+from typing import Dict
 
 import pandas as pd
-from pathlib import Path
 from openghg.types import SurfaceTypes, optionalPathType
 from openghg.util import get_datapath, get_site_info, sites_in_network 
 
