@@ -1,6 +1,9 @@
 from typing import Any, Dict, Hashable, List, Optional, Tuple, Union, cast
 from xarray import Dataset
-from openghg.util import FilePathOpt
+from openghg.types import optionalPathType
+
+__all__ = ["assign_attributes", "get_attributes", "define_species_label",
+           "assign_flux_attributes", "get_flux_attributes"]
 
 
 def assign_attributes(
@@ -9,8 +12,8 @@ def assign_attributes(
     network: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
     update_metadata_mismatch: bool = False,
-    site_filename: FilePathOpt = None,
-    species_filename: FilePathOpt = None   
+    site_filename: optionalPathType = None,
+    species_filename: optionalPathType = None   
 ) -> Dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
     are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
@@ -85,8 +88,8 @@ def get_attributes(
     scale: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
     date_range: Optional[List[str]] = None,
-    site_filename: FilePathOpt = None,
-    species_filename: FilePathOpt = None
+    site_filename: optionalPathType = None,
+    species_filename: optionalPathType = None
 ) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
@@ -312,7 +315,7 @@ def get_attributes(
 
 
 def define_species_label(species: str,
-                         species_filename: FilePathOpt = None) -> Tuple[str, str]:
+                         species_filename: optionalPathType = None) -> Tuple[str, str]:
     """
     Define standardised label to use for observation datasets.
     This uses the data stored within openghg_defs/data/site_info JSON file
@@ -367,7 +370,7 @@ def define_species_label(species: str,
 
 def _site_info_attributes(site: str,
                           network: Optional[str] = None,
-                          site_filename: FilePathOpt = None) -> Dict:
+                          site_filename: optionalPathType = None) -> Dict:
     """Reads site attributes from JSON
 
     This uses the data stored within openghg_defs/data/site_info JSON file by default.

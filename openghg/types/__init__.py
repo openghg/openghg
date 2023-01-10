@@ -20,4 +20,9 @@ from ._errors import (
     SearchError,
     AttrMismatchError,
 )
-from ._types import multiPathType, pathType, resultsType
+from ._types import (
+    multiPathType,
+    pathType,
+    optionalPathType,
+    resultsType,
+)

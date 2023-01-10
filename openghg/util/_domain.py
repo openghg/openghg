@@ -1,16 +1,15 @@
-from typing import Any, Dict, Tuple, Union, Optional
+from typing import Any, Dict, Tuple, Union
 
 from pathlib import Path
 import numpy as np
 from numpy import ndarray
 
-__all__ = ["find_domain", "convert_longitude"]
+from openghg.types import optionalPathType
+
+__all__ = ["get_domain_info", "find_domain", "convert_longitude"]
 
 
-FilePathType = Optional[Union[str, Path]]
-
-
-def get_domain_info(domain_filename: FilePathType = None) -> Dict[str, Any]:
+def get_domain_info(domain_filename: optionalPathType = None) -> Dict[str, Any]:
     """
     Extract data from domain info JSON file as a dictionary.
 
@@ -34,7 +33,7 @@ def get_domain_info(domain_filename: FilePathType = None) -> Dict[str, Any]:
 
 
 def find_domain(domain: str,
-                domain_filename: FilePathType = None) -> Tuple[ndarray, ndarray]:
+                domain_filename: optionalPathType = None) -> Tuple[ndarray, ndarray]:
     """
     Finds the latitude and longitude values in degrees associated
     with a given domain name.
