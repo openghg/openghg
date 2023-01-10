@@ -7,7 +7,7 @@ from openghg.types import pathType
 def parse_tmb(
     data_filepath: pathType,
     site: str = "TMB",
-    network: Optional[str] = "LGHG",
+    network: str = "LGHG",
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
@@ -20,6 +20,11 @@ def parse_tmb(
     Args:
         data_filepath: Path of file to load
         site: Site name
+        network: Network, defaults to LGHG
+        inlet: Inlet height. Will be inferred if not specified
+        instrument: Instrument name
+        sampling_period: Sampling period
+        measurement_type: Type of measurement taken e.g."flask", "insitu"
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """

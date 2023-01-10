@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 from openghg.standardise.meta import assign_attributes
 from openghg.types import pathType
@@ -12,10 +12,10 @@ def parse_npl(
     data_filepath: pathType,
     site: str = "NPL",
     network: str = "LGHG",
-    inlet: str = None,
-    instrument: str = None,
-    sampling_period: str = None,
-    measurement_type: str = None,
+    inlet: Optional[str] = None,
+    instrument: Optional[str] = None,
+    sampling_period: Optional[str] = None,
+    measurement_type: Optional[str] = None,
 ) -> Dict:
     """Reads NPL data files and returns the UUIDS of the Datasources
     the processed data has been assigned to
@@ -23,6 +23,11 @@ def parse_npl(
     Args:
         data_filepath: Path of file to load
         site: Site name
+        network: Network, defaults to LGHG
+        inlet: Inlet height. Will be inferred if not specified
+        instrument: Instrument name
+        sampling_period: Sampling period
+        measurement_type: Type of measurement taken e.g."flask", "insitu"
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """

@@ -19,7 +19,7 @@ def parse_noaa(
     Args:
         data_filepath: Data filepath
         site: Three letter site code
-        inlet: Inlet height, if no height use measurement type e.g. flask
+        inlet: Inlet height (as value unit e.g. "10m")
         measurement_type: One of ("flask", "insitu", "pfp")
         network: Network, defaults to NOAA
         instrument: Instrument name
