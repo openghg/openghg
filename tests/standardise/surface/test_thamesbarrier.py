@@ -45,5 +45,5 @@ def test_read_file(tmb_data):
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_tmb_cf_compliance(tmb_data):
-    co_data = tmb_data["CO"]["data"]
+    co_data = tmb_data["co"]["data"]
     assert check_cf_compliance(dataset=co_data)

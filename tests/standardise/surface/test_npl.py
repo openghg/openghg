@@ -36,5 +36,5 @@ def test_read_file(npl_data):
 
 @pytest.mark.cfchecks
 def test_npl_cf_compliance(npl_data):
-    co2_data = npl_data["CO2"]["data"]
+    co2_data = npl_data["co2"]["data"]
     assert check_cf_compliance(dataset=co2_data)
