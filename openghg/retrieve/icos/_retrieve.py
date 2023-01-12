@@ -30,8 +30,6 @@ def retrieve_atmospheric(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
-        function call environment.
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -67,8 +65,6 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
-        function call environment.
     Returns:
         ObsData, list[ObsData] or None
     """
