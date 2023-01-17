@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._gcwerks &#8212; OpenGHG 0+untagged.1.g7c20577.dirty documentation</title>
+    <title>openghg.standardise.surface._gcwerks &#8212; OpenGHG 0+untagged.1.g24d9b89.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g7c20577.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g24d9b89.dirty documentation</p>
   
 </a>
     
@@ -427,7 +427,7 @@
 
     <span class="c1"># Do some setup for processing</span>
     <span class="c1"># Load site data</span>
-    <span class="n">gcwerks_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">gcwerks_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
     <span class="n">gc_params</span> <span class="o">=</span> <span class="n">gcwerks_data</span><span class="p">[</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">]</span>
 
     <span class="n">network</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
@@ -745,7 +745,6 @@
     <span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="n">fnmatch</span>
 
     <span class="kn">from</span> <span class="nn">addict</span> <span class="kn">import</span> <span class="n">Dict</span> <span class="k">as</span> <span class="n">aDict</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">format_inlet</span>
     <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">define_species_label</span>
 
     <span class="c1"># Read inlets from the parameters</span>
@@ -767,7 +766,6 @@
 
         <span class="c1"># Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata</span>
         <span class="k">for</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">inlet_label</span> <span class="ow">in</span> <span class="n">expected_inlets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">inlet_label</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet_label</span><span class="p">)</span>
             <span class="c1"># Create a copy of metadata for local modification</span>
             <span class="n">spec_metadata</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">spec_metadata</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span><span class="p">[</span><span class="n">spec</span><span class="p">]</span>
@@ -930,14 +928,12 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">format_inlet</span>
-
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="n">instrument</span> <span class="o">=</span> <span class="n">instrument</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
     <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">gc_params</span><span class="p">[</span><span class="s2">&quot;sites&quot;</span><span class="p">][</span><span class="n">site</span><span class="p">][</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
 
-    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">)</span>
+    <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gc_params</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">][</span><span class="n">instrument</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>

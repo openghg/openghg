@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.g7c20577.dirty documentation</title>
+    <title>openghg.store._footprints &#8212; OpenGHG 0+untagged.1.g24d9b89.dirty documentation</title>
   
   
   
@@ -104,7 +104,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g7c20577.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g24d9b89.dirty documentation</p>
   
 </a>
     
@@ -575,7 +575,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># from xarray import load_dataset</span>
         <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">datasource_lookup</span><span class="p">,</span> <span class="n">infer_date_range</span><span class="p">,</span> <span class="n">load_metastore</span>
+        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">assign_data</span><span class="p">,</span>
+            <span class="n">datasource_lookup</span><span class="p">,</span>
+            <span class="n">infer_date_range</span><span class="p">,</span>
+            <span class="n">update_zero_dim</span><span class="p">,</span>
+            <span class="n">load_metastore</span>
+        <span class="p">)</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">hash_file</span><span class="p">,</span> <span class="n">species_lifetime</span><span class="p">,</span> <span class="n">timestamp_now</span>
 
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
@@ -659,7 +665,11 @@
         <span class="k">if</span> <span class="n">metmodel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;metmodel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">metmodel</span><span class="p">)</span>
 
-        <span class="n">fp_time</span> <span class="o">=</span> <span class="n">fp_data</span><span class="o">.</span><span class="n">time</span>
+        <span class="c1"># Check if time has 0-dimensions and, if so, expand this so time is 1D</span>
+        <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">fp_data</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="n">fp_data</span> <span class="o">=</span> <span class="n">update_zero_dim</span><span class="p">(</span><span class="n">fp_data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+
+        <span class="n">fp_time</span> <span class="o">=</span> <span class="n">fp_data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
 
         <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">period_str</span> <span class="o">=</span> <span class="n">infer_date_range</span><span class="p">(</span>
             <span class="n">fp_time</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span>
