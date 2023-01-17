@@ -4,9 +4,11 @@ from typing import Optional, Tuple, Union
 
 import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
-from xarray import DataArray
+from xarray import DataArray, Dataset
 
 TupleTimeType = Tuple[Union[int, float], str]
+
+__all__ = ["infer_date_range", "update_zero_dim"]
 
 
 def infer_date_range(
@@ -53,15 +55,18 @@ def infer_date_range(
 
     if n_dates == 1:
         try:
-            start_date = timestamp_tzaware(timestamp=time.values[0])
+            timestamp = time.values[0]
         except IndexError:
-            raise NotImplementedError(
-                "This type of BC file is not currently supported. Please see issue #349"
+            raise ValueError(
+                "'time' coord has 0 dimensions. Please update this data to remove ambiguity." +
+                "\nCan use openghg.store.update_zero_dim() to add this 'time' dimension to all variables"
             )
             # try:
             #     start_date = timestamp_tzaware(timestamp=time.values)
             # except ValueError:
             #     raise ValueError("Can't read date from dataset.")
+        else:
+            start_date = timestamp_tzaware(timestamp)
 
         if filepath is not None:
             filename = filepath.stem  # Filename without the extension
@@ -157,3 +162,23 @@ def infer_date_range(
             period_str = "varies"
 
     return start_date, end_date, period_str
+
+
+def update_zero_dim(ds: Dataset, dim: str = "time") -> Dataset:
+    """
+    Check whether a dimension within an xarray Dataset object is 0-size
+    (0 dimension) and update time to 1-size (1 dimension) if so.
+
+    Args:
+        ds: Input Dataset
+        dim: name of dimension to check
+
+    Returns:
+        ds: Dataset, updated if needed.
+    """
+
+    da = ds[dim]
+    if not da.dims:
+        ds = ds.expand_dims(dim={dim: 1})
+
+    return ds

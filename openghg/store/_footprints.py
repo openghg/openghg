@@ -230,7 +230,13 @@ class Footprints(BaseStore):
         """
         # from xarray import load_dataset
         import xarray as xr
-        from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
+        from openghg.store import (
+            assign_data,
+            datasource_lookup,
+            infer_date_range,
+            update_zero_dim,
+            load_metastore
+        )
         from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
 
         filepath = Path(filepath)
@@ -314,7 +320,11 @@ class Footprints(BaseStore):
         if metmodel is not None:
             metadata["metmodel"] = clean_string(metmodel)
 
-        fp_time = fp_data.time
+        # Check if time has 0-dimensions and, if so, expand this so time is 1D
+        if "time" in fp_data.coords:
+            fp_data = update_zero_dim(fp_data, dim="time")
+
+        fp_time = fp_data["time"]
 
         start_date, end_date, period_str = infer_date_range(
             fp_time, filepath=filepath, period=period, continuous=continuous
