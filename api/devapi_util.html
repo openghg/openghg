@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Util &#8212; OpenGHG 0+untagged.1.g24d9b89.dirty documentation</title>
+    <title>Util &#8212; OpenGHG 0+untagged.1.g2f1d76f.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g24d9b89.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g2f1d76f.dirty documentation</p>
   
 </a>
     
@@ -413,12 +413,15 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.find_domain">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Permalink to this definition">#</a></dt>
 <dd><p>Finds the latitude and longitude values in degrees associated
 with a given domain name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Pre-defined domain name (see ‘domain_info.json’)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Pre-defined domain name</p></li>
+<li><p><strong>domain_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative domain info file. Defaults to openghg_defs input.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Latitude and longitude values for the domain in degrees.</p>
@@ -582,10 +585,10 @@ with a given domain name.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.get_datapath">
 <span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">get_datapath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#get_datapath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.get_datapath" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns the correct path to JSON files used for assigning attributes</p>
+<dd><p>Returns the correct path to data files used for assigning attributes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – Name of JSON file</p>
+<dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Name of file to be accessed</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Path of file</p>
@@ -684,15 +687,15 @@ Used with <code class="xref py py-obj docutils literal notranslate"><span class=
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.load_json">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_json" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns a dictionary deserialised from JSON. This function only
-works for JSON files in the openghg/data directory.</p>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_json" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a dictionary deserialised from JSON.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – Name of JSON file</p></li>
-<li><p><strong>path</strong> (<em>str/Path</em>) – Path to filename. If not specified will extract default
-path to openghg/data directory</p></li>
+<li><p><strong>filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Name of JSON file</p></li>
+<li><p><strong>internal_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to use data internal to OpenGHG. This refers
+to JSON files stored within the openghg/data/ folder.
+If this is set to False, the full path to the file needs to be included.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -848,18 +851,32 @@ This checks whether lifetime is a list and contains 12 values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.format_inlet">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openghg/util/_inlet.html#format_inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.format_inlet" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/openghg/util/_inlet.html#format_inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.format_inlet" title="Permalink to this definition">#</a></dt>
 <dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
-<dd><p>Make sure inlet name conforms to standard of number followed by unit
-(or is one of the special keywords).
-If the string just contains numbers, it is assumed this is in metres and
-units of “m” will be added.</p>
-<p>e.g. “10m” not “10” or “10magl”</p>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span></dt>
+<dd><p>Make sure inlet / height name conforms to standard. The standard
+imposed can depend on the associated key_name itself (can
+be supplied as an option to check).</p>
+<dl class="simple">
+<dt>This standard is as follows:</dt><dd><ul class="simple">
+<li><p>number followed by unit</p></li>
+<li><p>number alone if unit / derviative is specified at the end of key_name (e.g. station_height_masl)</p></li>
+<li><p>unchanged if this is one of the special keywords (by default “multiple” or “various”)</p></li>
+</ul>
+</dd>
+<dt>Other considerations:</dt><dd><ul class="simple">
+<li><p>For units of “m”, we will also look for “magl” and “masl” (metres above ground and sea level)</p></li>
+<li><p>If the input string just contains numbers, it is assumed this is already within the correct unit.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Height above ground level</p></li>
+<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet / Height value in the specified units</p></li>
+<li><p><strong>units</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Units for the inlet value (“m” by default)</p></li>
+<li><p><strong>key_name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Name of the associated key. This is optional but will be used to
+determine whether the unit value should be added to the output string.</p></li>
 <li><p><strong>special_keywords</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>]) – Specify special keywords inlet could be set to
 If so do not apply any formatting.
 If this is not set a special keyword of “multiple” and “column” will still be allowed.</p></li>
@@ -870,6 +887,27 @@ If this is not set a special keyword of “multiple” and “column” will sti
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<dl>
+<dt>Usage:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10&quot;</span><span class="p">)</span>
+<span class="go">    &quot;10m&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10m&quot;</span><span class="p">)</span>
+<span class="go">    &quot;10m&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10magl&quot;</span><span class="p">)</span>
+<span class="go">    &quot;10m&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10.111&quot;</span><span class="p">)</span>
+<span class="go">    &quot;10.1m&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;multiple&quot;</span><span class="p">)</span>
+<span class="go">    &quot;multiple&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10m&quot;</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet&quot;</span><span class="p">)</span>
+<span class="go">    &quot;10m&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10m&quot;</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet_magl&quot;</span><span class="p">)</span>
+<span class="go">    &quot;10&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">format_inlet</span><span class="p">(</span><span class="s2">&quot;10m&quot;</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">)</span>
+<span class="go">    &quot;10&quot;</span>
+</pre></div>
+</div>
 </dd>
 </dl>
 </dd></dl>
@@ -914,12 +952,14 @@ error string.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.molar_mass">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">molar_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#molar_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.molar_mass" title="Permalink to this definition">#</a></dt>
-<dd><p>This function extracts the molar mass of a species from the
-‘acrg_species_info.json’ data file.</p>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">molar_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#molar_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.molar_mass" title="Permalink to this definition">#</a></dt>
+<dd><p>This function extracts the molar mass of a species.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
+<li><p><strong>species_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative species info file. Defaults to openghg_defs input.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Molar mass of species</p>
@@ -932,13 +972,16 @@ error string.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.species_lifetime">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">species_lifetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#species_lifetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.species_lifetime" title="Permalink to this definition">#</a></dt>
-<dd><p>Find species lifetime from stored reference (“acrg_species_info.json”).
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">species_lifetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#species_lifetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.species_lifetime" title="Permalink to this definition">#</a></dt>
+<dd><p>Find species lifetime.
 This can either be labelled as “lifetime” or “lifetime_monthly”.</p>
 <p>Note: no species synonyms accepted yet</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Species name e.g. “ch4” or “co2”</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Species name e.g. “ch4” or “co2”</p></li>
+<li><p><strong>species_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative species info file. Defaults to openghg_defs input.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Extracted lifetime or None is no lifetime was present.</p>
@@ -951,10 +994,9 @@ This can either be labelled as “lifetime” or “lifetime_monthly”.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.synonyms">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_new_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#synonyms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.synonyms" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_new_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#synonyms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.synonyms" title="Permalink to this definition">#</a></dt>
 <dd><p>Check to see if there are other names that we should be using for
-a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11,
-as this is used in species_info.json</p>
+a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -963,6 +1005,7 @@ as this is used in species_info.json</p>
 <li><p><strong>allow_new_species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Return original value (may be lower case)
 if this (or a synonym) is not found in the database.
 If False, raise a ValueError.</p></li>
+<li><p><strong>species_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative species info file. Defaults to openghg_defs input.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
