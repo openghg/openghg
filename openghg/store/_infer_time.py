@@ -58,8 +58,8 @@ def infer_date_range(
             timestamp = time.values[0]
         except IndexError:
             raise ValueError(
-                "'time' coord has 0 dimensions. Please update this data to remove ambiguity." +
-                "\nCan use openghg.store.update_zero_dim() to add this 'time' dimension to all variables"
+                "'time' coord has 0 dimensions. Please update this data to remove ambiguity."
+                + "\nCan use openghg.store.update_zero_dim() to add this 'time' dimension to all variables"
             )
             # try:
             #     start_date = timestamp_tzaware(timestamp=time.values)
