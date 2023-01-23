@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.g43230e6 documentation</title>
+    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.g7ed7d7e documentation</title>
   
   
   
@@ -524,11 +524,11 @@
         <span class="p">]</span>
 
         <span class="c1"># Name columns</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">set_axis</span><span class="p">(</span><span class="n">column_labels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;columns&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">set_axis</span><span class="p">(</span><span class="n">column_labels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;columns&quot;</span><span class="p">)</span>
 
         <span class="n">header_rows</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="c1"># Drop the first two rows now we have the name</span>
-        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">gas_data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">header_rows</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">gas_data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">header_rows</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
         <span class="n">gas_data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">gas_data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span><span class="p">)</span>
         <span class="c1"># Cast data to float64 / double</span>
         <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>

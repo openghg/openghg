@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g43230e6 documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.g7ed7d7e documentation</title>
   
   
   
@@ -615,14 +615,24 @@
         <span class="n">retrieved_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
 
     <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">start_date_tzaware</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
-        <span class="n">end_date_tzaware</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
-        <span class="n">end_date_tzaware_exclusive</span> <span class="o">=</span> <span class="n">end_date_tzaware</span> <span class="o">-</span> <span class="n">Timedelta</span><span class="p">(</span>
-            <span class="mi">1</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;nanosecond&quot;</span>
-        <span class="p">)</span>  <span class="c1"># Deduct 1 ns to make the end day (date) exclusive.</span>
+        
+        <span class="c1"># Check if underlying data is timezone aware.</span>
+        <span class="n">data_time_index</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">indexes</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
+        <span class="n">tzinfo</span> <span class="o">=</span> <span class="n">data_time_index</span><span class="o">.</span><span class="n">tzinfo</span>
+
+        <span class="k">if</span> <span class="n">tzinfo</span><span class="p">:</span>
+            <span class="n">start_date_filter</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+            <span class="n">end_date_filter</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_date_filter</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+            <span class="n">end_date_filter</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+
+        <span class="n">end_date_filter_exclusive</span> <span class="o">=</span> <span class="n">end_date_filter</span> <span class="o">-</span> <span class="n">Timedelta</span><span class="p">(</span>
+                <span class="mi">1</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;nanosecond&quot;</span>
+            <span class="p">)</span>  <span class="c1"># Deduct 1 ns to make the end day (date) exclusive.</span>
 
         <span class="c1"># Slice the data to only cover the dates we&#39;re interested in</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">start_date_tzaware</span><span class="p">,</span> <span class="n">end_date_tzaware_exclusive</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">start_date_filter</span><span class="p">,</span> <span class="n">end_date_filter_exclusive</span><span class="p">))</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">start_date_data</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
