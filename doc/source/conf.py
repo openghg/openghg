@@ -155,10 +155,6 @@ show_authors = False
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = "OpenGHG"
 
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-html_logo = "./images/OpenGHG_Logo_NoText.png"
-
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
@@ -168,6 +164,16 @@ html_logo = "./images/OpenGHG_Logo_NoText.png"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+html_logo = "./images/OpenGHG_Logo_NoText.png"
+
+html_theme_options = {
+    "logo": {
+        "image_light": "./images/OpenGHG_Logo_NoText.png",
+        "image_dark": "./images/OpenGHG_Logo_NoText.png",
+    }
+}
 
 html_css_files = ["custom.css"]
 html_js_files = ["custom.js"]

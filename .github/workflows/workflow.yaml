@@ -60,9 +60,7 @@ jobs:
   docs:
     name: Run checks on tutorial notebooks and build docs
     runs-on: ubuntu-latest
-    env:
-      OPENGHG_PATH: "/tmp/openghg_store"
-    needs: ["test"]
+    # needs: ["test"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -73,7 +71,7 @@ jobs:
         run: |
           pip install -r requirements.txt
           pip install .
-      - name: Install pandoc and build the documentation
+      - name: Install pandoc and requirements
         run: |
           sudo apt-get install -yq pandoc
           pip install -r requirements-doc.txt
@@ -82,7 +80,7 @@ jobs:
           cd doc
           make
       - name: Deploy to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@v4.4.0
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
         with:
           branch: gh-pages
           folder: "doc/build/html"

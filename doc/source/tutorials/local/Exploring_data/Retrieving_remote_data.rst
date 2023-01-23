@@ -38,8 +38,6 @@ code to retrieve data. You can also use the `search
 page <https://data.icos-cp.eu/portal/#%7B%22filterCategories%22:%7B%22project%22:%5B%22icos%22%5D,%22level%22:%5B1,2%5D,%22stationclass%22:%5B%22ICOS%22%5D%7D%7D>`__
 to find available data at a given site.
 
-.. container::
-
 Using ``retrieve_atmospheric``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
