@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Objectstore &#8212; OpenGHG 0+untagged.1.g7ed7d7e documentation</title>
+    <title>Objectstore &#8212; OpenGHG 0+untagged.1.ge9de082 documentation</title>
   
   
   
@@ -454,14 +454,14 @@ store functions (that create an object store on disk) or cloud object store func
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_bucket">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_bucket" title="Permalink to this definition">#</a></dt>
-<dd><p>Find and return a new bucket in the object store called
-‘bucket_name’. If ‘create_if_needed’ is True
-then the bucket will be created if it doesn’t exist. Otherwise,
-if the bucket does not exist then an exception will be raised.</p>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_bucket</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_bucket" title="Permalink to this definition">#</a></dt>
+<dd><p>Find and return the local object store path (bucket)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path to object store</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 </dd></dl>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.g7ed7d7e documentation</title>
+    <title>openghg.objectstore._local_store &#8212; OpenGHG 0+untagged.1.ge9de082 documentation</title>
   
   
   
@@ -574,13 +574,12 @@
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">(</span><span class="n">empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find and return a new bucket in the object store called</span>
-<span class="sd">    &#39;bucket_name&#39;. If &#39;create_if_needed&#39; is True</span>
-<span class="sd">    then the bucket will be created if it doesn&#39;t exist. Otherwise,</span>
-<span class="sd">    if the bucket does not exist then an exception will be raised.</span>
+<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find and return the local object store path (bucket)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Path to object store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">shutil</span>
     <span class="kn">import</span> <span class="nn">os</span>
 
     <span class="n">tutorial_store</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_TMP_STORE&quot;</span><span class="p">)</span>
@@ -590,24 +589,15 @@
     <span class="n">openghg_env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_PATH&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">openghg_env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object&quot;</span>
+            <span class="s2">&quot;Use of the OPENGHG_PATH environment variable is deprecated and will be ignored in coming versions.&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;If you want to set a specific object&quot;</span>
             <span class="o">+</span> <span class="s2">&quot; store path please use the configuration file. See docs.openghg.org/install&quot;</span><span class="p">,</span>
             <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">openghg_env</span><span class="p">)</span>
-            <span class="n">Path</span><span class="p">(</span><span class="n">openghg_env</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">openghg_env</span>
 
     <span class="n">local_store</span> <span class="o">=</span> <span class="n">get_local_objectstore_path</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;You cannot delete the object store using get_bucket any long&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;please check you really want to delete the whole store and use openghg.object_store.clear_store.&quot;</span>
-        <span class="p">)</span>
 
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">local_store</span><span class="p">)</span></div>
 
