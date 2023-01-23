@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Store &#8212; OpenGHG 0+untagged.1.g2f1d76f.dirty documentation</title>
+    <title>Store &#8212; OpenGHG 0+untagged.1.g39371ad.dirty documentation</title>
   
   
   
@@ -107,7 +107,7 @@
 
   
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g2f1d76f.dirty documentation</p>
+    <p class="title logo__title">OpenGHG 0+untagged.1.g39371ad.dirty documentation</p>
   
 </a>
     
@@ -654,13 +654,11 @@ which matches.</p></li>
 Necessary inputs will depend on the database being parsed.</p></li>
 </ul>
 </dd>
-</dl>
-<p>TODO: Could allow Callable[…, Dataset] type for a pre-defined function be passed</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
 </dd>
 </dl>
+<p>TODO: Could allow Callable[…, Dataset] type for a pre-defined function be passed</p>
 </dd></dl>
 
 <dl class="py method">
@@ -867,7 +865,7 @@ to the Footprints schema.</p>
 <li><p><strong>satellite</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Name of satellite (if relevant)</p></li>
 <li><p><strong>domain</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – For satellite only. If data has been selected on an area include the
 identifier name for domain covered. This can map to previously defined domains
-(see openghg_defs “domain_info.json” file) or a newly defined domain.</p></li>
+(see domain_info.json) or a newly defined domain.</p></li>
 <li><p><strong>selection</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – For satellite only, identifier for any data selection which has been
 performed on satellite data. This can be based on any form of filtering, binning etc.
 but should be unique compared to other selections made e.g. “land”, “glint”, “upperlimit”.
@@ -1164,18 +1162,21 @@ If a list/string is passed, the attribute(s) will be removed.</p></li>
 <dd><p>Assign data to a Datasource. This will either create a new Datasource
 Create or get an existing Datasource for each gas in the file</p>
 <blockquote>
-<div><dl class="simple">
-<dt>Args:</dt><dd><p>data_dict: Dictionary containing data and metadata for species
-lookup_results: Dictionary of lookup results]
-overwrite: If True overwrite current data stored</p>
-</dd>
-<dt>Returns:</dt><dd><p>dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</p>
-</dd>
-</dl>
+<div><p>Args:</p>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</p>
+<dd class="field-odd"><p><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>]</p>
+<blockquote>
+<div><p>data_dict: Dictionary containing data and metadata for species
+lookup_results: Dictionary of lookup results]
+overwrite: If True overwrite current data stored</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</p>
+</dd>
+</dl>
+</p>
 </dd>
 </dl>
 </dd></dl>
