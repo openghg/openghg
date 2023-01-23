@@ -24,12 +24,6 @@ sys.path.insert(0, str(openghg_dir))
 
 import openghg
 
-# script_dir = os.path.dirname(__file__)
-# openghg_dir = os.path.join(script_dir, "..", "..")
-
-# build_dir = script_dir.parent.parent.joinpath("build")
-
-
 # -- Project information -----------------------------------------------------
 
 project = "OpenGHG"
