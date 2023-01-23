@@ -282,7 +282,7 @@ def use_tutorial_store() -> None:
     Returns:
         None
     """
-    os.environ["OPENGHG_TMP_STORE"] = "1"
+    os.environ["OPENGHG_TUT_STORE"] = "1"
 
 
 def example_extract_path() -> Path:

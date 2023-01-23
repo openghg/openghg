@@ -22,9 +22,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
     - name: Lint with flake8
       run: |
         python -m pip install --upgrade pip wheel flake8
@@ -60,33 +61,28 @@ jobs:
   docs:
     name: Run checks on tutorial notebooks and build docs
     runs-on: ubuntu-latest
-    env:
-      OPENGHG_PATH: "/tmp/openghg_store"
     needs: ["test"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: "3.9"
+          cache: 'pip'
       - name: Install openghg
         run: |
-          pip install -r requirements.txt
+          pip install wheel
           pip install .
-      - name: Install pandoc and build the documentation
+      - name: Install pandoc and requirements
         run: |
           sudo apt-get install -yq pandoc
           pip install -r requirements-doc.txt
-      - name: Ensure .md files are synced with notebooks
-        run: |
-          jupytext --sync notebooks/tutorials/local/*.ipynb
-          jupytext --sync notebooks/tutorials/cloud/*.ipynb
       - name: Build documentation
         run: |
           cd doc
           make
       - name: Deploy to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@v4.4.0
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
         with:
           branch: gh-pages
           folder: "doc/build/html"
@@ -99,9 +95,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.9
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
+          cache: 'pip'
       - name: Install pypa/build
         run: |
           pip install --upgrade build
