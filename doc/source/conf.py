@@ -53,7 +53,6 @@ exclude_patterns = []
 
 extensions = [
     "sphinx.ext.napoleon",
-    "myst_nb",
     "sphinx_togglebutton",
     "sphinx.ext.mathjax",
     "sphinx.ext.autodoc",
