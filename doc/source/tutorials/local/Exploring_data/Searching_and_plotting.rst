@@ -1,11 +1,11 @@
 Searching and plotting
 ======================
 
-In this short tutorial we'll show how to retrieve some data and create a
+In this short tutorial we’ll show how to retrieve some data and create a
 simple plot using one of our plotting functions.
 
 As in the `previous tutorial <Adding_observation_data.ipynb>`__, we will
-start by setting up our temporary object store for our data. If you've
+start by setting up our temporary object store for our data. If you’ve
 already create your own local object store you can skip the next few
 steps and move onto the **Searching** section.
 
@@ -20,21 +20,64 @@ steps and move onto the **Searching** section.
 Searching
 ---------
 
-Let's search for all the methane data from Tacolneston
+Let’s search for all the methane data from Tacolneston to do this we
+need to know the site code. We can see a summary of known site codes
+using the ``summary_site_codes()`` function
+
+.. code:: ipython3
+
+    from openghg.standardise import summary_site_codes
+
+    ## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES
+    # import pandas as pd; pd.set_option('display.max_rows', None)
+
+    summary = summary_site_codes()
+    summary
+
+The output of this function is a `pandas
+DataFrame <https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#dataframe>`__.
+If we wanted to filter this to include sites containing the name
+“Tacolneston” we could do so as follows:
+
+.. code:: ipython3
+
+    site_long_name = summary["Long name"]
+    find_tacolneston = site_long_name.str.contains("Tacolneston")
+
+    summary[find_tacolneston]
+
+As you can see, there will sometimes be multiple entries for a site if
+this is included under multiple networks.
+
+If we wanted to see all available data associated with Tacolneston we
+can search for this using the site code of “TAC”.
+
+.. code:: ipython3
+
+    from openghg.retrieve import search
+
+    tac_data_search = search(site="tac")
+
+For our search we can take a look at the ``results`` property (which is
+a pandas DataFrame).
+
+.. code:: ipython3
+
+    tac_data_search.results
+
+To just look for the surface observations we can use the
+``search_surface`` function specifically. We can also pass multiple keys
+to extract, for example, just the methane data:
 
 .. code:: ipython3
 
     from openghg.retrieve import search_surface
 
-    ch4_results = search_surface(site="tac", species="ch4")
-    ch4_results
+    tac_surface_search = search_surface(site="TAC", species="ch4")
+    tac_surface_search.results
 
-Let's take a look at the results property which is a pandas DataFrame
-object.
-
-.. code:: ipython3
-
-    ch4_results.results
+There are also equivalent search functions for other data types
+including ``search_footprints``, ``search_emissions`` and ``search_bc``.
 
 If we want to take a look at the data from the 185m inlet we can first
 retrieve the data from the object store and then create a quick
@@ -44,31 +87,32 @@ object documentation for more information.
 
 .. code:: ipython3
 
-    data_185m = ch4_results.retrieve(inlet="185m")
+    data_185m = tac_surface_search.retrieve(inlet="185m")
 
    **NOTE:** the plots created below may not show up on the online
    documentation version of this notebook.
 
-.. code:: ipython3
-
-    data_185m.plot_timeseries()
-
-You can make some simple changes to the plot using arguments
+We can visualise this data using the in-built plotting commands from the
+``plotting`` sub-module. We can also modify the inputs to improve how
+this is displayed:
 
 .. code:: ipython3
 
-    data_185m.plot_timeseries(title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
+    from openghg.plotting import plot_timeseries
+
+    plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
 
 Plot all the data
 -----------------
 
-We can also retrieve all the data, get a ``list`` of
+If there are multiple results for a given search, we can also retrieve
+all the data and receive a ``list`` of
 ```ObsData`` <https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData>`__
 objects.
 
 .. code:: ipython3
 
-    all_ch4_tac = ch4_results.retrieve_all()
+    all_ch4_tac = tac_surface_search.retrieve()
 
 Then we can use the ``plot_timeseries`` function from the ``plotting``
 submodule to compare measurements from different inlets. This creates a
@@ -77,15 +121,13 @@ and and responsive, even with relatively large amounts of data.
 
 .. code:: ipython3
 
-    from openghg.plotting import plot_timeseries
-
     plot_timeseries(data=all_ch4_tac, units="ppb")
 
 Compare different sites
 -----------------------
 
-We can easily compare data from different sites by doing a quick search
-to see what's available
+We can easily compare data for the same species from different sites by
+doing a quick search to see what’s available
 
 .. code:: ipython3
 
@@ -95,69 +137,20 @@ to see what's available
 
     ch4_data
 
-Then we refine our search to only retrieve the inlets we want
+Then we refine our search to only retrieve the sites (and inlets) that
+we want:
 
 .. code:: ipython3
 
     ch4_data.results
 
-.. code:: ipython3
-
-    lower_inlets = search_surface(species="ch4", inlet=["42m", "54m"])
+We can retrieve the data we want to compare and make a plot
 
 .. code:: ipython3
 
-    lower_inlets
-
-Then we can retrieve all the data and make a plot.
-
-.. code:: ipython3
-
-    lower_inlet_data = lower_inlets.retrieve_all()
+    bsd_data = ch4_data.retrieve(site="BSD")
+    tac_data = ch4_data.retrieve(site="TAC", inlet="54m")
 
 .. code:: ipython3
 
-    plot_timeseries(data=lower_inlet_data, title="Comparing CH4 measurements at Tacolneston and Bilsdale")
-
-You can also search for different data types, say we want to find
-surface measurement data and emissions data at the same time. We can do
-that with the more generic ``search`` function.
-
-We need to first load in some emissions data
-
-.. code:: ipython3
-
-    from openghg.tutorial import populate_flux_data
-
-.. code:: ipython3
-
-    populate_flux_data()
-
-To search across different types we can use the more generic ``search``
-function.
-
-.. code:: ipython3
-
-    from openghg.retrieve import search
-
-.. code:: ipython3
-
-    results = search(species="ch4", data_type=["surface", "emissions"])
-
-.. code:: ipython3
-
-    results.results
-
-Cleanup
--------
-
-If you're finished with the data in this tutorial you can cleanup the
-tutorial object store using the ``clear_tutorial_store`` function.
-
-.. code:: ipython3
-
-    from openghg.tutorial import clear_tutorial_store
-
-.. code:: ipython3
-
-    clear_tutorial_store()
+    plot_timeseries(data=[bsd_data, tac_data], title="Comparing CH4 measurements at Tacolneston and Bilsdale")
