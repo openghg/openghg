@@ -77,10 +77,6 @@ jobs:
         run: |
           sudo apt-get install -yq pandoc
           pip install -r requirements-doc.txt
-      - name: Ensure .md files are synced with notebooks
-        run: |
-          jupytext --sync notebooks/tutorials/local/*.ipynb
-          jupytext --sync notebooks/tutorials/cloud/*.ipynb
       - name: Build documentation
         run: |
           cd doc

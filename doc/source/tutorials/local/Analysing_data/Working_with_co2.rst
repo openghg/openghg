@@ -18,6 +18,22 @@ the moment, the plan is to profile this so we can optimise performance.*
    **NOTE:** Plots created within this tutorial may not show up on the
    online documentation version of this notebook.
 
+0. Using the tutorial object store
+----------------------------------
+
+To avoid adding the example data we use in this tutorial to your normal
+object store, we need to tell OpenGHG to use a separate sandboxed object
+store that we'll call the tutorial store. To do this we use the
+``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
+``OPENGHG_TUT_STORE`` environment variable for this session and won't
+affect your use of OpenGHG outside of this tutorial.
+
+.. code:: ipython3
+
+    from openghg.tutorial import use_tutorial_store
+
+    use_tutorial_store()
+
 1. Loading data sources into the object store
 ---------------------------------------------
 
@@ -132,3 +148,17 @@ in an appropriate way:
 .. code:: ipython3
 
     # scenario.plot_comparison(baseline="percentile", recalculate=True)
+
+4. Cleanup
+----------
+
+If you're finished with the data in this tutorial you can cleanup the
+tutorial object store using the ``clear_tutorial_store`` function.
+
+.. code:: ipython3
+
+    from openghg.tutorial import clear_tutorial_store
+
+.. code:: ipython3
+
+    clear_tutorial_store()

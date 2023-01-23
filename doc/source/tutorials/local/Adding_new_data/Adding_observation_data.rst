@@ -24,10 +24,10 @@ affect your use of OpenGHG outside of this tutorial.
 1. Adding and standardising data
 --------------------------------
 
-Data types
-~~~~~~~~~~
+Source formats
+~~~~~~~~~~~~~~
 
-Within OpenGHG there are several data types which can be processed and
+Within OpenGHG there are several source formats which can be processed and
 stored within the object store. This includes data from the AGAGE, DECC,
 NOAA, LondonGHG, BEAC2ON networks.
 
@@ -35,9 +35,9 @@ When uploading a new data file, the data type must be specified
 alongside some additional details so OpenGHG can recognise the format
 and the correct standardisation can occur. The details needed will vary
 by the type of data being uploaded but will often include the
-measurement reference (e.g. a site code) and the name of any network.
+measurement reference (e.g. a site code) and the name of any network.
 
-For the full list of accepted observation inputs and data types, there
+For the full list of accepted observation inputs and source formats, there
 is a summary function which can be called:
 
 .. code:: ipython3
@@ -51,9 +51,9 @@ is a summary function which can be called:
 
     summary
 
-Note: there may be multiple data types applicable for a give site. This
+Note: there may be multiple source formats applicable for a give site. This
 is can be dependent on various factors including the instrument type
-used to measure the data e.g. for Tacolneston (“TAC”):
+used to measure the data e.g. for Tacolneston (“TAC”):
 
 .. code:: ipython3
 
@@ -269,10 +269,10 @@ Tacolneston data (“TAC”) site measured at the “185m” inlet:
 If we view our returned ``obs_data`` variable this will contain:
 
 -  ``data`` - The standardised data (accessed using
-   e.g. ``obs_data.data``). This is returned as an `xarray
+   e.g. ``obs_data.data``). This is returned as an `xarray
    Dataset <https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html>`__.
 -  ``metadata`` - The associated metadata (accessed using
-   e.g. ``obs_data.metadata``).
+   e.g. ``obs_data.metadata``).
 
 .. code:: ipython3
 

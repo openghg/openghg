@@ -33,7 +33,7 @@ import openghg
 # -- Project information -----------------------------------------------------
 
 project = "OpenGHG"
-copyright = "2022 OpenGHG development team"
+copyright = "2023 OpenGHG development team"
 author = "OpenGHG development team"
 
 # -- General configuration ---------------------------------------------------
@@ -268,15 +268,6 @@ def setup(app):
         app.add_directive("autoautosummary", AutoAutoSummary)
     except BaseException as e:
         raise e
-
-
-# Add processing of MyST Markdown notebooks
-nbsphinx_custom_formats = {
-    ".md": ["jupytext.reads", {"fmt": "mystnb"}],
-}
-
-nbsphinx_execute = "never"
-nb_execution_excludepatterns = ["*.md", "*.ipynb"]
 
 
 # Napoleon settings

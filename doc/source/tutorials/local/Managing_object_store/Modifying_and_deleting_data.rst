@@ -240,3 +240,17 @@ To make sure it's gone let's run the search again
     result.metadata
 
 An empty dictionary means no results, the deletion worked.
+
+Cleanup
+-------
+
+If you're finished with the data in this tutorial you can cleanup the
+tutorial object store using the ``clear_tutorial_store`` function.
+
+.. code:: ipython3
+
+    from openghg.tutorial import clear_tutorial_store
+
+.. code:: ipython3
+
+    clear_tutorial_store()

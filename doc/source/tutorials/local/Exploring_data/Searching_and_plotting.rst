@@ -147,3 +147,17 @@ function.
 .. code:: ipython3
 
     results.results
+
+Cleanup
+-------
+
+If you're finished with the data in this tutorial you can cleanup the
+tutorial object store using the ``clear_tutorial_store`` function.
+
+.. code:: ipython3
+
+    from openghg.tutorial import clear_tutorial_store
+
+.. code:: ipython3
+
+    clear_tutorial_store()

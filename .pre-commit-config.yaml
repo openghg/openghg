@@ -35,12 +35,3 @@ repos:
             types-requests,
             types-toml
           ]
-  - repo: https://github.com/kynan/nbstripout
-    rev: 0.6.0
-    hooks:
-      - id: nbstripout
-  - repo: https://github.com/mwouts/jupytext
-    rev: v1.14.1
-    hooks:
-    - id: jupytext
-      args: [--sync]

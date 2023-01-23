@@ -5,10 +5,10 @@ In addition to observation files, ancillary data can also be added to an
 openghg object store which can be used to perform analysis.
 
 At the moment, the accepted files include: - Footprints - regional
-outputs from an LPDM model (e.g. NAME) - Emissions/Flux - estimates of
+outputs from an LPDM model (e.g. NAME) - Emissions/Flux - estimates of
 species emissions within a region - Boundary conditions - vertical
 curtains at the boundary of a regional domain - Global CTM output
-(e.g. GEOSChem)
+(e.g. GEOSChem)
 
 These inputs must adhere to an expected format and are expected to
 minimally contain a fixed set of inputs.
@@ -18,6 +18,22 @@ standard methods from within the ACRG repository.*
 
    **NOTE:** Plots created within this tutorial may not show up on the
    online documentation version of this notebook.
+
+0. Using the tutorial object store
+----------------------------------
+
+To avoid adding the example data we use in this tutorial to your normal
+object store, we need to tell OpenGHG to use a separate sandboxed object
+store that we'll call the tutorial store. To do this we use the
+``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
+``OPENGHG_TUT_STORE`` environment variable for this session and won't
+affect your use of OpenGHG outside of this tutorial.
+
+.. code:: ipython3
+
+    from openghg.tutorial import use_tutorial_store
+
+    use_tutorial_store()
 
 1. Loading data sources into the object store
 ---------------------------------------------
@@ -280,4 +296,16 @@ Output for individual sources can also be created by specifying the
 
 *Plotting functions to be added for 2D / 3D data*
 
---------------
+4. Cleanup
+----------
+
+If you're finished with the data in this tutorial you can cleanup the
+tutorial object store using the ``clear_tutorial_store`` function.
+
+.. code:: ipython3
+
+    from openghg.tutorial import clear_tutorial_store
+
+.. code:: ipython3
+
+    clear_tutorial_store()

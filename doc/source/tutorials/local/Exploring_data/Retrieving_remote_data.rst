@@ -4,8 +4,24 @@ Retrieving data from remote archives
 This tutorial covers the retrieval of data from the ICOS Carbon Portal
 and the CEDA archives.
 
-ICOS
-----
+0. Using the tutorial object store
+----------------------------------
+
+To avoid adding the example data we use in this tutorial to your normal
+object store, we need to tell OpenGHG to use a separate sandboxed object
+store that we'll call the tutorial store. To do this we use the
+``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
+``OPENGHG_TUT_STORE`` environment variable for this session and won't
+affect your use of OpenGHG outside of this tutorial.
+
+.. code:: ipython3
+
+    from openghg.tutorial import use_tutorial_store
+
+    use_tutorial_store()
+
+1. ICOS
+-------
 
 It's easy to retrieve atmospheric gas measurements from the `ICOS Carbon
 Portal <https://www.icos-cp.eu/observations/carbon-portal>`__ using
@@ -144,8 +160,8 @@ Here you may notice we get a message telling us there is no new data to
 process, if you force a retrieval and there is no newer data you'll see
 this message.
 
-CEDA
-----
+2. CEDA
+-------
 
 To retrieve data from CEDA you can use the ``retrieve_ceda`` function
 from ``openghg.client``. This lets you pull down data from CEDA, process
@@ -194,7 +210,7 @@ using ``data`` and ``metadata``.
 Retrieving a second time
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The second time we (or another use) retrieves the data it will be pulled
+The second time we (or another user) retrieves the data it will be pulled
 from the object store, this should be faster than retrieving from CEDA.
 To get the same data again use the ``site``, ``species`` and ``inlet``
 arguments.
@@ -207,9 +223,16 @@ arguments.
 
     hfd_data2
 
-Cleanup the temporary object store
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3. Cleanup
+----------
+
+If you're finished with the data in this tutorial you can cleanup the
+tutorial object store using the ``clear_tutorial_store`` function.
 
 .. code:: ipython3
 
-    tmp_dir.cleanup()
+    from openghg.tutorial import clear_tutorial_store
+
+.. code:: ipython3
+
+    clear_tutorial_store()
