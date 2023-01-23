@@ -107,7 +107,16 @@ def data_read():
         period="monthly",
     )
 
-    # TODO: Make and add bc file for co2 which matched TEST domain
+    # CO2
+    bc_filepath1 = get_bc_datapath("co2_TEST_201407.nc")
+
+    BoundaryConditions.read_file(
+        filepath=bc_filepath1,
+        species="co2",
+        domain="TEST",
+        bc_input="MOZART",
+        period="monthly",
+    )
 
     # Footprint data
     # TAC footprint from 2012-08 - 2012-09 at 100m

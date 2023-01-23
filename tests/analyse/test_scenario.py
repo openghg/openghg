@@ -134,9 +134,6 @@ def test_scenario_infer_inputs_co2():
     Test ModelScenario can find data for co2 including specific co2 footprint.
     """
 
-    # TODO: Incorporate boundary conditions
-    # - need to add appropriate BC file on TEST domain
-
     start_date = "2014-07-01"
     end_date = "2014-08-01"
 
@@ -163,6 +160,7 @@ def test_scenario_infer_inputs_co2():
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None  # May need to be updated
+    assert model_scenario.bc is not None
 
     # Check attributes are being assigned correctly
     assert model_scenario.site == site
@@ -195,6 +193,10 @@ def test_scenario_infer_inputs_co2():
     flux_data = model_scenario.fluxes[source].data
     flux_time = flux_data["time"]
     assert flux_time[0] == Timestamp("2014-06-29T18:00:00")  # Test file - reduced time axis
+
+    # BC data
+    assert model_scenario.bc.metadata["species"] == "co2"
+    # TODO: Could add more checks here if needed.
 
 
 def test_scenario_flux_extend_co2():
