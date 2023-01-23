@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.1.g39371ad.dirty documentation</title>
+    <title>openghg.standardise.meta._attributes &#8212; OpenGHG 0+untagged.1.gb6542dc documentation</title>
   
   
   
@@ -26,7 +26,6 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
   
@@ -35,9 +34,6 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
-    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../../_static/doctools.js"></script>
     <script src="../../../../_static/sphinx_highlight.js"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -103,8 +99,9 @@
   
 
   
+    <img src="../../../../_static/./images/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../../_static/./images/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="Logo image">
   
-    <p class="title logo__title">OpenGHG 0+untagged.1.g39371ad.dirty documentation</p>
   
 </a>
     
@@ -348,7 +345,7 @@
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 
-<div class="viewcode-block" id="assign_attributes"><a class="viewcode-back" href="../../../../api/devapi_metadata.html#openghg.standardise.meta.assign_attributes">[docs]</a><span class="k">def</span> <span class="nf">assign_attributes</span><span class="p">(</span>
+<div class="viewcode-block" id="assign_attributes"><a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.meta.assign_attributes">[docs]</a><span class="k">def</span> <span class="nf">assign_attributes</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -405,7 +402,7 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-<div class="viewcode-block" id="get_attributes"><a class="viewcode-back" href="../../../../api/devapi_metadata.html#openghg.standardise.meta.get_attributes">[docs]</a><span class="k">def</span> <span class="nf">get_attributes</span><span class="p">(</span>
+<div class="viewcode-block" id="get_attributes"><a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.meta.get_attributes">[docs]</a><span class="k">def</span> <span class="nf">get_attributes</span><span class="p">(</span>
     <span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -634,7 +631,7 @@
     <span class="k">return</span> <span class="n">ds</span></div>
 
 
-<span class="k">def</span> <span class="nf">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="define_species_label"><a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.meta.define_species_label">[docs]</a><span class="k">def</span> <span class="nf">define_species_label</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Define standardised label to use for observation datasets.</span>
 <span class="sd">    This is defined using the &#39;site_info.json&#39; details with</span>
@@ -680,7 +677,7 @@
 
     <span class="n">species_label_lower</span> <span class="o">=</span> <span class="n">species_label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">species_label_lower</span><span class="p">,</span> <span class="n">species_label</span>
+    <span class="k">return</span> <span class="n">species_label_lower</span><span class="p">,</span> <span class="n">species_label</span></div>
 
 
 <span class="k">def</span> <span class="nf">_site_info_attributes</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
@@ -733,7 +730,7 @@
     <span class="k">return</span> <span class="n">attributes</span>
 
 
-<span class="k">def</span> <span class="nf">assign_flux_attributes</span><span class="p">(</span>
+<div class="viewcode-block" id="assign_flux_attributes"><a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.meta.assign_flux_attributes">[docs]</a><span class="k">def</span> <span class="nf">assign_flux_attributes</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -788,7 +785,7 @@
             <span class="o">**</span><span class="n">input_attributes</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">data</span>
+    <span class="k">return</span> <span class="n">data</span></div>
 
 
 <span class="k">def</span> <span class="nf">get_flux_attributes</span><span class="p">(</span>
@@ -961,7 +958,7 @@
     
 <p class="copyright">
 
-    &copy; Copyright 2022 OpenGHG development team.<br>
+    &copy; Copyright 2023 OpenGHG development team.<br>
 
 </p>
 
