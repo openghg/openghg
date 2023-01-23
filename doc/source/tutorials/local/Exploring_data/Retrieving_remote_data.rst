@@ -25,8 +25,8 @@ affect your use of OpenGHG outside of this tutorial.
 
 It's easy to retrieve atmospheric gas measurements from the `ICOS Carbon
 Portal <https://www.icos-cp.eu/observations/carbon-portal>`__ using
-OpenGHG. To do so we'll use the ``retrieve_icos`` function from
-``openghg.client``.
+OpenGHG. To do so we'll use the ``retrieve_atmospheric`` function from
+``openghg.retrieve.icos``.
 
 Checking available data
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,10 +40,10 @@ to find available data at a given site.
 
 .. container::
 
-Using ``retrieve_icos``
-~~~~~~~~~~~~~~~~~~~~~~~
+Using ``retrieve_atmospheric``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-First we'll import ``retrieve_icos`` from the ``client`` submodule, then
+First we'll import ``retrieve_atmospheric`` from the ``retrieve`` submodule, then
 we'll retrieve some data from Weybourne (**WAO**). The function will
 first check for any data from **WAO** already stored in the object
 store, if any is found it is returned, otherwise it'll retrieve the data
@@ -163,8 +163,8 @@ this message.
 2. CEDA
 -------
 
-To retrieve data from CEDA you can use the ``retrieve_ceda`` function
-from ``openghg.client``. This lets you pull down data from CEDA, process
+To retrieve data from CEDA you can use the ``retrieve_surface`` function
+from ``openghg.retrieve.ceda``. This lets you pull down data from CEDA, process
 it and store it in the object store. Once the data has been stored
 successive calls will retrieve the data from the object store.
 
@@ -179,7 +179,7 @@ To pull data from CEDA you'll first need to find the URL of the data. To
 do this use the `CEDA data browser <https://data.ceda.ac.uk/badc>`__ and
 copy the link to the file (right click on the download button and click
 copy link / copy link address). You can then pass that URL to
-``retrieve_ceda``, it will then download the data, do some
+``retrieve_surface``, it will then download the data, do some
 standardisation and checks and store it in the object store.
 
 We don't currently support downloading restricted data that requires a
