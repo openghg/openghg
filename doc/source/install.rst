@@ -76,11 +76,11 @@ Next install OpenGHG from our conda channel
 Configuration
 =============
 
-Once OpenGHG is installed use the `openghg-quickstart` command line tool to get your configuration file setup.
+Once OpenGHG is installed you can use `openghg` command line tool to get the configuration file setup.
 
 .. code-block:: bash
 
-    openghg-quickstart
+    openghg --quickstart
 
 You should now see text telling you you haven't got a configuration file (unless you've run the quickstart previously)
 and a prompt asking you enter a path for the object store. We'll just use the default path and hit return when prompted.

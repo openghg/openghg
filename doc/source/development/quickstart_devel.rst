@@ -115,7 +115,7 @@ To set the path to the object store you can run the following in the terminal
 
 .. code-block:: bash
 
-    openghg-quickstart
+    openghg --quickstart
 
 You should now see text telling you you haven't got a configuration file (unless you've run the quickstart previously)
 and a prompt asking you enter a path for the object store. We'll just use the default path and hit return when prompted.
