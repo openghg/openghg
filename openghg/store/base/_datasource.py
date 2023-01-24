@@ -586,9 +586,9 @@ class Datasource:
     @classmethod
     def load(
         cls: Type[T],
-        bucket: str = None,
-        uuid: str = None,
-        key: str = None,
+        bucket: Optional[str] = None,
+        uuid: Optional[str] = None,
+        key: Optional[str] = None,
         shallow: bool = False,
     ) -> T:
         """Load a Datasource from the object store either by name or UUID
