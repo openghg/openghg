@@ -8,7 +8,7 @@ from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_di
 from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
 from pandas import Timedelta, Timestamp
 from xarray import Dataset
-
+from helpers import clear_test_store
 
 def test_scenario_direct_objects():
     """
@@ -1372,3 +1372,25 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     expected_flux = 1 + 11  # All values should be 12
     output_flux = dataset_stacked.flux.values
     np.testing.assert_allclose(output_flux, expected_flux)
+
+
+def test_modelscenario_doesnt_error_empty_objectstore():
+    clear_test_store()
+
+    site = "TAC"
+    domain = "EUROPE"
+    species = "co2"
+    height = "185m"
+    source_natural = "natural"
+    start_date = "2017-07-01"
+    end_date = "2017-07-07"
+
+    scenario = ModelScenario(site=site,
+                        inlet=height,
+                        domain=domain,
+                        species=species,
+                        source=source_natural,
+                        start_date=start_date,
+                        end_date=end_date)
+
+    assert not scenario

@@ -217,6 +217,9 @@ class ModelScenario:
 
         # TODO: Check species, site etc. values align between inputs?
 
+    def __bool__(self) -> bool:
+        return bool(self.obs) or bool(self.footprint) or bool(self.fluxes) or bool(self.bc)
+
     def _get_data(self, keywords: ParamType, data_type: str) -> Any:
         """
         Use appropriate get function to search for data in object store.
@@ -337,7 +340,7 @@ class ModelScenario:
             if inlet is None and self.obs is not None:
                 inlet = self.obs.metadata["inlet"]
             elif inlet is None and height is not None:
-                inlet = height                        
+                inlet = height
                 inlet = clean_string(inlet)
                 inlet = format_inlet(inlet)
             else:
@@ -445,6 +448,9 @@ class ModelScenario:
 
         if self.fluxes is not None:
             if not hasattr(self, "species"):
+                if not self.fluxes:
+                    return
+
                 flux_values = list(self.fluxes.values())
                 flux_1 = flux_values[0]
                 self.species = flux_1.metadata["species"]
@@ -1429,10 +1435,18 @@ class ModelScenario:
         units_w = check_units(bc_data["vmr_w"], default=units_default)
 
         modelled_baseline = (
-            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(["height", "lon"])
-            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(["height", "lat"])
-            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(["height", "lon"])
-            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(["height", "lat"])
+            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(
+                ["height", "lon"]
+            )
+            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(
+                ["height", "lat"]
+            )
+            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(
+                ["height", "lon"]
+            )
+            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(
+                ["height", "lat"]
+            )
         )
 
         modelled_baseline.attrs["resample_to"] = resample_to
