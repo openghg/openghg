@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0+untagged.1.gf390179 documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0+untagged.1.g2fd1d9b documentation</title>
   
   
   
@@ -559,9 +559,6 @@
 
         <span class="c1"># TODO: Check species, site etc. values align between inputs?</span>
 
-    <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="n">ParamType</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Use appropriate get function to search for data in object store.</span>
@@ -680,7 +677,7 @@
             <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
             <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="n">height</span>
+                <span class="n">inlet</span> <span class="o">=</span> <span class="n">height</span>                        
                 <span class="n">inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
                 <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -788,9 +785,6 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;species&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">:</span>
-                    <span class="k">return</span>
-
                 <span class="n">flux_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
                 <span class="n">flux_1</span> <span class="o">=</span> <span class="n">flux_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="n">flux_1</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
@@ -1775,18 +1769,10 @@
         <span class="n">units_w</span> <span class="o">=</span> <span class="n">check_units</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_w&quot;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="n">units_default</span><span class="p">)</span>
 
         <span class="n">modelled_baseline</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_n&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_n&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_n</span> <span class="o">*</span> <span class="n">units_n</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_e&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_e&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_e</span> <span class="o">*</span> <span class="n">units_e</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_s&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_s&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_s</span> <span class="o">*</span> <span class="n">units_s</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_w&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_w&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_w</span> <span class="o">*</span> <span class="n">units_w</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_n&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_n&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_n</span> <span class="o">*</span> <span class="n">units_n</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_e&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_e&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_e</span> <span class="o">*</span> <span class="n">units_e</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">])</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_s&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_s&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_s</span> <span class="o">*</span> <span class="n">units_s</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_w&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_w&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_w</span> <span class="o">*</span> <span class="n">units_w</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">])</span>
         <span class="p">)</span>
 
         <span class="n">modelled_baseline</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;resample_to&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resample_to</span>
