@@ -19,7 +19,9 @@ logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 DataTypes = Union[BoundaryConditionsData, FluxData, FootprintData, ObsColumnData, ObsData]
-multDataTypes = Union[List[BoundaryConditionsData], List[FluxData], List[FootprintData], List[ObsColumnData], List[ObsData]]
+multDataTypes = Union[
+    List[BoundaryConditionsData], List[FluxData], List[FootprintData], List[ObsColumnData], List[ObsData]
+]
 
 
 def _get_generic(
@@ -241,7 +243,7 @@ def get_obs_surface_local(
     # to be within the metadata (for now)
     if inlet is None and height is not None:
         inlet = height
-    inlet = format_inlet(inlet)    
+    inlet = format_inlet(inlet)
 
     site_info = load_json(filename="site_info.json")
     site = site.upper()
@@ -251,20 +253,24 @@ def get_obs_surface_local(
         raise ValueError(f"No site called {site}, please enter a valid site name.")
 
     surface_keywords = {
-        "site":site,
-        "species":species,
-        "inlet":inlet,
-        "start_date":start_date,
-        "end_date":end_date,
-        "network":network,
-        "instrument":instrument,
-        "data_type":data_type,
+        "site": site,
+        "species": species,
+        "inlet": inlet,
+        "start_date": start_date,
+        "end_date": end_date,
+        "network": network,
+        "instrument": instrument,
+        "data_type": data_type,
     }
 
     # # Get the observation data
     # obs_results = search_surface(**surface_keywords)
-    retrieved_data = _get_generic(ambig_check_params=["inlet", "network", "instrument"],
-                                  **surface_keywords)  # type:ignore
+    retrieved_data = _get_generic(
+        bool=True,
+        elevate_inlets=False,
+        ambig_check_params=["inlet", "network", "instrument"],
+        **surface_keywords,  # type: ignore
+    )
 
     data = retrieved_data.data
 
@@ -432,8 +438,8 @@ def get_obs_column(
     network: Optional[str] = None,
     instrument: Optional[str] = None,
     platform: str = "satellite",
-    start_date: Optional[Timestamp] = None,
-    end_date: Optional[Timestamp] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
 ) -> ObsColumnData:
     """
     Extract available column data from the object store using keywords.
@@ -470,8 +476,8 @@ def get_flux(
     species: str,
     source: str,
     domain: str,
-    start_date: Optional[Timestamp] = None,
-    end_date: Optional[Timestamp] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
     time_resolution: Optional[str] = None,
 ) -> FluxData:
     """
@@ -515,8 +521,8 @@ def get_bc(
     species: str,
     domain: str,
     bc_input: Optional[str] = None,
-    start_date: Optional[Timestamp] = None,
-    end_date: Optional[Timestamp] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
 ) -> BoundaryConditionsData:
     """
     Get boundary conditions for a given species, domain and bc_input name.
@@ -548,12 +554,12 @@ def get_bc(
 def get_footprint(
     site: str,
     domain: str,
-    inlet: str = None,
-    height: str = None,
-    model: str = None,
-    start_date: Timestamp = None,
-    end_date: Timestamp = None,
-    species: str = None,
+    inlet: Optional[str] = None,
+    height: Optional[str] = None,
+    model: Optional[str] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
+    species: Optional[str] = None,
 ) -> FootprintData:
     """
     Get footprints from one site.
@@ -668,7 +674,7 @@ def _create_keyword_string(**kwargs: Any) -> str:
     This is used for printing details of keywords passed to the search functions.
     """
     used_keywords = {key: value for key, value in kwargs.items() if value is not None}
-    keyword_string = ', '.join([f"{key}='{value}'" for key, value in used_keywords.items()])
+    keyword_string = ", ".join([f"{key}='{value}'" for key, value in used_keywords.items()])
 
     return keyword_string
 
@@ -747,9 +753,9 @@ def _metadata_difference(
     return summary_difference
 
 
-def _metadata_difference_formatted(data: multDataTypes,
-                                   params: Optional[list] = None,
-                                   print_output: bool = True) -> str:
+def _metadata_difference_formatted(
+    data: multDataTypes, params: Optional[list] = None, print_output: bool = True
+) -> str:
     """
     Create formatted string for the difference in metadata between input objects.
 
