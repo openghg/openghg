@@ -155,14 +155,22 @@ class ObsSurface(BaseStore):
         # Test that the passed values are valid
         # Check validity of site, instrument, inlet etc in 'site_info.json'
         # Clean the strings
-        site = verify_site(site=site) if verify_site_code else clean_string(site)
+        if verify_site_code:
+            verified_site = verify_site(site=site)
+            if verified_site is None:
+                raise ValueError("Unable to validate site")
+            else:
+                site = verified_site
+        else:
+            site = clean_string(site)
+
         network = clean_string(network)
         instrument = clean_string(instrument)
         # sampling_period = clean_string(sampling_period)
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
-            inlet = height        
+            inlet = height
 
         # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
         inlet = clean_string(inlet)
