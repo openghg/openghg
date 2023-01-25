@@ -121,23 +121,24 @@ def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(filename: str, path: Optional[Union[str, Path]] = None) -> Dict:
+def load_json(filename: Optional[str] = None, path: Optional[Union[str, Path]] = None) -> Dict:
     """Returns a dictionary deserialised from JSON. This function only
     works for JSON files in the openghg/data directory.
 
     Args:
-        filename (str): Name of JSON file
-        path (str/Path): Path to filename. If not specified will extract default
-            path to openghg/data directory
+        filename: Name of JSON file
+        path: Path to file
     Returns:
         dict: Dictionary created from JSON
     """
     from json import load
 
-    if path is None:
+    if filename is not None:
         file_path = get_datapath(filename)
+    elif path is not None:
+        file_path = Path(path)
     else:
-        file_path = Path(path) / filename
+        raise ValueError("Please pass either filename or path")
 
     with open(file_path, "r") as f:
         data: Dict[str, Any] = load(f)

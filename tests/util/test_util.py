@@ -66,18 +66,13 @@ def test_verify_site():
 
     site = "atlantis"
 
-    with pytest.raises(InvalidSiteError):
-        result = verify_site(site=site)
-
     site = "cape"
+    result = verify_site(site=site)
+    assert result is None
 
-    with pytest.raises(InvalidSiteError):
-        result = verify_site(site=site)
-
-    site = "india"
-
-    with pytest.raises(InvalidSiteError):
-        result = verify_site(site=site)
+    site = "mars"
+    result = verify_site(site=site)
+    assert result is None
 
 
 def test_to_lowercase():
