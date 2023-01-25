@@ -3,13 +3,11 @@ import json
 import os
 import threading
 import warnings
-
-# from functools import lru_cache
 from pathlib import Path
 import shutil
 from typing import Dict, List, Optional, Union
 from uuid import uuid4
-
+import logging
 import pyvis
 from openghg.types import ObjectStoreError
 
@@ -29,6 +27,9 @@ __all__ = [
     "exists",
     "visualise_store",
 ]
+
+logger = logging.getLogger("openghg.objectstore")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def get_tutorial_store_path() -> Path:
@@ -278,13 +279,13 @@ def clear_object_store() -> None:
         None
     """
     local_store = str(get_local_objectstore_path())
-    print(f"You have requested to delete {local_store}.")
+    logger.warning(f"You have requested to delete {local_store}.")
 
     confirmed_path = input("Please enter the full path of the store: ")
     if confirmed_path == local_store:
         shutil.rmtree(local_store, ignore_errors=True)
     else:
-        print("Cannot delete object store.")
+        logger.warning("Cannot delete object store.")
 
 
 def query_store() -> Dict:

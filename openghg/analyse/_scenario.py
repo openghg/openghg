@@ -171,8 +171,8 @@ class ModelScenario:
             site = obs_metadata["site"]
             species = obs_metadata["species"]
             inlet = obs_metadata["inlet"]
-            print("Updating any inputs based on observation data")
-            print(f"site: {site}, species: {species}, inlet: {inlet}")
+            logger.info("Updating any inputs based on observation data")
+            logger.info(f"site: {site}, species: {species}, inlet: {inlet}")
 
         # Add footprint data (directly or through keywords)
         self.add_footprint(
@@ -249,19 +249,19 @@ class ModelScenario:
             except (SearchError, AttributeError):
                 num = i + 1
                 if num == num_checks:
-                    print(f"Unable to add {data_type} data based on keywords supplied.")
-                    print(" Inputs -")
+                    logger.info(f"Unable to add {data_type} data based on keywords supplied.")
+                    logger.info(" Inputs -")
                     for key, value in keyword_set.items():
-                        print(f" {key}: {value}")
+                        logger.info(f" {key}: {value}")
                     if search_fn is not None:
                         data_search = search_fn(**keyword_set)  # type:ignore
-                        print("---- Search results ---")
-                        print(f"Number of results returned: {len(data_search)}")
-                        print(data_search.results)
+                        logger.info("---- Search results ---")
+                        logger.info(f"Number of results returned: {len(data_search)}")
+                        logger.info(data_search.results)
                     print("\n")
                 data = None
             else:
-                print(f"Adding {data_type} to model scenario")
+                logger.info(f"Adding {data_type} to model scenario")
                 break
 
         return data
@@ -335,7 +335,7 @@ class ModelScenario:
             if inlet is None and self.obs is not None:
                 inlet = self.obs.metadata["inlet"]
             elif inlet is None and height is not None:
-                inlet = height                        
+                inlet = height
                 inlet = clean_string(inlet)
                 inlet = format_inlet(inlet)
             else:
@@ -506,9 +506,9 @@ class ModelScenario:
             if value is None:
                 missing.append(attr)
 
-                print(f"Must have {attr} data linked to this ModelScenario to run this function")
-                print("Include this by using the add function, with appropriate inputs:")
-                print("  ModelScenario.add_{attr}(...)")
+                logger.info(f"Must have {attr} data linked to this ModelScenario to run this function")
+                logger.info("Include this by using the add function, with appropriate inputs:")
+                logger.info("  ModelScenario.add_{attr}(...)")
 
         if missing:
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
@@ -595,7 +595,7 @@ class ModelScenario:
             obs_data_period_s = float(obs_attributes["sampling_period"])
         elif "sampling_period_estimate" in obs_attributes:
             estimate = obs_attributes["sampling_period_estimate"]
-            print(f"WARNING: Using estimated sampling period of {estimate}s for observational data")
+            logger.warning(f"Using estimated sampling period of {estimate}s for observational data")
             obs_data_period_s = float(estimate)
         else:
             infer_sampling_period = True
@@ -979,7 +979,7 @@ class ModelScenario:
 
         # Cache output from calculations
         if cache:
-            print("Caching calculated data")
+            logger.info("Caching calculated data")
             self.modelled_obs = modelled_obs
             # self.scenario[name] = modelled_obs
         else:
@@ -1224,7 +1224,7 @@ class ModelScenario:
         # Iterate through the time coord to get the total mf at each time step using the H back coord
         # at each release time we disaggregate the particles backwards over the previous 24hrs
         # The final value then contains the 29-day integrated residual footprints
-        print("Calculating modelled timeseries comparison:")
+        logger.info("Calculating modelled timeseries comparison:")
         iters = tqdm(time_array.values)
         for tt, time in enumerate(iters):
 
@@ -1427,10 +1427,18 @@ class ModelScenario:
         units_w = check_units(bc_data["vmr_w"], default=units_default)
 
         modelled_baseline = (
-            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(["height", "lon"])
-            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(["height", "lat"])
-            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(["height", "lon"])
-            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(["height", "lat"])
+            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(
+                ["height", "lon"]
+            )
+            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(
+                ["height", "lat"]
+            )
+            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(
+                ["height", "lon"]
+            )
+            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(
+                ["height", "lat"]
+            )
         )
 
         modelled_baseline.attrs["resample_to"] = resample_to
@@ -1439,7 +1447,7 @@ class ModelScenario:
 
         # Cache output from calculations
         if cache:
-            print("Caching calculated data")
+            logger.info("Caching calculated data")
             self.modelled_baseline = modelled_baseline
             # self.scenario[name] = modelled_obs
         else:
@@ -1511,7 +1519,7 @@ class ModelScenario:
                 name = modelled_baseline.name
                 combined_dataset = combined_dataset.assign({name: modelled_baseline})
             else:
-                print(
+                logger.warning(
                     "Unable to calculate baseline data. Add boundary conditions using ModelScenarion.add_bc(...) to do this."
                 )
 
@@ -1604,7 +1612,7 @@ class ModelScenario:
                 y_baseline = modelled_baseline.data
                 y_data = y_data + y_baseline
             else:
-                print("Unable to calculate baseline from boundary conditions")
+                logger.warning("Unable to calculate baseline from boundary conditions")
         elif baseline == "percentile":
             mf = obs.data["mf"]
             y_baseline = mf.quantile(1.0, dim="time").values

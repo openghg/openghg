@@ -1,8 +1,11 @@
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
-
+import logging
 from openghg.store.base import BaseStore
 from xarray import Dataset
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 __all__ = ["EulerianModel"]
 
@@ -86,7 +89,7 @@ class EulerianModel(BaseStore):
             else:
                 raise ValueError("Input data must contain one of '{coord_options}' co-ordinate")
             if name != coord:
-                print("Renaming co-ordinate '{coord}' to '{name}'")
+                logger.info("Renaming co-ordinate '{coord}' to '{name}'")
                 em_data = em_data.rename({coord: name})
 
         attrs = em_data.attrs
