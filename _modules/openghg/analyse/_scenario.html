@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0+untagged.1.gd3f3281 documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0+untagged.1.gfe0bd40 documentation</title>
   
   
   
@@ -513,8 +513,8 @@
             <span class="n">site</span> <span class="o">=</span> <span class="n">obs_metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
             <span class="n">species</span> <span class="o">=</span> <span class="n">obs_metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
             <span class="n">inlet</span> <span class="o">=</span> <span class="n">obs_metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updating any inputs based on observation data&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, species: </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">, inlet: </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Updating any inputs based on observation data&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, species: </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">, inlet: </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Add footprint data (directly or through keywords)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_footprint</span><span class="p">(</span>
@@ -591,19 +591,19 @@
             <span class="k">except</span> <span class="p">(</span><span class="n">SearchError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
                 <span class="n">num</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">num</span> <span class="o">==</span> <span class="n">num_checks</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to add </span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> data based on keywords supplied.&quot;</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; Inputs -&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to add </span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> data based on keywords supplied.&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; Inputs -&quot;</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">keyword_set</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">search_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">data_search</span> <span class="o">=</span> <span class="n">search_fn</span><span class="p">(</span><span class="o">**</span><span class="n">keyword_set</span><span class="p">)</span>  <span class="c1"># type:ignore</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---- Search results ---&quot;</span><span class="p">)</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of results returned: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_search</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="n">data_search</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;---- Search results ---&quot;</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of results returned: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_search</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">data_search</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Adding </span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> to model scenario&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Adding </span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> to model scenario&quot;</span><span class="p">)</span>
                 <span class="k">break</span>
 
         <span class="k">return</span> <span class="n">data</span>
@@ -677,7 +677,7 @@
             <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
             <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="n">height</span>                        
+                <span class="n">inlet</span> <span class="o">=</span> <span class="n">height</span>
                 <span class="n">inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
                 <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -848,9 +848,9 @@
             <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
 
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Must have </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> data linked to this ModelScenario to run this function&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Include this by using the add function, with appropriate inputs:&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  ModelScenario.add_</span><span class="si">{attr}</span><span class="s2">(...)&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Must have </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> data linked to this ModelScenario to run this function&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Include this by using the add function, with appropriate inputs:&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;  ModelScenario.add_</span><span class="si">{attr}</span><span class="s2">(...)&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing necessary </span><span class="si">{</span><span class="s1">&#39; and &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2"> data.&quot;</span><span class="p">)</span>
@@ -937,7 +937,7 @@
             <span class="n">obs_data_period_s</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">obs_attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period&quot;</span><span class="p">])</span>
         <span class="k">elif</span> <span class="s2">&quot;sampling_period_estimate&quot;</span> <span class="ow">in</span> <span class="n">obs_attributes</span><span class="p">:</span>
             <span class="n">estimate</span> <span class="o">=</span> <span class="n">obs_attributes</span><span class="p">[</span><span class="s2">&quot;sampling_period_estimate&quot;</span><span class="p">]</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: Using estimated sampling period of </span><span class="si">{</span><span class="n">estimate</span><span class="si">}</span><span class="s2">s for observational data&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using estimated sampling period of </span><span class="si">{</span><span class="n">estimate</span><span class="si">}</span><span class="s2">s for observational data&quot;</span><span class="p">)</span>
             <span class="n">obs_data_period_s</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">infer_sampling_period</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1321,7 +1321,7 @@
 
         <span class="c1"># Cache output from calculations</span>
         <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Caching calculated data&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Caching calculated data&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">modelled_obs</span> <span class="o">=</span> <span class="n">modelled_obs</span>
             <span class="c1"># self.scenario[name] = modelled_obs</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1566,7 +1566,7 @@
         <span class="c1"># Iterate through the time coord to get the total mf at each time step using the H back coord</span>
         <span class="c1"># at each release time we disaggregate the particles backwards over the previous 24hrs</span>
         <span class="c1"># The final value then contains the 29-day integrated residual footprints</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating modelled timeseries comparison:&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Calculating modelled timeseries comparison:&quot;</span><span class="p">)</span>
         <span class="n">iters</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">time_array</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">tt</span><span class="p">,</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">iters</span><span class="p">):</span>
 
@@ -1769,10 +1769,18 @@
         <span class="n">units_w</span> <span class="o">=</span> <span class="n">check_units</span><span class="p">(</span><span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_w&quot;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="n">units_default</span><span class="p">)</span>
 
         <span class="n">modelled_baseline</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_n&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_n&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_n</span> <span class="o">*</span> <span class="n">units_n</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
-            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_e&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_e&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_e</span> <span class="o">*</span> <span class="n">units_e</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">])</span>
-            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_s&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_s&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_s</span> <span class="o">*</span> <span class="n">units_s</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">])</span>
-            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_w&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_w&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_w</span> <span class="o">*</span> <span class="n">units_w</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">])</span>
+            <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_n&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_n&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_n</span> <span class="o">*</span> <span class="n">units_n</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_e&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_e&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_e</span> <span class="o">*</span> <span class="n">units_e</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_s&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_s&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_s</span> <span class="o">*</span> <span class="n">units_s</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">scenario</span><span class="p">[</span><span class="s2">&quot;particle_locations_w&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">bc_data</span><span class="p">[</span><span class="s2">&quot;vmr_w&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_w</span> <span class="o">*</span> <span class="n">units_w</span> <span class="o">/</span> <span class="n">output_units</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="p">)</span>
 
         <span class="n">modelled_baseline</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;resample_to&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resample_to</span>
@@ -1781,7 +1789,7 @@
 
         <span class="c1"># Cache output from calculations</span>
         <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Caching calculated data&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Caching calculated data&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">modelled_baseline</span> <span class="o">=</span> <span class="n">modelled_baseline</span>
             <span class="c1"># self.scenario[name] = modelled_obs</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1853,7 +1861,7 @@
                 <span class="n">name</span> <span class="o">=</span> <span class="n">modelled_baseline</span><span class="o">.</span><span class="n">name</span>
                 <span class="n">combined_dataset</span> <span class="o">=</span> <span class="n">combined_dataset</span><span class="o">.</span><span class="n">assign</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">modelled_baseline</span><span class="p">})</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="s2">&quot;Unable to calculate baseline data. Add boundary conditions using ModelScenarion.add_bc(...) to do this.&quot;</span>
                 <span class="p">)</span>
 
@@ -1946,7 +1954,7 @@
                 <span class="n">y_baseline</span> <span class="o">=</span> <span class="n">modelled_baseline</span><span class="o">.</span><span class="n">data</span>
                 <span class="n">y_data</span> <span class="o">=</span> <span class="n">y_data</span> <span class="o">+</span> <span class="n">y_baseline</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to calculate baseline from boundary conditions&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to calculate baseline from boundary conditions&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">baseline</span> <span class="o">==</span> <span class="s2">&quot;percentile&quot;</span><span class="p">:</span>
             <span class="n">mf</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span>
             <span class="n">y_baseline</span> <span class="o">=</span> <span class="n">mf</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
