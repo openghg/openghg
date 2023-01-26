@@ -128,10 +128,10 @@ class Emissions(BaseStore):
             "chunks": chunks,
         }
 
-        optional_keywords = {"database":database,
+        optional_keywords = {"database": database,
                              "database_version": database_version,
                              "model": model}
-        
+
         param.update(optional_keywords)
 
         emissions_data = parser_fn(**param)
@@ -145,7 +145,7 @@ class Emissions(BaseStore):
         for key, value in optional_keywords.items():
             if value is not None:
                 min_required.append(key)
-        
+
         required = tuple(min_required)
         lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
 

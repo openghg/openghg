@@ -52,7 +52,7 @@ def parse_openghg(
     metadata["domain"] = domain
     metadata["source"] = source
 
-    optional_keywords = {"database":database,
+    optional_keywords = {"database": database,
                          "database_version": database_version,
                          "model": model}
     for key, value in optional_keywords.items():
