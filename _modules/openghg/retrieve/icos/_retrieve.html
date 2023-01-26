@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0+untagged.1.gfe0bd40 documentation</title>
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0+untagged.1.gca7e57e documentation</title>
   
   
   
@@ -341,12 +341,9 @@
               
   <h1>Source code for openghg.retrieve.icos._retrieve</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_on_hub</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.retrieve&quot;</span><span class="p">)</span>
-<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
 <div class="viewcode-block" id="retrieve_atmospheric"><a class="viewcode-back" href="../../../../api/devapi_retrieve.html#openghg.retrieve.icos.retrieve_atmospheric">[docs]</a><span class="k">def</span> <span class="nf">retrieve_atmospheric</span><span class="p">(</span>
@@ -491,7 +488,7 @@
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">to_lowercase</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">data_level</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error: data level must be 1 or 2.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: data level must be 1 or 2.&quot;</span><span class="p">)</span>
 
     <span class="c1"># NOTE - we skip ranking here, will we be ranking ICOS data?</span>
     <span class="n">results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span>
@@ -581,7 +578,7 @@
     <span class="n">stat</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">stationId</span><span class="o">=</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">stat</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Please check you have passed a valid ICOS site.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please check you have passed a valid ICOS site.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">data_pids</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">data_level</span><span class="p">)</span>
@@ -600,7 +597,7 @@
         <span class="p">]</span>
 
     <span class="k">if</span> <span class="n">filtered_sources</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+        <span class="nb">print</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;No sources found for </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">. Please check with the ICOS Carbon Portal that this data is available.&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
