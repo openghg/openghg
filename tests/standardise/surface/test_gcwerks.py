@@ -186,12 +186,24 @@ def test_read_shangdianzi_ASM_inlet():
     data["nf3"][0] == pytest.approx(2.172)
     data["nf3"][-1] == pytest.approx(2.061)
 
+    expected_metadata = {
+        "instrument": "medusa",
+        "site": "sdz",
+        "network": "agage",
+        "species": "nf3",
+        "calibration_scale": "SIO-12",
+        "inlet": "80m",
+    }
+
+    metadata = res["nf3_80m"]["metadata"]
+
+    assert metadata.items() >= expected_metadata.items()
+
     # expected_metadata = {
     #     "instrument": "gcmd",
     #     "site": "thd",
     #     "network": "agage",
     #     "species": "ch4",
-    #     "units": "ppb",
     #     "scale": "Tohoku",
     #     "inlet": "10m",
     # }

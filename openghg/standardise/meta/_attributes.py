@@ -33,7 +33,7 @@ def assign_attributes(
         if network is None:
             network = gas_data.get("metadata", {}).get("network")
 
-        units = gas_data.get("metadata", {}).get("units")
+        # units = gas_data.get("metadata", {}).get("units")
         scale = gas_data.get("metadata", {}).get("calibration_scale")
 
         if sampling_period is None:
@@ -44,7 +44,7 @@ def assign_attributes(
             species=species,
             site=site,
             network=network,
-            units=units,
+            # units=units,
             scale=scale,
             global_attributes=site_attributes,
             sampling_period=sampling_period,
@@ -171,6 +171,17 @@ def get_attributes(
         global_attributes["sampling_period"] = str(sampling_period)
         global_attributes["sampling_period_unit"] = "s"
 
+    # Extract units if not defined
+    if units is None:
+        if "units" in global_attributes:
+            units = global_attributes["units"]
+            global_attributes.pop("units")
+        else:
+            try:
+                units = species_attrs[species_key]["units"]
+            except KeyError:
+                units = ""
+
     # Update the Dataset attributes
     ds.attrs.update(global_attributes)  # type: ignore
 
@@ -184,13 +195,6 @@ def get_attributes(
         name = species_attrs[species_key]["name"]
     except KeyError:
         name = species_label
-
-    # Extract units if not defined
-    if units is None:
-        try:
-            units = species_attrs[species_key]["units"]
-        except KeyError:
-            units = ""
 
     # Define label based on units
     if units in unit_mol_fraction:

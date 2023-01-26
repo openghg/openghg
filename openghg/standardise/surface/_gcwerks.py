@@ -423,7 +423,6 @@ def _split_species(
         for inlet, inlet_label in expected_inlets.items():
             # Create a copy of metadata for local modification
             spec_metadata = metadata.copy()
-            spec_metadata["units"] = units[spec]
             spec_metadata["calibration_scale"] = scale[spec]
 
             # If we've only got a single inlet
@@ -491,6 +490,11 @@ def _split_species(
                 site=site, inlet=inlet_label, instrument=instrument, gc_params=gc_params
             )
             attributes = attributes.copy()
+
+            # 26/01/2023: Add "units" to attributes (rather than metadata)
+            # - this can be used to add variable specific "units" attribute
+            #   and then be removed from the global attributes.
+            attributes["units"] = units[spec]
 
             # We want an xarray Dataset
             spec_data = spec_data.to_xarray()
