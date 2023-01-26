@@ -1,7 +1,7 @@
 import json
 import logging
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 from openghg.types import SearchError
 
 from openghg.dataobjects import (
@@ -35,7 +35,7 @@ def _get_generic(
         sort: Sort Dataset during recombination
         elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset
         ambig_check_params: Parameters to check and print if result is ambiguous.
-        kwargs: Search terms
+        kwargs: Additional search terms
     Returns:
         dataclass
     """
@@ -92,6 +92,7 @@ def get_obs_surface(
     calibration_scale: str = None,
     keep_missing: bool = False,
     skip_ranking: bool = False,
+    **kwargs: Any,
 ) -> Optional[ObsData]:
     """This is the equivalent of the get_obs function from the ACRG repository.
 
@@ -110,6 +111,7 @@ def get_obs_surface(
         network: Network for the site/instrument (must match number of sites).
         instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
+        kwargs: Additional search terms
     Returns:
         ObsData or None: ObsData object if data found, else None
     """
@@ -186,6 +188,7 @@ def get_obs_surface(
             calibration_scale=calibration_scale,
             keep_missing=keep_missing,
             skip_ranking=skip_ranking,
+            **kwargs,
         )
 
 
@@ -202,6 +205,7 @@ def get_obs_surface_local(
     calibration_scale: Optional[str] = None,
     keep_missing: Optional[bool] = False,
     skip_ranking: Optional[bool] = False,
+    **kwargs: Any,
 ) -> Optional[ObsData]:
     """This is the equivalent of the get_obs function from the ACRG repository.
 
@@ -222,6 +226,7 @@ def get_obs_surface_local(
         network: Network for the site/instrument (must match number of sites).
         instrument: Specific instrument for the sipte (must match number of sites).
         calibration_scale: Convert to this calibration scale
+        kwargs: Additional search terms
     Returns:
         ObsData or None: ObsData object if data found, else None
     """
@@ -260,6 +265,7 @@ def get_obs_surface_local(
         "instrument":instrument,
         "data_type":data_type,
     }
+    surface_keywords.update(kwargs)
 
     # # Get the observation data
     # obs_results = search_surface(**surface_keywords)
@@ -444,6 +450,7 @@ def get_obs_column(
     platform: str = "satellite",
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
+    **kwargs: Any,
 ) -> ObsColumnData:
     """
     Extract available column data from the object store using keywords.
@@ -455,6 +462,7 @@ def get_obs_column(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
+        kwargs: Additional search terms
     Returns:
         ObsColumnData: ObsColumnData object
     """
@@ -471,6 +479,7 @@ def get_obs_column(
         start_date=start_date,
         end_date=end_date,
         data_type="column",
+        **kwargs,
     )
 
     return ObsColumnData(data=obs_data.data, metadata=obs_data.metadata)
@@ -480,9 +489,13 @@ def get_flux(
     species: str,
     source: str,
     domain: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
     time_resolution: Optional[str] = None,
+    **kwargs: Any,
 ) -> FluxData:
     """
     The flux function reads in all flux files for the domain and species as an xarray Dataset.
@@ -496,6 +509,7 @@ def get_flux(
         start_date: Start date
         end_date: End date
         time_resolution: One of ["standard", "high"]
+        kwargs: Additional search terms
     Returns:
         FluxData: FluxData object
     """
@@ -504,10 +518,14 @@ def get_flux(
         species=species,
         source=source,
         domain=domain,
+        database=database,
+        database_version=database_version,
+        model=model,
         time_resolution=time_resolution,
         start_date=start_date,
         end_date=end_date,
         data_type="emissions",
+        **kwargs,
     )
 
     em_ds = em_data.data
@@ -527,6 +545,7 @@ def get_bc(
     bc_input: Optional[str] = None,
     start_date: Optional[Timestamp] = None,
     end_date: Optional[Timestamp] = None,
+    **kwargs: Any,
 ) -> BoundaryConditionsData:
     """
     Get boundary conditions for a given species, domain and bc_input name.
@@ -550,6 +569,7 @@ def get_bc(
         start_date=start_date,
         end_date=end_date,
         data_type="boundary_conditions",
+        **kwargs,
     )
 
     return BoundaryConditionsData(data=bc_data.data, metadata=bc_data.metadata)
@@ -564,6 +584,7 @@ def get_footprint(
     start_date: Timestamp = None,
     end_date: Timestamp = None,
     species: str = None,
+    **kwargs: Any,
 ) -> FootprintData:
     """
     Get footprints from one site.
@@ -583,11 +604,10 @@ def get_footprint(
                  if species needs a modified footprints from the typical 30-day
                  footprints appropriate for a long-lived species (like methane)
                  e.g. for high time resolution (co2) or is a short-lived species.
+        kwargs: Additional search terms
     Returns:
         FootprintData: FootprintData dataclass
     """
-    from openghg.retrieve import search
-    from openghg.store import recombine_datasets
     from openghg.util import clean_string, synonyms, format_inlet
 
     # Find the correct synonym for the passed species
@@ -609,6 +629,7 @@ def get_footprint(
         end_date=end_date,
         species=species,
         data_type="footprints",
+        **kwargs,
     )
 
     return FootprintData(data=fp_data.data, metadata=fp_data.metadata)

@@ -92,6 +92,9 @@ def test_read_file():
 
     assert metadata.items() >= expected_metadata.items()
 
+# TODO: Add test for adding additional years data - 2013 gpp cardomom
+# TODO: Add tests for adding new keywords to database
+
 
 def test_add_edgar_database():
     """Test edgar can be added to object store (default domain)"""
