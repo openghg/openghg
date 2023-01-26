@@ -445,20 +445,16 @@ class ModelScenario:
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
         if self.fluxes is not None:
-            if flux is not None:
+            if flux:
                 self.fluxes.update(flux)
         else:
-            self.fluxes = flux
+            # Flux can be None or empty dict.
+            if flux:
+                self.fluxes = flux
 
         if self.fluxes is not None:
             if not hasattr(self, "species"):
-                if not self.fluxes:
-                    return
-
                 flux_values = list(self.fluxes.values())
-
-                if not flux_values:
-                    return
 
                 flux_1 = flux_values[0]
                 self.species = flux_1.metadata["species"]
