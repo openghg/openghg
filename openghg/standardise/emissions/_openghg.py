@@ -8,6 +8,9 @@ def parse_openghg(
     source: str,
     domain: str,
     data_type: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -48,6 +51,14 @@ def parse_openghg(
     metadata["species"] = species
     metadata["domain"] = domain
     metadata["source"] = source
+
+    optional_keywords = {"database":database,
+                         "database_version": database_version,
+                         "model": model}
+    for key, value in optional_keywords.items():
+        if value is not None:
+            metadata[key] = value
+
     metadata["author"] = author_name
     metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
