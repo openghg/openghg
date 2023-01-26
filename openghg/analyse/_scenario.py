@@ -257,17 +257,15 @@ class ModelScenario:
                 num = i + 1
                 if num == num_checks:
                     print(f"Unable to add {data_type} data based on keywords supplied.")
-                    print(" Inputs - \n")
+                    print(" Inputs -")
                     for key, value in keyword_set.items():
-                        print(f" {key}: {value}\n")
+                        print(f" {key}: {value}")
                     if search_fn is not None:
                         data_search = search_fn(**keyword_set)  # type:ignore
                         print(f"---- Search results - {data_type} ---")
                         print(f"Number of results returned: {len(data_search)}")
-                        print(data_search)
-                        # TODO: If we can determine how many results are returned from search
-                        # we can use this to give better information about why no data has
-                        # been found for these inputs.
+                        print(data_search.results)
+                    print("\n")
                 data = None
             else:
                 print(f"Adding {data_type} to model scenario")
@@ -1188,7 +1186,7 @@ class ModelScenario:
 
         # Create times for matching to the flux
         full_dates = date_range(
-            date_start_back.values, date_end.values, freq=highest_resolution, closed="left"
+            date_start_back.values, date_end.values, freq=highest_resolution, inclusive="left"
         ).to_numpy()
 
         # Create low frequency flux data (monthly)

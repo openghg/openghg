@@ -266,7 +266,7 @@ def get_obs_surface_local(
     # # Get the observation data
     # obs_results = search_surface(**surface_keywords)
     retrieved_data = _get_generic(
-        bool=True,
+        sort=True,
         elevate_inlets=False,
         ambig_check_params=["inlet", "network", "instrument"],
         **surface_keywords,  # type: ignore
@@ -279,14 +279,24 @@ def get_obs_surface_local(
         retrieved_data.metadata["inlet"] = "multiple"
 
     if start_date is not None and end_date is not None:
-        start_date_tzaware = timestamp_tzaware(start_date)
-        end_date_tzaware = timestamp_tzaware(end_date)
-        end_date_tzaware_exclusive = end_date_tzaware - Timedelta(
-            1, unit="nanosecond"
-        )  # Deduct 1 ns to make the end day (date) exclusive.
+        
+        # Check if underlying data is timezone aware.
+        data_time_index = data.indexes["time"]
+        tzinfo = data_time_index.tzinfo
+
+        if tzinfo:
+            start_date_filter = timestamp_tzaware(start_date)
+            end_date_filter = timestamp_tzaware(end_date)
+        else:
+            start_date_filter = Timestamp(start_date)
+            end_date_filter = Timestamp(end_date)
+
+        end_date_filter_exclusive = end_date_filter - Timedelta(
+                1, unit="nanosecond"
+            )  # Deduct 1 ns to make the end day (date) exclusive.
 
         # Slice the data to only cover the dates we're interested in
-        data = data.sel(time=slice(start_date_tzaware, end_date_tzaware_exclusive))
+        data = data.sel(time=slice(start_date_filter, end_date_filter_exclusive))
 
     try:
         start_date_data = timestamp_tzaware(data.time[0].values)
