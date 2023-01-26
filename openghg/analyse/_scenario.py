@@ -89,7 +89,7 @@ class ModelScenario:
     """
 
     def __bool__(self) -> bool:
-        return bool(self.obs) and bool(self.footprint) and bool(self.fluxes) and bool(self.bc)
+        return bool(self.obs) or bool(self.footprint) or bool(self.fluxes) or bool(self.bc)
 
     def __init__(
         self,
@@ -219,9 +219,6 @@ class ModelScenario:
         self.flux_stacked: Optional[Dataset] = None
 
         # TODO: Check species, site etc. values align between inputs?
-
-    def __bool__(self) -> bool:
-        return bool(self.obs) or bool(self.footprint) or bool(self.fluxes) or bool(self.bc)
 
     def _get_data(self, keywords: ParamType, data_type: str) -> Any:
         """
