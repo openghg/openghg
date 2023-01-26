@@ -103,7 +103,7 @@ def test_icos_retrieve_and_store(mocker):
         "instrument": "ftir",
         "site": "wao",
         "measurement_type": "co2 mixing ratio (dry mole fraction)",
-        "units": "µmol mol-1",
+        # "units": "µmol mol-1",  # units removed from metadata / global attributes
         "sampling_height": "10m",
         "sampling_height_units": "metres",
         "inlet": "10m",
