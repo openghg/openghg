@@ -220,6 +220,9 @@ class ModelScenario:
 
         # TODO: Check species, site etc. values align between inputs?
 
+    def __bool__(self) -> bool:
+        return bool(self.obs) or bool(self.footprint) or bool(self.fluxes) or bool(self.bc)
+
     def _get_data(self, keywords: ParamType, data_type: str) -> Any:
         """
         Use appropriate get function to search for data in object store.
@@ -449,6 +452,9 @@ class ModelScenario:
 
         if self.fluxes is not None:
             if not hasattr(self, "species"):
+                if not self.fluxes:
+                    return
+
                 flux_values = list(self.fluxes.values())
 
                 if not flux_values:
