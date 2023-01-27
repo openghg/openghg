@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.g76cdbb2 documentation</title>
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.ge36e8a4 documentation</title>
   
   
   
@@ -785,16 +785,14 @@ format using the <code class="docutils literal notranslate"><span class="pre">.s
 </pre></div>
 </div>
 <p>This tells us that the netcdf input for “emissions” should contain:</p>
-<ul>
+<ul class="simple">
 <li><p>Data variables:</p>
-<blockquote>
-<div><ul class="simple">
+<ul>
 <li><p>“flux” data variable with dimensions of (“time”, “lat”, “lon”)</p></li>
 </ul>
-</div></blockquote>
 </li>
 <li><p>Data types:</p>
-<ul class="simple">
+<ul>
 <li><p>“flux”, “lat”, “lon” variables / coordinates should be float type - “time” coordinate should be</p></li>
 </ul>
 </li>
@@ -802,15 +800,13 @@ format using the <code class="docutils literal notranslate"><span class="pre">.s
 <p>datetime64</p>
 <p>Similarly for <code class="docutils literal notranslate"><span class="pre">Footprints</span></code>, as described in the standardisations
 section, there are a few different input options available:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>inert species (default - integrated footprint)</p></li>
 <li><p>high spatial resolution (<code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code> flag)</p></li>
 <li><p>high time resolution (<code class="docutils literal notranslate"><span class="pre">high_time_res</span></code> flag) (e.g. for carbon dioxide)</p></li>
 <li><p>short-lived species (<code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code> flag)</p></li>
 <li><p>particle locations (<code class="docutils literal notranslate"><span class="pre">particle_locations</span></code> - default is True, expect to be included)</p></li>
 </ul>
-</div></blockquote>
 <section id="default-inert-footprint-format">
 <h3>Default (inert) footprint format<a class="headerlink" href="#default-inert-footprint-format" title="Permalink to this heading">#</a></h3>
 <p>These can be shown by passing keywords to the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method. For
