@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.gddf09e9 documentation</title>
+    <title>openghg.retrieve._access &#8212; OpenGHG 0+untagged.1.gb3a8344 documentation</title>
   
   
   
@@ -343,7 +343,7 @@
 <span></span><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">SearchError</span>
 
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="p">(</span>
@@ -361,9 +361,7 @@
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 <span class="n">DataTypes</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">,</span> <span class="n">FluxData</span><span class="p">,</span> <span class="n">FootprintData</span><span class="p">,</span> <span class="n">ObsColumnData</span><span class="p">,</span> <span class="n">ObsData</span><span class="p">]</span>
-<span class="n">multDataTypes</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
-    <span class="n">List</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FluxData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsColumnData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]</span>
-<span class="p">]</span>
+<span class="n">multDataTypes</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BoundaryConditionsData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FluxData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsColumnData</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]]</span>
 
 
 <span class="k">def</span> <span class="nf">_get_generic</span><span class="p">(</span>
@@ -379,7 +377,7 @@
 <span class="sd">        sort: Sort Dataset during recombination</span>
 <span class="sd">        elevate_inlets: Elevate the inlet attribute to be a variable within the Dataset</span>
 <span class="sd">        ambig_check_params: Parameters to check and print if result is ambiguous.</span>
-<span class="sd">        kwargs: Search terms</span>
+<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dataclass</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -436,6 +434,7 @@
     <span class="n">calibration_scale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">keep_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">skip_ranking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
 
@@ -454,6 +453,7 @@
 <span class="sd">        network: Network for the site/instrument (must match number of sites).</span>
 <span class="sd">        instrument: Specific instrument for the sipte (must match number of sites).</span>
 <span class="sd">        calibration_scale: Convert to this calibration scale</span>
+<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsData or None: ObsData object if data found, else None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -530,6 +530,7 @@
             <span class="n">calibration_scale</span><span class="o">=</span><span class="n">calibration_scale</span><span class="p">,</span>
             <span class="n">keep_missing</span><span class="o">=</span><span class="n">keep_missing</span><span class="p">,</span>
             <span class="n">skip_ranking</span><span class="o">=</span><span class="n">skip_ranking</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -546,6 +547,7 @@
     <span class="n">calibration_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">keep_missing</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">skip_ranking</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This is the equivalent of the get_obs function from the ACRG repository.</span>
 
@@ -566,6 +568,7 @@
 <span class="sd">        network: Network for the site/instrument (must match number of sites).</span>
 <span class="sd">        instrument: Specific instrument for the sipte (must match number of sites).</span>
 <span class="sd">        calibration_scale: Convert to this calibration scale</span>
+<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsData or None: ObsData object if data found, else None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -585,7 +588,7 @@
     <span class="c1"># to be within the metadata (for now)</span>
     <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="n">height</span>
-    <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+    <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>    
 
     <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;site_info.json&quot;</span><span class="p">)</span>
     <span class="n">site</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -595,24 +598,21 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No site called </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, please enter a valid site name.&quot;</span><span class="p">)</span>
 
     <span class="n">surface_keywords</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
-        <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
-        <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">inlet</span><span class="p">,</span>
-        <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">start_date</span><span class="p">,</span>
-        <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">end_date</span><span class="p">,</span>
-        <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
-        <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">instrument</span><span class="p">,</span>
-        <span class="s2">&quot;data_type&quot;</span><span class="p">:</span> <span class="n">data_type</span><span class="p">,</span>
+        <span class="s2">&quot;site&quot;</span><span class="p">:</span><span class="n">site</span><span class="p">,</span>
+        <span class="s2">&quot;species&quot;</span><span class="p">:</span><span class="n">species</span><span class="p">,</span>
+        <span class="s2">&quot;inlet&quot;</span><span class="p">:</span><span class="n">inlet</span><span class="p">,</span>
+        <span class="s2">&quot;start_date&quot;</span><span class="p">:</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="s2">&quot;end_date&quot;</span><span class="p">:</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="s2">&quot;network&quot;</span><span class="p">:</span><span class="n">network</span><span class="p">,</span>
+        <span class="s2">&quot;instrument&quot;</span><span class="p">:</span><span class="n">instrument</span><span class="p">,</span>
+        <span class="s2">&quot;data_type&quot;</span><span class="p">:</span><span class="n">data_type</span><span class="p">,</span>
     <span class="p">}</span>
+    <span class="n">surface_keywords</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="c1"># # Get the observation data</span>
     <span class="c1"># obs_results = search_surface(**surface_keywords)</span>
-    <span class="n">retrieved_data</span> <span class="o">=</span> <span class="n">_get_generic</span><span class="p">(</span>
-        <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">elevate_inlets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">ambig_check_params</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">,</span> <span class="s2">&quot;instrument&quot;</span><span class="p">],</span>
-        <span class="o">**</span><span class="n">surface_keywords</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-    <span class="p">)</span>
+    <span class="n">retrieved_data</span> <span class="o">=</span> <span class="n">_get_generic</span><span class="p">(</span><span class="n">ambig_check_params</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">,</span> <span class="s2">&quot;instrument&quot;</span><span class="p">],</span>
+                                  <span class="o">**</span><span class="n">surface_keywords</span><span class="p">)</span>  <span class="c1"># type:ignore</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">retrieved_data</span><span class="o">.</span><span class="n">data</span>
 
@@ -790,8 +790,9 @@
     <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
-    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsColumnData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract available column data from the object store using keywords.</span>
@@ -803,6 +804,7 @@
 <span class="sd">        start_date: Start date</span>
 <span class="sd">        end_date: End date</span>
 <span class="sd">        time_resolution: One of [&quot;standard&quot;, &quot;high&quot;]</span>
+<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsColumnData: ObsColumnData object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -819,6 +821,7 @@
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;column&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ObsColumnData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">obs_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
@@ -828,9 +831,13 @@
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">database</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">database_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FluxData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The flux function reads in all flux files for the domain and species as an xarray Dataset.</span>
@@ -844,6 +851,7 @@
 <span class="sd">        start_date: Start date</span>
 <span class="sd">        end_date: End date</span>
 <span class="sd">        time_resolution: One of [&quot;standard&quot;, &quot;high&quot;]</span>
+<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        FluxData: FluxData object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -852,10 +860,14 @@
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+        <span class="n">database_version</span><span class="o">=</span><span class="n">database_version</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">time_resolution</span><span class="o">=</span><span class="n">time_resolution</span><span class="p">,</span>
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;emissions&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">em_ds</span> <span class="o">=</span> <span class="n">em_data</span><span class="o">.</span><span class="n">data</span>
@@ -873,8 +885,9 @@
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bc_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryConditionsData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get boundary conditions for a given species, domain and bc_input name.</span>
@@ -898,6 +911,7 @@
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;boundary_conditions&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">BoundaryConditionsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">bc_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">bc_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
@@ -906,12 +920,13 @@
 <div class="viewcode-block" id="get_footprint"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.get_footprint">[docs]</a><span class="k">def</span> <span class="nf">get_footprint</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FootprintData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get footprints from one site.</span>
@@ -931,11 +946,10 @@
 <span class="sd">                 if species needs a modified footprints from the typical 30-day</span>
 <span class="sd">                 footprints appropriate for a long-lived species (like methane)</span>
 <span class="sd">                 e.g. for high time resolution (co2) or is a short-lived species.</span>
+<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        FootprintData: FootprintData dataclass</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
-    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">recombine_datasets</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">format_inlet</span>
 
     <span class="c1"># Find the correct synonym for the passed species</span>
@@ -957,6 +971,7 @@
         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">FootprintData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">fp_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">fp_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
@@ -1026,7 +1041,7 @@
 <span class="sd">    This is used for printing details of keywords passed to the search functions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">used_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
-    <span class="n">keyword_string</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=&#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39;&quot;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">used_keywords</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+    <span class="n">keyword_string</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">=&#39;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39;&quot;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">used_keywords</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
 
     <span class="k">return</span> <span class="n">keyword_string</span>
 
@@ -1105,9 +1120,9 @@
     <span class="k">return</span> <span class="n">summary_difference</span>
 
 
-<span class="k">def</span> <span class="nf">_metadata_difference_formatted</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">multDataTypes</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">print_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_metadata_difference_formatted</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">multDataTypes</span><span class="p">,</span>
+                                   <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">print_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create formatted string for the difference in metadata between input objects.</span>
 
