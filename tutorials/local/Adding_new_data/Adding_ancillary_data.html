@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.ge36e8a4 documentation</title>
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.g52a6098 documentation</title>
   
   
   
@@ -821,8 +821,7 @@ footprint for an inert species:</p>
 </div>
 <p>This tells us that the default netcdf input for “footprints” should
 contain:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>Data variables:</p>
 <ul>
 <li><p>“fp” data variable with dimensions of (“time”, “lat”, “lon”)</p></li>
@@ -838,7 +837,6 @@ contain:</p>
 </ul>
 </li>
 </ul>
-</div></blockquote>
 <p>The “fp” data variable describes the sensivity map within the regional
 domain. The “particle_locations_*” variables describe the senitivity
 map at each of the ordinal boundaries of the domain. Setting the
@@ -859,8 +857,7 @@ flag:</p>
 </div>
 <p>This tells us that, in addition to the “default” variables, for
 short-lived species there also must be:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>Additional data variables:</p>
 <ul>
 <li><p>“mean_age_particles_n”, “mean_age_particles_s” with dimensions of (“time”, “lon”, “height”)</p></li>
@@ -873,7 +870,6 @@ short-lived species there also must be:</p>
 </ul>
 </li>
 </ul>
-</div></blockquote>
 <p>Similiarly for the <code class="docutils literal notranslate"><span class="pre">high_time_res</span></code> and <code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code> flags to
 the <code class="docutils literal notranslate"><span class="pre">Footprints.schema()</span></code> method, these require additional variables
 within the input footprint files.</p>
