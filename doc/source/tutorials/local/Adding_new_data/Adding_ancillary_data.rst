@@ -482,7 +482,7 @@ This tells us that the netcdf input for “emissions” should contain:
 
 - Data variables:
  
-   - “flux” data variable with dimensions of (“time”, “lat”, “lon”)
+  - “flux” data variable with dimensions of (“time”, “lat”, “lon”)
 
 - Data types:
 
@@ -495,11 +495,11 @@ Footprints
 Similarly for ``Footprints``, as described in the standardisations
 section, there are a few different input options available:
 
- - inert species (default - integrated footprint)
- - high spatial resolution (``high_spatial_res`` flag)
- - high time resolution (``high_time_res`` flag) (e.g. for carbon dioxide)
- - short-lived species (``short_lifetime`` flag)
- - particle locations (``particle_locations`` - default is True, expect to be included)
+- inert species (default - integrated footprint)
+- high spatial resolution (``high_spatial_res`` flag)
+- high time resolution (``high_time_res`` flag) (e.g. for carbon dioxide)
+- short-lived species (``short_lifetime`` flag)
+- particle locations (``particle_locations`` - default is True, expect to be included)
 
 Default (inert) footprint format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
