@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.gb3a8344 documentation</title>
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.g50071b2 documentation</title>
   
   
   
@@ -795,14 +795,25 @@ footprint for an inert species:</p>
 </pre></div>
 </div>
 <p>This tells us that the default netcdf input for “footprints” should
-contain: - Data variables: - “fp” data variable with dimensions of
-(“time”, “lat”, “lon”) - “particle_locations_n”, “particle_locations_s”
-with dimensions of (“time”, “lon”, “height”) - “particle_locations_e”,
-“particle_locations_w” with dimensions of (“time”, “lat”, “height”) -
-Data types: - “fp”, “lat”, “lon”, “height” variables / coordinates
-should be float type - “particle_locations_n”, “particle_locations_e”,
-“particle_locations_s”, “particle_locations_w” variables should also be
-float type - “time” coordinate should be datetime64</p>
+contain:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Data variables:</p>
+<ul>
+<li><p>“fp” data variable with dimensions of (“time”, “lat”, “lon”)</p></li>
+<li><p>“particle_locations_n”, “particle_locations_s” with dimensions of (“time”, “lon”, “height”)</p></li>
+<li><p>“particle_locations_e”, “particle_locations_w” with dimensions of (“time”, “lat”, “height”)</p></li>
+</ul>
+</li>
+<li><p>Data types:</p>
+<ul>
+<li><p>“fp”, “lat”, “lon”, “height” variables / coordinates should be float type</p></li>
+<li><p>“particle_locations_n”, “particle_locations_e”, “particle_locations_s”, “particle_locations_w” variables should also be float type</p></li>
+<li><p>“time” coordinate should be datetime64</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
 <p>The “fp” data variable describes the sensivity map within the regional
 domain. The “particle_locations_*” variables describe the senitivity
 map at each of the ordinal boundaries of the domain. Setting the
@@ -822,11 +833,22 @@ flag:</p>
 </pre></div>
 </div>
 <p>This tells us that, in addition to the “default” variables, for
-short-lived species there also must be: - Additional data variables: -
-“mean_age_particles_n”, “mean_age_particles_s” with dimensions of
-(“time”, “lon”, “height”) - “mean_age_particles_e”,
-“mean_age_particles_w” with dimensions of (“time”, “lat”, “height”) -
-Data types: - all new variables should be float type</p>
+short-lived species there also must be:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Additional data variables:</p>
+<ul>
+<li><p>“mean_age_particles_n”, “mean_age_particles_s” with dimensions of (“time”, “lon”, “height”)</p></li>
+<li><p>“mean_age_particles_e”, “mean_age_particles_w” with dimensions of (“time”, “lat”, “height”)</p></li>
+</ul>
+</li>
+<li><p>Data types:</p>
+<ul>
+<li><p>all new variables should be float type</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
 <p>Similiarly for the <code class="docutils literal notranslate"><span class="pre">high_time_res</span></code> and <code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code> flags to
 the <code class="docutils literal notranslate"><span class="pre">Footprints.schema()</span></code> method, these require additional variables
 within the input footprint files.</p>

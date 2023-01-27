@@ -498,14 +498,19 @@ footprint for an inert species:
 
 
 This tells us that the default netcdf input for “footprints” should
-contain: - Data variables: - “fp” data variable with dimensions of
-(“time”, “lat”, “lon”) - “particle_locations_n”, “particle_locations_s”
-with dimensions of (“time”, “lon”, “height”) - “particle_locations_e”,
-“particle_locations_w” with dimensions of (“time”, “lat”, “height”) -
-Data types: - “fp”, “lat”, “lon”, “height” variables / coordinates
-should be float type - “particle_locations_n”, “particle_locations_e”,
-“particle_locations_s”, “particle_locations_w” variables should also be
-float type - “time” coordinate should be datetime64
+contain:
+
+ - Data variables:
+ 
+   - “fp” data variable with dimensions of (“time”, “lat”, “lon”)
+   - “particle_locations_n”, “particle_locations_s” with dimensions of (“time”, “lon”, “height”)
+   - “particle_locations_e”, “particle_locations_w” with dimensions of (“time”, “lat”, “height”)
+
+ - Data types:
+ 
+   - “fp”, “lat”, “lon”, “height” variables / coordinates should be float type
+   - “particle_locations_n”, “particle_locations_e”, “particle_locations_s”, “particle_locations_w” variables should also be float type
+   - “time” coordinate should be datetime64
 
 The “fp” data variable describes the sensivity map within the regional
 domain. The “particle_locations\_\*” variables describe the senitivity
@@ -535,11 +540,16 @@ flag:
 
 
 This tells us that, in addition to the “default” variables, for
-short-lived species there also must be: - Additional data variables: -
-“mean_age_particles_n”, “mean_age_particles_s” with dimensions of
-(“time”, “lon”, “height”) - “mean_age_particles_e”,
-“mean_age_particles_w” with dimensions of (“time”, “lat”, “height”) -
-Data types: - all new variables should be float type
+short-lived species there also must be:
+
+ - Additional data variables:
+ 
+   - “mean_age_particles_n”, “mean_age_particles_s” with dimensions of (“time”, “lon”, “height”)
+   - “mean_age_particles_e”, “mean_age_particles_w” with dimensions of (“time”, “lat”, “height”)
+ 
+ - Data types:
+ 
+   - all new variables should be float type
 
 Similiarly for the ``high_time_res`` and ``high_spatial_res`` flags to
 the ``Footprints.schema()`` method, these require additional variables
