@@ -290,6 +290,9 @@ def standardise_flux(
     species: str,
     source: str,
     domain: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -331,6 +334,13 @@ def standardise_flux(
             "period": period,
         }
 
+        optional_keywords = {"database": database,
+                            "database_version": database_version,
+                            "model": model}
+        for key, value in optional_keywords.items():
+            if value is not None:
+                metadata[key] = value
+
         metadata = {k: v for k, v in metadata.items()}
 
         to_post = create_post_dict(
@@ -346,6 +356,9 @@ def standardise_flux(
             species=species,
             source=source,
             domain=domain,
+            database=database,
+            database_version=database_version,
+            model=model,
             high_time_resolution=high_time_resolution,
             period=period,
             continuous=continuous,
