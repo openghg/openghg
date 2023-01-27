@@ -13,6 +13,10 @@ Adding new data
 
    local/Adding_new_data/Adding_observation_data
 
+.. toctree::
+   :maxdepth: 1
+
+   local/Adding_new_data/Adding_ancillary_data
 
 Analysing data
 ---------------
