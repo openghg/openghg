@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.g50071b2 documentation</title>
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.g76cdbb2 documentation</title>
   
   
   
@@ -393,8 +393,22 @@ to minimally contain a fixed set of inputs.</p>
 transformation functions available to create and store data in this
 format directly. See the ``openghg.transform`` sub-module for options.
 To be expanded upon.</em></p>
+<section id="using-the-tutorial-object-store">
+<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Permalink to this heading">#</a></h2>
+<p>To avoid adding the example data we use in this tutorial to your normal
+object store, we need to tell OpenGHG to use a separate sandboxed object
+store that we’ll call the tutorial store. To do this we use the
+<code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
+<code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
+affect your use of OpenGHG outside of this tutorial.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+
+<span class="n">use_tutorial_store</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 <section id="adding-and-standardising-data">
-<h2>Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Permalink to this heading">#</a></h2>
+<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Permalink to this heading">#</a></h2>
 <p>Data can be added to the object store using appropriate functions from
 the <code class="docutils literal notranslate"><span class="pre">openghg.standardise</span></code> sub module. This includes:</p>
 <ul class="simple">
@@ -751,7 +765,7 @@ include other separators.</p>
 </section>
 </section>
 <section id="input-format">
-<h2>Input format<a class="headerlink" href="#input-format" title="Permalink to this heading">#</a></h2>
+<h2>2. Input format<a class="headerlink" href="#input-format" title="Permalink to this heading">#</a></h2>
 <p>For each of these data types there is an associated object from the
 <code class="docutils literal notranslate"><span class="pre">openghg.store</span></code> sub-module:</p>
 <ul class="simple">
@@ -770,18 +784,33 @@ format using the <code class="docutils literal notranslate"><span class="pre">.s
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>DataSchema(data_vars={&#39;flux&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;lon&#39;)}, dtypes={&#39;lat&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;lon&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;time&#39;: &lt;class &#39;numpy.datetime64&#39;&gt;, &#39;flux&#39;: &lt;class &#39;numpy.floating&#39;&gt;}, dims=None)
 </pre></div>
 </div>
-<p>This tells us that the netcdf input for “emissions” should contain: -
-Data variables: - “flux” data variable with dimensions of (“time”,
-“lat”, “lon”) - Data types: - “flux”, “lat”, “lon” variables /
-coordinates should be float type - “time” coordinate should be
-datetime64</p>
+<p>This tells us that the netcdf input for “emissions” should contain:</p>
+<ul>
+<li><p>Data variables:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>“flux” data variable with dimensions of (“time”, “lat”, “lon”)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Data types:</p>
+<ul class="simple">
+<li><p>“flux”, “lat”, “lon” variables / coordinates should be float type - “time” coordinate should be</p></li>
+</ul>
+</li>
+</ul>
+<p>datetime64</p>
 <p>Similarly for <code class="docutils literal notranslate"><span class="pre">Footprints</span></code>, as described in the standardisations
-section, there are a few different input options available: - inert
-species (default - integrated footprint) - high spatial resolution
-(<code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code> flag) - high time resolution (<code class="docutils literal notranslate"><span class="pre">high_time_res</span></code>
-flag) (e.g. for carbon dioxide) - short-lived species
-(<code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code> flag) - particle locations (<code class="docutils literal notranslate"><span class="pre">particle_locations</span></code> -
-default is True, expect to be included)</p>
+section, there are a few different input options available:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>inert species (default - integrated footprint)</p></li>
+<li><p>high spatial resolution (<code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code> flag)</p></li>
+<li><p>high time resolution (<code class="docutils literal notranslate"><span class="pre">high_time_res</span></code> flag) (e.g. for carbon dioxide)</p></li>
+<li><p>short-lived species (<code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code> flag)</p></li>
+<li><p>particle locations (<code class="docutils literal notranslate"><span class="pre">particle_locations</span></code> - default is True, expect to be included)</p></li>
+</ul>
+</div></blockquote>
 <section id="default-inert-footprint-format">
 <h3>Default (inert) footprint format<a class="headerlink" href="#default-inert-footprint-format" title="Permalink to this heading">#</a></h3>
 <p>These can be shown by passing keywords to the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method. For
@@ -854,6 +883,17 @@ the <code class="docutils literal notranslate"><span class="pre">Footprints.sche
 within the input footprint files.</p>
 </section>
 </section>
+<section id="cleanup">
+<h2>3. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
+<p>If you’re finished with the data in this tutorial you can cleanup the
+tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -895,8 +935,13 @@ within the input footprint files.</p>
 <nav id="bd-toc-nav" class="page-toc">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#using-the-tutorial-object-store">
+   0. Using the tutorial object store
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#adding-and-standardising-data">
-   Adding and standardising data
+   1. Adding and standardising data
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
@@ -930,7 +975,7 @@ within the input footprint files.</p>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#input-format">
-   Input format
+   2. Input format
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
@@ -944,6 +989,11 @@ within the input footprint files.</p>
     </a>
    </li>
   </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#cleanup">
+   3. Cleanup
+  </a>
  </li>
 </ul>
 

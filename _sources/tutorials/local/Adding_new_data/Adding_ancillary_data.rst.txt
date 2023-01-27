@@ -19,8 +19,24 @@ transformation functions available to create and store data in this
 format directly. See the ``openghg.transform`` sub-module for options.
 To be expanded upon.*
 
-Adding and standardising data
------------------------------
+0. Using the tutorial object store
+----------------------------------
+
+To avoid adding the example data we use in this tutorial to your normal
+object store, we need to tell OpenGHG to use a separate sandboxed object
+store that we'll call the tutorial store. To do this we use the
+``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
+``OPENGHG_TUT_STORE`` environment variable for this session and won't
+affect your use of OpenGHG outside of this tutorial.
+
+.. code:: ipython3
+
+    from openghg.tutorial import use_tutorial_store
+
+    use_tutorial_store()
+
+1. Adding and standardising data
+--------------------------------
 
 Data can be added to the object store using appropriate functions from
 the ``openghg.standardise`` sub module. This includes:
@@ -60,7 +76,7 @@ added to the object store.
 
 
 Data domains
-^^^^^^^^^^^^
+~~~~~~~~~~~~
 
 For spatial data, we can indicate consistent areas and resolution using
 a *domain* as a label for this. For multiple pieces of data, a single
@@ -74,7 +90,7 @@ this has been consistently applied*)
 *Add details for how to check known domains*
 
 Footprints
-~~~~~~~~~~
+^^^^^^^^^^
 
 To standardise and store footprint data, in addition to the data file to
 standardise, we also need to pass a set of keywords to label this. As a
@@ -133,7 +149,7 @@ labelled correctly. See schema details below for how these inputs are
 defined.
 
 Flux / Emissions
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 To store and standardise flux / emissions data, as well as the input
 file, as a minimum we need to supply the following keywords: -
@@ -164,7 +180,7 @@ described above.
     flux_data = get_flux(species="ch4", domain="EUROPE", source="anthro")
 
 Boundary conditions
-~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^
 
 The boundary conditions data type describe the vertical curtains of a
 regional domain. To store and standardise boundary conditions data, as
@@ -190,7 +206,7 @@ climatology product [++REFINE AND ADD LINK++]*.
 
 
 Defining ‘source’ and ‘bc_input’
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Unlike the ``domain`` and ``species`` inputs which have some pre-defined
 values, the ``source`` and ``bc_input`` keywords can be chosen by the
@@ -433,8 +449,8 @@ Note that the ``source`` and ``bc_input`` keywords can also include “-”
 to logically separate the descriptor e.g. “anthro-waste” but should not
 include other separators.
 
-Input format
-------------
+2. Input format
+---------------
 
 For each of these data types there is an associated object from the
 ``openghg.store`` sub-module:
@@ -462,22 +478,31 @@ format using the ``.schema()`` method:
 
 
 
-This tells us that the netcdf input for “emissions” should contain: -
-Data variables: - “flux” data variable with dimensions of (“time”,
-“lat”, “lon”) - Data types: - “flux”, “lat”, “lon” variables /
-coordinates should be float type - “time” coordinate should be
+This tells us that the netcdf input for “emissions” should contain:
+
+- Data variables:
+ 
+   - “flux” data variable with dimensions of (“time”, “lat”, “lon”)
+
+- Data types:
+
+  - “flux”, “lat”, “lon” variables / coordinates should be float type - “time” coordinate should be
 datetime64
 
+Footprints
+^^^^^^^^^^
+
 Similarly for ``Footprints``, as described in the standardisations
-section, there are a few different input options available: - inert
-species (default - integrated footprint) - high spatial resolution
-(``high_spatial_res`` flag) - high time resolution (``high_time_res``
-flag) (e.g. for carbon dioxide) - short-lived species
-(``short_lifetime`` flag) - particle locations (``particle_locations`` -
-default is True, expect to be included)
+section, there are a few different input options available:
+
+ - inert species (default - integrated footprint)
+ - high spatial resolution (``high_spatial_res`` flag)
+ - high time resolution (``high_time_res`` flag) (e.g. for carbon dioxide)
+ - short-lived species (``short_lifetime`` flag)
+ - particle locations (``particle_locations`` - default is True, expect to be included)
 
 Default (inert) footprint format
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These can be shown by passing keywords to the ``.schema()`` method. For
 example, if nothing is passed this returns the details for an integrated
@@ -520,7 +545,7 @@ requirement for these particle location boundary sensitivies to be
 included.
 
 Other footprint formats
-^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~
 
 For species with a short lifetime the input footprints require
 additional variables. This can be seen by passing the ``short_lifetime``
@@ -554,3 +579,17 @@ short-lived species there also must be:
 Similiarly for the ``high_time_res`` and ``high_spatial_res`` flags to
 the ``Footprints.schema()`` method, these require additional variables
 within the input footprint files.
+
+3. Cleanup
+----------
+
+If you're finished with the data in this tutorial you can cleanup the
+tutorial object store using the ``clear_tutorial_store`` function.
+
+.. code:: ipython3
+
+    from openghg.tutorial import clear_tutorial_store
+
+.. code:: ipython3
+
+    clear_tutorial_store()
