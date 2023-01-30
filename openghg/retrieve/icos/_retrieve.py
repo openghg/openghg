@@ -270,11 +270,11 @@ def _retrieve_remote(
 
     standardised_data: Dict[str, Dict] = {}
 
-    for dobj_url in dobj_urls:
+    for n, dobj_url in enumerate(dobj_urls):
         dobj = Dobj(dobj_url)
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
-        # This is the metadata
+        # This is the metadata, dobj.info and dobj.meta are equal
         dobj_info = dobj.meta
 
         metadata = {}
@@ -282,16 +282,17 @@ def _retrieve_remote(
         specific_info = dobj_info["specificInfo"]
         col_data = specific_info["columns"]
 
-        for col in col_data:
-            # Find the species
-            for s in species:
-                if col["label"] == s.lower():
-                    measurement_type = col["valueType"]["self"]["label"].lower()
-                    units = col["valueType"]["unit"].lower()
-                    this_species = str(s)
-                    break
+        # Get the species this dobj holds information for
+        not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
+        species_info = next(i for i in col_data if i["label"] not in not_the_species)
 
-        metadata["species"] = this_species
+        measurement_type = species_info["valueType"]["self"]["label"].lower()
+        units = species_info["valueType"]["unit"].lower()
+        the_species = species_info["label"]
+
+        species_info = next(item for item in col_data if item["label"] == "ch4")
+
+        metadata["species"] = the_species
         acq_data = specific_info["acquisition"]
         station_data = acq_data["station"]
 
@@ -358,6 +359,14 @@ def _retrieve_remote(
         metadata["source_format"] = "icos"
         metadata["icos_data_level"] = str(data_level)
 
+        try:
+            dataset_source = dobj.info["specification"]["project"]["self"]["label"]
+        except KeyError:
+            dataset_source = "NA"
+            logger.warning("Unable to read project information from dobj.")
+
+        metadata["dataset_source"] = dataset_source
+
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
 
@@ -365,7 +374,6 @@ def _retrieve_remote(
             dataframe = dataframe.sort_index()
 
         spec = metadata["species"]
-        inlet = metadata["inlet"]
 
         rename_cols = {
             "stdev": spec + " variability",
@@ -393,7 +401,7 @@ def _retrieve_remote(
         # So there isn't an easy way of getting a hash of a Dataset, can we do something
         # simple here we can compare data that's being added? Then we'll be able to make sure
         # ObsSurface.store_data won't accept data it's already seen
-        data_key = f"{spec}_{inlet}"
+        data_key = f"key-{n}"
         # TODO - do we need both attributes and metadata here?
         standardised_data[data_key] = {
             "metadata": metadata,
