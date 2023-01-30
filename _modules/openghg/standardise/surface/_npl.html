@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._npl &#8212; OpenGHG 0+untagged.1.geef33d0 documentation</title>
+    <title>openghg.standardise.surface._npl &#8212; OpenGHG 0+untagged.1.gce9bcc8 documentation</title>
   
   
   
@@ -376,7 +376,7 @@
 
     <span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;NPL&quot;</span>
 
-    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">npl_params</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;NPL&quot;</span><span class="p">]</span>
 
     <span class="c1"># mypy doesn&#39;t like NaT or NaNs - look into this</span>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.geef33d0 documentation</title>
+    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.gce9bcc8 documentation</title>
   
   
   
@@ -502,7 +502,7 @@
 
     <span class="c1"># Read the scale from JSON</span>
     <span class="c1"># I&#39;ll leave this here for the possible future movement from class to functions</span>
-    <span class="n">network_metadata</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">)</span>
+    <span class="n">network_metadata</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;process_gcwerks_parameters.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">crds_metadata</span> <span class="o">=</span> <span class="n">network_metadata</span><span class="p">[</span><span class="s2">&quot;CRDS&quot;</span><span class="p">]</span>
 
     <span class="c1"># This dictionary is used to store the gas data and its associated metadata</span>
@@ -615,6 +615,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_site_info</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">site_attributes</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">crds_metadata</span><span class="p">[</span><span class="s2">&quot;sites&quot;</span><span class="p">][</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
         <span class="n">global_attributes</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
@@ -622,7 +624,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to read attributes for site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># TODO - we need to combine the metadata</span>
-    <span class="n">full_site_metadata</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;site_info.json&quot;</span><span class="p">)</span>
+    <span class="n">full_site_metadata</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">()</span>
 
     <span class="n">attributes</span> <span class="o">=</span> <span class="n">global_attributes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
