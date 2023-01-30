@@ -21,7 +21,10 @@ def clear_test_store():
     # Clears the testing object store
     path = os.getenv("OPENGHG_PATH")
     if path is not None:
-        shutil.rmtree(path)
+        try:
+            shutil.rmtree(path)
+        except FileNotFoundError:
+            pass
 
 
 def get_surface_datapath(filename: str, source_format: str) -> Path:

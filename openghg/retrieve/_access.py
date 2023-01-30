@@ -266,7 +266,10 @@ def get_obs_surface_local(
     # # Get the observation data
     # obs_results = search_surface(**surface_keywords)
     retrieved_data = _get_generic(
-        ambig_check_params=["inlet", "network", "instrument"], **surface_keywords  # type:ignore
+        sort=True,
+        elevate_inlets=False,
+        ambig_check_params=["inlet", "network", "instrument"],
+        **surface_keywords,  # type: ignore
     )
 
     data = retrieved_data.data
@@ -445,8 +448,8 @@ def get_obs_column(
     network: Optional[str] = None,
     instrument: Optional[str] = None,
     platform: str = "satellite",
-    start_date: Optional[Timestamp] = None,
-    end_date: Optional[Timestamp] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
 ) -> ObsColumnData:
     """
     Extract available column data from the object store using keywords.
@@ -483,8 +486,8 @@ def get_flux(
     species: str,
     source: str,
     domain: str,
-    start_date: Optional[Timestamp] = None,
-    end_date: Optional[Timestamp] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
     time_resolution: Optional[str] = None,
 ) -> FluxData:
     """
@@ -528,8 +531,8 @@ def get_bc(
     species: str,
     domain: str,
     bc_input: Optional[str] = None,
-    start_date: Optional[Timestamp] = None,
-    end_date: Optional[Timestamp] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
 ) -> BoundaryConditionsData:
     """
     Get boundary conditions for a given species, domain and bc_input name.
@@ -564,8 +567,8 @@ def get_footprint(
     inlet: Optional[str] = None,
     height: Optional[str] = None,
     model: Optional[str] = None,
-    start_date: Optional[Timestamp] = None,
-    end_date: Optional[Timestamp] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
     species: Optional[str] = None,
 ) -> FootprintData:
     """

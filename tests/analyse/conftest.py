@@ -7,6 +7,7 @@ from helpers import (
 )
 from openghg.objectstore import get_bucket
 from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
+from helpers import clear_test_store
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -14,7 +15,7 @@ def data_read():
     """
     Data set up for running tests for these sets of modules.
     """
-    get_bucket(empty=True)
+    clear_test_store()
 
     # Files for creating forward model (mf_mod) for methane and carbon dioxide at TAC site
 

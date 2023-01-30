@@ -88,6 +88,9 @@ class ModelScenario:
     operations to be performed combining these inputs.
     """
 
+    def __bool__(self) -> bool:
+        return bool(self.obs) or bool(self.footprint) or bool(self.fluxes) or bool(self.bc)
+
     def __init__(
         self,
         site: Optional[str] = None,
@@ -242,6 +245,7 @@ class ModelScenario:
         if isinstance(keywords, dict):
             keywords = [keywords]
 
+        data = None
         num_checks = len(keywords)
         for i, keyword_set in enumerate(keywords):
             try:
@@ -255,7 +259,7 @@ class ModelScenario:
                         print(f" {key}: {value}")
                     if search_fn is not None:
                         data_search = search_fn(**keyword_set)  # type:ignore
-                        print("---- Search results ---")
+                        print(f"---- Search results - {data_type} ---")
                         print(f"Number of results returned: {len(data_search)}")
                         print(data_search.results)
                     print("\n")
@@ -335,7 +339,7 @@ class ModelScenario:
             if inlet is None and self.obs is not None:
                 inlet = self.obs.metadata["inlet"]
             elif inlet is None and height is not None:
-                inlet = height                        
+                inlet = height
                 inlet = clean_string(inlet)
                 inlet = format_inlet(inlet)
             else:
@@ -436,14 +440,17 @@ class ModelScenario:
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
         if self.fluxes is not None:
-            if flux is not None:
+            if flux:
                 self.fluxes.update(flux)
         else:
-            self.fluxes = flux
+            # Flux can be None or empty dict.
+            if flux:
+                self.fluxes = flux
 
         if self.fluxes is not None:
             if not hasattr(self, "species"):
                 flux_values = list(self.fluxes.values())
+
                 flux_1 = flux_values[0]
                 self.species = flux_1.metadata["species"]
 
@@ -1427,10 +1434,18 @@ class ModelScenario:
         units_w = check_units(bc_data["vmr_w"], default=units_default)
 
         modelled_baseline = (
-            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(["height", "lon"])
-            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(["height", "lat"])
-            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(["height", "lon"])
-            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(["height", "lat"])
+            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(
+                ["height", "lon"]
+            )
+            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(
+                ["height", "lat"]
+            )
+            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(
+                ["height", "lon"]
+            )
+            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(
+                ["height", "lat"]
+            )
         )
 
         modelled_baseline.attrs["resample_to"] = resample_to
