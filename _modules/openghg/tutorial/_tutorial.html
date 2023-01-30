@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0+untagged.1.g9bc2abd documentation</title>
+    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0+untagged.1.g43375b3 documentation</title>
   
   
   
@@ -350,11 +350,8 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_footprint</span><span class="p">,</span> <span class="n">standardise_flux</span><span class="p">,</span> <span class="n">standardise_bc</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.tutorial&quot;</span><span class="p">)</span>
-<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
+<span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_footprint</span><span class="p">,</span> <span class="n">standardise_flux</span><span class="p">,</span> <span class="n">standardise_bc</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bilsdale_datapaths&quot;</span><span class="p">]</span>
 
@@ -392,7 +389,7 @@
 
     <span class="n">tac_inert_path</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">tac_fp_inert</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Standardising footprint data...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Standardising footprint data...&quot;</span><span class="p">)</span>
     <span class="c1"># TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?</span>
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
@@ -418,10 +415,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">tac_fp_co2</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_co2_201707.tar.gz&quot;</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Retrieving example data...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Retrieving example data...&quot;</span><span class="p">)</span>
     <span class="n">tac_co2_path</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">tac_fp_co2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Standardising footprint data...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Standardising footprint data...&quot;</span><span class="p">)</span>
     <span class="c1"># TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?</span>
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
@@ -445,7 +442,7 @@
                     <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
                 <span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="populate_flux_data"><a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_flux_data">[docs]</a><span class="k">def</span> <span class="nf">populate_flux_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -498,7 +495,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">use_tutorial_store</span><span class="p">()</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Retrieving data...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Retrieving data...&quot;</span><span class="p">)</span>
     <span class="n">eur_2016_flux</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/flux/ch4-ukghg-all_EUROPE_2016.tar.gz&quot;</span>
     <span class="n">flux_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">eur_2016_flux</span><span class="p">)</span>
 
@@ -508,7 +505,7 @@
     <span class="n">flux_data_waste</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">flux_data</span> <span class="k">if</span> <span class="n">source_waste</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">flux_data_energyprod</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">flux_data</span> <span class="k">if</span> <span class="n">source_energyprod</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Standardising flux...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Standardising flux...&quot;</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">devnull</span><span class="p">:</span>
@@ -526,7 +523,7 @@
                     <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
                 <span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">populate_bc</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -543,7 +540,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">use_tutorial_store</span><span class="p">()</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Retrieving data...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Retrieving data...&quot;</span><span class="p">)</span>
     <span class="n">eur_2016_bc</span> <span class="o">=</span> <span class="p">(</span>
         <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz&quot;</span>
     <span class="p">)</span>
@@ -553,14 +550,15 @@
     <span class="n">domain</span> <span class="o">=</span> <span class="s2">&quot;EUROPE&quot;</span>
     <span class="n">species</span> <span class="o">=</span> <span class="s2">&quot;ch4&quot;</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Standardising boundary conditions...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Standardising boundary conditions...&quot;</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">devnull</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">devnull</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;bc_data_path&quot;</span><span class="p">,</span> <span class="n">bc_data_path</span><span class="p">)</span>
                 <span class="n">standardise_bc</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">bc_data_path</span><span class="p">,</span> <span class="n">bc_input</span><span class="o">=</span><span class="n">bc_input</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="populate_surface_data"><a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.populate_surface_data">[docs]</a><span class="k">def</span> <span class="nf">populate_surface_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -578,7 +576,7 @@
     <span class="n">tac_data</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz&quot;</span>
     <span class="n">capegrim_data</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz&quot;</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Retrieving example data...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Retrieving example data...&quot;</span><span class="p">)</span>
     <span class="n">bsd_paths</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">bsd_data</span><span class="p">)</span>
     <span class="n">tac_paths</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">tac_data</span><span class="p">)</span>
     <span class="n">capegrim_paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">capegrim_data</span><span class="p">))</span>
@@ -586,7 +584,7 @@
     <span class="c1"># Create the tuple required</span>
     <span class="n">capegrim_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">capegrim_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">capegrim_paths</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Standardising data...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Standardising data...&quot;</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
@@ -602,7 +600,7 @@
                     <span class="n">network</span><span class="o">=</span><span class="s2">&quot;agage&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="bilsdale_datapaths"><a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.bilsdale_datapaths">[docs]</a><span class="k">def</span> <span class="nf">bilsdale_datapaths</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
@@ -751,7 +749,7 @@
 
     <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tutorial store at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> cleared.&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tutorial store at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> cleared.&quot;</span><span class="p">)</span></div>
 </pre></div>
 
             </article>

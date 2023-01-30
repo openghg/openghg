@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Retrieve &#8212; OpenGHG 0+untagged.1.g9bc2abd documentation</title>
+    <title>Retrieve &#8212; OpenGHG 0+untagged.1.g43375b3 documentation</title>
   
   
   
@@ -753,8 +753,8 @@ To be consistent with the footprints, fluxes should be in mol/m2/s.</p>
 <li><p><strong>species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Species name</p></li>
 <li><p><strong>source</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Source name</p></li>
 <li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Domain e.g. EUROPE</p></li>
-<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – Start date</p></li>
-<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – End date</p></li>
+<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Start date</p></li>
+<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – End date</p></li>
 <li><p><strong>time_resolution</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – One of [“standard”, “high”]</p></li>
 </ul>
 </dd>
@@ -782,8 +782,8 @@ station called DJI, footprints site called DJI-SAM</p></li>
 <li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Domain name for the footprints</p></li>
 <li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Height above ground level in metres</p></li>
 <li><p><strong>height</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Alias for inlet</p></li>
-<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – Output start date in a format that Pandas can interpret</p></li>
-<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – Output end date in a format that Pandas can interpret</p></li>
+<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Output start date in a format that Pandas can interpret</p></li>
+<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Output end date in a format that Pandas can interpret</p></li>
 <li><p><strong>species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Species identifier e.g. “co2” for carbon dioxide. Only needed
 if species needs a modified footprints from the typical 30-day
 footprints appropriate for a long-lived species (like methane)
@@ -811,8 +811,8 @@ e.g. for high time resolution (co2) or is a short-lived species.</p></li>
 - a model name such as “MOZART” or “CAMS”
 - a description such as “UniformAGAGE” (uniform values based on AGAGE average)</p></li>
 <li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Region for boundary conditions e.g. EUROPE</p></li>
-<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – Start date</p></li>
-<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>]) – End date</p></li>
+<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Start date</p></li>
+<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – End date</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

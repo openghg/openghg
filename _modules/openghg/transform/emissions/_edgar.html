@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.transform.emissions._edgar &#8212; OpenGHG 0+untagged.1.g9bc2abd documentation</title>
+    <title>openghg.transform.emissions._edgar &#8212; OpenGHG 0+untagged.1.g43375b3 documentation</title>
   
   
   
@@ -345,13 +345,10 @@
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 <span class="kn">from</span> <span class="nn">zipfile</span> <span class="kn">import</span> <span class="n">ZipFile</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
-
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.transform.emissions&quot;</span><span class="p">)</span>
-<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 <span class="n">ArrayType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]]</span>
 
@@ -483,8 +480,8 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to retrieve species from database filenames.&quot;</span> <span class="s2">&quot; Please specify&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">species_from_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">species_label</span> <span class="o">!=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species_from_file</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s2">&quot;Input species does not match species extracted from&quot;</span><span class="p">,</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;WARNING: Input species does not match species extracted from&quot;</span><span class="p">,</span>
             <span class="s2">&quot; database filenames. Please check.&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -535,9 +532,7 @@
                 <span class="sa">f</span><span class="s2">&quot;EDGAR </span><span class="si">{</span><span class="n">edgar_version</span><span class="si">}</span><span class="s2"> range: </span><span class="si">{</span><span class="n">start_year</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">end_year</span><span class="si">}</span><span class="s2">.&quot;</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2"> is before this period.&quot;</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="n">end_year</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Using last available year from EDGAR </span><span class="si">{</span><span class="n">edgar_version</span><span class="si">}</span><span class="s2"> range:&quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">start_year</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">end_year</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using last available year from EDGAR </span><span class="si">{</span><span class="n">edgar_version</span><span class="si">}</span><span class="s2"> range:&quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">start_year</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">end_year</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="n">edgar_file</span> <span class="o">=</span> <span class="n">files_by_year</span><span class="p">[</span><span class="n">end_year</span><span class="p">]</span>
             <span class="n">edgar_file_info</span> <span class="o">=</span> <span class="n">_extract_file_info</span><span class="p">(</span><span class="n">edgar_file</span><span class="p">)</span>
 
@@ -795,7 +790,7 @@
                 <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">lon_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">lon_out</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">180</span> <span class="ow">or</span> <span class="n">lon_out</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">180</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Converting longitude to stay within -180 - 180 bounds&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting longitude to stay within -180 - 180 bounds&quot;</span><span class="p">)</span>
         <span class="n">lon_converted</span> <span class="o">=</span> <span class="n">convert_longitude</span><span class="p">(</span><span class="n">lon_out</span><span class="p">)</span>
         <span class="n">lon_out</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">lon_converted</span><span class="p">)</span>
 
