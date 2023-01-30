@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 # from openghg.util import running_locally
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from openghg.dataobjects import RankSources
 
 
-def rank_sources(site: str, species: str, service_url: str = None) -> RankSources:
+def rank_sources(site: str, species: str, service_url: Optional[str] = None) -> RankSources:
     """Retrieve datasources for a specific site and species. Returns a RankSources
     object that can be used to set and modify ranking data.
 

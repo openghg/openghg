@@ -88,6 +88,9 @@ class ModelScenario:
     operations to be performed combining these inputs.
     """
 
+    def __bool__(self) -> bool:
+        return bool(self.obs) or bool(self.footprint) or bool(self.fluxes) or bool(self.bc)
+
     def __init__(
         self,
         site: Optional[str] = None,
@@ -242,6 +245,7 @@ class ModelScenario:
         if isinstance(keywords, dict):
             keywords = [keywords]
 
+        data = None
         num_checks = len(keywords)
         for i, keyword_set in enumerate(keywords):
             try:
@@ -436,14 +440,17 @@ class ModelScenario:
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
         if self.fluxes is not None:
-            if flux is not None:
+            if flux:
                 self.fluxes.update(flux)
         else:
-            self.fluxes = flux
+            # Flux can be None or empty dict.
+            if flux:
+                self.fluxes = flux
 
         if self.fluxes is not None:
             if not hasattr(self, "species"):
                 flux_values = list(self.fluxes.values())
+
                 flux_1 = flux_values[0]
                 self.species = flux_1.metadata["species"]
 
