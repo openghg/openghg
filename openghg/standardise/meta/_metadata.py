@@ -86,6 +86,6 @@ def sync_surface_metadata(
             try:
                 meta_copy[key] = attributes[key]
             except KeyError:
-                logger.warning(f"WARNING: {key} key not in attributes or metadata")
+                logger.warning(f"{key} key not in attributes or metadata")
 
     return meta_copy

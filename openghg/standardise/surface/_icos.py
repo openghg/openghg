@@ -130,9 +130,9 @@ def _read_data_large_header(
 
     if len_header != 40:
         logger.warning(
-            f"WARNING: We expect a header length of 40 but got {len_header}, \
-                note that some metadata may not be collected, \
-                please raise an issue on GitHub if this file format is to be expected."
+            f"We expect a header length of 40 but got {len_header}, \
+            note that some metadata may not be collected, \
+            please raise an issue on GitHub if this file format is to be expected."
         )
 
     dtypes = {

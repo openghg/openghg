@@ -87,9 +87,9 @@ class EulerianModel(BaseStore):
                 if coord in em_data.coords:
                     break
             else:
-                raise ValueError("Input data must contain one of '{coord_options}' co-ordinate")
+                raise ValueError(f"Input data must contain one of '{coord_options}' co-ordinate")
             if name != coord:
-                logger.info("Renaming co-ordinate '{coord}' to '{name}'")
+                logger.info(f"Renaming co-ordinate '{coord}' to '{name}'")
                 em_data = em_data.rename({coord: name})
 
         attrs = em_data.attrs

@@ -79,7 +79,7 @@ methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
 logger = logging.getLogger("openghg.analyse")
-logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 
 class ModelScenario:
@@ -249,8 +249,8 @@ class ModelScenario:
             except (SearchError, AttributeError):
                 num = i + 1
                 if num == num_checks:
-                    logger.info(f"Unable to add {data_type} data based on keywords supplied.")
-                    logger.info(" Inputs -")
+                    logger.warning(f"Unable to add {data_type} data based on keywords supplied.")
+                    logger.warning(" Inputs -")
                     for key, value in keyword_set.items():
                         logger.info(f" {key}: {value}")
                     if search_fn is not None:
@@ -506,9 +506,9 @@ class ModelScenario:
             if value is None:
                 missing.append(attr)
 
-                logger.info(f"Must have {attr} data linked to this ModelScenario to run this function")
-                logger.info("Include this by using the add function, with appropriate inputs:")
-                logger.info("  ModelScenario.add_{attr}(...)")
+                logger.error(f"Must have {attr} data linked to this ModelScenario to run this function")
+                logger.error("Include this by using the add function, with appropriate inputs:")
+                logger.error("  ModelScenario.add_{attr}(...)")
 
         if missing:
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")

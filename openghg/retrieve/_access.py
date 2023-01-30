@@ -739,11 +739,11 @@ def _metadata_difference(
     for param in param_difference:
         summary_difference[param] = []
         if print_output:
-            logging.debug(f" {param}: ")
+            logger.info(f" {param}: ")
         for m in metadata:
             summary_difference[param].append(m[param])
             if print_output:
-                logging.info(f" '{m[param]}', ")
+                logger.info(f" '{m[param]}', ")
         if print_output:
             logger.info("\n")  # print new line
 
