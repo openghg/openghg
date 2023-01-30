@@ -7,6 +7,7 @@ from helpers import (
 )
 from openghg.objectstore import get_bucket
 from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
+from helpers import clear_test_store
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -14,7 +15,7 @@ def data_read():
     """
     Data set up for running tests for these sets of modules.
     """
-    get_bucket(empty=True)
+    clear_test_store()
 
     # Files for creating forward model (mf_mod) for methane and carbon dioxide at TAC site
 
@@ -107,7 +108,16 @@ def data_read():
         period="monthly",
     )
 
-    # TODO: Make and add bc file for co2 which matched TEST domain
+    # CO2
+    bc_filepath1 = get_bc_datapath("co2_TEST_201407.nc")
+
+    BoundaryConditions.read_file(
+        filepath=bc_filepath1,
+        species="co2",
+        domain="TEST",
+        bc_input="MOZART",
+        period="monthly",
+    )
 
     # Footprint data
     # TAC footprint from 2012-08 - 2012-09 at 100m

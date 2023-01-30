@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
-
+import logging
 import xarray as xr
+
+logger = logging.getLogger("openghg.standardise.surface")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_noaa(
@@ -170,8 +173,8 @@ def _split_inlets(
 
         if inlet is not None:
             # TODO: Add to logging?
-            print(
-                f"WARNING: Ignoring inlet value of {inlet} since file has each data point has an associated height (contains 'intake_height' variable)"
+            logger.warning(
+                f"Ignoring inlet value of {inlet} since file has each data point has an associated height (contains 'intake_height' variable)"
             )
 
         # Group dataset by the height values
@@ -225,8 +228,8 @@ def _split_inlets(
             inlet = inlet_from_file
         elif inlet is not None and inlet_from_file:
             if inlet != inlet_from_file:
-                print(
-                    f"WARNING: Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}"
+                logger.warning(
+                    f"Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}"
                 )
         else:
             raise ValueError(
@@ -324,7 +327,8 @@ def _read_obspack(
         # Extract units attribute from value data variable
         units = processed_ds["value"].units
     except (KeyError, AttributeError):
-        print("Unable to extract units from 'value' within input dataset")
+        logger.warning("Unable to extract units from 'value' within input dataset")
+        units = "NA"
 
     metadata = {}
     metadata["site"] = site

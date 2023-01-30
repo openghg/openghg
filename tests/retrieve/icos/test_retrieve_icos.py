@@ -46,7 +46,7 @@ def test_retrieve_icos_cloud(monkeypatch, mocker):
     assert res == mock_obs
 
 
-def test_icos_retrieve_invalid_site(mocker, capfd):
+def test_icos_retrieve_invalid_site(mocker, caplog):
     s = Station()
     s._valid = False
 
@@ -56,9 +56,7 @@ def test_icos_retrieve_invalid_site(mocker, capfd):
 
     assert no_data is None
 
-    out, _ = capfd.readouterr()
-
-    assert out.rstrip() == "Please check you have passed a valid ICOS site."
+    assert "Please check you have passed a valid ICOS site." in caplog.text
 
 
 def test_icos_retrieve_and_store(mocker):

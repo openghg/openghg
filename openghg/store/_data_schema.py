@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
-
+import logging
 import numpy as np
 from xarray import Dataset
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 __all__ = ["DataSchema"]
 
@@ -42,7 +45,7 @@ class DataSchema:
         """
         expected_data_vars = self.data_vars
         if expected_data_vars is None:
-            print("No data variables to check against schema")
+            logger.debug("No data variables to check against schema")
             return None
         else:
             expected_dv = expected_data_vars.keys()
@@ -75,7 +78,7 @@ class DataSchema:
         """
         expected_dims = self.dims
         if expected_dims is None:
-            print("No dims to check against schema")
+            logger.debug("No dims to check against schema")
             return None
 
         dims = data.dims
@@ -98,7 +101,7 @@ class DataSchema:
         """
         expected_data_types = self.dtypes
         if expected_data_types is None:
-            print("No data types to check against schema")
+            logger.debug("No data types to check against schema")
             return None
 
         for variable, edata_type in expected_data_types.items():

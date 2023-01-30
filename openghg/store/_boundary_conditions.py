@@ -95,7 +95,13 @@ class BoundaryConditions(BaseStore):
         """
         from collections import defaultdict
 
-        from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
+        from openghg.store import (
+            assign_data,
+            datasource_lookup,
+            infer_date_range,
+            update_zero_dim,
+            load_metastore,
+        )
         from openghg.util import clean_string, hash_file, timestamp_now
         from xarray import open_dataset
 
@@ -141,8 +147,12 @@ class BoundaryConditions(BaseStore):
         metadata["author"] = author_name
         metadata["processed"] = str(timestamp_now())
 
+        # Check if time has 0-dimensions and, if so, expand this so time is 1D
+        if "time" in bc_data.coords:
+            bc_data = update_zero_dim(bc_data, dim="time")
+
         # Currently ACRG boundary conditions are split by month or year
-        bc_time = bc_data.time
+        bc_time = bc_data["time"]
 
         start_date, end_date, period_str = infer_date_range(
             bc_time, filepath=filepath, period=period, continuous=continuous

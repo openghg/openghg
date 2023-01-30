@@ -1,7 +1,10 @@
 from typing import Any, Dict, List, Optional, Union
-
 from openghg.dataobjects import ObsData
 from openghg.util import running_on_hub
+import logging
+
+logger = logging.getLogger("openghg.retrieve")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def retrieve_atmospheric(
@@ -157,7 +160,7 @@ def local_retrieve(
     from openghg.util import to_lowercase
 
     if not 1 <= data_level <= 2:
-        print("Error: data level must be 1 or 2.")
+        logger.error("Error: data level must be 1 or 2.")
 
     # NOTE - we skip ranking here, will we be ranking ICOS data?
     results = search_surface(
@@ -254,7 +257,7 @@ def _retrieve_remote(
     stat = station.get(stationId=site.upper())
 
     if not stat.valid:
-        print("Please check you have passed a valid ICOS site.")
+        logger.error("Please check you have passed a valid ICOS site.")
         return None
 
     data_pids = stat.data(level=data_level)
@@ -273,7 +276,7 @@ def _retrieve_remote(
         ]
 
     if filtered_sources.empty:
-        print(
+        logger.error(
             f"No sources found for {species} at {site}. Please check with the ICOS Carbon Portal that this data is available."
         )
         return None

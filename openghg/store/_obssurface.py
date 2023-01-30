@@ -162,7 +162,7 @@ class ObsSurface(BaseStore):
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
-            inlet = height        
+            inlet = height
 
         # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
         inlet = clean_string(inlet)
@@ -314,7 +314,7 @@ class ObsSurface(BaseStore):
                 progress_bar.update(1)
 
                 logger.info(f"Completed processing: {data_filepath.name}.")
-                logger.info(f"\tUUIDs: {datasource_uuids}")
+                # logger.info(f"\tUUIDs: {datasource_uuids}")
 
         # Ensure we explicitly close the metadata store
         # as we're using the cached storage method

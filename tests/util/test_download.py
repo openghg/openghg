@@ -15,7 +15,7 @@ def test_url_parser():
     assert parse_url_filename(url) == "no_file_extension"
 
 
-def test_download_data(requests_mock, capfd):
+def test_download_data(requests_mock, caplog):
     content = "some_excellent_bytes".encode("utf-8")
     url = "http://example.com/data/test.nc"
     requests_mock.get(url, content=content)
@@ -28,6 +28,4 @@ def test_download_data(requests_mock, capfd):
 
     data = download_data(url=url)
 
-    out, _ = capfd.readouterr()
-
-    assert "Unable to download http://example.com/data/test.nc, please check URL." in out
+    assert "Unable to download http://example.com/data/test.nc, please check URL." in caplog.text

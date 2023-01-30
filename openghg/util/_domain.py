@@ -26,7 +26,7 @@ def get_domain_info(domain_filename: optionalPathType = None) -> Dict[str, Any]:
     if domain_filename is None:
         domain_info_json = load_json(domain_info_file)
     else:
-        domain_info_json = load_json(domain_info_file)
+        domain_info_json = load_json(domain_filename)
 
     return domain_info_json
 
