@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._datahandler &#8212; OpenGHG 0+untagged.1.g52a6098 documentation</title>
+    <title>openghg.dataobjects._datahandler &#8212; OpenGHG 0+untagged.1.ga87ab85 documentation</title>
   
   
   
@@ -345,9 +345,12 @@
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
 <span class="kn">from</span> <span class="nn">openghg.store.spec</span> <span class="kn">import</span> <span class="n">define_data_type_classes</span>
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">load_metastore</span>
-
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">tinydb</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.dataobjects&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
 <div class="viewcode-block" id="DataHandler"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataHandler">[docs]</a><span class="k">class</span> <span class="nc">DataHandler</span><span class="p">:</span>
@@ -533,7 +536,7 @@
                 <span class="c1"># Update the metadata stored internally so we&#39;re up to date</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="n">internal_copy</span>
 
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified metadata for </span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified metadata for </span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataHandler.delete_datasource"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.delete_datasource">[docs]</a>    <span class="k">def</span> <span class="nf">delete_datasource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete a Datasource in the object store.</span>

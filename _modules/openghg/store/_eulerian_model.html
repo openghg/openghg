@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._eulerian_model &#8212; OpenGHG 0+untagged.1.g52a6098 documentation</title>
+    <title>openghg.store._eulerian_model &#8212; OpenGHG 0+untagged.1.ga87ab85 documentation</title>
   
   
   
@@ -342,9 +342,12 @@
   <h1>Source code for openghg.store._eulerian_model</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.store&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;EulerianModel&quot;</span><span class="p">]</span>
 
@@ -426,9 +429,9 @@
                 <span class="k">if</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">em_data</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input data must contain one of &#39;</span><span class="si">{coord_options}</span><span class="s2">&#39; co-ordinate&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input data must contain one of &#39;</span><span class="si">{</span><span class="n">coord_options</span><span class="si">}</span><span class="s2">&#39; co-ordinate&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">coord</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Renaming co-ordinate &#39;</span><span class="si">{coord}</span><span class="s2">&#39; to &#39;</span><span class="si">{name}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Renaming co-ordinate &#39;</span><span class="si">{</span><span class="n">coord</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
                 <span class="n">em_data</span> <span class="o">=</span> <span class="n">em_data</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="n">coord</span><span class="p">:</span> <span class="n">name</span><span class="p">})</span>
 
         <span class="n">attrs</span> <span class="o">=</span> <span class="n">em_data</span><span class="o">.</span><span class="n">attrs</span>
