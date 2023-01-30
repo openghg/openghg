@@ -692,17 +692,15 @@ def _create_keyword_string(**kwargs: Any) -> str:
 def _metadata_difference(
     data: multDataTypes, params: Optional[list] = None, print_output: bool = True
 ) -> Dict[str, list]:
-    """
-    Check differences between metadata for returned data objects. Note this will
+    """Check differences between metadata for returned data objects. Note this will
     only look at differences between values which are strings (not lists, floats etc.)
 
     Args:
-        data : Multiple data objects e.g. multiple ObsData as a list
-        params : Specific metadata parameters to check. If None all parameters will be checked
-        print_output : Summarise and print output to screen.
-
+        data: Multiple data objects e.g. multiple ObsData as a list
+        params: Specific metadata parameters to check. If None all parameters will be checked
+        print_output: Summarise and print output to screen.
     Returns:
-        Dict[str, list] : Keys and lists of values from the metadata with differences.
+        Dict[str, list]: Keys and lists of values from the metadata with differences.
     """
     # Extract metadata dictionaries from each data object in list
     metadata = [d.metadata for d in data]
@@ -744,13 +742,13 @@ def _metadata_difference(
     for param in param_difference:
         summary_difference[param] = []
         if print_output:
-            print(f" {param}: ", end="")
+            logger.info(f" {param}: ")
         for m in metadata:
             summary_difference[param].append(m[param])
             if print_output:
-                print(f" '{m[param]}', ", end="")
+                logger.info(f" '{m[param]}', ")
         if print_output:
-            print()  # print new line
+            logger.info("\n")  # print new line
 
     # if print_output:
     #     print("Datasets contain:")

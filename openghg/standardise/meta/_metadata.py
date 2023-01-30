@@ -1,8 +1,11 @@
 import math
 from copy import deepcopy
 from typing import Dict, List, Optional
-
+import logging
 from openghg.util import is_number
+
+logger = logging.getLogger("openghg.standardise.meta")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def metadata_default_keys() -> List:
@@ -83,6 +86,6 @@ def sync_surface_metadata(
             try:
                 meta_copy[key] = attributes[key]
             except KeyError:
-                print(f"WARNING: {key} key not in attributes or metadata")
+                logger.warning(f"{key} key not in attributes or metadata")
 
     return meta_copy
