@@ -84,14 +84,14 @@ def _get_generic(
 def get_obs_surface(
     site: str,
     species: str,
-    inlet: str = None,
-    height: str = None,
-    start_date: Union[str, Timestamp] = None,
-    end_date: Union[str, Timestamp] = None,
-    average: str = None,
-    network: str = None,
-    instrument: str = None,
-    calibration_scale: str = None,
+    inlet: Optional[str] = None,
+    height: Optional[str] = None,
+    start_date: Optional[Union[str, Timestamp]] = None,
+    end_date: Optional[Union[str, Timestamp]] = None,
+    average: Optional[str] = None,
+    network: Optional[str] = None,
+    instrument: Optional[str] = None,
+    calibration_scale: Optional[str] = None,
     keep_missing: bool = False,
     skip_ranking: bool = False,
 ) -> Optional[ObsData]:
@@ -279,7 +279,7 @@ def get_obs_surface_local(
         retrieved_data.metadata["inlet"] = "multiple"
 
     if start_date is not None and end_date is not None:
-        
+
         # Check if underlying data is timezone aware.
         data_time_index = data.indexes["time"]
         tzinfo = data_time_index.tzinfo
@@ -292,8 +292,8 @@ def get_obs_surface_local(
             end_date_filter = Timestamp(end_date)
 
         end_date_filter_exclusive = end_date_filter - Timedelta(
-                1, unit="nanosecond"
-            )  # Deduct 1 ns to make the end day (date) exclusive.
+            1, unit="nanosecond"
+        )  # Deduct 1 ns to make the end day (date) exclusive.
 
         # Slice the data to only cover the dates we're interested in
         data = data.sel(time=slice(start_date_filter, end_date_filter_exclusive))
