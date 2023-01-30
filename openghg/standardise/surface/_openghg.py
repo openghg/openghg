@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Dict, Optional, Union, cast
-
+import logging
 import xarray as xr
+
+logger = logging.getLogger("openghg.standardise.surface")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
@@ -139,7 +142,9 @@ def parse_openghg(
             site_info_all = site_data[site_value]
             break
     else:
-        print("Unknown site. Will attempt to extract metadata from dataset attributes or input keywords")
+        logger.info(
+            "Unknown site. Will attempt to extract metadata from dataset attributes or input keywords"
+        )
         site_info_all = {}
 
     for network_value in network_case_options:
@@ -147,7 +152,7 @@ def parse_openghg(
             site_info = site_info_all[network_value]
             break
     else:
-        print(
+        logger.info(
             "Network {network} does not match with site {site}. Will attempt to extract metadata from dataset attributes or input keywords"
         )
         site_info = {}

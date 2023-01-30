@@ -1,1 +1,0 @@
-../../../../tests/data/footprints/TAC-100magl_UKV_co2_TEST_201407.nc

@@ -72,7 +72,7 @@ logger.addHandler(fileHandler)
 consoleHandler = logging.StreamHandler()
 consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
 consoleHandler.setFormatter(consoleFormatter)
-consoleHandler.setLevel(logging.WARNING)
+consoleHandler.setLevel(logging.INFO)
 logger.addHandler(consoleHandler)
 
 del logfile_path, hub_env, cloud_env, create_default_config

@@ -1,12 +1,17 @@
 import re
 from pathlib import Path
 from typing import Optional, Tuple, Union
-
+import logging
 import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
-from xarray import DataArray
+from xarray import DataArray, Dataset
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 TupleTimeType = Tuple[Union[int, float], str]
+
+__all__ = ["infer_date_range", "update_zero_dim"]
 
 
 def infer_date_range(
@@ -53,15 +58,18 @@ def infer_date_range(
 
     if n_dates == 1:
         try:
-            start_date = timestamp_tzaware(timestamp=time.values[0])
+            timestamp = time.values[0]
         except IndexError:
-            raise NotImplementedError(
-                "This type of BC file is not currently supported. Please see issue #349"
+            raise ValueError(
+                "'time' coord has 0 dimensions. Please update this data to remove ambiguity."
+                + "\nCan use openghg.store.update_zero_dim() to add this 'time' dimension to all variables"
             )
             # try:
             #     start_date = timestamp_tzaware(timestamp=time.values)
             # except ValueError:
             #     raise ValueError("Can't read date from dataset.")
+        else:
+            start_date = timestamp_tzaware(timestamp)
 
         if filepath is not None:
             filename = filepath.stem  # Filename without the extension
@@ -103,13 +111,13 @@ def infer_date_range(
             time_unit: Optional[str] = freq[1]
         else:
             if inferred_freq is not None:
-                print(f"Only one time point, inferring frequency of {inferred_freq}")
+                logger.info(f"Only one time point, inferring frequency of {inferred_freq}")
                 time_value, time_unit = inferred_freq
 
         # Check input period against inferred period
-        if inferred_freq != freq:
-            print(
-                f"Warning: Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})"
+        if inferred_freq != freq and period is not None:
+            logger.warning(
+                f"Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})"
             )
 
         # Create time offset and use to create start and end datetime
@@ -140,7 +148,7 @@ def infer_date_range(
         # value in preference to any user specified input.
         # Note: this is opposite to the other part of this branch.
         if freq is not None and inferred_freq is not None and freq != inferred_freq:
-            print(f"Warning: Input period: {period} does not map to inferred frequency {inferred_freq}")
+            logger.warning(f"Input period: {period} does not map to inferred frequency {inferred_freq}")
             freq = inferred_freq
 
         # Create time offset, using inferred offset
@@ -157,3 +165,23 @@ def infer_date_range(
             period_str = "varies"
 
     return start_date, end_date, period_str
+
+
+def update_zero_dim(ds: Dataset, dim: str = "time") -> Dataset:
+    """
+    Check whether a dimension within an xarray Dataset object is 0-size
+    (0 dimension) and update time to 1-size (1 dimension) if so.
+
+    Args:
+        ds: Input Dataset
+        dim: name of dimension to check
+
+    Returns:
+        ds: Dataset, updated if needed.
+    """
+
+    da = ds[dim]
+    if not da.dims:
+        ds = ds.expand_dims(dim={dim: 1})
+
+    return ds

@@ -3,7 +3,6 @@ import math
 from copy import deepcopy
 from typing import Dict, List, Optional
 from openghg.types import AttrMismatchError
-
 from openghg.util import is_number
 
 logger = logging.getLogger("openghg.standardise.metadata")
@@ -106,6 +105,6 @@ def sync_surface_metadata(
             try:
                 meta_copy[key] = attributes[key]
             except KeyError:
-                print(f"WARNING: {key} key not in attributes or metadata")
+                logger.warning(f"{key} key not in attributes or metadata")
 
     return meta_copy

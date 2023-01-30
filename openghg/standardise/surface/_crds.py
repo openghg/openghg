@@ -182,11 +182,11 @@ def _read_data(
         ]
 
         # Name columns
-        gas_data = gas_data.set_axis(column_labels, axis="columns", inplace=False)
+        gas_data = gas_data.set_axis(column_labels, axis="columns")
 
         header_rows = 2
         # Drop the first two rows now we have the name
-        gas_data = gas_data.drop(index=gas_data.head(header_rows).index, inplace=False)
+        gas_data = gas_data.drop(index=gas_data.head(header_rows).index)
         gas_data.index = to_datetime(gas_data.index, format="%y%m%d %H%M%S")
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")

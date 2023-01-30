@@ -45,14 +45,14 @@ Metadata
 
 These ensure the metadata and attributes stored with data are correct.
 
-.. autofunction:: assign_attributes
+.. autofunction:: openghg.standardise.meta.assign_attributes
 
-.. autofunction:: get_attributes
+.. autofunction:: openghg.standardise.meta.get_attributes
 
-.. autofunction:: assign_flux_attributes
+.. autofunction:: openghg.standardise.meta.assign_flux_attributes
 
-.. autofunction:: define_species_label
+.. autofunction:: openghg.standardise.meta.define_species_label
 
-.. autofunction:: metadata_default_keys
+.. autofunction:: openghg.standardise.meta.metadata_default_keys
 
-.. autofunction:: sync_surface_metadata
+.. autofunction:: openghg.standardise.meta.sync_surface_metadata
