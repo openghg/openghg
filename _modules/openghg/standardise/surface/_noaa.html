@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.g7e61ac3 documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.g4126269 documentation</title>
   
   
   
@@ -342,9 +342,12 @@
   <h1>Source code for openghg.standardise.surface._noaa</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
-
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.standardise.surface&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
 <div class="viewcode-block" id="parse_noaa"><a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.surface.parse_noaa">[docs]</a><span class="k">def</span> <span class="nf">parse_noaa</span><span class="p">(</span>
@@ -553,8 +556,8 @@
 
         <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># TODO: Add to logging?</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;WARNING: Ignoring inlet value of </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> since file has each data point has an associated height (contains &#39;intake_height&#39; variable)&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Ignoring inlet value of </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> since file has each data point has an associated height (contains &#39;intake_height&#39; variable)&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Group dataset by the height values</span>
@@ -608,8 +611,8 @@
             <span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet_from_file</span>
         <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inlet_from_file</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">inlet</span> <span class="o">!=</span> <span class="n">inlet_from_file</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;WARNING: Provided inlet </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> does not match inlet derived from the input file: </span><span class="si">{</span><span class="n">inlet_from_file</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Provided inlet </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2"> does not match inlet derived from the input file: </span><span class="si">{</span><span class="n">inlet_from_file</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -707,7 +710,8 @@
         <span class="c1"># Extract units attribute from value data variable</span>
         <span class="n">units</span> <span class="o">=</span> <span class="n">processed_ds</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">units</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to extract units from &#39;value&#39; within input dataset&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to extract units from &#39;value&#39; within input dataset&quot;</span><span class="p">)</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
 
     <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
