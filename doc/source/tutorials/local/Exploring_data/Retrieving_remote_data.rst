@@ -14,11 +14,11 @@ store that we'll call the tutorial store. To do this we use the
 ``OPENGHG_TUT_STORE`` environment variable for this session and won't
 affect your use of OpenGHG outside of this tutorial.
 
-.. code:: ipython3
+.. ipython::
 
-    from openghg.tutorial import use_tutorial_store
+    In [1]: from openghg.tutorial import use_tutorial_store
 
-    use_tutorial_store()
+    In [1]: use_tutorial_store()
 
 1. ICOS
 -------
@@ -47,48 +47,81 @@ first check for any data from **WAO** already stored in the object
 store, if any is found it is returned, otherwise it'll retrieve the data
 from the ICOS Carbon Portal, this may take a bit longer.
 
-.. code:: ipython3
+.. ipython::
 
-    from openghg.retrieve.icos import retrieve_atmospheric
+   In [1]: from openghg.retrieve.icos import retrieve_atmospheric
 
-.. code:: ipython3
+.. ipython::
 
-    wao_data = retrieve_atmospheric(site="WAO", species="ch4")
+    In [2]: wao_data = retrieve_atmospheric(site="WAO", species="ch4", sampling_height="10m")
+    In [3]: len(wao_data)
+    Out[3]: 3
 
-Now we can inspect ``wao_data``, an ``ObsData`` object to see what was
-retrieved.
+Here `wao_data` is a list of three `ObsData` objects, each one containing differing amounts of data.
+We can have a look at the reason for their being three versions of data by checking the `dataset_source` key
+in the attached metadata.
 
-.. code:: ipython3
+.. ipython::
 
-    wao_data
+    In [7]: dataset_sources = [obs.metadata["dataset_source"] for obs in wao_data]
 
-We can see that we've retrieved ``ch4`` data that covers 2013-04-01 -
-2015-07-31. Quite a lot of metadata is saved during the retrieval
+    In [8]: dataset_sources
+    Out[8]: ['ICOS', 'InGOS', 'European ObsPack']
+
+Let's say we want to look at ICOS dataset, we can
+
+.. ipython::
+
+    In [9]: wao_data_icos = wao_data[0]
+    In [11]: wao_data_icos.data
+    Out[11]:
+        <xarray.Dataset>
+        Dimensions:                     (time: 4883)
+        Coordinates:
+        * time                        (time) datetime64[ns] 2021-07-01 ... 2022-02-...
+        Data variables:
+            flag                        (time) object 'O' 'O' 'O' 'O' ... 'O' 'O' 'O'
+            ch4_number_of_observations  (time) int64 59 59 59 58 60 ... 59 60 60 60 58
+            ch4_variability             (time) float64 0.277 0.373 1.646 ... 1.332 3.087
+            ch4                         (time) float64 1.951e+03 1.952e+03 ... 2.103e+03
+        Attributes: (12/34)
+            species:                ch4
+            instrument:             FTIR
+            instrument_data:        ['FTIR', 'http://meta.icos-cp.eu/resources/instru...
+            site:                   WAO
+            measurement_type:       ch4 mixing ratio (dry mole fraction)
+            units:                  nmol mol-1
+            ...                     ...
+            Conventions:            CF-1.8
+            file_created:           2023-02-02 15:25:52.075469+00:00
+            processed_by:           OpenGHG_Cloud
+            calibration_scale:      unknown
+            sampling_period:        NOT_SET
+            sampling_period_unit:   s
+
+We can see that we've retrieved ``ch4`` data that covers 2021-07-01 -
+2022-02-28. A lot of metadata is stored during the retrieval
 process, including where the data was retrieved from (``dobj_pid`` in
-the metadata), the instruments and their associated metadata and a
+the metadata), the instruments, their associated metadata and a
 citation string.
 
 You can see more information about the instruments by going to the link
 in the ``instrument_data`` section of the metadata
 
-.. code:: ipython3
+.. ipython::
 
-    metadata = wao_data.metadata
-    instrument_data = metadata["instrument_data"]
-    citation_string = metadata["citation_string"]
+    In [14]: metadata = wao_data_icos.metadata
+    ...: instrument_data = metadata["instrument_data"]
+    ...: citation_string = metadata["citation_string"]
+
+    In [15]: instrument_data
+    Out[15]: ['FTIR', 'http://meta.icos-cp.eu/resources/instruments/ATC_505']
+
+    In [16]: citation_string
+    Out[16]: 'Forster, G., Manning, A. (2022). ICOS ATC CH4 Release, Weybourne (10.0 m), 2021-07-01–2022-02-28, ICOS RI, https://hdl.handle.net/11676/LmhTdKx6FLGwplSh2tAIGGLj'
 
 Here we get the instrument name and a link to the instrument data on the
 ICOS Carbon Portal.
-
-.. code:: ipython3
-
-    instrument_data
-
-And we can easily get the citation string for the data
-
-.. code:: ipython3
-
-    citation_string
 
 Viewing the data
 ~~~~~~~~~~~~~~~~
@@ -96,11 +129,12 @@ Viewing the data
 As with any ``ObsData`` object we can quickly plot it to have a look.
 
    **NOTE:** the plot created below may not show up on the online
-   documentation version of this notebook.
+   documentation. If you're using an `ipython` console to run through the tutorial,
+   the plot will open in a new browser window.
 
-.. code:: ipython3
+.. ipython::
 
-    wao_data.plot_timeseries()
+   In [17]:  wao_data_icos.plot_timeseries()
 
 Data levels
 ~~~~~~~~~~~
@@ -122,23 +156,37 @@ By default level 2 data is retrieved but this can be changed by passing
 ``data_level`` to ``retrieve_icos``. Below we'll retrieve some more
 recent data from **WAO**.
 
-.. code:: ipython3
+.. ipython::
 
-    wao_data_level1 = retrieve_atmospheric(site="WAO", species="CH4", data_level=1)
+    In [2]:  wao_data_level1 = retrieve_atmospheric(site="WAO",
+    ...:                                             species="CH4",
+    ...:                                             sampling_height="10m",
+    ...:                                             data_level=1,
+    ...:                                             dataset_source="icos")
+    In [4]: wao_data_level1.data.time[0]
+    Out[4]:
+    <xarray.DataArray 'time' ()>
+    array('2022-03-01T00:00:00.000000000', dtype='datetime64[ns]')
+    Coordinates:
+        time     datetime64[ns] 2022-03-01
 
-.. code:: ipython3
+    In [7]: wao_data_level1.data.time[-1]
+    Out[7]:
+    <xarray.DataArray 'time' ()>
+    array('2023-02-01T22:00:00.000000000', dtype='datetime64[ns]')
+    Coordinates:
+        time     datetime64[ns] 2023-02-01T22:00:00
+    ...
 
-    wao_data_level1
-
-You can see that we've now got data from 2021-07-01 - 2022-04-24. The
-ability to retrieve different level data has been added for convenienve,
+You can see that we've now got data from 2022-03-01 - 2023-02-01. The
+ability to retrieve different level data has been added for convenience,
 choose the best option for your workflow.
 
    **NOTE:** level 1 data may not have been quality checked.
 
-.. code:: ipython3
+.. ipython::
 
-    wao_data_level1.plot_timeseries(title="WAO - Level 1 data")
+    In [10]: wao_data_level1.plot_timeseries(title="WAO - Level 1 data")
 
 Forcing retrieval
 ~~~~~~~~~~~~~~~~~
@@ -150,9 +198,10 @@ If you retrieve data using ``retrieve_icos`` and notice that it does not
 return the most up to date data (compare the dates with those on the
 portal) you can force a retrieval using ``force_retrieval``.
 
-.. code:: ipython3
+.. ipython::
 
-    new_data = retrieve_atmospheric(site="WAO", species="CH4", data_level=1, force_retrieval=True)
+    In [11]: new_data = retrieve_atmospheric(site="WAO", species="CH4", data_level=1, force_retrieval=True)
+    WARNING:openghg.store:Note: There is no new data to process.
 
 Here you may notice we get a message telling us there is no new data to
 process, if you force a retrieval and there is no newer data you'll see

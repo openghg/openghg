@@ -15,6 +15,7 @@ def retrieve_atmospheric(
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
     data_level: int = 2,
+    dataset_source: Optional[str] = None,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -33,8 +34,7 @@ def retrieve_atmospheric(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
-        function call environment.
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -46,6 +46,7 @@ def retrieve_atmospheric(
         end_date=end_date,
         force_retrieval=force_retrieval,
         data_level=data_level,
+        dataset_source=dataset_source,
     )
 
 
@@ -70,8 +71,6 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
-        function call environment.
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -121,6 +120,7 @@ def local_retrieve(
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
     data_level: int = 2,
+    dataset_source: Optional[str] = None,
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -140,6 +140,8 @@ def local_retrieve(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
+    Returns:
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -161,13 +163,16 @@ def local_retrieve(
         start_date=start_date,
         end_date=end_date,
         icos_data_level=data_level,
+        dataset_source=dataset_source,
     )
 
     if results and not force_retrieval:
         obs_data = results.retrieve_all()
     else:
         # We'll also need to check we have current data
-        standardised_data = _retrieve_remote(site=site, species=species, data_level=data_level)
+        standardised_data = _retrieve_remote(
+            site=site, species=species, data_level=data_level, dataset_source=dataset_source
+        )
 
         if standardised_data is None:
             return None
@@ -179,7 +184,7 @@ def local_retrieve(
         for data in standardised_data.values():
             measurement_data = data["data"]
             # These contain URLs that are case sensitive so skip lowercasing these
-            skip_keys = ["citation_string", "instrument_data", "dobj_pid"]
+            skip_keys = ["citation_string", "instrument_data", "dobj_pid", "dataset_source"]
             metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
@@ -194,6 +199,7 @@ def _retrieve_remote(
     data_level: int,
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
+    dataset_source: Optional[str] = None,
 ) -> Optional[Dict]:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
     a format expected by OpenGHG. A dictionary of metadata and Datasets
@@ -209,6 +215,7 @@ def _retrieve_remote(
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         species: Species name
         sampling_height: Sampling height in metres
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
     Returns:
         dict or None: Dictionary of processed data and metadata if found
     """
@@ -222,7 +229,6 @@ def _retrieve_remote(
         )
 
     import re
-
     from openghg.standardise.meta import assign_attributes
     from openghg.util import load_json
     from pandas import to_datetime
@@ -282,6 +288,15 @@ def _retrieve_remote(
 
         specific_info = dobj_info["specificInfo"]
         col_data = specific_info["columns"]
+
+        try:
+            dobj_dataset_source = dobj_info["specification"]["project"]["self"]["label"]
+        except KeyError:
+            dobj_dataset_source = "NA"
+            logger.warning("Unable to read project information from dobj.")
+
+        if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
+            continue
 
         # Get the species this dobj holds information for
         not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
@@ -360,13 +375,7 @@ def _retrieve_remote(
         metadata["source_format"] = "icos"
         metadata["icos_data_level"] = str(data_level)
 
-        try:
-            dataset_source = dobj_info["specification"]["project"]["self"]["label"]
-        except KeyError:
-            dataset_source = "NA"
-            logger.warning("Unable to read project information from dobj.")
-
-        metadata["dataset_source"] = dataset_source
+        metadata["dataset_source"] = dobj_dataset_source
 
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
