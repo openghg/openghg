@@ -266,6 +266,7 @@ def _retrieve_remote(
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
 
+    # TODO - move this to the supplementary info site, is it even needed?
     site_metadata = load_json("icos_atmos_site_metadata.json")
 
     standardised_data: Dict[str, Dict] = {}
@@ -290,7 +291,7 @@ def _retrieve_remote(
         units = species_info["valueType"]["unit"].lower()
         the_species = species_info["label"]
 
-        species_info = next(item for item in col_data if item["label"] == "ch4")
+        species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
 
         metadata["species"] = the_species
         acq_data = specific_info["acquisition"]
@@ -360,7 +361,7 @@ def _retrieve_remote(
         metadata["icos_data_level"] = str(data_level)
 
         try:
-            dataset_source = dobj.info["specification"]["project"]["self"]["label"]
+            dataset_source = dobj_info["specification"]["project"]["self"]["label"]
         except KeyError:
             dataset_source = "NA"
             logger.warning("Unable to read project information from dobj.")
