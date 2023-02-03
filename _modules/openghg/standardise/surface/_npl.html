@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._npl &#8212; OpenGHG 0+untagged.1.g80a2e19 documentation</title>
+    <title>openghg.standardise.surface._npl &#8212; OpenGHG 0+untagged.1.g13b7a85 documentation</title>
   
   
   
@@ -365,29 +365,19 @@
 <span class="sd">    Args:</span>
 <span class="sd">        data_filepath: Path of file to load</span>
 <span class="sd">        site: Site name</span>
-<span class="sd">        network: Network, defaults to LGHG</span>
-<span class="sd">        inlet: Inlet height. Will be inferred if not specified</span>
-<span class="sd">        instrument: Instrument name</span>
-<span class="sd">        sampling_period: Sampling period</span>
-<span class="sd">        measurement_type: Type of measurement taken e.g.&quot;flask&quot;, &quot;insitu&quot;</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        list: UUIDs of Datasources data has been assigned to</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_site_info</span><span class="p">,</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">synonyms</span>
 
     <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">sampling_period</span> <span class="o">=</span> <span class="s2">&quot;NOT_SET&quot;</span>
 
     <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_filepath</span><span class="p">)</span>
 
-    <span class="n">site_upper</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-    <span class="n">network_upper</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">site</span> <span class="o">=</span> <span class="s2">&quot;NPL&quot;</span>
 
     <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">npl_params</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="n">site_upper</span><span class="p">]</span>
-
-    <span class="n">site_data</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">()</span>
-    <span class="n">site_info</span> <span class="o">=</span> <span class="n">site_data</span><span class="p">[</span><span class="n">site_upper</span><span class="p">][</span><span class="n">network_upper</span><span class="p">]</span>
+    <span class="n">npl_params</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;NPL&quot;</span><span class="p">]</span>
 
     <span class="c1"># mypy doesn&#39;t like NaT or NaNs - look into this</span>
     <span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
@@ -407,43 +397,27 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">rename_dict</span><span class="p">)</span>
     <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">site_inlet_values</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to extract inlet height details for site &#39;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&#39;. Please input inlet value.&quot;</span><span class="p">)</span>
-
-    <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">site_inlet_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Use first entry</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">site_inlet_values</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: inlet value of &#39;</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&#39; does not match to known inlet values&quot;</span><span class="p">)</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
 
     <span class="n">gas_data</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">species_column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="n">processed_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="n">species_column</span><span class="p">]]</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">processed_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="n">species</span><span class="p">]]</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
 
         <span class="c1"># Convert methane to ppb</span>
-        <span class="k">if</span> <span class="n">species_column</span> <span class="o">==</span> <span class="s2">&quot;CH4&quot;</span><span class="p">:</span>
-            <span class="n">processed_data</span><span class="p">[</span><span class="n">species_column</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">1000</span>
-
-        <span class="n">species</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species_column</span><span class="p">)</span>
-        <span class="n">species</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">allow_new_species</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;CH4&quot;</span><span class="p">:</span>
+            <span class="n">processed_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">1000</span>
 
         <span class="c1"># No averaging applied to raw obs, set variability to 0 to allow get_obs to calculate</span>
         <span class="c1"># when averaging</span>
-        <span class="n">processed_data</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> variability&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">species</span><span class="p">)]</span> <span class="o">=</span> <span class="n">processed_data</span><span class="p">[</span><span class="n">species_column</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.0</span>
+        <span class="n">processed_data</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> variability&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">species</span><span class="p">)]</span> <span class="o">=</span> <span class="n">processed_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.0</span>
 
         <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">npl_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
-        <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
-        <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">)</span>
+        <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">npl_params</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
         <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">npl_params</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
 
-        <span class="n">attributes</span> <span class="o">=</span> <span class="n">site_attributes</span>
-        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
-
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">species</span><span class="p">),</span>
             <span class="s2">&quot;sampling_period&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">),</span>
             <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="s2">&quot;NPL&quot;</span><span class="p">,</span>
             <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;LGHG&quot;</span><span class="p">,</span>
@@ -456,7 +430,7 @@
         <span class="n">gas_data</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
             <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">processed_data</span><span class="p">,</span>
-            <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">,</span>
+            <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">site_attributes</span><span class="p">,</span>
         <span class="p">}</span>
 
     <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>

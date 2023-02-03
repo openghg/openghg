@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.g80a2e19 documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.g13b7a85 documentation</title>
   
   
   
@@ -343,6 +343,7 @@
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.standardise.surface&quot;</span><span class="p">)</span>
@@ -364,7 +365,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">        data_filepath: Data filepath</span>
 <span class="sd">        site: Three letter site code</span>
-<span class="sd">        inlet: Inlet height (as value unit e.g. &quot;10m&quot;)</span>
+<span class="sd">        inlet: Inlet height, if no height use measurement type e.g. flask</span>
 <span class="sd">        measurement_type: One of (&quot;flask&quot;, &quot;insitu&quot;, &quot;pfp&quot;)</span>
 <span class="sd">        network: Network, defaults to NOAA</span>
 <span class="sd">        instrument: Instrument name</span>
@@ -397,6 +398,47 @@
             <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
             <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Output inlet name in expected format. This will include 1 decimal place for floats with a fractional component</span>
+<span class="sd">    and 0 decimal places otherwise.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inlet : Inlet value. This can be a string as long as this can be converted directly to a float</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str : Formatted string of inlet name</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; _format_inlet(40)</span>
+<span class="sd">        &quot;40m&quot;</span>
+<span class="sd">        &gt;&gt;&gt; _format_inlet(&quot;10.0&quot;)</span>
+<span class="sd">        &quot;10m&quot;</span>
+<span class="sd">        &gt;&gt;&gt; _format_inlet(2.511432)</span>
+<span class="sd">        &quot;2.5m&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inlet</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inlet_value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">inlet_values_str</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">inlet_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">inlet_values_str</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to convert inlet </span><span class="si">{inlet}</span><span class="s2"> to a float&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inlet_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">inlet_values</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inlet_value</span> <span class="o">=</span> <span class="n">inlet</span>
+
+    <span class="k">if</span> <span class="n">inlet_value</span> <span class="o">%</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">inlet_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_value</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">m&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inlet_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">inlet_value</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">m&quot;</span>
+
+    <span class="k">return</span> <span class="n">inlet_str</span>
 
 
 <span class="k">def</span> <span class="nf">_standarise_variables</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
@@ -498,7 +540,6 @@
 <span class="sd">        {&quot;ch4_40m&quot;: {&quot;data&quot;: xr.Dataset(...), &quot;attributes&quot;: {...}, &quot;metadata&quot;: {...}}, &quot;ch4_60m&quot;: {...}, ...}</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">format_inlet</span>
 
     <span class="n">orig_attrs</span> <span class="o">=</span> <span class="n">obspack_ds</span><span class="o">.</span><span class="n">attrs</span>
     <span class="n">species</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
@@ -528,8 +569,8 @@
         <span class="k">for</span> <span class="n">ht</span><span class="p">,</span> <span class="n">obspack_ds_ht</span> <span class="ow">in</span> <span class="n">obspack_ds_grouped</span><span class="p">:</span>
 
             <span class="c1"># Creating id keys of the form &quot;&lt;species&gt;_&lt;inlet&gt;&quot; e.g. &quot;ch4_40m&quot; or &quot;co_12.5m&quot;</span>
-            <span class="n">inlet_str</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ht</span><span class="p">),</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet&quot;</span><span class="p">)</span>
-            <span class="n">inlet_magl_str</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ht</span><span class="p">),</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">)</span>
+            <span class="n">inlet_str</span> <span class="o">=</span> <span class="n">_format_inlet</span><span class="p">(</span><span class="n">ht</span><span class="p">)</span>
+            <span class="n">inlet_num_str</span> <span class="o">=</span> <span class="n">inlet_str</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">num_groups</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">id_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">inlet_str</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -547,9 +588,9 @@
             <span class="n">meta_copy</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
             <span class="n">attrs_copy</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_str</span>
-            <span class="n">attrs_copy</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_magl_str</span>
+            <span class="n">attrs_copy</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_num_str</span>
             <span class="n">meta_copy</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_str</span>
-            <span class="n">meta_copy</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_magl_str</span>
+            <span class="n">meta_copy</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_num_str</span>
 
             <span class="n">gas_data</span><span class="p">[</span><span class="n">id_key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta_copy</span>
             <span class="n">gas_data</span><span class="p">[</span><span class="n">id_key</span><span class="p">][</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrs_copy</span>
@@ -560,7 +601,7 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="n">inlet_from_file</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">inlet_from_file</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">inlet_value</span><span class="p">))</span>
+            <span class="n">inlet_from_file</span> <span class="o">=</span> <span class="n">_format_inlet</span><span class="p">(</span><span class="n">inlet_value</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">measurement_type</span> <span class="o">==</span> <span class="s2">&quot;flask&quot;</span><span class="p">:</span>
             <span class="n">inlet_from_file</span> <span class="o">=</span> <span class="s2">&quot;flask&quot;</span>
@@ -581,14 +622,14 @@
         <span class="n">id_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="k">if</span> <span class="n">inlet</span> <span class="o">!=</span> <span class="s2">&quot;flask&quot;</span><span class="p">:</span>
-            <span class="n">inlet_magl_str</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">)</span>
+            <span class="n">inlet_num_str</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">inlet_magl_str</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+            <span class="n">inlet_num_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_magl_str</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_num_str</span>
         <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet</span>
-        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_magl_str</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inlet_num_str</span>
 
         <span class="n">standardised_ds</span> <span class="o">=</span> <span class="n">_standarise_variables</span><span class="p">(</span><span class="n">obspack_ds</span><span class="p">,</span> <span class="n">species</span><span class="p">)</span>
 
