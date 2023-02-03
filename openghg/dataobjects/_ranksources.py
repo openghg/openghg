@@ -1,3 +1,4 @@
+# type: ignore
 from typing import Dict, Union
 
 from openghg.store import ObsSurface
@@ -59,6 +60,7 @@ class RankSources:
     #     return self._user_info
 
     def _get_sources_local(self, site: str, species: str) -> Dict:
+        raise NotImplementedError
         site = verify_site(site=site)
 
         # Save these

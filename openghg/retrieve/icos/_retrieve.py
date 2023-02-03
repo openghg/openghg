@@ -1,7 +1,10 @@
 from typing import Any, Dict, List, Optional, Union
-
 from openghg.dataobjects import ObsData
 from openghg.util import running_on_hub
+import logging
+
+logger = logging.getLogger("openghg.retrieve")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def retrieve_atmospheric(
@@ -12,6 +15,7 @@ def retrieve_atmospheric(
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
     data_level: int = 2,
+    update_metadata_mismatch: bool = False,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -32,6 +36,9 @@ def retrieve_atmospheric(
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
         function call environment.
+        update_metadata_mismatch: If metadata derived from ICOS Header does not match
+            to derived attributes, update metadata to match to attributes.
+            Otherwise a AttrMismatchError will be raised.
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -43,6 +50,7 @@ def retrieve_atmospheric(
         end_date=end_date,
         force_retrieval=force_retrieval,
         data_level=data_level,
+        update_metadata_mismatch=update_metadata_mismatch,
     )
 
 
@@ -69,6 +77,9 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
         function call environment.
+        update_metadata_mismatch: If metadata derived from ICOS Header does not match
+            to derived attributes, update metadata to match to attributes.
+            Otherwise a AttrMismatchError will be raised.
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -118,6 +129,7 @@ def local_retrieve(
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
     data_level: int = 2,
+    update_metadata_mismatch: bool = False,
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -137,16 +149,18 @@ def local_retrieve(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        update_metadata_mismatch: If metadata derived from ICOS Header does not match
+            to derived attributes, update metadata to match to attributes.
+            Otherwise a AttrMismatchError will be raised.
     Returns:
         ObsData, list[ObsData] or None
     """
-    from openghg.dataobjects import ObsData
     from openghg.retrieve import search_surface
     from openghg.store import ObsSurface
     from openghg.util import to_lowercase
 
     if not 1 <= data_level <= 2:
-        print("Error: data level must be 1 or 2.")
+        logger.error("Error: data level must be 1 or 2.")
 
     # NOTE - we skip ranking here, will we be ranking ICOS data?
     results = search_surface(
@@ -164,7 +178,12 @@ def local_retrieve(
         obs_data = results.retrieve_all()
     else:
         # We'll also need to check we have current data
-        standardised_data = _retrieve_remote(site=site, species=species, data_level=data_level)
+        standardised_data = _retrieve_remote(
+            site=site,
+            species=species,
+            data_level=data_level,
+            update_metadata_mismatch=update_metadata_mismatch,
+        )
 
         if standardised_data is None:
             return None
@@ -191,6 +210,7 @@ def _retrieve_remote(
     data_level: int,
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
+    update_metadata_mismatch: bool = False,
 ) -> Optional[Dict]:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
     a format expected by OpenGHG. A dictionary of metadata and Datasets
@@ -206,6 +226,9 @@ def _retrieve_remote(
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         species: Species name
         sampling_height: Sampling height in metres
+        update_metadata_mismatch: If metadata derived from ICOS Header does not match
+            to derived attributes, update metadata to match to attributes.
+            Otherwise a AttrMismatchError will be raised.
     Returns:
         dict or None: Dictionary of processed data and metadata if found
     """
@@ -221,7 +244,7 @@ def _retrieve_remote(
     import re
 
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import load_json
+    from openghg.util import load_json, format_inlet
     from pandas import to_datetime
 
     if species is None:
@@ -236,7 +259,7 @@ def _retrieve_remote(
     stat = station.get(stationId=site.upper())
 
     if not stat.valid:
-        print("Please check you have passed a valid ICOS site.")
+        logger.error("Please check you have passed a valid ICOS site.")
         return None
 
     data_pids = stat.data(level=data_level)
@@ -255,7 +278,7 @@ def _retrieve_remote(
         ]
 
     if filtered_sources.empty:
-        print(
+        logger.error(
             f"No sources found for {species} at {site}. Please check with the ICOS Carbon Portal that this data is available."
         )
         return None
@@ -263,7 +286,7 @@ def _retrieve_remote(
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
 
-    site_metadata = load_json("icos_atmos_site_metadata.json")
+    site_metadata = load_json(filename="icos_atmos_site_metadata.json")
 
     standardised_data: Dict[str, Dict] = {}
 
@@ -328,21 +351,21 @@ def _retrieve_remote(
         metadata["units"] = units
 
         _sampling_height = acq_data["samplingHeight"]
-        metadata["sampling_height"] = f"{int(float(_sampling_height))}m"
-        metadata["inlet_height_magl"] = f"{int(float(_sampling_height))}m"
+        metadata["sampling_height"] = format_inlet(_sampling_height, key_name="sampling_height")
         metadata["sampling_height_units"] = "metres"
-        metadata["inlet"] = f"{int(float(_sampling_height))}m"
+        metadata["inlet"] = format_inlet(_sampling_height, key_name="inlet")
+        metadata["inlet_height_magl"] = format_inlet(_sampling_height, key_name="inlet_height_magl")
 
         loc_data = station_data["location"]
         metadata["station_long_name"] = loc_data["label"]
         metadata["station_latitude"] = str(loc_data["lat"])
         metadata["station_longitude"] = str(loc_data["lon"])
-        metadata["station_altitude"] = f"{int(float(loc_data['alt']))}m"
+        metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
 
         site_specific = site_metadata[site.upper()]
         metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
         metadata["data_owner_email"] = site_specific["email"]
-        metadata["station_height_masl"] = f"{int(float(site_specific['eas']))}m"
+        metadata["station_height_masl"] = format_inlet(site_specific["eas"], key_name="station_height_masl")
 
         metadata["citation_string"] = dobj_info["references"]["citationString"]
         metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
@@ -398,8 +421,9 @@ def _retrieve_remote(
             "attributes": metadata,
         }
 
-    # Make sure everything is CF compliant
-    standardised_data = assign_attributes(data=standardised_data)
+    standardised_data = assign_attributes(
+        data=standardised_data, update_metadata_mismatch=update_metadata_mismatch
+    )
 
     return standardised_data
 

@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Dict, Optional, Union, cast
-
+import logging
 import xarray as xr
+
+logger = logging.getLogger("openghg.standardise.surface")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
@@ -21,8 +24,8 @@ def parse_openghg(
     Parse and extract data from pre-formatted netcdf file which already
     matches expected OpenGHG format.
 
-    At the moment this must also be for a site known to OpenGHG. See
-    'site_info.json' file.
+    At the moment this must also be for a site known to OpenGHG.
+    See "site_info.json" file within the openghg_defs repository.
 
     The arguments specified below are the metadata needed to store this
     surface observation file within the object store. If these keywords are
@@ -46,7 +49,7 @@ def parse_openghg(
     Returns:
         Dict: Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, load_json, format_inlet
+    from openghg.util import clean_string, format_inlet, load_json, get_site_info
     from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
 
     data_filepath = Path(data_filepath)
@@ -107,7 +110,7 @@ def parse_openghg(
 
     metadata = cast(Dict[str, str], metadata_initial)
 
-    metadata["inlet_height_magl"] = str(metadata["inlet"]).strip("m")
+    metadata["inlet_height_magl"] = format_inlet(str(metadata["inlet"]), key_name="inlet_height_magl")
     metadata["data_type"] = "surface"
 
     # Define remaining keys needed for metadata
@@ -133,13 +136,15 @@ def parse_openghg(
     network_case_options = [network, network.upper(), network.lower()]
 
     # Extract centralised data for site (if present)
-    site_data = load_json(filename="site_info.json")
+    site_data = get_site_info()
     for site_value in site_case_options:
         if site_value in site_data:
             site_info_all = site_data[site_value]
             break
     else:
-        print("Unknown site. Will attempt to extract metadata from dataset attributes or input keywords")
+        logger.info(
+            "Unknown site. Will attempt to extract metadata from dataset attributes or input keywords"
+        )
         site_info_all = {}
 
     for network_value in network_case_options:
@@ -147,7 +152,7 @@ def parse_openghg(
             site_info = site_info_all[network_value]
             break
     else:
-        print(
+        logger.info(
             "Network {network} does not match with site {site}. Will attempt to extract metadata from dataset attributes or input keywords"
         )
         site_info = {}

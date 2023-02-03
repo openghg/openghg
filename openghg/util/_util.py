@@ -215,9 +215,9 @@ def multiple_inlets(site: str) -> bool:
     Returns:
         bool: True if multiple inlets
     """
-    from openghg.util import load_json
+    from openghg.util import get_site_info
 
-    site_data = load_json("site_info.json")
+    site_data = get_site_info()
 
     site = site.upper()
     network = next(iter(site_data[site]))

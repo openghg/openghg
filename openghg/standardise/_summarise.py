@@ -1,42 +1,35 @@
-from typing import Dict, Union
+from typing import Dict
 
 import pandas as pd
-from pathlib import Path
-from openghg.types import SurfaceTypes
-from openghg.util import get_datapath, load_json, sites_in_network
+from openghg.types import SurfaceTypes, optionalPathType
+from openghg.util import get_datapath, get_site_info, sites_in_network
 
 # from openghg.types import DataTypes  # Would this be more appropriate?
 # This does include Footprint as well as the input obs data types?
 
 
-def _extract_site_names(site_codes: list,
-                        site_json: Union[str, Path] = "default") -> list:
+def _extract_site_names(site_codes: list, site_filepath: optionalPathType = None) -> list:
     """
     Extracts long names for site codes.
 
+    This uses the data stored within openghg_defs/site_info JSON file by default.
+
     Args:
         site_codes: List of site codes
-        site_json: By default this will use the "site_info.json" file
-            but an alternative file which matches to this format may be specified.
+        site_filepath: Alternative site info file.
 
     Returns:
         list: Long names for each site code
     """
 
-    # Uses "site_info.json" file by default.
-    if site_json == "default":
-        site_params = load_json("site_info.json")
-    else:
-        site_json_path = Path(site_json)
-        path = site_json_path.parent
-        filename = site_json_path.name
-        site_data = load_json(filename=filename, path=path)
+    # Get data for site
+    site_data = get_site_info(site_filepath)
 
     # Extracts long name from site data
     site_names = []
     for site in site_codes:
-        site_data = site_params[site]
-        data0 = list(site_data.values())[0]  # Uses first network entry
+        site_details = site_data[site]
+        data0 = list(site_details.values())[0]  # Uses first network entry
         try:
             site_name = data0["long_name"]
         except KeyError:
@@ -77,9 +70,9 @@ def summary_source_formats() -> pd.DataFrame:
         # applicable to network sites.
         # TODO: May be a bad assumption, consider this and update as necessary.
         if len(site_codes) == 0:
-            site_codes = sites_in_network(source_format)
+            site_codes = sites_in_network(network=source_format)
 
-        site_names = _extract_site_names(site_codes)
+        site_names = _extract_site_names(site_codes=site_codes)
 
         if len(source_format_site) > 0:
             site_data = source_format_site.copy()
@@ -106,7 +99,7 @@ def summary_source_formats() -> pd.DataFrame:
     return collated_site_data
 
 
-def summary_site_codes() -> pd.DataFrame:
+def summary_site_codes(site_filepath: optionalPathType = None) -> pd.DataFrame:
     """
     Create summary DataFrame of site codes. This includes details of the network,
     longitude, latitude, height above sea level and stored heights.
@@ -116,34 +109,28 @@ def summary_site_codes() -> pd.DataFrame:
 
     Returns:
         pandas.DataFrame
-
-    TODO: Allow input for site json file to use. Must match to format within
-    "site_info.json" file.
     """
 
-    from openghg.util import load_json
-
-    site_info = load_json(filename="site_info.json")
+    # Get data for site
+    site_data = get_site_info(site_filepath)
 
     site_dict: Dict[str, list] = {}
     site_dict["site"] = []
     site_dict["network"] = []
 
-    expected_keys: list = ["long_name",
-                           "latitude",
-                           "longitude",
-                           "height_station_masl",
-                          ["heights", "height"]]
+    expected_keys: list = ["long_name", "latitude", "longitude", "height_station_masl", ["heights", "height"]]
 
     name_keys = [key[0] if isinstance(key, list) else key for key in expected_keys]
     for key in name_keys:
         site_dict[key] = []
 
-    for site, network_data in site_info.items():
+    for site, network_data in site_data.items():
         for network, data in network_data.items():
             for key in expected_keys:
                 if not isinstance(key, list):
-                    search_keys = [key, ]
+                    search_keys = [
+                        key,
+                    ]
                 else:
                     search_keys = key
 
@@ -162,11 +149,16 @@ def summary_site_codes() -> pd.DataFrame:
 
     all_keys = name_keys.copy()
     all_keys.extend(["site", "network"])
-    descriptive_names = {"site": "Site Code",
-                         "long_name": "Long name",
-                         "height_station_masl": "Station height (masl)",
-                         "heights": "Inlet heights"}
-    column_names = {name: (descriptive_names[name] if name in descriptive_names else name.capitalize()) for name in all_keys}
+    descriptive_names = {
+        "site": "Site Code",
+        "long_name": "Long name",
+        "height_station_masl": "Station height (masl)",
+        "heights": "Inlet heights",
+    }
+    column_names = {
+        name: (descriptive_names[name] if name in descriptive_names else name.capitalize())
+        for name in all_keys
+    }
 
     site_df = site_df.rename(columns=column_names)
     site_df = site_df.set_index("Site Code")

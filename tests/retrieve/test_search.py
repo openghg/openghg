@@ -45,7 +45,7 @@ def test_search_surface(inlet_keyword, inlet_value):
         "calibration_scale": "wmo-x2007",
         "long_name": "heathfield",
         "data_type": "surface",
-        "inlet_height_magl": "50m",
+        "inlet_height_magl": "50",
     }
 
     assert partial_metdata.items() <= res.metadata[key].items()
@@ -95,7 +95,7 @@ def test_search_site():
         "species": "co2",
         "calibration_scale": "wmo-x2007",
         "long_name": "bilsdale",
-        "inlet_height_magl": "42m",
+        "inlet_height_magl": "42",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "station_longitude": -1.15033,
@@ -122,7 +122,7 @@ def test_search_site():
         "species": "co2",
         "calibration_scale": "wmo-x2007",
         "long_name": "bilsdale",
-        "inlet_height_magl": "108m",
+        "inlet_height_magl": "108",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "station_longitude": -1.15033,

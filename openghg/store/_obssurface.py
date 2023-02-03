@@ -322,7 +322,7 @@ class ObsSurface(BaseStore):
                 progress_bar.update(1)
 
                 logger.info(f"Completed processing: {data_filepath.name}.")
-                logger.info(f"\tUUIDs: {datasource_uuids}")
+                # logger.info(f"\tUUIDs: {datasource_uuids}")
 
         # Ensure we explicitly close the metadata store
         # as we're using the cached storage method

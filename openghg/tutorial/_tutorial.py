@@ -8,8 +8,11 @@ import tarfile
 import warnings
 from pathlib import Path
 from typing import List, Union
-
+import logging
 from openghg.standardise import standardise_footprint, standardise_flux, standardise_bc
+
+logger = logging.getLogger("openghg.tutorial")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 __all__ = ["bilsdale_datapaths"]
 
@@ -47,7 +50,7 @@ def populate_footprint_inert() -> None:
 
     tac_inert_path = retrieve_example_data(url=tac_fp_inert)[0]
 
-    print("Standardising footprint data...")
+    logger.info("Standardising footprint data...")
     # TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -73,10 +76,10 @@ def populate_footprint_co2() -> None:
     """
     tac_fp_co2 = "https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_co2_201707.tar.gz"
 
-    print("Retrieving example data...")
+    logger.info("Retrieving example data...")
     tac_co2_path = retrieve_example_data(url=tac_fp_co2)[0]
 
-    print("Standardising footprint data...")
+    logger.info("Standardising footprint data...")
     # TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -100,7 +103,7 @@ def populate_footprint_co2() -> None:
                     species=species,
                 )
 
-    print("Done.")
+    logger.info("Done.")
 
 
 def populate_flux_data() -> None:
@@ -153,7 +156,7 @@ def populate_flux_ch4() -> None:
     """
     use_tutorial_store()
 
-    print("Retrieving data...")
+    logger.info("Retrieving data...")
     eur_2016_flux = "https://github.com/openghg/example_data/raw/main/flux/ch4-ukghg-all_EUROPE_2016.tar.gz"
     flux_data = retrieve_example_data(url=eur_2016_flux)
 
@@ -163,7 +166,7 @@ def populate_flux_ch4() -> None:
     flux_data_waste = [filename for filename in flux_data if source_waste in str(filename)][0]
     flux_data_energyprod = [filename for filename in flux_data if source_energyprod in str(filename)][0]
 
-    print("Standardising flux...")
+    logger.info("Standardising flux...")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
@@ -181,7 +184,7 @@ def populate_flux_ch4() -> None:
                     domain=domain,
                 )
 
-    print("Done.")
+    logger.info("Done.")
 
 
 def populate_bc() -> None:
@@ -198,7 +201,7 @@ def populate_bc_ch4() -> None:
     """
     use_tutorial_store()
 
-    print("Retrieving data...")
+    logger.info("Retrieving data...")
     eur_2016_bc = (
         "https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz"
     )
@@ -208,15 +211,14 @@ def populate_bc_ch4() -> None:
     domain = "EUROPE"
     species = "ch4"
 
-    print("Standardising boundary conditions...")
+    logger.info("Standardising boundary conditions...")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
-                print("bc_data_path", bc_data_path)
                 standardise_bc(filepath=bc_data_path, bc_input=bc_input, species=species, domain=domain)
 
-    print("Done.")
+    logger.info("Done.")
 
 
 def populate_surface_data() -> None:
@@ -234,7 +236,7 @@ def populate_surface_data() -> None:
     tac_data = "https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz"
     capegrim_data = "https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz"
 
-    print("Retrieving example data...")
+    logger.info("Retrieving example data...")
     bsd_paths = retrieve_example_data(url=bsd_data)
     tac_paths = retrieve_example_data(url=tac_data)
     capegrim_paths = sorted(retrieve_example_data(url=capegrim_data))
@@ -242,7 +244,7 @@ def populate_surface_data() -> None:
     # Create the tuple required
     capegrim_tuple = (capegrim_paths[0], capegrim_paths[1])
 
-    print("Standardising data...")
+    logger.info("Standardising data...")
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -258,7 +260,7 @@ def populate_surface_data() -> None:
                     network="agage",
                 )
 
-    print("Done.")
+    logger.info("Done.")
 
 
 def bilsdale_datapaths() -> List:
@@ -407,4 +409,4 @@ def clear_tutorial_store() -> None:
 
     shutil.rmtree(path=path, ignore_errors=True)
 
-    print(f"Tutorial store at {path} cleared.")
+    logger.info(f"Tutorial store at {path} cleared.")

@@ -37,3 +37,7 @@ class RequestBucketError(OpenGHGError):
 
 class SearchError(OpenGHGError):
     """Related to searching the object store"""
+
+
+class AttrMismatchError(OpenGHGError):
+    """Mismatch between attributes of input file and derived metadata"""

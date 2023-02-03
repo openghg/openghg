@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Union
-
+import logging
 from openghg.store import ObsSurface
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def add_noaa_obspack(
@@ -63,7 +66,7 @@ def add_noaa_obspack(
             raise ValueError(f"Did not recognise input {project} for project")
     else:
         projects_to_read = project_names
-        print(f"Reading subset of data from {','.join(projects_to_read)}")
+        logger.info(f"Reading subset of data from {','.join(projects_to_read)}")
 
     if isinstance(data_directory, str):
         data_directory = Path(data_directory)
@@ -92,7 +95,9 @@ def add_noaa_obspack(
                 overwrite=overwrite,
             )
         elif project in project_names_not_implemented:
-            print(f"Not processing {filepath.name} - no standardisation for {project} data implemented yet.")
+            logger.warning(
+                f"Not processing {filepath.name} - no standardisation for {project} data implemented yet."
+            )
             processed = {}
         else:
             processed = {}
@@ -202,7 +207,7 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
     # extract nc files.
     for subdir in subdirectories:
         path_to_search = data_directory / subdir
-        print(f"Searching for {ext} files within {path_to_search}")
+        logger.info(f"Searching for {ext} files within {path_to_search}")
         files = list(path_to_search.glob(f"*{ext}"))
         suffix_values = [file.suffix for file in files]
         if ext in suffix_values:

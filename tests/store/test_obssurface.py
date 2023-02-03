@@ -322,7 +322,7 @@ def test_read_cranfield():
     data_filepath = get_surface_datapath(filename="THB_hourly_means_test.csv", source_format="Cranfield_CRDS")
 
     results = ObsSurface.read_file(
-        filepath=data_filepath, source_format="CRANFIELD", site="THB", network="CRANFIELD"
+        filepath=data_filepath, source_format="CRANFIELD", site="TMB", network="CRANFIELD"
     )
 
     expected_keys = ["ch4", "co", "co2"]
@@ -472,11 +472,11 @@ def test_read_thames_barrier():
         sampling_period="3600s",
     )
 
-    expected_keys = sorted(["CH4", "CO2", "CO"])
+    expected_keys = sorted(["ch4", "co2", "co"])
 
     assert sorted(list(results["processed"]["thames_test_20190707.csv"].keys())) == expected_keys
 
-    uuid = results["processed"]["thames_test_20190707.csv"]["CO2"]["uuid"]
+    uuid = results["processed"]["thames_test_20190707.csv"]["co2"]["uuid"]
 
     data = Datasource.load(uuid=uuid, shallow=False).data()
     data = data["2019-07-01-00:39:55+00:00_2019-08-01-01:10:29+00:00"]
@@ -740,7 +740,7 @@ def test_read_multiside_aqmesh():
         "in_ulez": "No",
         "latitude": 55.798813,
         "longitude": -4.058363,
-        "inlet": 1,
+        "inlet": "1m",
         "network": "aqmesh_glasgow",
         "sampling_period": "NOT_SET",
         "species": "co2",

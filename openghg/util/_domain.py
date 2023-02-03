@@ -3,21 +3,44 @@ from typing import Any, Dict, Tuple, Union
 import numpy as np
 from numpy import ndarray
 
+from openghg.types import optionalPathType
 
-def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
+__all__ = ["get_domain_info", "find_domain", "convert_longitude"]
+
+
+def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
+    """Extract data from domain info JSON file as a dictionary.
+
+    This uses the data stored within openghg_defs/domain_info JSON file by default.
+
+    Args:
+        domain_filepath: Alternative domain info file.
+    Returns:
+        dict: Data from domain JSON file
     """
-    Finds the latitude and longitude values in degrees associated
+    from openghg_defs import domain_info_file
+    from openghg.util import load_json
+
+    if domain_filepath is None:
+        domain_info_json = load_json(path=domain_info_file)
+    else:
+        domain_info_json = load_json(path=domain_filepath)
+
+    return domain_info_json
+
+
+def find_domain(domain: str, domain_filepath: optionalPathType = None) -> Tuple[ndarray, ndarray]:
+    """Finds the latitude and longitude values in degrees associated
     with a given domain name.
 
     Args:
-        domain: Pre-defined domain name (see 'domain_info.json')
-
+        domain: Pre-defined domain name
+        domain_filepath: Alternative domain info file. Defaults to openghg_defs input.
     Returns:
         array, array : Latitude and longitude values for the domain in degrees.
     """
-    from openghg.util import load_json
 
-    domain_info = load_json(filename="domain_info.json")
+    domain_info = get_domain_info(domain_filepath)
 
     # Look for domain in domain_info file
     if domain in domain_info:
@@ -36,8 +59,7 @@ def find_domain(domain: str) -> Tuple[ndarray, ndarray]:
 
 
 def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
-    """
-    Attempts to extract or derive coordinate (typically latitude/longitude)
+    """Attempts to extract or derive coordinate (typically latitude/longitude)
     values for a domain from provided data dictionary (typically
     this can be derived from 'domain_info.json' file).
 
@@ -55,17 +77,16 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
         data: Data dictionary containing details of domain
               (e.g. derived from 'domain_info.json')
         domain: Name of domain
-
     Returns:
         array: Extracted or derived coordinate values
     """
-    from openghg.util import get_datapath
+    from openghg_defs import data_path
 
     # Look for explicit file keyword in data e.g. "latitude_file"
     # Extract data from file if found and return
     filename_str = f"{coord}_file"
     if filename_str in data:
-        full_filename = get_datapath(data[filename_str])
+        full_filename = data_path / data[filename_str]
         coord_data: ndarray = np.loadtxt(full_filename)
         return coord_data
 
@@ -73,7 +94,7 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     # if data is present by looking for file of form "domain/{domain}_{coord}.csv"
     # e.g. "domain/EUROPE_latitude.csv" (within "openghg/openghg/data" folder)
     try:
-        full_filename = get_datapath(f"{domain}_{coord}.dat", "domain")
+        full_filename = data_path / "domain" / f"{domain}_{coord}.dat"
         coord_data = np.loadtxt(full_filename)
     except OSError:
         pass
@@ -100,13 +121,11 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
 def convert_longitude(
     longitude: ndarray, return_index: bool = False
 ) -> Union[ndarray, Tuple[ndarray, ndarray]]:
-    """
-    Convert longitude extent to -180 - 180 and reorder.
+    """Convert longitude extent to -180 - 180 and reorder.
 
     Args:
         longitude: Array of valid longitude values in degrees.
         return_index: Return re-ordering index as well as updated longitude
-
     Returns:
         ndarray(, ndarray) : Updated longitude values and new indices if requested.
     """
