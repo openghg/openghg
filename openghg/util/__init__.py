@@ -2,7 +2,7 @@
     Utility functions for OpenGHG
 """
 from ._cli import cli
-from ._domain import convert_longitude, find_domain
+from ._domain import get_domain_info, convert_longitude, find_domain
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import (
@@ -24,8 +24,8 @@ from ._file import (
 )
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
 from ._inlet import format_inlet
-from ._site import sites_in_network
-from ._species import check_lifetime_monthly, molar_mass, species_lifetime, synonyms
+from ._site import get_site_info, sites_in_network
+from ._species import get_species_info, check_lifetime_monthly, molar_mass, species_lifetime, synonyms
 from ._strings import clean_string, is_number, remove_punctuation, to_lowercase
 from ._time import (
     check_date,

@@ -55,7 +55,7 @@ def parse_beaco2n(
             f"Unable to read data file, please make sure it is in the standard BEACO2N format.\nError: {e}"
         )
 
-    beaco2n_site_data = load_json("beaco2n_site_data.json")
+    beaco2n_site_data = load_json("beaco2n_site_data.json", internal_data=True)
 
     try:
         site_metadata = beaco2n_site_data[site.upper()]
