@@ -1,0 +1,1057 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.g295e40b documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_new_data/Adding_ancillary_data';</script>
+    <script src="../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Comparing observations to emissions" href="../Analysing_data/Comparing_with_emissions.html" />
+    <link rel="prev" title="Adding observation data" href="Adding_observation_data.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../../../_static/./images/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/./images/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
+                        What’s new
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
+            <div class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    More
+                </button>
+                <div class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
+                        What’s new
+                      </a>
+                    </li>
+                
+                </div>
+            </div>
+            
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Adding_observation_data.html">Adding observation data</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Adding ancillary spatial data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Comparing_with_emissions.html">Comparing observations to emissions</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Working_with_co2.html">Working with carbon dioxide</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">Explore NOAA ObsPack</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="adding-ancillary-spatial-data">
+<h1>Adding ancillary spatial data<a class="headerlink" href="#adding-ancillary-spatial-data" title="Permalink to this heading">#</a></h1>
+<p>This tutorial demonstrates how to add ancillary spatial data to the
+OpenGHG store. These are split into several data types which currently
+include:</p>
+<ul class="simple">
+<li><p>“footprints” - regional outputs from an LPDM model (e.g. NAME)</p></li>
+<li><p>“emissions” - estimates of species emissions/flux within a region</p></li>
+<li><p>“boundary_conditions” - vertical curtains at the boundary of a
+regional domain</p></li>
+<li><p><em>“eulerian_model” - Global CTM output (e.g. GEOSChem)</em></p></li>
+</ul>
+<p>These inputs must adhere to an expected netcdf format and are expected
+to minimally contain a fixed set of inputs.</p>
+<p><em>For some often used databases and inputs, there will be limited
+transformation functions available to create and store data in this
+format directly. See the ``openghg.transform`` sub-module for options.
+To be expanded upon.</em></p>
+<section id="using-the-tutorial-object-store">
+<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Permalink to this heading">#</a></h2>
+<p>To avoid adding the example data we use in this tutorial to your normal
+object store, we need to tell OpenGHG to use a separate sandboxed object
+store that we’ll call the tutorial store. To do this we use the
+<code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
+<code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
+affect your use of OpenGHG outside of this tutorial.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+
+<span class="n">use_tutorial_store</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="adding-and-standardising-data">
+<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Permalink to this heading">#</a></h2>
+<p>Data can be added to the object store using appropriate functions from
+the <code class="docutils literal notranslate"><span class="pre">openghg.standardise</span></code> sub module. This includes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">standardise_footprints</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">standardise_flux</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">standardise_bc</span></code></p></li>
+<li><p><em>``standardise_eulerian`` - not implemented yet</em></p></li>
+</ul>
+<p>For all data types, as well as the path to the data file, a set of
+keywords should be supplied. The applicable keywords depends upon the
+data type itself but are used to categorise the data.</p>
+<p>We can grab some data which is in the expected format (see below for
+more details on the format) for our different types so these can be
+added to the object store.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+
+<span class="n">fp_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_inert_201607.tar.gz&quot;</span>
+<span class="n">data_file_fp</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">fp_url</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">flux_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/flux/ch4-ukghg-all_EUROPE_2016.tar.gz&quot;</span>
+<span class="n">data_file_flux</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">flux_url</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">bc_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz&quot;</span>
+<span class="n">data_file_bc</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">bc_url</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Downloading tac_footprint_inert_201607.tar.gz: 100%|██████████| 67.0M/67.0M [00:17&lt;00:00, 3.95MB/s]
+Downloading ch4-ukghg-all_EUROPE_2016.tar.gz: 100%|██████████| 82.5k/82.5k [00:00&lt;00:00, 2.38MB/s]
+Downloading ch4_EUROPE_201607.tar.gz: 100%|██████████| 77.4k/77.4k [00:00&lt;00:00, 4.22MB/s]
+</pre></div>
+</div>
+<section id="data-domains">
+<h3>Data domains<a class="headerlink" href="#data-domains" title="Permalink to this heading">#</a></h3>
+<p>For spatial data, we can indicate consistent areas and resolution using
+a <em>domain</em> as a label for this. For multiple pieces of data, a single
+domain name should refer to the exact same set of latitude and longitude
+bounds.</p>
+<p>There are some pre-defined domain names already defined but it is also
+possible to add new domain labels and definitions as needed. (<em>make sure
+this has been consistently applied</em>)</p>
+<p><em>Add details for how to check known domains</em></p>
+<section id="footprints">
+<h4>Footprints<a class="headerlink" href="#footprints" title="Permalink to this heading">#</a></h4>
+<p>To standardise and store footprint data, in addition to the data file to
+standardise, we also need to pass a set of keywords to label this. As a
+minumum this needs to include: - <code class="docutils literal notranslate"><span class="pre">site</span></code> - site identifier (use
+<code class="docutils literal notranslate"><span class="pre">openghg.standardise.summary_site_codes()</span></code> function to check this) -
+<code class="docutils literal notranslate"><span class="pre">inlet</span></code> (/ height) associated with the site - <code class="docutils literal notranslate"><span class="pre">domain</span></code> - regional
+domain covered by the footprint - <code class="docutils literal notranslate"><span class="pre">model</span></code> - name of model used to
+create the footprint</p>
+<p>Additional details can also be specified, in particular, for the
+meteorological model used (metmodel) and the species name (if relevant).</p>
+<p>For the example below, the footprint data generated from the NAME model
+for the Tacolneston (TAC) site at 100m inlet. This covers an area over
+Europe which we have defined as the “EUROPE” domain. Unless a specific
+species is specified, this will be assumed to be a generic inert
+species.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_footprint</span>
+
+<span class="n">standardise_footprint</span><span class="p">(</span><span class="n">data_file_fp</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;NAME&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span><span class="p">:</span><span class="n">openghg</span><span class="o">.</span><span class="n">store</span><span class="p">:</span><span class="n">This</span> <span class="n">file</span> <span class="n">has</span> <span class="n">been</span> <span class="n">uploaded</span> <span class="n">previously</span> <span class="k">with</span> <span class="n">the</span> <span class="n">filename</span> <span class="p">:</span> <span class="n">TAC</span><span class="o">-</span><span class="mi">100</span><span class="n">magl_UKV_EUROPE_201607</span><span class="o">.</span><span class="n">nc</span> <span class="o">-</span> <span class="n">skipping</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>This standardised data can then be accessed and retrieved from the
+object store using the <code class="docutils literal notranslate"><span class="pre">get_footprint</span></code> function available from the
+<code class="docutils literal notranslate"><span class="pre">openghg.retrieve</span></code> submodule.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_footprint</span>
+
+<span class="n">footprint_data</span> <span class="o">=</span> <span class="n">get_footprint</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For the standards associated the footprint files, there are also flags
+which can be passed to sub-categorise the footprint inputs: -
+<code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code> - footprints containing multiple spatial
+resolutions. This is usually an embedded high resolution region within a
+larger lower resolution domain. - <code class="docutils literal notranslate"><span class="pre">high_time_res</span></code> - footprints which
+include an additional dimension for resolving on the time axis. This is
+associated with shorter term flux changes (e.g. natural sources of
+carbon dioxide). A species will normally be associated with this
+footprint (e.g. “co2”). - <code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code> - footprints for species
+with a shorter lifetime (&lt;30 days). An explicit species input should be
+associated with this footprint as well.</p>
+<p>If possible, the standardise functionality will attempt to infer these
+details but they should be supplied to ensure the footprint data is
+labelled correctly. See schema details below for how these inputs are
+defined.</p>
+</section>
+<section id="flux-emissions">
+<h4>Flux / Emissions<a class="headerlink" href="#flux-emissions" title="Permalink to this heading">#</a></h4>
+<p>To store and standardise flux / emissions data, as well as the input
+file, as a minimum we need to supply the following keywords: -
+<code class="docutils literal notranslate"><span class="pre">species</span></code> - a name for the associated species - <code class="docutils literal notranslate"><span class="pre">domain</span></code> - the
+regional domain covered by the flux data - <code class="docutils literal notranslate"><span class="pre">source</span></code> - a name for the
+source of that data.</p>
+<p>Optionally, additional identifiers can be use including: - <code class="docutils literal notranslate"><span class="pre">database</span></code>
+- inventory/database name associated with the flux data -
+<code class="docutils literal notranslate"><span class="pre">database_version</span></code> - if a database is specified, a version should be
+included as well - <code class="docutils literal notranslate"><span class="pre">model</span></code> - the name of the model used to generate
+the flux data</p>
+<p>For the example below, the flux data is for methane (“ch4”) and which,
+again, is covered by the same “EUROPE” domain as the footprint data
+described above.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_flux</span>
+
+<span class="n">standardise_flux</span><span class="p">(</span><span class="n">data_file_flux</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;anthro&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ukghg&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_flux</span>
+
+<span class="n">flux_data</span> <span class="o">=</span> <span class="n">get_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;anthro&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="boundary-conditions">
+<h4>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading">#</a></h4>
+<p>The boundary conditions data type describe the vertical curtains of a
+regional domain. To store and standardise boundary conditions data, as
+well as the input file, as a minimum we need to supply the following
+keywords: - <code class="docutils literal notranslate"><span class="pre">species</span></code> - a name for the associated species - <code class="docutils literal notranslate"><span class="pre">domain</span></code>
+- the name of the domain the vertical curtains surround - <code class="docutils literal notranslate"><span class="pre">bc_input</span></code> -
+a keyword descriptor for the boundary conditions inputs used</p>
+<p>For the example below, the boundary conditions are for methane (“ch4”)
+at the edges of the “EUROPE” domain. They were created using the <em>CAMS
+climatology product [++REFINE AND ADD LINK++]</em>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_bc</span>
+
+<span class="n">standardise_bc</span><span class="p">(</span><span class="n">data_file_bc</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">bc_input</span><span class="o">=</span><span class="s2">&quot;CAMS&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span><span class="p">:</span><span class="n">openghg</span><span class="o">.</span><span class="n">store</span><span class="p">:</span><span class="n">This</span> <span class="n">file</span> <span class="n">has</span> <span class="n">been</span> <span class="n">uploaded</span> <span class="n">previously</span> <span class="k">with</span> <span class="n">the</span> <span class="n">filename</span> <span class="p">:</span> <span class="n">ch4_EUROPE_201607</span><span class="o">.</span><span class="n">nc</span> <span class="o">-</span> <span class="n">skipping</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="defining-source-and-bc-input">
+<h3>Defining ‘source’ and ‘bc_input’<a class="headerlink" href="#defining-source-and-bc-input" title="Permalink to this heading">#</a></h3>
+<p>Unlike the <code class="docutils literal notranslate"><span class="pre">domain</span></code> and <code class="docutils literal notranslate"><span class="pre">species</span></code> inputs which have some pre-defined
+values, the <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code> keywords can be chosen by the
+user as a way to describe the flux and boundary condition inputs,
+alongside the additional optional values. However, once a convention is
+chosen for a given <code class="docutils literal notranslate"><span class="pre">source</span></code> or <code class="docutils literal notranslate"><span class="pre">bc_input</span></code>, consistent keywords
+should be used to describe like data so this can be associated and
+distinguished correctly. Combinations of these keywords with the other
+identifiers (such as species and domain) should allow associated data in
+a timeseries to be identified.</p>
+<p>See “Modifying_and_deleting_data” tutorial <em>[++ADD INTERNAL LINK++]</em> for
+how to update stored metadata if needed.</p>
+<p>To check the data and metadata already stored within an object store,
+the <code class="docutils literal notranslate"><span class="pre">search</span></code> function from within the <code class="docutils literal notranslate"><span class="pre">openghg.retrieve</span></code> sub-module
+can be used</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
+
+<span class="n">search_results</span> <span class="o">=</span> <span class="n">search</span><span class="p">()</span>
+<span class="n">search_results</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>data_type</th>
+      <th>processed by</th>
+      <th>processed on</th>
+      <th>raw file used</th>
+      <th>species</th>
+      <th>domain</th>
+      <th>source</th>
+      <th>author</th>
+      <th>processed</th>
+      <th>source_format</th>
+      <th>...</th>
+      <th>height</th>
+      <th>spatial_resolution</th>
+      <th>heights</th>
+      <th>variables</th>
+      <th>title</th>
+      <th>date_created</th>
+      <th>bc_input</th>
+      <th>min_height</th>
+      <th>max_height</th>
+      <th>input_filename</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>emissions</td>
+      <td>cv18710@bristol.ac.uk</td>
+      <td>2021-01-08 12:18:49.803837+00:00</td>
+      <td>/home/cv18710/work_shared/gridded_fluxes/ch4/u...</td>
+      <td>ch4</td>
+      <td>europe</td>
+      <td>anthro</td>
+      <td>openghg cloud</td>
+      <td>2023-01-27 09:52:03.717769+00:00</td>
+      <td>openghg</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>footprints</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>europe</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>100m</td>
+      <td>standard_spatial_resolution</td>
+      <td>[500.0, 1500.0, 2500.0, 3500.0, 4500.0, 5500.0...</td>
+      <td>[fp, temperature, pressure, wind_speed, wind_d...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>boundary_conditions</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>ch4</td>
+      <td>europe</td>
+      <td>NaN</td>
+      <td>openghg cloud</td>
+      <td>2023-01-27 11:45:22.736279+00:00</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>ecmwf cams ch4 volume mixing ratios at domain ...</td>
+      <td>2018-11-13 09:25:29.112138</td>
+      <td>cams</td>
+      <td>500.0</td>
+      <td>19500.0</td>
+      <td>ch4_europe_201607.nc</td>
+    </tr>
+  </tbody>
+</table>
+<p>3 rows × 32 columns</p>
+</div><p>To search for just one data type a specific <code class="docutils literal notranslate"><span class="pre">search_*</span></code> function can be
+used (or the <code class="docutils literal notranslate"><span class="pre">data_type</span></code> input of <code class="docutils literal notranslate"><span class="pre">&quot;emissions&quot;</span></code> or
+<code class="docutils literal notranslate"><span class="pre">&quot;boundary_conditions&quot;</span></code> can be passed to the <code class="docutils literal notranslate"><span class="pre">search</span></code> function). For
+example, for flux data:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_flux</span>
+
+<span class="n">search_results_flux</span> <span class="o">=</span> <span class="n">search_flux</span><span class="p">()</span>
+<span class="n">search_results_flux</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>data_type</th>
+      <th>processed by</th>
+      <th>processed on</th>
+      <th>raw file used</th>
+      <th>species</th>
+      <th>domain</th>
+      <th>source</th>
+      <th>author</th>
+      <th>processed</th>
+      <th>source_format</th>
+      <th>start_date</th>
+      <th>end_date</th>
+      <th>max_longitude</th>
+      <th>min_longitude</th>
+      <th>max_latitude</th>
+      <th>min_latitude</th>
+      <th>time_resolution</th>
+      <th>time_period</th>
+      <th>uuid</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>emissions</td>
+      <td>cv18710@bristol.ac.uk</td>
+      <td>2021-01-08 12:18:49.803837+00:00</td>
+      <td>/home/cv18710/work_shared/gridded_fluxes/ch4/u...</td>
+      <td>ch4</td>
+      <td>europe</td>
+      <td>anthro</td>
+      <td>openghg cloud</td>
+      <td>2023-01-27 09:52:03.717769+00:00</td>
+      <td>openghg</td>
+      <td>2016-01-01 00:00:00+00:00</td>
+      <td>2016-12-31 23:59:59+00:00</td>
+      <td>39.38</td>
+      <td>-97.9</td>
+      <td>79.057</td>
+      <td>10.729</td>
+      <td>standard</td>
+      <td>1 year</td>
+      <td>b16fefdf-c92d-4cc9-8aac-367bcb6b82fe</td>
+    </tr>
+  </tbody>
+</table>
+</div><p>In this case the <code class="docutils literal notranslate"><span class="pre">source</span></code> value has been set to <code class="docutils literal notranslate"><span class="pre">&quot;anthro&quot;</span></code>.</p>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code> keywords can also include “-”
+to logically separate the descriptor e.g. “anthro-waste” but should not
+include other separators.</p>
+</section>
+</section>
+<section id="input-format">
+<h2>2. Input format<a class="headerlink" href="#input-format" title="Permalink to this heading">#</a></h2>
+<p>For each of these data types there is an associated object from the
+<code class="docutils literal notranslate"><span class="pre">openghg.store</span></code> sub-module:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Footprints</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Emissions</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BoundaryConditions</span></code></p></li>
+<li><p><em>``EulerianModel`` - to be completed</em></p></li>
+</ul>
+<p>These objects can be used to give us information about the expected data
+format using the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">Emissions</span>
+
+<span class="n">Emissions</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>DataSchema(data_vars={&#39;flux&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;lon&#39;)}, dtypes={&#39;lat&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;lon&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;time&#39;: &lt;class &#39;numpy.datetime64&#39;&gt;, &#39;flux&#39;: &lt;class &#39;numpy.floating&#39;&gt;}, dims=None)
+</pre></div>
+</div>
+<p>This tells us that the netcdf input for “emissions” should contain:</p>
+<ul class="simple">
+<li><p>Data variables:</p>
+<ul>
+<li><p>“flux” data variable with dimensions of (“time”, “lat”, “lon”)</p></li>
+</ul>
+</li>
+<li><p>Data types:</p>
+<ul>
+<li><p>“flux”, “lat”, “lon” variables / coordinates should be float type - “time” coordinate should be</p></li>
+</ul>
+</li>
+</ul>
+<p>datetime64</p>
+<p>Similarly for <code class="docutils literal notranslate"><span class="pre">Footprints</span></code>, as described in the standardisations
+section, there are a few different input options available:</p>
+<ul class="simple">
+<li><p>inert species (default - integrated footprint)</p></li>
+<li><p>high spatial resolution (<code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code> flag)</p></li>
+<li><p>high time resolution (<code class="docutils literal notranslate"><span class="pre">high_time_res</span></code> flag) (e.g. for carbon dioxide)</p></li>
+<li><p>short-lived species (<code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code> flag)</p></li>
+<li><p>particle locations (<code class="docutils literal notranslate"><span class="pre">particle_locations</span></code> - default is True, expect to be included)</p></li>
+</ul>
+<section id="default-inert-footprint-format">
+<h3>Default (inert) footprint format<a class="headerlink" href="#default-inert-footprint-format" title="Permalink to this heading">#</a></h3>
+<p>These can be shown by passing keywords to the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method. For
+example, if nothing is passed this returns the details for an integrated
+footprint for an inert species:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">Footprints</span>
+<span class="n">Footprints</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>DataSchema(data_vars={&#39;fp&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;lon&#39;), &#39;particle_locations_n&#39;: (&#39;time&#39;, &#39;lon&#39;, &#39;height&#39;), &#39;particle_locations_e&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;height&#39;), &#39;particle_locations_s&#39;: (&#39;time&#39;, &#39;lon&#39;, &#39;height&#39;), &#39;particle_locations_w&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;height&#39;)}, dtypes={&#39;lat&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;lon&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;time&#39;: &lt;class &#39;numpy.datetime64&#39;&gt;, &#39;fp&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;height&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_n&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_e&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_s&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_w&#39;: &lt;class &#39;numpy.floating&#39;&gt;}, dims=None)
+</pre></div>
+</div>
+<p>This tells us that the default netcdf input for “footprints” should
+contain:</p>
+<ul class="simple">
+<li><p>Data variables:</p>
+<ul>
+<li><p>“fp” data variable with dimensions of (“time”, “lat”, “lon”)</p></li>
+<li><p>“particle_locations_n”, “particle_locations_s” with dimensions of (“time”, “lon”, “height”)</p></li>
+<li><p>“particle_locations_e”, “particle_locations_w” with dimensions of (“time”, “lat”, “height”)</p></li>
+</ul>
+</li>
+<li><p>Data types:</p>
+<ul>
+<li><p>“fp”, “lat”, “lon”, “height” variables / coordinates should be float type</p></li>
+<li><p>“particle_locations_n”, “particle_locations_e”, “particle_locations_s”, “particle_locations_w” variables should also be float type</p></li>
+<li><p>“time” coordinate should be datetime64</p></li>
+</ul>
+</li>
+</ul>
+<p>The “fp” data variable describes the sensivity map within the regional
+domain. The “particle_locations_*” variables describe the senitivity
+map at each of the ordinal boundaries of the domain. Setting the
+<code class="docutils literal notranslate"><span class="pre">particle_locations</span></code> flag as False (True by default) would remove the
+requirement for these particle location boundary sensitivies to be
+included.</p>
+</section>
+<section id="other-footprint-formats">
+<h3>Other footprint formats<a class="headerlink" href="#other-footprint-formats" title="Permalink to this heading">#</a></h3>
+<p>For species with a short lifetime the input footprints require
+additional variables. This can be seen by passing the <code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code>
+flag:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Footprints</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">short_lifetime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>DataSchema(data_vars={&#39;fp&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;lon&#39;), &#39;particle_locations_n&#39;: (&#39;time&#39;, &#39;lon&#39;, &#39;height&#39;), &#39;particle_locations_e&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;height&#39;), &#39;particle_locations_s&#39;: (&#39;time&#39;, &#39;lon&#39;, &#39;height&#39;), &#39;particle_locations_w&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;height&#39;), &#39;mean_age_particles_n&#39;: (&#39;time&#39;, &#39;lon&#39;, &#39;height&#39;), &#39;mean_age_particles_e&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;height&#39;), &#39;mean_age_particles_s&#39;: (&#39;time&#39;, &#39;lon&#39;, &#39;height&#39;), &#39;mean_age_particles_w&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;height&#39;)}, dtypes={&#39;lat&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;lon&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;time&#39;: &lt;class &#39;numpy.datetime64&#39;&gt;, &#39;fp&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;height&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_n&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_e&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_s&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_w&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;mean_age_particles_n&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;mean_age_particles_e&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;mean_age_particles_s&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;mean_age_particles_w&#39;: &lt;class &#39;numpy.floating&#39;&gt;}, dims=None)
+</pre></div>
+</div>
+<p>This tells us that, in addition to the “default” variables, for
+short-lived species there also must be:</p>
+<ul class="simple">
+<li><p>Additional data variables:</p>
+<ul>
+<li><p>“mean_age_particles_n”, “mean_age_particles_s” with dimensions of (“time”, “lon”, “height”)</p></li>
+<li><p>“mean_age_particles_e”, “mean_age_particles_w” with dimensions of (“time”, “lat”, “height”)</p></li>
+</ul>
+</li>
+<li><p>Data types:</p>
+<ul>
+<li><p>all new variables should be float type</p></li>
+</ul>
+</li>
+</ul>
+<p>Similiarly for the <code class="docutils literal notranslate"><span class="pre">high_time_res</span></code> and <code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code> flags to
+the <code class="docutils literal notranslate"><span class="pre">Footprints.schema()</span></code> method, these require additional variables
+within the input footprint files.</p>
+</section>
+</section>
+<section id="cleanup">
+<h2>3. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
+<p>If you’re finished with the data in this tutorial you can cleanup the
+tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="Adding_observation_data.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Adding observation data</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="../Analysing_data/Comparing_with_emissions.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Comparing observations to emissions</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#using-the-tutorial-object-store">
+   0. Using the tutorial object store
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#adding-and-standardising-data">
+   1. Adding and standardising data
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#data-domains">
+     Data domains
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#footprints">
+       Footprints
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#flux-emissions">
+       Flux / Emissions
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#boundary-conditions">
+       Boundary conditions
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#defining-source-and-bc-input">
+     Defining ‘source’ and ‘bc_input’
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-format">
+   2. Input format
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#default-inert-footprint-format">
+     Default (inert) footprint format
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#other-footprint-formats">
+     Other footprint formats
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#cleanup">
+   3. Cleanup
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+<div class="toc-item">
+  
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2023 OpenGHG development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>
