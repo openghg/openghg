@@ -180,11 +180,13 @@ def local_retrieve(
         obs_data = results.retrieve_all()
     else:
         # We'll also need to check we have current data
-        standardised_data = _retrieve_remote(site=site,
-                                             species=species,
-                                             data_level=data_level,
-                                             dataset_source=dataset_source,
-                                             update_metadata_mismatch=update_metadata_mismatch)
+        standardised_data = _retrieve_remote(
+            site=site,
+            species=species,
+            data_level=data_level,
+            dataset_source=dataset_source,
+            update_metadata_mismatch=update_metadata_mismatch,
+        )
 
         if standardised_data is None:
             return None
@@ -287,7 +289,7 @@ def _retrieve_remote(
 
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
-    
+
     # TODO - move this to the supplementary info site, is it even needed?
     site_metadata = load_json("icos_atmos_site_metadata.json", internal_data=True)
 
@@ -373,12 +375,12 @@ def _retrieve_remote(
         metadata["station_long_name"] = loc_data["label"]
         metadata["station_latitude"] = str(loc_data["lat"])
         metadata["station_longitude"] = str(loc_data["lon"])
-        metadata["station_altitude"] = format_inlet(loc_data['alt'], key_name="station_altitude")
+        metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
 
         site_specific = site_metadata[site.upper()]
         metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
         metadata["data_owner_email"] = site_specific["email"]
-        metadata["station_height_masl"] = format_inlet(site_specific['eas'], key_name="station_height_masl")
+        metadata["station_height_masl"] = format_inlet(site_specific["eas"], key_name="station_height_masl")
 
         metadata["citation_string"] = dobj_info["references"]["citationString"]
         metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
@@ -435,8 +437,9 @@ def _retrieve_remote(
             "attributes": metadata,
         }
 
-    standardised_data = assign_attributes(data=standardised_data,
-                                          update_metadata_mismatch=update_metadata_mismatch)
+    standardised_data = assign_attributes(
+        data=standardised_data, update_metadata_mismatch=update_metadata_mismatch
+    )
 
     return standardised_data
 
