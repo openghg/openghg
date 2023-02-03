@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._emissions &#8212; OpenGHG 0+untagged.1.g13b7a85 documentation</title>
+    <title>openghg.store._emissions &#8212; OpenGHG 0+untagged.1.g96831eb documentation</title>
   
   
   
@@ -394,9 +394,6 @@
         <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">database</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">database_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
         <span class="n">high_time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -411,9 +408,6 @@
 <span class="sd">            species: Species name</span>
 <span class="sd">            domain: Emissions domain</span>
 <span class="sd">            source: Emissions source</span>
-<span class="sd">            database: Name of database source for this input (if relevant)</span>
-<span class="sd">            database_version: Name of database version (if relevant)</span>
-<span class="sd">            model: Model name (if relevant)</span>
 <span class="sd">            source_format : Type of data being input e.g. openghg (internal format)</span>
 <span class="sd">            high_time_resolution: If this is a high resolution file</span>
 <span class="sd">            period: Period of measurements. Only needed if this can not be inferred from the time coords</span>
@@ -470,12 +464,6 @@
             <span class="s2">&quot;chunks&quot;</span><span class="p">:</span> <span class="n">chunks</span><span class="p">,</span>
         <span class="p">}</span>
 
-        <span class="n">optional_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="n">database</span><span class="p">,</span>
-                             <span class="s2">&quot;database_version&quot;</span><span class="p">:</span> <span class="n">database_version</span><span class="p">,</span>
-                             <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
-
-        <span class="n">param</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optional_keywords</span><span class="p">)</span>
-
         <span class="n">emissions_data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">param</span><span class="p">)</span>
 
         <span class="c1"># Checking against expected format for Emissions</span>
@@ -483,12 +471,7 @@
             <span class="n">em_data</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
             <span class="n">Emissions</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">em_data</span><span class="p">)</span>
 
-        <span class="n">min_required</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">optional_keywords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">min_required</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-
-        <span class="n">required</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">min_required</span><span class="p">)</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">)</span>
         <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
 
         <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;emissions&quot;</span>

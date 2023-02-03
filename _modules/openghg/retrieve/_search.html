@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g13b7a85 documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g96831eb documentation</title>
   
   
   
@@ -452,7 +452,6 @@
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Search for boundary condition data</span>
 
@@ -470,7 +469,6 @@
 <span class="sd">                    - suitable pandas Offset Alias</span>
 <span class="sd">                    - tuple of (value, unit) as would be passed to pandas.Timedelta function</span>
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
-<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        SearchResults: SearchResults object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -489,7 +487,6 @@
         <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
         <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;boundary_conditions&quot;</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -498,7 +495,6 @@
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Search for eulerian data</span>
 
@@ -507,7 +503,6 @@
 <span class="sd">        species: Species name</span>
 <span class="sd">        start_date: Start date (inclusive) associated with model run</span>
 <span class="sd">        end_date: End date (exclusive) associated with model run</span>
-<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        SearchResults: SearchResults object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -518,12 +513,7 @@
         <span class="n">end_date</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">search</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-        <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
-        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
-        <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eulerian_model&quot;</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;eulerian_model&quot;</span>
     <span class="p">)</span></div>
 
 
@@ -531,15 +521,11 @@
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">database</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">database_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">high_time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Search for emissions data</span>
 
@@ -547,9 +533,6 @@
 <span class="sd">        species: Species name</span>
 <span class="sd">        domain: Emissions domain</span>
 <span class="sd">        source: Emissions source</span>
-<span class="sd">        database: Name of database source for this input (if relevant)</span>
-<span class="sd">        database_version: Name of database version (if relevant)</span>
-<span class="sd">        model: Model name (if relevant)</span>
 <span class="sd">        source_format : Type of data being input e.g. openghg (internal format)</span>
 <span class="sd">        high_time_resolution: If this is a high resolution file</span>
 <span class="sd">        period: Period of measurements. Only needed if this can not be inferred from the time coords</span>
@@ -558,7 +541,6 @@
 <span class="sd">                    - suitable pandas Offset Alias</span>
 <span class="sd">                    - tuple of (value, unit) as would be passed to pandas.Timedelta function</span>
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
-<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        SearchResults: SearchResults object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -572,16 +554,12 @@
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
         <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
         <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
-        <span class="n">database_version</span><span class="o">=</span><span class="n">database_version</span><span class="p">,</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
         <span class="n">high_time_resolution</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
         <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;emissions&quot;</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -601,7 +579,6 @@
     <span class="n">high_spatial_res</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">high_time_res</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">short_lifetime</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Search for footprints data</span>
 
@@ -622,7 +599,6 @@
 <span class="sd">                        Note this will be set to True automatically if species=&quot;co2&quot; (Carbon Dioxide).</span>
 <span class="sd">        short_lifetime: Indicate footprint is for a short-lived species. Needs species input.</span>
 <span class="sd">                        Note this will be set to True if species has an associated lifetime.</span>
-<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        SearchResults: SearchResults object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -655,7 +631,6 @@
         <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
         <span class="n">short_lifetime</span><span class="o">=</span><span class="n">short_lifetime</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -673,7 +648,6 @@
     <span class="n">data_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">icos_data_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Cloud object store search</span>
 
@@ -692,7 +666,6 @@
 <span class="sd">        argument only needs to be used to narrow the search to data solely from these sources.</span>
 <span class="sd">        sampling_height: Sampling height of measurements</span>
 <span class="sd">        icos_data_level: ICOS data level, see ICOS documentation</span>
-<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        SearchResults: SearchResults object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -726,7 +699,6 @@
         <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
         <span class="n">sampling_height</span><span class="o">=</span><span class="n">sampling_height</span><span class="p">,</span>
         <span class="n">icos_data_level</span><span class="o">=</span><span class="n">icos_data_level</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">results</span></div>
@@ -741,7 +713,6 @@
     <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Search column data</span>
 
@@ -761,7 +732,6 @@
 <span class="sd">        platform: Type of platform. Should be one of:</span>
 <span class="sd">            - &quot;satellite&quot;</span>
 <span class="sd">            - &quot;site&quot;</span>
-<span class="sd">        kwargs: Additional search terms</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        SearchResults: SearchResults object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -775,7 +745,6 @@
         <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
         <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
         <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;column&quot;</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 

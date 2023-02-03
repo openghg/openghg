@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Installation &#8212; OpenGHG 0+untagged.1.g13b7a85 documentation</title>
+    <title>Installation &#8212; OpenGHG 0+untagged.1.g96831eb documentation</title>
   
   
   
@@ -386,7 +386,6 @@ of libraries can be installed without making changes to versions of libraries ne
 <h3>conda<a class="headerlink" href="#conda" title="Permalink to this heading">#</a></h3>
 <p>First create and activate a conda environment</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>openghg_env
-<span class="c1"># Activate the environment</span>
 conda<span class="w"> </span>activate<span class="w"> </span>openghg_env
 </pre></div>
 </div>
@@ -398,16 +397,26 @@ conda<span class="w"> </span>activate<span class="w"> </span>openghg_env
 </section>
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">#</a></h2>
-<p>On the first run on OpenGHG a configuration file will be created in your home folder. On Linux this should be under
-<code class="docutils literal notranslate"><span class="pre">/home/&lt;your</span> <span class="pre">username&gt;/.config/openghg/openghg.conf</span></code> or on macOS
-<code class="docutils literal notranslate"><span class="pre">/Users/&lt;your</span> <span class="pre">username&gt;/.config/openghg/openghg.conf</span></code>. In this file we set the path for the object store.
-By default the object store will be created at <code class="docutils literal notranslate"><span class="pre">/home/&lt;your</span> <span class="pre">username&gt;/openghg_store</span></code>.
-To modify this path open the config file with a text editor and change the value assigned to <code class="docutils literal notranslate"><span class="pre">local_store</span></code>.</p>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[object_store]</span>
-<span class="n">local_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/&lt;your username&gt;/openghg_store&quot;</span>
+<p>Once OpenGHG is installed you can use <code class="xref py py-obj docutils literal notranslate"><span class="pre">openghg</span></code> command line tool to get the configuration file setup.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>openghg<span class="w"> </span>--quickstart
 </pre></div>
 </div>
-<p>Remember to replace <code class="docutils literal notranslate"><span class="pre">&lt;your</span> <span class="pre">username&gt;</span></code> with your username.</p>
+<p>You should now see text telling you you haven’t got a configuration file (unless you’ve run the quickstart previously)
+and a prompt asking you enter a path for the object store. We’ll just use the default path and hit return when prompted.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>No<span class="w"> </span>configuration<span class="w"> </span>file<span class="w"> </span>found,<span class="w"> </span>please<span class="w"> </span>see<span class="w"> </span>installation<span class="w"> </span>instructions.
+
+Please<span class="w"> </span>enter<span class="w"> </span>a<span class="w"> </span>path<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>object<span class="w"> </span>store<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span>/home/gareth/openghg_store<span class="o">)</span>:
+Creating<span class="w"> </span>config<span class="w"> </span>at<span class="w"> </span>/home/gareth/.config/openghg/openghg.conf
+</pre></div>
+</div>
+<p>A configuration file has been created and you’re ready to run OpenGHG. If you ever want to modify the configuration file
+you can find it at <code class="docutils literal notranslate"><span class="pre">~/.config/openghg/openghg.conf</span></code>. My configuration file looks like this</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;47363762-2963-4a2d-8afc-dejh05380f19&quot;</span>
+
+<span class="k">[object_store]</span>
+<span class="n">local_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/gareth/openghg_store&quot;</span>
+</pre></div>
+</div>
 <section id="deprecation-of-openghg-path">
 <h3>Deprecation of <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code><a class="headerlink" href="#deprecation-of-openghg-path" title="Permalink to this heading">#</a></h3>
 <p>If you’ve previously used OpenGHG and worked through our tutorials you might have encountered
