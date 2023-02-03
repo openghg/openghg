@@ -73,11 +73,7 @@ Finally install OpenGHG itself. The ``-e`` / ``--editable`` flag here tells ``pi
 
    pip install -e .
 
-OpenGHG should now be installed, you can check this by opening ``ipython`` and running
-
-.. code-block:: ipython
-
-   In [1]: import openghg
+Now OpenGHG is installed please move on to :ref:`Configuring the object store<Configuring the object store>`.
 
 ``conda``
 ^^^^^^^^^
@@ -107,28 +103,40 @@ And finally install OpenGHG
 
    conda develop .
 
-OpenGHG should now be installed, you can check this by opening ``ipython`` and running
+Now OpenGHG is installed we'll move onto configuring the object store.
 
-.. code-block:: ipython
-
-   In [1]: import openghg
-
-
-The object store
-================
+Configuring the object store
+============================
 
 The object store is where OpenGHG stores its information. Metadata and binary data are stored with in a key-value setup.
 As you'll be using OpenGHG locally this means all data will be stored on your local or network file system.
 
-When you first import OpenGHG it creates a file in your home directory at ``~/.config/openghg/openghg.conf``. Open this file with
-your chosen text editor and you'll see the contents of a `TOML <https://toml.io/en/>`_ file that looks like this
+To set the path to the object store you can run the following in the terminal
+
+.. code-block:: bash
+
+    openghg --quickstart
+
+You should now see text telling you you haven't got a configuration file (unless you've run the quickstart previously)
+and a prompt asking you enter a path for the object store. We'll just use the default path and hit return when prompted.
+
+.. code-block:: bash
+
+    No configuration file found, please see installation instructions.
+
+    Please enter a path for the object store (default: /home/gareth/openghg_store):
+    Creating config at /home/gareth/.config/openghg/openghg.conf
+
+
+A configuration file has been created and you're ready to run OpenGHG. If you ever want to modify the configuration file
+you can find it at ``~/.config/openghg/openghg.conf``. My configuration file looks like this
 
 .. code-block:: toml
 
-   [object_store]
-   local_store = "/home/gareth/openghg_store"
+    user_id = "47363762-2963-4a2d-8afc-dejh05380f19"
 
-By default the object store will be created in your home directory, if you want to move it just change that path.
+    [object_store]
+    local_store = "/home/gareth/openghg_store"
 
 
 Jupyter

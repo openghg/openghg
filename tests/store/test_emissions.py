@@ -1,16 +1,17 @@
 import pytest
 from helpers import get_emissions_datapath
-from openghg.objectstore import get_bucket
 from openghg.retrieve import search, search_flux
-from openghg.store import Emissions, datasource_lookup, load_metastore, recombine_datasets
+from openghg.store import Emissions, datasource_lookup, load_metastore
 from openghg.util import hash_bytes
 from openghg.types import DatasourceLookupError
 from xarray import open_dataset
 from pandas import Timestamp
 
+from helpers import clear_test_store
+
 
 def test_read_binary_data(mocker):
-    get_bucket(empty=True)
+    clear_test_store()
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
@@ -95,7 +96,6 @@ def test_read_file():
     assert metadata.items() >= expected_metadata.items()
 
 # TODO: Add test for adding additional years data - 2013 gpp cardomom
-# TODO: Add tests for adding new keywords to database
 
 def test_read_file_additional_keys():
     """
@@ -109,7 +109,7 @@ def test_read_file_additional_keys():
 
     Should produce 2 search results.
     """
-    get_bucket(empty=True)
+    clear_test_store()
 
     test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
@@ -169,7 +169,7 @@ def test_read_file_align_correct_datasource():
     
     Should produce 2 search results.
     """
-    get_bucket(empty=True)
+    clear_test_store()
 
     test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
@@ -234,7 +234,7 @@ def test_read_file_fails_ambiguous():
      - same as test_read_file_align_correct_datasource() but doesn't pass 
      `database_version` keyword at all for final file.
     """
-    get_bucket(empty=True)
+    clear_test_store()
 
     test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
@@ -276,7 +276,7 @@ def test_read_file_fails_ambiguous():
 
 def test_add_edgar_database():
     """Test edgar can be added to object store (default domain)"""
-    get_bucket(empty=True)
+    clear_test_store()
     
     folder = "v6.0_CH4"
     test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")

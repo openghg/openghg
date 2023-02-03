@@ -20,7 +20,7 @@ def parse_btt(
     """
     from numpy import nan as np_nan
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import clean_string, load_json, get_site_info
+    from openghg.util import clean_string, load_json, get_site_info, format_inlet
     from pandas import Timestamp, isnull, read_csv, to_timedelta
 
     # TODO: Decide what to do about inputs which aren't use anywhere
@@ -49,7 +49,7 @@ def parse_btt(
 
     metadata = {}
     metadata["site"] = site
-    metadata["inlet"] = network_params["inlet"]
+    metadata["inlet"] = format_inlet(network_params["inlet"], key_name="inlet")
     metadata["instrument"] = network_params["instrument"]
     metadata["sampling_period"] = str(sampling_period)
     metadata["station_longitude"] = site_info["longitude"]
@@ -59,7 +59,7 @@ def parse_btt(
     metadata["source_format"] = "btt"
 
     attributes = network_params["global_attributes"]
-    attributes["inlet_height_magl"] = network_params["inlet"].strip("m")
+    attributes["inlet_height_magl"] = format_inlet(network_params["inlet"], key_name="inlet_height_magl")
     attributes.update(metadata)
 
     data = read_csv(data_filepath)
