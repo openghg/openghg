@@ -45,7 +45,7 @@ def parse_tmb(
     data = data.rename(columns=rename_dict)
     data.index.name = "time"
 
-    tb_params = load_json(filename="attributes.json")["TMB"]
+    tb_params = load_json(filename="attributes.json", internal_data=True)["TMB"]
 
     gas_data = {}
 

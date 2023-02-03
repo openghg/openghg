@@ -2,6 +2,10 @@ from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
 from openghg.util import running_on_hub
+import logging
+
+logger = logging.getLogger("openghg.retrieve")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def retrieve_surface(
@@ -158,13 +162,13 @@ def local_retrieve_surface(
     extension = filename.split(".")[-1].lower()
 
     if extension != "nc":
-        print("We can only currently retrieve and process NetCDF files.")
+        logger.warning("We can only currently retrieve and process NetCDF files.")
         return None
 
     binary_data = download_data(url=url)
 
     if binary_data is None:
-        print("Error: No data retrieved.")
+        logger.error("No data retrieved.")
         return None
 
     with io.BytesIO(binary_data) as buf:
@@ -201,10 +205,10 @@ def local_retrieve_surface(
                 try:
                     metadata["site"] = additional_metadata["site"]
                 except KeyError:
-                    print("Unable to read site from additional_metadata.")
+                    logger.error("Unable to read site from additional_metadata.")
                     return None
             else:
-                print("Error: cannot find site code, please pass additional metadata.")
+                logger.error("Error: cannot find site code, please pass additional metadata.")
                 return None
 
         try:
@@ -213,7 +217,7 @@ def local_retrieve_surface(
             try:
                 metadata["inlet"] = additional_metadata["inlet"]
             except KeyError:
-                print("Unable to read inlet from data or additional_metadata.")
+                logger.error("Unable to read inlet from data or additional_metadata.")
                 return None
 
     to_store = {key: {"data": dataset, "metadata": metadata}}

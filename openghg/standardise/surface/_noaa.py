@@ -1,8 +1,11 @@
 from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
-
+import logging
 import numpy as np
 import xarray as xr
+
+logger = logging.getLogger("openghg.standardise.surface")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_noaa(
@@ -211,8 +214,8 @@ def _split_inlets(
 
         if inlet is not None:
             # TODO: Add to logging?
-            print(
-                f"WARNING: Ignoring inlet value of {inlet} since file has each data point has an associated height (contains 'intake_height' variable)"
+            logger.warning(
+                f"Ignoring inlet value of {inlet} since file has each data point has an associated height (contains 'intake_height' variable)"
             )
 
         # Group dataset by the height values
@@ -266,8 +269,8 @@ def _split_inlets(
             inlet = inlet_from_file
         elif inlet is not None and inlet_from_file:
             if inlet != inlet_from_file:
-                print(
-                    f"WARNING: Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}"
+                logger.warning(
+                    f"Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}"
                 )
         else:
             raise ValueError(
@@ -365,7 +368,8 @@ def _read_obspack(
         # Extract units attribute from value data variable
         units = processed_ds["value"].units
     except (KeyError, AttributeError):
-        print("Unable to extract units from 'value' within input dataset")
+        logger.warning("Unable to extract units from 'value' within input dataset")
+        units = "NA"
 
     metadata = {}
     metadata["site"] = site
@@ -489,7 +493,7 @@ def _read_raw_data(
     Returns:
         dict: Dictionary containing attributes, data and metadata keys
     """
-    from openghg.util import clean_string, load_json, read_header
+    from openghg.util import clean_string, load_json, read_header, get_site_info
     from pandas import Timestamp, read_csv
 
     header = read_header(filepath=data_filepath)
@@ -544,7 +548,7 @@ def _read_raw_data(
     # Read the site code from the Dataframe
     site = str(data["sample_site_code"][0]).upper()
 
-    site_data = load_json("site_info.json")
+    site_data = get_site_info()
     # If this isn't a site we recognize try and read it from the filename
     if site not in site_data:
         site = str(data_filepath.name).split("_")[1].upper()
@@ -600,7 +604,7 @@ def _read_raw_data(
     data = data.to_xarray()
 
     # TODO  - this could do with a better name
-    noaa_params = load_json("attributes.json")["NOAA"]
+    noaa_params = load_json("attributes.json", internal_data=True)["NOAA"]
 
     site_attributes = noaa_params["global_attributes"]
     site_attributes["inlet_height_magl"] = "NA"

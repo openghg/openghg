@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 from openghg.standardise.meta import assign_attributes
 from openghg.types import pathType
@@ -12,10 +12,10 @@ def parse_npl(
     data_filepath: pathType,
     site: str = "NPL",
     network: str = "LGHG",
-    inlet: str = None,
-    instrument: str = None,
-    sampling_period: str = None,
-    measurement_type: str = None,
+    inlet: Optional[str] = None,
+    instrument: Optional[str] = None,
+    sampling_period: Optional[str] = None,
+    measurement_type: Optional[str] = None,
 ) -> Dict:
     """Reads NPL data files and returns the UUIDS of the Datasources
     the processed data has been assigned to
@@ -34,7 +34,7 @@ def parse_npl(
 
     site = "NPL"
 
-    attributes_data = load_json(filename="attributes.json")
+    attributes_data = load_json(filename="attributes.json", internal_data=True)
     npl_params = attributes_data["NPL"]
 
     # mypy doesn't like NaT or NaNs - look into this

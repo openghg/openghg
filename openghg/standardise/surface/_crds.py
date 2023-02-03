@@ -160,7 +160,7 @@ def _read_data(
 
     # Read the scale from JSON
     # I'll leave this here for the possible future movement from class to functions
-    network_metadata = load_json(filename="process_gcwerks_parameters.json")
+    network_metadata = load_json(filename="process_gcwerks_parameters.json", internal_data=True)
     crds_metadata = network_metadata["CRDS"]
 
     # This dictionary is used to store the gas data and its associated metadata
@@ -273,6 +273,8 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
     Returns:
         dict: Dictionary of attributes
     """
+    from openghg.util import get_site_info
+
     try:
         site_attributes: Dict = crds_metadata["sites"][site.upper()]
         global_attributes: Dict = site_attributes["global_attributes"]
@@ -280,7 +282,7 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
         raise ValueError(f"Unable to read attributes for site: {site}")
 
     # TODO - we need to combine the metadata
-    full_site_metadata = load_json(filename="site_info.json")
+    full_site_metadata = get_site_info()
 
     attributes = global_attributes.copy()
 

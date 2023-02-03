@@ -82,7 +82,7 @@ def parse_gcwerks(
 
     # Do some setup for processing
     # Load site data
-    gcwerks_data = load_json(filename="process_gcwerks_parameters.json")
+    gcwerks_data = load_json(filename="process_gcwerks_parameters.json", internal_data=True)
     gc_params = gcwerks_data["GCWERKS"]
 
     network = clean_string(network)

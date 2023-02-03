@@ -1,15 +1,40 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict, Any
 
 from openghg.util import load_json
+from openghg.types import optionalPathType
 
-__all__ = ["synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
+__all__ = ["get_species_info", "synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
 
 
-def synonyms(species: str, lower: bool = True, allow_new_species: bool = True) -> str:
+def get_species_info(species_filename: optionalPathType = None) -> Dict[str, Any]:
+    """
+    Extract data from species info JSON file as a dictionary.
+
+    This uses the data stored within openghg_defs/species_info JSON file by default.
+
+    Args:
+        species_filename: Alternative species info file.
+
+    Returns:
+        dict: Data from species JSON file
+    """
+    from openghg_defs import species_info_file
+
+    if species_filename is None:
+        species_info_json = load_json(species_info_file)
+    else:
+        species_info_json = load_json(species_filename)
+
+    return species_info_json
+
+
+def synonyms(species: str,
+             lower: bool = True,
+             allow_new_species: bool = True,
+             species_filename: optionalPathType = None) -> str:
     """
     Check to see if there are other names that we should be using for
-    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11,
-    as this is used in species_info.json
+    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11.
 
     Args:
         species : Input string that you're trying to match
@@ -17,6 +42,7 @@ def synonyms(species: str, lower: bool = True, allow_new_species: bool = True) -
         allow_new_species : Return original value (may be lower case)
             if this (or a synonym) is not found in the database.
             If False, raise a ValueError.
+        species_filename: Alternative species info file. Defaults to openghg_defs input.
     Returns:
         str: Matched species string
 
@@ -25,7 +51,7 @@ def synonyms(species: str, lower: bool = True, allow_new_species: bool = True) -
     and changed if needed.
     """
     # Load in the species data
-    species_data = load_json(filename="acrg_species_info.json")
+    species_data = get_species_info(species_filename)
 
     # First test whether site matches keys (case insensitive)
     matched_strings = [k for k in species_data if k.upper() == species.upper()]
@@ -59,27 +85,26 @@ def synonyms(species: str, lower: bool = True, allow_new_species: bool = True) -
 LifetimeType = Optional[Union[str, List[str]]]
 
 
-def species_lifetime(species: Union[str, None]) -> LifetimeType:
+def species_lifetime(species: Union[str, None],
+                     species_filename: optionalPathType = None) -> LifetimeType:
     """
-    Find species lifetime from stored reference ("acrg_species_info.json").
+    Find species lifetime.
     This can either be labelled as "lifetime" or "lifetime_monthly".
 
     Note: no species synonyms accepted yet
 
     Args:
         species : Species name e.g. "ch4" or "co2"
+        species_filename: Alternative species info file. Defaults to openghg_defs input.
 
     Returns:
         str / list / None : Extracted lifetime or None is no lifetime was present.
     """
-    species_info = load_json(filename="acrg_species_info.json")
+    species_data = get_species_info(species_filename)
 
     if species is not None:
-        try:
-            species_data = species_info[species]
-        except KeyError:
-            species_upper = species.upper()
-            species_data = species_info[species_upper]
+        species_label = synonyms(species, lower=False, allow_new_species=False)
+        species_data = species_data[species_label]
     else:
         return None
 
@@ -120,23 +145,20 @@ def check_lifetime_monthly(lifetime: LifetimeType) -> bool:
         return False
 
 
-def molar_mass(species: str) -> float:
+def molar_mass(species: str, species_filename: optionalPathType = None) -> float:
     """
-    This function extracts the molar mass of a species from the
-    'acrg_species_info.json' data file.
+    This function extracts the molar mass of a species.
 
     Args:
-        species :
+        species : Species name
+        species_filename: Alternative species info file. Defaults to openghg_defs input.
 
     Returns:
         float : Molar mass of species
     """
-    species_info = load_json(filename="acrg_species_info.json")
+    species_data = get_species_info(species_filename)
 
-    # TODO: Add when this functionality has made it into develop
-    # species_label = synonyms(species, lower=False, allow_new_species=False)
-    # molmass = float(species_info[species_label]['mol_mass'])
-    species = species.upper()
+    species_label = synonyms(species, lower=False, allow_new_species=False)
+    molmass = float(species_data[species_label]['mol_mass'])
 
-    molmass = float(species_info[species]["mol_mass"])
     return molmass
