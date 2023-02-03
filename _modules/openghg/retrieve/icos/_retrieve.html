@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0+untagged.1.g96831eb documentation</title>
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0+untagged.1.g4270afd documentation</title>
   
   
   
@@ -376,6 +376,8 @@
 <span class="sd">                        to be distributed through the Carbon Portal.</span>
 <span class="sd">                        This level is the ICOS-data product and free available for users.</span>
 <span class="sd">        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</span>
+<span class="sd">        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless</span>
+<span class="sd">        function call environment.</span>
 <span class="sd">        update_metadata_mismatch: If metadata derived from ICOS Header does not match</span>
 <span class="sd">            to derived attributes, update metadata to match to attributes.</span>
 <span class="sd">            Otherwise a AttrMismatchError will be raised.</span>
@@ -415,6 +417,8 @@
 <span class="sd">                        to be distributed through the Carbon Portal.</span>
 <span class="sd">                        This level is the ICOS-data product and free available for users.</span>
 <span class="sd">        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</span>
+<span class="sd">        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless</span>
+<span class="sd">        function call environment.</span>
 <span class="sd">        update_metadata_mismatch: If metadata derived from ICOS Header does not match</span>
 <span class="sd">            to derived attributes, update metadata to match to attributes.</span>
 <span class="sd">            Otherwise a AttrMismatchError will be raised.</span>
@@ -516,12 +520,10 @@
         <span class="n">obs_data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># We&#39;ll also need to check we have current data</span>
-        <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">_retrieve_remote</span><span class="p">(</span>
-            <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-            <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
-            <span class="n">update_metadata_mismatch</span><span class="o">=</span><span class="n">update_metadata_mismatch</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">_retrieve_remote</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                                             <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                                             <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
+                                             <span class="n">update_metadata_mismatch</span><span class="o">=</span><span class="n">update_metadata_mismatch</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">standardised_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -698,12 +700,12 @@
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">])</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">])</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_altitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;alt&quot;</span><span class="p">],</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_altitude&quot;</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_altitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s1">&#39;alt&#39;</span><span class="p">],</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_altitude&quot;</span><span class="p">)</span>
 
         <span class="n">site_specific</span> <span class="o">=</span> <span class="n">site_metadata</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_owner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">site_specific</span><span class="p">[</span><span class="s1">&#39;firstName&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">site_specific</span><span class="p">[</span><span class="s1">&#39;lastName&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_owner_email&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_specific</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">site_specific</span><span class="p">[</span><span class="s2">&quot;eas&quot;</span><span class="p">],</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">site_specific</span><span class="p">[</span><span class="s1">&#39;eas&#39;</span><span class="p">],</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">)</span>
 
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;citation_string&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;citationString&quot;</span><span class="p">]</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;licence_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;licence&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
@@ -759,9 +761,8 @@
             <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
         <span class="p">}</span>
 
-    <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">update_metadata_mismatch</span><span class="o">=</span><span class="n">update_metadata_mismatch</span>
-    <span class="p">)</span>
+    <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span>
+                                          <span class="n">update_metadata_mismatch</span><span class="o">=</span><span class="n">update_metadata_mismatch</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">standardised_data</span>
 
