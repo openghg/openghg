@@ -2,7 +2,6 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
-
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -230,7 +229,13 @@ class Footprints(BaseStore):
         """
         # from xarray import load_dataset
         import xarray as xr
-        from openghg.store import assign_data, datasource_lookup, infer_date_range, load_metastore
+        from openghg.store import (
+            assign_data,
+            datasource_lookup,
+            infer_date_range,
+            update_zero_dim,
+            load_metastore,
+        )
         from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
 
         filepath = Path(filepath)
@@ -269,7 +274,7 @@ class Footprints(BaseStore):
         if species == "co2":
             # Expect co2 data to have high time resolution
             if not high_time_res:
-                print("Updating high_time_res to True for co2 data")
+                logger.info("Updating high_time_res to True for co2 data")
                 high_time_res = True
 
         if short_lifetime and not species:
@@ -280,7 +285,7 @@ class Footprints(BaseStore):
             lifetime = species_lifetime(species)
             if lifetime is not None:
                 # TODO: May want to add a check on length of lifetime here
-                print("Updating short_lifetime to True since species has an associated lifetime")
+                logger.info("Updating short_lifetime to True since species has an associated lifetime")
                 short_lifetime = True
 
         # Checking against expected format for footprints
@@ -314,7 +319,11 @@ class Footprints(BaseStore):
         if metmodel is not None:
             metadata["metmodel"] = clean_string(metmodel)
 
-        fp_time = fp_data.time
+        # Check if time has 0-dimensions and, if so, expand this so time is 1D
+        if "time" in fp_data.coords:
+            fp_data = update_zero_dim(fp_data, dim="time")
+
+        fp_time = fp_data["time"]
 
         start_date, end_date, period_str = infer_date_range(
             fp_time, filepath=filepath, period=period, continuous=continuous

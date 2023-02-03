@@ -1,6 +1,9 @@
 from typing import Any, Dict, Hashable, List, Optional, Tuple, Union, cast
-
+import logging
 from xarray import Dataset
+
+logger = logging.getLogger("openghg.standardise")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def assign_attributes(
@@ -112,6 +115,7 @@ def get_attributes(
     # Is this better?
     variable_names = cast(Dict[str, Any], ds.variables)
     to_underscores = {var: var.lower().replace(" ", "_") for var in variable_names}
+    to_underscores.pop("time")  # Added to remove warning around resetting time index.
     ds = ds.rename(to_underscores)  # type: ignore
 
     species_lower = species.lower()
@@ -378,7 +382,7 @@ def _site_info_attributes(site: str, network: Optional[str] = None) -> Dict:
             except KeyError:
                 pass
     else:
-        print(
+        logger.info(
             f"We haven't seen site {site} before, please let us know so we can update our records."
             + "\nYou can help us by opening an issue on GitHub: https://github.com/openghg/openghg/issues"
         )

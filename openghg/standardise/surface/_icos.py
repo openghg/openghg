@@ -1,5 +1,9 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
+import logging
+
+logger = logging.getLogger("openghg.standardise.surface")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_icos(
@@ -125,10 +129,10 @@ def _read_data_large_header(
     len_header = len(header)
 
     if len_header != 40:
-        print(
-            f"WARNING: We expect a header length of 40 but got {len_header}, \
-                note that some metadata may not be collected, \
-                please raise an issue on GitHub if this file format is to be expected."
+        logger.warning(
+            f"We expect a header length of 40 but got {len_header}, \
+            note that some metadata may not be collected, \
+            please raise an issue on GitHub if this file format is to be expected."
         )
 
     dtypes = {
