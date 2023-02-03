@@ -111,14 +111,12 @@ in the ``instrument_data`` section of the metadata
 .. ipython::
 
     In [14]: metadata = wao_data_icos.metadata
-    ...: instrument_data = metadata["instrument_data"]
-    ...: citation_string = metadata["citation_string"]
 
-    In [15]: instrument_data
+    In [15]: metadata["instrument_data"]
     Out[15]: ['FTIR', 'http://meta.icos-cp.eu/resources/instruments/ATC_505']
 
-    In [16]: citation_string
-    Out[16]: 'Forster, G., Manning, A. (2022). ICOS ATC CH4 Release, Weybourne (10.0 m), 2021-07-01–2022-02-28, ICOS RI, https://hdl.handle.net/11676/LmhTdKx6FLGwplSh2tAIGGLj'
+    In [16]: metadata["citation_string"]
+    Out[16]: 'Forster, G., Manning, A. (2022). ICOS ATC CH4 Release, Weybourne (10.0 m), 2021-07-01-2022-02-28, ICOS RI, https://hdl.handle.net/11676/LmhTdKx6FLGwplSh2tAIGGLj'
 
 Here we get the instrument name and a link to the instrument data on the
 ICOS Carbon Portal.
@@ -158,25 +156,21 @@ recent data from **WAO**.
 
 .. ipython::
 
-    In [2]:  wao_data_level1 = retrieve_atmospheric(site="WAO",
-    ...:                                             species="CH4",
-    ...:                                             sampling_height="10m",
-    ...:                                             data_level=1,
-    ...:                                             dataset_source="icos")
+    In [2]: wao_data_level1 = retrieve_atmospheric(site="WAO", species="CH4", sampling_height="10m", data_level=1, dataset_source="icos")
     In [4]: wao_data_level1.data.time[0]
     Out[4]:
-    <xarray.DataArray 'time' ()>
-    array('2022-03-01T00:00:00.000000000', dtype='datetime64[ns]')
-    Coordinates:
-        time     datetime64[ns] 2022-03-01
-
+        <xarray.DataArray 'time' ()>
+        array('2022-03-01T00:00:00.000000000', dtype='datetime64[ns]')
+        Coordinates:
+            time     datetime64[ns] 2022-03-01
+        ...
     In [7]: wao_data_level1.data.time[-1]
     Out[7]:
-    <xarray.DataArray 'time' ()>
-    array('2023-02-01T22:00:00.000000000', dtype='datetime64[ns]')
-    Coordinates:
-        time     datetime64[ns] 2023-02-01T22:00:00
-    ...
+        <xarray.DataArray 'time' ()>
+        array('2023-02-01T22:00:00.000000000', dtype='datetime64[ns]')
+        Coordinates:
+            time     datetime64[ns] 2023-02-01T22:00:00
+        ...
 
 You can see that we've now got data from 2022-03-01 - 2023-02-01. The
 ability to retrieve different level data has been added for convenience,
@@ -203,9 +197,8 @@ portal) you can force a retrieval using ``force_retrieval``.
     In [11]: new_data = retrieve_atmospheric(site="WAO", species="CH4", data_level=1, force_retrieval=True)
     WARNING:openghg.store:Note: There is no new data to process.
 
-Here you may notice we get a message telling us there is no new data to
-process, if you force a retrieval and there is no newer data you'll see
-this message.
+Here we get a message telling us there is no new data to
+process, this will depend on the rate at which datasets are updated on the ICOS Carbon Portal.
 
 2. CEDA
 -------
@@ -235,24 +228,27 @@ link given above.
 
 Now we're ready to retrieve the data.
 
-.. code:: ipython3
+.. ipython::
 
-    from openghg.retrieve.ceda import retrieve_surface
+    In [1]: from openghg.retrieve.ceda import retrieve_surface
 
-.. code:: ipython3
+.. ipython::
 
-    url = "https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-crds_heathfield_20130101_co2-100m.nc?download=1"
+    In [2]: url = "https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-crds_heathfield_20130101_co2-100m.nc?download=1"
 
-.. code:: ipython3
+.. ipython::
 
-    hfd_data = retrieve_surface(url=url)
+    In [3]: hfd_data = retrieve_surface(url=url)
+    Downloading bristol-crds_heathfield_20130101_co2-100m.nc: 100%|███████████████████████████████████████████████| 29.2M/29.2M [00:15<00:00, 2.01MB/s]
 
 Now we've got the data, we can use it as any other ``ObsData`` object,
 using ``data`` and ``metadata``.
 
-.. code:: ipython3
+.. ipython::
 
-    hfd_data.plot_timeseries()
+    In [4]: hfd_data.plot_timeseries()
+
+Within an ``ipython`` session the plot will be opened in a new window, in a notebook it will appear in the cell below.
 
 Retrieving a second time
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -262,13 +258,35 @@ from the object store, this should be faster than retrieving from CEDA.
 To get the same data again use the ``site``, ``species`` and ``inlet``
 arguments.
 
-.. code:: ipython3
+.. ipython::
 
-    hfd_data2 = retrieve_surface(site="hfd", species="co2")
+    In [6]: hfd_data_ceda = retrieve_surface(site="hfd", species="co2")
 
-.. code:: ipython3
+    In [7]: hfd_data_ceda
+    Out[7]:
+    ObsData(data=<xarray.Dataset>
+    Dimensions:                     (time: 955322)
+    Coordinates:
+    * time                        (time) datetime64[ns] 2013-11-20T12:51:30 ......
+    Data variables:
+        co2                         (time) float64 401.4 401.4 401.5 ... 409.2 409.1
+        co2_variability             (time) float64 0.075 0.026 0.057 ... 0.031 0.018
+        co2_number_of_observations  (time) float64 19.0 19.0 20.0 ... 19.0 19.0 19.0
+    Attributes: (12/21)
+        comment:              Cavity ring-down measurements. Output from GCWerks
+        Source:               In situ measurements of air
+        Processed by:         Aoife Grant, University of Bristol (aoife.grant@bri...
+        data_owner_email:     s.odoherty@bristol.ac.uk
+        data_owner:           Simon O'Doherty
+        inlet_height_magl:    100.0
+        ...                   ...
+        data_type:            surface
+        data_source:          ceda_archive
+        network:              CEDA_RETRIEVED
+        sampling_period:      NA
+        site:                 HFD
+        inlet:                100m, metadata={'data_type': 'surface', 'comment': 'cavity ring-down measurements. output from gcwerks', 'source': 'in situ measurements of air', 'processed by': 'aoife grant, university of bristol (aoife.grant@bristol.ac.uk)', 'data_owner_email': 's.odoherty@bristol.ac.uk', 'data_owner': "simon o'doherty", 'inlet_height_magl': 100.0, 'conventions': 'cf-1.6', 'conditions of use': 'ensure that you contact the data owner at the outset of your project.', 'file created': '2018-10-22 16:05:33.492535', 'station_long_name': 'heathfield, uk', 'station_height_masl': 150.0, 'station_latitude': 50.97675, 'station_longitude': 0.23048, 'calibration_scale': 'noaa-2007', 'species': 'co2', 'data_source': 'ceda_archive', 'network': 'ceda_retrieved', 'sampling_period': 'na', 'site': 'hfd', 'inlet': '100m', 'uuid': 'd55cdacc-8c9c-4651-a888-a4598c26905d'})
 
-    hfd_data2
 
 3. Cleanup
 ----------
@@ -276,10 +294,11 @@ arguments.
 If you're finished with the data in this tutorial you can cleanup the
 tutorial object store using the ``clear_tutorial_store`` function.
 
-.. code:: ipython3
+.. ipython::
 
-    from openghg.tutorial import clear_tutorial_store
+    In [8]: from openghg.tutorial import clear_tutorial_store
 
-.. code:: ipython3
+.. ipython::
 
-    clear_tutorial_store()
+    In [9]: clear_tutorial_store()
+    INFO:openghg.tutorial:Tutorial store at /home/gareth/openghg_store/tutorial_store cleared.
