@@ -96,8 +96,11 @@ def test_icos_retrieve_and_store(mocker):
     )
 
     # 05/01/2023: Added update_metadata_mismatch to account for WAO difference
-    retrieved_data_first = retrieve_atmospheric(site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True)
+    retrieved_data_first = retrieve_atmospheric(
+        site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True
+    )
 
+    assert isinstance(retrieved_data_first, list)
     assert retrieved_data_first is not None
 
     first_obs = retrieved_data_first[0]
@@ -111,18 +114,18 @@ def test_icos_retrieve_and_store(mocker):
         "measurement_type": "co2 mixing ratio (dry mole fraction)",
         "units": "µmol mol-1",
         "sampling_height": "10m",
-        "inlet_height_magl": "10m",
         "sampling_height_units": "metres",
         "inlet": "10m",
-        "station_long_name": "weybourne observatory, uk", # May need to be updated
+        "inlet_height_magl": "10",
+        "station_long_name": "weybourne observatory, uk",  # May need to be updated
         # "station_long_name": "wao",
         "station_latitude": "52.95",
         "station_longitude": "1.121",
         "station_altitude": "31m",
-        "station_height_masl": "10.0",  # Will need to be updated to 17
-        # "station_height_masl": "17.0",
         "data_owner": "andrew manning",
         "data_owner_email": "a.manning@uea.ac.uk",
+        "station_height_masl": "10.0",  # Will need to be updated to 17
+        # "station_height_masl": "17.0",
         "licence_name": "icos ccby4 data licence",
         "licence_info": "http://meta.icos-cp.eu/ontologies/cpmeta/icoslicence",
         "network": "icos",
@@ -130,7 +133,6 @@ def test_icos_retrieve_and_store(mocker):
         "data_source": "icoscp",
         "source_format": "icos",
         "icos_data_level": "2",
-        "dataset_source": "icos",
         "conditions_of_use": "ensure that you contact the data owner at the outset of your project.",
         "source": "in situ measurements of air",
         "conventions": "cf-1.8",
@@ -140,6 +142,7 @@ def test_icos_retrieve_and_store(mocker):
         "sampling_period_unit": "s",
         "instrument_data": ["FTIR", "http://meta.icos-cp.eu/resources/instruments/ATC_505"],
         "citation_string": "Forster, G., Manning, A. (2022). ICOS ATC CO2 Release, Weybourne (10.0 m), 2021-10-21–2022-02-28, ICOS RI, https://hdl.handle.net/11676/NR9p9jxC7B7M46MdGuCOrzD3",
+        "dataset_source": "ICOS",
         "Conventions": "CF-1.8",
     }
 
@@ -154,23 +157,21 @@ def test_icos_retrieve_and_store(mocker):
 
     second_obs = retrieved_data_first[1]
 
-    second_expected_metadata = {
-        "dataset_source": "european obspack",
-        "sampling_period_unit": "s",
-        "instrument_data": [
-            "FTIR",
-            "http://meta.icos-cp.eu/resources/instruments/ATC_505",
-            "ULTRAMAT 6-E",
-            "http://meta.icos-cp.eu/resources/instruments/ATC_1391",
-        ],
-    }
+    assert second_obs.metadata["dataset_source"] == "European ObsPack"
 
-    assert second_expected_metadata.items() <= second_obs.metadata.items()
+    assert second_obs.metadata["instrument_data"] == [
+        "FTIR",
+        "http://meta.icos-cp.eu/resources/instruments/ATC_505",
+        "ULTRAMAT 6-E",
+        "http://meta.icos-cp.eu/resources/instruments/ATC_1391",
+    ]
 
     assert retrieve_all.call_count == 0
 
     # 05/01/2023: Added update_metadata_mismatch to account for WAO difference
-    retrieved_data_second = retrieve_atmospheric(site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True)
+    retrieved_data_second = retrieve_atmospheric(
+        site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True
+    )
 
     assert retrieved_data_second is not None
     assert retrieve_all.call_count == 1
@@ -185,7 +186,9 @@ def test_icos_retrieve_and_store(mocker):
     # Now we do a force retrieve and make sure we get the correct message printed
 
     # 05/01/2023: Added update_metadata_mismatch to account for WAO difference
-    retrieve_atmospheric(site="WAO", species="co2", sampling_height="10m", force_retrieval=True, update_metadata_mismatch=True)
+    retrieve_atmospheric(
+        site="WAO", species="co2", sampling_height="10m", force_retrieval=True, update_metadata_mismatch=True
+    )
 
     logfile_data = get_logfile_path().read_text()
     assert "There is no new data to process." in logfile_data
