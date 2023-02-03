@@ -1,7 +1,7 @@
 import pytest
 from helpers import get_emissions_datapath
 from openghg.objectstore import get_bucket
-from openghg.retrieve import search
+from openghg.retrieve import search, search_flux
 from openghg.store import Emissions, datasource_lookup, load_metastore, recombine_datasets
 from openghg.util import hash_bytes
 from xarray import open_dataset
@@ -119,12 +119,11 @@ def test_add_edgar_database():
     output_key = f"{species}_{default_source}_{default_domain}_{date}"
     assert output_key in proc_results
 
-    search_results = search(
+    search_results = search_flux(
         species=species,
         date=date,
         database=database,  # would searching for lowercase not work?
         database_version=version,
-        data_type="emissions",
     )
 
     assert search_results
