@@ -91,7 +91,7 @@ def site_code_finder(site_name: str) -> Optional[str]:
     from openghg.util import load_json
     from rapidfuzz import process  # type: ignore
 
-    sites = load_json("site_lookup.json")
+    sites = load_json("site_lookup.json", internal_data=True)
 
     inverted = {s["short_name"]: c for c, s in sites.items()}
 
@@ -154,18 +154,18 @@ def verify_site(site: str) -> str:
     from openghg.types import InvalidSiteError
     from openghg.util import load_json, remove_punctuation
 
-    site_data = load_json("site_lookup.json")
+    site_lookup = load_json("site_lookup.json", internal_data=True)
 
-    if site.upper() in site_data:
+    if site.upper() in site_lookup:
         return site.lower()
     else:
         site = remove_punctuation(site)
-        name_lookup: Dict[str, str] = {value["short_name"]: code for code, value in site_data.items()}
+        name_lookup: Dict[str, str] = {value["short_name"]: code for code, value in site_lookup.items()}
 
         try:
             return name_lookup[site].lower()
         except KeyError:
-            long_names = {value["long_name"]: code for code, value in site_data.items()}
+            long_names = {value["long_name"]: code for code, value in site_lookup.items()}
             message = find_matching_site(site_name=site, possible_sites=long_names)
             raise InvalidSiteError(message)
 
@@ -178,9 +178,9 @@ def multiple_inlets(site: str) -> bool:
     Returns:
         bool: True if multiple inlets
     """
-    from openghg.util import load_json
+    from openghg.util import get_site_info
 
-    site_data = load_json("site_info.json")
+    site_data = get_site_info()
 
     site = site.upper()
     network = next(iter(site_data[site]))

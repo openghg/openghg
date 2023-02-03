@@ -40,7 +40,7 @@ def parse_edgar(
      - If no domain or lat_out, lon_out data is supplied, the global EDGAR
     data will be added labelled as "globaledgar" domain.
 
-    Pre-exisiting domains are defined within the 'domain_info.json' file.
+    Pre-exisiting domains are defined within the openghg_defs "domain_info.json" file.
 
     Metadata will also be added to the stored data including:
      - "domain": domain (e.g. "europe") OR "globaledgar"
@@ -382,7 +382,7 @@ def _check_lat_lon(
 
     For case 1, only domain needs to be specified (lat_out and lon_out can
     be specified but they must already exactly match the domain definition).
-    The details will be extracted from 'domain_info.json'.
+    The details will be extracted from openghg_defs "domain_info.json" file.
 
     For case 2, the domain, lat_out and lon_out must all be specified.
 
