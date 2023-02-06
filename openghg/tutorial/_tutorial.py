@@ -314,6 +314,16 @@ def clear_example_cache() -> None:
         shutil.rmtree(extracted_examples, ignore_errors=True)
 
 
+def retrieve_surface_example() -> List[Path]:
+    """Retrieve some example surface data
+
+    Returns:
+        list: List of paths to data files
+    """
+    url = "https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz"
+    return retrieve_example_data(url=url)
+
+
 def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) -> List[Path]:
     """Retrieve data from the OpenGHG example data repository, cache the downloaded data,
     extract the data and return the filepaths of the extracted files.

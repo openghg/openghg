@@ -6,6 +6,7 @@ from ._tutorial import (
     populate_flux_ch4,
     populate_flux_co2,
     populate_bc_ch4,
+    retrieve_surface_example,
     populate_footprint_co2,
     populate_footprint_inert,
     retrieve_example_data,
