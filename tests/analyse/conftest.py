@@ -5,10 +5,10 @@ from helpers import (
     get_footprint_datapath,
     get_surface_datapath,
 )
-from openghg.objectstore import get_bucket
 from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
 from helpers import clear_test_store
 
+from helpers import clear_test_store
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():

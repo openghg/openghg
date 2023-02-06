@@ -1,5 +1,4 @@
 import os
-import shutil
 import sys
 import tempfile
 
@@ -8,25 +7,39 @@ import pytest
 # Added for import of openghg from testing directory
 sys.path.insert(0, os.path.abspath("."))
 
-# We still require OpenGHG to be in the directory above OpenGHG when running the tests
-# acquire_dir = "../acquire"
-
-# Use the local Acquire
-# sys.path.insert(0, os.path.abspath(acquire_dir))
-# sys.path.insert(0, os.path.abspath(f"{acquire_dir}/services"))
-
-# # load all of the common fixtures used by the mocked tests
-# pytest_plugins = ["services.fixtures.mocked_services"]
-
 temporary_store = tempfile.TemporaryDirectory()
 temporary_store_path = temporary_store.name
+
+
+# @pytest.fixture(autouse=True)
+# def mock_auth_fixture(monkeypatch):
+#     def return_mock():
+#         return {
+#             "object_store": {"local_store": str(temporary_store_path)},
+#             "user_id": "test-id-123",
+#         }
+
+#     monkeypatch.setattr("openghg.util.read_local_config", return_mock)
+
+from typing import Iterator
+from unittest.mock import patch
+
+
+@pytest.fixture(scope="session", autouse=True)
+def default_session_fixture() -> Iterator[None]:
+    mock_config = {
+        "object_store": {"local_store": str(temporary_store_path)},
+        "user_id": "test-id-123",
+    }
+    with patch("openghg.util.read_local_config", return_value=mock_config):
+        yield
 
 
 def pytest_sessionstart(session):
     """Set the required environment variables for OpenGHG
     at the start of the test session.
     """
-    os.environ["OPENGHG_PATH"] = temporary_store_path
+    os.environ["OPENGHG_TEST"] = temporary_store_path
 
 
 def pytest_sessionfinish(session, exitstatus):

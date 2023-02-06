@@ -1,7 +1,7 @@
 """
     Utility functions for OpenGHG
 """
-
+from ._cli import cli
 from ._domain import get_domain_info, convert_longitude, find_domain
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
@@ -56,7 +56,7 @@ from ._time import (
     trim_daterange,
     valid_daterange,
 )
-from ._user import create_default_config, get_user_config_path, read_local_config
+from ._user import create_config, get_user_config_path, read_local_config
 from ._util import (
     find_matching_site,
     multiple_inlets,
@@ -68,3 +68,4 @@ from ._util import (
     unanimous,
     verify_site,
 )
+from ._versions import show_versions

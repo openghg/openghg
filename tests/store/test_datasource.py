@@ -82,7 +82,7 @@ def test_add_data(data):
         "species": "ch4",
         "calibration_scale": "wmo-x2004a",
         "long_name": "bilsdale",
-        "inlet_height_magl": "248m",
+        "inlet_height_magl": "248",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "station_longitude": -1.15033,
