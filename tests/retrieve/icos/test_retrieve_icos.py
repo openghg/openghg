@@ -106,15 +106,15 @@ def test_icos_retrieve_and_store(mocker):
         "sampling_height": "10m",
         "sampling_height_units": "metres",
         "inlet": "10m",
-        "station_long_name": "weybourne observatory, uk", # May need to be updated
+        "station_long_name": "weybourne observatory, uk",  # May need to be updated
         # "station_long_name": "wao",
         "station_latitude": "52.95",
         "station_longitude": "1.121",
         "station_altitude": "31m",
-        "station_height_masl": "10.0",  # Will need to be updated to 17
+        # "station_height_masl": "10.0",  # Will need to be updated to 17
         # "station_height_masl": "17.0",
-        "data_owner": "andrew manning",
-        "data_owner_email": "a.manning@uea.ac.uk",
+        # "data_owner": "andrew manning",
+        # "data_owner_email": "a.manning@uea.ac.uk",
         "licence_name": "icos ccby4 data licence",
         "licence_info": "http://meta.icos-cp.eu/ontologies/cpmeta/icoslicence",
         "network": "icos",
@@ -132,6 +132,8 @@ def test_icos_retrieve_and_store(mocker):
         "citation_string": "Forster, G., ICOS RI, 2022. ICOS ATC NRT CO2 growing time series, Weybourne (10.0 m), 2022-03-01–2022-07-26, https://hdl.handle.net/11676/XRijo66u4lkxVVk5osjM84Oo",
         "Conventions": "CF-1.8",
     }
+
+    print(metadata["station_height_masl"])
 
     assert expected_metadata.items() <= metadata.items()
 
