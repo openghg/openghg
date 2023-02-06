@@ -12,14 +12,13 @@ __all__ = [
     "get_footprint_datapath",
     "glob_files",
     "clear_test_store",
-    "key_to_local_filepath,",
     "all_datasource_keys",
 ]
 
 
 def clear_test_store():
     # Clears the testing object store
-    path = os.getenv("OPENGHG_PATH")
+    path = os.getenv("OPENGHG_TEST")
     if path is not None:
         try:
             shutil.rmtree(path)

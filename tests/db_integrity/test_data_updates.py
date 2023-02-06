@@ -10,6 +10,8 @@ from openghg.retrieve import get_obs_surface, get_flux
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
 
+from helpers import clear_test_store
+
 def flux_data_read():
     """
     Flux data set up.
@@ -37,7 +39,7 @@ def test_database_update_repeat():
     """
 
     # Attempt to add same data to the database twice
-    get_bucket(empty=True)
+    clear_test_store()
     flux_data_read()
     flux_data_read()
 
@@ -49,7 +51,7 @@ def test_database_update_repeat():
     em_param["domain"] = "EUROPE"
     em_param["source"] = "anthro"
 
-    flux = get_flux(**em_param)    
+    flux = get_flux(**em_param)
 
     assert flux is not None
 
@@ -60,7 +62,7 @@ def test_database_update_repeat():
     # bc_param["domain"] = "EUROPE"
     # bc_param["species"] = "ch4"
     # bc_param["bc_input"] = "MOZART"
-    
+
     # bc = get_bc(**bc_param)
 
     # assert bc
@@ -73,7 +75,7 @@ def test_database_update_repeat():
     # fp_param["height"] = "100m"
     # fp_param["domain"] = "EUROPE"
     # fp_param["model"] = "NAME"
-    
+
     # footprint = get_footprint(**fp_param)
 
     # assert footprint is not None
@@ -92,7 +94,7 @@ def bsd_data_read_crds():
     source_format1 = "CRDS"
 
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
-    
+
     ObsSurface.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network)
 
 
@@ -109,7 +111,7 @@ def bsd_data_read_gcmd():
 
     bsd_path2 = get_surface_datapath(filename="bilsdale-md.14.C", source_format="GC")
     bsd_prec_path2 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
-    
+
     ObsSurface.read_file(filepath=(bsd_path2, bsd_prec_path2),
                          source_format=source_format2,
                          site=site,
@@ -130,7 +132,7 @@ def bsd_small_edit_data_read():
 
     bsd_path3 = get_surface_datapath(filename="bilsdale-md.small-edit.14.C", source_format="GC")
     bsd_prec_path3 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
-    
+
     ObsSurface.read_file(filepath=(bsd_path3, bsd_prec_path3),
                          source_format=source_format2,
                          site=site,
@@ -150,7 +152,7 @@ def bsd_diff_data_read():
 
     bsd_path4 = get_surface_datapath(filename="bilsdale-md.diff-value.14.C", source_format="GC")
     bsd_prec_path4 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
-    
+
     ObsSurface.read_file(filepath=(bsd_path4, bsd_prec_path4),
                          source_format=source_format2,
                          site=site,
@@ -192,7 +194,7 @@ def read_gcmd_file_pd(filename):
                                    + gcwerks_file_data["dd"] \
                                    + gcwerks_file_data["hh"] \
                                    + gcwerks_file_data["mi"]
-    
+
     gcwerks_file_data["date_time"] = pd.to_datetime(gcwerks_file_data["date_time"], format="%Y%m%d%H%M")
     gcwerks_file_data = gcwerks_file_data.dropna(subset="SF6")
 
@@ -208,7 +210,7 @@ def test_obs_data_read_header_diff():
      - BSD GCMD different data added - header changed so hash will be different but data will be the same
     Expect that GCMD (and CRDS) data can still be accessed.
     """
-    get_bucket(empty=True)
+    clear_test_store()
     # Load BSD data - CRDS data
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
@@ -256,7 +258,7 @@ def test_obs_data_read_header_diff():
 
     # Load datasource and keys, key dictionary includes "v1", "latest" etc.
 
-    # TODO: Can we check if this has been saved as a new version?   
+    # TODO: Can we check if this has been saved as a new version?
 
 
 def test_obs_data_read_data_diff():
@@ -269,7 +271,7 @@ def test_obs_data_read_data_diff():
     Expect that different GCMD will be retrieved from search (as latest version).
     Expect CRDS data can still be accessed.
     """
-    get_bucket(empty=True)  
+    clear_test_store()
     # Load BSD data - CRDS
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
@@ -330,7 +332,7 @@ def bsd_data_read_crds_diff_frequency():
     source_format1 = "CRDS"
 
     bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.min.dat", source_format="CRDS")
-    
+
     ObsSurface.read_file(filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
 
 
@@ -345,7 +347,7 @@ def test_obs_data_read_two_frequencies():
     Expect hourly data to be found as "latest" version to be retrieved (is this what we want?).
     Expect GCMD data to still be available.
     """
-    get_bucket(empty=True)  
+    clear_test_store()
     # Load BSD data - CRDS minutely frequency (and GCWERKS data)
     bsd_data_read_crds()
     # Load BSD data - CRDS hourly frequency
@@ -423,7 +425,7 @@ def bsd_data_read_crds_overwrite():
     source_format1 = "CRDS"
 
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
-    
+
     ObsSurface.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True)
 
 
@@ -431,7 +433,7 @@ def bsd_data_read_crds_overwrite():
 #     """
 #     Test adding new file for GC with same time points but some different data values
 #     """
-#     get_bucket(empty=True)  
+#     clear_test_store()
 #     # Load BSD data - CRDS minutely frequency
 #     bsd_data_read_crds()
 #     # Load BSD data - CRDS hourly frequency

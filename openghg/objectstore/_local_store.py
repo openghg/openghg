@@ -233,13 +233,12 @@ def exists(bucket: str, key: str) -> bool:
     return len(names) > 0
 
 
-def get_bucket(empty: bool = False) -> str:
-    """Find and return a new bucket in the object store called
-    'bucket_name'. If 'create_if_needed' is True
-    then the bucket will be created if it doesn't exist. Otherwise,
-    if the bucket does not exist then an exception will be raised.
+def get_bucket() -> str:
+    """Find and return the local object store path (bucket)
+
+    Returns:
+        str: Path to object store
     """
-    import shutil
     import os
 
     tutorial_store = os.getenv("OPENGHG_TMP_STORE")
@@ -249,24 +248,15 @@ def get_bucket(empty: bool = False) -> str:
     openghg_env = os.getenv("OPENGHG_PATH")
     if openghg_env is not None:
         warnings.warn(
-            "Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object"
+            "Use of the OPENGHG_PATH environment variable is deprecated and will be ignored in coming versions."
+            + "If you want to set a specific object"
             + " store path please use the configuration file. See docs.openghg.org/install",
             category=DeprecationWarning,
         )
 
-        if empty is True:
-            shutil.rmtree(openghg_env)
-            Path(openghg_env).mkdir(parents=True)
-
         return openghg_env
 
     local_store = get_local_objectstore_path()
-
-    if empty is True:
-        raise NotImplementedError(
-            "You cannot delete the object store using get_bucket any long"
-            + "please check you really want to delete the whole store and use openghg.object_store.clear_store."
-        )
 
     return str(local_store)
 

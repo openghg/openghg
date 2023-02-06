@@ -6,8 +6,9 @@ from helpers import (
     get_eulerian_datapath,
     get_footprint_datapath,
     get_surface_datapath,
+    clear_test_store
 )
-from openghg.objectstore import get_bucket
+
 from openghg.store import (
     BoundaryConditions,
     Emissions,
@@ -20,7 +21,7 @@ from openghg.store import (
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
-    get_bucket(empty=True)
+    clear_test_store()
 
     # DECC network sites
     network = "DECC"

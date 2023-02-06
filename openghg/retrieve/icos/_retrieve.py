@@ -34,8 +34,6 @@ def retrieve_atmospheric(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
-        function call environment.
         update_metadata_mismatch: If metadata derived from ICOS Header does not match
             to derived attributes, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
@@ -75,8 +73,6 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        bypass_call: Bypass the remote function call, used to shortcut calls within a the serverless
-        function call environment.
         update_metadata_mismatch: If metadata derived from ICOS Header does not match
             to derived attributes, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
