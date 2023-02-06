@@ -1,8 +1,9 @@
 from pathlib import Path
 
-from helpers import get_emissions_datapath, get_footprint_datapath, get_surface_datapath
+from helpers import get_emissions_datapath, get_footprint_datapath, get_surface_datapath, clear_test_store
 from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
 from openghg.util import compress
+from openghg.retrieve import search_footprints
 
 
 # Test local functions
@@ -46,7 +47,9 @@ def test_local_obs_openghg():
      - "inlet_height_magl" in metadata was just being set to "inlet" from metadata ("185m")
      - sync_surface_metadata was trying to compare the two values of 185.0 and "185m" but "185m" could not be converted to a float - ValueError
     """
-    filepath = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG")
+    filepath = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
+    )
 
     results = standardise_surface(
         filepaths=filepath,
@@ -145,3 +148,19 @@ def test_standardise(monkeypatch, mocker, tmpdir):
             },
         }
     )
+
+
+def test_standardise_footprint_overwrite_deletes_old_datasource(mocker):
+    clear_test_store()
+
+    filepath = get_footprint_datapath(filename="RGL-90magl_UKV_co2_TEST_201401.nc")
+
+    res_a = standardise_footprint(filepath=filepath, site="RGL", domain="UKV", model="UKV", inlet="90m")
+
+    print(res_a)
+
+    res_b = standardise_footprint(
+        filepath=filepath, site="RGL", domain="UKV", model="UKV", inlet="90m", overwrite=True
+    )
+
+    assert res_b["rgl_ukv_UKV_90m"]["new"] is False

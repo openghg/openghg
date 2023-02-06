@@ -144,6 +144,18 @@ class Datasource:
         if self._data:
             # We need to remove them from the curre
             # pop the current daterange from
+
+            # Check the equality of what we've got at the moment and what
+            # we're going to add, doing a simple dict eqality comparison
+            # isn't enought to check the contents of the Datasets here
+            if new_data == self._data:
+                for _old, _new in zip(self._data.values(), new_data.values()):
+                    if not _old.equals(_new):
+                        break
+                else:
+                    logger.warning("No new data, nothing to do.")
+                    return None
+
             overlapping = []
             for existing_daterange in self._data:
                 for new_daterange in new_data:
