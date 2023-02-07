@@ -84,7 +84,73 @@ It does this by applying the underlying search function to each of the metadata 
 These metadata stores are loaded from fixed paths within each object store and the
 search function is applied to it.
 
-So
+Currently
+*********
+
+1. Pass in data type or not
+2. Loads in all the data classes
+3. Makes sure the data type selected is valid
+4. Retrieves the metakey from each class, loads the metastore and searches it
+
+Redesign
+********
+
+Problems
+________
+
+1. Each object is created and knows its own key
+2. When the object is created it creates its own metakey
+3. Search retrieves each of the metadata keys of each object
+4. This means we can't have duplicate ObsSurfaces for example as these are loaded in and their metadata key loaded
+
+Solutions
+_________
+
+- But, if we just pass in the object store path, then each ObsSurface can have the same UUID just in a different place.
+- Do they need a fixed UUID?
+
+* Current loading process of ObsSurface
+
+.. code-block:: python
+
+    from openghg.objectstore import get_bucket, get_object_from_json
+
+    if not cls.exists():
+        return cls()
+
+    if bucket is None:
+        bucket = get_bucket()
+
+    key = f"{cls._root}/uuid/{cls._uuid}"
+    data = get_object_from_json(bucket=bucket, key=key)
+
+    return cls.from_data(data=data)
+
+So if we update get_bucket to return a different object store path then each object will get put in the right
+place. But is this the best way of doing it?
+
+How to handle store selection
+_____________________________
+
+If we want to add data to the object store we need to tell
+
+How about read and write categories within the config?
+Could have something like
+
+.. code-block:: toml
+
+     user_id = "uuid-123"
+
+     [object_stores.local]
+     path = "/home/gar/object_store"
+     access = "rw"
+
+     [object_stores.group]
+     path = "/network_share/group_store"
+     access = "r"
+
+
+But how to get ``get_bucket`` to return the correct path depending on the read write process?
 
 .. code-block:: python
 
