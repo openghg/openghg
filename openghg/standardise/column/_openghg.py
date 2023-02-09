@@ -34,7 +34,7 @@ def parse_openghg(
         satellite: Name of satellite (if relevant)
         domain: For satellite only. If data has been selected on an area include the
             identifier name for domain covered. This can map to previously defined domains
-            (see domain_info.json) or a newly defined domain.
+            (see openghg_defs "domain_info.json" file) or a newly defined domain.
         selection: For satellite only, identifier for any data selection which has been
             performed on satellite data. This can be based on any form of filtering, binning etc.
             but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
@@ -194,7 +194,7 @@ def parse_openghg(
     # network_case_options = [network, network.upper(), network.lower()]
 
     # # Extract centralised data for site (if present)
-    # site_data = load_json(filename="acrg_site_info.json")
+    # site_data = load_json(filename="site_info.json")
     # for site_value in site_case_options:
     #     if site_value in site_data:
     #         site_info_all = site_data[site_value]

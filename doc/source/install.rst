@@ -64,7 +64,6 @@ First create and activate a conda environment
 .. code-block:: bash
 
     conda create --name openghg_env
-    # Activate the environment
     conda activate openghg_env
 
 Next install OpenGHG from our conda channel
@@ -77,6 +76,33 @@ Next install OpenGHG from our conda channel
 Configuration
 =============
 
+Once OpenGHG is installed you can use `openghg` command line tool to get the configuration file setup.
+
+.. code-block:: bash
+
+    openghg --quickstart
+
+You should now see text telling you you haven't got a configuration file (unless you've run the quickstart previously)
+and a prompt asking you enter a path for the object store. We'll just use the default path and hit return when prompted.
+
+.. code-block:: bash
+
+    No configuration file found, please see installation instructions.
+
+    Please enter a path for the object store (default: /home/gareth/openghg_store):
+    Creating config at /home/gareth/.config/openghg/openghg.conf
+
+
+A configuration file has been created and you're ready to run OpenGHG. If you ever want to modify the configuration file
+you can find it at ``~/.config/openghg/openghg.conf``. My configuration file looks like this
+
+.. code-block:: toml
+
+    user_id = "47363762-2963-4a2d-8afc-dejh05380f19"
+
+    [object_store]
+    local_store = "/home/gareth/openghg_store"
+
 Deprecation of ``OPENGHG_PATH``
 -------------------------------
 
@@ -84,22 +110,6 @@ If you've previously used OpenGHG and worked through our tutorials you might hav
 the need to set the ``OPENGHG_PATH`` environment variable. Now that we've moved to a configuration
 file this is not longer used. If you previously set a custom path using the variable please update
 the configuration file as below.
-
-Updating the config file
-------------------------
-
-On the first run on OpenGHG a configuration file will be created in your home folder. On Linux this should be under
-``/home/<your username>/.config/openghg/openghg.conf`` or on macOS
-``/Users/<your username>/.config/openghg/openghg.conf``. In this file we set the path for the object store.
-By default the object store will be created at ``/home/<your username>/openghg_store``.
-To modify this path open the config file with a text editor and change the value assigned to ``local_store``.
-
-.. code-block:: toml
-
-    [object_store]
-    local_store = "/home/<your username>/openghg_store"
-
-Remember to replace ``<your username>`` with your username.
 
 
 Developers

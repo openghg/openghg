@@ -3,9 +3,12 @@ import copy
 from openghg.store.base import Datasource
 from openghg.store.spec import define_data_type_classes
 from openghg.store import load_metastore
-
+import logging
 import tinydb
 from typing import DefaultDict, Dict, List, Set, Optional, Union
+
+logger = logging.getLogger("openghg.dataobjects")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class DataHandler:
@@ -191,7 +194,7 @@ class DataHandler:
                 # Update the metadata stored internally so we're up to date
                 self.metadata[u] = internal_copy
 
-                print(f"Modified metadata for {u}.")
+                logger.info(f"Modified metadata for {u}.")
 
     def delete_datasource(self, uuid: Union[List, str]) -> None:
         """Delete a Datasource in the object store.

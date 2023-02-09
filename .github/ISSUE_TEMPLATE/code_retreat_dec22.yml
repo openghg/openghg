@@ -1,0 +1,43 @@
+name: Code Retreat Dec 22
+description: Code Retreat - to add and improve.
+labels: [CodeRetreatDec22]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature that's missing
+      description: |
+        Please do a quick search of existing issues to make sure that this has not been asked before.
+        Add a detailed description of what's missing.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+      description: |
+        Description of what you want to happen.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: |
+        Description of any alternative solutions or features you've considered.
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: |
+        Add any other context about the feature request here.
+    validations:
+      required: false
+  - type: textarea
+    id: code-suggest
+    attributes:
+      label: Additional code / helper functions
+      description: |
+        Any code you had to write to get OpenGHG to do what you want
+    validations:
+      required: false

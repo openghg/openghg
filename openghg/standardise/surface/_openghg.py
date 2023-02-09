@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Dict, Optional, Union, cast
-
+import logging
 import xarray as xr
+
+logger = logging.getLogger("openghg.standardise.surface")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_openghg(
@@ -21,8 +24,8 @@ def parse_openghg(
     Parse and extract data from pre-formatted netcdf file which already
     matches expected OpenGHG format.
 
-    At the moment this must also be for a site known to OpenGHG. See
-    'acrg_site_info.json' file.
+    At the moment this must also be for a site known to OpenGHG.
+    See "site_info.json" file within the openghg_defs repository.
 
     The arguments specified below are the metadata needed to store this
     surface observation file within the object store. If these keywords are
@@ -46,7 +49,7 @@ def parse_openghg(
     Returns:
         Dict: Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, load_json
+    from openghg.util import clean_string, format_inlet, load_json, get_site_info
     from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
 
     data_filepath = Path(data_filepath)
@@ -101,12 +104,13 @@ def parse_openghg(
             raise ValueError("More than one inlet value found in attributes, please pass as argument.")
 
         inlet = inlet_val[0]
+        inlet = format_inlet(str(inlet))
 
     metadata_initial["inlet"] = inlet
 
     metadata = cast(Dict[str, str], metadata_initial)
 
-    metadata["inlet_height_magl"] = metadata["inlet"]
+    metadata["inlet_height_magl"] = format_inlet(str(metadata["inlet"]), key_name="inlet_height_magl")
     metadata["data_type"] = "surface"
 
     # Define remaining keys needed for metadata
@@ -114,15 +118,14 @@ def parse_openghg(
     metadata_needed = [param for param in metadata_needed if param not in metadata]
 
     metadata["site"] = clean_string(metadata["site"])
-    # metadata["species"] = synonyms(
-    #     metadata["species"]
-    # ).lower()
-    # # May want to remove the .lower() here and centralise this
     metadata["species"] = define_species_label(metadata["species"])[0]
 
     # Update attributes to match metadata after cleaning
     attributes["site"] = metadata["site"]
     attributes["species"] = metadata["species"]
+
+    if "inlet" in attributes:
+        attributes["inlet_height_magl"] = str(attributes["inlet"]).strip("m")
 
     site = metadata["site"]
     network = metadata["network"]
@@ -133,13 +136,15 @@ def parse_openghg(
     network_case_options = [network, network.upper(), network.lower()]
 
     # Extract centralised data for site (if present)
-    site_data = load_json(filename="acrg_site_info.json")
+    site_data = get_site_info()
     for site_value in site_case_options:
         if site_value in site_data:
             site_info_all = site_data[site_value]
             break
     else:
-        print("Unknown site. Will attempt to extract metadata from dataset attributes or input keywords")
+        logger.info(
+            "Unknown site. Will attempt to extract metadata from dataset attributes or input keywords"
+        )
         site_info_all = {}
 
     for network_value in network_case_options:
@@ -147,7 +152,7 @@ def parse_openghg(
             site_info = site_info_all[network_value]
             break
     else:
-        print(
+        logger.info(
             "Network {network} does not match with site {site}. Will attempt to extract metadata from dataset attributes or input keywords"
         )
         site_info = {}
@@ -171,7 +176,7 @@ def parse_openghg(
                         break
 
     # Load attributes data for network if present
-    param_data = load_json(filename="attributes.json")
+    param_data = load_json(filename="attributes.json", internal_data=True)
     for network_value in network_case_options:
         if network_value in param_data:
             network_params = param_data[network_value]

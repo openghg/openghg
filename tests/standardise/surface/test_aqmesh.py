@@ -31,7 +31,7 @@ def test_aqmesh_read():
         "in_ulez": "No",
         "latitude": 55.91796,
         "longitude": -4.406231,
-        "inlet": 1,
+        "inlet": "1m",
         "network": "aqmesh_glasgow",
         "sampling_period": "NOT_SET",
         "species": "co2",

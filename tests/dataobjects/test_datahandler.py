@@ -29,7 +29,7 @@ def footprint_read(mocker):
 
     print(datapath)
 
-    mock_uuids = [f"test-uuid-{n}" for n in range(100, 105)]
+    mock_uuids = [f"test-uuid-{n}" for n in range(100, 188)]
     mocker.patch("uuid.uuid4", side_effect=mock_uuids)
     # model_params = {"simulation_params": "123"}
 
@@ -54,7 +54,9 @@ def footprint_read(mocker):
 def test_footprint_metadata_modification(footprint_read):
     search_res = data_handler_lookup(data_type="footprints", site="tmb", network="lghg")
 
-    uuid = "test-uuid-100"
+    assert len(search_res.metadata) == 1
+    uuid = next(iter(search_res.metadata))
+
     metadata = search_res.metadata[uuid]
 
     assert metadata["domain"] == "europe"
@@ -80,7 +82,8 @@ def test_delete_footprint_data(footprint_read):
     res = data_handler_lookup(data_type="footprints", site="tmb")
 
     fp_obj = Footprints.load()
-    uuid = "test-uuid-100"
+
+    uuid = fp_obj.datasources()[0]
     ds = Datasource.load(uuid=uuid, shallow=True)
     key = ds.key()
     datasource_path = key_to_local_filepath(key=key)
@@ -109,10 +112,13 @@ def test_delete_footprint_data(footprint_read):
 def test_find_modify_metadata():
     search_res = data_handler_lookup(data_type="surface", site="tac", species="co2")
 
+    assert len(search_res.metadata) == 1
+    uuid = next(iter(search_res.metadata))
+
     to_add = {"forgotten_key": "tis_but_a_scratch", "another_key": "swallow", "a_third": "parrot"}
 
     start_metadata = {
-        "test-uuid-101": {
+        uuid: {
             "site": "tac",
             "instrument": "picarro",
             "sampling_period": "60.0",
@@ -135,12 +141,12 @@ def test_find_modify_metadata():
         }
     }
 
-    search_res.update_metadata(uuid="test-uuid-101", to_update=to_add)
+    search_res.update_metadata(uuid=uuid, to_update=to_add)
 
     res = search_surface(site="tac", species="co2")
 
     diff_d = {
-        k: v for k, v in res.metadata["test-uuid-101"].items() if k not in start_metadata["test-uuid-101"]
+        k: v for k, v in res.metadata[uuid].items() if k not in start_metadata[uuid]
     }
 
     assert diff_d == {"forgotten_key": "tis_but_a_scratch", "another_key": "swallow", "a_third": "parrot"}
@@ -149,8 +155,12 @@ def test_find_modify_metadata():
 def test_modify_multiple_uuids():
     res = data_handler_lookup(data_type="surface", site="tac")
 
+    print(res.metadata)
+
+    uuids = sorted(res.metadata.keys())
+
     expected = {
-        "test-uuid-100": {
+        uuids[0]: {
             "site": "tac",
             "instrument": "picarro",
             "sampling_period": "60.0",
@@ -162,16 +172,16 @@ def test_modify_multiple_uuids():
             "calibration_scale": "wmo-x2004a",
             "long_name": "tacolneston",
             "data_type": "surface",
-            "inlet_height_magl": "100m",
+            "inlet_height_magl": "100",
             "data_owner": "simon o'doherty",
             "data_owner_email": "s.odoherty@bristol.ac.uk",
             "station_longitude": 1.13872,
             "station_latitude": 52.51775,
             "station_long_name": "tacolneston tower, uk",
             "station_height_masl": 50.0,
-            "uuid": "test-uuid-100",
+            "uuid": uuids[0],
         },
-        "test-uuid-101": {
+        uuids[1]: {
             "site": "tac",
             "instrument": "picarro",
             "sampling_period": "60.0",
@@ -183,14 +193,14 @@ def test_modify_multiple_uuids():
             "calibration_scale": "wmo-x2007",
             "long_name": "tacolneston",
             "data_type": "surface",
-            "inlet_height_magl": "100m",
+            "inlet_height_magl": "100",
             "data_owner": "simon o'doherty",
             "data_owner_email": "s.odoherty@bristol.ac.uk",
             "station_longitude": 1.13872,
             "station_latitude": 52.51775,
             "station_long_name": "tacolneston tower, uk",
             "station_height_masl": 50.0,
-            "uuid": "test-uuid-101",
+            "uuid": uuids[1],
         },
     }
 
@@ -229,7 +239,7 @@ def test_delete_metadata_keys():
         "calibration_scale": "wmo-x2004a",
         "long_name": "tacolneston",
         "data_type": "surface",
-        "inlet_height_magl": "100m",
+        "inlet_height_magl": "100",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "station_longitude": 1.13872,
@@ -254,7 +264,7 @@ def test_delete_metadata_keys():
         "calibration_scale": "wmo-x2004a",
         "long_name": "tacolneston",
         "data_type": "surface",
-        "inlet_height_magl": "100m",
+        "inlet_height_magl": "100",
         "data_owner": "simon o'doherty",
         "data_owner_email": "s.odoherty@bristol.ac.uk",
         "station_longitude": 1.13872,

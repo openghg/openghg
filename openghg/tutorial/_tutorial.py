@@ -8,8 +8,11 @@ import tarfile
 import warnings
 from pathlib import Path
 from typing import List, Union
+import logging
+from openghg.standardise import standardise_footprint, standardise_flux, standardise_bc
 
-from openghg.standardise import standardise_footprint, standardise_flux
+logger = logging.getLogger("openghg.tutorial")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 __all__ = ["bilsdale_datapaths"]
 
@@ -47,19 +50,20 @@ def populate_footprint_inert() -> None:
 
     tac_inert_path = retrieve_example_data(url=tac_fp_inert)[0]
 
-    print("Standardising footprint data...")
+    logger.info("Standardising footprint data...")
     # TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
                 site = "TAC"
-                height = "100m"
+                # height = "100m"
+                inlet = "100m"
                 domain = "EUROPE"
                 model = "NAME"
 
                 standardise_footprint(
-                    filepath=tac_inert_path, site=site, height=height, domain=domain, model=model
+                    filepath=tac_inert_path, site=site, inlet=inlet, domain=domain, model=model
                 )
 
 
@@ -72,10 +76,10 @@ def populate_footprint_co2() -> None:
     """
     tac_fp_co2 = "https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_co2_201707.tar.gz"
 
-    print("Retrieving example data...")
+    logger.info("Retrieving example data...")
     tac_co2_path = retrieve_example_data(url=tac_fp_co2)[0]
 
-    print("Standardising footprint data...")
+    logger.info("Standardising footprint data...")
     # TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -84,21 +88,22 @@ def populate_footprint_co2() -> None:
                 site = "TAC"
                 domain = "EUROPE"
                 species = "co2"
-                height = "185m"
+                # height = "185m"
+                inlet = "185m"
                 model = "NAME"
                 metmodel = "UKV"
 
                 standardise_footprint(
                     filepath=tac_co2_path,
                     site=site,
-                    height=height,
+                    inlet=inlet,
                     domain=domain,
                     model=model,
                     metmodel=metmodel,
                     species=species,
                 )
 
-    print("Done.")
+    logger.info("Done.")
 
 
 def populate_flux_data() -> None:
@@ -151,7 +156,7 @@ def populate_flux_ch4() -> None:
     """
     use_tutorial_store()
 
-    print("Retrieving data...")
+    logger.info("Retrieving data...")
     eur_2016_flux = "https://github.com/openghg/example_data/raw/main/flux/ch4-ukghg-all_EUROPE_2016.tar.gz"
     flux_data = retrieve_example_data(url=eur_2016_flux)
 
@@ -161,7 +166,7 @@ def populate_flux_ch4() -> None:
     flux_data_waste = [filename for filename in flux_data if source_waste in str(filename)][0]
     flux_data_energyprod = [filename for filename in flux_data if source_energyprod in str(filename)][0]
 
-    print("Standardising flux...")
+    logger.info("Standardising flux...")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
@@ -179,7 +184,41 @@ def populate_flux_ch4() -> None:
                     domain=domain,
                 )
 
-    print("Done.")
+    logger.info("Done.")
+
+
+def populate_bc() -> None:
+    """ """
+    populate_bc_ch4()
+
+
+def populate_bc_ch4() -> None:
+    """Populates the tutorial object store with boundary conditions data from the
+    example data repository.
+
+    Returns:
+        None
+    """
+    use_tutorial_store()
+
+    logger.info("Retrieving data...")
+    eur_2016_bc = (
+        "https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz"
+    )
+    bc_data_path = retrieve_example_data(url=eur_2016_bc)[0]
+
+    bc_input = "CAMS"
+    domain = "EUROPE"
+    species = "ch4"
+
+    logger.info("Standardising boundary conditions...")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with open(os.devnull, "w") as devnull:
+            with contextlib.redirect_stdout(devnull):
+                standardise_bc(filepath=bc_data_path, bc_input=bc_input, species=species, domain=domain)
+
+    logger.info("Done.")
 
 
 def populate_surface_data() -> None:
@@ -197,7 +236,7 @@ def populate_surface_data() -> None:
     tac_data = "https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz"
     capegrim_data = "https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz"
 
-    print("Retrieving example data...")
+    logger.info("Retrieving example data...")
     bsd_paths = retrieve_example_data(url=bsd_data)
     tac_paths = retrieve_example_data(url=tac_data)
     capegrim_paths = sorted(retrieve_example_data(url=capegrim_data))
@@ -205,7 +244,7 @@ def populate_surface_data() -> None:
     # Create the tuple required
     capegrim_tuple = (capegrim_paths[0], capegrim_paths[1])
 
-    print("Standardising data...")
+    logger.info("Standardising data...")
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -221,7 +260,7 @@ def populate_surface_data() -> None:
                     network="agage",
                 )
 
-    print("Done.")
+    logger.info("Done.")
 
 
 def bilsdale_datapaths() -> List:
@@ -245,7 +284,7 @@ def use_tutorial_store() -> None:
     Returns:
         None
     """
-    os.environ["OPENGHG_TMP_STORE"] = "1"
+    os.environ["OPENGHG_TUT_STORE"] = "1"
 
 
 def example_extract_path() -> Path:
@@ -287,6 +326,8 @@ def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) 
     """
     from openghg.objectstore import get_tutorial_store_path
     from openghg.util import download_data, parse_url_filename
+
+    use_tutorial_store()
 
     # Check we're getting a tar
     output_filename = parse_url_filename(url=url)
@@ -354,3 +395,18 @@ def unpack_example_archive(archive_path: Path, extract_dir: Union[str, Path, Non
     extracted_filepaths = [Path(extract_dir, str(fname)) for fname in filenames]
 
     return extracted_filepaths
+
+
+def clear_tutorial_store() -> None:
+    """Delete the contents of the tutorial object store
+
+    Returns:
+        None
+    """
+    from openghg.objectstore import get_tutorial_store_path
+
+    path = get_tutorial_store_path()
+
+    shutil.rmtree(path=path, ignore_errors=True)
+
+    logger.info(f"Tutorial store at {path} cleared.")

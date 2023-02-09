@@ -5,15 +5,15 @@ modelled output based on this data. The types of data currently included are:
  - Fixed domain sensitivity maps known as footprints (FootprintData)
  - Fixed domain flux maps (FluxData) - multiple maps can be included and
  referenced by source name
-
-TODO: Also need to incorporate boundary conditions
+ - Fixed domain vertical curtains at each boundary (BoundaryConditionsData)
 
 A ModelScenario instance can be created by searching the object store manually
 and providing these outputs:
->>> obs = get_obs_surface(site, species, ...)
->>> footprint = get_footprint(site, domain, ...)
->>> flux = get_flux(species, source, ...)
->>> model = ModelScenario(obs=obs, footprint=footprint, flux=flux)
+>>> obs = get_obs_surface(site, species, inlet, ...)
+>>> footprint = get_footprint(site, domain, inlet, ...)
+>>> flux = get_flux(species, source, domain, ...)
+>>> bc = get_bc(species, domain, bc_input, ...)
+>>> model = ModelScenario(obs=obs, footprint=footprint, flux=flux, bc=bc)
 
 A ModelScenario instance can also be created using keywords to search the object store:
 >>> model = ModelScenario(site,
@@ -22,6 +22,7 @@ A ModelScenario instance can also be created using keywords to search the object
                           network,
                           domain,
                           sources=sources,
+                          bc_input=bc_input,
                           start_date=start_date,
                           end_date=end_date)
 
@@ -30,11 +31,13 @@ A ModelScenario instance can also be initialised and then populated after creati
 >>> model.add_obs(obs=obs)
 >>> model.add_footprint(site, inlet, domain, ...)
 >>> model.add_flux(species, domain, sources, ...)
+>>> model.add_bc(species, domain, bc_input, ...)
 
 Once created, methods can be called on ModelScenario which will combine these
 data sources and cache the outputs (if requested) to make for quicker calculation.
 
 >>> modelled_obs = model.calc_modelled_obs()
+>>> modelled_baseline = model.calc_modelled_baseline()
 >>> combined_data = model.footprints_data_merge()
 
 If some input types needed for these operations are missing, the user will be alerted
@@ -76,7 +79,7 @@ methodType = Optional[Literal["nearest", "pad", "ffill", "backfill", "bfill"]]
 
 
 logger = logging.getLogger("openghg.analyse")
-logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 
 class ModelScenario:
@@ -84,6 +87,9 @@ class ModelScenario:
     This class stores together observation data with ancillary data and allows
     operations to be performed combining these inputs.
     """
+
+    def __bool__(self) -> bool:
+        return bool(self.obs) or bool(self.footprint) or bool(self.fluxes) or bool(self.bc)
 
     def __init__(
         self,
@@ -168,8 +174,8 @@ class ModelScenario:
             site = obs_metadata["site"]
             species = obs_metadata["species"]
             inlet = obs_metadata["inlet"]
-            print("Updating any inputs based on observation data")
-            print(f"site: {site}, species: {species}, inlet: {inlet}")
+            logger.info("Updating any inputs based on observation data")
+            logger.info(f"site: {site}, species: {species}, inlet: {inlet}")
 
         # Add footprint data (directly or through keywords)
         self.add_footprint(
@@ -239,6 +245,7 @@ class ModelScenario:
         if isinstance(keywords, dict):
             keywords = [keywords]
 
+        data = None
         num_checks = len(keywords)
         for i, keyword_set in enumerate(keywords):
             try:
@@ -246,21 +253,19 @@ class ModelScenario:
             except (SearchError, AttributeError):
                 num = i + 1
                 if num == num_checks:
-                    print(f"Unable to add {data_type} data based on keywords supplied.")
-                    print(" Inputs - \n")
+                    logger.warning(f"Unable to add {data_type} data based on keywords supplied.")
+                    logger.warning(" Inputs -")
                     for key, value in keyword_set.items():
-                        print(f" {key}: {value}\n")
+                        logger.info(f" {key}: {value}")
                     if search_fn is not None:
                         data_search = search_fn(**keyword_set)  # type:ignore
-                        print("---- Search results ---")
-                        print(f"Number of results returned: {len(data_search)}")
-                        print(data_search)
-                        # TODO: If we can determine how many results are returned from search
-                        # we can use this to give better information about why no data has
-                        # been found for these inputs.
+                        logger.info("---- Search results ---")
+                        logger.info(f"Number of results returned: {len(data_search)}")
+                        logger.info(data_search.results)
+                    print("\n")
                 data = None
             else:
-                print(f"Adding {data_type} to model scenario")
+                logger.info(f"Adding {data_type} to model scenario")
                 break
 
         return data
@@ -334,7 +339,7 @@ class ModelScenario:
             if inlet is None and self.obs is not None:
                 inlet = self.obs.metadata["inlet"]
             elif inlet is None and height is not None:
-                inlet = height                        
+                inlet = height
                 inlet = clean_string(inlet)
                 inlet = format_inlet(inlet)
             else:
@@ -435,14 +440,17 @@ class ModelScenario:
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
         if self.fluxes is not None:
-            if flux is not None:
+            if flux:
                 self.fluxes.update(flux)
         else:
-            self.fluxes = flux
+            # Flux can be None or empty dict.
+            if flux:
+                self.fluxes = flux
 
         if self.fluxes is not None:
             if not hasattr(self, "species"):
                 flux_values = list(self.fluxes.values())
+
                 flux_1 = flux_values[0]
                 self.species = flux_1.metadata["species"]
 
@@ -505,9 +513,9 @@ class ModelScenario:
             if value is None:
                 missing.append(attr)
 
-                print(f"Must have {attr} data linked to this ModelScenario to run this function")
-                print("Include this by using the add function, with appropriate inputs:")
-                print("  ModelScenario.add_{attr}(...)")
+                logger.error(f"Must have {attr} data linked to this ModelScenario to run this function")
+                logger.error("Include this by using the add function, with appropriate inputs:")
+                logger.error("  ModelScenario.add_{attr}(...)")
 
         if missing:
             raise ValueError(f"Missing necessary {' and '.join(missing)} data.")
@@ -516,9 +524,10 @@ class ModelScenario:
         """
         Find the platform for a site, if present.
 
-        This will access the "acrg_site_info.json" file to find this information.
+        This will access the "site_info.json" file from openghg_defs dependency to 
+        find this information.
         """
-        from openghg.util import load_json
+        from openghg.util import get_site_info
 
         try:
             site = self.site
@@ -526,9 +535,9 @@ class ModelScenario:
         except AttributeError:
             return None
         else:
-            site_info = load_json(filename="acrg_site_info.json")
+            site_data = get_site_info()
             try:
-                site_details = site_info[site_upper]
+                site_details = site_data[site_upper]
             except KeyError:
                 return None
             else:
@@ -594,7 +603,7 @@ class ModelScenario:
             obs_data_period_s = float(obs_attributes["sampling_period"])
         elif "sampling_period_estimate" in obs_attributes:
             estimate = obs_attributes["sampling_period_estimate"]
-            print(f"WARNING: Using estimated sampling period of {estimate}s for observational data")
+            logger.warning(f"Using estimated sampling period of {estimate}s for observational data")
             obs_data_period_s = float(estimate)
         else:
             infer_sampling_period = True
@@ -978,7 +987,7 @@ class ModelScenario:
 
         # Cache output from calculations
         if cache:
-            print("Caching calculated data")
+            logger.info("Caching calculated data")
             self.modelled_obs = modelled_obs
             # self.scenario[name] = modelled_obs
         else:
@@ -1025,6 +1034,8 @@ class ModelScenario:
         flux = flux.reindex_like(scenario, "ffill")
         flux_modelled: DataArray = scenario["fp"] * flux["flux"]
         timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
+
+        # TODO: Add details about units to output
 
         if output_TS and output_fpXflux:
             return timeseries, flux_modelled
@@ -1173,7 +1184,7 @@ class ModelScenario:
 
         # Create times for matching to the flux
         full_dates = date_range(
-            date_start_back.values, date_end.values, freq=highest_resolution, closed="left"
+            date_start_back.values, date_end.values, freq=highest_resolution, inclusive="left"
         ).to_numpy()
 
         # Create low frequency flux data (monthly)
@@ -1221,7 +1232,7 @@ class ModelScenario:
         # Iterate through the time coord to get the total mf at each time step using the H back coord
         # at each release time we disaggregate the particles backwards over the previous 24hrs
         # The final value then contains the 29-day integrated residual footprints
-        print("Calculating modelled timeseries comparison:")
+        logger.info("Calculating modelled timeseries comparison:")
         iters = tqdm(time_array.values)
         for tt, time in enumerate(iters):
 
@@ -1285,6 +1296,8 @@ class ModelScenario:
                 # work out timeseries by summing over lat, lon (24 hrs)
                 timeseries[tt] = fpXflux_time.sum()
 
+        # TODO: Add details about units to output
+
         if output_fpXflux:
             fpXflux = DataArray(
                 fpXflux,
@@ -1312,6 +1325,7 @@ class ModelScenario:
         self,
         resample_to: str = "coarsest",
         platform: Optional[str] = None,
+        output_units: float = 1e-9,
         cache: bool = True,
         recalculate: bool = False,
     ) -> DataArray:
@@ -1413,19 +1427,35 @@ class ModelScenario:
             loss_s = 1.0
             loss_w = 1.0
 
+        # Check and extract units as float, if present.
+        units_default = 1.0
+        units_n = check_units(bc_data["vmr_n"], default=units_default)
+        units_e = check_units(bc_data["vmr_e"], default=units_default)
+        units_s = check_units(bc_data["vmr_s"], default=units_default)
+        units_w = check_units(bc_data["vmr_w"], default=units_default)
+
         modelled_baseline = (
-            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n).sum(["height", "lon"])
-            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e).sum(["height", "lat"])
-            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s).sum(["height", "lon"])
-            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w).sum(["height", "lat"])
+            (scenario["particle_locations_n"] * bc_data["vmr_n"] * loss_n * units_n / output_units).sum(
+                ["height", "lon"]
+            )
+            + (scenario["particle_locations_e"] * bc_data["vmr_e"] * loss_e * units_e / output_units).sum(
+                ["height", "lat"]
+            )
+            + (scenario["particle_locations_s"] * bc_data["vmr_s"] * loss_s * units_s / output_units).sum(
+                ["height", "lon"]
+            )
+            + (scenario["particle_locations_w"] * bc_data["vmr_w"] * loss_w * units_w / output_units).sum(
+                ["height", "lat"]
+            )
         )
 
         modelled_baseline.attrs["resample_to"] = resample_to
+        modelled_baseline.attrs["units"] = output_units
         modelled_baseline = modelled_baseline.rename("bc_mod")
 
         # Cache output from calculations
         if cache:
-            print("Caching calculated data")
+            logger.info("Caching calculated data")
             self.modelled_baseline = modelled_baseline
             # self.scenario[name] = modelled_obs
         else:
@@ -1497,7 +1527,7 @@ class ModelScenario:
                 name = modelled_baseline.name
                 combined_dataset = combined_dataset.assign({name: modelled_baseline})
             else:
-                print(
+                logger.warning(
                     "Unable to calculate baseline data. Add boundary conditions using ModelScenarion.add_bc(...) to do this."
                 )
 
@@ -1579,6 +1609,9 @@ class ModelScenario:
         else:
             label = f"Modelled {species.upper()}"
 
+        # TODO: Check modelled_obs units and ensure these match to modelled_baseline
+        # - currently modelled_baseline outputs in 1e-9 (ppb) by default.
+
         if baseline == "boundary_conditions":
             if self.bc is not None:
                 modelled_baseline = self.calc_modelled_baseline(
@@ -1587,7 +1620,7 @@ class ModelScenario:
                 y_baseline = modelled_baseline.data
                 y_data = y_data + y_baseline
             else:
-                print("Unable to calculate baseline from boundary conditions")
+                logger.warning("Unable to calculate baseline from boundary conditions")
         elif baseline == "percentile":
             mf = obs.data["mf"]
             y_baseline = mf.quantile(1.0, dim="time").values
@@ -1800,6 +1833,27 @@ def stack_datasets(datasets: Sequence[Dataset], dim: str = "time", method: metho
             data_stacked += data_match
 
     return data_stacked
+
+
+def check_units(data_var: DataArray, default: float) -> float:
+    """
+    Check "units" attribute within a DataArray. Expect this to be a float
+    or possible to convert to a float.
+    If not present, use default value.
+    """
+
+    attrs = data_var.attrs
+    if "units" in attrs:
+        units_from_attrs = attrs["units"]
+        if not isinstance(units_from_attrs, float):
+            try:
+                units = float(units_from_attrs)
+            except ValueError:
+                raise ValueError(f"Cannot extract {units_from_attrs} value as float")
+    else:
+        units = default
+
+    return units
 
 
 # def footprints_data_merge(data: Union[dict, ObsData],

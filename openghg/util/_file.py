@@ -1,7 +1,18 @@
 import bz2
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
+
+from openghg.types import pathType
+
+__all__ = [
+    "load_parser", "load_surface_parser", "load_column_parser",
+    "load_column_source_parser", "load_emissions_parser",
+    "load_emissions_database_parser",
+    "get_datapath", "get_logfile_path", "load_json", "read_header",
+    "compress", "decompress", "compress_str", "decompress_str",
+    "compress_json", "decompress_json",
+]
 
 
 def load_parser(data_name: str, module_name: str) -> Callable:
@@ -103,11 +114,11 @@ def load_emissions_database_parser(database: str) -> Callable:
     return fn
 
 
-def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
-    """Returns the correct path to JSON files used for assigning attributes
+def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
+    """Returns the correct path to data files used for assigning attributes
 
     Args:
-        filename (str): Name of JSON file
+        filename: Name of file to be accessed
     Returns:
         pathlib.Path: Path of file
     """
@@ -121,26 +132,29 @@ def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(filename: str) -> Dict:
-    """Returns a dictionary deserialised from JSON. This function only
-    works for JSON files in the openghg/data directory.
+def load_json(filename: pathType, internal_data: bool = False) -> Dict:
+    """Returns a dictionary deserialised from JSON.
 
     Args:
-        filename (str): Name of JSON file
+        filename: Name of JSON file
+        internal_data: Whether to use data internal to OpenGHG. This refers
+            to JSON files stored within the openghg/data/ folder.
+            If this is set to False, the full path to the file needs to be included.
     Returns:
         dict: Dictionary created from JSON
     """
     from json import load
 
-    path = get_datapath(filename)
+    if internal_data:
+        filename = get_datapath(filename)
 
-    with open(path, "r") as f:
+    with open(filename, "r") as f:
         data: Dict[str, Any] = load(f)
 
     return data
 
 
-def read_header(filepath: Union[str, Path], comment_char: str = "#") -> List:
+def read_header(filepath: pathType, comment_char: str = "#") -> List:
     """Reads the header lines denoted by the comment_char
 
     Args:

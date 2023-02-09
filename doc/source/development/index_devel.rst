@@ -6,10 +6,19 @@ Here we'll explain the tools we used to create OpenGHG, some of the best practic
 As everything used to build OpenGHG is open-source we've documented our use of these technologies in a way that should get you up and running
 with a development environment.
 
+Quickstart
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   quickstart_devel
+
+
 Python development
 ------------------
 
-Covers how we develop OpenGHG and the standards we hope to adhere to
+Covers how we develop OpenGHG and the standards we adhere to
 
 .. toctree::
    :maxdepth: 1
@@ -26,16 +35,3 @@ The specifications for data accepted by storage functions in OpenGHG
    :maxdepth: 1
 
    specifications/data_spec
-
-
-Fn functions
--------------
-
-How to setup Fn and develop functions using Docker
-
-.. toctree::
-   :maxdepth: 1
-
-   cloud/fn_setup
-   cloud/fn_devel
-   cloud/fn_usage

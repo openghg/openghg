@@ -20,7 +20,7 @@ def parse_btt(
     """
     from numpy import nan as np_nan
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import clean_string, load_json
+    from openghg.util import clean_string, load_json, get_site_info, format_inlet
     from pandas import Timestamp, isnull, read_csv, to_timedelta
 
     # TODO: Decide what to do about inputs which aren't use anywhere
@@ -37,10 +37,10 @@ def parse_btt(
     # Take std-dev measurements from these columns for these species
     species_sd = {"CO2": "co2.sd.ppm", "CH4": "ch4.sd.ppb"}
 
-    site_data = load_json(filename="acrg_site_info.json")
+    site_data = get_site_info()
     site_info = site_data[site][network]
 
-    param_data = load_json(filename="attributes.json")
+    param_data = load_json(filename="attributes.json", internal_data=True)
     network_params = param_data["BTT"]
     site_attributes = network_params["global_attributes"]
 
@@ -49,7 +49,7 @@ def parse_btt(
 
     metadata = {}
     metadata["site"] = site
-    metadata["inlet"] = network_params["inlet"]
+    metadata["inlet"] = format_inlet(network_params["inlet"], key_name="inlet")
     metadata["instrument"] = network_params["instrument"]
     metadata["sampling_period"] = str(sampling_period)
     metadata["station_longitude"] = site_info["longitude"]
@@ -59,7 +59,7 @@ def parse_btt(
     metadata["source_format"] = "btt"
 
     attributes = network_params["global_attributes"]
-    attributes["inlet_height_magl"] = network_params["inlet"].strip("m")
+    attributes["inlet_height_magl"] = format_inlet(network_params["inlet"], key_name="inlet_height_magl")
     attributes.update(metadata)
 
     data = read_csv(data_filepath)

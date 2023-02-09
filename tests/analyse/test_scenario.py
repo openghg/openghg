@@ -8,7 +8,7 @@ from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_di
 from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
 from pandas import Timedelta, Timestamp
 from xarray import Dataset
-
+from helpers import clear_test_store
 
 def test_scenario_direct_objects():
     """
@@ -134,9 +134,6 @@ def test_scenario_infer_inputs_co2():
     Test ModelScenario can find data for co2 including specific co2 footprint.
     """
 
-    # TODO: Incorporate boundary conditions
-    # - need to add appropriate BC file on TEST domain
-
     start_date = "2014-07-01"
     end_date = "2014-08-01"
 
@@ -163,6 +160,7 @@ def test_scenario_infer_inputs_co2():
     assert model_scenario.obs is not None
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None  # May need to be updated
+    assert model_scenario.bc is not None
 
     # Check attributes are being assigned correctly
     assert model_scenario.site == site
@@ -195,6 +193,10 @@ def test_scenario_infer_inputs_co2():
     flux_data = model_scenario.fluxes[source].data
     flux_time = flux_data["time"]
     assert flux_time[0] == Timestamp("2014-06-29T18:00:00")  # Test file - reduced time axis
+
+    # BC data
+    assert model_scenario.bc.metadata["species"] == "co2"
+    # TODO: Could add more checks here if needed.
 
 
 def test_scenario_flux_extend_co2():
@@ -764,7 +766,7 @@ def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Option
 
 def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4_dummy):
     """Test expected modelled baseline with known dummy data"""
-    modelled_baseline = model_scenario_ch4_dummy.calc_modelled_baseline()
+    modelled_baseline = model_scenario_ch4_dummy.calc_modelled_baseline(output_units=1)
 
     aligned_time = modelled_baseline["time"]
     assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
@@ -1105,7 +1107,7 @@ def model_scenario_radon_dummy(obs_radon_dummy, footprint_radon_dummy, bc_radon_
 
 def test_modelled_baseline_radon(model_scenario_radon_dummy, footprint_radon_dummy, bc_radon_dummy):
     """Test expected modelled baseline for Rn (short-lived species) with known dummy data"""
-    modelled_baseline = model_scenario_radon_dummy.calc_modelled_baseline()
+    modelled_baseline = model_scenario_radon_dummy.calc_modelled_baseline(output_units=1)
 
     aligned_time = modelled_baseline["time"]
     assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
@@ -1180,7 +1182,7 @@ def test_modelled_baseline_short_life(
     model_scenario_short_life_dummy, footprint_short_life_dummy, bc_short_life_dummy
 ):
     """Test expected modelled baseline for short-lived species 'HFO-1234zee' with known dummy data"""
-    modelled_baseline = model_scenario_short_life_dummy.calc_modelled_baseline()
+    modelled_baseline = model_scenario_short_life_dummy.calc_modelled_baseline(output_units=1)
 
     aligned_time = modelled_baseline["time"]
     assert aligned_time[0] == Timestamp("2012-01-01T00:00:00")
@@ -1370,3 +1372,25 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     expected_flux = 1 + 11  # All values should be 12
     output_flux = dataset_stacked.flux.values
     np.testing.assert_allclose(output_flux, expected_flux)
+
+
+def test_modelscenario_doesnt_error_empty_objectstore():
+    clear_test_store()
+
+    site = "TAC"
+    domain = "EUROPE"
+    species = "co2"
+    height = "185m"
+    source_natural = "natural"
+    start_date = "2017-07-01"
+    end_date = "2017-07-07"
+
+    scenario = ModelScenario(site=site,
+                        inlet=height,
+                        domain=domain,
+                        species=species,
+                        source=source_natural,
+                        start_date=start_date,
+                        end_date=end_date)
+
+    assert not scenario

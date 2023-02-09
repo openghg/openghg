@@ -1,8 +1,11 @@
+=====
 Types
 =====
 
 Custom errors
-^^^^^^^^^^^^^
+=============
+
+.. autoclass:: openghg.types.OpenGHGError
 
 .. autoclass:: openghg.types.InvalidSiteError
 
@@ -12,15 +15,12 @@ Custom errors
 
 .. autoclass:: openghg.types.ObjectStoreError
 
-Custom types
-^^^^^^^^^^^^
+.. autoclass:: openghg.types.DatasourceLookupError
 
-Used to makes type hinting with ``mypy`` easier.
+.. autoclass:: openghg.types.EncodingError
 
-.. autoclass:: openghg.types.pathType
+.. autoclass:: openghg.types.MutexTimeoutError
 
-.. autoclass:: openghg.types.multiPathType
+.. autoclass:: openghg.types.RequestBucketError
 
-.. autoclass:: openghg.types.resultsType
-
-
+.. autoclass:: openghg.types.SearchError

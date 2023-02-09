@@ -1,8 +1,10 @@
 from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
-
-import numpy as np
+import logging
 import xarray as xr
+
+logger = logging.getLogger("openghg.standardise.surface")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_noaa(
@@ -20,7 +22,7 @@ def parse_noaa(
     Args:
         data_filepath: Data filepath
         site: Three letter site code
-        inlet: Inlet height, if no height use measurement type e.g. flask
+        inlet: Inlet height (as value unit e.g. "10m")
         measurement_type: One of ("flask", "insitu", "pfp")
         network: Network, defaults to NOAA
         instrument: Instrument name
@@ -53,47 +55,6 @@ def parse_noaa(
             instrument=instrument,
             sampling_period=sampling_period,
         )
-
-
-def _format_inlet(inlet: Union[str, float, int]) -> str:
-    """
-    Output inlet name in expected format. This will include 1 decimal place for floats with a fractional component
-    and 0 decimal places otherwise.
-
-    Args:
-        inlet : Inlet value. This can be a string as long as this can be converted directly to a float
-
-    Returns:
-        str : Formatted string of inlet name
-
-    Examples:
-        >>> _format_inlet(40)
-        "40m"
-        >>> _format_inlet("10.0")
-        "10m"
-        >>> _format_inlet(2.511432)
-        "2.5m"
-    """
-    if isinstance(inlet, str):
-        try:
-            inlet_value: Union[float, np.floating] = float(inlet)
-        except ValueError:
-            inlet_values_str = inlet.split("-")
-            try:
-                inlet_values = [float(value) for value in inlet_values_str]
-            except ValueError:
-                raise ValueError("Unable to convert inlet {inlet} to a float")
-            else:
-                inlet_value = np.mean(inlet_values)
-    else:
-        inlet_value = inlet
-
-    if inlet_value % 1 == 0:
-        inlet_str = f"{inlet_value:.0f}m"
-    else:
-        inlet_str = f"{inlet_value:.1f}m"
-
-    return inlet_str
 
 
 def _standarise_variables(obspack_ds: xr.Dataset, species: str) -> xr.Dataset:
@@ -195,6 +156,7 @@ def _split_inlets(
         {"ch4_40m": {"data": xr.Dataset(...), "attributes": {...}, "metadata": {...}}, "ch4_60m": {...}, ...}
 
     """
+    from openghg.util import format_inlet
 
     orig_attrs = obspack_ds.attrs
     species = attributes["species"]
@@ -211,8 +173,8 @@ def _split_inlets(
 
         if inlet is not None:
             # TODO: Add to logging?
-            print(
-                f"WARNING: Ignoring inlet value of {inlet} since file has each data point has an associated height (contains 'intake_height' variable)"
+            logger.warning(
+                f"Ignoring inlet value of {inlet} since file has each data point has an associated height (contains 'intake_height' variable)"
             )
 
         # Group dataset by the height values
@@ -224,8 +186,8 @@ def _split_inlets(
         for ht, obspack_ds_ht in obspack_ds_grouped:
 
             # Creating id keys of the form "<species>_<inlet>" e.g. "ch4_40m" or "co_12.5m"
-            inlet_str = _format_inlet(ht)
-            inlet_num_str = inlet_str.strip("m")
+            inlet_str = format_inlet(str(ht), key_name="inlet")
+            inlet_magl_str = format_inlet(str(ht), key_name="inlet_height_magl")
 
             if num_groups > 1:
                 id_key = f"{species}_{inlet_str}"
@@ -243,9 +205,9 @@ def _split_inlets(
             meta_copy = metadata.copy()
 
             attrs_copy["inlet"] = inlet_str
-            attrs_copy["inlet_height_magl"] = inlet_num_str
+            attrs_copy["inlet_height_magl"] = inlet_magl_str
             meta_copy["inlet"] = inlet_str
-            meta_copy["inlet_height_magl"] = inlet_num_str
+            meta_copy["inlet_height_magl"] = inlet_magl_str
 
             gas_data[id_key]["metadata"] = meta_copy
             gas_data[id_key]["attributes"] = attrs_copy
@@ -256,7 +218,7 @@ def _split_inlets(
         except KeyError:
             inlet_from_file = None
         else:
-            inlet_from_file = _format_inlet(inlet_value)
+            inlet_from_file = format_inlet(str(inlet_value))
 
         if measurement_type == "flask":
             inlet_from_file = "flask"
@@ -266,8 +228,8 @@ def _split_inlets(
             inlet = inlet_from_file
         elif inlet is not None and inlet_from_file:
             if inlet != inlet_from_file:
-                print(
-                    f"WARNING: Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}"
+                logger.warning(
+                    f"Provided inlet {inlet} does not match inlet derived from the input file: {inlet_from_file}"
                 )
         else:
             raise ValueError(
@@ -277,14 +239,14 @@ def _split_inlets(
         id_key = f"{species}"
 
         if inlet != "flask":
-            inlet_num_str = inlet.strip("m")
+            inlet_magl_str = format_inlet(inlet, key_name="inlet_height_magl")
         else:
-            inlet_num_str = ""
+            inlet_magl_str = "NA"
 
         metadata["inlet"] = inlet
-        metadata["inlet_height_magl"] = inlet_num_str
+        metadata["inlet_height_magl"] = inlet_magl_str
         attributes["inlet"] = inlet
-        attributes["inlet_height_magl"] = inlet_num_str
+        attributes["inlet_height_magl"] = inlet_magl_str
 
         standardised_ds = _standarise_variables(obspack_ds, species)
 
@@ -365,7 +327,8 @@ def _read_obspack(
         # Extract units attribute from value data variable
         units = processed_ds["value"].units
     except (KeyError, AttributeError):
-        print("Unable to extract units from 'value' within input dataset")
+        logger.warning("Unable to extract units from 'value' within input dataset")
+        units = "NA"
 
     metadata = {}
     metadata["site"] = site
@@ -489,7 +452,7 @@ def _read_raw_data(
     Returns:
         dict: Dictionary containing attributes, data and metadata keys
     """
-    from openghg.util import clean_string, load_json, read_header
+    from openghg.util import clean_string, load_json, read_header, get_site_info
     from pandas import Timestamp, read_csv
 
     header = read_header(filepath=data_filepath)
@@ -544,7 +507,7 @@ def _read_raw_data(
     # Read the site code from the Dataframe
     site = str(data["sample_site_code"][0]).upper()
 
-    site_data = load_json("acrg_site_info.json")
+    site_data = get_site_info()
     # If this isn't a site we recognize try and read it from the filename
     if site not in site_data:
         site = str(data_filepath.name).split("_")[1].upper()
@@ -600,7 +563,7 @@ def _read_raw_data(
     data = data.to_xarray()
 
     # TODO  - this could do with a better name
-    noaa_params = load_json("attributes.json")["NOAA"]
+    noaa_params = load_json("attributes.json", internal_data=True)["NOAA"]
 
     site_attributes = noaa_params["global_attributes"]
     site_attributes["inlet_height_magl"] = "NA"

@@ -1,6 +1,4 @@
 Jinja2
-jupytext
-myst-nb
 notebook
 nbsphinx
 pydata-sphinx-theme

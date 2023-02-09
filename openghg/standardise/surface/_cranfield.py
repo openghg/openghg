@@ -22,7 +22,7 @@ def parse_cranfield(
     Returns:
         dict: Dictionary of gas data
     """
-    from openghg.util import clean_string
+    from openghg.util import clean_string, format_inlet
     from pandas import read_csv
 
     if sampling_period is None:
@@ -49,12 +49,15 @@ def parse_cranfield(
     data["co"] = data["co"] * 1e3
     data["co variability"] = data["co variability"] * 1e3
 
+    inlet = "10m"
+
     metadata = {}
     metadata["site"] = "THB"
     metadata["instrument"] = "CRDS"
     metadata["sampling_period"] = str(sampling_period)
-    metadata["height"] = "10magl"
-    metadata["inlet"] = "10magl"
+    metadata["height"] = format_inlet(inlet, key_name="height")
+    metadata["inlet"] = format_inlet(inlet, key_name="inlet")
+    metadata["inlet_height_magl"] = format_inlet(inlet, key_name="inlet_height_magl")
     metadata["network"] = "CRANFIELD"
     metadata["data_type"] = "surface"
 

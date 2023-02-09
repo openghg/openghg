@@ -81,7 +81,7 @@ def _parse_metadata(filepath: pathType) -> Dict:
         dict: Dictionary of metadata
     """
     from addict import Dict as aDict
-    from openghg.util import check_date
+    from openghg.util import check_date, format_inlet
     from pandas import read_csv
 
     filepath = Path(filepath)
@@ -104,7 +104,7 @@ def _parse_metadata(filepath: pathType) -> Dict:
         site_data["in_ulez"] = row["ULEZ"]
         site_data["latitude"] = row["Latitude"]
         site_data["longitude"] = row["Longitude"]
-        site_data["inlet"] = row["Height"]
+        site_data["inlet"] = format_inlet(row["Height"], key_name="inlet")
         site_data["network"] = "aqmesh_glasgow"
         site_data["sampling_period"] = "NA"
         site_data["data_type"] = "surface"

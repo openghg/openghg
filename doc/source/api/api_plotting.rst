@@ -1,5 +1,6 @@
-Plotting functions
-==================
+========
+Plotting
+========
 
 These functions help in the creation of simple plots.
 

@@ -3,10 +3,13 @@ import zipfile
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
-
+import logging
 import numpy as np
 import xarray as xr
 from numpy import ndarray
+
+logger = logging.getLogger("openghg.transform.emissions")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
 
@@ -37,7 +40,7 @@ def parse_edgar(
      - If no domain or lat_out, lon_out data is supplied, the global EDGAR
     data will be added labelled as "globaledgar" domain.
 
-    Pre-exisiting domains are defined within the 'domain_info.json' file.
+    Pre-exisiting domains are defined within the openghg_defs "domain_info.json" file.
 
     Metadata will also be added to the stored data including:
      - "domain": domain (e.g. "europe") OR "globaledgar"
@@ -138,8 +141,8 @@ def parse_edgar(
         raise ValueError("Unable to retrieve species from database filenames." " Please specify")
 
     if species_from_file is not None and species_label != synonyms(species_from_file):
-        print(
-            "WARNING: Input species does not match species extracted from",
+        logger.warning(
+            "Input species does not match species extracted from",
             " database filenames. Please check.",
         )
 
@@ -190,7 +193,9 @@ def parse_edgar(
                 f"EDGAR {edgar_version} range: {start_year}-{end_year}." f" {year} is before this period."
             )
         elif year > end_year:
-            print(f"Using last available year from EDGAR {edgar_version} range:" f"{start_year}-{end_year}.")
+            logger.info(
+                f"Using last available year from EDGAR {edgar_version} range:" f"{start_year}-{end_year}."
+            )
             edgar_file = files_by_year[end_year]
             edgar_file_info = _extract_file_info(edgar_file)
 
@@ -377,7 +382,7 @@ def _check_lat_lon(
 
     For case 1, only domain needs to be specified (lat_out and lon_out can
     be specified but they must already exactly match the domain definition).
-    The details will be extracted from 'domain_info.json'.
+    The details will be extracted from openghg_defs "domain_info.json" file.
 
     For case 2, the domain, lat_out and lon_out must all be specified.
 
@@ -448,7 +453,7 @@ def _check_lat_lon(
                 )
 
     if lon_out is not None and (lon_out.max() > 180 or lon_out.min() < -180):
-        print("Converting longitude to stay within -180 - 180 bounds")
+        logger.info("Converting longitude to stay within -180 - 180 bounds")
         lon_converted = convert_longitude(lon_out)
         lon_out = cast(Optional[ndarray], lon_converted)
 

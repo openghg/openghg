@@ -82,7 +82,7 @@ def parse_gcwerks(
 
     # Do some setup for processing
     # Load site data
-    gcwerks_data = load_json(filename="process_gcwerks_parameters.json")
+    gcwerks_data = load_json(filename="process_gcwerks_parameters.json", internal_data=True)
     gc_params = gcwerks_data["GCWERKS"]
 
     network = clean_string(network)
@@ -400,6 +400,7 @@ def _split_species(
     from fnmatch import fnmatch
 
     from addict import Dict as aDict
+    from openghg.util import format_inlet
     from openghg.standardise.meta import define_species_label
 
     # Read inlets from the parameters
@@ -421,6 +422,7 @@ def _split_species(
 
         # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
         for inlet, inlet_label in expected_inlets.items():
+            inlet_label = format_inlet(inlet_label)
             # Create a copy of metadata for local modification
             spec_metadata = metadata.copy()
             spec_metadata["units"] = units[spec]
@@ -583,12 +585,14 @@ def _get_site_attributes(site: str, inlet: str, instrument: str, gc_params: Dict
     Returns:
         dict: Dictionary of attributes
     """
+    from openghg.util import format_inlet
+
     site = site.upper()
     instrument = instrument.lower()
 
     attributes: Dict[str, str] = gc_params["sites"][site]["global_attributes"]
 
-    attributes["inlet_height_magl"] = inlet
+    attributes["inlet_height_magl"] = format_inlet(inlet, key_name="inlet_height_magl")
     try:
         attributes["comment"] = gc_params["comment"][instrument]
     except KeyError:

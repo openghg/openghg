@@ -2,13 +2,16 @@ name: openghg_env
 channels:
   - conda-forge
   - defaults
+  - anaconda
 dependencies:
+  - python >= 3.8
   - addict
   - dask
   - h5netcdf
-  - icoscp
   - matplotlib
-  - msgpack
+  - msgpack-python
+  - netcdf4
+  - nbformat
   - numexpr
   - numpy
   - nc-time-axis
@@ -21,7 +24,10 @@ dependencies:
   - tinydb
   - toml
   - tqdm
-  - xarray >= 0.18.2
+  - xarray
   - urllib3 >= 1.26.3
   - pip
   - xesmf
+  - pip:
+    - icoscp
+    - openghg_defs @ git+https://github.com/openghg/supplementary_data

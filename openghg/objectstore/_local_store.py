@@ -3,13 +3,11 @@ import json
 import os
 import threading
 import warnings
-
-# from functools import lru_cache
 from pathlib import Path
 import shutil
 from typing import Dict, List, Optional, Union
 from uuid import uuid4
-
+import logging
 import pyvis
 from openghg.types import ObjectStoreError
 
@@ -19,7 +17,6 @@ __all__ = [
     "delete_object",
     "get_local_objectstore_path",
     "get_tutorial_store_path",
-    "clear_tutorial_store",
     "get_all_object_names",
     "get_object_names",
     "get_object",
@@ -31,6 +28,9 @@ __all__ = [
     "visualise_store",
 ]
 
+logger = logging.getLogger("openghg.objectstore")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
 
 def get_tutorial_store_path() -> Path:
     """Get the path to the local tutorial store
@@ -39,17 +39,6 @@ def get_tutorial_store_path() -> Path:
         pathlib.Path: Path of tutorial store
     """
     return get_local_objectstore_path() / "tutorial_store"
-
-
-def clear_tutorial_store() -> None:
-    """Delete the contents of the tutorial object store
-
-    Returns:
-        None
-    """
-    path = get_tutorial_store_path()
-
-    shutil.rmtree(path=path, ignore_errors=True)
 
 
 # @lru_cache
@@ -244,13 +233,12 @@ def exists(bucket: str, key: str) -> bool:
     return len(names) > 0
 
 
-def get_bucket(empty: bool = False) -> str:
-    """Find and return a new bucket in the object store called
-    'bucket_name'. If 'create_if_needed' is True
-    then the bucket will be created if it doesn't exist. Otherwise,
-    if the bucket does not exist then an exception will be raised.
+def get_bucket() -> str:
+    """Find and return the local object store path (bucket)
+
+    Returns:
+        str: Path to object store
     """
-    import shutil
     import os
 
     tutorial_store = os.getenv("OPENGHG_TMP_STORE")
@@ -260,24 +248,15 @@ def get_bucket(empty: bool = False) -> str:
     openghg_env = os.getenv("OPENGHG_PATH")
     if openghg_env is not None:
         warnings.warn(
-            "Use of the OPENGHG_PATH environment variable is deprecated. If you want to set a specific object"
+            "Use of the OPENGHG_PATH environment variable is deprecated and will be ignored in coming versions."
+            + "If you want to set a specific object"
             + " store path please use the configuration file. See docs.openghg.org/install",
             category=DeprecationWarning,
         )
 
-        if empty is True:
-            shutil.rmtree(openghg_env)
-            Path(openghg_env).mkdir(parents=True)
-
         return openghg_env
 
     local_store = get_local_objectstore_path()
-
-    if empty is True:
-        raise NotImplementedError(
-            "You cannot delete the object store using get_bucket any long"
-            + "please check you really want to delete the whole store and use openghg.object_store.clear_store."
-        )
 
     return str(local_store)
 
@@ -290,13 +269,13 @@ def clear_object_store() -> None:
         None
     """
     local_store = str(get_local_objectstore_path())
-    print(f"You have requested to delete {local_store}.")
+    logger.warning(f"You have requested to delete {local_store}.")
 
     confirmed_path = input("Please enter the full path of the store: ")
     if confirmed_path == local_store:
         shutil.rmtree(local_store, ignore_errors=True)
     else:
-        print("Cannot delete object store.")
+        logger.warning("Cannot delete object store.")
 
 
 def query_store() -> Dict:

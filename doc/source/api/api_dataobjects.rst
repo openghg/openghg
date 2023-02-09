@@ -1,15 +1,15 @@
-======================
-dataobjects API detail
-======================
+============
+Data objects
+============
 
-_BaseData
-=========
+DataHandler
+===========
 
-The base dataclass inherited by (most of) the dataclasses below.
+This ``dataclass`` is used to modify metadata stored in :ref:`Datasource<Datasource>` objects and the metadata store.
+``DataHandler`` instances are created by the :ref:`data_handler_lookup<data_handler_lookup>` function.
 
-.. autoclass:: openghg.dataobjects._BaseData
+.. autoclass:: openghg.dataobjects.DataHandler
     :members:
-
 
 SearchResults
 =============
@@ -32,15 +32,31 @@ retrieve function.
 FluxData
 ========
 
-This ``dataclass`` is used to return observations data from the get_flux function
+This ``dataclass`` is used to return observations data from the :ref:`get_flux<get_flux>` function
 
 .. autoclass:: openghg.dataobjects.FluxData
+    :members:
+
+ObsColumnData
+=============
+
+This ``dataclass`` is used to return observations data from the :ref:`get_obs_column<get_obs_column>` function
+
+.. autoclass:: openghg.dataobjects.ObsColumnData
     :members:
 
 FootprintData
 =============
 
-This ``dataclass`` is used to return observations data from the get_footprint function
+This ``dataclass`` is used to return observations data from the :ref:`get_footprint<get_footprint>` function
 
 .. autoclass:: openghg.dataobjects.FootprintData
+    :members:
+
+BoundaryConditionsData
+======================
+
+This ``dataclass`` is used to return observations data from the :ref:`get_bc<get_bc>` function
+
+.. autoclass:: openghg.dataobjects.BoundaryConditionsData
     :members:
