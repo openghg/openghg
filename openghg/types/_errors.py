@@ -23,6 +23,10 @@ class DatasourceLookupError(OpenGHGError):
     """Raised if Datasource lookup fails"""
 
 
+class DatasourceCombineError(OpenGHGError):
+    """Raised if we are unable to combine previous data within a Datasource with new data"""
+
+
 class EncodingError(ObjectStoreError):
     pass
 

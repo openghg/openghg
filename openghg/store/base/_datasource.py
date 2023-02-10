@@ -2,7 +2,7 @@ from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Unio
 import logging
 import numpy as np
 from openghg.store.spec import define_data_types
-from pandas import DataFrame, Timestamp
+from pandas import DataFrame, Timestamp, Timedelta
 from xarray import Dataset
 
 logger = logging.getLogger("openghg.store.base")
@@ -120,22 +120,33 @@ class Datasource:
         from openghg.util import daterange_overlap
         from xarray import concat as xr_concat
 
-        # For now we'll only group timeseries data.
-        # This is to a
-        # if data_type != "timeseries"
-        # Group by year
-        # year_group = data.groupby("time.year")
         # Extract period associated with data from metadata
         # TODO: May want to add period as a potential data variable so would need to extract from there if needed
         period = self.get_period()
 
-        new_data = {
-            self.get_representative_daterange_str(year_data, period=period): year_data
-            for _, year_data in data.groupby("time.year")
-        }
+        # new_data = {
+        #     self.get_representative_daterange_str(year_data, period=period): year_data
+        #     for _, year_data in data.groupby("time.year")
+        # }
+
+        # Group by year
+        data_year_groups = {year: dataset for year, dataset in data.groupby("time.year")}
+        new_datasets = list(data_year_groups.values())
+        # Extract date ranges for each group
+        new_daterange_str = [self.get_representative_daterange_str(dataset, period=period) for dataset in new_datasets]
+        num_data_groups = len(data_year_groups)
 
         # Use a dictionary keyed with the daterange covered by each segment of data
-        # new_data = {}
+        new_data = {}
+
+        for i in range(num_data_groups):
+            data_split = new_datasets[i]
+            if i < num_data_groups - 1:
+                new_daterange = self.clip_daterange(new_daterange_str[i], new_daterange_str[i+1])
+            else:
+                new_daterange = new_daterange_str[i]
+            new_data[new_daterange] = data_split
+            
 
         # for _, data in year_group:
         #     daterange_str = self.get_representative_daterange_str(data, period=period)
@@ -362,6 +373,26 @@ class Datasource:
         daterange_str = create_daterange_str(start=start_date, end=end_date)
 
         return daterange_str
+
+    def clip_daterange(self, end_date, start_date_next):
+
+        if end_date >= start_date_next:
+            end_date = start_date_next - Timedelta(seconds=1)
+            
+        return end_date
+
+    def clip_daterange_from_str(self, daterange_str1, daterange_str2):
+
+        from openghg.util import create_daterange_str
+
+        start_date, end_date = daterange_str1.split("_")
+        start_date_next, _ = daterange_str2.split("_")
+
+        end_date = self.clip_daterange(end_date, start_date_next)
+
+        daterange_str1_clipped = create_daterange_str(start_date, end_date)
+            
+        return daterange_str1_clipped
 
     def get_period(self) -> Optional[str]:
         """
