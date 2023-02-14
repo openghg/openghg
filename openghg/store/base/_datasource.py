@@ -142,11 +142,10 @@ class Datasource:
         for i in range(num_data_groups):
             data_split = new_datasets[i]
             if i < num_data_groups - 1:
-                new_daterange = self.clip_daterange(new_daterange_str[i], new_daterange_str[i+1])
+                new_daterange = self.clip_daterange(new_daterange_str[i], new_daterange_str[i + 1])
             else:
                 new_daterange = new_daterange_str[i]
             new_data[new_daterange] = data_split
-            
 
         # for _, data in year_group:
         #     daterange_str = self.get_representative_daterange_str(data, period=period)
@@ -378,7 +377,7 @@ class Datasource:
 
         if end_date >= start_date_next:
             end_date = start_date_next - Timedelta(seconds=1)
-            
+
         return end_date
 
     def clip_daterange_from_str(self, daterange_str1, daterange_str2):
@@ -391,7 +390,7 @@ class Datasource:
         end_date = self.clip_daterange(end_date, start_date_next)
 
         daterange_str1_clipped = create_daterange_str(start_date, end_date)
-            
+
         return daterange_str1_clipped
 
     def get_period(self) -> Optional[str]:
