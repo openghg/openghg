@@ -143,7 +143,7 @@ def bsd_small_edit_data_read():
 def bsd_diff_data_read():
     """
     Add overlapping Bilsdale GCMD data to the object store:
-     - Small different in data values (should create different hash)
+     - Small difference in data values (should create different hash)
     """
     site = "bsd"
     network = "DECC"
@@ -158,6 +158,12 @@ def bsd_diff_data_read():
                          site=site,
                          network=network,
                          instrument=instrument)
+
+
+
+
+
+
 
 
 def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
@@ -409,6 +415,55 @@ def test_obs_data_read_two_frequencies():
     # TODO: Can we check if this has been saved as a new version?
 
 
+#%% Look at replacing data with different / overlapping internal time stamps
+
+def bsd_start_overlap_data_read(overwrite=False):
+    """
+    Add Bilsdale GCMD data for two neighbouring years (2013 and 2014)
+     - Last date of 2013 modified so the date range associated with this chunk
+       overlaps with start of 2014 (the next year)
+       when the sampling period of 3600 (hourly) is considered.
+    """
+    site = "bsd"
+    network = "DECC"
+    source_format = "GCWERKS"
+    instrument = "GCMD"
+
+    bsd_path_2013 = get_surface_datapath(filename="bilsdale-md.overlap-start.13.C", source_format="GC")
+    bsd_prec_path_2013 = get_surface_datapath(filename="bilsdale-md.13.precisions.C", source_format="GC")
+
+    bsd_path_2014 = get_surface_datapath(filename="bilsdale-md.14.C", source_format="GC")
+    bsd_prec_path_2014 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
+
+    input_files = [(bsd_path_2013, bsd_prec_path_2013), (bsd_path_2014, bsd_prec_path_2014)]
+
+    ObsSurface.read_file(filepath=input_files,
+                         source_format=source_format,
+                         site=site,
+                         network=network,
+                         instrument=instrument,
+                        #  sampling_period=3600,
+                         overwrite=overwrite)
+
+
+def test_obs_data_representative_date_overlap():
+    """
+    Added test based on fix for Issue 506.
+
+    Due to sampling period being used to create representative date string
+    when storing data. If the end of one chunk overlapped with the start of the
+    next chunk this created overlapping date ranges.
+
+    This test just checks this will no longer raise a KeyError based on this.
+    """
+    bsd_start_overlap_data_read()
+    bsd_start_overlap_data_read(overwrite=True)
+
+    ## TODO: Decide what else to check here.
+    # - Can we check stored date range keys to make sure this doesn't overlap
+    # and has been correctly clipped?
+
+
 #%% Check overwrite functionality
 # TODO: Add check to overwrite functionality
 # - need to be clear on what we expect to happen here
@@ -482,3 +537,4 @@ def bsd_data_read_crds_overwrite():
 #     # np.testing.assert_allclose(sf6, expected_sf6)
 
 #     # TODO: Can we check if this has been saved as a new version?
+
