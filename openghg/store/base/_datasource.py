@@ -373,19 +373,31 @@ class Datasource:
 
         return daterange_str
 
-    def clip_daterange(self, end_date, start_date_next):
-
+    def clip_daterange(self,
+                       end_date: Timestamp,
+                       start_date_next: Timestamp) -> Timestamp:
+        """
+        Clip any end_date greater than the next start date (start_date_next) to be
+        1 second less.
+        """
         if end_date >= start_date_next:
             end_date = start_date_next - Timedelta(seconds=1)
 
         return end_date
 
-    def clip_daterange_from_str(self, daterange_str1, daterange_str2):
-
+    def clip_daterange_from_str(self, daterange_str1: str, daterange_str2: str) -> str:
+        """
+        Ensure the end date of a daterange string is not greater than the start
+        date of the next daterange string. Update as needed.
+        """
         from openghg.util import create_daterange_str
 
-        start_date, end_date = daterange_str1.split("_")
-        start_date_next, _ = daterange_str2.split("_")
+        start_date_str, end_date_str = daterange_str1.split("_")
+        start_date_next_str, _ = daterange_str2.split("_")
+
+        start_date = Timestamp(start_date_str)
+        end_date = Timestamp(end_date_str)
+        start_date_next = Timestamp(start_date_next_str)
 
         end_date = self.clip_daterange(end_date, start_date_next)
 
