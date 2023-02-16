@@ -1,5 +1,5 @@
 {
-    "BIK": {
+  "BIK": {
         "EUROCOM": {
           "height": ["300m"],
           "height_name": ["300magl"],
@@ -9,16 +9,76 @@
           "longitude": 23.03
         }
       },
-    "MHD": {
-    "AGAGE": {
-      "height": ["10m"],
-      "height_name": ["10magl"],
-      "height_station_masl": 5.0,
-      "latitude": 53.32611,
-      "long_name": "Mace Head, Ireland",
-      "longitude": -9.90389
+  "BSD": {
+    "DECC": {
+      "height": ["248m", "108m", "42m"],
+      "height_name": ["248magl", "110magl", "50magl"],
+      "height_station_masl": 380.0,
+      "latitude": 54.35858,
+      "long_name": "Bilsdale, UK",
+      "longitude": -1.15033
     },
-    "EUROCOM": {
+    "NOAA": {
+      "height": ["108m", "42m", "248m"],
+      "height_name": ["110magl", "50magl", "248magl"],
+      "height_station_masl": 380.0,
+      "latitude": 54.35858,
+      "long_name": "Bilsdale, UK",
+      "longitude": -1.15033
+    }
+  },
+  "CGO": {
+    "AGAGE": {
+      "height": ["70m", "10m"],
+      "height_name": ["70magl", "10magl"],
+      "height_station_masl": 94.0,
+      "latitude": -40.683,
+      "long_name": "Cape Grim, Tasmania",
+      "longitude": 144.689
+    },
+    "NOAA": {
+      "height_station_masl": 94.0,
+      "latitude": -40.683,
+      "long_name": "Cape Grim, Tasmania, Australia",
+      "longitude": 144.69
+    }
+  },
+  "ESP": {
+    "EC": {
+      "height": ["40m"],
+      "height_name": ["40magl"],
+      "height_station_masl": 7.0,
+      "latitude": 49.382935,
+      "long_name": "Estevan Point, British Columbia, Canada",
+      "longitude": -126.544097
+    },
+    "NOAA": {
+      "height_station_masl": 7.0,
+      "latitude": 49.383,
+      "long_name": "Estevan Point,  British Columbia, Canada",
+      "longitude": -126.5441
+    }
+  },
+  "HFD": {
+    "DECC": {
+      "height": ["100m", "50m"],
+      "height_name": ["100magl", "50magl"],
+      "height_station_masl": 150.0,
+      "latitude": 50.97675,
+      "long_name": "Heathfield, UK",
+      "longitude": 0.23048
+    },
+    "GAUGE": {
+      "height": ["100m", "50m"],
+      "height_name": ["100magl", "50magl"],
+      "height_station_masl": 150.0,
+      "latitude": 50.97675,
+      "long_name": "Heathfield, UK",
+      "longitude": 0.23048
+    }
+  },
+  "MHD": {
+    "AGAGE": {
       "height": ["10m"],
       "height_name": ["10magl"],
       "height_station_masl": 5.0,
@@ -41,6 +101,14 @@
       "longitude": -9.899
     }
   },
+  "POCN25": {
+    "NOAA": {
+      "height_station_masl": 10.0,
+      "latitude": 25.0,
+      "long_name": "Pacific Ocean (25 N), N/A",
+      "longitude": -139.0
+    }
+  },
   "TAC": {
     "DECC": {
       "height": ["185m", "54m", "100m"],
@@ -50,7 +118,7 @@
       "long_name": "Tacolneston Tower, UK",
       "longitude": 1.13872
     },
-    "EUROCOM": {
+    "ICOS": {
       "height": ["100m", "54m", "185m"],
       "height_name": ["100magl", "50magl", "185magl"],
       "height_station_masl": 50.0,
@@ -63,6 +131,43 @@
       "latitude": 52.5177,
       "long_name": "Tacolneston, United Kingdom",
       "longitude": 1.1386
+    }
+  },
+  "TMB": {
+    "CRANFIELD": {
+      "height": ["5m"],
+      "height_name": ["5magl"],
+      "height_station_masl": 5.0,
+      "latitude": 51.496769,
+      "long_name": "Thames Barrier, UK",
+      "longitude": 0.036995
+    },
+    "LGHG": {
+      "height": ["5m"],
+      "height_name": ["5magl"],
+      "height_station_masl": 5.0,
+      "latitude": 51.496769,
+      "long_name": "Thames Barrier, UK",
+      "longitude": 0.036995,
+      "status": "current"
+    }
+  },
+  "TTA": {
+    "DECC": {
+      "height": ["222m"],
+      "height_name": ["222magl"],
+      "height_station_masl": 300.0,
+      "latitude": 56.55511,
+      "long_name": "Angus Tower, UK",
+      "longitude": -2.98598
+    },
+    "ICOS": {
+      "height": ["222m"],
+      "height_name": ["222magl"],
+      "height_station_masl": 300.0,
+      "latitude": 56.55511,
+      "long_name": "Angus Tower, UK",
+      "longitude": -2.98598
     }
   }
 }
