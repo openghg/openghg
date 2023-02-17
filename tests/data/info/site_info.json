@@ -21,6 +21,17 @@
       },
   "BSD": {
     "DECC": {
+      "defaults": [
+        {
+          "gases": ["CO", "N2O"],
+          "inlet": ["248m", "248m"],
+          "instrument": ["GCECD", "picarro5310"],
+          "periods": [
+            ["1900-01-01", "2019-03-06"],
+            ["2019-03-06", "2100-01-01"]
+          ]
+        }
+      ],
       "height": ["248m", "108m", "42m"],
       "height_name": ["248magl", "110magl", "50magl"],
       "height_station_masl": 380.0,
@@ -28,7 +39,7 @@
       "long_name": "Bilsdale, UK",
       "longitude": -1.15033
     },
-    "NOAA": {
+      "NOAA": {
       "height": ["108m", "42m", "248m"],
       "height_name": ["110magl", "50magl", "248magl"],
       "height_station_masl": 380.0,
