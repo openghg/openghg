@@ -1,9 +1,8 @@
-.. TODO - this needs converting from md to rst
 # Changing the object store path
 
 To change the object store path you can do it in one of two ways
 
-## 1. Modifying the configuration file directly
+## Modifying the configuration file directly
 
 Your local configuration file can be found in the `.config` directory in your home folder. On Linux and MacOS the file can be accessed at `~/.config/openghg/openghg.conf`. We don't currently support Windows.
 
@@ -16,7 +15,7 @@ user_id = "6dea284d-888a-4cd6-974e-f8888c4b7be3"
 local_store = "/home/gareth/openghg_store"
 ```
 
-To update the path to the object store all I need to do is change the path after `local_store = `. Say I want to move the store to another folder in my home directory, I can just update the path like so
+To update the path to the object store change the path after `local_store = `. To move the store to another folder in my home directory, I can just update the path like so
 
 ```toml
 user_id = "6dea284d-888a-4cd6-974e-f8888c4b7be3"
@@ -38,7 +37,6 @@ If the folder doesn't exist you'll be presented with an input field asking if yo
 
 ```python!
 check_config()
-our configuration file is correct.
 The folder /home/gareth/atmos_chem/object_store does not exist
 Should we create it? (y/n): y
 The folder /home/gareth/atmos_chem/object_store has ben created.
@@ -47,7 +45,7 @@ The folder /home/gareth/atmos_chem/object_store has ben created.
 OpenGHG will now use the new path when searching for and storing data.
 
 
-## 2. Command line
+## Command line
 
 OpenGHG provides a command line interface accessible from the terminal. To update the path of the object store you can run `openghg --quickstart`. This will read your current configuration file and ask if you wan to update the object store path.
 
