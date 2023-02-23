@@ -56,6 +56,8 @@ def sync_surface_metadata(
     """
     meta_copy = deepcopy(metadata)
 
+    attr_mismatches = {}
+
     # Check if we have differences
     for key, value in metadata.items():
         try:
@@ -67,9 +69,7 @@ def sync_surface_metadata(
             if is_number(attr_value) and is_number(value):
                 if not math.isclose(float(attr_value), float(value), rel_tol=relative_tolerance):
                     if not update_mismatch:
-                        raise AttrMismatchError(
-                            f"Value not within tolerance, metadata: {value} - attributes: {attr_value}"
-                        )
+                        attr_mismatches[key] = (value, attr_value)
                     else:
                         logger.warning(
                             f"Value not within tolerance, metadata: {value} - attributes: {attr_value}\n"
@@ -81,9 +81,7 @@ def sync_surface_metadata(
                 # metadata as all lowercase, within the attributes we'll keep the case.
                 if str(value).lower() != str(attr_value).lower():
                     if not update_mismatch:
-                        raise AttrMismatchError(
-                            f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}"
-                        )
+                        attr_mismatches[key] = (value, attr_value)
                     else:
                         logger.warning(
                             f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}\n"
@@ -93,6 +91,11 @@ def sync_surface_metadata(
         except KeyError:
             # Key wasn't in attributes for comparison
             pass
+
+    if attr_mismatches:
+        mismatch_details = [f" - '{key}', metadata: {values[0]}, attributes: {values[1]}" for key, values in attr_mismatches.items()]
+        mismatch_str = "\n".join(mismatch_details)
+        raise AttrMismatchError(f"Metadata mismatch / value not within tolerance for the following keys:\n{mismatch_str}")
 
     default_keys_to_add = metadata_default_keys()
 
