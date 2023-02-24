@@ -271,6 +271,7 @@ def bilsdale_datapaths() -> List:
         list: List of paths
     """
     crds_path = Path(__file__).resolve().parent.parent.parent.joinpath("tests/data/proc_test_data/CRDS")
+    print(crds_path)
 
     return list(crds_path.glob("bsd.picarro.1minute.*.min.*"))
 
