@@ -1,6 +1,5 @@
 from pathlib import Path
 from typing import Dict, Optional
-
 from openghg.types import pathType
 
 
@@ -31,10 +30,10 @@ def parse_tmb(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import (
         clean_string,
-        load_json,
         get_site_info,
         format_inlet,
         synonyms,
+        load_internal_json,
     )
     from pandas import read_csv as pd_read_csv
 
@@ -59,7 +58,7 @@ def parse_tmb(
     site_upper = site.upper()
     network_upper = network.upper()
 
-    attributes_data = load_json(filename="attributes.json")
+    attributes_data = load_internal_json(filename="attributes.json")
     tb_params = attributes_data[site_upper]
 
     site_data = get_site_info()

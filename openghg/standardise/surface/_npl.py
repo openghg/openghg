@@ -4,7 +4,7 @@ from typing import Dict, Optional
 
 from openghg.standardise.meta import assign_attributes
 from openghg.types import pathType
-from openghg.util import clean_string, load_json
+from openghg.util import clean_string, load_internal_json
 from pandas import NaT, read_csv
 
 
@@ -41,7 +41,7 @@ def parse_npl(
     site_upper = site.upper()
     network_upper = network.upper()
 
-    attributes_data = load_json(filename="attributes.json")
+    attributes_data = load_internal_json(filename="attributes.json")
     npl_params = attributes_data[site_upper]
 
     site_data = get_site_info()

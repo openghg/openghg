@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
 
-from openghg.util import load_json
+
 from pandas import DataFrame, Timedelta
 
 
@@ -85,8 +85,7 @@ def _read_data(
         dict: Dictionary of gas data
     """
     import warnings
-
-    from openghg.util import clean_string, find_duplicate_timestamps, format_inlet
+    from openghg.util import clean_string, find_duplicate_timestamps, format_inlet, load_internal_json
     from pandas import RangeIndex, read_csv, to_datetime
 
     split_fname = data_filepath.stem.split(".")
@@ -163,7 +162,7 @@ def _read_data(
 
     # Read the scale from JSON
     # I'll leave this here for the possible future movement from class to functions
-    network_metadata = load_json(filename="process_gcwerks_parameters.json")
+    network_metadata = load_internal_json(filename="process_gcwerks_parameters.json")
     crds_metadata = network_metadata["CRDS"]
 
     # This dictionary is used to store the gas data and its associated metadata

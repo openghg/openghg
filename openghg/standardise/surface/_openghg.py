@@ -49,7 +49,7 @@ def parse_openghg(
     Returns:
         Dict: Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, format_inlet, load_json, get_site_info
+    from openghg.util import clean_string, format_inlet, load_internal_json, get_site_info
     from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
 
     data_filepath = Path(data_filepath)
@@ -176,7 +176,7 @@ def parse_openghg(
                         break
 
     # Load attributes data for network if present
-    param_data = load_json(filename="attributes.json")
+    param_data = load_internal_json(filename="attributes.json")
     for network_value in network_case_options:
         if network_value in param_data:
             network_params = param_data[network_value]

@@ -452,7 +452,7 @@ def _read_raw_data(
     Returns:
         dict: Dictionary containing attributes, data and metadata keys
     """
-    from openghg.util import clean_string, load_json, read_header, get_site_info
+    from openghg.util import clean_string, read_header, get_site_info, load_internal_json
     from pandas import Timestamp, read_csv
 
     header = read_header(filepath=data_filepath)
@@ -563,7 +563,7 @@ def _read_raw_data(
     data = data.to_xarray()
 
     # TODO  - this could do with a better name
-    noaa_params = load_json(filename="attributes.json")["NOAA"]
+    noaa_params = load_internal_json(filename="attributes.json")["NOAA"]
 
     site_attributes = noaa_params["global_attributes"]
     site_attributes["inlet_height_magl"] = "NA"

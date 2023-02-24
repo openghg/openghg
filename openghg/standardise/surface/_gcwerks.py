@@ -75,14 +75,14 @@ def parse_gcwerks(
     from pathlib import Path
 
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import clean_string, load_json
+    from openghg.util import clean_string, load_internal_json
 
     data_filepath = Path(data_filepath)
     precision_filepath = Path(precision_filepath)
 
     # Do some setup for processing
     # Load site data
-    gcwerks_data = load_json(filename="process_gcwerks_parameters.json")
+    gcwerks_data = load_internal_json(filename="process_gcwerks_parameters.json")
     gc_params = gcwerks_data["GCWERKS"]
 
     network = clean_string(network)
