@@ -184,4 +184,57 @@ Stored csv (or otherwise)::
  tac 	co2  	10m  	inlet    	2012-01-01	2013-01-01
 
 
+Layering functionality
+----------------------
+
+To aid usability we may also want to allow the ability to apply more general rules which could be applied. For example we may want to state that, by default, the "highest" inlet should be chosen. To tie this to a specific keyword we could use e.g. "ALL" or "---" under that keyword? Could use e.g. {} or $$ or %% to indicate this is a special word/string to be substituted? e.g. ::
+
+ site,species,inlet,different,start_date,end_date
+ {---},,{highest},inlet,,
+ tac,,100m,inlet,,
+ tac,co2,10m,inlet,2012-01-01,2013-01-01
+
+This could be substituted to include the relevant details depending on the search when appropriate.
+When no site values were input this would just show the following::
+
+ view_data_ranks()
+
+ -->
+
+ site	species	inlet	different	start_date	end_date
+ {---}  NaN     {highest}  inlet     NaN         NaN   
+ tac 	NaN    	100m 	inlet    	NaN       	NaN    
+ tac 	co2  	10m  	inlet    	2012-01-01	2013-01-01
+
+But including a value for the site could give::
+
+ view_data_ranks(site="tac")
+
+ -->
+
+ site	species	inlet	different	start_date	end_date
+ tac  NaN     185m  inlet     NaN         NaN   
+ tac 	NaN    	100m 	inlet    	NaN       	NaN    
+ tac 	co2  	10m  	inlet    	2012-01-01	2013-01-01
+
+To determine which inlet was the "highest" this would need to:
+
+ - search the data, for all data related to site="tac" (and data_type="surface"?)
+ - from this data find the unique inlets
+ - compare these inlets to find which one is the "highest" (resolve "100m" and so forth to include just numbers)
+ - choose the "highest" inlet
+
+Note that in this case of the tac rules shown so far, the later rule to use "100m" as default for tac across the whole range would supercede the earlier more general rule for using "185m" i.e. this would be interpreted as::
+
+ ALL DATA          |--------------------------------------------|
+ Rule A - 185m (1) |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+ Rule B - 100m (2) |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+ Resolved          |22222222222222222222222222222222222222222222|
+
+If we were looking at a different site, such as "bsd" which had no additional rules,
+and had inlets at 10m and 75m this would be interpreted as::
+
+ ALL DATA          |--------------------------------------------|
+ Rule A - 75m (1)  |xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|
+ Resolved          |11111111111111111111111111111111111111111111|
 
