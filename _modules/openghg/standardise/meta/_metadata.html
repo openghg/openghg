@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0+untagged.1.g3cf3bf2 documentation</title>
+    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0+untagged.1.g69786b0 documentation</title>
   
   
   
@@ -398,8 +398,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">meta_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
 
-    <span class="n">attr_mismatches</span> <span class="o">=</span> <span class="p">{}</span>
-
     <span class="c1"># Check if we have differences</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
@@ -411,7 +409,9 @@
             <span class="k">if</span> <span class="n">is_number</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_number</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">attr_value</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="n">relative_tolerance</span><span class="p">):</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">update_mismatch</span><span class="p">:</span>
-                        <span class="n">attr_mismatches</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">AttrMismatchError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Value not within tolerance, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                             <span class="sa">f</span><span class="s2">&quot;Value not within tolerance, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -423,7 +423,9 @@
                 <span class="c1"># metadata as all lowercase, within the attributes we&#39;ll keep the case.</span>
                 <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">update_mismatch</span><span class="p">:</span>
-                        <span class="n">attr_mismatches</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">AttrMismatchError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Metadata mismatch for &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                             <span class="sa">f</span><span class="s2">&quot;Metadata mismatch for &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -433,11 +435,6 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="c1"># Key wasn&#39;t in attributes for comparison</span>
             <span class="k">pass</span>
-
-    <span class="k">if</span> <span class="n">attr_mismatches</span><span class="p">:</span>
-        <span class="n">mismatch_details</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot; - &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;, metadata: </span><span class="si">{</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, attributes: </span><span class="si">{</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">attr_mismatches</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
-        <span class="n">mismatch_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mismatch_details</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="n">AttrMismatchError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata mismatch / value not within tolerance for the following keys:</span><span class="se">\n</span><span class="si">{</span><span class="n">mismatch_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">default_keys_to_add</span> <span class="o">=</span> <span class="n">metadata_default_keys</span><span class="p">()</span>
 
