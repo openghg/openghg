@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, Optional
 
-from openghg.types import pathType
+from openghg.types import pathType, optionalPathType
 
 
 def parse_tmb(
@@ -12,6 +12,7 @@ def parse_tmb(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    site_filename: optionalPathType = None,
     **kwargs: Dict,
 ) -> Dict:
     """Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
@@ -25,6 +26,8 @@ def parse_tmb(
         instrument: Instrument name
         sampling_period: Sampling period
         measurement_type: Type of measurement taken e.g."flask", "insitu"
+        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
@@ -122,6 +125,6 @@ def parse_tmb(
             "attributes": attributes,
         }
 
-    gas_data = assign_attributes(data=gas_data, site=site)
+    gas_data = assign_attributes(data=gas_data, site=site, site_filename=site_filename)
 
     return gas_data
