@@ -211,7 +211,7 @@ class Footprints(BaseStore):
             domain: Domain of footprints
             model: Model used to create footprint (e.g. NAME or FLEXPART)
             inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
-            height: Alias for inlet. One of height or inlet must be included.
+            height: Alias for inlet. One of height or inlet MUST be included.
             metmodel: Underlying meteorlogical model used (e.g. UKV)
             species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
             network: Network name

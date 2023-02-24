@@ -52,6 +52,9 @@ class Emissions(BaseStore):
         species: str,
         source: str,
         domain: str,
+        database: Optional[str] = None,
+        database_version: Optional[str] = None,
+        model: Optional[str] = None,
         source_format: str = "openghg",
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
@@ -66,6 +69,9 @@ class Emissions(BaseStore):
             species: Species name
             domain: Emissions domain
             source: Emissions source
+            database: Name of database source for this input (if relevant)
+            database_version: Name of database version (if relevant)
+            model: Model name (if relevant)
             source_format : Type of data being input e.g. openghg (internal format)
             high_time_resolution: If this is a high resolution file
             period: Period of measurements. Only needed if this can not be inferred from the time coords
@@ -122,6 +128,12 @@ class Emissions(BaseStore):
             "chunks": chunks,
         }
 
+        optional_keywords = {"database": database,
+                             "database_version": database_version,
+                             "model": model}
+
+        param.update(optional_keywords)
+
         emissions_data = parser_fn(**param)
 
         # Checking against expected format for Emissions
@@ -129,7 +141,12 @@ class Emissions(BaseStore):
             em_data = split_data["data"]
             Emissions.validate_data(em_data)
 
-        required = ("species", "source", "domain")
+        min_required = ["species", "source", "domain"]
+        for key, value in optional_keywords.items():
+            if value is not None:
+                min_required.append(key)
+
+        required = tuple(min_required)
         lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
 
         data_type = "emissions"

@@ -104,6 +104,22 @@ def test_standardise_flux():
     assert "co2_gpp-cardamom_europe" in proc_results
 
 
+def test_standardise_flux_additional_keywords():
+
+    test_datapath = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
+
+    proc_results = standardise_flux(
+        filepath=test_datapath,
+        species="ch4",
+        source="anthro",
+        domain="globaledgar",
+        database="EDGAR",
+        database_version="v50",
+    )
+
+    assert "ch4_anthro_globaledgar" in proc_results
+
+
 def test_standardise(monkeypatch, mocker, tmpdir):
     monkeypatch.setenv("OPENGHG_HUB", "1")
     call_fn_mock = mocker.patch("openghg.cloud.call_function", autospec=True)
