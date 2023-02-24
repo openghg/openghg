@@ -4,8 +4,9 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._basedata &#8212; OpenGHG 0+untagged.1.g1757ec4 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>&lt;no title&gt; &#8212; OpenGHG 0+untagged.1.g1757ec4 documentation</title>
   
   
   
@@ -41,7 +42,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/dataobjects/_basedata';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Managing_object_store/Changing_object_store';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -126,7 +127,7 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+                      <a class="nav-link nav-internal" href="../../index.html">
                         Tutorials
                       </a>
                     </li>
@@ -245,7 +246,7 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+                      <a class="nav-link nav-internal" href="../../index.html">
                         Tutorials
                       </a>
                     </li>
@@ -339,27 +340,49 @@
             
             <article class="bd-article" role="main">
               
-  <h1>Source code for openghg.dataobjects._basedata</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This is used as a base for the other dataclasses and shouldn&#39;t be used directly.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+  <p># Changing the object store path</p>
+<p>To change the object store path you can do it in one of two ways</p>
+<p>## Modifying the configuration file directly</p>
+<p>Your local configuration file can be found in the <em class="xref py py-obj">config</em> directory in your home folder. On Linux and MacOS the file can be accessed at <em class="xref py py-obj">conf</em>. We don’t currently support Windows.</p>
+<p>If you created the file using the <em class="xref py py-obj">openghg –quickstart</em> command the file should look like this</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>toml
+user_id = “6dea284d-888a-4cd6-974e-f8888c4b7be3”</p>
+<p>[object_store]
+local_store = “/home/gareth/openghg_store”
+<a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<p>To update the path to the object store change the path after <a href="#id9"><span class="problematic" id="id10">`</span></a>local_store = <a href="#id11"><span class="problematic" id="id12">`</span></a>. To move the store to another folder in my home directory, I can just update the path like so</p>
+<p><a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a>toml
+user_id = “6dea284d-888a-4cd6-974e-f8888c4b7be3”</p>
+<p>[object_store]
+local_store = “/home/gareth/atmos_chem/object_store”
+<a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a></p>
+<p>Now we can use the <em class="xref py py-obj">check_config</em> command line tool to make sure the configuration file is valid. This checks to make sure the layout of the config file is correct and that the directory exists. To do this we’ll use an <em class="xref py py-obj">ipython</em> session.</p>
+<p><a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a>python
+from openghg.util import check_config</p>
+<p>check_config()
+Your configuration file is valid.
+<a href="#id25"><span class="problematic" id="id26">``</span></a><a href="#id27"><span class="problematic" id="id28">`</span></a></p>
+<p>If the folder doesn’t exist you’ll be presented with an input field asking if you want the folder to be created.</p>
+<p><code class="docutils literal notranslate"><span class="pre">`python!</span>
+<span class="pre">check_config()</span>
+<span class="pre">The</span> <span class="pre">folder</span> <span class="pre">/home/gareth/atmos_chem/object_store</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">exist</span>
+<span class="pre">Should</span> <span class="pre">we</span> <span class="pre">create</span> <span class="pre">it?</span> <span class="pre">(y/n):</span> <span class="pre">y</span>
+<span class="pre">The</span> <span class="pre">folder</span> <span class="pre">/home/gareth/atmos_chem/object_store</span> <span class="pre">has</span> <span class="pre">ben</span> <span class="pre">created.</span>
+<span class="pre">`</span></code></p>
+<p>OpenGHG will now use the new path when searching for and storing data.</p>
+<p>## Command line</p>
+<p>OpenGHG provides a command line interface accessible from the terminal. To update the path of the object store you can run <em class="xref py py-obj">openghg –quickstart</em>. This will read your current configuration file and ask if you wan to update the object store path.</p>
+<p><a href="#id29"><span class="problematic" id="id30">``</span></a><a href="#id31"><span class="problematic" id="id32">`</span></a>shell!
+OpenGHG configuration
+———————</p>
+<p>User config exists at /home/gareth/.config/openghg/openghg.conf, checking…
+Current object store path: /home/gareth/openghg_store
+Would you like to update the path? (y/n): y
+Enter new path for object store: /home/gareth/atmos_chem/openghg_store
+Updated configuration saved.
+<a href="#id33"><span class="problematic" id="id34">``</span></a><a href="#id35"><span class="problematic" id="id36">`</span></a></p>
+<p>OpenGHG will now use the new path when searching for and storing data.</p>
 
-<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
-
-
-<div class="viewcode-block" id="_BaseData"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects._BaseData">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">_BaseData</span><span class="p">:</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span>
-    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span>
-
-    <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-
-<div class="viewcode-block" id="_BaseData.__str__"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects._BaseData.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="se">\n</span><span class="s2">Metadata : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="si">}</span><span class="s2">&quot;</span></div></div>
-</pre></div>
 
             </article>
             
@@ -377,6 +400,18 @@
           
             <div class="bd-sidebar-secondary bd-toc">
               
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="simple visible nav section-nav flex-column">
+</ul>
+
+</nav>
+</div>
+
 <div class="toc-item">
   
 <div id="searchbox"></div>
