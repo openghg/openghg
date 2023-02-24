@@ -14,18 +14,7 @@ from openghg.standardise import standardise_footprint, standardise_flux, standar
 logger = logging.getLogger("openghg.tutorial")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
-__all__ = ["bilsdale_datapaths"]
 
-
-# def _suppress_output(func):
-#     def wrapper(*a, **ka):
-#         with warnings.catch_warnings():
-#             warnings.simplefilter("ignore")
-#             with open(os.devnull, "w") as devnull:
-#                 with contextlib.redirect_stdout(devnull):
-#                     return func(*a, **ka)
-
-#     return wrapper
 def populate_footprint_data() -> None:
     """Adds all footprint data to the tutorial object store
 
@@ -261,19 +250,6 @@ def populate_surface_data() -> None:
                 )
 
     logger.info("Done.")
-
-
-def bilsdale_datapaths() -> List:
-    """Return a list of paths to the Tacolneston data for use in the ranking
-    tutorial
-
-    Returns:
-        list: List of paths
-    """
-    crds_path = Path(__file__).resolve().parent.parent.parent.joinpath("tests/data/proc_test_data/CRDS")
-    print(crds_path)
-
-    return list(crds_path.glob("bsd.picarro.1minute.*.min.*"))
 
 
 def use_tutorial_store() -> None:
