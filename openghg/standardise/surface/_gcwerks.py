@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
-
 from pandas import DataFrame
+
+from openghg.types import optionalPathType
 
 
 def find_files(
@@ -60,6 +61,7 @@ def parse_gcwerks(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    site_filename: optionalPathType = None,
 ) -> Dict:
     """Reads a GC data file by creating a GC object and associated datasources
 
@@ -69,6 +71,8 @@ def parse_gcwerks(
         site: Three letter code or name for site
         instrument: Instrument name
         network: Network name
+        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of source_name : UUIDs
     """
@@ -124,7 +128,7 @@ def parse_gcwerks(
     )
 
     # Assign attributes to the data for CF compliant NetCDFs
-    gas_data = assign_attributes(data=gas_data, site=site)
+    gas_data = assign_attributes(data=gas_data, site=site, site_filename=site_filename)
 
     return gas_data
 
