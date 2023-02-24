@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.gb635624 documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.gbe83af9 documentation</title>
   
   
   
@@ -345,6 +345,8 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span>
+
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.standardise.surface&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
@@ -357,6 +359,7 @@
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>    
     <span class="o">**</span><span class="n">kwarg</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read NOAA data from raw text file or ObsPack NetCDF</span>
@@ -369,6 +372,8 @@
 <span class="sd">        network: Network, defaults to NOAA</span>
 <span class="sd">        instrument: Instrument name</span>
 <span class="sd">        sampling_period: Sampling period</span>
+<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of data and metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -387,6 +392,7 @@
             <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
             <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
             <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+            <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_read_raw_file</span><span class="p">(</span>
@@ -396,6 +402,7 @@
             <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
             <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
             <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+            <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -604,6 +611,7 @@
     <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read NOAA ObsPack NetCDF files</span>
 
@@ -614,7 +622,8 @@
 <span class="sd">        measurement_type: One of flask, insitu or pfp</span>
 <span class="sd">        inlet: Inlet height, if no height use measurement type e.g. flask</span>
 <span class="sd">        instrument: Instrument name</span>
-
+<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of results</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -720,7 +729,7 @@
 
     <span class="n">gas_data</span> <span class="o">=</span> <span class="n">_split_inlets</span><span class="p">(</span><span class="n">processed_ds</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
 
-    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">)</span>
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">gas_data</span>
 
@@ -732,6 +741,7 @@
     <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads NOAA data files and returns a dictionary of processed</span>
 <span class="sd">    data and metadata.</span>
@@ -743,6 +753,8 @@
 <span class="sd">        measurement_type: One of flask, insitu or pfp</span>
 <span class="sd">        inlet: Inlet height, if no height use measurement type e.g. flask</span>
 <span class="sd">        instrument: Instrument name</span>
+<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        list: UUIDs of Datasources data has been assigned to</span>
@@ -770,7 +782,7 @@
         <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;NOAA&quot;</span><span class="p">)</span>
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;NOAA&quot;</span><span class="p">,</span> <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">gas_data</span>
 

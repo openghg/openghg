@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise._standardise &#8212; OpenGHG 0+untagged.1.gb635624 documentation</title>
+    <title>openghg.standardise._standardise &#8212; OpenGHG 0+untagged.1.gbe83af9 documentation</title>
   
   
   
@@ -345,6 +345,7 @@
 
 <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">create_file_package</span><span class="p">,</span> <span class="n">create_post_dict</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_on_hub</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span>
 
 
 <div class="viewcode-block" id="standardise_surface"><a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_surface">[docs]</a><span class="k">def</span> <span class="nf">standardise_surface</span><span class="p">(</span>
@@ -356,6 +357,7 @@
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">calibration_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise surface measurements and store the data in the object store.</span>
@@ -368,6 +370,8 @@
 <span class="sd">        inlet: Inlet height in metres</span>
 <span class="sd">        instrument: Instrument name</span>
 <span class="sd">        sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour</span>
+<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">        overwrite: Overwrite data currently present in the object store</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary containing confirmation of standardisation process.</span>
@@ -378,6 +382,8 @@
         <span class="n">filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepaths</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
+        <span class="c1"># TODO: Use input for site_filename here? How to include this?</span>
+
         <span class="c1"># To convert bytes to megabytes</span>
         <span class="n">MB</span> <span class="o">=</span> <span class="mf">1e6</span>
         <span class="c1"># The largest file we&#39;ll just directly POST to the standardisation</span>
@@ -460,6 +466,7 @@
             <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
             <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
             <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+            <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">,</span>
             <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -632,6 +639,9 @@
     <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">database</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">database_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">high_time_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -673,6 +683,13 @@
             <span class="s2">&quot;period&quot;</span><span class="p">:</span> <span class="n">period</span><span class="p">,</span>
         <span class="p">}</span>
 
+        <span class="n">optional_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="n">database</span><span class="p">,</span>
+                            <span class="s2">&quot;database_version&quot;</span><span class="p">:</span> <span class="n">database_version</span><span class="p">,</span>
+                            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">optional_keywords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
         <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
         <span class="n">to_post</span> <span class="o">=</span> <span class="n">create_post_dict</span><span class="p">(</span>
@@ -688,6 +705,9 @@
             <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
             <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
             <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+            <span class="n">database_version</span><span class="o">=</span><span class="n">database_version</span><span class="p">,</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
             <span class="n">high_time_resolution</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
             <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
             <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>

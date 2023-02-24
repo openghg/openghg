@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.transform.emissions._edgar &#8212; OpenGHG 0+untagged.1.gb635624 documentation</title>
+    <title>openghg.transform.emissions._edgar &#8212; OpenGHG 0+untagged.1.gbe83af9 documentation</title>
   
   
   
@@ -436,7 +436,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">zipped</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="n">known_version</span> <span class="o">=</span> <span class="n">_edgar_known_versions</span><span class="p">()</span>
+    <span class="n">known_versions</span> <span class="o">=</span> <span class="n">_edgar_known_versions</span><span class="p">()</span>
 
     <span class="c1"># Check readme file for edgar version (if not specified)</span>
     <span class="k">if</span> <span class="n">zipped</span> <span class="ow">and</span> <span class="n">edgar_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -491,11 +491,17 @@
     <span class="c1"># If version not yet found, extract version from file naming scheme</span>
     <span class="k">if</span> <span class="n">edgar_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">possible_version</span> <span class="o">=</span> <span class="n">db_info</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">possible_version</span> <span class="ow">in</span> <span class="n">known_version</span><span class="p">:</span>
-            <span class="n">edgar_version</span> <span class="o">=</span> <span class="n">possible_version</span>
+        <span class="n">possible_version_clean</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">possible_version</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">possible_version_clean</span> <span class="ow">in</span> <span class="n">known_versions</span><span class="p">:</span>
+            <span class="n">edgar_version</span> <span class="o">=</span> <span class="n">possible_version_clean</span>
 
-    <span class="k">if</span> <span class="n">edgar_version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_version</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to infer EDGAR version (</span><span class="si">{</span><span class="n">edgar_version</span><span class="si">}</span><span class="s2">).&quot;</span> <span class="s2">&quot; Please pass as an argument&quot;</span><span class="p">)</span>
+    <span class="n">edgar_version</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">edgar_version</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">edgar_version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_versions</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">edgar_version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to infer EDGAR version (</span><span class="si">{</span><span class="n">edgar_version</span><span class="si">}</span><span class="s2">).&quot;</span> <span class="sa">f</span><span class="s2">&quot; Please pass as an argument (one of </span><span class="si">{</span><span class="n">known_versions</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to infer EDGAR version.&quot;</span> <span class="sa">f</span><span class="s2">&quot; Please pass as an argument (one of </span><span class="si">{</span><span class="n">known_versions</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 
     <span class="c1"># TODO: May want to split out into a separate function, so we can use this for</span>
     <span class="c1"># - yearly - &quot;v6.0_CH4_2015_TOTALS.0.1x0.1.nc&quot;</span>
@@ -804,8 +810,8 @@
 
 <span class="k">def</span> <span class="nf">_edgar_known_versions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Define list of known versions for the EDGAR database&quot;&quot;&quot;</span>
-    <span class="n">known_version</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;v432&quot;</span><span class="p">,</span> <span class="s2">&quot;v50&quot;</span><span class="p">,</span> <span class="s2">&quot;v6.0&quot;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">known_version</span>
+    <span class="n">known_versions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;v432&quot;</span><span class="p">,</span> <span class="s2">&quot;v50&quot;</span><span class="p">,</span> <span class="s2">&quot;v60&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">known_versions</span>
 
 
 <span class="k">def</span> <span class="nf">_check_readme_version</span><span class="p">(</span>
@@ -863,8 +869,8 @@
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Check against known versions and remove &#39;.&#39; if these don&#39;t match.</span>
-            <span class="n">known_version</span> <span class="o">=</span> <span class="n">_edgar_known_versions</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">edgar_version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_version</span><span class="p">:</span>
+            <span class="n">known_versions</span> <span class="o">=</span> <span class="n">_edgar_known_versions</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">edgar_version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_versions</span><span class="p">:</span>
                 <span class="n">edgar_version</span> <span class="o">=</span> <span class="n">edgar_version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">edgar_version</span> <span class="o">=</span> <span class="kc">None</span>

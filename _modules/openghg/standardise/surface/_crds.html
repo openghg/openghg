@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.gb635624 documentation</title>
+    <title>openghg.standardise.surface._crds &#8212; OpenGHG 0+untagged.1.gbe83af9 documentation</title>
   
   
   
@@ -344,6 +344,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timedelta</span>
 
 
@@ -355,6 +356,7 @@
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
@@ -369,6 +371,8 @@
 <span class="sd">        instrument: Instrument name</span>
 <span class="sd">        sampling_period: Sampling period in seconds</span>
 <span class="sd">        measurement_type: Measurement type e.g. insitu, flask</span>
+<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">        drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of gas data</span>
@@ -397,7 +401,10 @@
     <span class="p">)</span>
 
     <span class="c1"># Ensure the data is CF compliant</span>
-    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">)</span>
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span>
+                                 <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                                 <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+                                 <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">gas_data</span></div>
 
@@ -410,6 +417,7 @@
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the datafile passed in and extract the data we require.</span>
@@ -422,6 +430,8 @@
 <span class="sd">        instrument: Instrument name</span>
 <span class="sd">        sampling_period: Sampling period in seconds</span>
 <span class="sd">        measurement_type: Measurement type e.g. insitu, flask</span>
+<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">        drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of gas data</span>
@@ -539,7 +549,10 @@
         <span class="c1"># Here we can convert the Dataframe to a Dataset and then write the attributes</span>
         <span class="n">gas_data</span> <span class="o">=</span> <span class="n">gas_data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
 
-        <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">_get_site_attributes</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">crds_metadata</span><span class="o">=</span><span class="n">crds_metadata</span><span class="p">)</span>
+        <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">_get_site_attributes</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                                               <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                                               <span class="n">crds_metadata</span><span class="o">=</span><span class="n">crds_metadata</span><span class="p">,</span>
+                                               <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">)</span>
 
         <span class="n">scale</span> <span class="o">=</span> <span class="n">crds_metadata</span><span class="p">[</span><span class="s2">&quot;default_scales&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="s2">&quot;NA&quot;</span><span class="p">)</span>
 
@@ -610,13 +623,18 @@
     <span class="k">return</span> <span class="n">metadata</span>
 
 
-<span class="k">def</span> <span class="nf">_get_site_attributes</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">crds_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_get_site_attributes</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">crds_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+                         <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Gets the site specific attributes for writing to Datsets</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        site: Site name</span>
 <span class="sd">        inlet: Inlet height, example: 108m</span>
 <span class="sd">        crds_metadata: General CRDS metadata</span>
+<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -629,7 +647,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to read attributes for site: </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># TODO - we need to combine the metadata</span>
-    <span class="n">full_site_metadata</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">()</span>
+    <span class="n">full_site_metadata</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">(</span><span class="n">site_filename</span><span class="p">)</span>
 
     <span class="n">attributes</span> <span class="o">=</span> <span class="n">global_attributes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 

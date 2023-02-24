@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._thamesbarrier &#8212; OpenGHG 0+untagged.1.gb635624 documentation</title>
+    <title>openghg.standardise.surface._thamesbarrier &#8212; OpenGHG 0+untagged.1.gbe83af9 documentation</title>
   
   
   
@@ -343,7 +343,7 @@
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">pathType</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">optionalPathType</span>
 
 
 <div class="viewcode-block" id="parse_tmb"><a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.surface.parse_tmb">[docs]</a><span class="k">def</span> <span class="nf">parse_tmb</span><span class="p">(</span>
@@ -354,6 +354,7 @@
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">measurement_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads THAMESBARRIER data files and returns the UUIDS of the Datasources</span>
@@ -367,6 +368,8 @@
 <span class="sd">        instrument: Instrument name</span>
 <span class="sd">        sampling_period: Sampling period</span>
 <span class="sd">        measurement_type: Type of measurement taken e.g.&quot;flask&quot;, &quot;insitu&quot;</span>
+<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        list: UUIDs of Datasources data has been assigned to</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -464,7 +467,7 @@
             <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">,</span>
         <span class="p">}</span>
 
-    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">gas_data</span></div>
 </pre></div>
