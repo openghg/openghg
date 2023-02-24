@@ -12,7 +12,7 @@ Quickstart
 .. toctree::
    :maxdepth: 1
 
-   quickstart_devel.rst
+   quickstart_devel
 
 
 Python development
@@ -35,16 +35,3 @@ The specifications for data accepted by storage functions in OpenGHG
    :maxdepth: 1
 
    specifications/data_spec
-
-
-Fn functions
--------------
-
-How to setup Fn and develop functions using Docker
-
-.. toctree::
-   :maxdepth: 1
-
-   cloud/fn_setup
-   cloud/fn_devel
-   cloud/fn_usage
