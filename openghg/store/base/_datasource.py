@@ -142,7 +142,7 @@ class Datasource:
         for i in range(num_data_groups):
             data_split = new_datasets[i]
             if i < num_data_groups - 1:
-                new_daterange = self.clip_daterange(new_daterange_str[i], new_daterange_str[i + 1])
+                new_daterange = self.clip_daterange_from_str(new_daterange_str[i], new_daterange_str[i + 1])
             else:
                 new_daterange = new_daterange_str[i]
             new_data[new_daterange] = data_split

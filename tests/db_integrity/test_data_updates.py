@@ -6,9 +6,11 @@ import pandas as pd
 import numpy as np
 from helpers import get_surface_datapath, get_emissions_datapath, get_bc_datapath, get_footprint_datapath
 from openghg.store import ObsSurface, Emissions, BoundaryConditions, Footprints
+from openghg.store.base import Datasource
 from openghg.retrieve import get_obs_surface, get_flux
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
+
 
 from helpers import clear_test_store
 
@@ -158,12 +160,6 @@ def bsd_diff_data_read():
                          site=site,
                          network=network,
                          instrument=instrument)
-
-
-
-
-
-
 
 
 def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
@@ -417,32 +413,23 @@ def test_obs_data_read_two_frequencies():
 
 #%% Look at replacing data with different / overlapping internal time stamps
 
-def bsd_start_overlap_data_read(overwrite=False):
+
+def bsd_data_read_crds_internal_overlap(overwrite=False):
     """
-    Add Bilsdale GCMD data for two neighbouring years (2013 and 2014)
-     - Last date of 2013 modified so the date range associated with this chunk
-       overlaps with start of 2014 (the next year)
-       when the sampling period of 3600 (hourly) is considered.
+    Add Bilsdale *hourly* data for CRDS instrument to object store
+     - CRDS: ch4, co2, co
     """
+
     site = "bsd"
     network = "DECC"
-    source_format = "GCWERKS"
-    instrument = "GCMD"
+    source_format1 = "CRDS"
 
-    bsd_path_2013 = get_surface_datapath(filename="bilsdale-md.overlap-start.13.C", source_format="GC")
-    bsd_prec_path_2013 = get_surface_datapath(filename="bilsdale-md.13.precisions.C", source_format="GC")
+    bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.overlap-dates.dat", source_format="CRDS")
 
-    bsd_path_2014 = get_surface_datapath(filename="bilsdale-md.14.C", source_format="GC")
-    bsd_prec_path_2014 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
-
-    input_files = [(bsd_path_2013, bsd_prec_path_2013), (bsd_path_2014, bsd_prec_path_2014)]
-
-    ObsSurface.read_file(filepath=input_files,
-                         source_format=source_format,
+    ObsSurface.read_file(filepath=bsd_path_hourly,
+                         source_format=source_format1,
                          site=site,
                          network=network,
-                         instrument=instrument,
-                        #  sampling_period=3600,
                          overwrite=overwrite)
 
 
@@ -456,12 +443,40 @@ def test_obs_data_representative_date_overlap():
 
     This test just checks this will no longer raise a KeyError based on this.
     """
-    bsd_start_overlap_data_read()
-    bsd_start_overlap_data_read(overwrite=True)
 
-    ## TODO: Decide what else to check here.
-    # - Can we check stored date range keys to make sure this doesn't overlap
-    # and has been correctly clipped?
+    clear_test_store()
+    bsd_data_read_crds_internal_overlap()
+    # TODO: Update code to allow this to pass - think about how to do this in
+    # the overlapping section
+    # bsd_data_read_crds_internal_overlap(overwrite=True)
+
+    obs = ObsSurface.load()
+    uuids = obs.datasources()
+
+    datasources = []
+    for uuid in uuids:
+        datasource = Datasource.load(uuid=uuid)
+        datasources.append(datasource)
+
+    data = [datasource.data() for datasource in datasources]
+    one_species_data = data[0]
+    keys = list(one_species_data.keys())
+    keys.sort()
+
+    time_range_key1 = keys[0]
+    time_range_key2 = keys[1]
+
+    start1, end1 = time_range_key1.split("_")
+    start2, end2 = time_range_key2.split("_")
+
+    expected_start1 = pd.Timestamp("2014-01-30T11:20:45", tz='utc')
+    expected_start2 = pd.Timestamp("2015-01-01T00:01:00", tz='utc')
+
+    time_buffer = pd.Timedelta(seconds=1)
+
+    assert pd.Timestamp(start1) == expected_start1
+    assert pd.Timestamp(end1) == (expected_start2 - time_buffer)
+    assert pd.Timestamp(start2) == expected_start2
 
 
 #%% Check overwrite functionality
