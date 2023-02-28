@@ -3,10 +3,11 @@ from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
+from pandas import Timedelta
+from xarray import Dataset
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
-from xarray import Dataset
 
 __all__ = ["ObsSurface"]
 
@@ -110,7 +111,7 @@ class ObsSurface(BaseStore):
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
+        sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
         overwrite: bool = False,
@@ -150,7 +151,6 @@ class ObsSurface(BaseStore):
         from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import SurfaceTypes
         from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
-        from pandas import Timedelta
         from tqdm import tqdm
 
         if not isinstance(filepath, list):
@@ -167,7 +167,6 @@ class ObsSurface(BaseStore):
         site = verify_site(site=site) if verify_site_code else clean_string(site)
         network = clean_string(network)
         instrument = clean_string(instrument)
-        # sampling_period = clean_string(sampling_period)
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
@@ -180,12 +179,35 @@ class ObsSurface(BaseStore):
         sampling_period_seconds: Union[str, None] = None
         # If we have a sampling period passed we want the number of seconds
         if sampling_period is not None:
-            sampling_period_seconds = str(float(Timedelta(sampling_period).total_seconds()))
+            # Check value passed is not just a number with no units
+            try:
+                float(sampling_period)
+            except (ValueError, TypeError):
+                # If this cannot be evaluated to a float assume this is correct form.
+                pass
+            else:
+                raise ValueError(
+                    f"Invalid sampling period: '{sampling_period}'. Must be specified as a string with unit (e.g. 1m for 1 minute)."
+                )
 
+            # Check string passed can be evaluated as a Timedelta object
+            # and extract this in seconds.
+            try:
+                sampling_period_td = Timedelta(sampling_period)
+            except ValueError:
+                raise ValueError(
+                    f"Could not evaluate sampling period: '{sampling_period}'. Must be specified as a string with valid unit (e.g. 1m for 1 minute)."
+                )
+
+            sampling_period_seconds = str(float(sampling_period_td.total_seconds()))
+
+            # Check if sampling period has resolved to 0 seconds.
             if sampling_period_seconds == "0.0":
                 raise ValueError(
-                    "Invalid sampling period result, please pass a valid pandas time such as 1m for 1 minute."
+                    f"Sampling period resolves to <= 0.0 seconds. Please check input: '{sampling_period}'"
                 )
+            
+            # TODO: May want to add check for NaT or NaN
 
         # Load the data retrieve object
         parser_fn = load_surface_parser(source_format=source_format)

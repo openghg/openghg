@@ -97,25 +97,17 @@ def test_read_data(mocker):
         _ = ObsSurface.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
 
-def test_read_CRDS_incorrent_sampling_period_raises():
+@pytest.mark.parametrize("sampling_period", ["60", 60, "60000000000", "twelve-thousand"])
+def test_read_CRDS_incorrect_sampling_period_raises(sampling_period):
     clear_test_store()
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exec_info:
         ObsSurface.read_file(
-            filepath=filepath, source_format="CRDS", site="bsd", network="DECC", sampling_period="60"
+            filepath=filepath, source_format="CRDS", site="bsd", network="DECC", sampling_period=sampling_period
         )
-        ObsSurface.read_file(
-            filepath=filepath, source_format="CRDS", site="bsd", network="DECC", sampling_period=60
-        )
-        ObsSurface.read_file(
-            filepath=filepath,
-            source_format="CRDS",
-            site="bsd",
-            network="DECC",
-            sampling_period="twelve-thousand",
-        )
+        assert "Invalid sampling period" in exec_info or "Could not evaluate sampling period" in exec_info
 
 
 def test_read_CRDS():
