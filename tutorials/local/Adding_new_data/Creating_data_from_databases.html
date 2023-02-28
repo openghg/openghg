@@ -7,8 +7,9 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.types._errors &#8212; OpenGHG 0+untagged.1.g26b16f8 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Using databases to add data &#8212; OpenGHG 0+untagged.1.g26b16f8 documentation</title>
   
   
   
@@ -44,7 +45,7 @@
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/types/_errors';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_new_data/Creating_data_from_databases';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -143,7 +144,7 @@
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+                      <a class="nav-link nav-internal" href="../../index.html">
                         Tutorials
                       </a>
                     </li>
@@ -232,6 +233,10 @@ document.write(`
   
 
   
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
 </div>
 
     </nav>
@@ -265,7 +270,7 @@ document.write(`
                 
 
                     <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../tutorials/index.html">
+                      <a class="nav-link nav-internal" href="../../index.html">
                         Tutorials
                       </a>
                     </li>
@@ -362,10 +367,7 @@ document.write(`
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    
-    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
-    
-    <li class="breadcrumb-item active" aria-current="page">openghg.types._errors</li>
+    <li class="breadcrumb-item active" aria-current="page">Using databases to add data</li>
   </ul>
 </nav>
 </div>
@@ -382,51 +384,110 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <h1>Source code for openghg.types._errors</h1><div class="highlight"><pre>
-<span></span>
-<div class="viewcode-block" id="OpenGHGError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.OpenGHGError">[docs]</a><span class="k">class</span> <span class="nc">OpenGHGError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Top level OpenGHG error&quot;&quot;&quot;</span></div>
+  <section id="using-databases-to-add-data">
+<h1>Using databases to add data<a class="headerlink" href="#using-databases-to-add-data" title="Permalink to this heading">#</a></h1>
+<p>Within OpenGHG so far, we have been using the provided standardisation
+functions for known input file formats (source formats) to populate the
+object store ([see here and here] - add links to previous tutorial
+pages). OpenGHG also provides functionality to create data from
+underlying databases and add this to the object store as well. At
+present, this has been implemented for the <a class="reference external" href="https://edgar.jrc.ec.europa.eu/">EDGAR global anthropogenic
+database</a> to allow emissions files
+to be created on a regional domain.</p>
+<section id="tutorial-store">
+<h2>Tutorial store<a class="headerlink" href="#tutorial-store" title="Permalink to this heading">#</a></h2>
+<p>…</p>
+</section>
+<section id="creating-emissions-from-the-edgar-database">
+<h2>Creating emissions from the EDGAR database<a class="headerlink" href="#creating-emissions-from-the-edgar-database" title="Permalink to this heading">#</a></h2>
+<p>To create emissions maps from an underlying database, we can use the
+<code class="docutils literal notranslate"><span class="pre">transform_data(...)</span></code> method for the <code class="docutils literal notranslate"><span class="pre">Emissions</span></code> object (from
+<code class="docutils literal notranslate"><span class="pre">openghg.store</span></code>). The general form for this is as follows (same as
+<code class="docutils literal notranslate"><span class="pre">Emissions.read_file()</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">Emissions</span>
 
-
-<div class="viewcode-block" id="InvalidSiteError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.InvalidSiteError">[docs]</a><span class="k">class</span> <span class="nc">InvalidSiteError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if an invalid site is passed&quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="UnknownDataError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.UnknownDataError">[docs]</a><span class="k">class</span> <span class="nc">UnknownDataError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if an unknown data type is passed&quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="FunctionError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.FunctionError">[docs]</a><span class="k">class</span> <span class="nc">FunctionError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if a serverless function cannot be called correctly&quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="ObjectStoreError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.ObjectStoreError">[docs]</a><span class="k">class</span> <span class="nc">ObjectStoreError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if an error accessing an object at a key in the object store occurs&quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="DatasourceLookupError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.DatasourceLookupError">[docs]</a><span class="k">class</span> <span class="nc">DatasourceLookupError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised if Datasource lookup fails&quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="EncodingError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.EncodingError">[docs]</a><span class="k">class</span> <span class="nc">EncodingError</span><span class="p">(</span><span class="n">ObjectStoreError</span><span class="p">):</span>
-    <span class="k">pass</span></div>
-
-
-<div class="viewcode-block" id="MutexTimeoutError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.MutexTimeoutError">[docs]</a><span class="k">class</span> <span class="nc">MutexTimeoutError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-    <span class="k">pass</span></div>
-
-
-<div class="viewcode-block" id="RequestBucketError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.RequestBucketError">[docs]</a><span class="k">class</span> <span class="nc">RequestBucketError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-    <span class="k">pass</span></div>
-
-
-<div class="viewcode-block" id="SearchError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.SearchError">[docs]</a><span class="k">class</span> <span class="nc">SearchError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Related to searching the object store&quot;&quot;&quot;</span></div>
-
-
-<span class="k">class</span> <span class="nc">AttrMismatchError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mismatch between attributes of input file and derived metadata&quot;&quot;&quot;</span>
+<span class="n">Emissions</span><span class="o">.</span><span class="n">transform_data</span><span class="p">(</span><span class="n">datapath</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>  <span class="c1"># Additional keywords</span>
 </pre></div>
+</div>
+<p>This function expects the path, the name of the database as well as
+keyword inputs which will be determined by the underlying function being
+accessed. To use this for the global EDGAR database this must be locally
+available and a link provided to the folder path (<code class="docutils literal notranslate"><span class="pre">datapath</span></code> input)
+(<strong>Add option to download this data e.g. via wget if possible</strong> GJ -
+could we use the <code class="docutils literal notranslate"><span class="pre">retrieve_data</span></code> function?). The <code class="docutils literal notranslate"><span class="pre">database</span></code> input
+must also be specified as <code class="docutils literal notranslate"><span class="pre">&quot;edgar&quot;</span></code>.</p>
+<p><strong>Should we add ``transform_…`` functions as a shorthand (c.f.
+standardise_… functions)?</strong></p>
+<p>We will need to provide inputs for species and for our domain (area) of
+interest. A flux map of the correct format will then be created and
+added to the openghg object store with the associated keywords.</p>
+<p>In the background, this will call the
+<code class="docutils literal notranslate"><span class="pre">openghg.transform.emissions.parse_edgar</span></code> function in the background
+and we can look at this function for details of what keywords we need to
+provide:</p>
+<ul class="simple">
+<li><p>date - the year to process from the database (as a string)</p></li>
+<li><p>species - the species name</p></li>
+<li><p>domain / lat_out / lon_out</p>
+<ul>
+<li><p>To describe the regional domain a keyword can be passed for
+pre-determined domains OR a new set of lat-lon arrays.</p></li>
+</ul>
+</li>
+<li><p>edgar_version - specify this if this cannot be extracted from the
+database provided</p></li>
+</ul>
+<p><strong>How do we find out which domains are available and what they mean?
+Need a checker function?</strong></p>
+<p><em>Note: for creating new domains this currently relies on the xesmf
+package which is better installed in a conda environment than using pip.
+Please see details in install instructions around this.</em></p>
+<p><strong>++Add paired down edgar database here which can be downloaded and
+used.++</strong></p>
+<p>For example, this would create a new emissions map for methane, “ch4”,
+for the area over Europe, “EUROPE” domain for 2014. The edgar database
+provided is v6.0, annual, global and for methane.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">Emissions</span>
+
+<span class="n">datapath</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
+<span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;edgar&quot;</span>
+
+<span class="n">Emissions</span><span class="o">.</span><span class="n">transform_data</span><span class="p">(</span><span class="n">datapath</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="mi">2014</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can then check the data has been added to the object store.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_emissions</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">search_emissions</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s2">&quot;edgar&quot;</span><span class="p">)</span>
+
+<span class="n">results</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+</section>
+<section id="adding-new-options">
+<h2>Adding new options<a class="headerlink" href="#adding-new-options" title="Permalink to this heading">#</a></h2>
+<section id="transformation-workflow">
+<h3>Transformation workflow<a class="headerlink" href="#transformation-workflow" title="Permalink to this heading">#</a></h3>
+<p>Within OpenGHG, there are multiple ways to add data to the object store.
+The most direct way is to use a standardisation functions already
+introduced ([see here] - add link to previous tutorial pages) which can
+be used to convert from an understood format (<code class="docutils literal notranslate"><span class="pre">source_format</span></code>) into
+the standardised openghg format and add this to the database. The other
+way is to use the tranformation workflow which extracts a subset /
+performs an operation to update the provided data and adds this to the
+object store.</p>
+<p>In this way, the standardisation functions can be considered as a
+one-to-one mapping to be run only when the data is first added and when
+the data has been updated, whereas the transformation functions allow a
+one-to-many mapping where many different data products can be stored
+within the openghg object store depending on the inputs.</p>
+<p>The main implementation for this at present, is in creating flux /
+emissions maps based on underlying inventories or databases but this can
+be expanded for use with any data type as appropriate.</p>
+</section>
+</section>
+</section>
+
 
                 </article>
               
@@ -441,6 +502,25 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tutorial-store">Tutorial store</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-emissions-from-the-edgar-database">Creating emissions from the EDGAR database</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-new-options">Adding new options</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#transformation-workflow">Transformation workflow</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._gcwerks &#8212; OpenGHG 0+untagged.1.g62b098e documentation</title>
+    <title>openghg.standardise.surface._gcwerks &#8212; OpenGHG 0+untagged.1.g26b16f8 documentation</title>
   
   
   
@@ -640,9 +640,8 @@ document.write(`
 
     <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Compare input to definition within json file</span>
-        <span class="n">file_sampling_period_td</span> <span class="o">=</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">extracted_sampling_period</span><span class="p">))</span>
-        <span class="n">sampling_period_td</span> <span class="o">=</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">))</span>
-        <span class="n">comparison_seconds</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sampling_period_td</span> <span class="o">-</span> <span class="n">file_sampling_period_td</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">file_sampling_period</span> <span class="o">=</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">extracted_sampling_period</span><span class="p">)</span>
+        <span class="n">comparison_seconds</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sampling_period</span> <span class="o">-</span> <span class="n">file_sampling_period</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
         <span class="n">tolerance_seconds</span> <span class="o">=</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="n">comparison_seconds</span> <span class="o">&gt;</span> <span class="n">tolerance_seconds</span><span class="p">:</span>

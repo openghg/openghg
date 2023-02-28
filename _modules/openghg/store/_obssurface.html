@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g62b098e documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g26b16f8 documentation</title>
   
   
   
@@ -388,11 +388,10 @@ document.write(`
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
-<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">resultsType</span><span class="p">,</span> <span class="n">optionalPathType</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ObsSurface&quot;</span><span class="p">]</span>
 
@@ -496,7 +495,7 @@ document.write(`
         <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Timedelta</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">calibration_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;insitu&quot;</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -536,6 +535,7 @@ document.write(`
         <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">datasource_lookup</span><span class="p">,</span> <span class="n">load_metastore</span>
         <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">SurfaceTypes</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">hash_file</span><span class="p">,</span> <span class="n">load_surface_parser</span><span class="p">,</span> <span class="n">verify_site</span>
+        <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
         <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -552,6 +552,7 @@ document.write(`
         <span class="n">site</span> <span class="o">=</span> <span class="n">verify_site</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">)</span> <span class="k">if</span> <span class="n">verify_site_code</span> <span class="k">else</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
         <span class="n">network</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
         <span class="n">instrument</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">instrument</span><span class="p">)</span>
+        <span class="c1"># sampling_period = clean_string(sampling_period)</span>
 
         <span class="c1"># Check if alias `height` is included instead of `inlet`</span>
         <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -564,35 +565,12 @@ document.write(`
         <span class="n">sampling_period_seconds</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># If we have a sampling period passed we want the number of seconds</span>
         <span class="k">if</span> <span class="n">sampling_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Check value passed is not just a number with no units</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="nb">float</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-                <span class="c1"># If this cannot be evaluated to a float assume this is correct form.</span>
-                <span class="k">pass</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Invalid sampling period: &#39;</span><span class="si">{</span><span class="n">sampling_period</span><span class="si">}</span><span class="s2">&#39;. Must be specified as a string with unit (e.g. 1m for 1 minute).&quot;</span>
-                <span class="p">)</span>
+            <span class="n">sampling_period_seconds</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()))</span>
 
-            <span class="c1"># Check string passed can be evaluated as a Timedelta object</span>
-            <span class="c1"># and extract this in seconds.</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">sampling_period_td</span> <span class="o">=</span> <span class="n">Timedelta</span><span class="p">(</span><span class="n">sampling_period</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Could not evaluate sampling period: &#39;</span><span class="si">{</span><span class="n">sampling_period</span><span class="si">}</span><span class="s2">&#39;. Must be specified as a string with valid unit (e.g. 1m for 1 minute).&quot;</span>
-                <span class="p">)</span>
-
-            <span class="n">sampling_period_seconds</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sampling_period_td</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()))</span>
-
-            <span class="c1"># Check if sampling period has resolved to 0 seconds.</span>
             <span class="k">if</span> <span class="n">sampling_period_seconds</span> <span class="o">==</span> <span class="s2">&quot;0.0&quot;</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Sampling period resolves to &lt;= 0.0 seconds. Please check input: &#39;</span><span class="si">{</span><span class="n">sampling_period</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="s2">&quot;Invalid sampling period result, please pass a valid pandas time such as 1m for 1 minute.&quot;</span>
                 <span class="p">)</span>
-
-            <span class="c1"># TODO: May want to add check for NaT or NaN</span>
 
         <span class="c1"># Load the data retrieve object</span>
         <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_surface_parser</span><span class="p">(</span><span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">)</span>
