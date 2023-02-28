@@ -206,7 +206,7 @@ class ObsSurface(BaseStore):
                 raise ValueError(
                     f"Sampling period resolves to <= 0.0 seconds. Please check input: '{sampling_period}'"
                 )
-            
+
             # TODO: May want to add check for NaT or NaN
 
         # Load the data retrieve object
