@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._user &#8212; OpenGHG 0+untagged.1.g26b16f8 documentation</title>
+    <title>openghg.util._user &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
   
   
   
@@ -487,10 +487,8 @@ document.write(`
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="n">config</span><span class="p">[</span><span class="s2">&quot;user_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
             <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="k">if</span> <span class="n">updated</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updated configuration saved.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">default_objstore_path</span> <span class="o">=</span> <span class="n">get_default_objectstore_path</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">silent</span><span class="p">:</span>
@@ -500,9 +498,6 @@ document.write(`
             <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">obj_store_input</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 
         <span class="n">user_config_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">obj_store_path</span><span class="p">:</span>
-            <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">default_objstore_path</span>
 
         <span class="n">user_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
         <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;object_store&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;local_store&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj_store_path</span><span class="p">)},</span> <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
