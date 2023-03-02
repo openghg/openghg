@@ -102,10 +102,8 @@ def create_config(silent: bool = False) -> None:
         except KeyError:
             config["user_id"] = str(uuid.uuid4())
             updated = True
-
-        if updated:
-            print("Updated configuration saved.\n")
     else:
+        updated = True
         default_objstore_path = get_default_objectstore_path()
 
         if silent:
@@ -115,9 +113,6 @@ def create_config(silent: bool = False) -> None:
             obj_store_path = Path(obj_store_input).expanduser().resolve()
 
         user_config_path.parent.mkdir(parents=True, exist_ok=True)
-
-        if not obj_store_path:
-            obj_store_path = default_objstore_path
 
         user_id = str(uuid.uuid4())
         config = {"object_store": {"local_store": str(obj_store_path)}, "user_id": user_id}
