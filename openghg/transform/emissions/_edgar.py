@@ -166,6 +166,9 @@ def parse_edgar(
     # - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
     # - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
 
+    if isinstance(date, int):
+        date = str(date)
+
     if len(date) == 4:
         year = int(date)
     else:
