@@ -1,19 +1,10 @@
-# TODO: Add import for xesmf within specific functions and NOT general import at the top.
-# TODO: Add try-except around xesmf import with helpful error message
-
 from typing import Optional, Tuple, TypeVar, Union, cast
 
 import numpy as np
 import xarray as xr
 from numpy import ndarray
 
-xesmf_error_message = (
-    "Unable to import xesmf for use with regridding algorithms"
-    "To use transform modules please follow instructions"
-    "for installing non-python dependencies (requires conda"
-    "to be installed even if using pip to install other packages)"
-)
-# TODO: Add explicit link to instruction page once created
+from openghg.types import construct_xesmf_import_error
 
 
 def _getGridCC(lat: ndarray, lon: ndarray) -> Tuple[ndarray, ndarray]:
@@ -110,8 +101,8 @@ def regrid_uniform_cc(
     """
     try:
         import xesmf  # type:ignore
-    except ImportError:
-        raise ImportError(xesmf_error_message)
+    except ImportError as e:
+        raise ImportError(construct_xesmf_import_error(e))
 
     if latlon is None:
         latlon = ["lat", "lon"]

@@ -19,6 +19,7 @@ from ._errors import (
     RequestBucketError,
     SearchError,
     AttrMismatchError,
+    construct_xesmf_import_error,
 )
 from ._types import (
     multiPathType,
