@@ -267,7 +267,7 @@ def download_edgar_data() -> Path:
     edgar_v60_database = "https://github.com/openghg/example_data/raw/main/databases/TOTALS_nc.tar.gz"
 
     logger.info("Retrieving example database...")
-    edgar_database_path = retrieve_example_data(url=edgar_v60_database)
+    edgar_database_path = retrieve_example_data(url=edgar_v60_database)[0]
     logger.info("Done.")
 
     return edgar_database_path
