@@ -153,3 +153,30 @@ def read_local_config() -> Dict:
 
     config: Dict = toml.loads(config_path.read_text())
     return config
+
+
+def valid_config() -> bool:
+    """Check that the user config file is valid and the paths
+    given in it exist.
+
+    Returns:
+        bool
+    """
+    config_path = get_user_config_path()
+
+    if not config_path.exists():
+        logger.warning("Configuration file does not exist.")
+        create_config()
+
+    config = read_local_config()
+    uid = config["user_id"]
+    object_stores = config["object_store"]
+
+    try:
+        uuid.UUID(uid, version=4)
+    except ValueError:
+        return False
+
+    for path in object_stores.values():
+        if not Path(path).exists():
+            return False
