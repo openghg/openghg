@@ -10,13 +10,25 @@ present, this has been implemented for the `EDGAR global anthropogenic
 database <https://edgar.jrc.ec.europa.eu/>`__ to allow emissions files
 to be created on a regional domain.
 
-Tutorial store
---------------
+0. Using the tutorial object store
+----------------------------------
 
-…
+To avoid adding the example data we use in this tutorial to your normal
+object store, we need to tell OpenGHG to use a separate sandboxed object
+store that we'll call the tutorial store. To do this we use the
+``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
+``OPENGHG_TUT_STORE`` environment variable for this session and won't
+affect your use of OpenGHG outside of this tutorial.
 
-Creating emissions from the EDGAR database
-------------------------------------------
+.. code:: ipython3
+
+    from openghg.tutorial import use_tutorial_store
+
+    use_tutorial_store()
+
+
+1. Creating emissions from the EDGAR database
+---------------------------------------------
 
 To create emissions maps from an underlying database, we can use the
 ``transform_data(...)`` method for the ``Emissions`` object (from
@@ -31,21 +43,16 @@ To create emissions maps from an underlying database, we can use the
 
 This function expects the path, the name of the database as well as
 keyword inputs which will be determined by the underlying function being
-accessed. To use this for the global EDGAR database this must be locally
-available and a link provided to the folder path (``datapath`` input)
-(**Add option to download this data e.g. via wget if possible** GJ -
-could we use the ``retrieve_data`` function?). The ``database`` input
-must also be specified as ``"edgar"``.
-
-**Should we add ``transform_...`` functions as a shorthand (c.f.
-standardise\_… functions)?**
+accessed. To use this for the global EDGAR database, currently, this must be locally
+available and a link provided to the folder path (``datapath`` input). The
+``database`` input must also be specified as ``"edgar"``.
 
 We will need to provide inputs for species and for our domain (area) of
 interest. A flux map of the correct format will then be created and
 added to the openghg object store with the associated keywords.
 
 In the background, this will call the
-``openghg.transform.emissions.parse_edgar`` function in the background
+``openghg.transform.emissions.parse_edgar`` function 
 and we can look at this function for details of what keywords we need to
 provide:
 
@@ -66,8 +73,14 @@ Need a checker function?**
 package which is better installed in a conda environment than using pip.
 Please see details in install instructions around this.*
 
-**++Add paired down edgar database here which can be downloaded and
-used.++**
+We have provided an example of the EDGAR v6.0 database containing a limited subset
+of "CH4" data from 2014-2015 which can be downloaded for this tutorial.
+
+.. code:: python
+
+   from openghg.tutorial import download_edgar_data
+
+   edgar_datapath = download_edgar_data()
 
 For example, this would create a new emissions map for methane, “ch4”,
 for the area over Europe, “EUROPE” domain for 2014. The edgar database
@@ -77,10 +90,9 @@ provided is v6.0, annual, global and for methane.
 
    from openghg.store import Emissions
 
-   datapath = "..."
    database = "edgar"
 
-   Emissions.transform_data(datapath, database, date=2014, domain="EUROPE", species="ch4")
+   Emissions.transform_data(edgar_datapath, database, date=2014, domain="EUROPE", species="ch4")
 
 We can then check the data has been added to the object store.
 
@@ -91,6 +103,8 @@ We can then check the data has been added to the object store.
    results = search_emissions(database="edgar")
 
    results.results
+
+2. 
 
 Adding new options
 ------------------
@@ -116,3 +130,5 @@ within the openghg object store depending on the inputs.
 The main implementation for this at present, is in creating flux /
 emissions maps based on underlying inventories or databases but this can
 be expanded for use with any data type as appropriate.
+
+(:ref:`FootprintData<FootprintData>`)
