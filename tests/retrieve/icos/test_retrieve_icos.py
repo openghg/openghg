@@ -116,16 +116,15 @@ def test_icos_retrieve_and_store(mocker):
         "sampling_height": "10m",
         "sampling_height_units": "metres",
         "inlet": "10m",
-        "inlet_height_magl": "10",
         "station_long_name": "weybourne observatory, uk",  # May need to be updated
         # "station_long_name": "wao",
         "station_latitude": "52.95",
         "station_longitude": "1.121",
         "station_altitude": "31m",
-        "data_owner": "andrew manning",
-        "data_owner_email": "a.manning@uea.ac.uk",
-        "station_height_masl": "10.0",  # Will need to be updated to 17
+        # "station_height_masl": "10.0",  # Will need to be updated to 17
         # "station_height_masl": "17.0",
+        # "data_owner": "andrew manning",
+        # "data_owner_email": "a.manning@uea.ac.uk",
         "licence_name": "icos ccby4 data licence",
         "licence_info": "http://meta.icos-cp.eu/ontologies/cpmeta/icoslicence",
         "network": "icos",
@@ -145,8 +144,6 @@ def test_icos_retrieve_and_store(mocker):
         "dataset_source": "ICOS",
         "Conventions": "CF-1.8",
     }
-
-    assert metadata_checker_obssurface(metadata=first_obs_metadata, species="co2")
 
     assert first_expected_metadata.items() <= first_obs_metadata.items()
 

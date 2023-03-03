@@ -248,7 +248,7 @@ def _retrieve_remote(
 
     import re
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import load_json, format_inlet
+    from openghg.util import format_inlet
     from pandas import to_datetime
 
     if species is None:
@@ -289,9 +289,6 @@ def _retrieve_remote(
 
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
-
-    # TODO - move this to the supplementary info site, is it even needed?
-    site_metadata = load_json("icos_atmos_site_metadata.json", internal_data=True)
 
     standardised_data: Dict[str, Dict] = {}
 
@@ -377,10 +374,9 @@ def _retrieve_remote(
         metadata["station_longitude"] = str(loc_data["lon"])
         metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
 
-        site_specific = site_metadata[site.upper()]
-        metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
-        metadata["data_owner_email"] = site_specific["email"]
-        metadata["station_height_masl"] = format_inlet(site_specific["eas"], key_name="station_height_masl")
+        metadata["data_owner"] = f"{stat.firstName} {stat.lastName}"
+        metadata["data_owner_email"] = str(stat.email)
+        metadata["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
 
         metadata["citation_string"] = dobj_info["references"]["citationString"]
         metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
