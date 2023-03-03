@@ -93,7 +93,7 @@ def test_to_lowercase():
 def test_site_code_finder():
     assert site_code_finder("heathfield") == "hfd"
     assert site_code_finder("monte_cimone") == "cmn"
-    assert site_code_finder("cape verde") == "cvo"
+    assert site_code_finder("shangdianzi") == "sdz"
     assert site_code_finder("jungfraujoch") == "jfj"
 
     assert site_code_finder("nonsensical") is None
