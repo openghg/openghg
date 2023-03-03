@@ -42,7 +42,7 @@ def assign_attributes(
     """
     from openghg.standardise.meta import sync_surface_metadata
 
-    for key, gas_data in data.items():
+    for _, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
         species = gas_data["metadata"]["species"]
 
