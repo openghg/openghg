@@ -6,34 +6,30 @@ from openghg.types import optionalPathType
 __all__ = ["get_species_info", "synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
 
 
-def get_species_info(species_filename: optionalPathType = None) -> Dict[str, Any]:
-    """
-    Extract data from species info JSON file as a dictionary.
+def get_species_info(species_filepath: optionalPathType = None) -> Dict[str, Any]:
+    """Extract data from species info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/species_info JSON file by default.
 
     Args:
-        species_filename: Alternative species info file.
-
+        species_filepath: Alternative species info file.
     Returns:
         dict: Data from species JSON file
     """
     from openghg_defs import species_info_file
 
-    if species_filename is None:
-        species_info_json = load_json(species_info_file)
-    else:
-        species_info_json = load_json(species_filename)
+    fpath = species_info_file if species_filepath is None else species_filepath
 
-    return species_info_json
+    return load_json(path=fpath)
 
 
-def synonyms(species: str,
-             lower: bool = True,
-             allow_new_species: bool = True,
-             species_filename: optionalPathType = None) -> str:
-    """
-    Check to see if there are other names that we should be using for
+def synonyms(
+    species: str,
+    lower: bool = True,
+    allow_new_species: bool = True,
+    species_filepath: optionalPathType = None,
+) -> str:
+    """Check to see if there are other names that we should be using for
     a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11.
 
     Args:
@@ -42,7 +38,7 @@ def synonyms(species: str,
         allow_new_species : Return original value (may be lower case)
             if this (or a synonym) is not found in the database.
             If False, raise a ValueError.
-        species_filename: Alternative species info file. Defaults to openghg_defs input.
+        species_filepath: Alternative species info file. Defaults to openghg_defs input.
     Returns:
         str: Matched species string
 
@@ -51,7 +47,7 @@ def synonyms(species: str,
     and changed if needed.
     """
     # Load in the species data
-    species_data = get_species_info(species_filename)
+    species_data = get_species_info(species_filepath=species_filepath)
 
     # First test whether site matches keys (case insensitive)
     matched_strings = [k for k in species_data if k.upper() == species.upper()]
@@ -85,22 +81,19 @@ def synonyms(species: str,
 LifetimeType = Optional[Union[str, List[str]]]
 
 
-def species_lifetime(species: Union[str, None],
-                     species_filename: optionalPathType = None) -> LifetimeType:
-    """
-    Find species lifetime.
+def species_lifetime(species: Union[str, None], species_filepath: optionalPathType = None) -> LifetimeType:
+    """Find species lifetime.
     This can either be labelled as "lifetime" or "lifetime_monthly".
 
     Note: no species synonyms accepted yet
 
     Args:
         species : Species name e.g. "ch4" or "co2"
-        species_filename: Alternative species info file. Defaults to openghg_defs input.
-
+        species_filepath: Alternative species info file. Defaults to openghg_defs input.
     Returns:
         str / list / None : Extracted lifetime or None is no lifetime was present.
     """
-    species_data = get_species_info(species_filename)
+    species_data = get_species_info(species_filepath=species_filepath)
 
     if species is not None:
         species_label = synonyms(species, lower=False, allow_new_species=False)
@@ -123,18 +116,15 @@ def species_lifetime(species: Union[str, None],
 
 
 def check_lifetime_monthly(lifetime: LifetimeType) -> bool:
-    """
-    Check whether retrieved lifetime value represents monthly lifetimes.
+    """Check whether retrieved lifetime value represents monthly lifetimes.
     This checks whether lifetime is a list and contains 12 values.
 
     Args:
         lifetime : str or list representation of lifetime value
-
     Returns:
         bool : True of lifetime matches criteria for monthly data, False otherwise
-
-        Raises ValueError:
-            if lifetime is a list but does not contain exactly 12 entries, one for each month
+    Raises ValueError:
+        if lifetime is a list but does not contain exactly 12 entries, one for each month
     """
     if isinstance(lifetime, list):
         if len(lifetime) == 12:
@@ -145,20 +135,18 @@ def check_lifetime_monthly(lifetime: LifetimeType) -> bool:
         return False
 
 
-def molar_mass(species: str, species_filename: optionalPathType = None) -> float:
-    """
-    This function extracts the molar mass of a species.
+def molar_mass(species: str, species_filepath: optionalPathType = None) -> float:
+    """Extracts the molar mass of a species.
 
     Args:
         species : Species name
-        species_filename: Alternative species info file. Defaults to openghg_defs input.
-
+        species_filepath: Alternative species info file. Defaults to openghg_defs input.
     Returns:
         float : Molar mass of species
     """
-    species_data = get_species_info(species_filename)
+    species_data = get_species_info(species_filepath=species_filepath)
 
     species_label = synonyms(species, lower=False, allow_new_species=False)
-    molmass = float(species_data[species_label]['mol_mass'])
+    molmass = float(species_data[species_label]["mol_mass"])
 
     return molmass

@@ -20,7 +20,7 @@ def parse_openghg(
     calibration_scale: Optional[str] = None,
     data_owner: Optional[str] = None,
     data_owner_email: Optional[str] = None,
-    site_filename: optionalPathType = None,
+    site_filepath: optionalPathType = None,
     **kwargs: str,
 ) -> Dict:
     """
@@ -48,13 +48,13 @@ def parse_openghg(
             e.g. "WMOX2007"
         data_owner: Name of data owner.
         data_owner_email: Email address for data owner.
-        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         kwargs: Any additional attributes to be associated with the data.
     Returns:
         Dict: Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, format_inlet, load_json, get_site_info
+    from openghg.util import clean_string, format_inlet, load_internal_json, get_site_info
     from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
 
     data_filepath = Path(data_filepath)
@@ -141,7 +141,7 @@ def parse_openghg(
     network_case_options = [network, network.upper(), network.lower()]
 
     # Extract centralised data for site (if present)
-    site_data = get_site_info(site_filename=site_filename)
+    site_data = get_site_info(site_filepath=site_filepath)
     for site_value in site_case_options:
         if site_value in site_data:
             site_info_all = site_data[site_value]
@@ -181,7 +181,7 @@ def parse_openghg(
                         break
 
     # Load attributes data for network if present
-    param_data = load_json(filename="attributes.json", internal_data=True)
+    param_data = load_internal_json(filename="attributes.json")
     for network_value in network_case_options:
         if network_value in param_data:
             network_params = param_data[network_value]
@@ -208,6 +208,6 @@ def parse_openghg(
 
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
-    gas_data = assign_attributes(data=gas_data, site=site, network=network, site_filename=site_filename)
+    gas_data = assign_attributes(data=gas_data, site=site, network=network, site_filepath=site_filepath)
 
     return gas_data

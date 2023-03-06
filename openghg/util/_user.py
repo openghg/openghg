@@ -97,9 +97,12 @@ def create_config(silent: bool = False) -> None:
             print("Matching object store path, nothing to do.\n")
 
         # Some users may not have a user ID if they've used previous versions of OpenGHG
+        # Or if they UUID isn't valid a new one is created, the value of the UUID
+        # doesn't matter at the moment, it's not used for anything very important
         try:
             user_id = config["user_id"]
-        except KeyError:
+            uuid.UUID(user_id, version=4)
+        except (KeyError, ValueError):
             config["user_id"] = str(uuid.uuid4())
             updated = True
     else:
@@ -148,3 +151,30 @@ def read_local_config() -> Dict:
 
     config: Dict = toml.loads(config_path.read_text())
     return config
+
+
+def check_config() -> None:
+    """Check that the user config file is valid and the paths
+    given in it exist.
+
+    Returns:
+        bool
+    """
+    config_path = get_user_config_path()
+
+    if not config_path.exists():
+        logger.warning("Configuration file does not exist.")
+        create_config()
+
+    config = read_local_config()
+    uid = config["user_id"]
+    object_stores = config["object_store"]
+
+    try:
+        uuid.UUID(uid, version=4)
+    except ValueError:
+        logger.error("Invalid user ID. Please re-run quickstart to setup a valid config file.")
+
+    for path in object_stores.values():
+        if not Path(path).exists():
+            logger.info(f"{path} does not exist but will be created.")
