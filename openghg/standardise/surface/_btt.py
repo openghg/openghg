@@ -20,7 +20,7 @@ def parse_btt(
     """
     from numpy import nan as np_nan
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import clean_string, load_json, get_site_info, format_inlet
+    from openghg.util import clean_string, load_internal_json, get_site_info, format_inlet
     from pandas import Timestamp, isnull, read_csv, to_timedelta
 
     # TODO: Decide what to do about inputs which aren't use anywhere
@@ -40,7 +40,7 @@ def parse_btt(
     site_data = get_site_info()
     site_info = site_data[site][network]
 
-    param_data = load_json(filename="attributes.json")
+    param_data = load_internal_json(filename="attributes.json")
     network_params = param_data["BTT"]
     site_attributes = network_params["global_attributes"]
 

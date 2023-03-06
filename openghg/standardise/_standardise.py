@@ -3,6 +3,7 @@ from typing import Dict, List, Literal, Optional, Tuple, Union
 
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.util import running_on_hub
+from openghg.types import optionalPathType
 
 
 def standardise_surface(
@@ -14,6 +15,7 @@ def standardise_surface(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     calibration_scale: Optional[str] = None,
+    site_filepath: optionalPathType = None,
     overwrite: bool = False,
 ) -> Optional[Dict]:
     """Standardise surface measurements and store the data in the object store.
@@ -26,6 +28,8 @@ def standardise_surface(
         inlet: Inlet height in metres
         instrument: Instrument name
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         overwrite: Overwrite data currently present in the object store
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -36,6 +40,8 @@ def standardise_surface(
         filepaths = [filepaths]
 
     if running_on_hub():
+        # TODO: Use input for site_filepath here? How to include this?
+
         # To convert bytes to megabytes
         MB = 1e6
         # The largest file we'll just directly POST to the standardisation
@@ -118,6 +124,7 @@ def standardise_surface(
             instrument=instrument,
             sampling_period=sampling_period,
             inlet=inlet,
+            site_filepath=site_filepath,
             overwrite=overwrite,
         )
 
@@ -290,6 +297,9 @@ def standardise_flux(
     species: str,
     source: str,
     domain: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -331,6 +341,11 @@ def standardise_flux(
             "period": period,
         }
 
+        optional_keywords = {"database": database, "database_version": database_version, "model": model}
+        for key, value in optional_keywords.items():
+            if value is not None:
+                metadata[key] = value
+
         metadata = {k: v for k, v in metadata.items()}
 
         to_post = create_post_dict(
@@ -346,6 +361,9 @@ def standardise_flux(
             species=species,
             source=source,
             domain=domain,
+            database=database,
+            database_version=database_version,
+            model=model,
             high_time_resolution=high_time_resolution,
             period=period,
             continuous=continuous,

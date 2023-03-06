@@ -142,7 +142,21 @@ def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(filename: Optional[str] = None, path: Optional[Union[str, Path]] = None) -> Dict:
+def load_json(path: Union[str, Path]) -> Dict:
+    """Returns a dictionary deserialised from JSON.
+
+    Args:
+        path: Path to file, can be any filepath
+    Returns:
+        dict: Dictionary created from JSON
+    """
+    with open(path, "r") as f:
+        data: Dict[str, Any] = json.load(f)
+
+    return data
+
+
+def load_internal_json(filename: str) -> Dict:
     """Returns a dictionary deserialised from JSON. Pass filename to load data from JSON files in the
     openghg/data directory or pass a full filepath to path to load from any file.
 
@@ -152,19 +166,8 @@ def load_json(filename: Optional[str] = None, path: Optional[Union[str, Path]] =
     Returns:
         dict: Dictionary created from JSON
     """
-    from json import load
-
-    if filename is not None:
-        file_path = get_datapath(filename)
-    elif path is not None:
-        file_path = Path(path)
-    else:
-        raise ValueError("Please pass either filename or path")
-
-    with open(file_path, "r") as f:
-        data: Dict[str, Any] = load(f)
-
-    return data
+    file_path = get_datapath(filename=filename)
+    return load_json(path=file_path)
 
 
 def read_header(filepath: pathType, comment_char: str = "#") -> List:

@@ -47,7 +47,7 @@ def assign_attributes(
     """
     from openghg.standardise.meta import sync_surface_metadata
 
-    for key, gas_data in data.items():
+    for _, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
         species = gas_data["metadata"]["species"]
 
@@ -131,7 +131,7 @@ def get_attributes(
         site_filepath: Alternative site info file
         species_filepath: Alternative species info file
     """
-    from openghg.util import load_json, timestamp_now, get_species_info
+    from openghg.util import load_internal_json, timestamp_now, get_species_info
     from pandas import Timestamp as pd_Timestamp
 
     if not isinstance(ds, Dataset):
@@ -161,7 +161,7 @@ def get_attributes(
 
     # Load attributes files
     species_attrs = get_species_info()
-    attributes_data = load_json(filename="attributes.json")
+    attributes_data = load_internal_json(filename="attributes.json")
 
     unit_interpret = attributes_data["unit_interpret"]
     unit_mol_fraction = attributes_data["unit_mol_fraction"]
