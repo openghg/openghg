@@ -155,7 +155,7 @@ def read_local_config() -> Dict:
     return config
 
 
-def valid_config() -> bool:
+def check_config() -> bool:
     """Check that the user config file is valid and the paths
     given in it exist.
 
@@ -175,8 +175,7 @@ def valid_config() -> bool:
     try:
         uuid.UUID(uid, version=4)
     except ValueError:
-        return False
+        logger.error("Invalid user ID.")
 
     for path in object_stores.values():
-        if not Path(path).exists():
-            return False
+        raise NotImplementedError
