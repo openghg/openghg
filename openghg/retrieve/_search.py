@@ -331,6 +331,7 @@ def search_surface(
     data_source: Optional[str] = None,
     sampling_height: Optional[str] = None,
     icos_data_level: Optional[int] = None,
+    dataset_source: Optional[str] = None,
     **kwargs: Any,
 ) -> SearchResults:
     """Cloud object store search
@@ -350,6 +351,7 @@ def search_surface(
         argument only needs to be used to narrow the search to data solely from these sources.
         sampling_height: Sampling height of measurements
         icos_data_level: ICOS data level, see ICOS documentation
+        dataset_source: For ICOS data only: dataset source name, for example ICOS, InGOS, European ObsPack
         kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
@@ -384,6 +386,7 @@ def search_surface(
         network=network,
         sampling_height=sampling_height,
         icos_data_level=icos_data_level,
+        dataset_source=dataset_source,
         **kwargs,
     )
 

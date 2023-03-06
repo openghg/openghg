@@ -3,8 +3,13 @@ import logging
 from xarray import Dataset
 from openghg.types import optionalPathType
 
-__all__ = ["assign_attributes", "get_attributes", "define_species_label",
-           "assign_flux_attributes", "get_flux_attributes"]
+__all__ = [
+    "assign_attributes",
+    "get_attributes",
+    "define_species_label",
+    "assign_flux_attributes",
+    "get_flux_attributes",
+]
 
 logger = logging.getLogger("openghg.standardise")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -16,8 +21,8 @@ def assign_attributes(
     network: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
     update_metadata_mismatch: bool = False,
-    site_filename: optionalPathType = None,
-    species_filename: optionalPathType = None   
+    site_filepath: optionalPathType = None,
+    species_filepath: optionalPathType = None,
 ) -> Dict:
     """Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
     are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
@@ -34,15 +39,15 @@ def assign_attributes(
         network: Network name
         update_metadata_mismatch: If current metadata does not match to attributes
             update metadata.
-        site_filename: Alternative site info file
-        species_filename: Alternative species info file
+        site_filepath: Alternative site info file
+        species_filepath: Alternative species info file
 
     Returns:
         dict: Dictionary of combined data with correct attributes assigned to Datasets
     """
     from openghg.standardise.meta import sync_surface_metadata
 
-    for key, gas_data in data.items():
+    for _, gas_data in data.items():
         site_attributes = gas_data.get("attributes", {})
         species = gas_data["metadata"]["species"]
 
@@ -66,8 +71,8 @@ def assign_attributes(
             scale=scale,
             global_attributes=site_attributes,
             sampling_period=sampling_period,
-            site_filename=site_filename,
-            species_filename=species_filename
+            site_filepath=site_filepath,
+            species_filepath=species_filepath,
         )
 
         measurement_data = gas_data["data"]
@@ -75,9 +80,9 @@ def assign_attributes(
 
         attrs = measurement_data.attrs
 
-        gas_data["metadata"] = sync_surface_metadata(metadata=metadata,
-                                                     attributes=attrs,
-                                                     update_mismatch=update_metadata_mismatch)
+        gas_data["metadata"] = sync_surface_metadata(
+            metadata=metadata, attributes=attrs, update_mismatch=update_metadata_mismatch
+        )
 
     return data
 
@@ -92,8 +97,8 @@ def get_attributes(
     scale: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
     date_range: Optional[List[str]] = None,
-    site_filename: optionalPathType = None,
-    species_filename: optionalPathType = None
+    site_filepath: optionalPathType = None,
+    species_filepath: optionalPathType = None,
 ) -> Dataset:
     """
     This function writes attributes to an xarray.Dataset so that they conform with
@@ -123,10 +128,10 @@ def get_attributes(
         date_range: Start and end date for output
             If you only want an end date, just put a very early start date
             (e.g. ["1900-01-01", "2010-01-01"])
-        site_filename: Alternative site info file
-        species_filename: Alternative species info file
+        site_filepath: Alternative site info file
+        species_filepath: Alternative species info file
     """
-    from openghg.util import load_json, timestamp_now, get_species_info
+    from openghg.util import load_internal_json, timestamp_now, get_species_info
     from pandas import Timestamp as pd_Timestamp
 
     if not isinstance(ds, Dataset):
@@ -156,7 +161,7 @@ def get_attributes(
 
     # Load attributes files
     species_attrs = get_species_info()
-    attributes_data = load_json("attributes.json", internal_data=True)
+    attributes_data = load_internal_json(filename="attributes.json")
 
     unit_interpret = attributes_data["unit_interpret"]
     unit_mol_fraction = attributes_data["unit_mol_fraction"]
@@ -164,7 +169,7 @@ def get_attributes(
 
     # Extract both label to use for species and key for attributes
     # Typically species_label will be the lower case version of species_key
-    species_label, species_key = define_species_label(species, species_filename)
+    species_label, species_key = define_species_label(species, species_filepath)
 
     species_rename = {}
     for var in matched_keys:
@@ -204,7 +209,7 @@ def get_attributes(
     ds.attrs.update(global_attributes)  # type: ignore
 
     # Add some site attributes
-    site_attributes = _site_info_attributes(site.upper(), network, site_filename)
+    site_attributes = _site_info_attributes(site.upper(), network, site_filepath)
     ds.attrs.update(site_attributes)
 
     # Species-specific attributes
@@ -319,10 +324,8 @@ def get_attributes(
     return ds
 
 
-def define_species_label(species: str,
-                         species_filename: optionalPathType = None) -> Tuple[str, str]:
-    """
-    Define standardised label to use for observation datasets.
+def define_species_label(species: str, species_filepath: optionalPathType = None) -> Tuple[str, str]:
+    """Define standardised label to use for observation datasets.
     This uses the data stored within openghg_defs/data/site_info JSON file
     by default with alternative names ('alt') defined within.
 
@@ -337,13 +340,11 @@ def define_species_label(species: str,
 
     Args:
         species : Species name.
-        species_filename : Alternative species info file.
-
+        species_filepath : Alternative species info file.
     Returns:
         str, str: Both the species label to be used exactly and the original attribute
                   key needed to extract additional data from the 'site_info.json'
                   attributes file.
-
     Example:
         >>> define_species_label("methane")
             ("ch4", "CH4")
@@ -354,15 +355,13 @@ def define_species_label(species: str,
         >>> define_species_label("CH4C13")
             ("dch4c13", "DCH4C13")
     """
-
     from openghg.util import clean_string, synonyms
 
     # Extract species label using synonyms function
     try:
-        species_label = synonyms(species,
-                                 lower=False,
-                                 allow_new_species=False,
-                                 species_filename=species_filename)
+        species_label = synonyms(
+            species, lower=False, allow_new_species=False, species_filepath=species_filepath
+        )
     except ValueError:
         species_underscore = species.replace(" ", "_")
         species_remove_dash = species_underscore.replace("-", "")
@@ -373,9 +372,9 @@ def define_species_label(species: str,
     return species_label_lower, species_label
 
 
-def _site_info_attributes(site: str,
-                          network: Optional[str] = None,
-                          site_filename: optionalPathType = None) -> Dict:
+def _site_info_attributes(
+    site: str, network: Optional[str] = None, site_filepath: optionalPathType = None
+) -> Dict:
     """Reads site attributes from JSON
 
     This uses the data stored within openghg_defs/data/site_info JSON file by default.
@@ -383,7 +382,7 @@ def _site_info_attributes(site: str,
     Args:
         site: Site code
         network: Network name
-        site_filename: Alternative site info file
+        site_filepath: Alternative site info file
     Returns:
         dict: Dictionary of site attributes
     """
@@ -392,7 +391,7 @@ def _site_info_attributes(site: str,
     site = site.upper()
 
     # Read site info file
-    site_data = get_site_info(site_filename)
+    site_data = get_site_info(site_filepath)
 
     if network is None:
         network = next(iter(site_data[site]))

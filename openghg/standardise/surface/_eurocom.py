@@ -23,7 +23,7 @@ def parse_eurocom(
         dict: Dictionary of measurement data
     """
     from openghg.standardise.meta import assign_attributes, get_attributes
-    from openghg.util import load_json, read_header, format_inlet
+    from openghg.util import load_internal_json, read_header, format_inlet
     from pandas import Timestamp, read_csv
 
     data_filepath = Path(data_filepath)
@@ -97,7 +97,7 @@ def parse_eurocom(
     # Convert to xarray Dataset
     data = data.to_xarray()
 
-    attributes_data = load_json(filename="attributes.json")
+    attributes_data = load_internal_json(filename="attributes.json")
     eurocom_attributes = attributes_data["EUROCOM"]
     global_attributes = eurocom_attributes["global_attributes"]
 
