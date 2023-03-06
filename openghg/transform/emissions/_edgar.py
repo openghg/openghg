@@ -94,7 +94,7 @@ def parse_edgar(
     else:
         zipped = False
 
-    known_version = _edgar_known_versions()
+    known_versions = _edgar_known_versions()
 
     # Check readme file for edgar version (if not specified)
     if zipped and edgar_version is None:
@@ -149,11 +149,17 @@ def parse_edgar(
     # If version not yet found, extract version from file naming scheme
     if edgar_version is None:
         possible_version = db_info["version"]
-        if possible_version in known_version:
-            edgar_version = possible_version
+        possible_version_clean = clean_string(possible_version)
+        if possible_version_clean in known_versions:
+            edgar_version = possible_version_clean
 
-    if edgar_version not in known_version:
-        raise ValueError(f"Unable to infer EDGAR version ({edgar_version})." " Please pass as an argument")
+    edgar_version = clean_string(edgar_version)
+
+    if edgar_version not in known_versions:
+        if edgar_version is None:
+            raise ValueError(f"Unable to infer EDGAR version ({edgar_version})." f" Please pass as an argument (one of {known_versions})")
+        else:
+            raise ValueError(f"Unable to infer EDGAR version." f" Please pass as an argument (one of {known_versions})")
 
     # TODO: May want to split out into a separate function, so we can use this for
     # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
@@ -462,8 +468,8 @@ def _check_lat_lon(
 
 def _edgar_known_versions() -> list:
     """Define list of known versions for the EDGAR database"""
-    known_version = ["v432", "v50", "v6.0"]
-    return known_version
+    known_versions = ["v432", "v50", "v60"]
+    return known_versions
 
 
 def _check_readme_version(
@@ -521,8 +527,8 @@ def _check_readme_version(
             pass
         else:
             # Check against known versions and remove '.' if these don't match.
-            known_version = _edgar_known_versions()
-            if edgar_version not in known_version:
+            known_versions = _edgar_known_versions()
+            if edgar_version not in known_versions:
                 edgar_version = edgar_version.replace(".", "")
     else:
         edgar_version = None

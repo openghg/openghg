@@ -141,7 +141,7 @@ def test_read_obspack_tower_multi_height():
     parsed_surface_metachecker(data=data)
 
 
-def test_read_file_site_filename_read(scsn06_data):
+def test_read_file_site_filepath_read(scsn06_data):
     ch4_data = scsn06_data["ch4"]["data"]
 
     assert ch4_data.time[0] == Timestamp("1991-07-05T17:00:00")
@@ -164,7 +164,7 @@ def test_read_file_site_filename_read(scsn06_data):
 
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
-def test_noaa_site_filename_cf_compliance(scsn06_data):
+def test_noaa_site_filepath_cf_compliance(scsn06_data):
     ch4_data = scsn06_data["ch4"]["data"]
 
     assert check_cf_compliance(dataset=ch4_data)

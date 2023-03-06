@@ -77,7 +77,6 @@ def test_ceda_retrieve(mocker):
         "inlet_height_magl": 100.0,
         "Conventions": "CF-1.6",
         "Conditions of use": "Ensure that you contact the data owner at the outset of your project.",
-        "File created": "2018-10-22 16:05:33.492535",
         "station_long_name": "Heathfield, UK",
         "station_height_masl": 150.0,
         "station_latitude": 50.97675,
@@ -88,7 +87,7 @@ def test_ceda_retrieve(mocker):
         "data_source": "ceda_archive",
         "network": "CEDA_RETRIEVED",
         "sampling_period": "NA",
-        "site": "HFD",
+        "site": "hfd",
         "inlet": "100m",
     }
 

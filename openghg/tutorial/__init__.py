@@ -11,7 +11,6 @@ from ._tutorial import (
     retrieve_example_data,
     clear_example_cache,
     example_extract_path,
-    bilsdale_datapaths,
     use_tutorial_store,
     unpack_example_archive,
 )

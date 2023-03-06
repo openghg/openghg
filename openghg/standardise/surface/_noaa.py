@@ -3,6 +3,8 @@ from typing import Any, Dict, Hashable, Optional, Union, cast
 import logging
 import xarray as xr
 
+from openghg.types import optionalPathType
+
 logger = logging.getLogger("openghg.standardise.surface")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
@@ -15,6 +17,7 @@ def parse_noaa(
     network: str = "NOAA",
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
+    site_filepath: optionalPathType = None,
     **kwarg: Dict,
 ) -> Dict:
     """Read NOAA data from raw text file or ObsPack NetCDF
@@ -27,6 +30,8 @@ def parse_noaa(
         network: Network, defaults to NOAA
         instrument: Instrument name
         sampling_period: Sampling period
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of data and metadata
     """
@@ -45,6 +50,7 @@ def parse_noaa(
             measurement_type=measurement_type,
             instrument=instrument,
             sampling_period=sampling_period,
+            site_filepath=site_filepath,
         )
     else:
         return _read_raw_file(
@@ -54,6 +60,7 @@ def parse_noaa(
             measurement_type=measurement_type,
             instrument=instrument,
             sampling_period=sampling_period,
+            site_filepath=site_filepath,
         )
 
 
@@ -262,6 +269,7 @@ def _read_obspack(
     measurement_type: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
+    site_filepath: optionalPathType = None,
 ) -> Dict[str, Dict]:
     """Read NOAA ObsPack NetCDF files
 
@@ -272,7 +280,8 @@ def _read_obspack(
         measurement_type: One of flask, insitu or pfp
         inlet: Inlet height, if no height use measurement type e.g. flask
         instrument: Instrument name
-
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of results
     """
@@ -378,7 +387,7 @@ def _read_obspack(
 
     gas_data = _split_inlets(processed_ds, attributes, metadata, inlet=inlet)
 
-    gas_data = assign_attributes(data=gas_data, site=site, network=network)
+    gas_data = assign_attributes(data=gas_data, site=site, network=network, site_filepath=site_filepath)
 
     return gas_data
 
@@ -390,6 +399,7 @@ def _read_raw_file(
     measurement_type: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
+    site_filepath: optionalPathType = None,
 ) -> Dict:
     """Reads NOAA data files and returns a dictionary of processed
     data and metadata.
@@ -401,6 +411,8 @@ def _read_raw_file(
         measurement_type: One of flask, insitu or pfp
         inlet: Inlet height, if no height use measurement type e.g. flask
         instrument: Instrument name
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
 
     Returns:
         list: UUIDs of Datasources data has been assigned to
@@ -428,7 +440,7 @@ def _read_raw_file(
         sampling_period=sampling_period,
     )
 
-    gas_data = assign_attributes(data=gas_data, site=site, network="NOAA")
+    gas_data = assign_attributes(data=gas_data, site=site, network="NOAA", site_filepath=site_filepath)
 
     return gas_data
 
@@ -452,7 +464,7 @@ def _read_raw_data(
     Returns:
         dict: Dictionary containing attributes, data and metadata keys
     """
-    from openghg.util import clean_string, load_json, read_header, get_site_info
+    from openghg.util import clean_string, read_header, get_site_info, load_internal_json
     from pandas import Timestamp, read_csv
 
     header = read_header(filepath=data_filepath)
@@ -563,7 +575,7 @@ def _read_raw_data(
     data = data.to_xarray()
 
     # TODO  - this could do with a better name
-    noaa_params = load_json("attributes.json", internal_data=True)["NOAA"]
+    noaa_params = load_internal_json(filename="attributes.json")["NOAA"]
 
     site_attributes = noaa_params["global_attributes"]
     site_attributes["inlet_height_magl"] = "NA"
