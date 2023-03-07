@@ -9,44 +9,39 @@ from openghg.types import optionalPathType, ArrayLikeMatch, ArrayLike, XrDataLik
 __all__ = ["get_domain_info", "find_domain", "convert_longitude"]
 
 
-def get_domain_info(domain_filename: optionalPathType = None) -> Dict[str, Any]:
-    """
-    Extract data from domain info JSON file as a dictionary.
+def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
+    """Extract data from domain info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/domain_info JSON file by default.
 
     Args:
-        domain_filename: Alternative domain info file.
-
+        domain_filepath: Alternative domain info file.
     Returns:
         dict: Data from domain JSON file
     """
     from openghg_defs import domain_info_file
     from openghg.util import load_json
 
-    if domain_filename is None:
-        domain_info_json = load_json(domain_info_file)
+    if domain_filepath is None:
+        domain_info_json = load_json(path=domain_info_file)
     else:
-        domain_info_json = load_json(domain_filename)
+        domain_info_json = load_json(path=domain_filepath)
 
     return domain_info_json
 
 
-def find_domain(domain: str,
-                domain_filename: optionalPathType = None) -> Tuple[ndarray, ndarray]:
-    """
-    Finds the latitude and longitude values in degrees associated
+def find_domain(domain: str, domain_filepath: optionalPathType = None) -> Tuple[ndarray, ndarray]:
+    """Finds the latitude and longitude values in degrees associated
     with a given domain name.
 
     Args:
         domain: Pre-defined domain name
-        domain_filename: Alternative domain info file. Defaults to openghg_defs input.
-
+        domain_filepath: Alternative domain info file. Defaults to openghg_defs input.
     Returns:
         array, array : Latitude and longitude values for the domain in degrees.
     """
 
-    domain_info = get_domain_info(domain_filename)
+    domain_info = get_domain_info(domain_filepath)
 
     # Look for domain in domain_info file
     if domain in domain_info:
@@ -65,8 +60,7 @@ def find_domain(domain: str,
 
 
 def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
-    """
-    Attempts to extract or derive coordinate (typically latitude/longitude)
+    """Attempts to extract or derive coordinate (typically latitude/longitude)
     values for a domain from provided data dictionary (typically
     this can be derived from 'domain_info.json' file).
 
@@ -84,7 +78,6 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
         data: Data dictionary containing details of domain
               (e.g. derived from 'domain_info.json')
         domain: Name of domain
-
     Returns:
         array: Extracted or derived coordinate values
     """
@@ -126,31 +119,6 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     return coord_data
 
 
-# def convert_longitude(
-#     longitude: ndarray, return_index: bool = False
-# ) -> Union[ndarray, Tuple[ndarray, ndarray]]:
-#     """
-#     Convert longitude extent to -180 - 180 and reorder.
-
-#     Args:
-#         longitude: Array of valid longitude values in degrees.
-#         return_index: Return re-ordering index as well as updated longitude
-
-#     Returns:
-#         ndarray(, ndarray) : Updated longitude values and new indices if requested.
-#     """
-#     # Check range of longitude values and convert to -180 - +180
-#     mtohe = longitude > 180
-#     longitude[mtohe] = longitude[mtohe] - 360
-#     ordinds = np.argsort(longitude)
-#     longitude = longitude[ordinds]
-
-#     if return_index:
-#         return longitude, ordinds
-#     else:
-#         return longitude
-
-
 def find_coord_name(data: XrDataLike, options: List[str]) -> Optional[str]:
     """
     Find the name of a coordinate based on input options.
@@ -180,7 +148,6 @@ def convert_longitude(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
 
     Args:
         longitude: Valid longitude values in degrees.
-
     Returns:
         ndarray / DataArray : Updated longitude values in the same order.
     """

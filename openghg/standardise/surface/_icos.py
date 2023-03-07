@@ -17,7 +17,7 @@ def parse_icos(
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
     header_type: str = "large",
-    site_filename: optionalPathType = None,
+    site_filepath: optionalPathType = None,
     **kwargs: Dict,
 ) -> Dict:
     """Parses an ICOS data file and creates a dictionary containing the Dataset and metadata
@@ -32,7 +32,7 @@ def parse_icos(
         measurement_type: Measurement type e.g. insitu, flask
         header_type: ICOS data file with large (40 line) header or shorter single line header
             Options: large, small
-        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of gas data
@@ -76,10 +76,9 @@ def parse_icos(
         )
 
     # Ensure the data is CF compliant
-    gas_data = assign_attributes(data=gas_data,
-                                 site=site,
-                                 sampling_period=sampling_period,
-                                 site_filename=site_filename)
+    gas_data = assign_attributes(
+        data=gas_data, site=site, sampling_period=sampling_period, site_filepath=site_filepath
+    )
 
     return gas_data
 

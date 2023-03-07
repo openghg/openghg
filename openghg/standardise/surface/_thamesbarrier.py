@@ -12,7 +12,7 @@ def parse_tmb(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
-    site_filename: optionalPathType = None,
+    site_filepath: optionalPathType = None,
     **kwargs: Dict,
 ) -> Dict:
     """Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
@@ -26,7 +26,7 @@ def parse_tmb(
         instrument: Instrument name
         sampling_period: Sampling period
         measurement_type: Type of measurement taken e.g."flask", "insitu"
-        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         list: UUIDs of Datasources data has been assigned to
@@ -34,10 +34,10 @@ def parse_tmb(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import (
         clean_string,
-        load_json,
         get_site_info,
         format_inlet,
         synonyms,
+        load_internal_json,
     )
     from pandas import read_csv as pd_read_csv
 
@@ -62,16 +62,18 @@ def parse_tmb(
     site_upper = site.upper()
     network_upper = network.upper()
 
-    attributes_data = load_json(filename="attributes.json", internal_data=True)
+    attributes_data = load_internal_json(filename="attributes.json")
     tb_params = attributes_data[site_upper]
 
     site_data = get_site_info()
-    site_info = site_data[site_upper][network_upper]    
+    site_info = site_data[site_upper][network_upper]
 
     try:
         site_inlet_values = site_info["height"]
     except KeyError:
-        raise ValueError(f"Unable to extract inlet height details for site '{site}'. Please input inlet value.")
+        raise ValueError(
+            f"Unable to extract inlet height details for site '{site}'. Please input inlet value."
+        )
 
     inlet = format_inlet(inlet)
     if inlet is None:
@@ -125,6 +127,6 @@ def parse_tmb(
             "attributes": attributes,
         }
 
-    gas_data = assign_attributes(data=gas_data, site=site, site_filename=site_filename)
+    gas_data = assign_attributes(data=gas_data, site=site, site_filepath=site_filepath)
 
     return gas_data
