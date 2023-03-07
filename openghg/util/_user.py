@@ -2,7 +2,6 @@ import logging
 import os
 import platform
 from pathlib import Path
-import pprint
 from typing import Dict
 import uuid
 import toml
@@ -76,16 +75,16 @@ def create_config(silent: bool = False) -> None:
     # of the user ID
     if user_config_path.exists():
         if silent:
-            print("Error: cannot overwrite an existing configuration. Please run quickstart.")
+            logger.error("Error: cannot overwrite an existing configuration. Please run interactively.")
             return
 
-        print(f"User config exists at {str(user_config_path)}, checking...")
+        logger.info(f"User config exists at {str(user_config_path)}, checking...")
 
         config = toml.loads(user_config_path.read_text())
 
         objstore_path_config = Path(config["object_store"]["local_store"])
 
-        print(f"Current object store path: {objstore_path_config}")
+        logger.info(f"Current object store path: {objstore_path_config}")
         update_input = input("Would you like to update the path? (y/n): ")
         if update_input.lower() in ("y", "yes"):
             new_path_input = input("Enter new path for object store: ")
@@ -94,7 +93,7 @@ def create_config(silent: bool = False) -> None:
             config["object_store"]["local_store"] = str(new_path)
             updated = True
         else:
-            print("Matching object store path, nothing to do.\n")
+            logger.info("Matching object store path, nothing to do.\n")
 
         # Some users may not have a user ID if they've used previous versions of OpenGHG
         # Or if they UUID isn't valid a new one is created, the value of the UUID
@@ -122,17 +121,13 @@ def create_config(silent: bool = False) -> None:
 
         obj_store_path.mkdir(exist_ok=True)
 
-        print(f"Creating config at {str(user_config_path)}\n")
+        logger.info(f"Creating config at {str(user_config_path)}\n")
 
     if updated:
-        pp = pprint.PrettyPrinter(width=50, compact=True)
-        print("Writing configuration:\n")
-        pp.pprint(config)
-        print("\n")
-
+        logger.info(f"Configuration written to {user_config_path}")
         user_config_path.write_text(toml.dumps(config))
     else:
-        print("Configuration unchanged.")
+        logger.info("Configuration unchanged.")
 
 
 # @lru_cache
@@ -173,7 +168,8 @@ def check_config() -> None:
     try:
         uuid.UUID(uid, version=4)
     except ValueError:
-        logger.error("Invalid user ID. Please re-run quickstart to setup a valid config file.")
+        logger.exception("Invalid user ID. Please re-run quickstart to setup a valid config file.")
+        raise
 
     for path in object_stores.values():
         if not Path(path).exists():

@@ -57,13 +57,7 @@ from ._time import (
     trim_daterange,
     valid_daterange,
 )
-from ._user import (
-    create_config,
-    get_user_id,
-    get_user_config_path,
-    read_local_config,
-    get_default_objectstore_path,
-)
+from ._user import create_config, get_user_id, get_user_config_path, read_local_config, check_config
 from ._util import (
     find_matching_site,
     multiple_inlets,
