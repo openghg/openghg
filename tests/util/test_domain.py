@@ -61,18 +61,6 @@ def test_convert_longitude(lon_in, expected_lon_out):
     np.testing.assert_allclose(lon_out, expected_lon_out)
 
 
-@pytest.mark.parametrize("lon_in,expected_lon_out",
-                         [(np.array([360.0]), np.array([0.0])),
-                          (np.array([181.0]), np.array([-179.0])),
-                          (np.array([-180.0, 0.0, 179.9]), np.array([-180.0, 0.0, 179.9])),
-                          (np.arange(180,361,1), np.arange(-180,1,1)),
-                         ])
-def test_convert_longitude(lon_in, expected_lon_out):
-    """Test expected longitude conversion for individual values and range."""
-    lon_out = convert_longitude(lon_in)
-    np.testing.assert_allclose(lon_out, expected_lon_out)
-
-
 @pytest.mark.parametrize("lon_start,lon_stop,expected_lon_start,expected_lon_stop",
                          [(0, 360, -180, 180),
                           (-180, 180, -180, 180),
