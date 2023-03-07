@@ -4,7 +4,7 @@ import numpy as np
 import xarray as xr
 from numpy import ndarray
 
-from openghg.types import construct_xesmf_import_error
+from openghg.types import construct_xesmf_import_error, ArrayLike, ArrayLikeMatch
 
 
 def _getGridCC(lat: ndarray, lon: ndarray) -> Tuple[ndarray, ndarray]:
@@ -56,12 +56,6 @@ def convert_to_ndarray(array: Union[ndarray, xr.DataArray]) -> ndarray:
         values = array
 
     return values
-
-
-# Create types for ndarray or xr.DataArray inputs
-# Using TypeVar means - whichever type is passed in will be the one which is returned.
-ArrayLikeMatch = TypeVar("ArrayLikeMatch", np.ndarray, xr.DataArray)
-ArrayLike = Union[ndarray, xr.DataArray]
 
 
 def regrid_uniform_cc(
@@ -186,7 +180,9 @@ def regrid_uniform_cc(
         # regridded = regridded.assign_coords(**{"x":output_lat,"y":output_lon})
         # regridded = regridded.rename({"x":"lat","y":"lon"})
 
-    regridder.clean_weight_file()
+    # # In later versions of xesmf (0.7?) this no longer seems to be needed
+    # # as weight files are not stored on disk.
+    # regridder.clean_weight_file()
 
     return regridded
 
