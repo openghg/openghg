@@ -267,7 +267,7 @@ def parse_edgar(
     if lat_name is None or lon_name is None:
         raise ValueError(f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
                           " Please check this is a 2D grid map."
-    )
+                        )
 
     # Check range of longitude values and convert to -180 - +180
     flux_da = convert_internal_longitude(flux_da, lon_name=lon_name)
