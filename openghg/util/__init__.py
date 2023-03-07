@@ -2,7 +2,14 @@
     Utility functions for OpenGHG
 """
 from ._cli import cli
-from ._domain import get_domain_info, convert_longitude, find_domain
+from ._domain import (
+    get_domain_info,
+    find_domain,
+    find_coord_name,
+    convert_longitude,
+    convert_internal_longitude,
+    cut_data_extent,
+)
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import (

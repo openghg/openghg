@@ -26,4 +26,8 @@ from ._types import (
     pathType,
     optionalPathType,
     resultsType,
+    ArrayLike,
+    ArrayLikeMatch,
+    XrDataLike,
+    XrDataLikeMatch,
 )
