@@ -1,6 +1,7 @@
 
 from typing import Optional
 
+
 class OpenGHGError(Exception):
     """Top level OpenGHG error"""
 
@@ -56,5 +57,5 @@ def construct_xesmf_import_error(exception: Optional[str] = None) -> str:
 
     if exception:
         xesmf_error_message = f"{xesmf_error_message} Full error returned: {exception}"
-    
+
     return xesmf_error_message

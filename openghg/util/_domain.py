@@ -1,8 +1,7 @@
-from typing import Any, Dict, Tuple, List, Union, Optional
+from typing import Any, Dict, Tuple, List, Optional
 
 import numpy as np
 from numpy import ndarray
-from xarray import DataArray, Dataset
 
 from openghg.types import optionalPathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
 
@@ -127,7 +126,7 @@ def find_coord_name(data: XrDataLike, options: List[str]) -> Optional[str]:
     Args:
         data: xarray Data structure
         options: List of options to check. Will be checked in order.
-    
+
     Returns:
         str / None: Name of coordinate if located within data. None otherwise.
     """
@@ -174,7 +173,7 @@ def convert_internal_longitude(data: XrDataLikeMatch,
         lon_name = find_coord_name(data, lon_options)
         if lon_name is None:
             raise ValueError("Please specify 'lon_name'.")
-    
+
     longitude = data[lon_name]
     longitude = convert_longitude(longitude)
 
@@ -215,7 +214,7 @@ def cut_data_extent(data: XrDataLikeMatch,
         lat_name = find_coord_name(data, lat_options)
         if lat_name is None:
             raise ValueError("Please specify 'lat_name'.")
-    
+
     if lon_name is None:
         lon_options = ["lon", "longitude"]
         lon_name = find_coord_name(data, lon_options)

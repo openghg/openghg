@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, TypeVar, Union, cast
+from typing import Optional, Tuple, Union, cast
 
 import numpy as np
 import xarray as xr
