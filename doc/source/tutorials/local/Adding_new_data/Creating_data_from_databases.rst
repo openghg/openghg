@@ -66,8 +66,9 @@ provide:
 -  edgar_version - specify this if this cannot be extracted from the
    database provided
 
-**How do we find out which domains are available and what they mean?
-Need a checker function?**
+
+*Checker function for seeing which pre-existing domains are present will
+be added soon.*
 
 *Note: for creating new domains this currently relies on the xesmf
 package which is better installed in a conda environment than using pip.
@@ -98,15 +99,14 @@ We can then check the data has been added to the object store.
 
 .. code:: python
 
-   from openghg.retrieve import search_emissions
+   from openghg.retrieve import search_flux
 
-   results = search_emissions(database="edgar")
+   results = search_flux(database="edgar")
 
    results.results
 
-2. 
 
-Adding new options
+2. Adding new options
 ------------------
 
 Transformation workflow
@@ -114,7 +114,7 @@ Transformation workflow
 
 Within OpenGHG, there are multiple ways to add data to the object store.
 The most direct way is to use a standardisation functions already
-introduced ([see here] - add link to previous tutorial pages) which can
+introduced which can
 be used to convert from an understood format (``source_format``) into
 the standardised openghg format and add this to the database. The other
 way is to use the tranformation workflow which extracts a subset /
