@@ -234,14 +234,7 @@ def get_obs_surface_local(
     """
     import numpy as np
     from openghg.retrieve import search_surface
-    from openghg.util import (
-        clean_string,
-        format_inlet,
-        load_json,
-        synonyms,
-        timestamp_tzaware,
-        get_site_info
-    )
+    from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware, get_site_info
     from pandas import Timedelta
 
     if running_on_hub():
@@ -390,9 +383,13 @@ def get_obs_surface_local(
         ].median()
 
         # Create attributes for variability variable
-        ds_resampled[f"{species}_variability"].attrs["long_name"] = f"{data.attrs['long_name']}_variability"
+        if "long_name" in data.attrs:
+            ds_resampled[f"{species}_variability"].attrs[
+                "long_name"
+            ] = f"{data.attrs['long_name']}_variability"
 
-        ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
+        if "units" in data[species].attrs:
+            ds_resampled[f"{species}_variability"].attrs["units"] = data[species].attrs["units"]
 
         # Resampling may introduce NaNs, so remove, if not keep_missing
         if keep_missing is False:
