@@ -2,7 +2,6 @@ import glob
 import json
 import os
 import threading
-import warnings
 from pathlib import Path
 import shutil
 from typing import Dict, List, Optional, Union
@@ -239,22 +238,9 @@ def get_bucket() -> str:
     Returns:
         str: Path to object store
     """
-    import os
-
     tutorial_store = os.getenv("OPENGHG_TMP_STORE")
     if tutorial_store is not None:
         return str(get_tutorial_store_path())
-
-    openghg_env = os.getenv("OPENGHG_PATH")
-    if openghg_env is not None:
-        warnings.warn(
-            "Use of the OPENGHG_PATH environment variable is deprecated and will be ignored in coming versions."
-            + "If you want to set a specific object"
-            + " store path please use the configuration file. See docs.openghg.org/install",
-            category=DeprecationWarning,
-        )
-
-        return openghg_env
 
     local_store = get_local_objectstore_path()
 
