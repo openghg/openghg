@@ -158,8 +158,7 @@ def check_config() -> None:
     config_path = get_user_config_path()
 
     if not config_path.exists():
-        logger.warning("Configuration file does not exist.")
-        create_config()
+        logger.warning("Configuration file does not exist. Please create it by running openghg --quickstart.")
 
     config = read_local_config()
     uid = config["user_id"]
