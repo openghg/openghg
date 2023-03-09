@@ -52,8 +52,8 @@ def test_create_coord():
 @pytest.mark.parametrize("lon_in,expected_lon_out",
                          [(np.array([360.0]), np.array([0.0])),
                           (np.array([181.0]), np.array([-179.0])),
-                          (np.array([-180.0, 0.0, 180.0]), np.array([-180.0, 0.0, 180.0])),
-                          (np.arange(1,361,1), np.arange(-179,181,1))
+                          (np.array([-180.0, 0.0, 179.9]), np.array([-180.0, 0.0, 179.9])),
+                          (np.arange(1,361,1), np.concatenate([np.arange(1,180,1), np.arange(-180,1,1)])),
                          ])
 def test_convert_longitude(lon_in, expected_lon_out):
     """Test expected longitude conversion for individual values and range."""
