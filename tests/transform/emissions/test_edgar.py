@@ -82,6 +82,7 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
     assert metadata.items() >= expected_metadata.items()
 
 
+@pytest.mark.xesmf
 def test_parse_edgar_domain():
     """
     Test EDGAR output can be created for a pre-existing domain.
@@ -137,6 +138,7 @@ def test_parse_edgar_domain():
     assert metadata.items() >= expected_metadata.items()
 
 
+@pytest.mark.xesmf
 def test_parse_edgar_new_domain():
     """
     Test EDGAR can be resampled to new, specified domain.
