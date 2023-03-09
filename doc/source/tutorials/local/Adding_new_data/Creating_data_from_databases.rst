@@ -95,6 +95,8 @@ provided is v6.0, annual, global and for methane.
 
    Emissions.transform_data(edgar_datapath, database, date=2014, domain="EUROPE", species="ch4")
 
+*Note: this can take a few minutes to complete.*
+
 We can then check the data has been added to the object store.
 
 .. code:: python

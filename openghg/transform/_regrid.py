@@ -24,27 +24,43 @@ def _getGridCC(lat: ndarray, lon: ndarray) -> Tuple[ndarray, ndarray]:
     return LON, LAT
 
 
-def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -> xr.Dataset:
+# def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -> xr.Dataset:
+#     """
+#     Creates a Dataset ready to be used by the xesmf regridder from 1D arrays
+#     of latitude and longitude values.
+
+#     This includes both the centre points and bounds of the latitude and longitude
+#     grids (needed for conservative regridding methods but not for bilinear etc.)
+#     """
+#     LON, LAT = np.meshgrid(lon, lat)
+#     LON_b, LAT_b = _getGridCC(lat, lon)
+
+#     grid = xr.Dataset(
+#         {
+#             "lon": (["x", "y"], LON),
+#             "lat": (["x", "y"], LAT),
+#             "lon_b": (["x_b", "y_b"], LON_b),
+#             "lat_b": (["x_b", "y_b"], LAT_b),
+#         }
+#     )
+
+#     return grid
+
+
+def _create_uniform_coords(lat: ndarray, lon: ndarray) -> xr.Dataset:
     """
     Creates a Dataset ready to be used by the xesmf regridder from 1D arrays
     of latitude and longitude values.
-
-    This includes both the centre points and bounds of the latitude and longitude
-    grids (needed for conservative regridding methods but not for bilinear etc.)
     """
-    LON, LAT = np.meshgrid(lon, lat)
-    LON_b, LAT_b = _getGridCC(lat, lon)
 
-    grid = xr.Dataset(
+    ds_out = xr.Dataset(
         {
-            "lon": (["x", "y"], LON),
-            "lat": (["x", "y"], LAT),
-            "lon_b": (["x_b", "y_b"], LON_b),
-            "lat_b": (["x_b", "y_b"], LAT_b),
+            "lat": (["lat"], lat, {"units": "degrees_north"}),
+            "lon": (["lon"], lon, {"units": "degrees_east"}),
         }
     )
 
-    return grid
+    return ds_out
 
 
 def convert_to_ndarray(array: Union[ndarray, xr.DataArray]) -> ndarray:
@@ -136,49 +152,53 @@ def regrid_uniform_cc(
     lat_out = convert_to_ndarray(lat_out)
     lon_out = convert_to_ndarray(lon_out)
 
-    input_grid = _create_xesmf_grid_uniform_cc(lat_in, lon_in)
-    output_grid = _create_xesmf_grid_uniform_cc(lat_out, lon_out)
+    # 09/03/2023: Don't seem to need inputs with centre and bounding boxes for
+    # uniform grid and xesmf "conservative" method anymore.
+    input_grid = _create_uniform_coords(lat_in, lon_in)
+    output_grid = _create_uniform_coords(lat_out, lon_out)
 
     regridder = xesmf.Regridder(input_grid, output_grid, method)
     regridded: ArrayLikeMatch = regridder(data)
 
-    if isinstance(regridded, xr.DataArray):
-        from scipy.sparse import coo_matrix  # type:ignore
+    # # 09/03/2023: Don't need this for uniform grid anymore due to changes above
+    # # but a variant may be needed for non-uniform grids e.g. tropomi data.
+    # if isinstance(regridded, xr.DataArray):
+    #     from scipy.sparse import coo_matrix  # type:ignore
 
-        # Checking dimensions and mapping back lat_out and lon_out
-        # May be overkill but attempting to make sure this is done correctly.
-        # The regridded DataArray will contain dimensions of ('x', 'y') for
-        # data, 'lat' and 'lon' coordinates e.g. lon = [[-10,-10],[0,0]]
-        # This is to allow for the generic case where ('lat', 'lon') is not
-        # a rectilinear (uniform) grid.
-        # Since we are creating a uniform grid we want to flatten this and
-        # put data back on ('lat', 'lon') dimension.
-        regridded_stack = regridded.stack(z=("x", "y"))
-        lat_coord = regridded_stack["lat"]
-        lon_coord = regridded_stack["lon"]
+    #     # Checking dimensions and mapping back lat_out and lon_out
+    #     # May be overkill but attempting to make sure this is done correctly.
+    #     # The regridded DataArray will contain dimensions of ('x', 'y') for
+    #     # data, 'lat' and 'lon' coordinates e.g. lon = [[-10,-10],[0,0]]
+    #     # This is to allow for the generic case where ('lat', 'lon') is not
+    #     # a rectilinear (uniform) grid.
+    #     # Since we are creating a uniform grid we want to flatten this and
+    #     # put data back on ('lat', 'lon') dimension.
+    #     regridded_stack = regridded.stack(z=("x", "y"))
+    #     lat_coord = regridded_stack["lat"]
+    #     lon_coord = regridded_stack["lon"]
 
-        # Find coords within our lat_out and lon_out grid for our regridded output
-        # Digitize is technically a binning operation outputting the number of the
-        # bin the value is within so to get indicies we can subtract 1.
-        lat_index = np.digitize(lat_coord, lat_out) - 1
-        lon_index = np.digitize(lon_coord, lon_out) - 1
+    #     # Find coords within our lat_out and lon_out grid for our regridded output
+    #     # Digitize is technically a binning operation outputting the number of the
+    #     # bin the value is within so to get indicies we can subtract 1.
+    #     lat_index = np.digitize(lat_coord, lat_out) - 1
+    #     lon_index = np.digitize(lon_coord, lon_out) - 1
 
-        # Create a sparse matrix from the flattened data and the lat, lon index values.
-        # Reshape to our required lat_out, lon_out and output as a numpy array
-        shape = (len(lat_out), len(lon_out))
-        regridded_grid = coo_matrix((regridded_stack.data, (lat_index, lon_index)), shape=shape).toarray()
+    #     # Create a sparse matrix from the flattened data and the lat, lon index values.
+    #     # Reshape to our required lat_out, lon_out and output as a numpy array
+    #     shape = (len(lat_out), len(lon_out))
+    #     regridded_grid = coo_matrix((regridded_stack.data, (lat_index, lon_index)), shape=shape).toarray()
 
-        regridded = xr.DataArray(
-            regridded_grid,
-            dims=("lat", "lon"),
-            coords={"lat": lat_out, "lon": lon_out},
-            attrs=regridded.attrs,
-        )
+    #     regridded = xr.DataArray(
+    #         regridded_grid,
+    #         dims=("lat", "lon"),
+    #         coords={"lat": lat_out, "lon": lon_out},
+    #         attrs=regridded.attrs,
+    #     )
 
-        # # Alternative, more simplistic approach. May not be generic
-        # regridded = regridded.drop(labels=("lat","lon"))
-        # regridded = regridded.assign_coords(**{"x":output_lat,"y":output_lon})
-        # regridded = regridded.rename({"x":"lat","y":"lon"})
+    #     # # Alternative, more simplistic approach. May not be generic
+    #     # regridded = regridded.drop(labels=("lat","lon"))
+    #     # regridded = regridded.assign_coords(**{"x":output_lat,"y":output_lon})
+    #     # regridded = regridded.rename({"x":"lat","y":"lon"})
 
     # # In later versions of xesmf (0.7?) this no longer seems to be needed
     # # as weight files are not stored on disk.
