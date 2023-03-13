@@ -369,7 +369,7 @@ def _retrieve_remote(
         metadata["inlet_height_magl"] = format_inlet(_sampling_height, key_name="inlet_height_magl")
 
         loc_data = station_data["location"]
-        metadata["station_long_name"] = loc_data["label"]
+
         metadata["station_latitude"] = str(loc_data["lat"])
         metadata["station_longitude"] = str(loc_data["lon"])
         metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")

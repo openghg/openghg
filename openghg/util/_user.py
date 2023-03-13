@@ -65,8 +65,9 @@ def create_config(silent: bool = False) -> None:
     Returns:
         None
     """
-    print("\nOpenGHG configuration")
-    print("---------------------\n")
+    if not silent:
+        print("\nOpenGHG configuration")
+        print("---------------------\n")
 
     user_config_path = get_user_config_path()
 
