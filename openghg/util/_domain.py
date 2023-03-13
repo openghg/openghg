@@ -166,7 +166,9 @@ def convert_internal_longitude(data: XrDataLikeMatch,
         data: Data with longitude values to convert.
         lon_name: By default will look a coord called "lon" or "longitude".
             Otherwise must be specified.
-        reorder: 
+        reorder: Whether to reorder the data based on the converted longitude values.
+    Returns:
+        DataArray / Dataset: Input data with updated longitude values
     """
     if lon_name is None:
         lon_options = ["lon", "longitude"]
