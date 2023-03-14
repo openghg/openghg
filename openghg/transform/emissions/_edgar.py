@@ -1,7 +1,7 @@
 import re
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
 import logging
 import numpy as np
@@ -67,7 +67,14 @@ def parse_edgar(
 
     from openghg.standardise.meta import assign_flux_attributes, define_species_label
     from openghg.store import infer_date_range
-    from openghg.util import clean_string, convert_longitude, molar_mass, synonyms, timestamp_now
+    from openghg.util import (
+        clean_string,
+        molar_mass,
+        synonyms,
+        find_coord_name,
+        convert_internal_longitude,
+        timestamp_now,
+    )
 
     # Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
     # Additional edgar functions which could be incorporated.
@@ -166,6 +173,9 @@ def parse_edgar(
     # - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
     # - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
 
+    if isinstance(date, int):
+        date = str(date)
+
     if len(date) == 4:
         year = int(date)
     else:
@@ -248,34 +258,41 @@ def parse_edgar(
     kg_to_g = 1e3
 
     flux_da = edgar_ds[name]
-    flux_values: ndarray[Any, Any] = flux_da.values * kg_to_g / species_molar_mass
+    # flux_values: ndarray[Any, Any] = flux_da.values * kg_to_g / species_molar_mass
+    flux_da = flux_da * kg_to_g / species_molar_mass
     units = "mol/m2/s"
 
-    lat_name = "lat"
-    lon_name = "lon"
-    try:
-        lat_in = edgar_ds[lat_name].values
-        lon_in = edgar_ds[lon_name].values
-    except KeyError:
+    lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
+    lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
+    if lat_name is None or lon_name is None:
         raise ValueError(
             f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
             " Please check this is a 2D grid map."
         )
 
     # Check range of longitude values and convert to -180 - +180
-    lon_in, ordinds = convert_longitude(lon_in, return_index=True)
-    flux_values = flux_values[:, ordinds]
+    flux_da = convert_internal_longitude(flux_da, lon_name=lon_name)
 
     if lat_out is not None and lon_out is not None:
         # Will produce import error if xesmf has not been installed.
         from openghg.transform import regrid_uniform_cc
+        from openghg.util import cut_data_extent
+
+        # To improve performance of regridding algorithm cut down the data
+        # to match the output grid (with buffer).
+        flux_da_cut = cut_data_extent(flux_da, lat_out, lon_out)
+        flux_values = flux_da_cut.values
+
+        lat_in_cut = flux_da_cut[lat_name]
+        lon_in_cut = flux_da_cut[lon_name]
 
         # regrid2d() used within acrg code for equivalent regrid function
         # but switched to using xesmf (rather than iris) here instead.
-        flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in, lon_in)
+        flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in_cut, lon_in_cut)
     else:
-        lat_out = lat_in
-        lon_out = lon_in
+        lat_out = flux_da[lat_name]
+        lon_out = flux_da[lon_name]
+        flux_values = flux_da.values
 
     edgar_attrs = edgar_ds.attrs
 
