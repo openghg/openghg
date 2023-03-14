@@ -35,7 +35,7 @@ Your configuration file is valid.
 
 If the folder doesn't exist you'll be presented with an input field asking if you want the folder to be created.
 
-```python!
+```python
 check_config()
 The folder /home/gareth/atmos_chem/object_store does not exist
 Should we create it? (y/n): y
