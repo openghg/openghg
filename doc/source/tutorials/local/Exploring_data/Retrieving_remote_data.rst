@@ -14,7 +14,7 @@ store that we'll call the tutorial store. To do this we use the
 ``OPENGHG_TUT_STORE`` environment variable for this session and won't
 affect your use of OpenGHG outside of this tutorial.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [1]: from openghg.tutorial import use_tutorial_store
 
@@ -47,11 +47,11 @@ first check for any data from **WAO** already stored in the object
 store, if any is found it is returned, otherwise it'll retrieve the data
 from the ICOS Carbon Portal, this may take a bit longer.
 
-.. ipython::
+.. code-block:: ipython3
 
    In [1]: from openghg.retrieve.icos import retrieve_atmospheric
 
-.. ipython::
+.. code-block:: ipython3
 
     In [2]: wao_data = retrieve_atmospheric(site="WAO", species="ch4", sampling_height="10m")
 
@@ -61,7 +61,7 @@ Here `wao_data` is a list of three `ObsData` objects, each one containing differ
 We can have a look at the reason for their being three versions of data by checking the `dataset_source` key
 in the attached metadata.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [7]: dataset_sources = [obs.metadata["dataset_source"] for obs in wao_data]
 
@@ -69,7 +69,7 @@ in the attached metadata.
 
 Let's say we want to look at ICOS dataset, we can
 
-.. ipython::
+.. code-block:: ipython3
 
     In [9]: wao_data_icos = wao_data[0]
 
@@ -84,7 +84,7 @@ citation string.
 You can see more information about the instruments by going to the link
 in the ``instrument_data`` section of the metadata
 
-.. ipython::
+.. code-block:: ipython3
 
     In [14]: metadata = wao_data_icos.metadata
 
@@ -104,7 +104,7 @@ As with any ``ObsData`` object we can quickly plot it to have a look.
    documentation. If you're using an `ipython` console to run through the tutorial,
    the plot will open in a new browser window.
 
-.. ipython::
+.. code-block:: ipython3
 
    In [17]:  wao_data_icos.plot_timeseries()
 
@@ -128,7 +128,7 @@ By default level 2 data is retrieved but this can be changed by passing
 ``data_level`` to ``retrieve_icos``. Below we'll retrieve some more
 recent data from **WAO**.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [2]: wao_data_level1 = retrieve_atmospheric(site="WAO", species="CH4", sampling_height="10m", data_level=1, dataset_source="icos")
 
@@ -143,7 +143,7 @@ choose the best option for your workflow.
 
    **NOTE:** level 1 data may not have been quality checked.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [10]: wao_data_level1.plot_timeseries(title="WAO - Level 1 data")
 
@@ -157,7 +157,7 @@ If you retrieve data using ``retrieve_icos`` and notice that it does not
 return the most up to date data (compare the dates with those on the
 portal) you can force a retrieval using ``force_retrieval``.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [11]: new_data = retrieve_atmospheric(site="WAO", species="CH4", data_level=1, force_retrieval=True)
 
@@ -192,15 +192,15 @@ link given above.
 
 Now we're ready to retrieve the data.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [1]: from openghg.retrieve.ceda import retrieve_surface
 
-.. ipython::
+.. code-block:: ipython3
 
     In [2]: url = "https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-crds_heathfield_20130101_co2-100m.nc?download=1"
 
-.. ipython::
+.. code-block:: ipython3
 
     In [3]: hfd_data = retrieve_surface(url=url)
 
@@ -209,7 +209,7 @@ Now we're ready to retrieve the data.
 Now we've got the data, we can use it as any other ``ObsData`` object,
 using ``data`` and ``metadata``.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [4]: hfd_data.plot_timeseries()
 
@@ -223,7 +223,7 @@ from the object store, this should be faster than retrieving from CEDA.
 To get the same data again use the ``site``, ``species`` and ``inlet``
 arguments.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [6]: hfd_data_ceda = retrieve_surface(site="hfd", species="co2")
 
@@ -236,11 +236,11 @@ arguments.
 If you're finished with the data in this tutorial you can cleanup the
 tutorial object store using the ``clear_tutorial_store`` function.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [8]: from openghg.tutorial import clear_tutorial_store
 
-.. ipython::
+.. code-block:: ipython3
 
     In [9]: clear_tutorial_store()
     INFO:openghg.tutorial:Tutorial store at /home/gareth/openghg_store/tutorial_store cleared.
