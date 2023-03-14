@@ -5,17 +5,6 @@ Tutorials
 These tutorials cover the use of OpenGHG when installed locally. They'll help you get started on
 standardising measurement data, searching the object store and exploring the NOAA ObsPack.
 
-Quickstart
-----------
-
-Get started quickly by following our quickstart guide
-
-.. toctree::
-   :maxdepth: 1
-
-   local/quickstart_devel
-
-
 Adding new data
 ---------------
 
@@ -24,6 +13,10 @@ Adding new data
 
    local/Adding_new_data/Adding_observation_data
 
+.. toctree::
+   :maxdepth: 1
+
+   local/Adding_new_data/Adding_ancillary_data
 
 Analysing data
 ---------------
@@ -60,7 +53,6 @@ Exploring data
 Managing the the object store
 -----------------------------
 
-
 These tutorials will help you understand how to add different types of data to the OpenGHG object store and how to
 delete or modify already existing data.
 
@@ -68,3 +60,8 @@ delete or modify already existing data.
    :maxdepth: 1
 
    local/Managing_object_store/Modifying_and_deleting_data
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Managing_object_store/Changing_object_store

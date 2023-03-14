@@ -3,6 +3,10 @@
 """
 from collections.abc import Iterable
 from typing import Any, Dict, Iterator, Optional, Tuple
+import logging
+
+logger = logging.getLogger("openghg.util")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def running_in_cloud() -> bool:
@@ -88,12 +92,12 @@ def site_code_finder(site_name: str) -> Optional[str]:
     Returns:
         str or None: Three letter site code if found
     """
-    from openghg.util import load_json
+    from openghg.util import remove_punctuation
     from rapidfuzz import process  # type: ignore
 
-    sites = load_json("site_lookup.json")
+    site_name = remove_punctuation(site_name)
 
-    inverted = {s["short_name"]: c for c, s in sites.items()}
+    inverted = _create_site_lookup_dict()
 
     matches = process.extract(query=site_name, choices=inverted.keys())
     highest_score = matches[0][1]
@@ -101,10 +105,16 @@ def site_code_finder(site_name: str) -> Optional[str]:
     if highest_score < 90:
         return None
 
+    # If there are multiple >= 90 matches we return None as this is ambiguous
+    greater_than_90 = sum(match[1] >= 90 for match in matches)
+    if greater_than_90 > 1:
+        logger.warning("Please provide more site information, more than one site found.")
+        return None
+
     matched_site = matches[0][0]
     site_code: str = inverted[matched_site]
 
-    return site_code
+    return site_code.lower()
 
 
 def find_matching_site(site_name: str, possible_sites: Dict) -> str:
@@ -141,7 +151,39 @@ def find_matching_site(site_name: str, possible_sites: Dict) -> str:
         return f"Unknown site: {site_name}"
 
 
-def verify_site(site: str) -> str:
+def _create_site_lookup_dict() -> Dict:
+    """Create a dictionary of site name: three letter site code values
+
+    Returns:
+        dict: Dictionary of site_name: site_code values
+    """
+    from openghg_defs import site_info_file
+    from openghg.util import load_json, remove_punctuation
+
+    site_info = load_json(path=site_info_file)
+
+    inverted = {}
+    for site, site_data in site_info.items():
+        for _, network_data in site_data.items():
+            try:
+                long_name = network_data["long_name"]
+            except KeyError:
+                pass
+            else:
+                # Remove the country from the name
+                try:
+                    no_country = remove_punctuation(long_name.split(",")[0])
+                except IndexError:
+                    no_country = remove_punctuation(long_name)
+
+                inverted[no_country] = site
+
+            break
+
+    return inverted
+
+
+def verify_site(site: str) -> Optional[str]:
     """Check if the passed site is a valid one and returns the three
     letter site code if found. Otherwise we use fuzzy text matching to suggest
     sites with similar names.
@@ -151,23 +193,18 @@ def verify_site(site: str) -> str:
     Returns:
         str: Verified three letter site code if valid site
     """
-    from openghg.types import InvalidSiteError
-    from openghg.util import load_json, remove_punctuation
+    from openghg.util import load_json
+    from openghg_defs import site_info_file
 
-    site_data = load_json("site_lookup.json")
+    site_data = load_json(path=site_info_file)
 
     if site.upper() in site_data:
         return site.lower()
     else:
-        site = remove_punctuation(site)
-        name_lookup: Dict[str, str] = {value["short_name"]: code for code, value in site_data.items()}
-
-        try:
-            return name_lookup[site].lower()
-        except KeyError:
-            long_names = {value["long_name"]: code for code, value in site_data.items()}
-            message = find_matching_site(site_name=site, possible_sites=long_names)
-            raise InvalidSiteError(message)
+        site_code = site_code_finder(site_name=site)
+        if site_code is None:
+            logger.warning(f"Unable to find site code for {site}, please provide additional metadata.")
+        return site_code
 
 
 def multiple_inlets(site: str) -> bool:
@@ -178,9 +215,9 @@ def multiple_inlets(site: str) -> bool:
     Returns:
         bool: True if multiple inlets
     """
-    from openghg.util import load_json
+    from openghg.util import get_site_info
 
-    site_data = load_json("acrg_site_info.json")
+    site_data = get_site_info()
 
     site = site.upper()
     network = next(iter(site_data[site]))

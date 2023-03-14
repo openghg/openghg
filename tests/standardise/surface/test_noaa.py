@@ -59,6 +59,10 @@ def test_read_obspack_2020():
     assert "sampling_period" in ch4_metadata
     assert "sampling_period_estimate" in ch4_metadata
 
+    # Check inlet in metadata
+    assert ch4_metadata["inlet"] == "40m"
+    assert ch4_metadata["inlet_height_magl"] == "40"
+
 
 def test_read_obspack_flask_2021():
     '''Test inputs from "obspack_multi-species_1_CCGGSurfaceFlask_v2.0_2021-02-09"'''
@@ -95,6 +99,10 @@ def test_read_obspack_flask_2021():
     assert "sampling_period" in ch4_metadata
     assert "sampling_period_estimate" in ch4_metadata
 
+    # Check inlet in metadata
+    assert ch4_metadata["inlet"] == "-2922m"
+    assert ch4_metadata["inlet_height_magl"] == "-2922"
+
     parsed_surface_metachecker(data=data)
 
 
@@ -125,18 +133,21 @@ def test_read_obspack_tower_multi_height():
     assert ch4_data_22m["ch4_variability"][0] == pytest.approx(78.326)
     assert ch4_data_22m["ch4_variability"][-1] == pytest.approx(18.081)
 
+    # Check metadata for inlet
+    metadata = data[inlet_key1]["metadata"]
+    assert metadata["inlet"] == "22m"
+    assert metadata["inlet_height_magl"] == "22"
+
     parsed_surface_metachecker(data=data)
 
 
-def test_read_file_site_filename_read(scsn06_data):
+def test_read_file_site_filepath_read(scsn06_data):
     ch4_data = scsn06_data["ch4"]["data"]
 
     assert ch4_data.time[0] == Timestamp("1991-07-05T17:00:00")
     assert ch4_data["ch4"][0] == pytest.approx(1713.21)
     assert ch4_data["ch4_repeatability"][0] == pytest.approx(2.4)
     assert ch4_data["ch4_selection_flag"][0] == 0
-
-    metadata = scsn06_data["ch4"]["metadata"]
 
     parsed_surface_metachecker(data=scsn06_data)
 
@@ -147,12 +158,13 @@ def test_read_file_site_filename_read(scsn06_data):
         "station_height_masl": 15.0,
     }
 
+    attrs = ch4_data.attrs
     for key, value in expected_attrs.items():
-        assert ch4_data.attrs[key] == value
+        assert attrs[key] == value
 
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
-def test_noaa_site_filename_cf_compliance(scsn06_data):
+def test_noaa_site_filepath_cf_compliance(scsn06_data):
     ch4_data = scsn06_data["ch4"]["data"]
 
     assert check_cf_compliance(dataset=ch4_data)

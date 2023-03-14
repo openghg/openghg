@@ -12,16 +12,18 @@ __all__ = [
     "get_footprint_datapath",
     "glob_files",
     "clear_test_store",
-    "key_to_local_filepath,",
     "all_datasource_keys",
 ]
 
 
 def clear_test_store():
     # Clears the testing object store
-    path = os.getenv("OPENGHG_PATH")
+    path = os.getenv("OPENGHG_TEST")
     if path is not None:
-        shutil.rmtree(path)
+        try:
+            shutil.rmtree(path)
+        except FileNotFoundError:
+            pass
 
 
 def get_surface_datapath(filename: str, source_format: str) -> Path:
@@ -78,6 +80,10 @@ def get_datapath_base(data_type: str, filename: str) -> Path:
 
 def get_retrieval_datapath(filename: str):
     return Path(__file__).parent.parent.joinpath(f"data/retrieve/{filename}").resolve()
+
+
+def get_info_datapath(filename: str):
+    return Path(__file__).parent.parent.joinpath(f"data/info/{filename}").resolve()
 
 
 def glob_files(search_str: str, data_type: str) -> List:

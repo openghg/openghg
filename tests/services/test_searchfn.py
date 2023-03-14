@@ -6,7 +6,7 @@
 
 # @pytest.fixture(scope="session")
 # def read_data(authenticated_user):
-#     get_bucket(empty=True)
+#     clear_test_store()
 
 #     data = get_surface_datapath(filename="capegrim-medusa.18.C", data_type="GC")
 #     precision = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", data_type="GC")

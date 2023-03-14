@@ -1,0 +1,459 @@
+{
+  "BAO": {
+    "NOAA": {
+      "height": ["300m"],
+      "height_name": ["300magl"],
+      "height_station_masl": 1584.0,
+      "latitude": 40.05,
+      "long_name": "Boulder Atmospheric Observatory, Colorado, United States",
+      "longitude": -105.004
+    }
+  },
+  "BIK": {
+        "EUROCOM": {
+          "height": ["300m"],
+          "height_name": ["300magl"],
+          "height_station_masl": 150.0,
+          "latitude": 53.23,
+          "long_name": "Bialystok, Poland",
+          "longitude": 23.03
+        }
+      },
+  "BSD": {
+    "DECC": {
+      "defaults": [
+        {
+          "gases": ["CO", "N2O"],
+          "inlet": ["248m", "248m"],
+          "instrument": ["GCECD", "picarro5310"],
+          "periods": [
+            ["1900-01-01", "2019-03-06"],
+            ["2019-03-06", "2100-01-01"]
+          ]
+        }
+      ],
+      "height": ["248m", "108m", "42m"],
+      "height_name": ["248magl", "110magl", "50magl"],
+      "height_station_masl": 380.0,
+      "latitude": 54.35858,
+      "long_name": "Bilsdale, UK",
+      "longitude": -1.15033
+    },
+      "NOAA": {
+      "height": ["108m", "42m", "248m"],
+      "height_name": ["110magl", "50magl", "248magl"],
+      "height_station_masl": 380.0,
+      "latitude": 54.35858,
+      "long_name": "Bilsdale, UK",
+      "longitude": -1.15033
+    }
+  },
+  "BTT": {
+    "GAUGE": {
+      "height": ["185m"],
+      "height_name": ["185magl"],
+      "latitude": 51.5215,
+      "long_name": "BT Tower, UK",
+      "longitude": -0.1389
+    },
+    "LGHG": {
+      "height": ["185m"],
+      "height_name": ["185magl"],
+      "latitude": 51.5215,
+      "long_name": "BT Tower, UK",
+      "longitude": -0.1389,
+      "status": "current"
+    }
+  },
+  "CGO": {
+    "AGAGE": {
+      "height": ["70m", "10m"],
+      "height_name": ["70magl", "10magl"],
+      "height_station_masl": 94.0,
+      "latitude": -40.683,
+      "long_name": "Cape Grim, Tasmania",
+      "longitude": 144.689
+    },
+    "NOAA": {
+      "height_station_masl": 94.0,
+      "latitude": -40.683,
+      "long_name": "Cape Grim, Tasmania, Australia",
+      "longitude": 144.69
+    }
+  },
+  "CMN": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 2155.0,
+      "latitude": 44.193889,
+      "long_name": "Monte Cimone, Italy",
+      "longitude": 10.701389
+    },
+    "ICOS": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 2155.0,
+      "latitude": 44.193889,
+      "long_name": "Monte Cimone, Italy",
+      "longitude": 10.701389
+    },
+    "NOAA": {
+      "latitude": 44.1936,
+      "longitude": 10.6999,
+      "height_station_masl": 2165.0,
+      "long_name": "Mt. Cimone Station, Italy",
+      "height": ["7m"],
+      "height_name": ["7magl"]
+    }
+  },
+  "ESP": {
+    "EC": {
+      "height": ["40m"],
+      "height_name": ["40magl"],
+      "height_station_masl": 7.0,
+      "latitude": 49.382935,
+      "long_name": "Estevan Point, British Columbia, Canada",
+      "longitude": -126.544097
+    },
+    "NOAA": {
+      "height_station_masl": 7.0,
+      "latitude": 49.383,
+      "long_name": "Estevan Point,  British Columbia, Canada",
+      "longitude": -126.5441
+    }
+  },
+  "GSN": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 72.0,
+      "latitude": 33.29244,
+      "long_name": "Gosan, Korea",
+      "longitude": 126.1618
+    }
+  },
+  "HFD": {
+    "DECC": {
+      "height": ["100m", "50m"],
+      "height_name": ["100magl", "50magl"],
+      "height_station_masl": 150.0,
+      "latitude": 50.97675,
+      "long_name": "Heathfield, UK",
+      "longitude": 0.23048
+    },
+    "GAUGE": {
+      "height": ["100m", "50m"],
+      "height_name": ["100magl", "50magl"],
+      "height_station_masl": 150.0,
+      "latitude": 50.97675,
+      "long_name": "Heathfield, UK",
+      "longitude": 0.23048
+    }
+  },
+  "JFJ": {
+    "AGAGE": {
+      "height": ["1000m", "10m"],
+      "height_name": ["1000magl", "10magl"],
+      "height_station_masl": 3570.0,
+      "latitude": 46.5475,
+      "long_name": "Jungfraujoch, Switzerland",
+      "longitude": 7.979167
+    },
+    "ICOS": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 3570.0,
+      "latitude": 46.5475,
+      "long_name": "Jungfraujoch, Switzerland",
+      "longitude": 7.979167
+    },
+    "NOAA": {
+      "latitude": 46.55,
+      "longitude": 7.987,
+      "height_station_masl": 3570.0,
+      "long_name": "Jungfraujoch, Switzerland",
+      "height": ["5m"],
+      "height_name": ["5magl"]
+    }
+  },
+  "MHD": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 5.0,
+      "latitude": 53.32611,
+      "long_name": "Mace Head, Ireland",
+      "longitude": -9.90389
+    },
+    "ICOS": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 5.0,
+      "latitude": 53.32611,
+      "long_name": "Mace Head, Ireland",
+      "longitude": -9.90389
+    },
+    "NOAA": {
+      "height_station_masl": 5.0,
+      "latitude": 53.326,
+      "long_name": "Mace Head, County Galway, Ireland",
+      "longitude": -9.899
+    }
+  },
+  "NPL": {
+    "LGHG": {
+      "height": ["NA"],
+      "height_name": ["NA"],
+      "height_station_masl": 0,
+      "latitude": 51.4241,
+      "long_name": "National Physical Laboratory",
+      "longitude": -0.3487,
+      "status": "current"
+    }
+  },
+  "POCN25": {
+    "NOAA": {
+      "height_station_masl": 10.0,
+      "latitude": 25.0,
+      "long_name": "Pacific Ocean (25 N), N/A",
+      "longitude": -139.0
+    }
+  },
+  "RGL": {
+    "DECC": {
+      "height": ["90m", "45m"],
+      "height_name": ["90magl", "45magl"],
+      "height_station_masl": 200.0,
+      "latitude": 51.997435,
+      "long_name": "Ridge Hill, UK",
+      "longitude": -2.5399
+    },
+    "ICOS": {
+      "height": ["90m", "45m"],
+      "height_name": ["90magl", "45magl"],
+      "height_station_masl": 200.0,
+      "latitude": 51.997435,
+      "long_name": "Ridge Hill, UK",
+      "longitude": -2.5399
+    },
+    "NOAA": {
+      "height": ["90m", "45m"],
+      "height_name": ["90magl", "45magl"],
+      "height_station_masl": 200.0,
+      "latitude": 51.997435,
+      "long_name": "Ridge Hill, UK",
+      "longitude": -2.5399
+    }
+  },
+  "RPB": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 32.0,
+      "latitude": 13.16512,
+      "long_name": "Ragged Point, Barbados",
+      "longitude": -59.43208,
+      "w3w": "///munched.brimmed.elect"
+    },
+    "NOAA": {
+      "height_station_masl": 15.0,
+      "latitude": 13.165,
+      "long_name": "Ragged Point, Barbados",
+      "longitude": -59.432
+    }
+  },
+  "SCSN06": {
+    "NOAA": {
+      "height_station_masl": 15.0,
+      "latitude": 6.0,
+      "long_name": "South China Sea (6 N), N/A",
+      "longitude": 107.0
+    }
+  },
+  "SDZ": {
+    "AGAGE": {
+      "height": ["80m", "10m"],
+      "height_name": ["80magl", "10magl"],
+      "height_station_masl": 287.0,
+      "latitude": 40.65,
+      "long_name": "Shangdianzi, China",
+      "longitude": 117.12
+    },
+    "NOAA": {
+      "height_station_masl": 293.0,
+      "latitude": 40.65,
+      "long_name": "Shangdianzi, Peoples Republic of China",
+      "longitude": 117.117
+    }
+  },
+  "SIO": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 10.0,
+      "latitude": 32.8328,
+      "long_name": "Scripps Institue of Oceanography, California",
+      "longitude": -117.2713
+    },
+    "NOAA": {
+      "height_station_masl": 14.0,
+      "latitude": 32.83,
+      "long_name": "La Jolla, California, United States",
+      "longitude": -117.27
+    }
+  },
+  "SMO": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 82.0,
+      "latitude": -14.25,
+      "long_name": "Cape Matatula, American Samoa",
+      "longitude": -170.56
+    },
+    "NOAA": {
+      "height_station_masl": 42.0,
+      "latitude": -14.2474,
+      "long_name": "Tutuila, American Samoa",
+      "longitude": -170.5644
+    }
+  },
+  "SPF": {
+    "NOAA": {
+      "height_station_masl": 1623.0,
+      "latitude": -73.8658,
+      "long_name": "Antarctic Firn Air, Antarctica",
+      "longitude": 163.687
+    }
+  },
+  "TAC": {
+    "DECC": {
+      "height": ["185m", "54m", "100m"],
+      "height_name": ["185magl", "50magl", "100magl"],
+      "height_station_masl": 50.0,
+      "latitude": 52.51775,
+      "long_name": "Tacolneston Tower, UK",
+      "longitude": 1.13872
+    },
+    "ICOS": {
+      "height": ["100m", "54m", "185m"],
+      "height_name": ["100magl", "50magl", "185magl"],
+      "height_station_masl": 50.0,
+      "latitude": 52.51775,
+      "long_name": "Tacolneston Tower, UK",
+      "longitude": 1.13872
+    },
+    "NOAA": {
+      "height_station_masl": 56.0,
+      "latitude": 52.5177,
+      "long_name": "Tacolneston, United Kingdom",
+      "longitude": 1.1386
+    }
+  },
+  "THD": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 107.0,
+      "latitude": 41.0541,
+      "long_name": "Trinidad Head, California",
+      "longitude": -124.151
+    },
+    "NOAA": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 107.0,
+      "latitude": 41.0541,
+      "long_name": "Trinidad Head, California",
+      "longitude": -124.151
+    },
+    "SIOCC": {
+      "height": ["10m"],
+      "height_name": ["10magl"],
+      "height_station_masl": 107.0,
+      "latitude": 41.0541,
+      "long_name": "Trinidad Head, California",
+      "longitude": -124.151
+    }
+  },
+  "TMB": {
+    "CRANFIELD": {
+      "height": ["5m"],
+      "height_name": ["5magl"],
+      "height_station_masl": 5.0,
+      "latitude": 51.496769,
+      "long_name": "Thames Barrier, UK",
+      "longitude": 0.036995
+    },
+    "LGHG": {
+      "height": ["5m"],
+      "height_name": ["5magl"],
+      "height_station_masl": 5.0,
+      "latitude": 51.496769,
+      "long_name": "Thames Barrier, UK",
+      "longitude": 0.036995,
+      "status": "current"
+    }
+  },
+  "TTA": {
+    "DECC": {
+      "height": ["222m"],
+      "height_name": ["222magl"],
+      "height_station_masl": 300.0,
+      "latitude": 56.55511,
+      "long_name": "Angus Tower, UK",
+      "longitude": -2.98598
+    },
+    "ICOS": {
+      "height": ["222m"],
+      "height_name": ["222magl"],
+      "height_station_masl": 300.0,
+      "latitude": 56.55511,
+      "long_name": "Angus Tower, UK",
+      "longitude": -2.98598
+    }
+  },
+  "WAO": {
+    "ICOS": {
+      "height": ["21m"],
+      "height_name": ["20magl"],
+      "height_station_masl": 10.0,
+      "latitude": 52.95042,
+      "long_name": "Weybourne Observatory, UK",
+      "longitude": 1.12194
+    },
+    "UCAM": {
+      "height": ["21m"],
+      "height_name": ["20magl"],
+      "height_station_masl": 10.0,
+      "latitude": 52.95042,
+      "long_name": "Weybourne Observatory, UK",
+      "longitude": 1.12194
+    },
+    "UEA": {
+      "height": ["21m"],
+      "height_name": ["20magl"],
+      "height_station_masl": 10.0,
+      "latitude": 52.95042,
+      "long_name": "Weybourne Observatory, UK",
+      "longitude": 1.12194
+    }
+  },
+  "ZEP": {
+    "AGAGE": {
+      "height": ["10m"],
+      "height_name": ["16magl"],
+      "height_station_masl": 474.0,
+      "latitude": 78.925,
+      "long_name": "Zeppelin, Ny Alesund, Norway",
+      "longitude": 11.92222
+    },
+    "NOAA": {
+      "height_station_masl": 474.0,
+      "latitude": 78.9067,
+      "long_name": "Ny-Alesund, Svalbard, Norway and Sweden",
+      "longitude": 11.8883
+    }
+  }
+}

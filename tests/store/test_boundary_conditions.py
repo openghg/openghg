@@ -3,6 +3,7 @@ from openghg.retrieve import search
 from openghg.store import BoundaryConditions, load_metastore, recombine_datasets
 from openghg.util import hash_bytes
 from xarray import open_dataset
+import numpy as np
 
 
 def test_read_data_monthly(mocker):
@@ -137,7 +138,72 @@ def test_read_file_yearly():
     assert expected_metadata.items() <= metadata.items()
 
 
-# TODO: Add test for co2 data - need to create TEST region to match other data for this
+def test_read_file_co2_no_time_dim():
+    """
+    Test monthly co2 file with with no time dimension can be read and intepreted
+    correctly.
+     - Input file contains "time" coordinate but this has a dimension of 0.
+     - Saved version of this file will update "time" and data variables to include
+     this with a 1D dimension.
+    """
+    test_datapath = get_bc_datapath("co2_EUROPE_201407.nc")
+
+    species = "co2"
+    bc_input = "CAMS"
+    domain = "EUROPE"
+
+    BoundaryConditions.read_file(
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+    )
+
+    search_results = search(
+        species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
+    )
+
+    bc_obs = search_results.retrieve_all()
+    bc_data = bc_obs.data
+    metadata = bc_obs.metadata
+
+    orig_data = open_dataset(test_datapath)
+
+    # Test search results against data extracted from original file
+    np.testing.assert_allclose(bc_data.lat, orig_data.lat)
+    np.testing.assert_allclose(bc_data.lon, orig_data.lon)
+
+    # For time a new 1D dimension will have been added for this data
+    # TODO: Including .astype(int) here as numpy complains about comparing
+    # <class 'numpy._FloatAbstractDType'> and <class 'numpy.dtype[datetime64]'>.
+    # May want to look into this further or accept this workaround.
+    np.testing.assert_allclose(bc_data.time[0].astype(int), orig_data.time.astype(int))
+
+    data_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
+    for dv in data_vars:
+        # Match stored 1D data to original 0D data by selecting on the time axis.
+        bc_dv_data = bc_data[dv].isel({"time": 0})
+        org_dv_data = orig_data[dv]
+        np.testing.assert_allclose(bc_dv_data, org_dv_data)
+
+    expected_metadata = {
+        "title": "ecmwf cams co2 volume mixing ratios at domain edges",
+        "species": "co2",
+        "domain": "europe",
+        "bc_input": "cams",
+        "start_date": "2014-07-01 00:00:00+00:00",
+        "end_date": "2014-07-31 23:59:59+00:00",
+        "max_longitude": 39.38,
+        "min_longitude": -97.9,
+        "max_latitude": 79.057,
+        "min_latitude": 10.729,
+        "data_type": "boundary_conditions",
+        "time_period": "1 month",
+    }
+
+    assert expected_metadata.items() <= metadata.items()
+
+
 # TODO: Add test for multiple values within a file - continuous (maybe monthly)
 # TODO: Add test around non-continuous data and key word?
 

@@ -1,6 +1,6 @@
 from json import dump, loads
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 
 from addict import Dict as aDict
 from openghg.dataobjects import ObsData
@@ -12,7 +12,7 @@ def to_dashboard(
     data: Union[ObsData, List[ObsData]],
     selected_vars: List,
     downsample_n: int = 3,
-    filename: str = None,
+    filename: Optional[str] = None,
 ) -> Union[Dict, None]:
     """Takes a Dataset produced by OpenGHG and outputs it into a JSON
     format readable by the OpenGHG dashboard or a related project.
@@ -103,7 +103,7 @@ def to_dashboard(
         return export_dict
 
 
-def to_dashboard_mobile(data: Dict, filename: Union[str, Path] = None) -> Union[Dict, None]:
+def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> Union[Dict, None]:
     """Export the Glasgow LICOR data to JSON for the dashboard
 
     Args:

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from json import dumps
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any, Dict, Iterator, Union
+from typing import Any, Dict, Iterator, Union, Optional
 
 import plotly.graph_objects as go
 
@@ -79,7 +79,11 @@ class ObsData(_BaseData, abc.Mapping):
         return to_transfer
 
     def plot_timeseries(
-        self, title: str = None, xlabel: str = None, ylabel: str = None, units: str = None
+        self,
+        title: Optional[str] = None,
+        xlabel: Optional[str] = None,
+        ylabel: Optional[str] = None,
+        units: Optional[str] = None,
     ) -> go.Figure:
         """Plot a timeseries"""
 

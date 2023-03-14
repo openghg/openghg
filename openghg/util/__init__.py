@@ -1,8 +1,15 @@
 """
     Utility functions for OpenGHG
 """
-
-from ._domain import convert_longitude, find_domain
+from ._cli import cli
+from ._domain import (
+    get_domain_info,
+    find_domain,
+    find_coord_name,
+    convert_longitude,
+    convert_internal_longitude,
+    cut_data_extent,
+)
 from ._download import download_data, parse_url_filename
 from ._export import to_dashboard, to_dashboard_mobile
 from ._file import (
@@ -19,12 +26,14 @@ from ._file import (
     load_emissions_database_parser,
     load_emissions_parser,
     load_json,
+    load_internal_json,
     load_surface_parser,
     read_header,
 )
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
 from ._inlet import format_inlet
-from ._species import check_lifetime_monthly, molar_mass, species_lifetime, synonyms
+from ._site import get_site_info, sites_in_network
+from ._species import get_species_info, check_lifetime_monthly, molar_mass, species_lifetime, synonyms
 from ._strings import clean_string, is_number, remove_punctuation, to_lowercase
 from ._time import (
     check_date,
@@ -55,7 +64,7 @@ from ._time import (
     trim_daterange,
     valid_daterange,
 )
-from ._user import create_default_config, get_user_config_path, read_local_config
+from ._user import create_config, get_user_id, get_user_config_path, read_local_config, check_config
 from ._util import (
     find_matching_site,
     multiple_inlets,
@@ -67,3 +76,4 @@ from ._util import (
     unanimous,
     verify_site,
 )
+from ._versions import show_versions

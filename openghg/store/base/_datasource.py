@@ -1,9 +1,12 @@
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
-
+import logging
 import numpy as np
 from openghg.store.spec import define_data_types
 from pandas import DataFrame, Timestamp
 from xarray import Dataset
+
+logger = logging.getLogger("openghg.store.base")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
@@ -157,7 +160,7 @@ class Datasource:
                     ex = self._data.pop(existing_daterange)
                     new = new_data.pop(new_daterange)
 
-                    print("NOTE: Combining overlapping data dateranges")
+                    logger.info("Combining overlapping data dateranges")
                     # Concatenate datasets along time dimension
                     try:
                         combined = xr_concat((ex, new), dim="time")
@@ -188,7 +191,7 @@ class Datasource:
 
                     # We may have overlapping dates but not duplicate times
                     if unique[count > 1].size > 0:
-                        print("NOTE: Dropping measurements at duplicate timestamps")
+                        logger.info("Dropping measurements at duplicate timestamps")
                         combined = combined.isel(time=index)
 
                     # TODO: May need to find a way to find period for *last point* rather than *current point*
@@ -547,7 +550,7 @@ class Datasource:
                 if not parent_folder.exists():
                     parent_folder.mkdir(parents=True, exist_ok=True)
 
-                data.to_netcdf(filepath)
+                data.to_netcdf(filepath, engine="netcdf4")
 
                 # Can we just take the bytes from the data here and then write then straight?
                 # TODO - for now just create a temporary directory - will have to update Acquire
@@ -586,9 +589,9 @@ class Datasource:
     @classmethod
     def load(
         cls: Type[T],
-        bucket: str = None,
-        uuid: str = None,
-        key: str = None,
+        bucket: Optional[str] = None,
+        uuid: Optional[str] = None,
+        key: Optional[str] = None,
         shallow: bool = False,
     ) -> T:
         """Load a Datasource from the object store either by name or UUID

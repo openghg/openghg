@@ -50,7 +50,7 @@ def test_read_file_no_attr():
     Test file in correct OpenGHG format but without attributes can be parsed
     as long as the missing and necessary attribute values are provided.
     Note: this will extract station details from values pre-defined within
-    the acrg_site_info.json file.
+    the 'site_info.json' file.
     """
     filepath = get_surface_datapath(filename="tac_co2_no_attr_openghg.nc", source_format="OPENGHG")
 

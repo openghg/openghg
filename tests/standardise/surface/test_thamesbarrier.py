@@ -19,9 +19,9 @@ def tmb_data():
 def test_read_file(tmb_data):
     parsed_surface_metachecker(data=tmb_data)
 
-    ch4_data = tmb_data["CH4"]["data"]
-    co2_data = tmb_data["CO2"]["data"]
-    co_data = tmb_data["CO"]["data"]
+    ch4_data = tmb_data["ch4"]["data"]
+    co2_data = tmb_data["co2"]["data"]
+    co_data = tmb_data["co"]["data"]
 
     assert ch4_data.time[0] == pd.Timestamp("2019-07-01T00:39:55.000000000")
     assert ch4_data["ch4"][0] == pytest.approx(1960.835716)
@@ -35,8 +35,15 @@ def test_read_file(tmb_data):
     assert co_data["co"][0] == pytest.approx(0.08788712)
     assert co_data["co_variability"][0] == 0
 
+    # Check metadata
+    ch4_metadata = tmb_data["ch4"]["metadata"]
+
+    assert ch4_metadata["inlet"] == "5m"
+
+    # TODO: Add additional metadata / attribute checks?
+
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_tmb_cf_compliance(tmb_data):
-    co_data = tmb_data["CO"]["data"]
+    co_data = tmb_data["co"]["data"]
     assert check_cf_compliance(dataset=co_data)

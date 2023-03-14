@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
 
-from openghg.util import load_json
+from openghg.types import optionalPathType
 from pandas import DataFrame, Timedelta
 
 
@@ -13,6 +13,7 @@ def parse_crds(
     instrument: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
     measurement_type: Optional[str] = None,
+    site_filepath: optionalPathType = None,
     drop_duplicates: bool = True,
     **kwargs: Dict,
 ) -> Dict:
@@ -27,6 +28,8 @@ def parse_crds(
         instrument: Instrument name
         sampling_period: Sampling period in seconds
         measurement_type: Measurement type e.g. insitu, flask
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
     Returns:
         dict: Dictionary of gas data
@@ -34,9 +37,12 @@ def parse_crds(
     from pathlib import Path
 
     from openghg.standardise.meta import assign_attributes
+    from openghg.util import format_inlet
 
     if not isinstance(data_filepath, Path):
         data_filepath = Path(data_filepath)
+
+    inlet = format_inlet(inlet)
 
     # This may seem like an almost pointless function as this is all we do
     # but it makes it a lot easier to test assign_attributes
@@ -52,7 +58,9 @@ def parse_crds(
     )
 
     # Ensure the data is CF compliant
-    gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
+    gas_data = assign_attributes(
+        data=gas_data, site=site, sampling_period=sampling_period, site_filepath=site_filepath
+    )
 
     return gas_data
 
@@ -65,6 +73,7 @@ def _read_data(
     instrument: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
     measurement_type: Optional[str] = None,
+    site_filepath: optionalPathType = None,
     drop_duplicates: bool = True,
 ) -> Dict:
     """Read the datafile passed in and extract the data we require.
@@ -77,13 +86,14 @@ def _read_data(
         instrument: Instrument name
         sampling_period: Sampling period in seconds
         measurement_type: Measurement type e.g. insitu, flask
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
     Returns:
         dict: Dictionary of gas data
     """
     import warnings
-
-    from openghg.util import clean_string, find_duplicate_timestamps
+    from openghg.util import clean_string, find_duplicate_timestamps, format_inlet, load_internal_json
     from pandas import RangeIndex, read_csv, to_datetime
 
     split_fname = data_filepath.stem.split(".")
@@ -160,7 +170,7 @@ def _read_data(
 
     # Read the scale from JSON
     # I'll leave this here for the possible future movement from class to functions
-    network_metadata = load_json(filename="process_gcwerks_parameters.json")
+    network_metadata = load_internal_json(filename="process_gcwerks_parameters.json")
     crds_metadata = network_metadata["CRDS"]
 
     # This dictionary is used to store the gas data and its associated metadata
@@ -182,11 +192,11 @@ def _read_data(
         ]
 
         # Name columns
-        gas_data = gas_data.set_axis(column_labels, axis="columns", inplace=False)
+        gas_data = gas_data.set_axis(column_labels, axis="columns")
 
         header_rows = 2
         # Drop the first two rows now we have the name
-        gas_data = gas_data.drop(index=gas_data.head(header_rows).index, inplace=False)
+        gas_data = gas_data.drop(index=gas_data.head(header_rows).index)
         gas_data.index = to_datetime(gas_data.index, format="%y%m%d %H%M%S")
         # Cast data to float64 / double
         gas_data = gas_data.astype("float64")
@@ -194,14 +204,16 @@ def _read_data(
         # Here we can convert the Dataframe to a Dataset and then write the attributes
         gas_data = gas_data.to_xarray()
 
-        site_attributes = _get_site_attributes(site=site, inlet=inlet, crds_metadata=crds_metadata)
+        site_attributes = _get_site_attributes(
+            site=site, inlet=inlet, crds_metadata=crds_metadata, site_filepath=site_filepath
+        )
 
         scale = crds_metadata["default_scales"].get(species.upper(), "NA")
 
         # Create a copy of the metadata dict
         species_metadata = metadata.copy()
         species_metadata["species"] = clean_string(species)
-        species_metadata["inlet"] = inlet
+        species_metadata["inlet"] = format_inlet(inlet, key_name="inlet")
         species_metadata["calibration_scale"] = scale
         species_metadata["long_name"] = site_attributes["long_name"]
         species_metadata["data_type"] = "surface"
@@ -227,6 +239,8 @@ def _read_metadata(filepath: Path, data: DataFrame) -> Dict:
     Returns:
         dict: Dictionary containing metadata
     """
+    from openghg.util import format_inlet
+
     # Find gas measured and port used
     type_meas = data[2][2]
     port = data[3][2]
@@ -256,23 +270,32 @@ def _read_metadata(filepath: Path, data: DataFrame) -> Dict:
     metadata["site"] = site
     metadata["instrument"] = instrument
     metadata["sampling_period"] = str(sampling_period)
-    metadata["inlet"] = inlet
+    metadata["inlet"] = format_inlet(inlet, key_name="inlet")
     metadata["port"] = port
     metadata["type"] = type_meas
 
     return metadata
 
 
-def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
+def _get_site_attributes(
+    site: str,
+    inlet: str,
+    crds_metadata: Dict,
+    site_filepath: optionalPathType = None,
+) -> Dict:
     """Gets the site specific attributes for writing to Datsets
 
     Args:
         site: Site name
         inlet: Inlet height, example: 108m
         crds_metadata: General CRDS metadata
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of attributes
     """
+    from openghg.util import get_site_info, format_inlet
+
     try:
         site_attributes: Dict = crds_metadata["sites"][site.upper()]
         global_attributes: Dict = site_attributes["global_attributes"]
@@ -280,12 +303,12 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
         raise ValueError(f"Unable to read attributes for site: {site}")
 
     # TODO - we need to combine the metadata
-    acrg_site_metadata = load_json(filename="acrg_site_info.json")
+    full_site_metadata = get_site_info(site_filepath)
 
     attributes = global_attributes.copy()
 
     try:
-        metadata = acrg_site_metadata[site.upper()]
+        metadata = full_site_metadata[site.upper()]
     except KeyError:
         pass
     else:
@@ -296,7 +319,7 @@ def _get_site_attributes(site: str, inlet: str, crds_metadata: Dict) -> Dict:
         attributes["station_long_name"] = site_metadata["long_name"]
         attributes["station_height_masl"] = site_metadata["height_station_masl"]
 
-    attributes["inlet_height_magl"] = inlet
+    attributes["inlet_height_magl"] = format_inlet(inlet, key_name="inlet_height_magl")
     attributes["comment"] = crds_metadata["comment"]
     attributes["long_name"] = site_attributes["gcwerks_site_name"]
 

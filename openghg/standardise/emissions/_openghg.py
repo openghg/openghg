@@ -8,6 +8,9 @@ def parse_openghg(
     source: str,
     domain: str,
     data_type: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -24,7 +27,7 @@ def parse_openghg(
         dict: Dictionary of data
     """
     from openghg.standardise.meta import assign_flux_attributes
-    from openghg.store import infer_date_range
+    from openghg.store import infer_date_range, update_zero_dim
     from openghg.util import timestamp_now
     from xarray import open_dataset
 
@@ -48,6 +51,14 @@ def parse_openghg(
     metadata["species"] = species
     metadata["domain"] = domain
     metadata["source"] = source
+
+    optional_keywords = {"database": database,
+                         "database_version": database_version,
+                         "model": model}
+    for key, value in optional_keywords.items():
+        if value is not None:
+            metadata[key] = value
+
     metadata["author"] = author_name
     metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
@@ -59,7 +70,11 @@ def parse_openghg(
     # e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but
     # contain 12 time points labelled as 2012-01-01, 2012-02-01, etc.
 
-    em_time = em_data.time
+    # Check if time has 0-dimensions and, if so, expand this so time is 1D
+    if "time" in em_data.coords:
+        em_data = update_zero_dim(em_data, dim="time")
+
+    em_time = em_data["time"]
 
     start_date, end_date, period_str = infer_date_range(
         em_time, filepath=filepath, period=period, continuous=continuous
