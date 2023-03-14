@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._btt &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>openghg.standardise.surface._btt &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -169,21 +169,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -291,21 +276,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -405,7 +375,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">nan</span> <span class="k">as</span> <span class="n">np_nan</span>
     <span class="kn">from</span> <span class="nn">openghg.standardise.meta</span> <span class="kn">import</span> <span class="n">assign_attributes</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">get_site_info</span><span class="p">,</span> <span class="n">format_inlet</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_internal_json</span><span class="p">,</span> <span class="n">get_site_info</span><span class="p">,</span> <span class="n">format_inlet</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">isnull</span><span class="p">,</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">to_timedelta</span>
 
     <span class="c1"># TODO: Decide what to do about inputs which aren&#39;t use anywhere</span>
@@ -425,7 +395,7 @@ document.write(`
     <span class="n">site_data</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">()</span>
     <span class="n">site_info</span> <span class="o">=</span> <span class="n">site_data</span><span class="p">[</span><span class="n">site</span><span class="p">][</span><span class="n">network</span><span class="p">]</span>
 
-    <span class="n">param_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">param_data</span> <span class="o">=</span> <span class="n">load_internal_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
     <span class="n">network_params</span> <span class="o">=</span> <span class="n">param_data</span><span class="p">[</span><span class="s2">&quot;BTT&quot;</span><span class="p">]</span>
     <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
 
@@ -534,7 +504,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

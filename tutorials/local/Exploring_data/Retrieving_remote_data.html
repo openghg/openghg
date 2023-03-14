@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Retrieving data from remote archives &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>Retrieving data from remote archives &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -172,21 +172,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -298,21 +283,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -361,6 +331,12 @@ document.write(`
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="Searching_and_plotting.html">Searching and plotting</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
 </ul>
 </div>
 </nav></div>
@@ -430,9 +406,9 @@ store that we’ll call the tutorial store. To do this we use the
 <code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
 <code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
 affect your use of OpenGHG outside of this tutorial.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
-<span class="n">use_tutorial_store</span><span class="p">()</span>
+<span class="gp">In [1]: </span><span class="n">use_tutorial_store</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
@@ -454,51 +430,58 @@ to find available data at a given site.</p>
 <section id="using-retrieve-atmospheric">
 <h3>Using <code class="docutils literal notranslate"><span class="pre">retrieve_atmospheric</span></code><a class="headerlink" href="#using-retrieve-atmospheric" title="Permalink to this heading">#</a></h3>
 <p>First we’ll import <code class="docutils literal notranslate"><span class="pre">retrieve_atmospheric</span></code> from the <code class="docutils literal notranslate"><span class="pre">retrieve</span></code> submodule, then
-we’ll retrieve some data from Weybourne (<strong>WAO</strong>). The function will
-first check for any data from <strong>WAO</strong> already stored in the object
+we’ll retrieve some data from Saclay (<strong>SAC</strong>). The function will
+first check for any data from <strong>SAC</strong> already stored in the object
 store, if any is found it is returned, otherwise it’ll retrieve the data
 from the ICOS Carbon Portal, this may take a bit longer.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve.icos</span> <span class="kn">import</span> <span class="n">retrieve_atmospheric</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">openghg.retrieve.icos</span> <span class="kn">import</span> <span class="n">retrieve_atmospheric</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [2]: </span><span class="n">sac_data</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;SAC&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">sampling_height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">)</span>
+
+<span class="gp">In [3]: </span><span class="nb">len</span><span class="p">(</span><span class="n">sac_data</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Now we can inspect <code class="docutils literal notranslate"><span class="pre">wao_data</span></code>, an <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object to see what was
-retrieved.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data</span>
+<p>Here <em class="xref py py-obj">sac_data</em> is a list of two <em class="xref py py-obj">ObsData</em> objects, each one containing differing amounts of data.
+We can have a look at the reason for their being two versions of data by checking the <em class="xref py py-obj">dataset_source</em> key
+in the attached metadata.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [7]: </span><span class="n">dataset_sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;dataset_source&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">sac_data</span><span class="p">]</span>
+
+<span class="gp">In [8]: </span><span class="n">dataset_sources</span>
 </pre></div>
 </div>
-<p>We can see that we’ve retrieved <code class="docutils literal notranslate"><span class="pre">ch4</span></code> data that covers 2013-04-01 -
-2015-07-31. Quite a lot of metadata is saved during the retrieval
+<p>Let’s say we want to look at the ICOS dataset, we can select that first dataset</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [9]: </span><span class="n">sac_data_icos</span> <span class="o">=</span> <span class="n">sac_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="gp">In [11]: </span><span class="n">sac_data_icos</span>
+</pre></div>
+</div>
+<p>We can see that we’ve retrieved <code class="docutils literal notranslate"><span class="pre">ch4</span></code> data that covers 2021-07-01 -
+2022-02-28. A lot of metadata is stored during the retrieval
 process, including where the data was retrieved from (<code class="docutils literal notranslate"><span class="pre">dobj_pid</span></code> in
-the metadata), the instruments and their associated metadata and a
+the metadata), the instruments, their associated metadata and a
 citation string.</p>
 <p>You can see more information about the instruments by going to the link
 in the <code class="docutils literal notranslate"><span class="pre">instrument_data</span></code> section of the metadata</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="n">wao_data</span><span class="o">.</span><span class="n">metadata</span>
-<span class="n">instrument_data</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span>
-<span class="n">citation_string</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;citation_string&quot;</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [14]: </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">sac_data_icos</span><span class="o">.</span><span class="n">metadata</span>
+
+<span class="gp">In [15]: </span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span>
+
+<span class="gp">In [16]: </span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;citation_string&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Here we get the instrument name and a link to the instrument data on the
 ICOS Carbon Portal.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">instrument_data</span>
-</pre></div>
-</div>
-<p>And we can easily get the citation string for the data</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">citation_string</span>
-</pre></div>
-</div>
 </section>
 <section id="viewing-the-data">
 <h3>Viewing the data<a class="headerlink" href="#viewing-the-data" title="Permalink to this heading">#</a></h3>
 <p>As with any <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object we can quickly plot it to have a look.</p>
 <blockquote>
 <div><p><strong>NOTE:</strong> the plot created below may not show up on the online
-documentation version of this notebook.</p>
+documentation. If you’re using an <em class="xref py py-obj">ipython</em> console to run through the tutorial,
+the plot will open in a new browser window.</p>
 </div></blockquote>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [17]: </span> <span class="n">sac_data_icos</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
@@ -517,20 +500,20 @@ docs</a>).</p>
 </div>
 <p>By default level 2 data is retrieved but this can be changed by passing
 <code class="docutils literal notranslate"><span class="pre">data_level</span></code> to <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code>. Below we’ll retrieve some more
-recent data from <strong>WAO</strong>.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+recent data from <strong>SAC</strong>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [2]: </span><span class="n">sac_data_level1</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;SAC&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">sampling_height</span><span class="o">=</span><span class="s2">&quot;100m&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dataset_source</span><span class="o">=</span><span class="s2">&quot;icos&quot;</span><span class="p">)</span>
+
+<span class="gp">In [4]: </span><span class="n">sac_data_level1</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="gp">In [7]: </span><span class="n">sac_data_level1</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span>
-</pre></div>
-</div>
-<p>You can see that we’ve now got data from 2021-07-01 - 2022-04-24. The
-ability to retrieve different level data has been added for convenienve,
-choose the best option for your workflow.</p>
+<p>You can see that we’ve now got quite recent data, usually up until a day or so before these docs were built. The
+ability to retrieve different level data has been added for convenience, choose the best option for your workflow.</p>
 <blockquote>
 <div><p><strong>NOTE:</strong> level 1 data may not have been quality checked.</p>
 </div></blockquote>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wao_data_level1</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;WAO - Level 1 data&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [10]: </span><span class="n">sac_data_level1</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;SAC - Level 1 data&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -541,12 +524,11 @@ retrieval from the ICOS Carbon Portal.</p>
 <p>If you retrieve data using <code class="docutils literal notranslate"><span class="pre">retrieve_icos</span></code> and notice that it does not
 return the most up to date data (compare the dates with those on the
 portal) you can force a retrieval using <code class="docutils literal notranslate"><span class="pre">force_retrieval</span></code>.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">new_data</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;WAO&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">force_retrieval</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [11]: </span><span class="n">new_data</span> <span class="o">=</span> <span class="n">retrieve_atmospheric</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;SAC&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;CH4&quot;</span><span class="p">,</span> <span class="n">data_level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">force_retrieval</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here you may notice we get a message telling us there is no new data to
-process, if you force a retrieval and there is no newer data you’ll see
-this message.</p>
+<p>Here we get a message telling us there is no new data to
+process, this will depend on the rate at which datasets are updated on the ICOS Carbon Portal.</p>
 </section>
 </section>
 <section id="ceda">
@@ -573,30 +555,32 @@ standardisation and checks and store it in the object store.</p>
 login to access. If you’d find this useful please open an issue at the
 link given above.</p>
 <p>Now we’re ready to retrieve the data.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve.ceda</span> <span class="kn">import</span> <span class="n">retrieve_surface</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">openghg.retrieve.ceda</span> <span class="kn">import</span> <span class="n">retrieve_surface</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-crds_heathfield_20130101_co2-100m.nc?download=1&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [2]: </span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-crds_heathfield_20130101_co2-100m.nc?download=1&quot;</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data</span> <span class="o">=</span> <span class="n">retrieve_surface</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [3]: </span><span class="n">hfd_data</span> <span class="o">=</span> <span class="n">retrieve_surface</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+
+<span class="gp">In [3]: </span><span class="n">hfd_data</span>
 </pre></div>
 </div>
 <p>Now we’ve got the data, we can use it as any other <code class="docutils literal notranslate"><span class="pre">ObsData</span></code> object,
 using <code class="docutils literal notranslate"><span class="pre">data</span></code> and <code class="docutils literal notranslate"><span class="pre">metadata</span></code>.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="n">hfd_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>Within an <code class="docutils literal notranslate"><span class="pre">ipython</span></code> session the plot will be opened in a new window, in a notebook it will appear in the cell below.</p>
 <section id="retrieving-a-second-time">
 <h3>Retrieving a second time<a class="headerlink" href="#retrieving-a-second-time" title="Permalink to this heading">#</a></h3>
 <p>The second time we (or another user) retrieves the data it will be pulled
 from the object store, this should be faster than retrieving from CEDA.
 To get the same data again use the <code class="docutils literal notranslate"><span class="pre">site</span></code>, <code class="docutils literal notranslate"><span class="pre">species</span></code> and <code class="docutils literal notranslate"><span class="pre">inlet</span></code>
 arguments.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data2</span> <span class="o">=</span> <span class="n">retrieve_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;hfd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hfd_data2</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [6]: </span><span class="n">hfd_data_ceda</span> <span class="o">=</span> <span class="n">retrieve_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;hfd&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">)</span>
+
+<span class="gp">In [7]: </span><span class="n">hfd_data_ceda</span>
 </pre></div>
 </div>
 </section>
@@ -605,10 +589,11 @@ arguments.</p>
 <h2>3. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [9]: </span><span class="n">clear_tutorial_store</span><span class="p">()</span>
+<span class="go">INFO:openghg.tutorial:Tutorial store at /home/gareth/openghg_store/tutorial_store cleared.</span>
 </pre></div>
 </div>
 </section>
@@ -708,7 +693,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

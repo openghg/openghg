@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._species &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>openghg.util._species &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -169,21 +169,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -291,21 +276,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -391,34 +361,30 @@ document.write(`
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_species_info&quot;</span><span class="p">,</span> <span class="s2">&quot;synonyms&quot;</span><span class="p">,</span> <span class="s2">&quot;species_lifetime&quot;</span><span class="p">,</span> <span class="s2">&quot;check_lifetime_monthly&quot;</span><span class="p">,</span> <span class="s2">&quot;molar_mass&quot;</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">get_species_info</span><span class="p">(</span><span class="n">species_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract data from species info JSON file as a dictionary.</span>
+<span class="k">def</span> <span class="nf">get_species_info</span><span class="p">(</span><span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract data from species info JSON file as a dictionary.</span>
 
 <span class="sd">    This uses the data stored within openghg_defs/species_info JSON file by default.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        species_filename: Alternative species info file.</span>
-
+<span class="sd">        species_filepath: Alternative species info file.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Data from species JSON file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg_defs</span> <span class="kn">import</span> <span class="n">species_info_file</span>
 
-    <span class="k">if</span> <span class="n">species_filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">species_info_json</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">species_info_file</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">species_info_json</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">species_filename</span><span class="p">)</span>
+    <span class="n">fpath</span> <span class="o">=</span> <span class="n">species_info_file</span> <span class="k">if</span> <span class="n">species_filepath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">species_filepath</span>
 
-    <span class="k">return</span> <span class="n">species_info_json</span>
+    <span class="k">return</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">fpath</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="synonyms"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.synonyms">[docs]</a><span class="k">def</span> <span class="nf">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-             <span class="n">lower</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-             <span class="n">allow_new_species</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-             <span class="n">species_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check to see if there are other names that we should be using for</span>
+<div class="viewcode-block" id="synonyms"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.synonyms">[docs]</a><span class="k">def</span> <span class="nf">synonyms</span><span class="p">(</span>
+    <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">lower</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">allow_new_species</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check to see if there are other names that we should be using for</span>
 <span class="sd">    a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11.</span>
 
 <span class="sd">    Args:</span>
@@ -427,7 +393,7 @@ document.write(`
 <span class="sd">        allow_new_species : Return original value (may be lower case)</span>
 <span class="sd">            if this (or a synonym) is not found in the database.</span>
 <span class="sd">            If False, raise a ValueError.</span>
-<span class="sd">        species_filename: Alternative species info file. Defaults to openghg_defs input.</span>
+<span class="sd">        species_filepath: Alternative species info file. Defaults to openghg_defs input.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Matched species string</span>
 
@@ -436,7 +402,7 @@ document.write(`
 <span class="sd">    and changed if needed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Load in the species data</span>
-    <span class="n">species_data</span> <span class="o">=</span> <span class="n">get_species_info</span><span class="p">(</span><span class="n">species_filename</span><span class="p">)</span>
+    <span class="n">species_data</span> <span class="o">=</span> <span class="n">get_species_info</span><span class="p">(</span><span class="n">species_filepath</span><span class="o">=</span><span class="n">species_filepath</span><span class="p">)</span>
 
     <span class="c1"># First test whether site matches keys (case insensitive)</span>
     <span class="n">matched_strings</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">species_data</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
@@ -470,22 +436,19 @@ document.write(`
 <span class="n">LifetimeType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span>
 
 
-<div class="viewcode-block" id="species_lifetime"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.species_lifetime">[docs]</a><span class="k">def</span> <span class="nf">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
-                     <span class="n">species_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LifetimeType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Find species lifetime.</span>
+<div class="viewcode-block" id="species_lifetime"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.species_lifetime">[docs]</a><span class="k">def</span> <span class="nf">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LifetimeType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find species lifetime.</span>
 <span class="sd">    This can either be labelled as &quot;lifetime&quot; or &quot;lifetime_monthly&quot;.</span>
 
 <span class="sd">    Note: no species synonyms accepted yet</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        species : Species name e.g. &quot;ch4&quot; or &quot;co2&quot;</span>
-<span class="sd">        species_filename: Alternative species info file. Defaults to openghg_defs input.</span>
-
+<span class="sd">        species_filepath: Alternative species info file. Defaults to openghg_defs input.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        str / list / None : Extracted lifetime or None is no lifetime was present.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">species_data</span> <span class="o">=</span> <span class="n">get_species_info</span><span class="p">(</span><span class="n">species_filename</span><span class="p">)</span>
+    <span class="n">species_data</span> <span class="o">=</span> <span class="n">get_species_info</span><span class="p">(</span><span class="n">species_filepath</span><span class="o">=</span><span class="n">species_filepath</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">species_label</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_new_species</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -508,18 +471,15 @@ document.write(`
 
 
 <div class="viewcode-block" id="check_lifetime_monthly"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.check_lifetime_monthly">[docs]</a><span class="k">def</span> <span class="nf">check_lifetime_monthly</span><span class="p">(</span><span class="n">lifetime</span><span class="p">:</span> <span class="n">LifetimeType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check whether retrieved lifetime value represents monthly lifetimes.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether retrieved lifetime value represents monthly lifetimes.</span>
 <span class="sd">    This checks whether lifetime is a list and contains 12 values.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        lifetime : str or list representation of lifetime value</span>
-
 <span class="sd">    Returns:</span>
 <span class="sd">        bool : True of lifetime matches criteria for monthly data, False otherwise</span>
-
-<span class="sd">        Raises ValueError:</span>
-<span class="sd">            if lifetime is a list but does not contain exactly 12 entries, one for each month</span>
+<span class="sd">    Raises ValueError:</span>
+<span class="sd">        if lifetime is a list but does not contain exactly 12 entries, one for each month</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lifetime</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lifetime</span><span class="p">)</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
@@ -530,21 +490,19 @@ document.write(`
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="molar_mass"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.molar_mass">[docs]</a><span class="k">def</span> <span class="nf">molar_mass</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function extracts the molar mass of a species.</span>
+<div class="viewcode-block" id="molar_mass"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.molar_mass">[docs]</a><span class="k">def</span> <span class="nf">molar_mass</span><span class="p">(</span><span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">species_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extracts the molar mass of a species.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        species : Species name</span>
-<span class="sd">        species_filename: Alternative species info file. Defaults to openghg_defs input.</span>
-
+<span class="sd">        species_filepath: Alternative species info file. Defaults to openghg_defs input.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        float : Molar mass of species</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">species_data</span> <span class="o">=</span> <span class="n">get_species_info</span><span class="p">(</span><span class="n">species_filename</span><span class="p">)</span>
+    <span class="n">species_data</span> <span class="o">=</span> <span class="n">get_species_info</span><span class="p">(</span><span class="n">species_filepath</span><span class="o">=</span><span class="n">species_filepath</span><span class="p">)</span>
 
     <span class="n">species_label</span> <span class="o">=</span> <span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_new_species</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">molmass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">species_data</span><span class="p">[</span><span class="n">species_label</span><span class="p">][</span><span class="s1">&#39;mol_mass&#39;</span><span class="p">])</span>
+    <span class="n">molmass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">species_data</span><span class="p">[</span><span class="n">species_label</span><span class="p">][</span><span class="s2">&quot;mol_mass&quot;</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">molmass</span></div>
 </pre></div>
@@ -597,7 +555,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

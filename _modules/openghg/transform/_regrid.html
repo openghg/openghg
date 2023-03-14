@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.transform._regrid &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>openghg.transform._regrid &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -169,21 +169,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -291,21 +276,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -383,22 +353,13 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for openghg.transform._regrid</h1><div class="highlight"><pre>
-<span></span><span class="c1"># TODO: Add import for xesmf within specific functions and NOT general import at the top.</span>
-<span class="c1"># TODO: Add try-except around xesmf import with helpful error message</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
 
-<span class="n">xesmf_error_message</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;Unable to import xesmf for use with regridding algorithms&quot;</span>
-    <span class="s2">&quot;To use transform modules please follow instructions&quot;</span>
-    <span class="s2">&quot;for installing non-python dependencies (requires conda&quot;</span>
-    <span class="s2">&quot;to be installed even if using pip to install other packages)&quot;</span>
-<span class="p">)</span>
-<span class="c1"># TODO: Add explicit link to instruction page once created</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">construct_xesmf_import_error</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">ArrayLikeMatch</span>
 
 
 <span class="k">def</span> <span class="nf">_getGridCC</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
@@ -418,27 +379,43 @@ document.write(`
     <span class="k">return</span> <span class="n">LON</span><span class="p">,</span> <span class="n">LAT</span>
 
 
-<span class="k">def</span> <span class="nf">_create_xesmf_grid_uniform_cc</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="c1"># def _create_xesmf_grid_uniform_cc(lat: ndarray, lon: ndarray) -&gt; xr.Dataset:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Creates a Dataset ready to be used by the xesmf regridder from 1D arrays</span>
+<span class="c1">#     of latitude and longitude values.</span>
+
+<span class="c1">#     This includes both the centre points and bounds of the latitude and longitude</span>
+<span class="c1">#     grids (needed for conservative regridding methods but not for bilinear etc.)</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     LON, LAT = np.meshgrid(lon, lat)</span>
+<span class="c1">#     LON_b, LAT_b = _getGridCC(lat, lon)</span>
+
+<span class="c1">#     grid = xr.Dataset(</span>
+<span class="c1">#         {</span>
+<span class="c1">#             &quot;lon&quot;: ([&quot;x&quot;, &quot;y&quot;], LON),</span>
+<span class="c1">#             &quot;lat&quot;: ([&quot;x&quot;, &quot;y&quot;], LAT),</span>
+<span class="c1">#             &quot;lon_b&quot;: ([&quot;x_b&quot;, &quot;y_b&quot;], LON_b),</span>
+<span class="c1">#             &quot;lat_b&quot;: ([&quot;x_b&quot;, &quot;y_b&quot;], LAT_b),</span>
+<span class="c1">#         }</span>
+<span class="c1">#     )</span>
+
+<span class="c1">#     return grid</span>
+
+
+<span class="k">def</span> <span class="nf">_create_uniform_coords</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a Dataset ready to be used by the xesmf regridder from 1D arrays</span>
 <span class="sd">    of latitude and longitude values.</span>
-
-<span class="sd">    This includes both the centre points and bounds of the latitude and longitude</span>
-<span class="sd">    grids (needed for conservative regridding methods but not for bilinear etc.)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">LON</span><span class="p">,</span> <span class="n">LAT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
-    <span class="n">LON_b</span><span class="p">,</span> <span class="n">LAT_b</span> <span class="o">=</span> <span class="n">_getGridCC</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
 
-    <span class="n">grid</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+    <span class="n">ds_out</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
         <span class="p">{</span>
-            <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="p">([</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="n">LON</span><span class="p">),</span>
-            <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="p">([</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="n">LAT</span><span class="p">),</span>
-            <span class="s2">&quot;lon_b&quot;</span><span class="p">:</span> <span class="p">([</span><span class="s2">&quot;x_b&quot;</span><span class="p">,</span> <span class="s2">&quot;y_b&quot;</span><span class="p">],</span> <span class="n">LON_b</span><span class="p">),</span>
-            <span class="s2">&quot;lat_b&quot;</span><span class="p">:</span> <span class="p">([</span><span class="s2">&quot;x_b&quot;</span><span class="p">,</span> <span class="s2">&quot;y_b&quot;</span><span class="p">],</span> <span class="n">LAT_b</span><span class="p">),</span>
+            <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="p">([</span><span class="s2">&quot;lat&quot;</span><span class="p">],</span> <span class="n">lat</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;degrees_north&quot;</span><span class="p">}),</span>
+            <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="p">([</span><span class="s2">&quot;lon&quot;</span><span class="p">],</span> <span class="n">lon</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;degrees_east&quot;</span><span class="p">}),</span>
         <span class="p">}</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">grid</span>
+    <span class="k">return</span> <span class="n">ds_out</span>
 
 
 <span class="k">def</span> <span class="nf">convert_to_ndarray</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
@@ -450,12 +427,6 @@ document.write(`
         <span class="n">values</span> <span class="o">=</span> <span class="n">array</span>
 
     <span class="k">return</span> <span class="n">values</span>
-
-
-<span class="c1"># Create types for ndarray or xr.DataArray inputs</span>
-<span class="c1"># Using TypeVar means - whichever type is passed in will be the one which is returned.</span>
-<span class="n">ArrayLikeMatch</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;ArrayLikeMatch&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span>
-<span class="n">ArrayLike</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="regrid_uniform_cc"><a class="viewcode-back" href="../../../api/api_transform.html#openghg.transform.regrid_uniform_cc">[docs]</a><span class="k">def</span> <span class="nf">regrid_uniform_cc</span><span class="p">(</span>
@@ -495,8 +466,8 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">xesmf</span>  <span class="c1"># type:ignore</span>
-    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">xesmf_error_message</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">construct_xesmf_import_error</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">latlon</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">latlon</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">]</span>
@@ -536,51 +507,57 @@ document.write(`
     <span class="n">lat_out</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">lat_out</span><span class="p">)</span>
     <span class="n">lon_out</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">lon_out</span><span class="p">)</span>
 
-    <span class="n">input_grid</span> <span class="o">=</span> <span class="n">_create_xesmf_grid_uniform_cc</span><span class="p">(</span><span class="n">lat_in</span><span class="p">,</span> <span class="n">lon_in</span><span class="p">)</span>
-    <span class="n">output_grid</span> <span class="o">=</span> <span class="n">_create_xesmf_grid_uniform_cc</span><span class="p">(</span><span class="n">lat_out</span><span class="p">,</span> <span class="n">lon_out</span><span class="p">)</span>
+    <span class="c1"># 09/03/2023: Don&#39;t seem to need inputs with centre and bounding boxes for</span>
+    <span class="c1"># uniform grid and xesmf &quot;conservative&quot; method anymore.</span>
+    <span class="n">input_grid</span> <span class="o">=</span> <span class="n">_create_uniform_coords</span><span class="p">(</span><span class="n">lat_in</span><span class="p">,</span> <span class="n">lon_in</span><span class="p">)</span>
+    <span class="n">output_grid</span> <span class="o">=</span> <span class="n">_create_uniform_coords</span><span class="p">(</span><span class="n">lat_out</span><span class="p">,</span> <span class="n">lon_out</span><span class="p">)</span>
 
     <span class="n">regridder</span> <span class="o">=</span> <span class="n">xesmf</span><span class="o">.</span><span class="n">Regridder</span><span class="p">(</span><span class="n">input_grid</span><span class="p">,</span> <span class="n">output_grid</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
     <span class="n">regridded</span><span class="p">:</span> <span class="n">ArrayLikeMatch</span> <span class="o">=</span> <span class="n">regridder</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">regridded</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="kn">import</span> <span class="n">coo_matrix</span>  <span class="c1"># type:ignore</span>
+    <span class="c1"># # 09/03/2023: Don&#39;t need this for uniform grid anymore due to changes above</span>
+    <span class="c1"># # but a variant may be needed for non-uniform grids e.g. tropomi data.</span>
+    <span class="c1"># if isinstance(regridded, xr.DataArray):</span>
+    <span class="c1">#     from scipy.sparse import coo_matrix  # type:ignore</span>
 
-        <span class="c1"># Checking dimensions and mapping back lat_out and lon_out</span>
-        <span class="c1"># May be overkill but attempting to make sure this is done correctly.</span>
-        <span class="c1"># The regridded DataArray will contain dimensions of (&#39;x&#39;, &#39;y&#39;) for</span>
-        <span class="c1"># data, &#39;lat&#39; and &#39;lon&#39; coordinates e.g. lon = [[-10,-10],[0,0]]</span>
-        <span class="c1"># This is to allow for the generic case where (&#39;lat&#39;, &#39;lon&#39;) is not</span>
-        <span class="c1"># a rectilinear (uniform) grid.</span>
-        <span class="c1"># Since we are creating a uniform grid we want to flatten this and</span>
-        <span class="c1"># put data back on (&#39;lat&#39;, &#39;lon&#39;) dimension.</span>
-        <span class="n">regridded_stack</span> <span class="o">=</span> <span class="n">regridded</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">))</span>
-        <span class="n">lat_coord</span> <span class="o">=</span> <span class="n">regridded_stack</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span>
-        <span class="n">lon_coord</span> <span class="o">=</span> <span class="n">regridded_stack</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">]</span>
+    <span class="c1">#     # Checking dimensions and mapping back lat_out and lon_out</span>
+    <span class="c1">#     # May be overkill but attempting to make sure this is done correctly.</span>
+    <span class="c1">#     # The regridded DataArray will contain dimensions of (&#39;x&#39;, &#39;y&#39;) for</span>
+    <span class="c1">#     # data, &#39;lat&#39; and &#39;lon&#39; coordinates e.g. lon = [[-10,-10],[0,0]]</span>
+    <span class="c1">#     # This is to allow for the generic case where (&#39;lat&#39;, &#39;lon&#39;) is not</span>
+    <span class="c1">#     # a rectilinear (uniform) grid.</span>
+    <span class="c1">#     # Since we are creating a uniform grid we want to flatten this and</span>
+    <span class="c1">#     # put data back on (&#39;lat&#39;, &#39;lon&#39;) dimension.</span>
+    <span class="c1">#     regridded_stack = regridded.stack(z=(&quot;x&quot;, &quot;y&quot;))</span>
+    <span class="c1">#     lat_coord = regridded_stack[&quot;lat&quot;]</span>
+    <span class="c1">#     lon_coord = regridded_stack[&quot;lon&quot;]</span>
 
-        <span class="c1"># Find coords within our lat_out and lon_out grid for our regridded output</span>
-        <span class="c1"># Digitize is technically a binning operation outputting the number of the</span>
-        <span class="c1"># bin the value is within so to get indicies we can subtract 1.</span>
-        <span class="n">lat_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">lat_coord</span><span class="p">,</span> <span class="n">lat_out</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="n">lon_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">lon_coord</span><span class="p">,</span> <span class="n">lon_out</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1">#     # Find coords within our lat_out and lon_out grid for our regridded output</span>
+    <span class="c1">#     # Digitize is technically a binning operation outputting the number of the</span>
+    <span class="c1">#     # bin the value is within so to get indicies we can subtract 1.</span>
+    <span class="c1">#     lat_index = np.digitize(lat_coord, lat_out) - 1</span>
+    <span class="c1">#     lon_index = np.digitize(lon_coord, lon_out) - 1</span>
 
-        <span class="c1"># Create a sparse matrix from the flattened data and the lat, lon index values.</span>
-        <span class="c1"># Reshape to our required lat_out, lon_out and output as a numpy array</span>
-        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lat_out</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">lon_out</span><span class="p">))</span>
-        <span class="n">regridded_grid</span> <span class="o">=</span> <span class="n">coo_matrix</span><span class="p">((</span><span class="n">regridded_stack</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">lat_index</span><span class="p">,</span> <span class="n">lon_index</span><span class="p">)),</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    <span class="c1">#     # Create a sparse matrix from the flattened data and the lat, lon index values.</span>
+    <span class="c1">#     # Reshape to our required lat_out, lon_out and output as a numpy array</span>
+    <span class="c1">#     shape = (len(lat_out), len(lon_out))</span>
+    <span class="c1">#     regridded_grid = coo_matrix((regridded_stack.data, (lat_index, lon_index)), shape=shape).toarray()</span>
 
-        <span class="n">regridded</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
-            <span class="n">regridded_grid</span><span class="p">,</span>
-            <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">),</span>
-            <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="n">lat_out</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="n">lon_out</span><span class="p">},</span>
-            <span class="n">attrs</span><span class="o">=</span><span class="n">regridded</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="c1">#     regridded = xr.DataArray(</span>
+    <span class="c1">#         regridded_grid,</span>
+    <span class="c1">#         dims=(&quot;lat&quot;, &quot;lon&quot;),</span>
+    <span class="c1">#         coords={&quot;lat&quot;: lat_out, &quot;lon&quot;: lon_out},</span>
+    <span class="c1">#         attrs=regridded.attrs,</span>
+    <span class="c1">#     )</span>
 
-        <span class="c1"># # Alternative, more simplistic approach. May not be generic</span>
-        <span class="c1"># regridded = regridded.drop(labels=(&quot;lat&quot;,&quot;lon&quot;))</span>
-        <span class="c1"># regridded = regridded.assign_coords(**{&quot;x&quot;:output_lat,&quot;y&quot;:output_lon})</span>
-        <span class="c1"># regridded = regridded.rename({&quot;x&quot;:&quot;lat&quot;,&quot;y&quot;:&quot;lon&quot;})</span>
+    <span class="c1">#     # # Alternative, more simplistic approach. May not be generic</span>
+    <span class="c1">#     # regridded = regridded.drop(labels=(&quot;lat&quot;,&quot;lon&quot;))</span>
+    <span class="c1">#     # regridded = regridded.assign_coords(**{&quot;x&quot;:output_lat,&quot;y&quot;:output_lon})</span>
+    <span class="c1">#     # regridded = regridded.rename({&quot;x&quot;:&quot;lat&quot;,&quot;y&quot;:&quot;lon&quot;})</span>
 
-    <span class="n">regridder</span><span class="o">.</span><span class="n">clean_weight_file</span><span class="p">()</span>
+    <span class="c1"># # In later versions of xesmf (0.7?) this no longer seems to be needed</span>
+    <span class="c1"># # as weight files are not stored on disk.</span>
+    <span class="c1"># regridder.clean_weight_file()</span>
 
     <span class="k">return</span> <span class="n">regridded</span></div>
 
@@ -675,7 +652,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

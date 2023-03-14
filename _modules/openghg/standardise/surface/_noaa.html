@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>openghg.standardise.surface._noaa &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -169,21 +169,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -291,21 +276,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -402,7 +372,7 @@ document.write(`
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NOAA&quot;</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>    
+    <span class="n">site_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwarg</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read NOAA data from raw text file or ObsPack NetCDF</span>
@@ -415,7 +385,7 @@ document.write(`
 <span class="sd">        network: Network, defaults to NOAA</span>
 <span class="sd">        instrument: Instrument name</span>
 <span class="sd">        sampling_period: Sampling period</span>
-<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).</span>
 <span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of data and metadata</span>
@@ -435,7 +405,7 @@ document.write(`
             <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
             <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
             <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
-            <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">,</span>
+            <span class="n">site_filepath</span><span class="o">=</span><span class="n">site_filepath</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_read_raw_file</span><span class="p">(</span>
@@ -445,7 +415,7 @@ document.write(`
             <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
             <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
             <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
-            <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">,</span>
+            <span class="n">site_filepath</span><span class="o">=</span><span class="n">site_filepath</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -654,7 +624,7 @@ document.write(`
     <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read NOAA ObsPack NetCDF files</span>
 
@@ -665,7 +635,7 @@ document.write(`
 <span class="sd">        measurement_type: One of flask, insitu or pfp</span>
 <span class="sd">        inlet: Inlet height, if no height use measurement type e.g. flask</span>
 <span class="sd">        instrument: Instrument name</span>
-<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).</span>
 <span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary of results</span>
@@ -772,7 +742,7 @@ document.write(`
 
     <span class="n">gas_data</span> <span class="o">=</span> <span class="n">_split_inlets</span><span class="p">(</span><span class="n">processed_ds</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">)</span>
 
-    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">)</span>
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">site_filepath</span><span class="o">=</span><span class="n">site_filepath</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">gas_data</span>
 
@@ -784,7 +754,7 @@ document.write(`
     <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">site_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads NOAA data files and returns a dictionary of processed</span>
 <span class="sd">    data and metadata.</span>
@@ -796,7 +766,7 @@ document.write(`
 <span class="sd">        measurement_type: One of flask, insitu or pfp</span>
 <span class="sd">        inlet: Inlet height, if no height use measurement type e.g. flask</span>
 <span class="sd">        instrument: Instrument name</span>
-<span class="sd">        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).</span>
+<span class="sd">        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).</span>
 <span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
 
 <span class="sd">    Returns:</span>
@@ -825,7 +795,7 @@ document.write(`
         <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;NOAA&quot;</span><span class="p">,</span> <span class="n">site_filename</span><span class="o">=</span><span class="n">site_filename</span><span class="p">)</span>
+    <span class="n">gas_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gas_data</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;NOAA&quot;</span><span class="p">,</span> <span class="n">site_filepath</span><span class="o">=</span><span class="n">site_filepath</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">gas_data</span>
 
@@ -849,7 +819,7 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary containing attributes, data and metadata keys</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">read_header</span><span class="p">,</span> <span class="n">get_site_info</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">read_header</span><span class="p">,</span> <span class="n">get_site_info</span><span class="p">,</span> <span class="n">load_internal_json</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">read_csv</span>
 
     <span class="n">header</span> <span class="o">=</span> <span class="n">read_header</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
@@ -960,7 +930,7 @@ document.write(`
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
 
     <span class="c1"># TODO  - this could do with a better name</span>
-    <span class="n">noaa_params</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s2">&quot;NOAA&quot;</span><span class="p">]</span>
+    <span class="n">noaa_params</span> <span class="o">=</span> <span class="n">load_internal_json</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)[</span><span class="s2">&quot;NOAA&quot;</span><span class="p">]</span>
 
     <span class="n">site_attributes</span> <span class="o">=</span> <span class="n">noaa_params</span><span class="p">[</span><span class="s2">&quot;global_attributes&quot;</span><span class="p">]</span>
     <span class="n">site_attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
@@ -1088,7 +1058,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

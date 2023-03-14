@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>openghg.tutorial._tutorial &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -169,21 +169,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -291,21 +276,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -637,6 +607,27 @@ document.write(`
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
 
 
+<span class="k">def</span> <span class="nf">download_edgar_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download edgar data to tutorial store to be used within parse_edgar transform</span>
+<span class="sd">    tutorial.</span>
+
+<span class="sd">    This is currently a limited subset of v6.0 CH4 data (2014-2015)</span>
+
+<span class="sd">    TODO: Upgrade to use v7.0 data when this has been checked and added into workflow.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+
+    <span class="n">use_tutorial_store</span><span class="p">()</span>
+
+    <span class="n">edgar_v60_database</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/databases/TOTALS_nc.tar.gz&quot;</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Retrieving example database...&quot;</span><span class="p">)</span>
+    <span class="n">edgar_database_path</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">edgar_v60_database</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">edgar_database_path</span>
+
+
 <div class="viewcode-block" id="use_tutorial_store"><a class="viewcode-back" href="../../../api/api_tutorial.html#openghg.tutorial.use_tutorial_store">[docs]</a><span class="k">def</span> <span class="nf">use_tutorial_store</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets an environment variable telling OpenGHG to use a</span>
 <span class="sd">    temporary object store. This sets the store to be</span>
@@ -822,7 +813,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

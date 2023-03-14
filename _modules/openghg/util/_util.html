@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._util &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>openghg.util._util &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -169,21 +169,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -291,21 +276,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -388,6 +358,10 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.util&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
 <div class="viewcode-block" id="running_in_cloud"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_in_cloud">[docs]</a><span class="k">def</span> <span class="nf">running_in_cloud</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -473,12 +447,12 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        str or None: Three letter site code if found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">remove_punctuation</span>
     <span class="kn">from</span> <span class="nn">rapidfuzz</span> <span class="kn">import</span> <span class="n">process</span>  <span class="c1"># type: ignore</span>
 
-    <span class="n">sites</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_lookup.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">site_name</span> <span class="o">=</span> <span class="n">remove_punctuation</span><span class="p">(</span><span class="n">site_name</span><span class="p">)</span>
 
-    <span class="n">inverted</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;short_name&quot;</span><span class="p">]:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sites</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">inverted</span> <span class="o">=</span> <span class="n">_create_site_lookup_dict</span><span class="p">()</span>
 
     <span class="n">matches</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">site_name</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">inverted</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
     <span class="n">highest_score</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
@@ -486,10 +460,16 @@ document.write(`
     <span class="k">if</span> <span class="n">highest_score</span> <span class="o">&lt;</span> <span class="mi">90</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
+    <span class="c1"># If there are multiple &gt;= 90 matches we return None as this is ambiguous</span>
+    <span class="n">greater_than_90</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">90</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">greater_than_90</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please provide more site information, more than one site found.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
     <span class="n">matched_site</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">site_code</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">inverted</span><span class="p">[</span><span class="n">matched_site</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">site_code</span></div>
+    <span class="k">return</span> <span class="n">site_code</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="find_matching_site"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_matching_site">[docs]</a><span class="k">def</span> <span class="nf">find_matching_site</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_sites</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -526,7 +506,39 @@ document.write(`
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Unknown site: </span><span class="si">{</span><span class="n">site_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
 
-<div class="viewcode-block" id="verify_site"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.verify_site">[docs]</a><span class="k">def</span> <span class="nf">verify_site</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_create_site_lookup_dict</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a dictionary of site name: three letter site code values</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of site_name: site_code values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg_defs</span> <span class="kn">import</span> <span class="n">site_info_file</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">remove_punctuation</span>
+
+    <span class="n">site_info</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">site_info_file</span><span class="p">)</span>
+
+    <span class="n">inverted</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">site</span><span class="p">,</span> <span class="n">site_data</span> <span class="ow">in</span> <span class="n">site_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">network_data</span> <span class="ow">in</span> <span class="n">site_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">long_name</span> <span class="o">=</span> <span class="n">network_data</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Remove the country from the name</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">no_country</span> <span class="o">=</span> <span class="n">remove_punctuation</span><span class="p">(</span><span class="n">long_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="n">no_country</span> <span class="o">=</span> <span class="n">remove_punctuation</span><span class="p">(</span><span class="n">long_name</span><span class="p">)</span>
+
+                <span class="n">inverted</span><span class="p">[</span><span class="n">no_country</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
+
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">inverted</span>
+
+
+<div class="viewcode-block" id="verify_site"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.verify_site">[docs]</a><span class="k">def</span> <span class="nf">verify_site</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the passed site is a valid one and returns the three</span>
 <span class="sd">    letter site code if found. Otherwise we use fuzzy text matching to suggest</span>
 <span class="sd">    sites with similar names.</span>
@@ -536,23 +548,18 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Verified three letter site code if valid site</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">InvalidSiteError</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span><span class="p">,</span> <span class="n">remove_punctuation</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
+    <span class="kn">from</span> <span class="nn">openghg_defs</span> <span class="kn">import</span> <span class="n">site_info_file</span>
 
-    <span class="n">site_lookup</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;site_lookup.json&quot;</span><span class="p">,</span> <span class="n">internal_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">site_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">site_info_file</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">site_lookup</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">site_data</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">site</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">site</span> <span class="o">=</span> <span class="n">remove_punctuation</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
-        <span class="n">name_lookup</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;short_name&quot;</span><span class="p">]:</span> <span class="n">code</span> <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">site_lookup</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">name_lookup</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">long_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]:</span> <span class="n">code</span> <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">site_lookup</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="n">find_matching_site</span><span class="p">(</span><span class="n">site_name</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">possible_sites</span><span class="o">=</span><span class="n">long_names</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidSiteError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+        <span class="n">site_code</span> <span class="o">=</span> <span class="n">site_code_finder</span><span class="p">(</span><span class="n">site_name</span><span class="o">=</span><span class="n">site</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">site_code</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to find site code for </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">, please provide additional metadata.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">site_code</span></div>
 
 
 <div class="viewcode-block" id="multiple_inlets"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.multiple_inlets">[docs]</a><span class="k">def</span> <span class="nf">multiple_inlets</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -629,7 +636,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

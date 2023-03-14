@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._domain &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>openghg.util._domain &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -169,21 +169,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -291,21 +276,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -383,54 +353,49 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for openghg.util._domain</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
 
-<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span><span class="p">,</span> <span class="n">ArrayLikeMatch</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">XrDataLike</span><span class="p">,</span> <span class="n">XrDataLikeMatch</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;get_domain_info&quot;</span><span class="p">,</span> <span class="s2">&quot;find_domain&quot;</span><span class="p">,</span> <span class="s2">&quot;convert_longitude&quot;</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">get_domain_info</span><span class="p">(</span><span class="n">domain_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract data from domain info JSON file as a dictionary.</span>
+<span class="k">def</span> <span class="nf">get_domain_info</span><span class="p">(</span><span class="n">domain_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract data from domain info JSON file as a dictionary.</span>
 
 <span class="sd">    This uses the data stored within openghg_defs/domain_info JSON file by default.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        domain_filename: Alternative domain info file.</span>
-
+<span class="sd">        domain_filepath: Alternative domain info file.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Data from domain JSON file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg_defs</span> <span class="kn">import</span> <span class="n">domain_info_file</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
 
-    <span class="k">if</span> <span class="n">domain_filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">domain_info_json</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">domain_info_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">domain_filepath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">domain_info_json</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">domain_info_file</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">domain_info_json</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">domain_filename</span><span class="p">)</span>
+        <span class="n">domain_info_json</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">domain_filepath</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">domain_info_json</span>
 
 
-<div class="viewcode-block" id="find_domain"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_domain">[docs]</a><span class="k">def</span> <span class="nf">find_domain</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                <span class="n">domain_filename</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Finds the latitude and longitude values in degrees associated</span>
+<div class="viewcode-block" id="find_domain"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_domain">[docs]</a><span class="k">def</span> <span class="nf">find_domain</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">domain_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the latitude and longitude values in degrees associated</span>
 <span class="sd">    with a given domain name.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        domain: Pre-defined domain name</span>
-<span class="sd">        domain_filename: Alternative domain info file. Defaults to openghg_defs input.</span>
-
+<span class="sd">        domain_filepath: Alternative domain info file. Defaults to openghg_defs input.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        array, array : Latitude and longitude values for the domain in degrees.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">domain_info</span> <span class="o">=</span> <span class="n">get_domain_info</span><span class="p">(</span><span class="n">domain_filename</span><span class="p">)</span>
+    <span class="n">domain_info</span> <span class="o">=</span> <span class="n">get_domain_info</span><span class="p">(</span><span class="n">domain_filepath</span><span class="p">)</span>
 
     <span class="c1"># Look for domain in domain_info file</span>
     <span class="k">if</span> <span class="n">domain</span> <span class="ow">in</span> <span class="n">domain_info</span><span class="p">:</span>
@@ -449,8 +414,7 @@ document.write(`
 
 
 <span class="k">def</span> <span class="nf">_get_coord_data</span><span class="p">(</span><span class="n">coord</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Attempts to extract or derive coordinate (typically latitude/longitude)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Attempts to extract or derive coordinate (typically latitude/longitude)</span>
 <span class="sd">    values for a domain from provided data dictionary (typically</span>
 <span class="sd">    this can be derived from &#39;domain_info.json&#39; file).</span>
 
@@ -468,7 +432,6 @@ document.write(`
 <span class="sd">        data: Data dictionary containing details of domain</span>
 <span class="sd">              (e.g. derived from &#39;domain_info.json&#39;)</span>
 <span class="sd">        domain: Name of domain</span>
-
 <span class="sd">    Returns:</span>
 <span class="sd">        array: Extracted or derived coordinate values</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -510,29 +473,140 @@ document.write(`
     <span class="k">return</span> <span class="n">coord_data</span>
 
 
-<div class="viewcode-block" id="convert_longitude"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.convert_longitude">[docs]</a><span class="k">def</span> <span class="nf">convert_longitude</span><span class="p">(</span>
-    <span class="n">longitude</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">return_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]]:</span>
+<span class="k">def</span> <span class="nf">find_coord_name</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">XrDataLike</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert longitude extent to -180 - 180 and reorder.</span>
+<span class="sd">    Find the name of a coordinate based on input options.</span>
+<span class="sd">    Only the first found value will be returned.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        longitude: Array of valid longitude values in degrees.</span>
-<span class="sd">        return_index: Return re-ordering index as well as updated longitude</span>
+<span class="sd">        data: xarray Data structure</span>
+<span class="sd">        options: List of options to check. Will be checked in order.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        ndarray(, ndarray) : Updated longitude values and new indices if requested.</span>
+<span class="sd">        str / None: Name of coordinate if located within data. None otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">option</span>
+            <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">name</span>
+
+
+<div class="viewcode-block" id="convert_longitude"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.convert_longitude">[docs]</a><span class="k">def</span> <span class="nf">convert_longitude</span><span class="p">(</span><span class="n">longitude</span><span class="p">:</span> <span class="n">ArrayLikeMatch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLikeMatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert longitude extent from (0 to 360) to (-180 to 180).</span>
+<span class="sd">    This does *not* reorder the values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        longitude: Valid longitude values in degrees.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ndarray / DataArray : Updated longitude values in the same order.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check range of longitude values and convert to -180 - +180</span>
-    <span class="n">mtohe</span> <span class="o">=</span> <span class="n">longitude</span> <span class="o">&gt;</span> <span class="mi">180</span>
-    <span class="n">longitude</span><span class="p">[</span><span class="n">mtohe</span><span class="p">]</span> <span class="o">=</span> <span class="n">longitude</span><span class="p">[</span><span class="n">mtohe</span><span class="p">]</span> <span class="o">-</span> <span class="mi">360</span>
-    <span class="n">ordinds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
-    <span class="n">longitude</span> <span class="o">=</span> <span class="n">longitude</span><span class="p">[</span><span class="n">ordinds</span><span class="p">]</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="p">((</span><span class="n">longitude</span> <span class="o">-</span> <span class="mi">180</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span><span class="p">)</span> <span class="o">-</span> <span class="mi">180</span>
 
-    <span class="k">if</span> <span class="n">return_index</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">ordinds</span>
+    <span class="k">return</span> <span class="n">longitude</span></div>
+
+
+<span class="k">def</span> <span class="nf">convert_internal_longitude</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">XrDataLikeMatch</span><span class="p">,</span>
+                               <span class="n">lon_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">reorder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XrDataLikeMatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert longitude coordinate within an xarray data structure (DataArray or Dataset).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Data with longitude values to convert.</span>
+<span class="sd">        lon_name: By default will look a coord called &quot;lon&quot; or &quot;longitude&quot;.</span>
+<span class="sd">            Otherwise must be specified.</span>
+<span class="sd">        reorder: Whether to reorder the data based on the converted longitude values.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        DataArray / Dataset: Input data with updated longitude values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">lon_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lon_options</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+        <span class="n">lon_name</span> <span class="o">=</span> <span class="n">find_coord_name</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lon_options</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lon_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please specify &#39;lon_name&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="n">longitude</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">lon_name</span><span class="p">]</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="n">convert_longitude</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="n">lon_name</span><span class="p">:</span> <span class="n">longitude</span><span class="p">})</span>
+
+    <span class="k">if</span> <span class="n">reorder</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">lon_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">cut_data_extent</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">XrDataLikeMatch</span><span class="p">,</span>
+                    <span class="n">lat_out</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+                    <span class="n">lon_out</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+                    <span class="n">lat_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">lon_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">XrDataLikeMatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cut down extent of data within an xarray data structure (DataArray or Dataset)</span>
+<span class="sd">    against an output latitude and longitude range.</span>
+
+<span class="sd">    A buffer based on the maximum difference along the lon_out and lat_out dimensions</span>
+<span class="sd">    will be added when the data is cut.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Data to be cut down</span>
+<span class="sd">        lat_out: Array containing output latitude values</span>
+<span class="sd">        lon_out: Array containing output longitude values</span>
+<span class="sd">        lat_name: Name of latitude dimension. Must be specified if not &quot;lat&quot; or &quot;latitude&quot;.</span>
+<span class="sd">        lon_name: Name of longitude dimension. Must be specified if not &quot;lon&quot; or &quot;longitude&quot;.</span>
+<span class="sd">        copy: Whether to explicitly copy the data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        xarray.DataArray / xarray.Dataset: data with reduced lat, lon ranges.        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">lat_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lat_options</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
+        <span class="n">lat_name</span> <span class="o">=</span> <span class="n">find_coord_name</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lat_options</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lat_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please specify &#39;lat_name&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">lon_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lon_options</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+        <span class="n">lon_name</span> <span class="o">=</span> <span class="n">find_coord_name</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lon_options</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lon_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please specify &#39;lon_name&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lat_out</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">lat_out</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">longitude</span></div>
+        <span class="n">lat_out</span> <span class="o">=</span> <span class="n">lat_out</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">lat_out</span><span class="p">[</span><span class="n">lat_name</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lon_out</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">lon_out</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lon_out</span> <span class="o">=</span> <span class="n">lon_out</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">lon_out</span><span class="p">[</span><span class="n">lon_name</span><span class="p">])</span>
+
+    <span class="n">lat_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">lat_out</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">lat_out</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">lon_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">lon_out</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">lon_out</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="n">lat_low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">lat_out</span><span class="p">)</span> <span class="o">-</span> <span class="n">lat_diff</span>
+    <span class="n">lat_high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lat_out</span><span class="p">)</span> <span class="o">+</span> <span class="n">lat_diff</span>
+    <span class="n">lon_low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">lon_out</span><span class="p">)</span> <span class="o">-</span> <span class="n">lon_diff</span>
+    <span class="n">lon_high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lon_out</span><span class="p">)</span> <span class="o">+</span> <span class="n">lon_diff</span>
+
+    <span class="n">lat_cut_wide_range</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">lat_low</span><span class="p">,</span> <span class="n">lat_high</span><span class="p">)</span>
+    <span class="n">lon_cut_wide_range</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">lon_low</span><span class="p">,</span> <span class="n">lon_high</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+        <span class="n">data_cut</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_cut</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="n">data_cut</span> <span class="o">=</span> <span class="n">data_cut</span><span class="o">.</span><span class="n">sel</span><span class="p">({</span><span class="n">lat_name</span><span class="p">:</span> <span class="n">lat_cut_wide_range</span><span class="p">,</span> <span class="n">lon_name</span><span class="p">:</span> <span class="n">lon_cut_wide_range</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">data_cut</span>
 </pre></div>
 
                 </article>
@@ -583,7 +657,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

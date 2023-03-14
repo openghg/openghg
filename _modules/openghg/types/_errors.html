@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.types._errors &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>openghg.types._errors &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -169,21 +169,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -291,21 +276,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -384,6 +354,9 @@ document.write(`
                   
   <h1>Source code for openghg.types._errors</h1><div class="highlight"><pre>
 <span></span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+
 <div class="viewcode-block" id="OpenGHGError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.OpenGHGError">[docs]</a><span class="k">class</span> <span class="nc">OpenGHGError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Top level OpenGHG error&quot;&quot;&quot;</span></div>
 
@@ -426,6 +399,21 @@ document.write(`
 
 <span class="k">class</span> <span class="nc">AttrMismatchError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Mismatch between attributes of input file and derived metadata&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">construct_xesmf_import_error</span><span class="p">(</span><span class="n">exception</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">ImportError</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">xesmf_error_message</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Unable to import xesmf for use with regridding algorithms.&quot;</span>
+        <span class="s2">&quot; To use transform modules please follow instructions&quot;</span>
+        <span class="s2">&quot; for installing non-python dependencies (requires conda&quot;</span>
+        <span class="s2">&quot; to be installed even if using pip to install other packages).&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># TODO: Add explicit link to instruction page once created</span>
+
+    <span class="k">if</span> <span class="n">exception</span><span class="p">:</span>
+        <span class="n">xesmf_error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xesmf_error_message</span><span class="si">}</span><span class="s2"> Full error returned: </span><span class="si">{</span><span class="n">exception</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">xesmf_error_message</span>
 </pre></div>
 
                 </article>
@@ -476,7 +464,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

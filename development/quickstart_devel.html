@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Quickstart - developer &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>Quickstart - developer &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -172,21 +172,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -298,21 +283,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -459,7 +429,7 @@ interfering with other Python installations.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
-<p>Now OpenGHG is installed please move on to <a class="reference internal" href="#configuring-the-object-store"><span class="std std-ref">Configuring the object store</span></a>.</p>
+<p>Now OpenGHG is installed please move on to <span class="xref std std-ref">Configuring the object store</span>.</p>
 </section>
 <section id="conda">
 <h4><code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#conda" title="Permalink to this heading">#</a></h4>
@@ -483,20 +453,41 @@ interfering with other Python installations.</p>
 </section>
 </section>
 </section>
-<section id="configuring-the-object-store">
-<h2>Configuring the object store<a class="headerlink" href="#configuring-the-object-store" title="Permalink to this heading">#</a></h2>
-<p>The object store is where OpenGHG stores its information. Metadata and binary data are stored with in a key-value setup.
-As you’ll be using OpenGHG locally this means all data will be stored on your local or network file system.</p>
-<p>To set the path to the object store you can run the following in the terminal</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>openghg<span class="w"> </span>--quickstart
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">#</a></h2>
+<p>OpenGHG needs to know where to create the object store it uses to store data, it does this by reading a configuration file in your home
+directory. As part of the setup process we need to create this configuration file using either the <code class="xref py py-obj docutils literal notranslate"><span class="pre">openghg.util.create_config</span></code> function
+or the command line interface.</p>
+<section id="python">
+<h3>Python<a class="headerlink" href="#python" title="Permalink to this heading">#</a></h3>
+<p>You can use the <em class="xref py py-obj">create_config</em> function to help you make a config file. First import</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">create_config</span>
+
+<span class="gp">In [2]: </span><span class="n">create_config</span><span class="p">()</span>
+
+<span class="go">OpenGHG configuration</span>
+<span class="gt">---------------------</span>
+
+<span class="n">Enter</span> <span class="n">path</span> <span class="k">for</span> <span class="nb">object</span> <span class="n">store</span> <span class="p">(</span><span class="n">default</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">gareth</span><span class="o">/</span><span class="n">openghg_store</span><span class="p">):</span>
+<span class="ne">INFO</span>:openghg.util:Creating config at /home/gareth/.config/openghg/openghg.conf
+
+<span class="ne">INFO</span>:openghg.util:Configuration written to /home/gareth/.config/openghg/openghg.conf
 </pre></div>
 </div>
-<p>You should now see text telling you you haven’t got a configuration file (unless you’ve run the quickstart previously)
-and a prompt asking you enter a path for the object store. We’ll just use the default path and hit return when prompted.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>No<span class="w"> </span>configuration<span class="w"> </span>file<span class="w"> </span>found,<span class="w"> </span>please<span class="w"> </span>see<span class="w"> </span>installation<span class="w"> </span>instructions.
+<p>Here I left the path to the object store blank to use the default path in my home directory.</p>
+</section>
+<section id="command-line">
+<h3>Command line<a class="headerlink" href="#command-line" title="Permalink to this heading">#</a></h3>
+<p>You can also use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">openghg</span></code> command line tool to get the configuration file setup.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>openghg<span class="w"> </span>--quickstart
 
-Please<span class="w"> </span>enter<span class="w"> </span>a<span class="w"> </span>path<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>object<span class="w"> </span>store<span class="w"> </span><span class="o">(</span>default:<span class="w"> </span>/home/gareth/openghg_store<span class="o">)</span>:
-Creating<span class="w"> </span>config<span class="w"> </span>at<span class="w"> </span>/home/gareth/.config/openghg/openghg.conf
+OpenGHG<span class="w"> </span>configuration
+---------------------
+
+Enter<span class="w"> </span>path<span class="w"> </span><span class="k">for</span><span class="w"> </span>object<span class="w"> </span>store<span class="w"> </span><span class="o">(</span>default<span class="w"> </span>/home/gareth/openghg_store<span class="o">)</span>:
+INFO:openghg.util:Creating<span class="w"> </span>config<span class="w"> </span>at<span class="w"> </span>/home/gareth/.config/openghg/openghg.conf
+
+INFO:openghg.util:Configuration<span class="w"> </span>written<span class="w"> </span>to<span class="w"> </span>/home/gareth/.config/openghg/openghg.conf
 </pre></div>
 </div>
 <p>A configuration file has been created and you’re ready to run OpenGHG. If you ever want to modify the configuration file
@@ -507,6 +498,7 @@ you can find it at <code class="docutils literal notranslate"><span class="pre">
 <span class="n">local_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/gareth/openghg_store&quot;</span>
 </pre></div>
 </div>
+</section>
 </section>
 <section id="jupyter">
 <h2>Jupyter<a class="headerlink" href="#jupyter" title="Permalink to this heading">#</a></h2>
@@ -573,7 +565,11 @@ contributing to OpenGHG <a class="reference external" href="https://github.com/o
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configuring-the-object-store">Configuring the object store</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python">Python</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#command-line">Command line</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#jupyter">Jupyter</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-next">What next?</a></li>
 </ul>
@@ -615,7 +611,7 @@ contributing to OpenGHG <a class="reference external" href="https://github.com/o
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>

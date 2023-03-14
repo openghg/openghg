@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Util &#8212; OpenGHG 0+untagged.1.ge8e0e34 documentation</title>
+    <title>Util &#8212; OpenGHG 0.5.0 documentation</title>
   
   
   
@@ -170,21 +170,6 @@
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
       
@@ -296,21 +281,6 @@ document.write(`
                       </a>
                     </li>
                 
-            <div class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    More
-                </button>
-                <div class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../whatsnew/index.html">
-                        What’s new
-                      </a>
-                    </li>
-                
-                </div>
-            </div>
-            
   </ul>
 </nav></div>
         
@@ -751,14 +721,14 @@ sites with similar names.</p>
 <h2>Domain<a class="headerlink" href="#domain" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.find_domain">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Permalink to this definition">#</a></dt>
 <dd><p>Finds the latitude and longitude values in degrees associated
 with a given domain name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>domain</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Pre-defined domain name</p></li>
-<li><p><strong>domain_filename</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative domain info file. Defaults to openghg_defs input.</p></li>
+<li><p><strong>domain_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative domain info file. Defaults to openghg_defs input.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -772,20 +742,18 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.convert_longitude">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">convert_longitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#convert_longitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.convert_longitude" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert longitude extent to -180 - 180 and reorder.</p>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">convert_longitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#convert_longitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.convert_longitude" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert longitude extent from (0 to 360) to (-180 to 180).
+This does <em>not</em> reorder the values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>longitude</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Array of valid longitude values in degrees.</p></li>
-<li><p><strong>return_index</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Return re-ordering index as well as updated longitude</p></li>
-</ul>
+<dd class="field-odd"><p><strong>longitude</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ArrayLikeMatch</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code>)) – Valid longitude values in degrees.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Updated longitude values and new indices if requested.</p>
+<dd class="field-even"><p>Updated longitude values in the same order.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ndarray(, ndarray)</p>
+<dd class="field-odd"><p>ndarray / DataArray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -961,7 +929,7 @@ If this is not set a special keyword of “multiple” and “column” will sti
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
 </p></div>
       
     </div>
