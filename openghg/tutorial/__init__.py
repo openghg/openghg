@@ -8,6 +8,7 @@ from ._tutorial import (
     populate_bc_ch4,
     populate_footprint_co2,
     populate_footprint_inert,
+    download_edgar_data,
     retrieve_example_data,
     clear_example_cache,
     example_extract_path,
