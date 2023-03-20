@@ -238,7 +238,8 @@ def get_bucket() -> str:
     Returns:
         str: Path to object store
     """
-    tutorial_store = os.getenv("OPENGHG_TMP_STORE")
+    tutorial_store = os.getenv("OPENGHG_TUT_STORE")
+
     if tutorial_store is not None:
         return str(get_tutorial_store_path())
 

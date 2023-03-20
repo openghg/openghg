@@ -68,8 +68,10 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
         "author": "OpenGHG Cloud",
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
-        "min_longitude": -174.85857,
-        "max_longitude": 180.0,
+        # "min_longitude": -174.85857,
+        # "max_longitude": 180.0,
+        "min_longitude": -180.0,
+        "max_longitude": 174.85858,
         "min_latitude": -89.95,
         "max_latitude": 89.95,
         "time_resolution": "standard",
@@ -80,6 +82,7 @@ def test_parse_edgar_raw(folder, version, species, mean_raw_flux):
     assert metadata.items() >= expected_metadata.items()
 
 
+@pytest.mark.xesmf
 def test_parse_edgar_domain():
     """
     Test EDGAR output can be created for a pre-existing domain.
@@ -135,6 +138,7 @@ def test_parse_edgar_domain():
     assert metadata.items() >= expected_metadata.items()
 
 
+@pytest.mark.xesmf
 def test_parse_edgar_new_domain():
     """
     Test EDGAR can be resampled to new, specified domain.

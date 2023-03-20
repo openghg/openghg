@@ -252,6 +252,27 @@ def populate_surface_data() -> None:
     logger.info("Done.")
 
 
+def download_edgar_data() -> Path:
+    """
+    Download edgar data to tutorial store to be used within parse_edgar transform
+    tutorial.
+
+    This is currently a limited subset of v6.0 CH4 data (2014-2015)
+
+    TODO: Upgrade to use v7.0 data when this has been checked and added into workflow.
+    """    
+
+    use_tutorial_store()
+
+    edgar_v60_database = "https://github.com/openghg/example_data/raw/main/databases/TOTALS_nc.tar.gz"
+
+    logger.info("Retrieving example database...")
+    edgar_database_path = retrieve_example_data(url=edgar_v60_database)[0]
+    logger.info("Done.")
+
+    return edgar_database_path
+
+
 def use_tutorial_store() -> None:
     """Sets an environment variable telling OpenGHG to use a
     temporary object store. This sets the store to be

@@ -66,15 +66,16 @@ def sync_surface_metadata(
 
             if is_number(attr_value) and is_number(value):
                 if not math.isclose(float(attr_value), float(value), rel_tol=relative_tolerance):
+                    err_warn_str = (
+                        f"Value of {key} not within tolerance, metadata: {value} - attributes: {attr_value}"
+                    )
                     if not update_mismatch:
-                        raise AttrMismatchError(
-                            f"Value not within tolerance, metadata: {value} - attributes: {attr_value}"
-                        )
+                        raise AttrMismatchError(err_warn_str)
                     else:
                         logger.warning(
-                            f"Value not within tolerance, metadata: {value} - attributes: {attr_value}\n"
-                            f"Updating metadata to use attribute value of {key} = {attr_value}"
+                            f"{err_warn_str}\nUpdating metadata to use attribute value of {key} = {attr_value}"
                         )
+
                     meta_copy[key] = str(attr_value)
             else:
                 # Here we don't care about case. Within the Datasource we'll store the
