@@ -1,4 +1,5 @@
 import pytest
+from pathlib import Path
 from openghg.util import check_lifetime_monthly, species_lifetime
 
 
@@ -41,3 +42,21 @@ def test_monthly_mismatch():
     with pytest.raises(ValueError):
         lifetime = ["12D", "13D"]
         monthly = check_lifetime_monthly(lifetime)
+
+
+def test_species_info_file_mock():
+    """
+    Test species_info_file from openghg_defs is being successfully mocked.
+
+    Because species_info_file is an external file (which can be updated), we have 
+    added a mock for an internal version when species_info_file is imported
+    which is static.
+
+    This is mocked within an autouse fixture in tests/conftest.py/openghg_defs_mock
+    """
+    from openghg_defs import species_info_file
+
+    # Check local filepath is being used when external module is called.
+    expected_location_end = Path("openghg/tests/data/info/species_info.json")
+
+    assert species_info_file.parts[-5:] == expected_location_end.parts

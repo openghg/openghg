@@ -27,15 +27,21 @@ def default_session_fixture() -> Iterator[None]:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def site_info_mock(session_mocker):
+def openghg_defs_mock(session_mocker):
     """
     Mock the external call to openghg_defs module for site_info_file
-    to replace this with a static version within the tests data directory.
+    and species_info_file to replace this with a static version within the
+    tests data directory.
     """
     import openghg_defs
 
     site_info_file = get_info_datapath(filename="site_info.json")
-    session_mocker.patch.object(openghg_defs, 'site_info_file', new=site_info_file)
+    session_mocker.patch.object(openghg_defs, "site_info_file", new=site_info_file)
+
+    species_info_file = get_info_datapath(filename="species_info.json")
+    session_mocker.patch.object(openghg_defs, 'species_info_file', new=species_info_file)
+
+    # TODO: Add domain_info as well?
 
     yield
 
