@@ -44,8 +44,16 @@ from pandas import Timedelta, Timestamp
 def test_get_obs_surface_average_works_without_longname():
     # The stored dataset here doesn't have a long_name attribute so failed
     # Now works with checks
-    obsdata = get_obs_surface(site="mhd", species="ch4", inlet="10magl", average="4H")
+    obsdata = get_obs_surface(
+        site="mhd",
+        species="ch4",
+        inlet="10magl",
+        average="4H",
+        instrument="gcmd",
+    )
+
     assert obsdata.data.attrs["averaged_period_str"] == "4H"
+    assert obsdata.data.attrs["averaged_period"] == 14400
 
 
 @pytest.mark.parametrize(

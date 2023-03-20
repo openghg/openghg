@@ -382,7 +382,6 @@ def get_obs_surface_local(
             f"{species}_variability"
         ].median()
 
-        print(data.attrs)
         # Create attributes for variability variable
         if "long_name" in data[species].attrs:
             ds_resampled[f"{species}_variability"].attrs[
