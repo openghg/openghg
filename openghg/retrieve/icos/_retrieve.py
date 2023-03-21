@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
-from openghg.util import running_on_hub
+from openghg.util import running_on_hub, load_json
+import openghg_defs
 import logging
 
 logger = logging.getLogger("openghg.retrieve")
@@ -83,9 +84,8 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
         ObsData, list[ObsData] or None
     """
     from io import BytesIO
-
-    from openghg.cloud import call_function, unpackage
     from xarray import load_dataset
+    from openghg.cloud import call_function, unpackage
 
     # The hub is the only place we want to make remote calls
     if running_on_hub():
@@ -290,6 +290,11 @@ def _retrieve_remote(
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
 
+    # Load our site metadata for a few things like the station's long_name that
+    # isn't in the ICOS metadata in the way we want it at the momenet - 2023-03-20
+    site_info_fpath = openghg_defs.site_info_file
+    openghg_site_metadata = load_json(path=site_info_fpath)
+
     standardised_data: Dict[str, Dict] = {}
 
     for n, dobj_url in enumerate(dobj_urls):
@@ -369,7 +374,13 @@ def _retrieve_remote(
         metadata["inlet_height_magl"] = format_inlet(_sampling_height, key_name="inlet_height_magl")
 
         loc_data = station_data["location"]
-        metadata["station_long_name"] = loc_data["label"]
+
+        try:
+            station_long_name = openghg_site_metadata[site.upper()]["ICOS"]["long_name"]
+        except KeyError:
+            station_long_name = loc_data["label"]
+
+        metadata["station_long_name"] = station_long_name
         metadata["station_latitude"] = str(loc_data["lat"])
         metadata["station_longitude"] = str(loc_data["lon"])
         metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
