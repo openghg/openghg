@@ -1,8 +1,8 @@
 # from pathlib import Path
 
-# import pytest
-# from openghg.objectstore import get_local_objectstore_path, get_tutorial_store_path, get_bucket
-
+import pytest
+from openghg.objectstore import get_local_objectstore_path, get_tutorial_store_path, get_bucket
+import tempfile
 
 # @pytest.fixture(scope="session")
 # def setup_config():
@@ -31,3 +31,9 @@
 #     data = query_store()
 
 # print(data)
+
+
+def test_get_bucket():
+    tmpdir = tempfile.gettempdir()
+    b = get_bucket()
+    assert tmpdir in b
