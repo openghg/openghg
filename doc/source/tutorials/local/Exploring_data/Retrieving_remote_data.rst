@@ -14,7 +14,7 @@ store that we'll call the tutorial store. To do this we use the
 ``OPENGHG_TUT_STORE`` environment variable for this session and won't
 affect your use of OpenGHG outside of this tutorial.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [1]: from openghg.tutorial import use_tutorial_store
 
@@ -42,38 +42,38 @@ Using ``retrieve_atmospheric``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First we'll import ``retrieve_atmospheric`` from the ``retrieve`` submodule, then
-we'll retrieve some data from Weybourne (**WAO**). The function will
-first check for any data from **WAO** already stored in the object
+we'll retrieve some data from Saclay (**SAC**). The function will
+first check for any data from **SAC** already stored in the object
 store, if any is found it is returned, otherwise it'll retrieve the data
 from the ICOS Carbon Portal, this may take a bit longer.
 
-.. ipython::
+.. code-block:: ipython3
 
    In [1]: from openghg.retrieve.icos import retrieve_atmospheric
 
-.. ipython::
+.. code-block:: ipython3
 
-    In [2]: wao_data = retrieve_atmospheric(site="WAO", species="ch4", sampling_height="10m")
+    In [2]: sac_data = retrieve_atmospheric(site="SAC", species="ch4", sampling_height="100m")
 
-    In [3]: len(wao_data)
+    In [3]: len(sac_data)
 
-Here `wao_data` is a list of three `ObsData` objects, each one containing differing amounts of data.
-We can have a look at the reason for their being three versions of data by checking the `dataset_source` key
+Here `sac_data` is a list of two `ObsData` objects, each one containing differing amounts of data.
+We can have a look at the reason for their being two versions of data by checking the `dataset_source` key
 in the attached metadata.
 
-.. ipython::
+.. code-block:: ipython3
 
-    In [7]: dataset_sources = [obs.metadata["dataset_source"] for obs in wao_data]
+    In [7]: dataset_sources = [obs.metadata["dataset_source"] for obs in sac_data]
 
     In [8]: dataset_sources
 
-Let's say we want to look at ICOS dataset, we can
+Let's say we want to look at the ICOS dataset, we can select that first dataset
 
-.. ipython::
+.. code-block:: ipython3
 
-    In [9]: wao_data_icos = wao_data[0]
+    In [9]: sac_data_icos = sac_data[0]
 
-    In [11]: wao_data_icos
+    In [11]: sac_data_icos
 
 We can see that we've retrieved ``ch4`` data that covers 2021-07-01 -
 2022-02-28. A lot of metadata is stored during the retrieval
@@ -84,9 +84,9 @@ citation string.
 You can see more information about the instruments by going to the link
 in the ``instrument_data`` section of the metadata
 
-.. ipython::
+.. code-block:: ipython3
 
-    In [14]: metadata = wao_data_icos.metadata
+    In [14]: metadata = sac_data_icos.metadata
 
     In [15]: metadata["instrument_data"]
 
@@ -104,9 +104,9 @@ As with any ``ObsData`` object we can quickly plot it to have a look.
    documentation. If you're using an `ipython` console to run through the tutorial,
    the plot will open in a new browser window.
 
-.. ipython::
+.. code-block:: ipython3
 
-   In [17]:  wao_data_icos.plot_timeseries()
+   In [17]:  sac_data_icos.plot_timeseries()
 
 Data levels
 ~~~~~~~~~~~
@@ -126,26 +126,25 @@ docs <https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone>`
 
 By default level 2 data is retrieved but this can be changed by passing
 ``data_level`` to ``retrieve_icos``. Below we'll retrieve some more
-recent data from **WAO**.
+recent data from **SAC**.
 
-.. ipython::
+.. code-block:: ipython3
 
-    In [2]: wao_data_level1 = retrieve_atmospheric(site="WAO", species="CH4", sampling_height="10m", data_level=1, dataset_source="icos")
+    In [2]: sac_data_level1 = retrieve_atmospheric(site="SAC", species="CH4", sampling_height="100m", data_level=1, dataset_source="icos")
 
-    In [4]: wao_data_level1.data.time[0]
+    In [4]: sac_data_level1.data.time[0]
 
-    In [7]: wao_data_level1.data.time[-1]
+    In [7]: sac_data_level1.data.time[-1]
 
 
-You can see that we've now got data from 2022-03-01 - 2023-02-01. The
-ability to retrieve different level data has been added for convenience,
-choose the best option for your workflow.
+You can see that we've now got quite recent data, usually up until a day or so before these docs were built. The
+ability to retrieve different level data has been added for convenience, choose the best option for your workflow.
 
    **NOTE:** level 1 data may not have been quality checked.
 
-.. ipython::
+.. code-block:: ipython3
 
-    In [10]: wao_data_level1.plot_timeseries(title="WAO - Level 1 data")
+    In [10]: sac_data_level1.plot_timeseries(title="SAC - Level 1 data")
 
 Forcing retrieval
 ~~~~~~~~~~~~~~~~~
@@ -157,9 +156,9 @@ If you retrieve data using ``retrieve_icos`` and notice that it does not
 return the most up to date data (compare the dates with those on the
 portal) you can force a retrieval using ``force_retrieval``.
 
-.. ipython::
+.. code-block:: ipython3
 
-    In [11]: new_data = retrieve_atmospheric(site="WAO", species="CH4", data_level=1, force_retrieval=True)
+    In [11]: new_data = retrieve_atmospheric(site="SAC", species="CH4", data_level=1, force_retrieval=True)
 
 Here we get a message telling us there is no new data to
 process, this will depend on the rate at which datasets are updated on the ICOS Carbon Portal.
@@ -192,15 +191,15 @@ link given above.
 
 Now we're ready to retrieve the data.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [1]: from openghg.retrieve.ceda import retrieve_surface
 
-.. ipython::
+.. code-block:: ipython3
 
     In [2]: url = "https://dap.ceda.ac.uk/badc/gauge/data/tower/heathfield/co2/100m/bristol-crds_heathfield_20130101_co2-100m.nc?download=1"
 
-.. ipython::
+.. code-block:: ipython3
 
     In [3]: hfd_data = retrieve_surface(url=url)
 
@@ -209,7 +208,7 @@ Now we're ready to retrieve the data.
 Now we've got the data, we can use it as any other ``ObsData`` object,
 using ``data`` and ``metadata``.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [4]: hfd_data.plot_timeseries()
 
@@ -223,7 +222,7 @@ from the object store, this should be faster than retrieving from CEDA.
 To get the same data again use the ``site``, ``species`` and ``inlet``
 arguments.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [6]: hfd_data_ceda = retrieve_surface(site="hfd", species="co2")
 
@@ -236,11 +235,11 @@ arguments.
 If you're finished with the data in this tutorial you can cleanup the
 tutorial object store using the ``clear_tutorial_store`` function.
 
-.. ipython::
+.. code-block:: ipython3
 
     In [8]: from openghg.tutorial import clear_tutorial_store
 
-.. ipython::
+.. code-block:: ipython3
 
     In [9]: clear_tutorial_store()
     INFO:openghg.tutorial:Tutorial store at /home/gareth/openghg_store/tutorial_store cleared.

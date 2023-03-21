@@ -52,14 +52,6 @@ Devloper API Reference
 
    api/index_devapi
 
-What's new
-==========
-
-.. toctree::
-   :maxdepth: 2
-
-   whatsnew/index
-
 Help
 ====
 
