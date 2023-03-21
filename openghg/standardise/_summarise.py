@@ -2,14 +2,13 @@ from typing import Dict
 
 import pandas as pd
 from openghg.types import SurfaceTypes, optionalPathType
-from openghg.util import get_datapath, get_site_info, sites_in_network 
+from openghg.util import get_datapath, get_site_info, sites_in_network
 
 # from openghg.types import DataTypes  # Would this be more appropriate?
 # This does include Footprint as well as the input obs data types?
 
 
-def _extract_site_names(site_codes: list,
-                        site_filename: optionalPathType = None) -> list:
+def _extract_site_names(site_codes: list, site_filepath: optionalPathType = None) -> list:
     """
     Extracts long names for site codes.
 
@@ -17,14 +16,14 @@ def _extract_site_names(site_codes: list,
 
     Args:
         site_codes: List of site codes
-        site_filename: Alternative site info file. 
+        site_filepath: Alternative site info file.
 
     Returns:
         list: Long names for each site code
     """
 
     # Get data for site
-    site_data = get_site_info(site_filename)
+    site_data = get_site_info(site_filepath)
 
     # Extracts long name from site data
     site_names = []
@@ -71,9 +70,9 @@ def summary_source_formats() -> pd.DataFrame:
         # applicable to network sites.
         # TODO: May be a bad assumption, consider this and update as necessary.
         if len(site_codes) == 0:
-            site_codes = sites_in_network(source_format)
+            site_codes = sites_in_network(network=source_format)
 
-        site_names = _extract_site_names(site_codes)
+        site_names = _extract_site_names(site_codes=site_codes)
 
         if len(source_format_site) > 0:
             site_data = source_format_site.copy()
@@ -100,7 +99,7 @@ def summary_source_formats() -> pd.DataFrame:
     return collated_site_data
 
 
-def summary_site_codes(site_filename: optionalPathType = None) -> pd.DataFrame:
+def summary_site_codes(site_filepath: optionalPathType = None) -> pd.DataFrame:
     """
     Create summary DataFrame of site codes. This includes details of the network,
     longitude, latitude, height above sea level and stored heights.
@@ -113,17 +112,13 @@ def summary_site_codes(site_filename: optionalPathType = None) -> pd.DataFrame:
     """
 
     # Get data for site
-    site_data = get_site_info(site_filename)
+    site_data = get_site_info(site_filepath)
 
     site_dict: Dict[str, list] = {}
     site_dict["site"] = []
     site_dict["network"] = []
 
-    expected_keys: list = ["long_name",
-                           "latitude",
-                           "longitude",
-                           "height_station_masl",
-                          ["heights", "height"]]
+    expected_keys: list = ["long_name", "latitude", "longitude", "height_station_masl", ["heights", "height"]]
 
     name_keys = [key[0] if isinstance(key, list) else key for key in expected_keys]
     for key in name_keys:
@@ -133,7 +128,9 @@ def summary_site_codes(site_filename: optionalPathType = None) -> pd.DataFrame:
         for network, data in network_data.items():
             for key in expected_keys:
                 if not isinstance(key, list):
-                    search_keys = [key, ]
+                    search_keys = [
+                        key,
+                    ]
                 else:
                     search_keys = key
 
@@ -152,11 +149,16 @@ def summary_site_codes(site_filename: optionalPathType = None) -> pd.DataFrame:
 
     all_keys = name_keys.copy()
     all_keys.extend(["site", "network"])
-    descriptive_names = {"site": "Site Code",
-                         "long_name": "Long name",
-                         "height_station_masl": "Station height (masl)",
-                         "heights": "Inlet heights"}
-    column_names = {name: (descriptive_names[name] if name in descriptive_names else name.capitalize()) for name in all_keys}
+    descriptive_names = {
+        "site": "Site Code",
+        "long_name": "Long name",
+        "height_station_masl": "Station height (masl)",
+        "heights": "Inlet heights",
+    }
+    column_names = {
+        name: (descriptive_names[name] if name in descriptive_names else name.capitalize())
+        for name in all_keys
+    }
 
     site_df = site_df.rename(columns=column_names)
     site_df = site_df.set_index("Site Code")

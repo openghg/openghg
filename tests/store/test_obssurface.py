@@ -322,7 +322,7 @@ def test_read_cranfield():
     data_filepath = get_surface_datapath(filename="THB_hourly_means_test.csv", source_format="Cranfield_CRDS")
 
     results = ObsSurface.read_file(
-        filepath=data_filepath, source_format="CRANFIELD", site="THB", network="CRANFIELD"
+        filepath=data_filepath, source_format="CRANFIELD", site="TMB", network="CRANFIELD"
     )
 
     expected_keys = ["ch4", "co", "co2"]

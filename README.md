@@ -12,10 +12,6 @@ power and scalability of the cloud.
 
 For more information please see [our documentation](https://docs.openghg.org/).
 
-## Cloud
-
-You can login to our [OpenGHG Cloud JupyterHub](https://hub.openghg.org) and use OpenGHG in the cloud. This will allow you to use the full power of OpenGHG from your local device. Once you're logged in please checkout [some of our tutorials](https://docs.openghg.org/tutorials/index.html) to help you get started.
-
 ## Install locally
 
 To run OpenGHG locally you'll need Python 3.8 or later on Linux or MacOS, we don't currently support Windows.
@@ -76,7 +72,48 @@ conda install --channel conda-forge --channel openghg openghg
 
 Note: the `xesmf` library is already incorporated into the conda install from vx.x onwards and so does not need to be installed separately.
 
-**Additional functionality**
+## Create the configuration file
+
+OpenGHG stores object store and user data in a configuration file in the user's home directory at `~/.config/openghg/openghg.conf`. As this sets the path of the object store, the user must
+create this file in one of two ways
+
+### Command line
+
+Using the `openghg` command line tool
+
+```
+openghg --quickstart
+
+OpenGHG configuration
+---------------------
+
+Enter path for object store (default /home/gareth/openghg_store):
+INFO:openghg.util:Creating config at /home/gareth/.config/openghg/openghg.conf
+
+INFO:openghg.util:Configuration written to /home/gareth/.config/openghg/openghg.conf
+```
+
+### Python
+
+Using the `create_config` function from the `openghg.util` submodule.
+
+```
+from openghg.util import create_config
+
+create_config()
+
+OpenGHG configuration
+---------------------
+
+Enter path for object store (default /home/gareth/openghg_store):
+INFO:openghg.util:Creating config at /home/gareth/.config/openghg/openghg.conf
+
+INFO:openghg.util:Configuration written to /home/gareth/.config/openghg/openghg.conf
+```
+
+You will be prompted to enter the path to the object store, leaving the prompt empty tells OpenGHG to use the default path in the user's home directory at `~/openghg_store`.
+
+## Additional functionality
 
 Some optional functionality is available within OpenGHG to allow for multi-dimensional regridding of map data (`openghg.tranform` sub-module). This makes use of the [`xesmf` package](https://xesmf.readthedocs.io/en/latest/). This Python library is built upon underlying FORTRAN and C libraries (ESMF) which cannot be installed directly within a Python virtual environment.
 
@@ -111,26 +148,6 @@ Now the dependencies have all been installed, the `xesmf` library can be install
 ```bash
 pip install xesmf
 ```
-
-## Setting the object store path
-
-On first import OpenGHG will create a configuration file at `~/.config/openghg/openghg.conf`. This file contains the path to the object store, which by default is set to `~/openghg_store`.
-
-The contents of the file will look like this
-
-```toml
-[object_store]
-local_store = "/home/your_username/openghg_store"
-```
-
-or on macOS
-
-```toml
-[object_store]
-local_store = "/Users/your_username/openghg_store"
-```
-
-Change this path to set the object store path.
 
 ## Developers
 

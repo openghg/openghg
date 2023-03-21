@@ -15,6 +15,7 @@ def retrieve_atmospheric(
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
     data_level: int = 2,
+    dataset_source: Optional[str] = None,
     update_metadata_mismatch: bool = False,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -34,6 +35,7 @@ def retrieve_atmospheric(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
         update_metadata_mismatch: If metadata derived from ICOS Header does not match
             to derived attributes, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
@@ -48,6 +50,7 @@ def retrieve_atmospheric(
         end_date=end_date,
         force_retrieval=force_retrieval,
         data_level=data_level,
+        dataset_source=dataset_source,
         update_metadata_mismatch=update_metadata_mismatch,
     )
 
@@ -125,6 +128,7 @@ def local_retrieve(
     end_date: Optional[str] = None,
     force_retrieval: bool = False,
     data_level: int = 2,
+    dataset_source: Optional[str] = None,
     update_metadata_mismatch: bool = False,
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
@@ -145,6 +149,7 @@ def local_retrieve(
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
         update_metadata_mismatch: If metadata derived from ICOS Header does not match
             to derived attributes, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
@@ -168,6 +173,7 @@ def local_retrieve(
         start_date=start_date,
         end_date=end_date,
         icos_data_level=data_level,
+        dataset_source=dataset_source,
     )
 
     if results and not force_retrieval:
@@ -178,6 +184,7 @@ def local_retrieve(
             site=site,
             species=species,
             data_level=data_level,
+            dataset_source=dataset_source,
             update_metadata_mismatch=update_metadata_mismatch,
         )
 
@@ -191,7 +198,7 @@ def local_retrieve(
         for data in standardised_data.values():
             measurement_data = data["data"]
             # These contain URLs that are case sensitive so skip lowercasing these
-            skip_keys = ["citation_string", "instrument_data", "dobj_pid"]
+            skip_keys = ["citation_string", "instrument_data", "dobj_pid", "dataset_source"]
             metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
@@ -206,6 +213,7 @@ def _retrieve_remote(
     data_level: int,
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
+    dataset_source: Optional[str] = None,
     update_metadata_mismatch: bool = False,
 ) -> Optional[Dict]:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
@@ -222,6 +230,7 @@ def _retrieve_remote(
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         species: Species name
         sampling_height: Sampling height in metres
+        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
         update_metadata_mismatch: If metadata derived from ICOS Header does not match
             to derived attributes, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
@@ -238,9 +247,8 @@ def _retrieve_remote(
         )
 
     import re
-
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import load_json, format_inlet
+    from openghg.util import format_inlet
     from pandas import to_datetime
 
     if species is None:
@@ -282,15 +290,13 @@ def _retrieve_remote(
     # Now extract the PIDs along with some data about them
     dobj_urls = filtered_sources["dobj"].tolist()
 
-    site_metadata = load_json("icos_atmos_site_metadata.json", internal_data=True)
-
     standardised_data: Dict[str, Dict] = {}
 
-    for dobj_url in dobj_urls:
+    for n, dobj_url in enumerate(dobj_urls):
         dobj = Dobj(dobj_url)
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
-        # This is the metadata
+        # This is the metadata, dobj.info and dobj.meta are equal
         dobj_info = dobj.meta
 
         metadata = {}
@@ -298,16 +304,26 @@ def _retrieve_remote(
         specific_info = dobj_info["specificInfo"]
         col_data = specific_info["columns"]
 
-        for col in col_data:
-            # Find the species
-            for s in species:
-                if col["label"] == s.lower():
-                    measurement_type = col["valueType"]["self"]["label"].lower()
-                    units = col["valueType"]["unit"].lower()
-                    this_species = str(s)
-                    break
+        try:
+            dobj_dataset_source = dobj_info["specification"]["project"]["self"]["label"]
+        except KeyError:
+            dobj_dataset_source = "NA"
+            logger.warning("Unable to read project information from dobj.")
 
-        metadata["species"] = this_species
+        if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
+            continue
+
+        # Get the species this dobj holds information for
+        not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
+        species_info = next(i for i in col_data if i["label"] not in not_the_species)
+
+        measurement_type = species_info["valueType"]["self"]["label"].lower()
+        units = species_info["valueType"]["unit"].lower()
+        the_species = species_info["label"]
+
+        species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
+
+        metadata["species"] = the_species
         acq_data = specific_info["acquisition"]
         station_data = acq_data["station"]
 
@@ -353,15 +369,14 @@ def _retrieve_remote(
         metadata["inlet_height_magl"] = format_inlet(_sampling_height, key_name="inlet_height_magl")
 
         loc_data = station_data["location"]
-        metadata["station_long_name"] = loc_data["label"]
+
         metadata["station_latitude"] = str(loc_data["lat"])
         metadata["station_longitude"] = str(loc_data["lon"])
         metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
 
-        site_specific = site_metadata[site.upper()]
-        metadata["data_owner"] = f"{site_specific['firstName']} {site_specific['lastName']}"
-        metadata["data_owner_email"] = site_specific["email"]
-        metadata["station_height_masl"] = format_inlet(site_specific["eas"], key_name="station_height_masl")
+        metadata["data_owner"] = f"{stat.firstName} {stat.lastName}"
+        metadata["data_owner_email"] = str(stat.email)
+        metadata["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
 
         metadata["citation_string"] = dobj_info["references"]["citationString"]
         metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
@@ -374,6 +389,8 @@ def _retrieve_remote(
         metadata["source_format"] = "icos"
         metadata["icos_data_level"] = str(data_level)
 
+        metadata["dataset_source"] = dobj_dataset_source
+
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
 
@@ -381,7 +398,6 @@ def _retrieve_remote(
             dataframe = dataframe.sort_index()
 
         spec = metadata["species"]
-        inlet = metadata["inlet"]
 
         rename_cols = {
             "stdev": spec + " variability",
@@ -409,7 +425,7 @@ def _retrieve_remote(
         # So there isn't an easy way of getting a hash of a Dataset, can we do something
         # simple here we can compare data that's being added? Then we'll be able to make sure
         # ObsSurface.store_data won't accept data it's already seen
-        data_key = f"{spec}_{inlet}"
+        data_key = f"key-{n}"
         # TODO - do we need both attributes and metadata here?
         standardised_data[data_key] = {
             "metadata": metadata,

@@ -14,18 +14,7 @@ from openghg.standardise import standardise_footprint, standardise_flux, standar
 logger = logging.getLogger("openghg.tutorial")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
-__all__ = ["bilsdale_datapaths"]
 
-
-# def _suppress_output(func):
-#     def wrapper(*a, **ka):
-#         with warnings.catch_warnings():
-#             warnings.simplefilter("ignore")
-#             with open(os.devnull, "w") as devnull:
-#                 with contextlib.redirect_stdout(devnull):
-#                     return func(*a, **ka)
-
-#     return wrapper
 def populate_footprint_data() -> None:
     """Adds all footprint data to the tutorial object store
 
@@ -263,16 +252,25 @@ def populate_surface_data() -> None:
     logger.info("Done.")
 
 
-def bilsdale_datapaths() -> List:
-    """Return a list of paths to the Tacolneston data for use in the ranking
-    tutorial
-
-    Returns:
-        list: List of paths
+def download_edgar_data() -> Path:
     """
-    crds_path = Path(__file__).resolve().parent.parent.parent.joinpath("tests/data/proc_test_data/CRDS")
+    Download edgar data to tutorial store to be used within parse_edgar transform
+    tutorial.
 
-    return list(crds_path.glob("bsd.picarro.1minute.*.min.*"))
+    This is currently a limited subset of v6.0 CH4 data (2014-2015)
+
+    TODO: Upgrade to use v7.0 data when this has been checked and added into workflow.
+    """    
+
+    use_tutorial_store()
+
+    edgar_v60_database = "https://github.com/openghg/example_data/raw/main/databases/TOTALS_nc.tar.gz"
+
+    logger.info("Retrieving example database...")
+    edgar_database_path = retrieve_example_data(url=edgar_v60_database)[0]
+    logger.info("Done.")
+
+    return edgar_database_path
 
 
 def use_tutorial_store() -> None:

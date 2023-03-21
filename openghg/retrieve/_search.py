@@ -110,6 +110,7 @@ def search_bc(
     end_date: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
+    **kwargs: Any,
 ) -> SearchResults:
     """Search for boundary condition data
 
@@ -127,6 +128,7 @@ def search_bc(
                     - suitable pandas Offset Alias
                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
         continuous: Whether time stamps have to be continuous.
+        kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
@@ -145,6 +147,7 @@ def search_bc(
         period=period,
         continuous=continuous,
         data_type="boundary_conditions",
+        **kwargs,
     )
 
 
@@ -153,6 +156,7 @@ def search_eulerian(
     species: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
+    **kwargs: Any,
 ) -> SearchResults:
     """Search for eulerian data
 
@@ -161,6 +165,7 @@ def search_eulerian(
         species: Species name
         start_date: Start date (inclusive) associated with model run
         end_date: End date (exclusive) associated with model run
+        kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
@@ -171,7 +176,12 @@ def search_eulerian(
         end_date = str(end_date)
 
     return search(
-        model=model, species=species, start_date=start_date, end_date=end_date, data_type="eulerian_model"
+        model=model,
+        species=species,
+        start_date=start_date,
+        end_date=end_date,
+        data_type="eulerian_model",
+        **kwargs,
     )
 
 
@@ -179,11 +189,15 @@ def search_flux(
     species: Optional[str] = None,
     source: Optional[str] = None,
     domain: Optional[str] = None,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     high_time_resolution: Optional[bool] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
+    **kwargs: Any,
 ) -> SearchResults:
     """Search for emissions data
 
@@ -191,6 +205,9 @@ def search_flux(
         species: Species name
         domain: Emissions domain
         source: Emissions source
+        database: Name of database source for this input (if relevant)
+        database_version: Name of database version (if relevant)
+        model: Model name (if relevant)
         source_format : Type of data being input e.g. openghg (internal format)
         high_time_resolution: If this is a high resolution file
         period: Period of measurements. Only needed if this can not be inferred from the time coords
@@ -199,6 +216,7 @@ def search_flux(
                     - suitable pandas Offset Alias
                     - tuple of (value, unit) as would be passed to pandas.Timedelta function
         continuous: Whether time stamps have to be continuous.
+        kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
@@ -212,12 +230,16 @@ def search_flux(
         species=species,
         source=source,
         domain=domain,
+        database=database,
+        database_version=database_version,
+        model=model,
         start_date=start_date,
         end_date=end_date,
         high_time_resolution=high_time_resolution,
         period=period,
         continuous=continuous,
         data_type="emissions",
+        **kwargs,
     )
 
 
@@ -237,6 +259,7 @@ def search_footprints(
     high_spatial_res: Optional[bool] = None,
     high_time_res: Optional[bool] = None,
     short_lifetime: Optional[bool] = None,
+    **kwargs: Any,
 ) -> SearchResults:
     """Search for footprints data
 
@@ -257,6 +280,7 @@ def search_footprints(
                         Note this will be set to True automatically if species="co2" (Carbon Dioxide).
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                         Note this will be set to True if species has an associated lifetime.
+        kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
@@ -289,6 +313,7 @@ def search_footprints(
         high_time_res=high_time_res,
         short_lifetime=short_lifetime,
         data_type="footprints",
+        **kwargs,
     )
 
 
@@ -306,6 +331,8 @@ def search_surface(
     data_source: Optional[str] = None,
     sampling_height: Optional[str] = None,
     icos_data_level: Optional[int] = None,
+    dataset_source: Optional[str] = None,
+    **kwargs: Any,
 ) -> SearchResults:
     """Cloud object store search
 
@@ -324,6 +351,8 @@ def search_surface(
         argument only needs to be used to narrow the search to data solely from these sources.
         sampling_height: Sampling height of measurements
         icos_data_level: ICOS data level, see ICOS documentation
+        dataset_source: For ICOS data only: dataset source name, for example ICOS, InGOS, European ObsPack
+        kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
@@ -357,6 +386,8 @@ def search_surface(
         network=network,
         sampling_height=sampling_height,
         icos_data_level=icos_data_level,
+        dataset_source=dataset_source,
+        **kwargs,
     )
 
     return results
@@ -371,6 +402,7 @@ def search_column(
     network: Optional[str] = None,
     instrument: Optional[str] = None,
     platform: Optional[str] = None,
+    **kwargs: Any,
 ) -> SearchResults:
     """Search column data
 
@@ -390,6 +422,7 @@ def search_column(
         platform: Type of platform. Should be one of:
             - "satellite"
             - "site"
+        kwargs: Additional search terms
     Returns:
         SearchResults: SearchResults object
     """
@@ -403,6 +436,7 @@ def search_column(
         instrument=instrument,
         platform=platform,
         data_type="column",
+        **kwargs,
     )
 
 

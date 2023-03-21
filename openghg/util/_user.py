@@ -2,7 +2,6 @@ import logging
 import os
 import platform
 from pathlib import Path
-import pprint
 from typing import Dict
 import uuid
 import toml
@@ -66,8 +65,9 @@ def create_config(silent: bool = False) -> None:
     Returns:
         None
     """
-    print("\nOpenGHG configuration")
-    print("---------------------\n")
+    if not silent:
+        print("\nOpenGHG configuration")
+        print("---------------------\n")
 
     user_config_path = get_user_config_path()
 
@@ -76,16 +76,16 @@ def create_config(silent: bool = False) -> None:
     # of the user ID
     if user_config_path.exists():
         if silent:
-            print("Error: cannot overwrite an existing configuration. Please run quickstart.")
+            logger.error("Error: cannot overwrite an existing configuration. Please run interactively.")
             return
 
-        print(f"User config exists at {str(user_config_path)}, checking...")
+        logger.info(f"User config exists at {str(user_config_path)}, checking...")
 
         config = toml.loads(user_config_path.read_text())
 
         objstore_path_config = Path(config["object_store"]["local_store"])
 
-        print(f"Current object store path: {objstore_path_config}")
+        logger.info(f"Current object store path: {objstore_path_config}")
         update_input = input("Would you like to update the path? (y/n): ")
         if update_input.lower() in ("y", "yes"):
             new_path_input = input("Enter new path for object store: ")
@@ -94,18 +94,19 @@ def create_config(silent: bool = False) -> None:
             config["object_store"]["local_store"] = str(new_path)
             updated = True
         else:
-            print("Matching object store path, nothing to do.\n")
+            logger.info("Matching object store path, nothing to do.\n")
 
         # Some users may not have a user ID if they've used previous versions of OpenGHG
+        # Or if they UUID isn't valid a new one is created, the value of the UUID
+        # doesn't matter at the moment, it's not used for anything very important
         try:
             user_id = config["user_id"]
-        except KeyError:
+            uuid.UUID(user_id, version=4)
+        except (KeyError, ValueError):
             config["user_id"] = str(uuid.uuid4())
             updated = True
-
-        if updated:
-            print("Updated configuration saved.\n")
     else:
+        updated = True
         default_objstore_path = get_default_objectstore_path()
 
         if silent:
@@ -116,25 +117,18 @@ def create_config(silent: bool = False) -> None:
 
         user_config_path.parent.mkdir(parents=True, exist_ok=True)
 
-        if not obj_store_path:
-            obj_store_path = default_objstore_path
-
         user_id = str(uuid.uuid4())
         config = {"object_store": {"local_store": str(obj_store_path)}, "user_id": user_id}
 
         obj_store_path.mkdir(exist_ok=True)
 
-        print(f"Creating config at {str(user_config_path)}\n")
+        logger.info(f"Creating config at {str(user_config_path)}\n")
 
     if updated:
-        pp = pprint.PrettyPrinter(width=50, compact=True)
-        print("Writing configuration:\n")
-        pp.pprint(config)
-        print("\n")
-
+        logger.info(f"Configuration written to {user_config_path}")
         user_config_path.write_text(toml.dumps(config))
     else:
-        print("Configuration unchanged.")
+        logger.info("Configuration unchanged.")
 
 
 # @lru_cache
@@ -153,3 +147,30 @@ def read_local_config() -> Dict:
 
     config: Dict = toml.loads(config_path.read_text())
     return config
+
+
+def check_config() -> None:
+    """Check that the user config file is valid and the paths
+    given in it exist.
+
+    Returns:
+        bool
+    """
+    config_path = get_user_config_path()
+
+    if not config_path.exists():
+        logger.warning("Configuration file does not exist. Please create it by running openghg --quickstart.")
+
+    config = read_local_config()
+    uid = config["user_id"]
+    object_stores = config["object_store"]
+
+    try:
+        uuid.UUID(uid, version=4)
+    except ValueError:
+        logger.exception("Invalid user ID. Please re-run quickstart to setup a valid config file.")
+        raise
+
+    for path in object_stores.values():
+        if not Path(path).exists():
+            logger.info(f"{path} does not exist but will be created.")

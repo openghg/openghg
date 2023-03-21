@@ -1,7 +1,7 @@
 import re
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
 import logging
 import numpy as np
@@ -67,7 +67,14 @@ def parse_edgar(
 
     from openghg.standardise.meta import assign_flux_attributes, define_species_label
     from openghg.store import infer_date_range
-    from openghg.util import clean_string, convert_longitude, molar_mass, synonyms, timestamp_now
+    from openghg.util import (
+        clean_string,
+        molar_mass,
+        synonyms,
+        find_coord_name,
+        convert_internal_longitude,
+        timestamp_now,
+    )
 
     # Currently based on acrg.name.emissions_helperfuncs.getedgarannualtotals()
     # Additional edgar functions which could be incorporated.
@@ -94,7 +101,7 @@ def parse_edgar(
     else:
         zipped = False
 
-    known_version = _edgar_known_versions()
+    known_versions = _edgar_known_versions()
 
     # Check readme file for edgar version (if not specified)
     if zipped and edgar_version is None:
@@ -149,16 +156,25 @@ def parse_edgar(
     # If version not yet found, extract version from file naming scheme
     if edgar_version is None:
         possible_version = db_info["version"]
-        if possible_version in known_version:
-            edgar_version = possible_version
+        possible_version_clean = clean_string(possible_version)
+        if possible_version_clean in known_versions:
+            edgar_version = possible_version_clean
 
-    if edgar_version not in known_version:
-        raise ValueError(f"Unable to infer EDGAR version ({edgar_version})." " Please pass as an argument")
+    edgar_version = clean_string(edgar_version)
+
+    if edgar_version not in known_versions:
+        if edgar_version is None:
+            raise ValueError(f"Unable to infer EDGAR version ({edgar_version})." f" Please pass as an argument (one of {known_versions})")
+        else:
+            raise ValueError(f"Unable to infer EDGAR version." f" Please pass as an argument (one of {known_versions})")
 
     # TODO: May want to split out into a separate function, so we can use this for
     # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"
     # - sectoral - "v6.0_CH4_2015_ENE.0.1x0.1.nc"
     # - monthly sectoral - "v6.0_CH4_2015_1_ENE.0.1x0.1.nc", "v6.0_CH4_2015_2_ENE.0.1x0.1.nc", ...
+
+    if isinstance(date, int):
+        date = str(date)
 
     if len(date) == 4:
         year = int(date)
@@ -242,34 +258,41 @@ def parse_edgar(
     kg_to_g = 1e3
 
     flux_da = edgar_ds[name]
-    flux_values: ndarray[Any, Any] = flux_da.values * kg_to_g / species_molar_mass
+    # flux_values: ndarray[Any, Any] = flux_da.values * kg_to_g / species_molar_mass
+    flux_da = flux_da * kg_to_g / species_molar_mass
     units = "mol/m2/s"
 
-    lat_name = "lat"
-    lon_name = "lon"
-    try:
-        lat_in = edgar_ds[lat_name].values
-        lon_in = edgar_ds[lon_name].values
-    except KeyError:
+    lat_name = find_coord_name(flux_da, options=["lat", "latitude"])
+    lon_name = find_coord_name(flux_da, options=["lon", "longitude"])
+    if lat_name is None or lon_name is None:
         raise ValueError(
             f"Could not find '{lat_name}' or '{lon_name}' in EDGAR file.\n"
             " Please check this is a 2D grid map."
         )
 
     # Check range of longitude values and convert to -180 - +180
-    lon_in, ordinds = convert_longitude(lon_in, return_index=True)
-    flux_values = flux_values[:, ordinds]
+    flux_da = convert_internal_longitude(flux_da, lon_name=lon_name)
 
     if lat_out is not None and lon_out is not None:
         # Will produce import error if xesmf has not been installed.
         from openghg.transform import regrid_uniform_cc
+        from openghg.util import cut_data_extent
+
+        # To improve performance of regridding algorithm cut down the data
+        # to match the output grid (with buffer).
+        flux_da_cut = cut_data_extent(flux_da, lat_out, lon_out)
+        flux_values = flux_da_cut.values
+
+        lat_in_cut = flux_da_cut[lat_name]
+        lon_in_cut = flux_da_cut[lon_name]
 
         # regrid2d() used within acrg code for equivalent regrid function
         # but switched to using xesmf (rather than iris) here instead.
-        flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in, lon_in)
+        flux_values = regrid_uniform_cc(flux_values, lat_out, lon_out, lat_in_cut, lon_in_cut)
     else:
-        lat_out = lat_in
-        lon_out = lon_in
+        lat_out = flux_da[lat_name]
+        lon_out = flux_da[lon_name]
+        flux_values = flux_da.values
 
     edgar_attrs = edgar_ds.attrs
 
@@ -462,8 +485,8 @@ def _check_lat_lon(
 
 def _edgar_known_versions() -> list:
     """Define list of known versions for the EDGAR database"""
-    known_version = ["v432", "v50", "v6.0"]
-    return known_version
+    known_versions = ["v432", "v50", "v60"]
+    return known_versions
 
 
 def _check_readme_version(
@@ -521,8 +544,8 @@ def _check_readme_version(
             pass
         else:
             # Check against known versions and remove '.' if these don't match.
-            known_version = _edgar_known_versions()
-            if edgar_version not in known_version:
+            known_versions = _edgar_known_versions()
+            if edgar_version not in known_versions:
                 edgar_version = edgar_version.replace(".", "")
     else:
         edgar_version = None

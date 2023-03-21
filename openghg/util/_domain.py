@@ -1,51 +1,46 @@
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Tuple, List, Optional
 
 import numpy as np
 from numpy import ndarray
 
-from openghg.types import optionalPathType
+from openghg.types import optionalPathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
 
 __all__ = ["get_domain_info", "find_domain", "convert_longitude"]
 
 
-def get_domain_info(domain_filename: optionalPathType = None) -> Dict[str, Any]:
-    """
-    Extract data from domain info JSON file as a dictionary.
+def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
+    """Extract data from domain info JSON file as a dictionary.
 
     This uses the data stored within openghg_defs/domain_info JSON file by default.
 
     Args:
-        domain_filename: Alternative domain info file.
-
+        domain_filepath: Alternative domain info file.
     Returns:
         dict: Data from domain JSON file
     """
     from openghg_defs import domain_info_file
     from openghg.util import load_json
 
-    if domain_filename is None:
-        domain_info_json = load_json(domain_info_file)
+    if domain_filepath is None:
+        domain_info_json = load_json(path=domain_info_file)
     else:
-        domain_info_json = load_json(domain_filename)
+        domain_info_json = load_json(path=domain_filepath)
 
     return domain_info_json
 
 
-def find_domain(domain: str,
-                domain_filename: optionalPathType = None) -> Tuple[ndarray, ndarray]:
-    """
-    Finds the latitude and longitude values in degrees associated
+def find_domain(domain: str, domain_filepath: optionalPathType = None) -> Tuple[ndarray, ndarray]:
+    """Finds the latitude and longitude values in degrees associated
     with a given domain name.
 
     Args:
         domain: Pre-defined domain name
-        domain_filename: Alternative domain info file. Defaults to openghg_defs input.
-
+        domain_filepath: Alternative domain info file. Defaults to openghg_defs input.
     Returns:
         array, array : Latitude and longitude values for the domain in degrees.
     """
 
-    domain_info = get_domain_info(domain_filename)
+    domain_info = get_domain_info(domain_filepath)
 
     # Look for domain in domain_info file
     if domain in domain_info:
@@ -64,8 +59,7 @@ def find_domain(domain: str,
 
 
 def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
-    """
-    Attempts to extract or derive coordinate (typically latitude/longitude)
+    """Attempts to extract or derive coordinate (typically latitude/longitude)
     values for a domain from provided data dictionary (typically
     this can be derived from 'domain_info.json' file).
 
@@ -83,7 +77,6 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
         data: Data dictionary containing details of domain
               (e.g. derived from 'domain_info.json')
         domain: Name of domain
-
     Returns:
         array: Extracted or derived coordinate values
     """
@@ -125,26 +118,137 @@ def _get_coord_data(coord: str, data: Dict[str, Any], domain: str) -> ndarray:
     return coord_data
 
 
-def convert_longitude(
-    longitude: ndarray, return_index: bool = False
-) -> Union[ndarray, Tuple[ndarray, ndarray]]:
+def find_coord_name(data: XrDataLike, options: List[str]) -> Optional[str]:
     """
-    Convert longitude extent to -180 - 180 and reorder.
+    Find the name of a coordinate based on input options.
+    Only the first found value will be returned.
 
     Args:
-        longitude: Array of valid longitude values in degrees.
-        return_index: Return re-ordering index as well as updated longitude
+        data: xarray Data structure
+        options: List of options to check. Will be checked in order.
 
     Returns:
-        ndarray(, ndarray) : Updated longitude values and new indices if requested.
+        str / None: Name of coordinate if located within data. None otherwise.
+    """
+    for option in options:
+        if option in data.coords:
+            name = option
+            break
+    else:
+        return None
+
+    return name
+
+
+def convert_longitude(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
+    """
+    Convert longitude extent from (0 to 360) to (-180 to 180).
+    This does *not* reorder the values.
+
+    Args:
+        longitude: Valid longitude values in degrees.
+    Returns:
+        ndarray / DataArray : Updated longitude values in the same order.
     """
     # Check range of longitude values and convert to -180 - +180
-    mtohe = longitude > 180
-    longitude[mtohe] = longitude[mtohe] - 360
-    ordinds = np.argsort(longitude)
-    longitude = longitude[ordinds]
+    longitude = ((longitude - 180) % 360) - 180
 
-    if return_index:
-        return longitude, ordinds
+    return longitude
+
+
+def convert_internal_longitude(data: XrDataLikeMatch,
+                               lon_name: Optional[str] = None,
+                               reorder: bool = True) -> XrDataLikeMatch:
+    """
+    Convert longitude coordinate within an xarray data structure (DataArray or Dataset).
+
+    Args:
+        data: Data with longitude values to convert.
+        lon_name: By default will look a coord called "lon" or "longitude".
+            Otherwise must be specified.
+        reorder: Whether to reorder the data based on the converted longitude values.
+    Returns:
+        DataArray / Dataset: Input data with updated longitude values
+    """
+    if lon_name is None:
+        lon_options = ["lon", "longitude"]
+        lon_name = find_coord_name(data, lon_options)
+        if lon_name is None:
+            raise ValueError("Please specify 'lon_name'.")
+
+    longitude = data[lon_name]
+    longitude = convert_longitude(longitude)
+
+    data = data.assign_coords({lon_name: longitude})
+
+    if reorder:
+        data = data.sortby(lon_name)
+
+    return data
+
+
+def cut_data_extent(data: XrDataLikeMatch,
+                    lat_out: ArrayLike,
+                    lon_out: ArrayLike,
+                    lat_name: Optional[str] = None,
+                    lon_name: Optional[str] = None,
+                    copy: bool = False) -> XrDataLikeMatch:
+    """
+    Cut down extent of data within an xarray data structure (DataArray or Dataset)
+    against an output latitude and longitude range.
+
+    A buffer based on the maximum difference along the lon_out and lat_out dimensions
+    will be added when the data is cut.
+
+    Args:
+        data: Data to be cut down
+        lat_out: Array containing output latitude values
+        lon_out: Array containing output longitude values
+        lat_name: Name of latitude dimension. Must be specified if not "lat" or "latitude".
+        lon_name: Name of longitude dimension. Must be specified if not "lon" or "longitude".
+        copy: Whether to explicitly copy the data.
+
+    Returns:
+        xarray.DataArray / xarray.Dataset: data with reduced lat, lon ranges.        
+    """
+    if lat_name is None:
+        lat_options = ["lat", "latitude"]
+        lat_name = find_coord_name(data, lat_options)
+        if lat_name is None:
+            raise ValueError("Please specify 'lat_name'.")
+
+    if lon_name is None:
+        lon_options = ["lon", "longitude"]
+        lon_name = find_coord_name(data, lon_options)
+        if lon_name is None:
+            raise ValueError("Please specify 'lon_name'.")
+
+    if isinstance(lat_out, np.ndarray):
+        lat_out.sort()
     else:
-        return longitude
+        lat_out = lat_out.sortby(lat_out[lat_name])
+
+    if isinstance(lon_out, np.ndarray):
+        lon_out.sort()
+    else:
+        lon_out = lon_out.sortby(lon_out[lon_name])
+
+    lat_diff = (lat_out[1:] - lat_out[:-1]).max()
+    lon_diff = (lon_out[1:] - lon_out[:-1]).max()
+
+    lat_low = np.min(lat_out) - lat_diff
+    lat_high = np.max(lat_out) + lat_diff
+    lon_low = np.min(lon_out) - lon_diff
+    lon_high = np.max(lon_out) + lon_diff
+
+    lat_cut_wide_range = slice(lat_low, lat_high)
+    lon_cut_wide_range = slice(lon_low, lon_high)
+
+    if copy:
+        data_cut = data.copy()
+    else:
+        data_cut = data
+
+    data_cut = data_cut.sel({lat_name: lat_cut_wide_range, lon_name: lon_cut_wide_range})
+
+    return data_cut

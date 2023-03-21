@@ -1,12 +1,8 @@
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
 import pytest
 from helpers import get_surface_datapath
 from openghg.dataobjects import SearchResults
 from openghg.retrieve import search
-from openghg.store import ObsSurface, rank_sources
+from openghg.store import ObsSurface
 from openghg.util import split_daterange_str
 from pandas import Timestamp
 
