@@ -255,8 +255,9 @@ def _read_data(
 
     if sampling_period is not None:
         # Compare input to definition within json file
-        file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
-        comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
+        file_sampling_period_td = pd_Timedelta(seconds=float(extracted_sampling_period))
+        sampling_period_td = pd_Timedelta(seconds=float(sampling_period))
+        comparison_seconds = abs(sampling_period_td - file_sampling_period_td).total_seconds()
         tolerance_seconds = 1
 
         if comparison_seconds > tolerance_seconds:

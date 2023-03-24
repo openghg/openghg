@@ -12,7 +12,7 @@ def test_site_info_file_mock():
     added a mock for an internal version when site_info_file is imported
     which is static.
 
-    This is mocked using an autouse fixture in tests/conftest.py/site_info_mock
+    This is mocked using an autouse fixture in tests/conftest.py/openghg_defs_mock
     """
     from openghg_defs import site_info_file
 
