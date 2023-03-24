@@ -124,36 +124,23 @@ class Datasource:
         # TODO: May want to add period as a potential data variable so would need to extract from there if needed
         period = self.get_period()
 
-        # new_data = {
-        #     self.get_representative_daterange_str(year_data, period=period): year_data
-        #     for _, year_data in data.groupby("time.year")
-        # }
-
-        # Group by year
-        data_year_groups = {year: dataset for year, dataset in data.groupby("time.year")}
-        new_datasets = list(data_year_groups.values())
-        # Extract date ranges for each group
-        new_daterange_str = [self.get_representative_daterange_str(dataset, period=period) for dataset in new_datasets]
-        num_data_groups = len(data_year_groups)
+        # Ensure data is in time order
+        time_coord = "time"
+        data = data.sortby(time_coord)
 
         # Use a dictionary keyed with the daterange covered by each segment of data
-        new_data = {}
+        # Group by year
+        new_data = {
+            self.get_representative_daterange_str(year_data, period=period): year_data
+            for _, year_data in data.groupby(f"{time_coord}.year")
+        }
 
-        for i in range(num_data_groups):
-            data_split = new_datasets[i]
-            if i < num_data_groups - 1:
-                new_daterange = self.clip_daterange_from_str(new_daterange_str[i], new_daterange_str[i + 1])
-            else:
-                new_daterange = new_daterange_str[i]
-            new_data[new_daterange] = data_split
-
-        # for _, data in year_group:
-        #     daterange_str = self.get_representative_daterange_str(data, period=period)
-        #     new_data[daterange_str] = data
+        # Ensure daterange strings are independent and do not overlap each other
+        # (this can occur due to representative date strings)
+        new_data = self._clip_daterange_label(new_data)
 
         if self._data:
-            # We need to remove them from the curre
-            # pop the current daterange from
+            # We need to remove them from the current daterange
             overlapping = []
             for existing_daterange in self._data:
                 for new_daterange in new_data:
@@ -173,7 +160,7 @@ class Datasource:
                     logger.info("Combining overlapping data dateranges")
                     # Concatenate datasets along time dimension
                     try:
-                        combined = xr_concat((ex, new), dim="time")
+                        combined = xr_concat((ex, new), dim=time_coord)
                     except (ValueError, KeyError):
                         # If data variables in the two datasets are not identical,
                         # xr_concat will raise an error
@@ -184,18 +171,18 @@ class Datasource:
                         # missing variables with NaN values.
                         dv_not_in_new = dv_ex - dv_new
                         for dv in dv_not_in_new:
-                            fill_values = np.zeros(len(new["time"])) * np.nan
-                            new = new.assign({dv: ("time", fill_values)})
+                            fill_values = np.zeros(len(new[time_coord])) * np.nan
+                            new = new.assign({dv: (time_coord, fill_values)})
 
                         dv_not_in_ex = dv_new - dv_ex
                         for dv in dv_not_in_ex:
-                            fill_values = np.zeros(len(ex["time"])) * np.nan
-                            ex = ex.assign({dv: ("time", fill_values)})
+                            fill_values = np.zeros(len(ex[time_coord])) * np.nan
+                            ex = ex.assign({dv: (time_coord, fill_values)})
 
                         # Should now be able to concatenate successfully
-                        combined = xr_concat((ex, new), dim="time")
+                        combined = xr_concat((ex, new), dim=time_coord)
 
-                    combined = combined.sortby("time")
+                    combined = combined.sortby(time_coord)
 
                     unique, index, count = np_unique(combined.time, return_counts=True, return_index=True)
 
@@ -210,6 +197,10 @@ class Datasource:
                         dataset=combined, period=period
                     )
                     combined_datasets[combined_daterange] = combined
+
+                # Checking for overlapping date range strings in combined
+                # data and clipping the labels as necessary.
+                combined_datasets = self._clip_daterange_label(combined_datasets)
 
                 self._data.update(combined_datasets)
             else:
@@ -404,6 +395,36 @@ class Datasource:
         daterange_str1_clipped = create_daterange_str(start_date, end_date)
 
         return daterange_str1_clipped
+
+    def _clip_daterange_label(self, labelled_datasets: Dict[str, Dataset]) -> Dict[str, Dataset]:
+        """
+        Check the daterange string labels for the datasets and ensure neighbouring
+        date ranges are not overlapping. The daterange string labels will be updated
+        as required.
+
+        Args:
+            labelled_datasets : Dictionary of datasets labelled by date range strings.
+                These are expected to be in time order.
+
+        Returns:
+            Dict : Same format as input with labels updated as necessary.
+        """
+
+        datestr_labels = list(labelled_datasets.keys())
+        num_data_groups = len(datestr_labels)
+
+        labelled_datasets_clipped = {}
+        for i in range(num_data_groups):
+            daterange_str_1 = datestr_labels[i]
+            if i < num_data_groups - 1:
+                daterange_str_2 = datestr_labels[i + 1]
+                daterange_str = self.clip_daterange_from_str(daterange_str_1, daterange_str_2)
+            else:
+                daterange_str = daterange_str_1
+            dataset = labelled_datasets[daterange_str_1]
+            labelled_datasets_clipped[daterange_str] = dataset
+
+        return labelled_datasets_clipped
 
     def get_period(self) -> Optional[str]:
         """

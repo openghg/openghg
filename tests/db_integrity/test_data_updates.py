@@ -441,14 +441,12 @@ def test_obs_data_representative_date_overlap():
     when storing data. If the end of one chunk overlapped with the start of the
     next chunk this created overlapping date ranges.
 
-    This test just checks this will no longer raise a KeyError based on this.
+    This test checks this will no longer raise a KeyError based on this.
     """
 
     clear_test_store()
     bsd_data_read_crds_internal_overlap()
-    # TODO: Update code to allow this to pass - think about how to do this in
-    # the overlapping section
-    # bsd_data_read_crds_internal_overlap(overwrite=True)
+    bsd_data_read_crds_internal_overlap(overwrite=True)
 
     obs = ObsSurface.load()
     uuids = obs.datasources()
@@ -469,13 +467,14 @@ def test_obs_data_representative_date_overlap():
     start1, end1 = time_range_key1.split("_")
     start2, end2 = time_range_key2.split("_")
 
-    expected_start1 = pd.Timestamp("2014-01-30T11:20:45", tz='utc')
-    expected_start2 = pd.Timestamp("2015-01-01T00:01:00", tz='utc')
-
     time_buffer = pd.Timedelta(seconds=1)
 
+    expected_start1 = pd.Timestamp("2014-01-30T11:20:45", tz='utc')
+    expected_start2 = pd.Timestamp("2015-01-01T00:01:00", tz='utc')
+    expected_end1 = (expected_start2 - time_buffer)
+
     assert pd.Timestamp(start1) == expected_start1
-    assert pd.Timestamp(end1) == (expected_start2 - time_buffer)
+    assert pd.Timestamp(end1) == expected_end1
     assert pd.Timestamp(start2) == expected_start2
 
 
