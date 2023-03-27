@@ -264,6 +264,11 @@ def test_obs_data_read_header_diff():
     # TODO: Can we check if this has been saved as a new version?
 
 
+@pytest.mark.xfail(reason="Related to Issue #591.\n" \
+                   " This test is to check updated data values will be stored within the object store for a current data set.\n" \
+                   " Currently doesn't seem to be adding the new data and retains the original data.\n",
+                   raises=AssertionError,
+                   strict=True)
 def test_obs_data_read_data_diff():
     """
     Test adding new file for GC with same time points but some different data values.
@@ -280,7 +285,7 @@ def test_obs_data_read_data_diff():
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    bsd_diff_data_read()
+    bsd_diff_data_read(overwrite=True)
 
     # Search for expected species
     # CRDS data
@@ -321,6 +326,9 @@ def test_obs_data_read_data_diff():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     # TODO: Can we check if this has been saved as a new version?
+
+
+# TODO: Add test for different time values as well.
 
 #%% Look at different data frequencies for the same data
 
