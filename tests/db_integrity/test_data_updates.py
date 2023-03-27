@@ -142,7 +142,7 @@ def bsd_small_edit_data_read():
                          instrument=instrument)
 
 
-def bsd_diff_data_read():
+def bsd_diff_data_read(overwrite=False):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data values (should create different hash)
@@ -159,7 +159,8 @@ def bsd_diff_data_read():
                          source_format=source_format2,
                          site=site,
                          network=network,
-                         instrument=instrument)
+                         instrument=instrument,
+                         overwrite=overwrite)
 
 
 def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
@@ -278,7 +279,7 @@ def test_obs_data_read_data_diff():
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    # Load BSD data - GCMD data (GCWERKS) with edit to data (will produce different hash)
+    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
     bsd_diff_data_read()
 
     # Search for expected species
@@ -310,7 +311,7 @@ def test_obs_data_read_data_diff():
     # expected_ch4_time = crds_file_data["date_time"].values
     # np.testing.assert_allclose(ch4_time, expected_ch4_time)
 
-    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.small-edit.14.C")
+    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
 
     obs_data_sf6 = search_sf6.retrieve()
     data_sf6 = obs_data_sf6.data
