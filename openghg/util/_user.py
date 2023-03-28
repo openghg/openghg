@@ -108,12 +108,12 @@ def create_config(silent: bool = False) -> None:
     else:
         updated = True
         default_objstore_path = get_default_objectstore_path()
-
-        if silent:
-            obj_store_path = default_objstore_path
-        else:
+        
+        obj_store_path = default_objstore_path
+        if not silent:
             obj_store_input = input(f"Enter path for object store (default {default_objstore_path}): ")
-            obj_store_path = Path(obj_store_input).expanduser().resolve()
+            if obj_store_input:
+                obj_store_path = Path(obj_store_input).expanduser().resolve()
 
         user_config_path.parent.mkdir(parents=True, exist_ok=True)
 
