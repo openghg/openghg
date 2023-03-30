@@ -7,7 +7,7 @@ from openghg.dataobjects import ObsData
 from openghg.util import get_species_info, synonyms, get_datapath
 
 
-def latex2html(
+def _latex2html(
     latex_string: str
 ) -> str:
     """Replace latex sub/superscript formatting with html.
@@ -43,17 +43,18 @@ def plot_timeseries(
     xlabel: Optional[str] = None,
     ylabel: Optional[str] = None,
     units: Optional[str] = None,
+    logo: Optional[bool] = True,
 ) -> go.Figure:
     """Plot a timeseries
 
     Args:
         data: ObsData object or list of objects
-        title: Title for figure
         xvar: x axis variable, defaults to time
         yvar: y axis variable, defaults to species
         xlabel: Label for x axis
         ylabel: Label for y axis
         units: Units for y axis
+        logo: Show the OpenGHG logo
     Returns:
         go.Figure: Plotly Graph Object Figure
     """
@@ -102,7 +103,7 @@ def plot_timeseries(
         site = metadata["site"]
         inlet = metadata["inlet"]
 
-        species_string = latex2html(
+        species_string = _latex2html(
             species_info[synonyms(species, lower=False)]["print_string"]
         )
 
@@ -166,7 +167,7 @@ def plot_timeseries(
         )
 
         # Save units and species names for axis labels
-        unit_strings.append(latex2html(unit_string))
+        unit_strings.append(_latex2html(unit_string))
         species_strings.append(species_string)
 
     if len(set(unit_strings)) > 1:
@@ -191,6 +192,12 @@ def plot_timeseries(
             "y": 0.99,
             "x": 0.01
         }
+        logo_pos = {
+            "yanchor": "bottom",
+            "xanchor": "right",
+            "y": 0.01,
+            "x": 0.99
+        }
     else:
         legend = {
             "yanchor": "top",
@@ -198,21 +205,35 @@ def plot_timeseries(
             "y": 0.99,
             "x": 0.99
         }
+        logo_pos = {
+            "yanchor": "bottom",
+            "xanchor": "left",
+            "y": 0.01,
+            "x": 0.01
+        }
     fig.update_layout(legend=legend,
                       template="seaborn")
 
     # Add OpenGHG logo
     logo = base64.b64encode(open(get_datapath("OpenGHG_Logo_NoText_transparent_200x200.png"), 'rb').read())
-    fig.add_layout_image(
-        dict(
-            source='data:image/png;base64,{}'.format(logo.decode()),
-            xref="x domain",
-            yref="y domain",
-            x=0.99, y=0.01,
-            sizex=0.1,
-            sizey=0.1,
-            xanchor="right", yanchor="bottom"
-        )
-    )
+    logo_dict = dict(
+        source='data:image/png;base64,{}'.format(logo.decode()),
+        xref="x domain",
+        yref="y domain",
+        sizex=0.1,
+        sizey=0.1)
+    logo_dict.update(logo_pos)
+
+    fig.add_layout_image(logo_dict
+        # dict(
+        #     source='data:image/png;base64,{}'.format(logo.decode()),
+        #     xref="x domain",
+        #     yref="y domain",
+        #     sizex=0.1,
+        #     sizey=0.1,
+        #     x=0.99, y=0.01,
+        #     xanchor="right", yanchor="bottom"
+        # )  # .update(logo_pos)
+                         )
 
     return fig
