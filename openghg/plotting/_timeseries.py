@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict, Tuple
 import plotly.graph_objects as go
 import numpy as np
 import base64
@@ -34,6 +34,97 @@ def _latex2html(
                                         replacements[rep])
 
     return html_string
+
+
+def _plot_remove_gaps(
+        x_data: np.ndarray,
+        y_data: np.ndarray,
+        gap: Optional[int] = 24 * 60 * 60 * 1e9
+) -> Tuple[np.ndarray, np.ndarray]:
+    '''Insert NaNs between big gaps in the data. 
+    Prevents connecting lines being drawn
+
+    Args:
+        x_data: plot timeseries (numpy timestamp)
+        y_data: data array
+        gap: gap beyond which a NaN is introducted (nanoseconds, default=1 day)
+
+    Returns:
+        x, y: x and y arrays to plot
+    '''
+
+    gap_idx = np.where(np.diff(x_data.astype(int)) > gap)[0]
+    x_data_plot = np.insert(x_data, gap_idx + 1, values=x_data[0])
+    y_data_plot = np.insert(y_data, gap_idx + 1, values=np.nan)
+
+    return x_data_plot, y_data_plot
+
+
+def _plot_legend_position(
+        ascending: bool
+) -> Tuple[Dict, Dict]:
+    """Position of legend and logo,
+    depending on whether data is ascending or descending
+
+    Args:
+        ascending (bool): Is the data ascending
+
+    Returns:
+        Dict, Dict: Plotly legend and logo position parameters
+    """
+
+    if ascending:
+        legend_pos = {
+            "yanchor": "top",
+            "xanchor": "left",
+            "y": 0.99,
+            "x": 0.01
+        }
+        logo_pos = {
+            "yanchor": "bottom",
+            "xanchor": "right",
+            "y": 0.01,
+            "x": 0.99
+        }
+    else:
+        legend_pos = {
+            "yanchor": "top",
+            "xanchor": "right",
+            "y": 0.99,
+            "x": 0.99
+        }
+        logo_pos = {
+            "yanchor": "bottom",
+            "xanchor": "left",
+            "y": 0.01,
+            "x": 0.01
+        }
+
+    return legend_pos, logo_pos
+
+
+def _plot_logo(
+        logo_pos: Dict,    
+) -> Dict:
+    """Create Plotly dictionary for logo
+
+    Args:
+        logo_pos: Dictionary containing the position of the logo
+
+    Returns:
+        Dictionary containing logo + position parameters
+    """
+
+    logo = base64.b64encode(open(get_datapath("OpenGHG_Logo_NoText_transparent_200x200.png"), 'rb').read())
+    logo_dict = dict(
+        source='data:image/png;base64,{}'.format(logo.decode()),
+        xref="x domain",
+        yref="y domain",
+        sizex=0.1,
+        sizey=0.1)
+    logo_dict.update(logo_pos)
+
+    return logo_dict
 
 
 def plot_timeseries(
@@ -122,8 +213,7 @@ def plot_timeseries(
             except KeyError:
                 y_data = dataset["mf"]
 
-        if units is not None or len(data) > 1:
-
+        if units is not None or len(data) > 0:
             data_attrs = y_data.attrs
             data_units = data_attrs.get("units", "1")
 
@@ -137,6 +227,8 @@ def plot_timeseries(
             unit_conversion = float(data_units) / float(unit_value)
         else:
             unit_conversion = 1
+            # TODO: Not sure what is expected for unit_value here
+            unit_value = "1"
 
         y_data *= unit_conversion
 
@@ -151,10 +243,11 @@ def plot_timeseries(
         else:
             ascending.append(False)
 
-        # Insert NaNs where there are large data gaps (removes connecting lines)
-        gap_idx = np.where(np.diff(x_data.values.astype(int)) > 24 * 60 * 60 * 1e9)[0]
-        x_data_plot = np.insert(x_data.values, gap_idx + 1, values=x_data.time[0])
-        y_data_plot = np.insert(y_data.values, gap_idx + 1, values=np.nan)
+        # Add NaNs where there are large data gaps
+        x_data_plot, y_data_plot = _plot_remove_gaps(x_data.values, y_data.values)
+
+        # Convert unit string to html
+        unit_string_html = _latex2html(unit_string)
 
         # Create plot
         fig.add_trace(
@@ -163,11 +256,12 @@ def plot_timeseries(
                 x=x_data_plot,
                 y=y_data_plot,
                 mode="lines",
+                hovertemplate="%{x|%Y-%m-%d %H:%M}<br> %{y:.1f} " + unit_string_html
             )
         )
 
         # Save units and species names for axis labels
-        unit_strings.append(_latex2html(unit_string))
+        unit_strings.append(unit_string_html)
         species_strings.append(species_string)
 
     if len(set(unit_strings)) > 1:
@@ -183,57 +277,14 @@ def plot_timeseries(
     if xlabel:
         fig.update_xaxes(title=xlabel)
 
-    # If any timeseries is ascending, put the legend in the top-left.
-    # Otherwise, put in the top-right
-    if True in set(ascending):
-        legend = {
-            "yanchor": "top",
-            "xanchor": "left",
-            "y": 0.99,
-            "x": 0.01
-        }
-        logo_pos = {
-            "yanchor": "bottom",
-            "xanchor": "right",
-            "y": 0.01,
-            "x": 0.99
-        }
-    else:
-        legend = {
-            "yanchor": "top",
-            "xanchor": "right",
-            "y": 0.99,
-            "x": 0.99
-        }
-        logo_pos = {
-            "yanchor": "bottom",
-            "xanchor": "left",
-            "y": 0.01,
-            "x": 0.01
-        }
-    fig.update_layout(legend=legend,
+    # Position the legend
+    legend_pos, logo_pos = _plot_legend_position(True in ascending)
+    fig.update_layout(legend=legend_pos,
                       template="seaborn")
 
     # Add OpenGHG logo
-    logo = base64.b64encode(open(get_datapath("OpenGHG_Logo_NoText_transparent_200x200.png"), 'rb').read())
-    logo_dict = dict(
-        source='data:image/png;base64,{}'.format(logo.decode()),
-        xref="x domain",
-        yref="y domain",
-        sizex=0.1,
-        sizey=0.1)
-    logo_dict.update(logo_pos)
-
-    fig.add_layout_image(logo_dict
-        # dict(
-        #     source='data:image/png;base64,{}'.format(logo.decode()),
-        #     xref="x domain",
-        #     yref="y domain",
-        #     sizex=0.1,
-        #     sizey=0.1,
-        #     x=0.99, y=0.01,
-        #     xanchor="right", yanchor="bottom"
-        # )  # .update(logo_pos)
-                         )
+    if logo:
+        logo_dict = _plot_logo(logo_pos)
+        fig.add_layout_image(logo_dict)
 
     return fig
