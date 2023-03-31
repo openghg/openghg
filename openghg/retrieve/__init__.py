@@ -19,3 +19,5 @@ from ._search import (
     search_footprints,
     search_surface,
 )
+
+from .met import retrieve_met

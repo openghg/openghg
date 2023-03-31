@@ -12,7 +12,7 @@ def define_data_types() -> Tuple[str, ...]:
         "surface",
         "column",
         "emissions",
-        # "met",
+        "met",
         "footprints",
         "boundary_conditions",
         "eulerian_model",
@@ -32,13 +32,14 @@ def define_data_type_classes() -> Dict[str, Any]:
         Footprints,
         ObsColumn,
         ObsSurface,
+        METStore,
     )
 
     data_type_classes = {
         "surface": ObsSurface,
         "column": ObsColumn,
         "emissions": Emissions,
-        # "met": ???
+         "met": METStore,
         "footprints": Footprints,
         "boundary_conditions": BoundaryConditions,
         "eulerian_model": EulerianModel,
