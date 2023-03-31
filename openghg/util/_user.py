@@ -108,7 +108,7 @@ def create_config(silent: bool = False) -> None:
     else:
         updated = True
         default_objstore_path = get_default_objectstore_path()
-        
+
         obj_store_path = default_objstore_path
         if not silent:
             obj_store_input = input(f"Enter path for object store (default {default_objstore_path}): ")
