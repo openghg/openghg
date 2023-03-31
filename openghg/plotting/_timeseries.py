@@ -39,7 +39,7 @@ def _latex2html(
 def _plot_remove_gaps(
         x_data: np.ndarray,
         y_data: np.ndarray,
-        gap: Optional[int] = 24 * 60 * 60 * 1e9
+        gap: Optional[int] = 24 * 60 * 60 * 1000000000
 ) -> Tuple[np.ndarray, np.ndarray]:
     '''Insert NaNs between big gaps in the data. 
     Prevents connecting lines being drawn
