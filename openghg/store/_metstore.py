@@ -156,11 +156,13 @@ class METStore(BaseStore):
 
         name = "_".join((metadata["site"], metadata["network"], date_str))
         self._datasource_uuids[datasource.uuid()] = name
+        
+        print(self._datasource_uuids[datasource.uuid()], datasource.uuid())
 
-        met.add_datasources(uuids=self._datasource_uuids[datasource.uuid()], data=met_data, metastore=metastore)
+        met.add_single_datasource(uuid={name:datasource.uuid()}, data=met_data, metastore=metastore)
 
         met.save()
-        metastore.close()
+        #metastore.close()
 
         
         # Write this updated object back to the object store

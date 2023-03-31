@@ -191,6 +191,27 @@ class BaseStore:
                 metastore.insert(meta_copy)
                 self._datasource_uuids[uid] = key
 
+    def add_single_datasource(self, uuid: Dict, data: Dict, metastore: TinyDB) -> None:
+        """Add the passed list of Datasources to the current list
+
+        Args:
+            datasource_uuids: Datasource UUIDs
+            metadata: Metadata for each species
+            metastore: TinyDB metadata store
+        Returns:
+            None
+        """
+        from openghg.util import to_lowercase
+
+        for key, uuid_data in uuid.items():
+            #for key, uuid_data in uuids.items():
+            meta_copy = data.metadata.copy()
+            meta_copy["uuid"] = uuid_data
+            # Make sure all the metadata is lowercase for easier searching later
+            meta_copy = to_lowercase(d=meta_copy)
+            metastore.insert(meta_copy)
+            self._datasource_uuids[uuid_data] = key
+
     def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range
 
