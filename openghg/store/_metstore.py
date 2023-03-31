@@ -21,6 +21,7 @@ class METStore(BaseStore):
     _uuid = "9fcabd0c-9b68-4ab4-a116-bc30a4472d67"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
+
     def save(self) -> None:
         """Save the object to the object store
 
@@ -39,7 +40,7 @@ class METStore(BaseStore):
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
     @staticmethod
-    def retrieve(site: str, network: str, years: Optional[Union[str, List[str]]] = None, start_date: Optional[str] = None, end_date: Optional[str] = None,) -> METData:
+    def retrieve(site: str, network: str, years: Optional[Union[str, List[str]]] = None, start_date: Optional[str] = None, end_date: Optional[str] = None, variables: Optional[List[str]] = None, key_path: Optional[str] = None, save_path: Optional[str] = None,) -> METData:
         """Retrieve data from either the local METStore or from a
         remote store if we don't have it locally
 
@@ -75,15 +76,20 @@ class METStore(BaseStore):
 
         # We'll just do full years for now, I don't think it's a huge amount of data (currently)
 
-        print("retrieving")
+        print("Retrieving")
         result = store.search(site=site, network=network, start_date=start_date, end_date=end_date)
+        
         #print(f"search result {result}")
         # Retrieve from the Copernicus store
         if result is None:
-            data = retrieve_met(site=site, network=network, start_date=start_date, end_date=end_date)
 
-            print("storing")
+            data = retrieve_met(site=site, network=network, start_date=start_date, end_date=end_date, save_path=save_path, variables=variables, key_path=key_path)
+
+            print("Storing")
             store._store(data)
+            store.save()
+        else:
+            print("File already exists")
 
         return result
 
@@ -109,8 +115,7 @@ class METStore(BaseStore):
         from openghg.store.base import Datasource
 
         datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids)
-        print(self._datasource_uuids)
-
+        #print(self._datasource_uuids)
         # We should only get one datasource here currently
         for datasource in datasources:
             if datasource.search_metadata(site=site, network=network, find_all=True):
@@ -150,9 +155,7 @@ class METStore(BaseStore):
         date_str = f"{metadata['start_date']}_{metadata['end_date']}"
 
         name = "_".join((metadata["site"], metadata["network"], date_str))
-        print(name)
         self._datasource_uuids[datasource.uuid()] = name
-        print(self._datasource_uuids)
 
         met.add_datasources(uuids=self._datasource_uuids[datasource.uuid()], data=met_data, metastore=metastore)
 

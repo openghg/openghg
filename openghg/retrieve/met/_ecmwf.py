@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import cdsapi  # type: ignore
+
 import numpy as np
 from typing import TYPE_CHECKING, List, Optional, Union
 import os
@@ -48,11 +48,14 @@ def retrieve_met(
         raise AttributeError("You must pass either the argument years or both start_date and end_date")
     
     # check that user has Copernicus key setup
-    is_file = os.path.isfile((os.getenv("HOME") if key_path is None else key_path) +"/.cdsapirc")
-    if is_file==False:
+    key_path =(os.getenv("HOME") if key_path is None else key_path) + "/.cdsapirc"
+    if not os.path.isfile(key_path):
         raise FileNotFoundError(
             f'No API key file was found at {(os.getenv("HOME") if key_path is None else key_path) +"/.cdsapirc"}. \n' 
-            'Follow the instructions at xxx to create it or pass the right file path to key_path')
+            'Follow the instructions at https://cds.climate.copernicus.eu/api-how-to to create it or pass the right file path (where your file .cdapirc is) to key_path')
+    
+    import cdsapi 
+
     
     if variables is None:
         variables = ["u_component_of_wind", "v_component_of_wind"]
@@ -82,11 +85,14 @@ def retrieve_met(
 
     cds_client = cdsapi.Client()
     dataset_name = "reanalysis-era5-pressure-levels"
-    default_save_path="/user/work/ef17148/openghg/metdata/" ## fix this to have a dynamic one!
+    default_save_path=os.path.join(os.getcwd().split("openghg")[0], "openghg/metdata") ## fix this to have a dynamic one!
     save_path=default_save_path if save_path is None else save_path
+    assert os.path.isdir(save_path), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
+
+    print(f"Retrieving to {save_path}")
+
 
     years, months = list(set([str(download_date).split("-")[0] for download_date in download_list])), list(set([str(download_date).split("-")[1] for download_date in download_list]))
-    print
     request = {
         "product_type": "reanalysis",
         "format": "netcdf",

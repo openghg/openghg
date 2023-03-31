@@ -50,10 +50,8 @@ def plot_met_timeseries(
         start_date = Timestamp(data.data.time.values[0]) if start_date is None else start_date
         end_date = Timestamp(data.data.time.values[-1]) if start_date is None else end_date
         dataset = data.data.sel(time=slice(Timestamp(start_date), Timestamp(end_date)))
-        print(len(dataset.time.values))
     else:
         dataset=data.data
-        print(len(dataset.time.values))
 
     layouts ={}
 
