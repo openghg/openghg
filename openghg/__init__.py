@@ -76,6 +76,3 @@ del logfile_path, hub_env, cloud_env
 module_root = _Path(__file__).resolve().parent
 
 data_path: _Path = module_root / "data"
-
-ecmwf_info_file: _Path = data_path / "ecmwf_dataset_info.json"
-

@@ -2,13 +2,12 @@ from __future__ import annotations
 
 
 import numpy as np
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import List, Optional, Union, Tuple
 import os
 import pandas as pd
 import xarray as xr
 
 from openghg.dataobjects import METData
-from openghg.store import METStore
 
 
 # import requests
@@ -28,7 +27,6 @@ def retrieve_met(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     variables: Optional[List[str]] = None,
-    key_path: Optional[str] = None,
     save_path: Optional[str] = None,
 ) -> METData:
     """Retrieve METData data. Downloads monthly met files.
@@ -42,30 +40,21 @@ def retrieve_met(
     Returns:
         METData: METData object holding data and metadata
     """
+    import cdsapi
 
-    # check right date 
-    if years==None and (start_date==None or end_date==None):
-        raise AttributeError("You must pass either the argument years or both start_date and end_date")
-    
-    # check that user has Copernicus key setup
-    key_path =(os.getenv("HOME") if key_path is None else key_path) + "/.cdsapirc"
-    if not os.path.isfile(key_path):
-        raise FileNotFoundError(
-            f'No API key file was found at {(os.getenv("HOME") if key_path is None else key_path) +"/.cdsapirc"}. \n' 
-            'Follow the instructions at https://cds.climate.copernicus.eu/api-how-to to create it or pass the right file path (where your file .cdapirc is) to key_path')
-    
-    import cdsapi 
+    # check right date
+    if years is None and (start_date is None or end_date is None):
+        raise AttributeError("You /must pass either the argument years or both start_date and end_date")
 
-    
     if variables is None:
         variables = ["u_component_of_wind", "v_component_of_wind"]
 
-    latitude, longitude, site_height, inlet_heights = _get_site_data(site=site, network=network)
+    latitude, longitude, site_height, inlet_heights = get_site_data(site=site, network=network)
 
     # Get the area to retrieve data for
     ecmwf_area = _get_ecmwf_area(site_lat=latitude, site_long=longitude)
     # Calculate the pressure at measurement height(s)
-    measure_pressure = _get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
+    measure_pressure = get_site_pressure(inlet_heights=inlet_heights, site_height=site_height)
     # Calculate the ERA5 pressure levels required
     ecmwf_pressure_levels = _altitude_to_ecmwf_pressure(measure_pressure=measure_pressure)
 
@@ -75,24 +64,27 @@ def retrieve_met(
         else:
             years = sorted(years)
 
-        download_list = pd.period_range(start=str(years[0]), end=str(years[-1]+1), freq='M')[:-1]
+        download_list = pd.period_range(start=str(years[0]), end=str(int(years[-1]) + 1), freq="M")[:-1]
+        start_d = pd.Timestamp(download_list[0])
+        end_d = pd.Timestamp(download_list[-1])
 
     if start_date is not None and end_date is not None:
-        download_list = pd.period_range(start=start_date, end=end_date, freq='M')
-        start_date = pd.Timestamp(start_date)
-        end_date = pd.Timestamp(end_date)
-    
+        download_list = pd.period_range(start=start_date, end=end_date, freq="M")
+        start_d = pd.Timestamp(start_date)
+        end_d = pd.Timestamp(end_date)
 
     cds_client = cdsapi.Client()
     dataset_name = "reanalysis-era5-pressure-levels"
-    default_save_path=os.path.join(os.getcwd().split("openghg")[0], "openghg/metdata") ## fix this to have a dynamic one!
-    save_path=default_save_path if save_path is None else save_path
-    assert os.path.isdir(save_path), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
+    default_save_path = os.path.join(os.getcwd().split("openghg")[0], "openghg/metdata")
+    save_path = default_save_path if save_path is None else save_path
+    assert os.path.isdir(
+        save_path
+    ), f"The save path {save_path} is not a directory. Please create it or pass a different save_path"
 
     print(f"Retrieving to {save_path}")
 
-
-    years, months = list(set([str(download_date).split("-")[0] for download_date in download_list])), list(set([str(download_date).split("-")[1] for download_date in download_list]))
+    years = list(set([str(download_date).split("-")[0] for download_date in download_list]))
+    months = list(set([str(download_date).split("-")[1] for download_date in download_list]))
     request = {
         "product_type": "reanalysis",
         "format": "netcdf",
@@ -103,11 +95,24 @@ def retrieve_met(
         "day": [str(x).zfill(2) for x in range(1, 32)],
         "time": [f"{str(x).zfill(2)}:00" for x in range(0, 24)],
         "area": ecmwf_area,
-    }  
-    #print(request)
-    cds_client.retrieve(dataset_name, request, os.path.join(save_path, f"Met_{site}_{network}_{start_date.year}{start_date.month}_{end_date.year}{end_date.month}.nc"))
-    dataset = xr.open_dataset(os.path.join(save_path, f"Met_{site}_{network}_{start_date.year}{start_date.month}_{end_date.year}{end_date.month}.nc"))
-
+    }
+    # print(request)
+    # dataset = cds_client.retrieve(dataset_name, request)
+    cds_client.retrieve(
+        dataset_name,
+        request,
+        os.path.join(
+            save_path,
+            f"Met_{site}_{network}_{start_d.year}{start_d.month}_{end_d.year}{end_d.month}.nc",
+        ),
+    )
+    dataset = xr.open_dataset(
+        os.path.join(
+            save_path,
+            f"Met_{site}_{network}_{start_d.year}{start_d.month}_{end_d.year}{end_d.month}.nc",
+        )
+    )
+    print(dataset)
     metadata = {
         "product_type": request["product_type"],
         "format": request["format"],
@@ -116,26 +121,18 @@ def retrieve_met(
         "area": request["area"],
         "site": site,
         "network": network,
-        "start_date": start_date,
-        "end_date": end_date,
+        "start_date": str(start_d),
+        "end_date": str(end_d),
     }
-
 
     return METData(data=dataset, metadata=metadata)
 
+    # Retrieve metadata from Copernicus about the dataset, this includes
+    # the location of the data netCDF file.
+    # result = cds_client.retrieve(dataset_name, request, filepath)
 
-        
-
-        # Retrieve metadata from Copernicus about the dataset, this includes
-        # the location of the data netCDF file.
-        #result = cds_client.retrieve(dataset_name, request, filepath)
-
-    
-    #raise NotImplementedError("The met retrieval module needs updating and doesn't currently work.")
+    # raise NotImplementedError("The met retrieval module needs updating and doesn't currently work.")
     # from openghg.dataobjects import METData
-
-
-
 
     # # TODO - we might need to customise this further in the future to
     # # request other types of weather data
@@ -237,7 +234,7 @@ def _two_closest_values(diff: np.ndarray) -> np.ndarray:
     return closest_values
 
 
-def _get_site_data(site: str, network: str) -> Tuple[float, float, float, List]:
+def get_site_data(site: str, network: str) -> Tuple[float, float, float, List]:
     """Extract site location data from site attributes file.
 
     Args:
@@ -287,7 +284,7 @@ def _get_ecmwf_area(site_lat: float, site_long: float) -> List:
     ]
 
 
-def _get_site_pressure(inlet_heights: List, site_height: float) -> List[float]:
+def get_site_pressure(inlet_heights: List, site_height: float) -> List[float]:
     """Calculate the pressure levels required
 
     Args:
@@ -324,10 +321,9 @@ def _altitude_to_ecmwf_pressure(measure_pressure: List[float]) -> List[str]:
     Returns:
         list: List of desired pressures
     """
-    from openghg.util import load_json
-    from openghg import ecmwf_info_file
+    from openghg.util import load_internal_json
 
-    ecmwf_metadata = load_json(ecmwf_info_file)
+    ecmwf_metadata = load_internal_json(filename="ecmwf_dataset_info.json")
     dataset_metadata = ecmwf_metadata["datasets"]
     valid_levels = dataset_metadata["reanalysis_era5_pressure_levels"]["valid_levels"]
 

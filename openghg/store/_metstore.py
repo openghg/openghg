@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, List, Union, Optional
 
 from openghg.store.base import BaseStore
 from pandas import Timestamp
-import pandas as pd
 
 if TYPE_CHECKING:
     from openghg.dataobjects import METData
@@ -20,7 +19,6 @@ class METStore(BaseStore):
     _root = "METStore"
     _uuid = "9fcabd0c-9b68-4ab4-a116-bc30a4472d67"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
 
     def save(self) -> None:
         """Save the object to the object store
@@ -40,7 +38,15 @@ class METStore(BaseStore):
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
     @staticmethod
-    def retrieve(site: str, network: str, years: Optional[Union[str, List[str]]] = None, start_date: Optional[str] = None, end_date: Optional[str] = None, variables: Optional[List[str]] = None, key_path: Optional[str] = None, save_path: Optional[str] = None,) -> METData:
+    def retrieve(
+        site: str,
+        network: str,
+        years: Optional[Union[str, List[str]]] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        variables: Optional[List[str]] = None,
+        save_path: Optional[str] = None,
+    ) -> Union[METData, None]:
         """Retrieve data from either the local METStore or from a
         remote store if we don't have it locally
 
@@ -54,23 +60,21 @@ class METStore(BaseStore):
         from openghg.retrieve.met import retrieve_met
         from pandas import Timestamp
 
-        # check right date 
-        if years==None and (start_date==None or end_date==None):
+        # check right date
+        if years is None and (start_date is None or end_date is None):
             raise AttributeError("You must pass either the argument years or both start_date and end_date")
 
-        if years is not None:
+        if years is None:
+            start_date = Timestamp(start_date)
+            end_date = Timestamp(end_date)
+        else:
             if not isinstance(years, list):
                 years = [years]
             else:
                 years = sorted(years)
-            
+
             start_date = Timestamp(f"{years[0]}-1-1")
             end_date = Timestamp(f"{years[-1]}-12-31")
-        
-        else:
-            start_date = Timestamp(start_date)
-            end_date = Timestamp(end_date)            
-
 
         store = METStore.load()
 
@@ -78,12 +82,19 @@ class METStore(BaseStore):
 
         print("Retrieving")
         result = store.search(site=site, network=network, start_date=start_date, end_date=end_date)
-        
-        #print(f"search result {result}")
+
+        # print(f"search result {result}")
         # Retrieve from the Copernicus store
         if result is None:
 
-            data = retrieve_met(site=site, network=network, start_date=start_date, end_date=end_date, save_path=save_path, variables=variables, key_path=key_path)
+            data = retrieve_met(
+                site=site,
+                network=network,
+                start_date=start_date,
+                end_date=end_date,
+                save_path=save_path,
+                variables=variables,
+            )
 
             print("Storing")
             store._store(data)
@@ -115,7 +126,7 @@ class METStore(BaseStore):
         from openghg.store.base import Datasource
 
         datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in self._datasource_uuids)
-        #print(self._datasource_uuids)
+        # print(self._datasource_uuids)
         # We should only get one datasource here currently
         for datasource in datasources:
             if datasource.search_metadata(site=site, network=network, find_all=True):
@@ -138,32 +149,27 @@ class METStore(BaseStore):
             None
         """
         from openghg.store.base import Datasource
+        from openghg.store import load_metastore  # ,assign_data, datasource_lookup
 
         metadata = met_data.metadata
-        
-        from openghg.store import assign_data, datasource_lookup, load_metastore
-        metastore = load_metastore(key=self._metakey)
-        
-        met = METStore.load()
 
+        metastore = load_metastore(key=self._metakey)
+
+        met = METStore.load()
 
         datasource = Datasource()
         datasource.add_data(metadata=metadata, data=met_data.data, data_type="met")
         datasource.save()
-        
 
         date_str = f"{metadata['start_date']}_{metadata['end_date']}"
 
         name = "_".join((metadata["site"], metadata["network"], date_str))
         self._datasource_uuids[datasource.uuid()] = name
-        
-        print(self._datasource_uuids[datasource.uuid()], datasource.uuid())
 
-        met.add_single_datasource(uuid={name:datasource.uuid()}, data=met_data, metastore=metastore)
+        met.add_single_datasource(uuid={name: datasource.uuid()}, data=met_data, metastore=metastore)
 
         met.save()
-        #metastore.close()
+        metastore.close()
 
-        
         # Write this updated object back to the object store
         self.save()
