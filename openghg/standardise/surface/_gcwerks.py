@@ -61,7 +61,7 @@ def parse_gcwerks(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
-    site_filename: optionalPathType = None,
+    site_filepath: optionalPathType = None,
 ) -> Dict:
     """Reads a GC data file by creating a GC object and associated datasources
 
@@ -71,7 +71,7 @@ def parse_gcwerks(
         site: Three letter code or name for site
         instrument: Instrument name
         network: Network name
-        site_filename: Alternative site info file (see openghg/supplementary_data repository for format).
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of source_name : UUIDs
@@ -79,14 +79,14 @@ def parse_gcwerks(
     from pathlib import Path
 
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import clean_string, load_json
+    from openghg.util import clean_string, load_internal_json
 
     data_filepath = Path(data_filepath)
     precision_filepath = Path(precision_filepath)
 
     # Do some setup for processing
     # Load site data
-    gcwerks_data = load_json(filename="process_gcwerks_parameters.json", internal_data=True)
+    gcwerks_data = load_internal_json(filename="process_gcwerks_parameters.json")
     gc_params = gcwerks_data["GCWERKS"]
 
     network = clean_string(network)
@@ -128,7 +128,7 @@ def parse_gcwerks(
     )
 
     # Assign attributes to the data for CF compliant NetCDFs
-    gas_data = assign_attributes(data=gas_data, site=site, site_filename=site_filename)
+    gas_data = assign_attributes(data=gas_data, site=site, site_filepath=site_filepath)
 
     return gas_data
 
@@ -255,8 +255,9 @@ def _read_data(
 
     if sampling_period is not None:
         # Compare input to definition within json file
-        file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
-        comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
+        file_sampling_period_td = pd_Timedelta(seconds=float(extracted_sampling_period))
+        sampling_period_td = pd_Timedelta(seconds=float(sampling_period))
+        comparison_seconds = abs(sampling_period_td - file_sampling_period_td).total_seconds()
         tolerance_seconds = 1
 
         if comparison_seconds > tolerance_seconds:

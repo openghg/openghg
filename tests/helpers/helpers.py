@@ -1,8 +1,8 @@
 """ Some helper functions for things we do in tests frequently
 """
-import os
 import shutil
 from pathlib import Path
+import tempfile
 from typing import Dict, List, Union
 
 __all__ = [
@@ -16,14 +16,14 @@ __all__ = [
 ]
 
 
+def temporary_store_path():
+    return Path(tempfile.gettempdir(), "openghg_testing_store")
+
+
 def clear_test_store():
     # Clears the testing object store
-    path = os.getenv("OPENGHG_TEST")
-    if path is not None:
-        try:
-            shutil.rmtree(path)
-        except FileNotFoundError:
-            pass
+    tmp_store = temporary_store_path()
+    shutil.rmtree(path=tmp_store, ignore_errors=True)
 
 
 def get_surface_datapath(filename: str, source_format: str) -> Path:
