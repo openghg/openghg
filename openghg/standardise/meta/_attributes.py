@@ -20,7 +20,7 @@ def assign_attributes(
     site: Optional[str] = None,
     network: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
-    update_metadata_mismatch: bool = False,
+    update_mismatch: bool = False,
     site_filepath: optionalPathType = None,
     species_filepath: optionalPathType = None,
 ) -> Dict:
@@ -37,8 +37,10 @@ def assign_attributes(
         sampling_period: Number of seconds for which air
                          sample is taken. Only for time variable attribute
         network: Network name
-        update_metadata_mismatch: If current metadata does not match to attributes
-            update metadata.
+        update_mismatch: This determines whether mismatches between 
+            attributes and metadata can be updated or whether
+            this should raise an AttrMismatchError.
+            If True, currently updates metadata with attribute value.
         site_filepath: Alternative site info file
         species_filepath: Alternative species info file
 
@@ -81,7 +83,7 @@ def assign_attributes(
         attrs = measurement_data.attrs
 
         gas_data["metadata"] = sync_surface_metadata(
-            metadata=metadata, attributes=attrs, update_mismatch=update_metadata_mismatch
+            metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
         )
 
     return data

@@ -15,6 +15,7 @@ def parse_crds(
     measurement_type: Optional[str] = None,
     site_filepath: optionalPathType = None,
     drop_duplicates: bool = True,
+    update_mismatch: bool = False,
     **kwargs: Dict,
 ) -> Dict:
     """Parses a CRDS data file and creates a dictionary of xarray Datasets
@@ -31,6 +32,10 @@ def parse_crds(
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         drop_duplicates: Drop measurements at duplicate timestamps, keeping the first.
+        update_mismatch: This determines whether mismatches between the internal data
+            attributes and the supplied / derived metadata can be updated or whether
+            this should raise an AttrMismatchError.
+            If True, currently updates metadata with attribute value.
     Returns:
         dict: Dictionary of gas data
     """
@@ -58,9 +63,11 @@ def parse_crds(
     )
 
     # Ensure the data is CF compliant
-    gas_data = assign_attributes(
-        data=gas_data, site=site, sampling_period=sampling_period, site_filepath=site_filepath
-    )
+    gas_data = assign_attributes(data=gas_data,
+                                 site=site,
+                                 sampling_period=sampling_period,
+                                 update_mismatch=update_mismatch,
+                                 site_filepath=site_filepath)
 
     return gas_data
 

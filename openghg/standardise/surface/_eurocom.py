@@ -9,6 +9,7 @@ def parse_eurocom(
     network: Optional[str] = None,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
+    update_mismatch: bool = False,
 ) -> Dict:
     """Parses EUROCOM data files into a format expected by OpenGHG
 
@@ -19,6 +20,10 @@ def parse_eurocom(
         network: Network name
         Inlet: Inlet height in metres
         Instrument: Instrument name
+        update_mismatch: This determines whether mismatches between the internal data
+            attributes and the supplied / derived metadata can be updated or whether
+            this should raise an AttrMismatchError.
+            If True, currently updates metadata with attribute value.
     Returns:
         dict: Dictionary of measurement data
     """
@@ -134,6 +139,9 @@ def parse_eurocom(
         "attributes": global_attributes,
     }
 
-    combined_data = assign_attributes(data=combined_data, site=site, sampling_period=sampling_period)
+    combined_data = assign_attributes(data=combined_data,
+                                      site=site,
+                                      sampling_period=sampling_period,
+                                      update_mismatch=update_mismatch)
 
     return combined_data
