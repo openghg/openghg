@@ -37,7 +37,7 @@ def sync_surface_metadata(
     metadata: Dict,
     attributes: Dict,
     keys_to_add: Optional[List] = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
 ) -> Dict:
     """Makes sure any duplicated keys between the metadata and attributes
     dictionaries match and that certain keys are present in the metadata.
@@ -49,12 +49,21 @@ def sync_surface_metadata(
         the attribute values. Note: this skips any keys which can't be
         copied from the attribute values.
         update_mismatch: If case insensitive mismatch is found between an
-            attribute and a metadata value, update the metadata to contain
-            the attribute value. By default this will raise an AttrMismatchError.
+            attribute and a metadata value, this determines the function behaviour.
+            This includes the options:
+             - "never" - don't update mismatches and raise an AttrMismatchError
+             - "attributes" - update mismatches based on input attributes
+             - "metadata" - update mismatches based on input metadata
     Returns:
         dict: Copy of metadata updated with attributes
     """
     meta_copy = deepcopy(metadata)
+
+    mismatch_keys = ["never", "attributes", "metadata"]
+    if update_mismatch.lower() not in mismatch_keys:
+        raise ValueError(f"Input for 'update_mismatch' should be one of {mismatch_keys}")
+    else:
+        update_mismatch = update_mismatch.lower()
 
     # Check if we have differences
     for key, value in metadata.items():
@@ -81,16 +90,22 @@ def sync_surface_metadata(
                 # Here we don't care about case. Within the Datasource we'll store the
                 # metadata as all lowercase, within the attributes we'll keep the case.
                 if str(value).lower() != str(attr_value).lower():
-                    if not update_mismatch:
+                    if update_mismatch == "never":
                         raise AttrMismatchError(
                             f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}"
                         )
-                    else:
+                    elif update_mismatch == "attributes":
                         logger.warning(
                             f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}\n"
                             f"Updating metadata to use attribute value of {key} = {attr_value}"
                         )
                         meta_copy[key] = attr_value
+                    elif update_mismatch == "metadata":
+                        logger.warning(
+                            f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}\n"
+                            f"Using supplied metadata value: {key} = {value}"
+                        )
+                        meta_copy[key] = attr_value                        
         except KeyError:
             # Key wasn't in attributes for comparison
             pass

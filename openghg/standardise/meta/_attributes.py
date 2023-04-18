@@ -20,7 +20,7 @@ def assign_attributes(
     site: Optional[str] = None,
     network: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
-    update_metadata_mismatch: bool = False,
+    update_metadata_mismatch: str = "never",
     site_filepath: optionalPathType = None,
     species_filepath: optionalPathType = None,
 ) -> Dict:
@@ -37,8 +37,12 @@ def assign_attributes(
         sampling_period: Number of seconds for which air
                          sample is taken. Only for time variable attribute
         network: Network name
-        update_metadata_mismatch: If current metadata does not match to attributes
-            update metadata.
+        update_metadata_mismatch: If case insensitive mismatch is found between an
+            attribute and a metadata value, this determines the function behaviour.
+            This includes the options:
+             - "never" - don't update mismatches and raise an AttrMismatchError
+             - "attributes" - update mistmatches based on attributes within data
+             - "metadata" - update mistmatches based on metadata within data
         site_filepath: Alternative site info file
         species_filepath: Alternative species info file
 
