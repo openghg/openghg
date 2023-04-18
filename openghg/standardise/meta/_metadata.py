@@ -83,7 +83,8 @@ def sync_surface_metadata(
                 if str(value).lower() != str(attr_value).lower():
                     if not update_mismatch:
                         raise AttrMismatchError(
-                            f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}"
+                            f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}\n"
+                            "To allow metadata to be updated using attribute values pass 'update_mismatch=True'"
                         )
                     else:
                         logger.warning(
