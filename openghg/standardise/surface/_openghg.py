@@ -198,7 +198,9 @@ def parse_openghg(
     # Define sources of attributes to use when defining metadata
     # The order here influences the hierarchy if keys appear multiple times.
     # kwargs allow additional variables such as "station_longitude" to be included if needed.
-    attribute_sources = [attributes, kwargs, site_info, site_attributes]
+    # 2023-04: Re-ordered to be - values explicitly passed, stored data (2), attributes from dataset
+    # # attribute_sources = [attributes, kwargs, site_info, site_attributes]
+    attribute_sources = [kwargs, site_info, site_attributes, attributes]
 
     # Search attributes sources (in order) and populate metadata
     for param in metadata_needed:
