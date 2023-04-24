@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union, Any
+from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from pandas import Timedelta
