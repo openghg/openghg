@@ -207,12 +207,14 @@ def get_attributes(
         global_attributes["sampling_period"] = str(sampling_period)
         global_attributes["sampling_period_unit"] = "s"
 
-    # Update the Dataset attributes
-    ds.attrs.update(global_attributes)  # type: ignore
-
+    # 04/2023: Switched around global and site attributes so 
+    # global attributes now supercede site attributes.
     # Add some site attributes
     site_attributes = _site_info_attributes(site.upper(), network, site_filepath)
     ds.attrs.update(site_attributes)
+
+    # Update the Dataset attributes
+    ds.attrs.update(global_attributes)  # type: ignore
 
     # Species-specific attributes
     # Extract long name
