@@ -281,19 +281,19 @@ class ObsSurface(BaseStore):
                 }
                 # TODO: extend optional_parameters to include kwargs when added
 
-                input_parameters = required_parameters
+                input_parameters = required_parameters.copy()
 
                 # Find parameters that parser_fn accepts (must accept all required arguments already)
                 signature = inspect.signature(parser_fn)
                 fn_accepted_parameters = [param.name for param in signature.parameters.values()]
 
                 # Check if optional parameters are present in function call and only use those which are.
-                for param, value in optional_parameters.items():
+                for param, param_value in optional_parameters.items():
                     if param in fn_accepted_parameters:
-                        input_parameters[param] = value
+                        input_parameters[param] = param_value
                     else:
                         logger.warning(
-                            f"Input: '{param}' (value: {value}) is not being used as part of the standardisation process."
+                            f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
                             f"This is not accepted by the current standardisation function: {parser_fn}"
                         )
 
