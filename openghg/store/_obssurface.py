@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
+from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union, Any
 
 import numpy as np
 from pandas import Timedelta
@@ -262,14 +262,14 @@ class ObsSurface(BaseStore):
 
                 # Define required input parameters for parser function
                 required_parameters = {
-                        "data_filepath": data_filepath,
-                        "site": site,
-                        "network": network,
-                        "inlet": inlet,
-                        "instrument": instrument,
-                        "sampling_period": sampling_period_seconds,
-                        "measurement_type": measurement_type,
-                        "site_filepath": site_filepath,
+                    "data_filepath": data_filepath,
+                    "site": site,
+                    "network": network,
+                    "inlet": inlet,
+                    "instrument": instrument,
+                    "sampling_period": sampling_period_seconds,
+                    "measurement_type": measurement_type,
+                    "site_filepath": site_filepath,
                 }
                 if source_format == "GCWERKS":
                     required_parameters["precision_filepath"] = precision_filepath
@@ -293,12 +293,12 @@ class ObsSurface(BaseStore):
                         input_parameters[param] = value
                     else:
                         logger.warning(
-                        f"Input: '{param}' (value: {value}) is not being used as part of the standardisation process."
-                        f"This is not accepted by the current standardisation function: {parser_fn}"
-                    )
+                            f"Input: '{param}' (value: {value}) is not being used as part of the standardisation process."
+                            f"This is not accepted by the current standardisation function: {parser_fn}"
+                        )
 
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
-                
+
                 # Call appropriate standardisation function with input parameters
                 data = parser_fn(**input_parameters)
 
