@@ -20,7 +20,7 @@ def assign_attributes(
     site: Optional[str] = None,
     network: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
-    update_metadata_mismatch: str = "never",
+    update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
     species_filepath: optionalPathType = None,
 ) -> Dict:
@@ -37,7 +37,7 @@ def assign_attributes(
         sampling_period: Number of seconds for which air
                          sample is taken. Only for time variable attribute
         network: Network name
-        update_metadata_mismatch: If case insensitive mismatch is found between an
+        update_mismatch: If case insensitive mismatch is found between an
             attribute and a metadata value, this determines the function behaviour.
             This includes the options:
              - "never" - don't update mismatches and raise an AttrMismatchError
@@ -85,7 +85,7 @@ def assign_attributes(
         attrs = measurement_data.attrs
 
         gas_data["metadata"] = sync_surface_metadata(
-            metadata=metadata, attributes=attrs, update_mismatch=update_metadata_mismatch
+            metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
         )
 
     return data
@@ -209,12 +209,14 @@ def get_attributes(
         global_attributes["sampling_period"] = str(sampling_period)
         global_attributes["sampling_period_unit"] = "s"
 
-    # Update the Dataset attributes
-    ds.attrs.update(global_attributes)  # type: ignore
-
+    # 04/2023: Switched around global and site attributes so 
+    # global attributes now supercede site attributes.
     # Add some site attributes
     site_attributes = _site_info_attributes(site.upper(), network, site_filepath)
     ds.attrs.update(site_attributes)
+
+    # Update the Dataset attributes
+    ds.attrs.update(global_attributes)  # type: ignore
 
     # Species-specific attributes
     # Extract long name

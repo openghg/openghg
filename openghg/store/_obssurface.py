@@ -5,6 +5,7 @@ from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
 import numpy as np
 from pandas import Timedelta
 from xarray import Dataset
+import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
@@ -116,6 +117,7 @@ class ObsSurface(BaseStore):
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
+        update_mismatch: bool = False,
         overwrite: bool = False,
         verify_site_code: bool = True,
         site_filepath: optionalPathType = None,
@@ -137,6 +139,10 @@ class ObsSurface(BaseStore):
             instrument: Instrument name
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
+            update_mismatch: This determines whether mismatches between the internal data
+                attributes and the supplied / derived metadata can be updated or whether
+                this should raise an AttrMismatchError.
+                If True, currently updates metadata with attribute value.
             overwrite: Overwrite previously uploaded data
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
@@ -254,32 +260,47 @@ class ObsSurface(BaseStore):
                     )
                     break
 
+                # Define required input parameters for parser function
+                required_parameters = {
+                    "data_filepath": data_filepath,
+                    "site": site,
+                    "network": network,
+                    "inlet": inlet,
+                    "instrument": instrument,
+                    "sampling_period": sampling_period_seconds,
+                    "measurement_type": measurement_type,
+                    "site_filepath": site_filepath,
+                }
+                if source_format == "GCWERKS":
+                    required_parameters["precision_filepath"] = precision_filepath
+
+                # Collect together optional parameters (not required but
+                # may be accepted by underlying parser function)
+                optional_parameters = {
+                    "update_mismatch" : update_mismatch
+                }
+                # TODO: extend optional_parameters to include kwargs when added
+
+                input_parameters = required_parameters.copy()
+
+                # Find parameters that parser_fn accepts (must accept all required arguments already)
+                signature = inspect.signature(parser_fn)
+                fn_accepted_parameters = [param.name for param in signature.parameters.values()]
+
+                # Check if optional parameters are present in function call and only use those which are.
+                for param, param_value in optional_parameters.items():
+                    if param in fn_accepted_parameters:
+                        input_parameters[param] = param_value
+                    else:
+                        logger.warning(
+                            f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
+                            f"This is not accepted by the current standardisation function: {parser_fn}"
+                        )
+
                 progress_bar.set_description(f"Processing: {data_filepath.name}")
 
-                if source_format == "GCWERKS":
-                    data = parser_fn(
-                        data_filepath=data_filepath,
-                        precision_filepath=precision_filepath,
-                        site=site,
-                        network=network,
-                        inlet=inlet,
-                        instrument=instrument,
-                        sampling_period=sampling_period_seconds,
-                        measurement_type=measurement_type,
-                        site_filepath=site_filepath,
-                    )
-                else:
-                    data = parser_fn(
-                        data_filepath=data_filepath,
-                        site=site,
-                        network=network,
-                        inlet=inlet,
-                        instrument=instrument,
-                        sampling_period=sampling_period_seconds,
-                        measurement_type=measurement_type,
-                        calibration_scale=calibration_scale,
-                        site_filepath=site_filepath,
-                    )
+                # Call appropriate standardisation function with input parameters
+                data = parser_fn(**input_parameters)
 
                 # Current workflow: if any species fails, whole filepath fails
                 for key, value in data.items():
