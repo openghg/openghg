@@ -39,7 +39,7 @@ def openghg_defs_mock(session_mocker):
     session_mocker.patch.object(openghg_defs, "site_info_file", new=site_info_file)
 
     species_info_file = get_info_datapath(filename="species_info.json")
-    session_mocker.patch.object(openghg_defs, 'species_info_file', new=species_info_file)
+    session_mocker.patch.object(openghg_defs, "species_info_file", new=species_info_file)
 
     # TODO: Add domain_info as well?
 
@@ -58,10 +58,7 @@ def pytest_sessionfinish(session, exitstatus):
     returning the exit status to the system.
     """
     print(f"\n\nCleaning up testing store at {tmp_store_path}")
-    try:
-        shutil.rmtree(tmp_store_path)
-    except FileNotFoundError:
-        pass
+    shutil.rmtree(tmp_store_path, ignore_errors=True)
 
 
 def pytest_addoption(parser):
