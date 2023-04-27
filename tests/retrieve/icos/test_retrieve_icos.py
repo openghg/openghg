@@ -59,6 +59,11 @@ def test_icos_retrieve_invalid_site(mocker, caplog):
     assert "Please check you have passed a valid ICOS site." in caplog.text
 
 
+def test_retrieve_Datas():
+    datas = retrieve_atmospheric(site="WAO", species="co2", sampling_height="10m")
+    print(datas)
+
+
 def test_icos_retrieve_and_store(mocker):
     # PIDs are the URLs for the data
     pid_csv = get_retrieval_datapath(filename="example_pids_wao.tar.gz")
