@@ -58,7 +58,10 @@ def pytest_sessionfinish(session, exitstatus):
     returning the exit status to the system.
     """
     print(f"\n\nCleaning up testing store at {tmp_store_path}")
-    shutil.rmtree(tmp_store_path)
+    try:
+        shutil.rmtree(tmp_store_path)
+    except FileNotFoundError:
+        pass
 
 
 def pytest_addoption(parser):
