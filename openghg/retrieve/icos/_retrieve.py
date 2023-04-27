@@ -183,7 +183,6 @@ def local_retrieve(
         standardised_data = _retrieve_remote(
             site=site,
             species=species,
-            sampling_height=sampling_height,
             data_level=data_level,
             dataset_source=dataset_source,
             update_metadata_mismatch=update_metadata_mismatch,
@@ -300,157 +299,166 @@ def _retrieve_remote(
 
     for n, dobj_url in enumerate(dobj_urls):
         dobj = Dobj(dobj_url)
+        logger.info(f"Retrieving {dobj_url}...")
+        # We've got to jump through some hoops here to try and avoid the NOAA
+        # ObsPack GlobalView data
+        try:
+            if "globalview" in dobj.meta["references"]["doi"]["titles"][0]["title"].lower():
+                logger.info(f"Skipping {dobj_url} as ObsPack GlobalView detected.")
+                continue
+        except KeyError:
+            pass
+
+        try:
+            dobj_dataset_source = dobj.meta["specification"]["project"]["self"]["label"]
+        except KeyError:
+            dobj_dataset_source = "NA"
+            logger.warning("Unable to read project information from dobj.")
+
+        if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
+            continue
+
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
-        print(dataframe)
-    #     # This is the metadata, dobj.info and dobj.meta are equal
-    #     dobj_info = dobj.meta
+        # This is the metadata, dobj.info and dobj.meta are equal
+        dobj_info = dobj.meta
 
-    #     metadata = {}
+        metadata = {}
 
-    #     specific_info = dobj_info["specificInfo"]
-    #     col_data = specific_info["columns"]
+        specific_info = dobj_info["specificInfo"]
+        col_data = specific_info["columns"]
 
-    #     try:
-    #         dobj_dataset_source = dobj_info["specification"]["project"]["self"]["label"]
-    #     except KeyError:
-    #         dobj_dataset_source = "NA"
-    #         logger.warning("Unable to read project information from dobj.")
+        # Get the species this dobj holds information for
+        not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
+        species_info = next(i for i in col_data if i["label"] not in not_the_species)
 
-    #     if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
-    #         continue
+        measurement_type = species_info["valueType"]["self"]["label"].lower()
+        units = species_info["valueType"]["unit"].lower()
+        the_species = species_info["label"]
 
-    #     # Get the species this dobj holds information for
-    #     not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
-    #     species_info = next(i for i in col_data if i["label"] not in not_the_species)
+        species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
 
-    #     measurement_type = species_info["valueType"]["self"]["label"].lower()
-    #     units = species_info["valueType"]["unit"].lower()
-    #     the_species = species_info["label"]
+        metadata["species"] = the_species
+        acq_data = specific_info["acquisition"]
+        station_data = acq_data["station"]
 
-    #     species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
+        to_store: Dict[str, Any] = {}
+        try:
+            instrument_metadata = acq_data["instrument"]
+        except KeyError:
+            to_store["instrument"] = "NA"
+            to_store["instrument_data"] = "NA"
+        else:
+            # Do some tidying of the instrument metadata
+            instruments = set()
+            cleaned_instrument_metadata = []
 
-    #     metadata["species"] = the_species
-    #     acq_data = specific_info["acquisition"]
-    #     station_data = acq_data["station"]
+            if not isinstance(instrument_metadata, list):
+                instrument_metadata = [instrument_metadata]
 
-    #     to_store: Dict[str, Any] = {}
-    #     try:
-    #         instrument_metadata = acq_data["instrument"]
-    #     except KeyError:
-    #         to_store["instrument"] = "NA"
-    #         to_store["instrument_data"] = "NA"
-    #     else:
-    #         # Do some tidying of the instrument metadata
-    #         instruments = set()
-    #         cleaned_instrument_metadata = []
+            for inst in instrument_metadata:
+                instrument_name = inst["label"]
+                instruments.add(instrument_name)
+                uri = inst["uri"]
 
-    #         if not isinstance(instrument_metadata, list):
-    #             instrument_metadata = [instrument_metadata]
+                cleaned_instrument_metadata.extend([instrument_name, uri])
 
-    #         for inst in instrument_metadata:
-    #             instrument_name = inst["label"]
-    #             instruments.add(instrument_name)
-    #             uri = inst["uri"]
+            if len(instruments) == 1:
+                instrument = instruments.pop()
+            else:
+                instrument = "multiple"
 
-    #             cleaned_instrument_metadata.extend([instrument_name, uri])
+            to_store["instrument"] = instrument
+            to_store["instrument_data"] = cleaned_instrument_metadata
 
-    #         if len(instruments) == 1:
-    #             instrument = instruments.pop()
-    #         else:
-    #             instrument = "multiple"
+        metadata.update(to_store)
 
-    #         to_store["instrument"] = instrument
-    #         to_store["instrument_data"] = cleaned_instrument_metadata
+        metadata["site"] = station_data["id"]
+        metadata["measurement_type"] = measurement_type
+        metadata["units"] = units
 
-    #     metadata.update(to_store)
+        _sampling_height = acq_data["samplingHeight"]
+        metadata["sampling_height"] = format_inlet(_sampling_height, key_name="sampling_height")
+        metadata["sampling_height_units"] = "metres"
+        metadata["inlet"] = format_inlet(_sampling_height, key_name="inlet")
+        metadata["inlet_height_magl"] = format_inlet(_sampling_height, key_name="inlet_height_magl")
 
-    #     metadata["site"] = station_data["id"]
-    #     metadata["measurement_type"] = measurement_type
-    #     metadata["units"] = units
+        loc_data = station_data["location"]
 
-    #     _sampling_height = acq_data["samplingHeight"]
-    #     metadata["sampling_height"] = format_inlet(_sampling_height, key_name="sampling_height")
-    #     metadata["sampling_height_units"] = "metres"
-    #     metadata["inlet"] = format_inlet(_sampling_height, key_name="inlet")
-    #     metadata["inlet_height_magl"] = format_inlet(_sampling_height, key_name="inlet_height_magl")
+        try:
+            station_long_name = openghg_site_metadata[site.upper()]["ICOS"]["long_name"]
+        except KeyError:
+            station_long_name = loc_data["label"]
 
-    #     loc_data = station_data["location"]
+        metadata["station_long_name"] = station_long_name
+        metadata["station_latitude"] = str(loc_data["lat"])
+        metadata["station_longitude"] = str(loc_data["lon"])
+        metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
 
-    #     try:
-    #         station_long_name = openghg_site_metadata[site.upper()]["ICOS"]["long_name"]
-    #     except KeyError:
-    #         station_long_name = loc_data["label"]
+        metadata["data_owner"] = f"{stat.firstName} {stat.lastName}"
+        metadata["data_owner_email"] = str(stat.email)
+        metadata["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
 
-    #     metadata["station_long_name"] = station_long_name
-    #     metadata["station_latitude"] = str(loc_data["lat"])
-    #     metadata["station_longitude"] = str(loc_data["lon"])
-    #     metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
+        metadata["citation_string"] = dobj_info["references"]["citationString"]
+        metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
+        metadata["licence_info"] = dobj_info["references"]["licence"]["url"]
 
-    #     metadata["data_owner"] = f"{stat.firstName} {stat.lastName}"
-    #     metadata["data_owner_email"] = str(stat.email)
-    #     metadata["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
+        # Add ICOS in directly here for now
+        metadata["network"] = "ICOS"
+        metadata["data_type"] = "surface"
+        metadata["data_source"] = "icoscp"
+        metadata["source_format"] = "icos"
+        metadata["icos_data_level"] = str(data_level)
 
-    #     metadata["citation_string"] = dobj_info["references"]["citationString"]
-    #     metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
-    #     metadata["licence_info"] = dobj_info["references"]["licence"]["url"]
+        metadata["dataset_source"] = dobj_dataset_source
 
-    #     # Add ICOS in directly here for now
-    #     metadata["network"] = "ICOS"
-    #     metadata["data_type"] = "surface"
-    #     metadata["data_source"] = "icoscp"
-    #     metadata["source_format"] = "icos"
-    #     metadata["icos_data_level"] = str(data_level)
+        dataframe.columns = [x.lower() for x in dataframe.columns]
+        dataframe = dataframe.dropna(axis="index")
 
-    #     metadata["dataset_source"] = dobj_dataset_source
+        if not dataframe.index.is_monotonic_increasing:
+            dataframe = dataframe.sort_index()
 
-    #     dataframe.columns = [x.lower() for x in dataframe.columns]
-    #     dataframe = dataframe.dropna(axis="index")
+        spec = metadata["species"]
 
-    #     if not dataframe.index.is_monotonic_increasing:
-    #         dataframe = dataframe.sort_index()
+        rename_cols = {
+            "stdev": spec + " variability",
+            "nbpoints": spec + " number_of_observations",
+        }
 
-    #     spec = metadata["species"]
+        # TODO - add this back in once we've merged the fixes in
+        # Try and conver the flag / userflag column to str
+        # possible_flag_cols = ("flag", "userflag")
+        # flag_col = [x for x in dataframe.columns if x in possible_flag_cols]
 
-    #     rename_cols = {
-    #         "stdev": spec + " variability",
-    #         "nbpoints": spec + " number_of_observations",
-    #     }
+        # PR328
+        # if flag_col:
+        #     flag_str = flag_col[0]
+        #     dataframe = dataframe.astype({flag_str: str})
 
-    #     # TODO - add this back in once we've merged the fixes in
-    #     # Try and conver the flag / userflag column to str
-    #     # possible_flag_cols = ("flag", "userflag")
-    #     # flag_col = [x for x in dataframe.columns if x in possible_flag_cols]
+        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
 
-    #     # PR328
-    #     # if flag_col:
-    #     #     flag_str = flag_col[0]
-    #     #     dataframe = dataframe.astype({flag_str: str})
+        dataframe.index.name = "time"
+        dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
 
-    #     dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
+        dataset = dataframe.to_xarray()
+        dataset.attrs.update(metadata)
 
-    #     dataframe.index.name = "time"
-    #     dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
+        # So there isn't an easy way of getting a hash of a Dataset, can we do something
+        # simple here we can compare data that's being added? Then we'll be able to make sure
+        # ObsSurface.store_data won't accept data it's already seen
+        data_key = f"key-{n}"
+        # TODO - do we need both attributes and metadata here?
+        standardised_data[data_key] = {
+            "metadata": metadata,
+            "data": dataset,
+            "attributes": metadata,
+        }
 
-    #     dataset = dataframe.to_xarray()
-    #     dataset.attrs.update(metadata)
+    standardised_data = assign_attributes(
+        data=standardised_data, update_metadata_mismatch=update_metadata_mismatch
+    )
 
-    #     # So there isn't an easy way of getting a hash of a Dataset, can we do something
-    #     # simple here we can compare data that's being added? Then we'll be able to make sure
-    #     # ObsSurface.store_data won't accept data it's already seen
-    #     data_key = f"key-{n}"
-    #     # TODO - do we need both attributes and metadata here?
-    #     standardised_data[data_key] = {
-    #         "metadata": metadata,
-    #         "data": dataset,
-    #         "attributes": metadata,
-    #     }
-
-    # standardised_data = assign_attributes(
-    #     data=standardised_data, update_metadata_mismatch=update_metadata_mismatch
-    # )
-
-    # return standardised_data
+    return standardised_data
 
 
 # def _read_site_metadata():
