@@ -183,6 +183,7 @@ def local_retrieve(
         standardised_data = _retrieve_remote(
             site=site,
             species=species,
+            sampling_height=sampling_height,
             data_level=data_level,
             dataset_source=dataset_source,
             update_metadata_mismatch=update_metadata_mismatch,
