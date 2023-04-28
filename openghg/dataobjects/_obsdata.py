@@ -87,9 +87,9 @@ class ObsData(_BaseData, abc.Mapping):
         logo: Optional[bool] = True,
     ) -> go.Figure:
         """Plot a timeseries"""
-        import openghg.plotting
+        from openghg.plotting import plot_timeseries as general_plot_timeseries
 
-        fig = openghg.plotting.plot_timeseries(
+        fig = general_plot_timeseries(
             self,
             title = title,
             xlabel = xlabel,
