@@ -186,6 +186,7 @@ def local_retrieve(
             data_level=data_level,
             dataset_source=dataset_source,
             update_metadata_mismatch=update_metadata_mismatch,
+            sampling_height=sampling_height,
         )
 
         if standardised_data is None:
@@ -272,14 +273,13 @@ def _retrieve_remote(
     species_upper = [s.upper() for s in species]
     # For this see https://stackoverflow.com/a/55335207
     search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
-    # Now filter the dataframe so we can extraxt the PIDS
+    # Now filter the dataframe so we can extract the PIDS
     filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
 
     if sampling_height is not None:
         sampling_height = str(float(sampling_height.rstrip("m")))
-        filtered_sources = filtered_sources[
-            [sampling_height in x for x in filtered_sources["samplingheight"]]
-        ]
+        height_filter = [sampling_height in str(x) for x in filtered_sources["samplingheight"]]
+        filtered_sources = filtered_sources[height_filter]
 
     if filtered_sources.empty:
         logger.error(
