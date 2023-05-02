@@ -20,7 +20,7 @@ def parse_openghg(
     calibration_scale: Optional[str] = None,
     data_owner: Optional[str] = None,
     data_owner_email: Optional[str] = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
     **kwargs: str,
 ) -> Dict:
@@ -49,10 +49,12 @@ def parse_openghg(
             e.g. "WMOX2007"
         data_owner: Name of data owner.
         data_owner_email: Email address for data owner.
-        update_mismatch: This determines whether mismatches between the internal data
-            attributes and the supplied / derived metadata can be updated or whether
-            this should raise an AttrMismatchError.
-            If True, currently updates metadata with attribute value.
+        update_mismatch: This determines how mismatches between the internal data
+            attributes and the supplied / derived metadata are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "attributes" - update mismatches based on input attributes
+                - "metadata" - update mismatches based on input metadata
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         kwargs: Any additional attributes to be associated with the data.

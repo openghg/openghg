@@ -17,7 +17,7 @@ def parse_noaa(
     network: str = "NOAA",
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
     **kwarg: Dict,
 ) -> Dict:
@@ -31,10 +31,12 @@ def parse_noaa(
         network: Network, defaults to NOAA
         instrument: Instrument name
         sampling_period: Sampling period
-        update_mismatch: This determines whether mismatches between the internal data
-            attributes and the supplied / derived metadata can be updated or whether
-            this should raise an AttrMismatchError.
-            If True, currently updates metadata with attribute value.
+        update_mismatch: This determines how mismatches between the internal data
+            attributes and the supplied / derived metadata are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "attributes" - update mismatches based on input attributes
+                - "metadata" - update mismatches based on input metadata
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
@@ -276,7 +278,7 @@ def _read_obspack(
     measurement_type: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
 ) -> Dict[str, Dict]:
     """Read NOAA ObsPack NetCDF files
@@ -288,10 +290,12 @@ def _read_obspack(
         measurement_type: One of flask, insitu or pfp
         inlet: Inlet height, if no height use measurement type e.g. flask
         instrument: Instrument name
-        update_mismatch: This determines whether mismatches between the internal data
-            attributes and the supplied / derived metadata can be updated or whether
-            this should raise an AttrMismatchError.
-            If True, currently updates metadata with attribute value.
+        update_mismatch: This determines how mismatches between the internal data
+            attributes and the supplied / derived metadata are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "attributes" - update mismatches based on input attributes
+                - "metadata" - update mismatches based on input metadata
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
@@ -415,7 +419,7 @@ def _read_raw_file(
     measurement_type: str,
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
 ) -> Dict:
     """Reads NOAA data files and returns a dictionary of processed
@@ -428,10 +432,12 @@ def _read_raw_file(
         measurement_type: One of flask, insitu or pfp
         inlet: Inlet height, if no height use measurement type e.g. flask
         instrument: Instrument name
-        update_mismatch: This determines whether mismatches between the internal data
-            attributes and the supplied / derived metadata can be updated or whether
-            this should raise an AttrMismatchError.
-            If True, currently updates metadata with attribute value.
+        update_mismatch: This determines how mismatches between the internal data
+            attributes and the supplied / derived metadata are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "attributes" - update mismatches based on input attributes
+                - "metadata" - update mismatches based on input metadata
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
 

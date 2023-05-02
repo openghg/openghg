@@ -97,7 +97,7 @@ def test_icos_retrieve_and_store(mocker):
 
     # 05/01/2023: Added update_mismatch to account for WAO difference
     retrieved_data_first = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", update_mismatch=True
+        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata"
     )
 
     assert isinstance(retrieved_data_first, list)
@@ -167,7 +167,7 @@ def test_icos_retrieve_and_store(mocker):
 
     # 05/01/2023: Added update_mismatch to account for WAO difference
     retrieved_data_second = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", update_mismatch=True
+        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata"
     )
 
     assert retrieved_data_second is not None
@@ -184,7 +184,7 @@ def test_icos_retrieve_and_store(mocker):
 
     # 05/01/2023: Added update_mismatch to account for WAO difference
     retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", force_retrieval=True, update_mismatch=True
+        site="WAO", species="co2", sampling_height="10m", force_retrieval=True, update_mismatch="metadata"
     )
 
     logfile_data = get_logfile_path().read_text()

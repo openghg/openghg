@@ -83,10 +83,14 @@ def assign_attributes(
         metadata = gas_data["metadata"]
 
         attrs = measurement_data.attrs
-
-        gas_data["metadata"] = sync_surface_metadata(
+        
+        metadata_aligned, attrs_aligned = sync_surface_metadata(
             metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
         )
+
+        gas_data["metadata"] = metadata_aligned
+        gas_data["attributes"] = attrs_aligned
+        measurement_data.attrs = gas_data["attributes"]
 
     return data
 

@@ -17,7 +17,7 @@ def retrieve_atmospheric(
     force_retrieval: bool = False,
     data_level: int = 2,
     dataset_source: Optional[str] = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -37,10 +37,12 @@ def retrieve_atmospheric(
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
-        update_mismatch: If metadata derived from stored data does not match
-            to attributes derived from ICOS Header, update metadata to match to attributes.
-            Otherwise a AttrMismatchError will be raised.
-    Returns:
+        update_mismatch: This determines how mismatches between the metadata derived from
+            stored data and attributes derived from ICOS Header are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "attributes" - update mismatches based on attributes from ICOS Header
+                - "metadata" - update mismatches based on input metadata    Returns:
         ObsData, list[ObsData] or None
     """
     return retrieve(
@@ -77,9 +79,12 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        update_mismatch: If metadata derived from stored data does not match
-            to attributes derived from ICOS Header, update metadata to match to attributes.
-            Otherwise a AttrMismatchError will be raised.
+        update_mismatch: This determines how mismatches between the metadata derived from
+            stored data and attributes derived from ICOS Header are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "attributes" - update mismatches based on attributes from ICOS Header
+                - "metadata" - update mismatches based on input metadata
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -129,7 +134,7 @@ def local_retrieve(
     force_retrieval: bool = False,
     data_level: int = 2,
     dataset_source: Optional[str] = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -150,9 +155,12 @@ def local_retrieve(
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
-        update_mismatch: If metadata derived from stored data does not match
-            to attributes derived from ICOS Header, update metadata to match to attributes.
-            Otherwise a AttrMismatchError will be raised.
+        update_mismatch: This determines how mismatches between the metadata derived from
+            stored data and attributes derived from ICOS Header are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "attributes" - update mismatches based on attributes from ICOS Header
+                - "metadata" - update mismatches based on input metadata
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -214,7 +222,7 @@ def _retrieve_remote(
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
     dataset_source: Optional[str] = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
 ) -> Optional[Dict]:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
     a format expected by OpenGHG. A dictionary of metadata and Datasets
@@ -231,9 +239,12 @@ def _retrieve_remote(
         species: Species name
         sampling_height: Sampling height in metres
         dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
-        update_mismatch: If metadata derived from stored data does not match
-            to attributes derived from ICOS Header, update metadata to match to attributes.
-            Otherwise a AttrMismatchError will be raised.
+        update_mismatch: This determines how mismatches between the metadata derived from
+            stored data and attributes derived from ICOS Header are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "attributes" - update mismatches based on attributes from ICOS Header
+                - "metadata" - update mismatches based on input metadata
     Returns:
         dict or None: Dictionary of processed data and metadata if found
     """

@@ -1,7 +1,7 @@
 import logging
 import math
 from copy import deepcopy
-from typing import Dict, List, Optional
+from typing import Dict, List, Tuple, Optional
 from openghg.types import AttrMismatchError
 from openghg.util import is_number
 
@@ -54,7 +54,7 @@ def sync_surface_metadata(
     attributes: Dict,
     keys_to_add: Optional[List] = None,
     update_mismatch: str = "never",
-) -> Dict:
+) -> Tuple[Dict, Dict]:
     """Makes sure any duplicated keys between the metadata and attributes
     dictionaries match and that certain keys are present in the metadata.
 
@@ -71,9 +71,10 @@ def sync_surface_metadata(
              - "attributes" - update mismatches based on input attributes
              - "metadata" - update mismatches based on input metadata
     Returns:
-        dict: Copy of metadata updated with attributes
+        dict, dict: Aligned metadata, attributes
     """
     meta_copy = deepcopy(metadata)
+    attrs_copy = deepcopy(attributes)
 
     mismatch_keys = ["never", "attributes", "metadata"]
     if update_mismatch.lower() not in mismatch_keys:
@@ -82,47 +83,47 @@ def sync_surface_metadata(
         update_mismatch = update_mismatch.lower()
 
     # Check if we have differences
-    for key, value in metadata.items():
+    for key, meta_value in metadata.items():
         try:
             attr_value = attributes[key]
 
             # This should mainly be used for lat/long
             relative_tolerance = 1e-3
 
-            if is_number(attr_value) and is_number(value):
-                if not math.isclose(float(attr_value), float(value), rel_tol=relative_tolerance):
-                    err_warn_str = (
-                        f"Value of {key} not within tolerance, metadata: {value} - attributes: {attr_value}"
+            if is_number(attr_value) and is_number(meta_value):
+                if not math.isclose(float(attr_value), float(meta_value), rel_tol=relative_tolerance):
+                    err_warn_num = (
+                        f"Value of {key} not within tolerance, metadata: {meta_value} - attributes: {attr_value}"
                     )
-                    if not update_mismatch:
-                        raise AttrMismatchError(err_warn_str)
-                    else:
+                    if update_mismatch == "never":
+                        raise AttrMismatchError(
+                            f"{err_warn_num}\nTo allow metadata/attributes to be updated, use 'update_mismatch' input")
+                    elif update_mismatch == "attributes":
                         logger.warning(
-                            f"{err_warn_str}\nUpdating metadata to use attribute value of {key} = {attr_value}"
-                        )
-
-                    meta_copy[key] = str(attr_value)
+                            f"{err_warn_num}\nUpdating metadata to use attribute value of {key} = {attr_value}")
+                        meta_copy[key] = str(attr_value)
+                    elif update_mismatch == "metadata":
+                        logger.warning(
+                            f"{err_warn_num}\nUpdating attributes to use metadata value of {key} = {meta_value}")
+                        attrs_copy[key] = str(meta_value)                    
             else:
                 # Here we don't care about case. Within the Datasource we'll store the
                 # metadata as all lowercase, within the attributes we'll keep the case.
-                if str(value).lower() != str(attr_value).lower():
+                err_warn_str = f"Metadata mismatch for '{key}', metadata: {meta_value} - attributes: {attr_value}"
+                if str(meta_value).lower() != str(attr_value).lower():
                     if update_mismatch == "never":
                         raise AttrMismatchError(
-                            f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}\n"
-                            "To allow metadata to be updated using attribute values pass 'update_mismatch=True'"
-                        )
+                            f"{err_warn_str}\nTo allow metadata/attributes to be updated, use 'update_mismatch' input")
                     elif update_mismatch == "attributes":
                         logger.warning(
-                            f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}\n"
-                            f"Updating metadata to use attribute value of {key} = {attr_value}"
+                            f"{err_warn_str}\nUpdating metadata to use attribute value of {key} = {attr_value}"
                         )
                         meta_copy[key] = attr_value
                     elif update_mismatch == "metadata":
                         logger.warning(
-                            f"Metadata mismatch for '{key}', metadata: {value} - attributes: {attr_value}\n"
-                            f"Using supplied metadata value: {key} = {value}"
+                            f"{err_warn_str}\nUpdating attributes to use metadata value: {key} = {meta_value}"
                         )
-                        meta_copy[key] = attr_value                        
+                        attrs_copy[key] = meta_value                   
         except KeyError:
             # Key wasn't in attributes for comparison
             pass
@@ -144,4 +145,4 @@ def sync_surface_metadata(
                 if key in keys_as_floats:
                     meta_copy[key] = float(meta_copy[key])
 
-    return meta_copy
+    return meta_copy, attrs_copy
