@@ -82,6 +82,8 @@ def sync_surface_metadata(
     else:
         update_mismatch = update_mismatch.lower()
 
+    attr_mismatches = {}
+
     # Check if we have differences
     for key, meta_value in metadata.items():
         try:
@@ -96,8 +98,7 @@ def sync_surface_metadata(
                         f"Value of {key} not within tolerance, metadata: {meta_value} - attributes: {attr_value}"
                     )
                     if update_mismatch == "never":
-                        raise AttrMismatchError(
-                            f"{err_warn_num}\nTo allow metadata/attributes to be updated, use 'update_mismatch' input")
+                        attr_mismatches[key] = (meta_value, attr_value)
                     elif update_mismatch == "attributes":
                         logger.warning(
                             f"{err_warn_num}\nUpdating metadata to use attribute value of {key} = {attr_value}")
@@ -108,12 +109,11 @@ def sync_surface_metadata(
                         attrs_copy[key] = str(meta_value)                    
             else:
                 # Here we don't care about case. Within the Datasource we'll store the
-                # metadata as all lowercase, within the attributes we'll keep the case.
+                # metadata as all lowercase, within the attributes we'll keep the case.                err_warn_str = f"Metadata mismatch for '{key}', metadata: {meta_value} - attributes: {attr_value}"
                 err_warn_str = f"Metadata mismatch for '{key}', metadata: {meta_value} - attributes: {attr_value}"
                 if str(meta_value).lower() != str(attr_value).lower():
                     if update_mismatch == "never":
-                        raise AttrMismatchError(
-                            f"{err_warn_str}\nTo allow metadata/attributes to be updated, use 'update_mismatch' input")
+                        attr_mismatches[key] = (meta_value, attr_value)
                     elif update_mismatch == "attributes":
                         logger.warning(
                             f"{err_warn_str}\nUpdating metadata to use attribute value of {key} = {attr_value}"
@@ -127,6 +127,11 @@ def sync_surface_metadata(
         except KeyError:
             # Key wasn't in attributes for comparison
             pass
+
+    if attr_mismatches:
+        mismatch_details = [f" - '{key}', metadata: {values[0]}, attributes: {values[1]}" for key, values in attr_mismatches.items()]
+        mismatch_str = "\n".join(mismatch_details)
+        raise AttrMismatchError(f"Metadata mismatch / value not within tolerance for the following keys:\n{mismatch_str}")
 
     default_keys_to_add = metadata_default_keys()
     keys_as_floats = metadata_keys_as_floats()

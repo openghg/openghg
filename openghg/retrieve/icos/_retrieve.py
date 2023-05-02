@@ -193,6 +193,7 @@ def local_retrieve(
             species=species,
             data_level=data_level,
             dataset_source=dataset_source,
+            sampling_height=sampling_height,
             update_mismatch=update_mismatch,
         )
 
@@ -283,14 +284,13 @@ def _retrieve_remote(
     species_upper = [s.upper() for s in species]
     # For this see https://stackoverflow.com/a/55335207
     search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
-    # Now filter the dataframe so we can extraxt the PIDS
+    # Now filter the dataframe so we can extract the PIDS
     filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
 
     if sampling_height is not None:
         sampling_height = str(float(sampling_height.rstrip("m")))
-        filtered_sources = filtered_sources[
-            [sampling_height in x for x in filtered_sources["samplingheight"]]
-        ]
+        height_filter = [sampling_height in str(x) for x in filtered_sources["samplingheight"]]
+        filtered_sources = filtered_sources[height_filter]
 
     if filtered_sources.empty:
         logger.error(
@@ -310,6 +310,25 @@ def _retrieve_remote(
 
     for n, dobj_url in enumerate(dobj_urls):
         dobj = Dobj(dobj_url)
+        logger.info(f"Retrieving {dobj_url}...")
+        # We've got to jump through some hoops here to try and avoid the NOAA
+        # ObsPack GlobalView data
+        try:
+            if "globalview" in dobj.meta["references"]["doi"]["titles"][0]["title"].lower():
+                logger.info(f"Skipping {dobj_url} as ObsPack GlobalView detected.")
+                continue
+        except KeyError:
+            pass
+
+        try:
+            dobj_dataset_source = dobj.meta["specification"]["project"]["self"]["label"]
+        except KeyError:
+            dobj_dataset_source = "NA"
+            logger.warning("Unable to read project information from dobj.")
+
+        if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
+            continue
+
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
         # This is the metadata, dobj.info and dobj.meta are equal
@@ -319,15 +338,6 @@ def _retrieve_remote(
 
         specific_info = dobj_info["specificInfo"]
         col_data = specific_info["columns"]
-
-        try:
-            dobj_dataset_source = dobj_info["specification"]["project"]["self"]["label"]
-        except KeyError:
-            dobj_dataset_source = "NA"
-            logger.warning("Unable to read project information from dobj.")
-
-        if dataset_source is not None and dataset_source.lower() != dobj_dataset_source.lower():
-            continue
 
         # Get the species this dobj holds information for
         not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
