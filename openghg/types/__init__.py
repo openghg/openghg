@@ -14,6 +14,7 @@ from ._errors import (
     FunctionError,
     ObjectStoreError,
     DatasourceLookupError,
+    DatasourceCombineError,
     EncodingError,
     MutexTimeoutError,
     RequestBucketError,
