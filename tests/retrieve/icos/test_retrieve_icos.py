@@ -1,6 +1,7 @@
+import bz2
 import datetime
 import json
-
+import pickle
 import pandas as pd
 import pytest
 from helpers import get_retrieval_datapath, metadata_checker_obssurface
@@ -59,35 +60,40 @@ def test_icos_retrieve_invalid_site(mocker, caplog):
     assert "Please check you have passed a valid ICOS site." in caplog.text
 
 
-def test_icos_retrieve_and_store(mocker):
-    # PIDs are the URLs for the data
-    pid_csv = get_retrieval_datapath(filename="example_pids_wao.tar.gz")
-    pid_df = pd.read_csv(pid_csv)
+def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
+    pids_csv = get_retrieval_datapath(filename="wao_pids.csv.bz2")
+    pid_df = pd.read_csv(pids_csv)
 
     valid_station = Station()
     valid_station._valid = True
 
     mocker.patch("icoscp.station.station.get", return_value=valid_station)
+    # Here we mock the station data for the PIDs to retrieve
     mocker.patch.object(Station, "data", return_value=pid_df)
 
-    # Sample data
-    mock_dobj_file = get_retrieval_datapath(filename="sample_icos_site.csv.gz")
-    sample_icos_data = pd.read_csv(mock_dobj_file)
+    dobjs = []
+    for n in range(1, 4):
+        pkl_path = get_retrieval_datapath(filename=f"dobj{n}.pkl.bz2")
+        with bz2.open(pkl_path, "rb") as f:
+            dobj = pickle.loads(f.read())
 
-    # Here we need to the list of metadata for each
-    example_metadata_path = get_retrieval_datapath(filename="wao_co2_metadata.json")
-    example_metadata = json.loads(example_metadata_path.read_text())
-    # We don't want a StopIteration below so lets have multiple copies
-    example_metadata *= 3
+        dobjs.append(dobj)
 
-    # Same metadata, for dobj.meta
-    # Mock the info property on the Dobj class
-    mocker.patch("icoscp.cpb.dobj.Dobj.meta", side_effect=example_metadata, new_callable=mocker.PropertyMock)
+    dobjs *= 2
 
-    mock_Dobj = Dobj()
+    # Mock the dobj values, here we'll get two values we read and the third dobj contains
+    # ObsPack GlobalView data that should currently be skipped
+    dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", side_effect=dobjs)
 
-    dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", return_value=mock_Dobj)
-    get_mock = mocker.patch.object(Dobj, "get", return_value=sample_icos_data)
+    # Note that we get an extra Unamed column in these dataframes due to the trip to csv and back
+    data_dobj1 = pd.read_csv(get_retrieval_datapath(filename="df_1.csv.bz2"))
+    data_dobj2 = pd.read_csv(get_retrieval_datapath(filename="df_2.csv.bz2"))
+
+    # The two dataframes that are returned
+    # Note we only have two here as the third dobj is ObsPack and
+    # the get fails with icoscp 0.1.17
+    get_return_vals = [data_dobj1, data_dobj2] * 2
+    get_mock = mocker.patch.object(Dobj, "get", side_effect=get_return_vals)
 
     # We patch this here so we can make sure we're getting the result from retrieve_all and not from
     # search
@@ -95,19 +101,13 @@ def test_icos_retrieve_and_store(mocker):
         SearchResults, "retrieve_all", side_effect=SearchResults.retrieve_all, autospec=True
     )
 
-    # 05/01/2023: Added update_metadata_mismatch to account for WAO difference
-    retrieved_data_first = retrieve_atmospheric(
+    data_first_retrieval = retrieve_atmospheric(
         site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True
     )
 
-    assert isinstance(retrieved_data_first, list)
-    assert retrieved_data_first is not None
+    meta1 = data_first_retrieval[0].metadata
 
-    first_obs = retrieved_data_first[0]
-    first_obs_data = first_obs.data
-    first_obs_metadata = first_obs.metadata
-
-    first_expected_metadata = {
+    meta1_expected = {
         "species": "co2",
         "instrument": "ftir",
         "site": "wao",
@@ -116,15 +116,12 @@ def test_icos_retrieve_and_store(mocker):
         "sampling_height": "10m",
         "sampling_height_units": "metres",
         "inlet": "10m",
-        "station_long_name": "weybourne observatory, uk",  # May need to be updated
-        # "station_long_name": "wao",
+        "inlet_height_magl": "10",
+        "station_long_name": "weybourne observatory, uk",
         "station_latitude": "52.95",
         "station_longitude": "1.121",
         "station_altitude": "31m",
-        # "station_height_masl": "10.0",  # Will need to be updated to 17
-        # "station_height_masl": "17.0",
-        # "data_owner": "andrew manning",
-        # "data_owner_email": "a.manning@uea.ac.uk",
+        "station_height_masl": 10.0,
         "licence_name": "icos ccby4 data licence",
         "licence_info": "http://meta.icos-cp.eu/ontologies/cpmeta/icoslicence",
         "network": "icos",
@@ -145,47 +142,36 @@ def test_icos_retrieve_and_store(mocker):
         "Conventions": "CF-1.8",
     }
 
-    assert first_expected_metadata.items() <= first_obs_metadata.items()
+    assert meta1_expected.items() <= meta1.items()
 
-    first_obs_data.time[0] == pd.Timestamp("2017-12-13T00:00:00")
-    first_obs_data["co2"][0] == pytest.approx(420.37399)
-    first_obs_data["co2_variability"][0] == 0.118
-    first_obs_data["co2_number_of_observations"][0] == 4
+    data1 = data_first_retrieval[0].data
 
-    second_obs = retrieved_data_first[1]
-
-    assert second_obs.metadata["dataset_source"] == "European ObsPack"
-
-    assert second_obs.metadata["instrument_data"] == [
-        "FTIR",
-        "http://meta.icos-cp.eu/resources/instruments/ATC_505",
-        "ULTRAMAT 6-E",
-        "http://meta.icos-cp.eu/resources/instruments/ATC_1391",
-    ]
+    assert data1.time[0] == pd.Timestamp("2021-10-21")
+    assert data1["co2"][0] == pytest.approx(415.365997)
+    assert data1["co2_variability"][0] == pytest.approx(0.234)
 
     assert retrieve_all.call_count == 0
+    assert get_mock.call_count == 2
 
-    # 05/01/2023: Added update_metadata_mismatch to account for WAO difference
-    retrieved_data_second = retrieve_atmospheric(
+    data_second_retrieval = retrieve_atmospheric(
         site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True
     )
 
-    assert retrieved_data_second is not None
-    assert retrieve_all.call_count == 1
+    data2 = data_second_retrieval[0].data
+    meta2 = data_second_retrieval[0].metadata
 
-    assert dobj_mock.call_count == 2
+    assert retrieve_all.call_count == 1
     assert get_mock.call_count == 2
 
-    # At the moment Datasource lowercases all the metadata, this behaviour should be changed
-    # assert retrieved_data_first.metadata == retrieved_data_second.metadata
-    assert retrieved_data_first[0].data.co2.equals(retrieved_data_second[0].data.co2)
+    assert data1.equals(data2)
 
-    # Now we do a force retrieve and make sure we get the correct message printed
-
-    # 05/01/2023: Added update_metadata_mismatch to account for WAO difference
-    retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", force_retrieval=True, update_metadata_mismatch=True
+    assert (
+        "Skipping https://meta.icos-cp.eu/objects/azGntCuTmL7lvAFbOnM6G_c0 as ObsPack GlobalView detected."
+        in caplog.text
     )
 
-    logfile_data = get_logfile_path().read_text()
-    assert "There is no new data to process." in logfile_data
+    _ = retrieve_atmospheric(
+        site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True, force_retrieval=True
+    )
+
+    assert "There is no new data to process." in caplog.text
