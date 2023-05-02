@@ -158,11 +158,15 @@ User
 
 Handling user configuration files.
 
-.. autofunction:: openghg.util.create_default_config
+.. autofunction:: openghg.util.create_config
+
+.. autofunction:: openghg.util.get_user_id
 
 .. autofunction:: openghg.util.get_user_config_path
 
 .. autofunction:: openghg.util.read_local_config
+
+.. autofunction:: openghg.util.check_config
 
 Environment detection
 =====================
