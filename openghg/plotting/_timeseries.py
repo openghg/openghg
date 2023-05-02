@@ -131,6 +131,7 @@ def plot_timeseries(
     data: Union[ObsData, List[ObsData]],
     xvar: Optional[str] = None,
     yvar: Optional[str] = None,
+    title: Optional[str] = None,
     xlabel: Optional[str] = None,
     ylabel: Optional[str] = None,
     units: Optional[str] = None,
@@ -142,6 +143,7 @@ def plot_timeseries(
         data: ObsData object or list of objects
         xvar: x axis variable, defaults to time
         yvar: y axis variable, defaults to species
+        title: Title for figure
         xlabel: Label for x axis
         ylabel: Label for y axis
         units: Units for y axis
