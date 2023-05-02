@@ -31,6 +31,8 @@ def hash_file(filepath: Path) -> str:
     BUF_SIZE = 65536
     sha1 = hashlib.sha1()
 
+    filepath = Path(filepath).expanduser().resolve()
+
     with open(filepath, "rb") as f:
         while True:
             data = f.read(BUF_SIZE)
