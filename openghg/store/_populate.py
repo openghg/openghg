@@ -55,7 +55,7 @@ def add_noaa_obspack(
     project_names_not_implemented = _create_project_names(project_options_not_implemented_yet)
 
     # If a specific project has been specified, extract file matching strings
-    if project:
+    if project is not None:
         if project in project_names:
             projects_to_read = [project]
         elif project in project_options:
@@ -73,30 +73,35 @@ def add_noaa_obspack(
 
     # ObsPack may contain nc or txt files
     # Try and extract one and then the other if possible
-    files = _find_noaa_files(data_directory, ".nc")
+    files = _find_noaa_files(data_directory=data_directory, ext=".nc")
     if not files:
-        files = _find_noaa_files(data_directory, ".txt")
+        files = _find_noaa_files(data_directory=data_directory, ext=".txt")
 
     # Find relevant details for each file and call parse_noaa() function
     processed_summary: Dict[str, Dict] = {}
     for filepath in files:
         param = _param_from_filename(filepath)
         site = param["site"]
-        project = param["project"]
+        _project = param["project"]
         measurement_type = param["measurement_type"]
 
-        if project in projects_to_read:
-            processed = ObsSurface.read_file(
-                filepath,
-                site=site,
-                measurement_type=measurement_type,
-                network="NOAA",
-                source_format="NOAA",
-                overwrite=overwrite,
-            )
-        elif project in project_names_not_implemented:
+        if _project in projects_to_read:
+            try:
+                print(f"Processing {filepath}")
+                processed = ObsSurface.read_file(
+                    filepath=filepath,
+                    site=site,
+                    measurement_type=measurement_type,
+                    network="NOAA",
+                    source_format="NOAA",
+                    overwrite=overwrite,
+                )
+            except Exception as e:
+                print(f"Had a problem processing {filepath} with error {e}")
+
+        elif _project in project_names_not_implemented:
             logger.warning(
-                f"Not processing {filepath.name} - no standardisation for {project} data implemented yet."
+                f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
             )
             processed = {}
         else:
@@ -142,8 +147,7 @@ def _param_from_filename(filename: Union[str, Path]) -> Dict:
 
 
 def _create_project_names(input_dict: Dict) -> List:
-    """
-    Creates full project names as would be included in the NOAA filepath
+    """Creates full project names as would be included in the NOAA filepath
 
     Expects input dictionary for each the type e.g. "surface" and the
     associated measurement types e.g. ["flask", "insitu", "pfp"]
@@ -162,14 +166,15 @@ def _create_project_names(input_dict: Dict) -> List:
     for key, values in input_dict.items():
         if not isinstance(values, list):
             values = [values]
+
         full_names = ["-".join([key, value]) for value in values]
         projects.extend(full_names)
+
     return projects
 
 
 def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
-    """
-    Find obs files in NOAA ObsPack.
+    """Find obs files in NOAA ObsPack.
 
     Expected directory structure is:
      - <ObsPack>/data/<filetype>/
@@ -199,7 +204,7 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
     elif ext == ".txt":
         subdirectories = ["data/txt", "txt"]
     else:
-        raise ValueError("Did not recognise input for extension: {ext}. Should be one of '.txt' or '.nc'")
+        raise ValueError(f"Did not recognise input for extension: {ext}. Should be one of '.txt' or '.nc'")
 
     data_directory = Path(data_directory).expanduser().resolve()
 
@@ -214,5 +219,9 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List:
             break
     else:
         files = []
+
+    unique_filepaths = list(set(files))
+
+    print(f"We've got {len(unique_filepaths)} unique filepaths and {len(files)} files.")
 
     return files

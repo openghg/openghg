@@ -346,7 +346,7 @@ def _read_obspack(
     metadata["species"] = species
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
-    metadata["data_source"] = "noaa_obspack"
+    # metadata["data_source"] = "noaa_obspack"
 
     # Add additional sampling_period_estimate if sampling_period is not set
     if sampling_period_estimate >= 0.0:

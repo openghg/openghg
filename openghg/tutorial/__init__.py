@@ -10,6 +10,7 @@ from ._tutorial import (
     populate_footprint_inert,
     download_edgar_data,
     retrieve_example_data,
+    retrieve_example_obspack,
     clear_example_cache,
     example_extract_path,
     use_tutorial_store,

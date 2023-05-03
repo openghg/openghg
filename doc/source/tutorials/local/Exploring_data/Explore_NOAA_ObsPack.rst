@@ -29,13 +29,6 @@ affect your use of OpenGHG outside of this tutorial.
 1. Loading the NOAA ObsPack data
 --------------------------------
 
-First we'll tell OpenGHG to use the tutorial object store, located in
-your computer's temporary directory.
-
-.. code:: ipython3
-
-    from openghg.tutorial import use_tutorial_store
-
 Download the data
 ~~~~~~~~~~~~~~~~~
 
@@ -48,11 +41,10 @@ a short time to download depending on your internet connection.
 
 .. code:: ipython3
 
-    from openghg.tutorial import retrieve_example_data
+    from openghg.tutorial import retrieve_example_obspack
     from openghg.store import add_noaa_obspack
 
-    url = "https://github.com/openghg/example_data/raw/main/obspack/obspack_ch4_example.tar.gz"
-    noaa_obspack_directory = retrieve_example_data(url=url)
+    noaa_obspack_directory = retrieve_example_obspack()
 
 Process and store the data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,29 +53,18 @@ Process and store the data
 
     res = add_noaa_obspack(noaa_obspack_directory)
 
-Visualise the data within the object store
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The object store should now contain a larage amount of CH4, we can
-visualise the structure of the store like so:
-
-.. code:: ipython3
-
-    from openghg.objectstore import visualise_store
-
-    visualise_store()
 
 2. Search, retrieve and plot
 ----------------------------
 
-Now we can query the object store and find all the flask data for
+The object store should now contain a large amount of CH4, we can query the object store and find all the flask data for
 example
 
 .. code:: ipython3
 
     from openghg.retrieve import search_surface
 
-    search_surface(species="ch4", measurement_type="flask", data_source="noaa_obspack")
+    flask_ch4 = search_surface(species="ch4", measurement_type="flask", data_source="noaa_obspack")
 
 Or we can do an all in one search and retrieve using
 ``get_obs_surface``. Here we find CH4 data from Estevan Point, British
@@ -115,7 +96,5 @@ tutorial object store using the ``clear_tutorial_store`` function.
 .. code:: ipython3
 
     from openghg.tutorial import clear_tutorial_store
-
-.. code:: ipython3
 
     clear_tutorial_store()
