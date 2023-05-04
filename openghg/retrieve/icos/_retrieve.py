@@ -404,11 +404,14 @@ def _retrieve_remote(
         metadata["station_long_name"] = station_long_name
         metadata["station_latitude"] = str(loc_data["lat"])
         metadata["station_longitude"] = str(loc_data["lon"])
-        metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
+
+        # 03/05/2023: Updated metadata to include altitude for "station_height_masl" explicitly.
+        # metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
+        # metadata["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
+        metadata["station_height_masl"] = format_inlet(loc_data["alt"], key_name="station_height_masl")
 
         metadata["data_owner"] = f"{stat.firstName} {stat.lastName}"
         metadata["data_owner_email"] = str(stat.email)
-        metadata["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
 
         metadata["citation_string"] = dobj_info["references"]["citationString"]
         metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
