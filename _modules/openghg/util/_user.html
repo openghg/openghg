@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._user &#8212; OpenGHG 0.5.0 documentation</title>
+    <title>openghg.util._user &#8212; OpenGHG 0.5.1 documentation</title>
   
   
   
@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
 
   
-  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -33,8 +33,8 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/doctools.js"></script>
@@ -366,7 +366,7 @@ document.write(`
 
 
 <span class="c1"># @lru_cache</span>
-<span class="k">def</span> <span class="nf">get_user_id</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="get_user_id"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.get_user_id">[docs]</a><span class="k">def</span> <span class="nf">get_user_id</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the user&#39;s ID</span>
 
 <span class="sd">    Returns:</span>
@@ -374,7 +374,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
     <span class="n">uid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">uid</span>
+    <span class="k">return</span> <span class="n">uid</span></div>
 
 
 <span class="k">def</span> <span class="nf">get_default_objectstore_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
@@ -414,7 +414,7 @@ document.write(`
     <span class="k">return</span> <span class="n">config_path</span></div>
 
 
-<span class="k">def</span> <span class="nf">create_config</span><span class="p">(</span><span class="n">silent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="create_config"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.create_config">[docs]</a><span class="k">def</span> <span class="nf">create_config</span><span class="p">(</span><span class="n">silent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a user config.</span>
 
 <span class="sd">    Returns:</span>
@@ -464,11 +464,11 @@ document.write(`
         <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">default_objstore_path</span> <span class="o">=</span> <span class="n">get_default_objectstore_path</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">silent</span><span class="p">:</span>
-            <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">default_objstore_path</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">default_objstore_path</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
             <span class="n">obj_store_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Enter path for object store (default </span><span class="si">{</span><span class="n">default_objstore_path</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span>
-            <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">obj_store_input</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">obj_store_input</span><span class="p">:</span>
+                <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">obj_store_input</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 
         <span class="n">user_config_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -483,7 +483,7 @@ document.write(`
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration written to </span><span class="si">{</span><span class="n">user_config_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">user_config_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">toml</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Configuration unchanged.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Configuration unchanged.&quot;</span><span class="p">)</span></div>
 
 
 <span class="c1"># @lru_cache</span>
@@ -504,7 +504,7 @@ document.write(`
     <span class="k">return</span> <span class="n">config</span></div>
 
 
-<span class="k">def</span> <span class="nf">check_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="check_config"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.check_config">[docs]</a><span class="k">def</span> <span class="nf">check_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check that the user config file is valid and the paths</span>
 <span class="sd">    given in it exist.</span>
 
@@ -528,7 +528,7 @@ document.write(`
 
     <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">object_stores</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> does not exist but will be created.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> does not exist but will be created.&quot;</span><span class="p">)</span></div>
 </pre></div>
 
                 </article>
@@ -536,9 +536,15 @@ document.write(`
               
               
                 <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
+</div></div>
+  
 </div>
+
                 </footer>
               
             </div>
@@ -548,7 +554,7 @@ document.write(`
             
           </div>
           <footer class="bd-footer-content">
-            <div class="bd-footer-content__inner"></div>
+            
           </footer>
         
       </main>
@@ -556,8 +562,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -579,7 +585,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
 </p></div>
       
     </div>

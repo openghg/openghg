@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.5.0 documentation</title>
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.5.1 documentation</title>
   
   
   
@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../../../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
 
   
-  <link href="../../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -33,8 +33,8 @@
     <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
-<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/doctools.js"></script>
@@ -355,7 +355,8 @@ document.write(`
   <h1>Source code for openghg.retrieve.icos._retrieve</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
-<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_on_hub</span>
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_on_hub</span><span class="p">,</span> <span class="n">load_json</span>
+<span class="kn">import</span> <span class="nn">openghg_defs</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.retrieve&quot;</span><span class="p">)</span>
@@ -438,9 +439,8 @@ document.write(`
 <span class="sd">        ObsData, list[ObsData] or None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
-
-    <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">call_function</span><span class="p">,</span> <span class="n">unpackage</span>
     <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+    <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">call_function</span><span class="p">,</span> <span class="n">unpackage</span>
 
     <span class="c1"># The hub is the only place we want to make remote calls</span>
     <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
@@ -541,6 +541,7 @@ document.write(`
             <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
             <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
             <span class="n">update_metadata_mismatch</span><span class="o">=</span><span class="n">update_metadata_mismatch</span><span class="p">,</span>
+            <span class="n">sampling_height</span><span class="o">=</span><span class="n">sampling_height</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">standardised_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -627,14 +628,13 @@ document.write(`
     <span class="n">species_upper</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">species</span><span class="p">]</span>
     <span class="c1"># For this see https://stackoverflow.com/a/55335207</span>
     <span class="n">search_str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\b(?:</span><span class="si">{}</span><span class="s2">)\b&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">,</span> <span class="n">species_upper</span><span class="p">)))</span>
-    <span class="c1"># Now filter the dataframe so we can extraxt the PIDS</span>
+    <span class="c1"># Now filter the dataframe so we can extract the PIDS</span>
     <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">data_pids</span><span class="p">[</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)]</span>
 
     <span class="k">if</span> <span class="n">sampling_height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">sampling_height</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sampling_height</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)))</span>
-        <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">filtered_sources</span><span class="p">[</span>
-            <span class="p">[</span><span class="n">sampling_height</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">filtered_sources</span><span class="p">[</span><span class="s2">&quot;samplingheight&quot;</span><span class="p">]]</span>
-        <span class="p">]</span>
+        <span class="n">height_filter</span> <span class="o">=</span> <span class="p">[</span><span class="n">sampling_height</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">filtered_sources</span><span class="p">[</span><span class="s2">&quot;samplingheight&quot;</span><span class="p">]]</span>
+        <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">filtered_sources</span><span class="p">[</span><span class="n">height_filter</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">filtered_sources</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
@@ -645,10 +645,34 @@ document.write(`
     <span class="c1"># Now extract the PIDs along with some data about them</span>
     <span class="n">dobj_urls</span> <span class="o">=</span> <span class="n">filtered_sources</span><span class="p">[</span><span class="s2">&quot;dobj&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
+    <span class="c1"># Load our site metadata for a few things like the station&#39;s long_name that</span>
+    <span class="c1"># isn&#39;t in the ICOS metadata in the way we want it at the momenet - 2023-03-20</span>
+    <span class="n">site_info_fpath</span> <span class="o">=</span> <span class="n">openghg_defs</span><span class="o">.</span><span class="n">site_info_file</span>
+    <span class="n">openghg_site_metadata</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">site_info_fpath</span><span class="p">)</span>
+
     <span class="n">standardised_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">dobj_url</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dobj_urls</span><span class="p">):</span>
         <span class="n">dobj</span> <span class="o">=</span> <span class="n">Dobj</span><span class="p">(</span><span class="n">dobj_url</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Retrieving </span><span class="si">{</span><span class="n">dobj_url</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="c1"># We&#39;ve got to jump through some hoops here to try and avoid the NOAA</span>
+        <span class="c1"># ObsPack GlobalView data</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;globalview&quot;</span> <span class="ow">in</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;doi&quot;</span><span class="p">][</span><span class="s2">&quot;titles&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;title&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">dobj_url</span><span class="si">}</span><span class="s2"> as ObsPack GlobalView detected.&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">][</span><span class="s2">&quot;project&quot;</span><span class="p">][</span><span class="s2">&quot;self&quot;</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to read project information from dobj.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataset_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">dobj_dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">continue</span>
+
         <span class="c1"># We need to pull the data down as .info (metadata) is populated further on this step</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="c1"># This is the metadata, dobj.info and dobj.meta are equal</span>
@@ -658,15 +682,6 @@ document.write(`
 
         <span class="n">specific_info</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;specificInfo&quot;</span><span class="p">]</span>
         <span class="n">col_data</span> <span class="o">=</span> <span class="n">specific_info</span><span class="p">[</span><span class="s2">&quot;columns&quot;</span><span class="p">]</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;specification&quot;</span><span class="p">][</span><span class="s2">&quot;project&quot;</span><span class="p">][</span><span class="s2">&quot;self&quot;</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">dobj_dataset_source</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unable to read project information from dobj.&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">dataset_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">dobj_dataset_source</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-            <span class="k">continue</span>
 
         <span class="c1"># Get the species this dobj holds information for</span>
         <span class="n">not_the_species</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;TIMESTAMP&quot;</span><span class="p">,</span> <span class="s2">&quot;Flag&quot;</span><span class="p">,</span> <span class="s2">&quot;NbPoints&quot;</span><span class="p">,</span> <span class="s2">&quot;Stdev&quot;</span><span class="p">}</span>
@@ -725,6 +740,12 @@ document.write(`
 
         <span class="n">loc_data</span> <span class="o">=</span> <span class="n">station_data</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]</span>
 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">station_long_name</span> <span class="o">=</span> <span class="n">openghg_site_metadata</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="s2">&quot;ICOS&quot;</span><span class="p">][</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">station_long_name</span> <span class="o">=</span> <span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
+
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_long_name</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">])</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">])</span>
         <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_altitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;alt&quot;</span><span class="p">],</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_altitude&quot;</span><span class="p">)</span>
@@ -823,9 +844,15 @@ document.write(`
               
               
                 <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
+</div></div>
+  
 </div>
+
                 </footer>
               
             </div>
@@ -835,7 +862,7 @@ document.write(`
             
           </div>
           <footer class="bd-footer-content">
-            <div class="bd-footer-content__inner"></div>
+            
           </footer>
         
       </main>
@@ -843,8 +870,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
-<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+  <script src="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -866,7 +893,7 @@ document.write(`
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
 </p></div>
       
     </div>

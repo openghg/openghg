@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Explore NOAA ObsPack &#8212; OpenGHG 0.5.0 documentation</title>
+    <title>Explore NOAA ObsPack &#8212; OpenGHG 0.5.1 documentation</title>
   
   
   
@@ -19,12 +19,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
 
   
-  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -34,8 +34,8 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/doctools.js"></script>
@@ -419,11 +419,6 @@ affect your use of OpenGHG outside of this tutorial.</p>
 </section>
 <section id="loading-the-noaa-obspack-data">
 <h2>1. Loading the NOAA ObsPack data<a class="headerlink" href="#loading-the-noaa-obspack-data" title="Permalink to this heading">#</a></h2>
-<p>First we’ll tell OpenGHG to use the tutorial object store, located in
-your computer’s temporary directory.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
-</pre></div>
-</div>
 <section id="download-the-data">
 <h3>Download the data<a class="headerlink" href="#download-the-data" title="Permalink to this heading">#</a></h3>
 <p>For convenience we have included a copy of the
@@ -432,41 +427,45 @@ example database. Once this has been downloaded, this can be processd
 using the <code class="docutils literal notranslate"><span class="pre">add_noaa_obspack()</span></code> function available from
 <code class="docutils literal notranslate"><span class="pre">openghg.store</span></code> subpackage. The file is ~ 128 MB in size so might take
 a short time to download depending on your internet connection.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_obspack</span>
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">add_noaa_obspack</span>
 
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/obspack/obspack_ch4_example.tar.gz&quot;</span>
-<span class="n">noaa_obspack_directory</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+<span class="n">noaa_obspack_directory</span> <span class="o">=</span> <span class="n">retrieve_example_obspack</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>Now we have the data retrieved and extracted we can ask OpenGHG to process it and add it to our local object store.</p>
 </section>
 <section id="process-and-store-the-data">
 <h3>Process and store the data<a class="headerlink" href="#process-and-store-the-data" title="Permalink to this heading">#</a></h3>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">add_noaa_obspack</span><span class="p">(</span><span class="n">noaa_obspack_directory</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="visualise-the-data-within-the-object-store">
-<h3>Visualise the data within the object store<a class="headerlink" href="#visualise-the-data-within-the-object-store" title="Permalink to this heading">#</a></h3>
-<p>The object store should now contain a larage amount of CH4, we can
-visualise the structure of the store like so:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">visualise_store</span>
-
-<span class="n">visualise_store</span><span class="p">()</span>
+<p>We pass the directory containing the ObsPack data to <code class="docutils literal notranslate"><span class="pre">add_noaa_obspack</span></code> which processes each of the files it finds in the directory.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">add_noaa_obspack</span><span class="p">(</span><span class="n">data_directory</span><span class="o">=</span><span class="n">noaa_obspack_directory</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="search-retrieve-and-plot">
 <h2>2. Search, retrieve and plot<a class="headerlink" href="#search-retrieve-and-plot" title="Permalink to this heading">#</a></h2>
-<p>Now we can query the object store and find all the flask data for
+<p>The object store should now contain a large amount of data, we can query the object store and find all the flask CH4 data for
 example</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
 
-<span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">measurement_type</span><span class="o">=</span><span class="s2">&quot;flask&quot;</span><span class="p">,</span> <span class="n">data_source</span><span class="o">=</span><span class="s2">&quot;noaa_obspack&quot;</span><span class="p">)</span>
+<span class="n">flask_ch4</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">measurement_type</span><span class="o">=</span><span class="s2">&quot;flask&quot;</span><span class="p">,</span> <span class="n">data_source</span><span class="o">=</span><span class="s2">&quot;noaa_obspack&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Or we can do an all in one search and retrieve using
+<p>Then we can look at the results print as a Pandas DataFrame by doing</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">flask_ch4</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+<p>Say we want to have a better look at some of the data from Sary Taukum, Kazakhstan</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kzd_data</span> <span class="o">=</span> <span class="n">flask_ch4</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;kzd&quot;</span><span class="p">)</span>
+
+<span class="n">kzd_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="using-get-obs-surface">
+<h2>3. Using <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code><a class="headerlink" href="#using-get-obs-surface" title="Permalink to this heading">#</a></h2>
+<p>Alternatively, we can do an all in one search and retrieve using
 <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code>. Here we find CH4 data from Estevan Point, British
 Columbia, retrieve it and plot it.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
@@ -484,13 +483,12 @@ doesn’t know which inlet to select, we need to tell it.</p>
 </div>
 </section>
 <section id="cleanup">
-<h2>3. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
+<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
+
+<span class="n">clear_tutorial_store</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
@@ -502,7 +500,10 @@ tutorial object store using the <code class="docutils literal notranslate"><span
               
               
                 <footer class="bd-footer-article">
-                  <!-- Previous / next buttons -->
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="../Analysing_data/Working_with_co2.html"
@@ -522,7 +523,10 @@ tutorial object store using the <code class="docutils literal notranslate"><span
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
+</div></div>
+  
 </div>
+
                 </footer>
               
             </div>
@@ -541,11 +545,11 @@ tutorial object store using the <code class="docutils literal notranslate"><span
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loading-the-noaa-obspack-data">1. Loading the NOAA ObsPack data</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#download-the-data">Download the data</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#process-and-store-the-data">Process and store the data</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visualise-the-data-within-the-object-store">Visualise the data within the object store</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#search-retrieve-and-plot">2. Search, retrieve and plot</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup">3. Cleanup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-get-obs-surface">3. Using <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup">4. Cleanup</a></li>
 </ul>
   </nav></div>
 
@@ -554,7 +558,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
             
           </div>
           <footer class="bd-footer-content">
-            <div class="bd-footer-content__inner"></div>
+            
           </footer>
         
       </main>
@@ -562,8 +566,8 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -585,7 +589,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
     <div class="footer-items__end">
       
         <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.1.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
 </p></div>
       
     </div>
