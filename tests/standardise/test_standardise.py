@@ -78,6 +78,7 @@ def test_standardise_column():
         satellite=satellite,
         domain=domain,
         species=species,
+        overwrite=True,
     )
 
     assert "error" not in results
