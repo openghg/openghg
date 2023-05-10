@@ -86,19 +86,14 @@ def add_noaa_obspack(
         measurement_type = param["measurement_type"]
 
         if _project in projects_to_read:
-            try:
-                print(f"Processing {filepath}")
-                processed = ObsSurface.read_file(
-                    filepath=filepath,
-                    site=site,
-                    measurement_type=measurement_type,
-                    network="NOAA",
-                    source_format="NOAA",
-                    overwrite=overwrite,
-                )
-            except Exception as e:
-                print(f"Had a problem processing {filepath} with error {e}")
-
+            processed = ObsSurface.read_file(
+                filepath=filepath,
+                site=site,
+                measurement_type=measurement_type,
+                network="NOAA",
+                source_format="NOAA",
+                overwrite=overwrite,
+            )
         elif _project in project_names_not_implemented:
             logger.warning(
                 f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
@@ -132,11 +127,11 @@ def _param_from_filename(filename: Union[str, Path]) -> Dict:
         >>> _param_from_filename("ch4_esp_surface-flask_2_representative.nc")
         {"species": "ch4", "site" : "esp", "project": "surface-flask", "measurement_type": "flask"}
     """
-
     if isinstance(filename, str):
         extracted_param = filename.split("_")
     else:
         extracted_param = filename.name.split("_")
+
     param = {}
     param["species"] = extracted_param[0]
     param["site"] = extracted_param[1]
