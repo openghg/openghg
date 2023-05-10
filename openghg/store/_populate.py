@@ -87,7 +87,7 @@ def add_noaa_obspack(
         _project = param["project"]
         measurement_type = param["measurement_type"]
 
-        if project in projects_to_read:
+        if _project in projects_to_read:
             try:
                 processed = ObsSurface.read_file(
                     filepath,
@@ -100,7 +100,7 @@ def add_noaa_obspack(
             except Exception:
                 files_with_errors.append(filepath.name)
 
-        elif project in project_names_not_implemented:
+        elif _project in project_names_not_implemented:
             logger.warning(
                 f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
             )
@@ -117,7 +117,7 @@ def add_noaa_obspack(
 
     if files_with_errors:
         err_string = "\n".join(files_with_errors)
-        logger.info(f"We were unable to process {len(files_with_errors)} - these were: {err_string}.")
+        logger.info(f"We were unable to process {len(files_with_errors)} files - these were:\n {err_string}.")
 
     return processed_summary
 
@@ -226,9 +226,5 @@ def _find_noaa_files(data_directory: Union[str, Path], ext: str) -> List[Path]:
             break
     else:
         files = []
-
-    unique_filepaths = list(set(files))
-
-    print(f"We've got {len(unique_filepaths)} unique filepaths and {len(files)} files.")
 
     return files

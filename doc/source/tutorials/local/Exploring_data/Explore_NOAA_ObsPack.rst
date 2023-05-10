@@ -46,18 +46,22 @@ a short time to download depending on your internet connection.
 
     noaa_obspack_directory = retrieve_example_obspack()
 
+Now we have the data retrieved and extracted we can ask OpenGHG to process it and add it to our local object store.
+
 Process and store the data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+We pass the directory containing the ObsPack data to ``add_noaa_obspack`` which processes each of the files it finds in the directory.
+
 .. code:: ipython3
 
-    res = add_noaa_obspack(noaa_obspack_directory)
+    res = add_noaa_obspack(data_directory=noaa_obspack_directory)
 
 
 2. Search, retrieve and plot
 ----------------------------
 
-The object store should now contain a large amount of CH4, we can query the object store and find all the flask data for
+The object store should now contain a large amount of data, we can query the object store and find all the flask CH4 data for
 example
 
 .. code:: ipython3
@@ -66,7 +70,25 @@ example
 
     flask_ch4 = search_surface(species="ch4", measurement_type="flask", data_source="noaa_obspack")
 
-Or we can do an all in one search and retrieve using
+Then we can look at the results print as a Pandas DataFrame by doing
+
+.. code:: ipython3
+
+    flask_ch4.results
+
+Say we want to have a better look at some of the data from Sary Taukum, Kazakhstan
+
+.. code:: ipython3
+
+    kzd_data = flask_ch4.retrieve(site="kzd")
+
+    kzd_data.plot_timeseries()
+
+
+3. Using ``get_obs_surface``
+----------------------------
+
+Alternatively, we can do an all in one search and retrieve using
 ``get_obs_surface``. Here we find CH4 data from Estevan Point, British
 Columbia, retrieve it and plot it.
 
@@ -87,7 +109,7 @@ doesn't know which inlet to select, we need to tell it.
 
     data.plot_timeseries()
 
-3. Cleanup
+4. Cleanup
 ----------
 
 If you're finished with the data in this tutorial you can cleanup the
