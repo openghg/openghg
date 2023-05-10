@@ -34,8 +34,7 @@ def metadata_default_keys() -> List:
 
 
 def metadata_keys_as_floats() -> List:
-    """
-    Define which keys should be consistently stored as numbers in the metadata
+    """Define which keys should be consistently stored as numbers in the metadata
     (even if they are not numbers within the attributes).
     """
 
