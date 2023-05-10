@@ -9,6 +9,7 @@ from uuid import uuid4
 import logging
 import pyvis
 from openghg.types import ObjectStoreError
+from openghg.util import read_local_config
 
 rlock = threading.RLock()
 
@@ -42,17 +43,26 @@ def get_tutorial_store_path() -> Path:
 
 # @lru_cache
 def get_local_objectstore_path() -> Path:
-    """Read
+    """Returns the path of the user's local object store
 
     Returns:
         pathlib.Path: Path of object store
     """
-    from openghg.util import read_local_config
-
     config = read_local_config()
     object_store_path = Path(config["object_store"]["local_store"])
 
     return object_store_path
+
+
+def get_objectstore_info() -> Dict:
+    """Read the local config file and return the data of each of the object stores the
+    user has access to.
+
+    Returns:
+        dict: Dictionary of object store data
+    """
+    config = read_local_config()
+    return config["object_store"]
 
 
 def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_prefix: bool = False) -> List:

@@ -65,6 +65,7 @@ def create_config(silent: bool = False) -> None:
     Returns:
         None
     """
+    raise NotImplementedError("This needs updating for multiple stores.")
     if not silent:
         print("\nOpenGHG configuration")
         print("---------------------\n")
