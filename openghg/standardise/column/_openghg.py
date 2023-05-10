@@ -260,6 +260,7 @@ def parse_openghg(
     # Update attributes to match metadata after cleaning
     attributes.update(metadata)
 
+    # TODO: Decide if the key here should be more descriptive that just `species`
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
     # gas_data = assign_attributes(data=gas_data, site=site, network=network)
