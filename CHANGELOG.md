@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Incorrect data being retrieved by the ICOS retrieval function - [PR #611](https://github.com/openghg/openghg/pull/611)
 - Error raised on attempt to delete object store after it wasn't created by some tests - [PR #626](https://github.com/openghg/openghg/pull/626)
 - Very small (nanosecond) changes in period between measurements resulting in error due to `pandas.infer_period` not being able to return a period - [PR #634](https://github.com/openghg/openghg/pull/634)
-- Processing of ObsPack resulted in errors due to limited metadata read and data overwrite, temporary fix in place - [PR #642](https://github.com/openghg/openghg/pull/642)
+- Processing of ObsPack resulted in errors due to limited metadata read and data overwrite, temporary fix in place for now - [PR #642](https://github.com/openghg/openghg/pull/642)
 
 ### Changed
 
