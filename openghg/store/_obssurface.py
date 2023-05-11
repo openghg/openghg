@@ -22,14 +22,6 @@ class ObsSurface(BaseStore):
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    # @staticmethod
-    # def load_metastore() -> TinyDB:
-    #     """ Load the ObsSurface metadata store
-
-    #     Returns:
-    #         TinyDB: TinyDB object
-    #     """
-
     @staticmethod
     def read_data(
         binary_data: bytes,

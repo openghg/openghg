@@ -49,7 +49,7 @@ def get_local_objectstore_path() -> Path:
         pathlib.Path: Path of object store
     """
     config = read_local_config()
-    object_store_path = Path(config["object_store"]["local_store"])
+    object_store_path = Path(config["object_store"]["local_store"]["path"])
 
     return object_store_path
 

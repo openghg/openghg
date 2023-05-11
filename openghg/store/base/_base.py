@@ -2,7 +2,6 @@
     modules inherit.
 """
 from typing import Dict, List, Optional, Type, TypeVar, Union
-from addict import Dict as aDict
 from pandas import Timestamp
 from tinydb import TinyDB
 
@@ -18,129 +17,143 @@ class BaseStore:
     _root = "root"
     _uuid = "root_uuid"
 
-    def __init__(self) -> None:
-        self._creation_datetime = timestamp_now()
+    def __init__(self, bucket: str) -> None:
+        self._creation_datetime = str(timestamp_now())
         self._stored = False
 
-        # Use an addict Dict here for easy nested data storage
-        self._datasource_table = aDict()
         # Keyed by Datasource UUID
         self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
         self._file_hashes: Dict[str, str] = {}
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: Dict[str, Dict] = {}
-        # Keyed by UUID
-        self._rank_data = aDict()
+        # Where we'll store this object
+        self._bucket = bucket
 
-    def __enter__(self, bucket: str):
-        return self.load(bucket=bucket)
+        if exists(bucket=bucket, key=self.key()):
+            data = get_object_from_json(bucket=bucket, key=self.key())
+            # Update myself
+            self.__dict__.update(data)
 
-    def __exit__(self, exc_type, exc_value, exc_tb):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
         self.save()
 
     @classmethod
-    def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
-        """Check if the object is already saved in the object
-        store
+    def key(cls):
+        return f"{cls._root}/uuid/{cls._uuid}"
 
-        Args:
-            bucket: Bucket for data storage
-        Returns:
-            bool: True if object exists
-        """
-        if bucket is None:
-            bucket = get_bucket()
+    def save(self):
+        if not self._bucket:
+            raise ValueError("Attempting to save without a bucket set.")
 
-        key = f"{cls._root}/uuid/{cls._uuid}"
+        set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
-        does_exist: bool = exists(bucket=bucket, key=key)
+    def to_data(self):
+        return self.__dict__
 
-        return does_exist
+    # @classmethod
+    # def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
+    #     """Check if the object is already saved in the object
+    #     store
 
-    @classmethod
-    def from_data(cls: Type[T], data: Dict) -> T:
-        """Create an object from data
+    #     Args:
+    #         bucket: Bucket for data storage
+    #     Returns:
+    #         bool: True if object exists
+    #     """
+    #     if bucket is None:
+    #         bucket = get_bucket()
 
-        Args:
-            data: JSON data
-        Returns:
-            cls: Class object of cls type
-        """
-        if not data:
-            raise ValueError("Unable to create object with empty dictionary")
+    #     key = f"{cls._root}/uuid/{cls._uuid}"
 
-        c = cls()
-        c._creation_datetime = timestamp_tzaware(data["creation_datetime"])
-        c._datasource_uuids = data["datasource_uuids"]
-        c._file_hashes = data["file_hashes"]
-        c._retrieved_hashes = data.get("retrieved_hashes", {})
-        c._datasource_table = aDict(data["datasource_table"])
-        c._rank_data = aDict(data["rank_data"])
-        c._stored = False
+    #     does_exist: bool = exists(bucket=bucket, key=key)
 
-        return c
+    #     return does_exist
 
-    def to_data(self) -> Dict:
-        """Return a JSON-serialisable dictionary of object
-        for storage in object store
+    # @classmethod
+    # def from_data(cls: Type[T], data: Dict) -> T:
+    #     """Create an object from data
 
-        Returns:
-            dict: Dictionary version of object
-        """
-        data: Dict[str, Union[str, bool, Dict]] = {}
-        data["creation_datetime"] = str(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_table"] = self._datasource_table
-        data["datasource_uuids"] = self._datasource_uuids
-        data["file_hashes"] = self._file_hashes
-        data["retrieved_hashes"] = self._retrieved_hashes
-        data["rank_data"] = self._rank_data
+    #     Args:
+    #         data: JSON data
+    #     Returns:
+    #         cls: Class object of cls type
+    #     """
+    #     if not data:
+    #         raise ValueError("Unable to create object with empty dictionary")
 
-        return data
+    #     c = cls()
+    #     c._creation_datetime = timestamp_tzaware(data["creation_datetime"])
+    #     c._datasource_uuids = data["datasource_uuids"]
+    #     c._file_hashes = data["file_hashes"]
+    #     c._retrieved_hashes = data.get("retrieved_hashes", {})
+    #     c._datasource_table = aDict(data["datasource_table"])
+    #     c._rank_data = aDict(data["rank_data"])
+    #     c._stored = False
 
-    @classmethod
-    def load(cls: Type[T], bucket: str) -> T:
-        """Load an object from the datastore using the passed
-        bucket and UUID
+    #     return c
 
-        Args:
-            bucket: Bucket to store object
-        Returns:
-            class: Class created from JSON data
-        """
-        if not cls.exists():
-            return cls()
+    # def to_data(self) -> Dict:
+    #     """Return a JSON-serialisable dictionary of object
+    #     for storage in object store
 
-        key = f"{cls._root}/uuid/{cls._uuid}"
-        data = get_object_from_json(bucket=bucket, key=key)
+    #     Returns:
+    #         dict: Dictionary version of object
+    #     """
+    #     data: Dict[str, Union[str, bool, Dict]] = {}
+    #     data["creation_datetime"] = str(self._creation_datetime)
+    #     data["stored"] = self._stored
+    #     data["datasource_table"] = self._datasource_table
+    #     data["datasource_uuids"] = self._datasource_uuids
+    #     data["file_hashes"] = self._file_hashes
+    #     data["retrieved_hashes"] = self._retrieved_hashes
+    #     data["rank_data"] = self._rank_data
 
-        return cls.from_data(data=data)
+    #     return data
 
-    @classmethod
-    def save(cls) -> None:
-        """Save the object to the object store
+    # @classmethod
+    # def load(cls: Type[T]) -> T:
+    #     """Load an object from the datastore using the passed
+    #     bucket and UUID
 
-        Args:
-            bucket: Bucket for data
-        Returns:
-            None
-        """
-        bucket = get_bucket()
+    #     Args:
+    #         bucket: Bucket to store object
+    #     Returns:
+    #         class: Class created from JSON data
+    #     """
+    #     if not cls.exists():
+    #         return cls()
 
-        obs_key = f"{cls._root}/uuid/{cls._uuid}"
+    #     key = f"{cls._root}/uuid/{cls._uuid}"
+    #     data = get_object_from_json(bucket=cls._bucket_name, key=key)
 
-        cls._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=cls.to_data())
+    #     return cls.from_data(data=data)
 
-    @classmethod
-    def uuid(cls: Type[T]) -> str:
+    # def save(self) -> None:
+    #     """Save the object to the object store
+
+    #     Args:
+    #         bucket: Bucket for data
+    #     Returns:
+    #         None
+    #     """
+    #     bucket = get_bucket()
+
+    #     obs_key = f"{self._root}/uuid/{self._uuid}"
+
+    #     self._stored = True
+    #     set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
+
+    def uuid(self: Type[T]) -> str:
         """Return the UUID of this object
 
         Returns:
             str: UUID of object
         """
-        return cls._uuid
+        return self._uuid
 
     def datasources(self: T) -> List[str]:
         """Return the list of Datasources UUIDs associated with this object
