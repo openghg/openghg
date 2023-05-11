@@ -1,10 +1,13 @@
-""" This file contains the BaseStore class from which other retrieve
+""" This file contains the BaseStore class from which other storage
     modules inherit.
 """
 from typing import Dict, List, Optional, Type, TypeVar, Union
-
+from addict import Dict as aDict
 from pandas import Timestamp
 from tinydb import TinyDB
+
+from openghg.objectstore import get_object_from_json, exists, get_bucket, set_object_from_json
+from openghg.util import timestamp_tzaware, timestamp_now
 
 __all__ = ["BaseStore"]
 
@@ -16,9 +19,6 @@ class BaseStore:
     _uuid = "root_uuid"
 
     def __init__(self) -> None:
-        from addict import Dict as aDict
-        from openghg.util import timestamp_now
-
         self._creation_datetime = timestamp_now()
         self._stored = False
 
@@ -33,6 +33,12 @@ class BaseStore:
         # Keyed by UUID
         self._rank_data = aDict()
 
+    def __enter__(self, bucket: str):
+        return self.load(bucket=bucket)
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self.save()
+
     @classmethod
     def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
         """Check if the object is already saved in the object
@@ -43,8 +49,6 @@ class BaseStore:
         Returns:
             bool: True if object exists
         """
-        from openghg.objectstore import exists, get_bucket
-
         if bucket is None:
             bucket = get_bucket()
 
@@ -63,9 +67,6 @@ class BaseStore:
         Returns:
             cls: Class object of cls type
         """
-        from addict import Dict as aDict
-        from openghg.util import timestamp_tzaware
-
         if not data:
             raise ValueError("Unable to create object with empty dictionary")
 
@@ -99,7 +100,7 @@ class BaseStore:
         return data
 
     @classmethod
-    def load(cls: Type[T], bucket: Optional[str] = None) -> T:
+    def load(cls: Type[T], bucket: str) -> T:
         """Load an object from the datastore using the passed
         bucket and UUID
 
@@ -108,19 +109,15 @@ class BaseStore:
         Returns:
             class: Class created from JSON data
         """
-        from openghg.objectstore import get_bucket, get_object_from_json
-
         if not cls.exists():
             return cls()
-
-        if bucket is None:
-            bucket = get_bucket()
 
         key = f"{cls._root}/uuid/{cls._uuid}"
         data = get_object_from_json(bucket=bucket, key=key)
 
         return cls.from_data(data=data)
 
+    @classmethod
     def save(cls) -> None:
         """Save the object to the object store
 
@@ -129,8 +126,6 @@ class BaseStore:
         Returns:
             None
         """
-        from openghg.objectstore import get_bucket, set_object_from_json
-
         bucket = get_bucket()
 
         obs_key = f"{cls._root}/uuid/{cls._uuid}"
@@ -202,7 +197,6 @@ class BaseStore:
             dict: Dictionary of rank and daterange covered by that rank
         """
         from collections import defaultdict
-
         from openghg.util import create_daterange_str, daterange_overlap
 
         if uuid not in self._rank_data:
