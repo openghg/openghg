@@ -14,6 +14,9 @@ from openghg.util import format_inlet
         ("multiple", "multiple"),
         ("column", "column"),
         (None, None),
+        (10, "10m"),
+        (10.0, "10m"),
+        (20.23456, "20.2m")
     ],
 )
 def test_format_inlet(test_input, expected):
@@ -22,6 +25,30 @@ def test_format_inlet(test_input, expected):
     special keywords ("multiple") and None.
     """
     output = format_inlet(test_input)
+    assert output == expected
+
+
+@pytest.mark.parametrize(
+    "test_input,expected,key_name",
+    [
+        ("10", "10m", None),
+        ("12.1", "12.1m", "inlet"),
+        ("10m", "10m", "inlet"),
+        ("10m", "10", "inlet_m"),
+        ("10m", "10", "inlet_magl"),
+        ("10magl", "10", "inlet_magl"),
+        ("31m", "31", "station_height_masl"),
+        ("31masl", "31", "station_height_masl"),
+        ("31m", "31m", "m_height"),  # Correctly won't recognise "m" unit in key_name as not at end of string
+    ],
+)
+def test_format_inlet_keyname(test_input, expected, key_name):
+    """
+    Test format_inlet formats inlet names in the right way when a key_name
+    is specified. The function will derive whether a unit needs to be 
+    included or not.
+    """
+    output = format_inlet(test_input, key_name=key_name)
     assert output == expected
 
 

@@ -69,6 +69,7 @@ def grid_out(grid_da):
     return lat_out, lon_out
 
 
+@pytest.mark.xesmf
 def test_regrid_da(grid_da, grid_out):
     """
     Test regridding for regrid_uniform_cc function on DataArray objects.
@@ -94,6 +95,7 @@ def test_regrid_da(grid_da, grid_out):
     assert out.dims == ("lat", "lon")
 
 
+@pytest.mark.xesmf
 def test_regrid_array(grid_da, grid_out):
     """
     Test regridding for regrid_uniform_cc function on numpy array objects.
@@ -116,6 +118,7 @@ def test_regrid_array(grid_da, grid_out):
     assert out.shape == (len(lat_out), len(lon_out))
 
 
+@pytest.mark.xesmf
 def test_regrid_uneven_lat_lon(grid_da):
     """
     Test grid can be regridded onto different lat-lon dimensions.
@@ -142,6 +145,7 @@ def test_regrid_uneven_lat_lon(grid_da):
     assert out.dims == ("lat", "lon")
 
 
+@pytest.mark.xesmf
 def test_unmatched_size_da(grid_da, grid_out):
     """Check error raised when lat_in, lon_in cannot be matched to grid (DataArray)"""
     xesmf = pytest.importorskip("xesmf")
@@ -153,6 +157,7 @@ def test_unmatched_size_da(grid_da, grid_out):
         regrid_uniform_cc(grid_da, lat_out, lon_out, lat_in_wrong, lon_in)
 
 
+@pytest.mark.xesmf
 def test_unmatched_size_array(grid_da, grid_out):
     """Check error raised when lat_in, lon_in cannot be matched to grid (numpy array)"""
     xesmf = pytest.importorskip("xesmf")

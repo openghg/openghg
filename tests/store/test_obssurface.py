@@ -11,7 +11,7 @@ from pandas import Timestamp
 
 
 def test_different_sampling_periods_diff_datasources():
-    get_bucket(empty=True)
+    clear_test_store()
 
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
 
@@ -59,7 +59,7 @@ def test_same_source_data_same_datasource():
 
 
 def test_read_data(mocker):
-    get_bucket(empty=True)
+    clear_test_store()
     fake_uuids = [f"test-uuid-{i}" for i in range(1, 101)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
@@ -97,25 +97,17 @@ def test_read_data(mocker):
         _ = ObsSurface.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
 
-def test_read_CRDS_incorrent_sampling_period_raises():
-    get_bucket(empty=True)
+@pytest.mark.parametrize("sampling_period", ["60", 60, "60000000000", "twelve-thousand"])
+def test_read_CRDS_incorrect_sampling_period_raises(sampling_period):
+    clear_test_store()
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exec_info:
         ObsSurface.read_file(
-            filepath=filepath, source_format="CRDS", site="bsd", network="DECC", sampling_period="60"
+            filepath=filepath, source_format="CRDS", site="bsd", network="DECC", sampling_period=sampling_period
         )
-        ObsSurface.read_file(
-            filepath=filepath, source_format="CRDS", site="bsd", network="DECC", sampling_period=60
-        )
-        ObsSurface.read_file(
-            filepath=filepath,
-            source_format="CRDS",
-            site="bsd",
-            network="DECC",
-            sampling_period="twelve-thousand",
-        )
+        assert "Invalid sampling period" in exec_info or "Could not evaluate sampling period" in exec_info
 
 
 def test_read_CRDS():
@@ -188,7 +180,7 @@ def test_read_CRDS():
 
 
 def test_read_GC():
-    get_bucket(empty=True)
+    clear_test_store()
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
@@ -317,12 +309,12 @@ def test_read_GC():
 
 
 def test_read_cranfield():
-    get_bucket(empty=True)
+    clear_test_store()
 
     data_filepath = get_surface_datapath(filename="THB_hourly_means_test.csv", source_format="Cranfield_CRDS")
 
     results = ObsSurface.read_file(
-        filepath=data_filepath, source_format="CRANFIELD", site="THB", network="CRANFIELD"
+        filepath=data_filepath, source_format="CRANFIELD", site="TMB", network="CRANFIELD"
     )
 
     expected_keys = ["ch4", "co", "co2"]
@@ -385,7 +377,7 @@ def test_read_openghg_format():
 
 
 def test_read_noaa_raw():
-    get_bucket(empty=True)
+    clear_test_store()
 
     data_filepath = get_surface_datapath(
         filename="co_pocn25_surface-flask_1_ccgg_event.txt", source_format="NOAA"
@@ -460,7 +452,7 @@ def test_read_noaa_obspack():
 
 
 def test_read_thames_barrier():
-    get_bucket(empty=True)
+    clear_test_store()
 
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
 
@@ -472,11 +464,11 @@ def test_read_thames_barrier():
         sampling_period="3600s",
     )
 
-    expected_keys = sorted(["CH4", "CO2", "CO"])
+    expected_keys = sorted(["ch4", "co2", "co"])
 
     assert sorted(list(results["processed"]["thames_test_20190707.csv"].keys())) == expected_keys
 
-    uuid = results["processed"]["thames_test_20190707.csv"]["CO2"]["uuid"]
+    uuid = results["processed"]["thames_test_20190707.csv"]["co2"]["uuid"]
 
     data = Datasource.load(uuid=uuid, shallow=False).data()
     data = data["2019-07-01-00:39:55+00:00_2019-08-01-01:10:29+00:00"]
@@ -494,7 +486,7 @@ def test_read_thames_barrier():
 
 
 def test_delete_Datasource():
-    bucket = get_bucket(empty=True)
+    bucket = get_bucket()
 
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
 
@@ -528,7 +520,7 @@ def test_delete_Datasource():
 
 
 def test_add_new_data_correct_datasource():
-    get_bucket(empty=True)
+    clear_test_store()
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.05.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.05.precisions.C", source_format="GC")
@@ -740,7 +732,7 @@ def test_read_multiside_aqmesh():
         "in_ulez": "No",
         "latitude": 55.798813,
         "longitude": -4.058363,
-        "inlet": 1,
+        "inlet": "1m",
         "network": "aqmesh_glasgow",
         "sampling_period": "NOT_SET",
         "species": "co2",

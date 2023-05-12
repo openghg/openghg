@@ -1,40 +1,64 @@
 import os
-import shutil
 import sys
-import tempfile
-
 import pytest
+import shutil
+from helpers import temporary_store_path
+from typing import Iterator
+from unittest.mock import patch
+
+from helpers import get_info_datapath
+
 
 # Added for import of openghg from testing directory
 sys.path.insert(0, os.path.abspath("."))
 
-# We still require OpenGHG to be in the directory above OpenGHG when running the tests
-# acquire_dir = "../acquire"
+tmp_store_path = temporary_store_path()
 
-# Use the local Acquire
-# sys.path.insert(0, os.path.abspath(acquire_dir))
-# sys.path.insert(0, os.path.abspath(f"{acquire_dir}/services"))
 
-# # load all of the common fixtures used by the mocked tests
-# pytest_plugins = ["services.fixtures.mocked_services"]
+@pytest.fixture(scope="session", autouse=True)
+def default_session_fixture() -> Iterator[None]:
+    mock_config = {
+        "object_store": {"local_store": str(tmp_store_path)},
+        "user_id": "test-id-123",
+    }
 
-temporary_store = tempfile.TemporaryDirectory()
-temporary_store_path = temporary_store.name
+    with patch("openghg.util.read_local_config", return_value=mock_config):
+        yield
+
+
+@pytest.fixture(scope="session", autouse=True)
+def openghg_defs_mock(session_mocker):
+    """
+    Mock the external call to openghg_defs module for site_info_file
+    and species_info_file to replace this with a static version within the
+    tests data directory.
+    """
+    import openghg_defs
+
+    site_info_file = get_info_datapath(filename="site_info.json")
+    session_mocker.patch.object(openghg_defs, "site_info_file", new=site_info_file)
+
+    species_info_file = get_info_datapath(filename="species_info.json")
+    session_mocker.patch.object(openghg_defs, "species_info_file", new=species_info_file)
+
+    # TODO: Add domain_info as well?
+
+    yield
 
 
 def pytest_sessionstart(session):
     """Set the required environment variables for OpenGHG
     at the start of the test session.
     """
-    os.environ["OPENGHG_PATH"] = temporary_store_path
+    shutil.rmtree(tmp_store_path, ignore_errors=True)
 
 
 def pytest_sessionfinish(session, exitstatus):
     """Called after whole test run finished, right before
     returning the exit status to the system.
     """
-    print(f"\n\nCleaning up testing store at {temporary_store.name}")
-    temporary_store.cleanup()
+    print(f"\n\nCleaning up testing store at {tmp_store_path}")
+    shutil.rmtree(tmp_store_path, ignore_errors=True)
 
 
 def pytest_addoption(parser):

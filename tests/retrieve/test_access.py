@@ -41,6 +41,21 @@ from pandas import Timedelta, Timestamp
 # ]
 
 
+def test_get_obs_surface_average_works_without_longname():
+    # The stored dataset here doesn't have a long_name attribute so failed
+    # Now works with checks
+    obsdata = get_obs_surface(
+        site="mhd",
+        species="ch4",
+        inlet="10magl",
+        average="4H",
+        instrument="gcmd",
+    )
+
+    assert obsdata.data.attrs["averaged_period_str"] == "4H"
+    assert obsdata.data.attrs["averaged_period"] == 14400
+
+
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
     [
@@ -66,7 +81,8 @@ def test_get_obs_surface(inlet_keyword, inlet_value):
     metadata = obsdata.metadata
 
     assert metadata["data_owner"] == "Simon O'Doherty"
-    assert metadata["inlet_height_magl"] == "248m"
+    assert metadata["inlet"] == "248m"
+    assert metadata["inlet_height_magl"] == "248"
 
     averaged_data = get_obs_surface(site="bsd", species="co2", inlet="248m", average="2h")
 
@@ -99,7 +115,6 @@ def test_no_data_raises():
         assert "Unable to find results for" in excinfo
         assert f"site='{site}'" in excinfo
         assert f"species='{species}'" in excinfo
-
 
 
 # def test_get_obs_surface_ranked_data_only():
@@ -321,7 +336,7 @@ def test_get_flux():
 
 
 def test_get_flux_no_result():
-    """Test sensible error message is being returned when no results are found 
+    """Test sensible error message is being returned when no results are found
     with input keywords for get_flux function"""
     with pytest.raises(SearchError) as execinfo:
         get_flux(species="co2", source="cinnamon", domain="antarctica")
@@ -341,8 +356,7 @@ def test_get_bc():
     assert float(bc.lon.max()) == pytest.approx(39.38)
     assert float(bc.lon.min()) == pytest.approx(-97.9)
 
-    bc_variables = ['height', 'lat', 'lon', 'time',
-                    'vmr_e', 'vmr_n', 'vmr_s', 'vmr_w']
+    bc_variables = ["height", "lat", "lon", "time", "vmr_e", "vmr_n", "vmr_s", "vmr_w"]
     assert sorted(list(bc.variables)) == bc_variables
 
     time = bc["time"]
@@ -358,7 +372,7 @@ def test_get_bc():
         ("inlet", "10"),
     ],
 )
-def test_get_footprint(inlet_keyword,inlet_value):
+def test_get_footprint(inlet_keyword, inlet_value):
     if inlet_keyword == "inlet":
         fp_result = get_footprint(site="tmb", domain="europe", inlet=inlet_value, model="test_model")
     elif inlet_keyword == "height":
@@ -378,7 +392,7 @@ def test_get_footprint(inlet_keyword,inlet_value):
 
 
 def test_get_footprint_no_result():
-    """Test sensible error message is being returned when no results are found 
+    """Test sensible error message is being returned when no results are found
     with input keywords for get_footprint function"""
     with pytest.raises(SearchError) as execinfo:
         get_footprint(site="seville", domain="spain", height="10m", model="test_model")

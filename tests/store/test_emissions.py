@@ -1,14 +1,17 @@
 import pytest
 from helpers import get_emissions_datapath
-from openghg.objectstore import get_bucket
-from openghg.retrieve import search
-from openghg.store import Emissions, datasource_lookup, load_metastore, recombine_datasets
+from openghg.retrieve import search, search_flux
+from openghg.store import Emissions, datasource_lookup, load_metastore
 from openghg.util import hash_bytes
+from openghg.types import DatasourceLookupError
 from xarray import open_dataset
+from pandas import Timestamp
+
+from helpers import clear_test_store
 
 
 def test_read_binary_data(mocker):
-    get_bucket(empty=True)
+    clear_test_store()
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
@@ -92,9 +95,189 @@ def test_read_file():
 
     assert metadata.items() >= expected_metadata.items()
 
+# TODO: Add test for adding additional years data - 2013 gpp cardomom
+
+def test_read_file_additional_keys():
+    """
+    Test multiple files can be added using additional keywords
+    ('database' and 'database_version' tested below).
+    and still be stored and retrieved separately.
+
+    Data used:
+     - EDGAR - ch4, anthro, globaledgar domain, 2014, version v5.0 (v50)
+     - EDGAR - ch4, anthro, globaledgar domain, 2015, version v6.0 (v60)
+
+    Should produce 2 search results.
+    """
+    clear_test_store()
+
+    test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
+
+    proc_results1 = Emissions.read_file(
+        filepath=test_datapath1,
+        species="ch4",
+        source="anthro",
+        domain="globaledgar",
+        database="EDGAR",
+        database_version="v50",
+    )
+
+    assert "ch4_anthro_globaledgar" in proc_results1
+
+    test_datapath2 = get_emissions_datapath("ch4-anthro_globaledgar_v6-0_2015.nc")
+
+    proc_results2 = Emissions.read_file(
+        filepath=test_datapath2,
+        species="ch4",
+        source="anthro",
+        domain="globaledgar",
+        database="EDGAR",
+        database_version="v60",
+    )
+
+    assert "ch4_anthro_globaledgar" in proc_results2
+
+    search_results_all = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR")
+
+    # Should still produce 2 search results - one for each added file (database_version)
+    assert len(search_results_all) == 2
+
+    # Check these can be distinguished by searching by database_version
+    search_results_1 = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v50")
+    search_results_2 = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v60")
+
+    assert len(search_results_1) == 1
+    assert len(search_results_2) == 1
+
+    assert search_results_1.results.iloc[0]["database_version"] == "v50"
+    assert search_results_1.results.iloc[0]["start_date"] == "2014-01-01 00:00:00+00:00"
+    assert search_results_2.results.iloc[0]["database_version"] == "v60"
+    assert search_results_2.results.iloc[0]["start_date"] == "2015-01-01 00:00:00+00:00"
+
+
+def test_read_file_align_correct_datasource():
+    """
+    Test datasources can be correctly aligned for additional keywords.
+    ('database' and 'database_version' tested below).
+
+    Data used:
+     - EDGAR v5.0 (v50)
+       - ch4, anthro, globaledgar domain, 2014
+       - ch4, anthro, globaledgar domain, 2015
+     - EDGAR v6.0 (v60)
+       - ch4, anthro, globaledgar domain, 2015
+    
+    Should produce 2 search results.
+    """
+    clear_test_store()
+
+    test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
+
+    Emissions.read_file(
+        filepath=test_datapath1,
+        species="ch4",
+        source="anthro",
+        domain="globaledgar",
+        database="EDGAR",
+        database_version="v50",
+    )
+
+    test_datapath2 = get_emissions_datapath("ch4-anthro_globaledgar_v6-0_2015.nc")
+
+    Emissions.read_file(
+        filepath=test_datapath2,
+        species="ch4",
+        source="anthro",
+        domain="globaledgar",
+        database="EDGAR",
+        database_version="v60",
+    )
+
+    test_datapath3 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2015.nc")
+
+    Emissions.read_file(
+        filepath=test_datapath3,
+        species="ch4",
+        source="anthro",
+        domain="globaledgar",
+        database="EDGAR",
+        database_version="v50",
+    )
+
+    search_results_all = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR")
+
+    # Should still produce 2 search results as 2014, 2015 v5.0 should be associated in a data source.
+    assert len(search_results_all) == 2
+
+    # Check these can be distinguished by searching by database_version
+    search_results_1 = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v50")
+    search_results_2 = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v60")
+
+    assert len(search_results_1) == 1
+    assert len(search_results_2) == 1
+
+    # Check both time points are found within the retrieved data for v5.0
+    edgar_v5_data = search_results_1.retrieve().data
+
+    assert edgar_v5_data.dims["time"] == 2
+    assert edgar_v5_data["time"][0] == Timestamp("2014-01-01")
+    assert edgar_v5_data["time"][1] == Timestamp("2015-01-01")
+
+
+def test_read_file_fails_ambiguous():
+    """
+    Test helpful error message is raised if read_file is unable to disambiguiate
+    between multiple datasources based on provided keywords when using 
+    additional keywords ('database' and 'database_version' tested).
+
+    Data used:
+     - same as test_read_file_align_correct_datasource() but doesn't pass 
+     `database_version` keyword at all for final file.
+    """
+    clear_test_store()
+
+    test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
+
+    Emissions.read_file(
+        filepath=test_datapath1,
+        species="ch4",
+        source="anthro",
+        domain="globaledgar",
+        database="EDGAR",
+        database_version="v50",
+    )
+
+    test_datapath2 = get_emissions_datapath("ch4-anthro_globaledgar_v6-0_2015.nc")
+
+    Emissions.read_file(
+        filepath=test_datapath2,
+        species="ch4",
+        source="anthro",
+        domain="globaledgar",
+        database="EDGAR",
+        database_version="v60",
+    )
+
+    test_datapath3 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2015.nc")
+
+    # Doesn't include a database_version input which would be needed to distinguish
+    # between the 2 previous datasources added.
+    with pytest.raises(DatasourceLookupError) as exc_info:
+        Emissions.read_file(
+            filepath=test_datapath3,
+            species="ch4",
+            source="anthro",
+            domain="globaledgar",
+            database="EDGAR",
+        )
+    
+    assert "More than once Datasource found for metadata" in exc_info.value.args[0]
+
 
 def test_add_edgar_database():
     """Test edgar can be added to object store (default domain)"""
+    clear_test_store()
+    
     folder = "v6.0_CH4"
     test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
 
@@ -116,12 +299,11 @@ def test_add_edgar_database():
     output_key = f"{species}_{default_source}_{default_domain}_{date}"
     assert output_key in proc_results
 
-    search_results = search(
+    search_results = search_flux(
         species=species,
         date=date,
         database=database,  # would searching for lowercase not work?
         database_version=version,
-        data_type="emissions",
     )
 
     assert search_results
@@ -139,8 +321,10 @@ def test_add_edgar_database():
         "author": "OpenGHG Cloud".lower(),
         "start_date": "2015-01-01 00:00:00+00:00",
         "end_date": "2015-12-31 23:59:59+00:00",
-        "min_longitude": -174.85857,
-        "max_longitude": 180.0,
+        # "min_longitude": -174.85857,
+        # "max_longitude": 180.0,
+        "min_longitude": -180.0,
+        "max_longitude": 174.85858,        
         "min_latitude": -89.95,
         "max_latitude": 89.95,
         "time_resolution": "standard",

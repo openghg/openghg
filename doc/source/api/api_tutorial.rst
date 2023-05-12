@@ -28,8 +28,6 @@ Functions used in our OpenGHG tutorial notebooks and documentation.
 
 .. autofunction:: openghg.tutorial.example_extract_path
 
-.. autofunction:: openghg.tutorial.bilsdale_datapaths
-
 .. autofunction:: openghg.tutorial.use_tutorial_store
 
 .. autofunction:: openghg.tutorial.unpack_example_archive

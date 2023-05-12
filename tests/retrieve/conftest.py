@@ -6,8 +6,9 @@ from helpers import (
     get_eulerian_datapath,
     get_footprint_datapath,
     get_surface_datapath,
+    clear_test_store,
 )
-from openghg.objectstore import get_bucket
+
 from openghg.store import (
     BoundaryConditions,
     Emissions,
@@ -20,7 +21,7 @@ from openghg.store import (
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
-    get_bucket(empty=True)
+    clear_test_store()
 
     # DECC network sites
     network = "DECC"
@@ -77,13 +78,17 @@ def data_read():
 
     # Obs Surface - openghg pre-formatted data
     # - This shouldn't conflict with TAC data above as this is for 185m rather than 100m
-    openghg_path = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG")
-    ObsSurface.read_file(filepath=openghg_path,
-                         source_format="OPENGHG",
-                         site="tac",
-                         network="DECC",
-                         instrument="picarro",
-                         sampling_period="1H")
+    openghg_path = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
+    )
+    ObsSurface.read_file(
+        filepath=openghg_path,
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1H",
+    )
 
     # Obs Column data
     column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
@@ -101,9 +106,9 @@ def data_read():
     test_datapath1 = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
     test_datapath2 = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
 
-    species="co2"
-    source="gpp-cardamom"
-    domain="europe"
+    species = "co2"
+    source = "gpp-cardamom"
+    domain = "europe"
 
     Emissions.read_file(
         filepath=test_datapath1,

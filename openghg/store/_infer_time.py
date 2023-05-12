@@ -1,10 +1,13 @@
 import re
 from pathlib import Path
 from typing import Optional, Tuple, Union
-
+import logging
 import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray, Dataset
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 TupleTimeType = Tuple[Union[int, float], str]
 
@@ -108,13 +111,13 @@ def infer_date_range(
             time_unit: Optional[str] = freq[1]
         else:
             if inferred_freq is not None:
-                print(f"Only one time point, inferring frequency of {inferred_freq}")
+                logger.info(f"Only one time point, inferring frequency of {inferred_freq}")
                 time_value, time_unit = inferred_freq
 
         # Check input period against inferred period
         if inferred_freq != freq and period is not None:
-            print(
-                f"Warning: Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})"
+            logger.warning(
+                f"Input period of {period} did not map to frequency inferred from filename: {inferred_freq} (date extracted: {date_match})"
             )
 
         # Create time offset and use to create start and end datetime
@@ -125,7 +128,9 @@ def infer_date_range(
         period_str = create_frequency_str(time_value, time_unit)
 
     else:
-        timestamps = pd.to_datetime([timestamp_tzaware(t) for t in time.values])
+        # Here we trim the timestamps to millisecond precision to reduce the likelihood of
+        # floating point errors result in ns differences in period
+        timestamps = pd.to_datetime(time.values.astype("datetime64[ms]"), utc=True)
         timestamps = timestamps.sort_values()
 
         inferred_period = pd.infer_freq(timestamps)
@@ -145,7 +150,7 @@ def infer_date_range(
         # value in preference to any user specified input.
         # Note: this is opposite to the other part of this branch.
         if freq is not None and inferred_freq is not None and freq != inferred_freq:
-            print(f"Warning: Input period: {period} does not map to inferred frequency {inferred_freq}")
+            logger.warning(f"Input period: {period} does not map to inferred frequency {inferred_freq}")
             freq = inferred_freq
 
         # Create time offset, using inferred offset

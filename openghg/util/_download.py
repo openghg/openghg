@@ -1,5 +1,9 @@
 from pathlib import Path
 from typing import Optional, Union
+import logging
+
+logger = logging.getLogger("openghg.util")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_url_filename(url: str) -> str:
@@ -67,13 +71,13 @@ def download_data(
         requests.exceptions.RequestException,
         requests.exceptions.ConnectionError,
     ) as e:
-        print(f"Unable to retrieve data from {url}, error: {str(e)}")
+        logger.info(f"Unable to retrieve data from {url}, error: {str(e)}")
         return None
 
     filename = Path(urlparse(url).path).name
 
     if r.status_code != 200:
-        print(f"Unable to download {url}, please check URL.")
+        logger.info(f"Unable to download {url}, please check URL.")
         return None
 
     file_size = int(r.headers.get("Content-Length", 0))

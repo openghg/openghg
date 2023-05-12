@@ -3,6 +3,27 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from openghg.types import pathType
+
+__all__ = [
+    "load_parser",
+    "load_surface_parser",
+    "load_column_parser",
+    "load_column_source_parser",
+    "load_emissions_parser",
+    "load_emissions_database_parser",
+    "get_datapath",
+    "get_logfile_path",
+    "load_json",
+    "read_header",
+    "compress",
+    "decompress",
+    "compress_str",
+    "decompress_str",
+    "compress_json",
+    "decompress_json",
+]
+
 
 def load_parser(data_name: str, module_name: str) -> Callable:
     """Load parse function from within module.
@@ -103,11 +124,11 @@ def load_emissions_database_parser(database: str) -> Callable:
     return fn
 
 
-def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
-    """Returns the correct path to JSON files used for assigning attributes
+def get_datapath(filename: pathType, directory: Optional[str] = None) -> Path:
+    """Returns the correct path to data files used for assigning attributes
 
     Args:
-        filename (str): Name of JSON file
+        filename: Name of file to be accessed
     Returns:
         pathlib.Path: Path of file
     """
@@ -121,31 +142,35 @@ def get_datapath(filename: str, directory: Optional[str] = None) -> Path:
         return Path(__file__).resolve().parent.parent.joinpath(f"data/{directory}/{filename}")
 
 
-def load_json(filename: str, path: Optional[Union[str, Path]] = None) -> Dict:
-    """Returns a dictionary deserialised from JSON. This function only
-    works for JSON files in the openghg/data directory.
+def load_json(path: Union[str, Path]) -> Dict:
+    """Returns a dictionary deserialised from JSON.
 
     Args:
-        filename (str): Name of JSON file
-        path (str/Path): Path to filename. If not specified will extract default
-            path to openghg/data directory
+        path: Path to file, can be any filepath
     Returns:
         dict: Dictionary created from JSON
     """
-    from json import load
-
-    if path is None:
-        file_path = get_datapath(filename)
-    else:
-        file_path = Path(path) / filename
-
-    with open(file_path, "r") as f:
-        data: Dict[str, Any] = load(f)
+    with open(path, "r") as f:
+        data: Dict[str, Any] = json.load(f)
 
     return data
 
 
-def read_header(filepath: Union[str, Path], comment_char: str = "#") -> List:
+def load_internal_json(filename: str) -> Dict:
+    """Returns a dictionary deserialised from JSON. Pass filename to load data from JSON files in the
+    openghg/data directory or pass a full filepath to path to load from any file.
+
+    Args:
+        filename: Name of JSON file. Must be located in openghg/data
+        path: Path to file, can be any filepath
+    Returns:
+        dict: Dictionary created from JSON
+    """
+    file_path = get_datapath(filename=filename)
+    return load_json(path=file_path)
+
+
+def read_header(filepath: pathType, comment_char: str = "#") -> List:
     """Reads the header lines denoted by the comment_char
 
     Args:

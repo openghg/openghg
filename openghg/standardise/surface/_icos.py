@@ -1,5 +1,11 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
+import logging
+
+from openghg.types import optionalPathType
+
+logger = logging.getLogger("openghg.standardise.surface")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def parse_icos(
@@ -11,6 +17,7 @@ def parse_icos(
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
     header_type: str = "large",
+    site_filepath: optionalPathType = None,
     **kwargs: Dict,
 ) -> Dict:
     """Parses an ICOS data file and creates a dictionary containing the Dataset and metadata
@@ -25,20 +32,24 @@ def parse_icos(
         measurement_type: Measurement type e.g. insitu, flask
         header_type: ICOS data file with large (40 line) header or shorter single line header
             Options: large, small
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
         dict: Dictionary of gas data
     """
     from pathlib import Path
 
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import clean_string
+    from openghg.util import clean_string, format_inlet
 
     site = clean_string(site)
-    inlet = clean_string(inlet)
     instrument = clean_string(instrument)
     network = clean_string(network)
     sampling_period = clean_string(sampling_period)
     measurement_type = clean_string(measurement_type)
+
+    inlet = clean_string(inlet)
+    inlet = format_inlet(inlet)
 
     if not isinstance(data_filepath, Path):
         data_filepath = Path(data_filepath)
@@ -65,7 +76,9 @@ def parse_icos(
         )
 
     # Ensure the data is CF compliant
-    gas_data = assign_attributes(data=gas_data, site=site, sampling_period=sampling_period)
+    gas_data = assign_attributes(
+        data=gas_data, site=site, sampling_period=sampling_period, site_filepath=site_filepath
+    )
 
     return gas_data
 
@@ -93,7 +106,7 @@ def _read_data_large_header(
     Returns:
         dict: Dictionary of gas data
     """
-    from openghg.util import read_header
+    from openghg.util import read_header, format_inlet
     from pandas import read_csv, to_datetime
 
     # Read metadata from the filename and cross check to make sure the passed
@@ -114,6 +127,7 @@ def _read_data_large_header(
     if site_fname.lower() != site:
         raise ValueError("Site mismatch between site argument passed and filename.")
 
+    inlet_height_fname = format_inlet(inlet_height_fname)
     if inlet is not None and inlet_height_fname.lower() != inlet:
         raise ValueError("Mismatch between inlet height passed and in filename.")
 
@@ -125,10 +139,10 @@ def _read_data_large_header(
     len_header = len(header)
 
     if len_header != 40:
-        print(
-            f"WARNING: We expect a header length of 40 but got {len_header}, \
-                note that some metadata may not be collected, \
-                please raise an issue on GitHub if this file format is to be expected."
+        logger.warning(
+            f"We expect a header length of 40 but got {len_header}, \
+            note that some metadata may not be collected, \
+            please raise an issue on GitHub if this file format is to be expected."
         )
 
     dtypes = {
@@ -267,7 +281,7 @@ def _read_data_small_header(
     Returns:
         dict: Dictionary of gas data
     """
-    from openghg.util import read_header
+    from openghg.util import read_header, format_inlet
     from pandas import Timestamp, read_csv
 
     # Read some metadata from the filename
@@ -349,6 +363,7 @@ def _read_data_small_header(
     if site_fname.lower() != site:
         raise ValueError("Site mismatch between site argument passed and filename")
 
+    inlet_height = format_inlet(inlet_height)
     if inlet_height.lower() != inlet:
         raise ValueError("Mismatch between inlet height passed and in filename")
 

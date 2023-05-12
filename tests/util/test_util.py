@@ -10,6 +10,7 @@ from openghg.util import (
     site_code_finder,
     to_lowercase,
     verify_site,
+    read_local_config,
 )
 
 
@@ -66,18 +67,13 @@ def test_verify_site():
 
     site = "atlantis"
 
-    with pytest.raises(InvalidSiteError):
-        result = verify_site(site=site)
-
     site = "cape"
+    result = verify_site(site=site)
+    assert result is None
 
-    with pytest.raises(InvalidSiteError):
-        result = verify_site(site=site)
-
-    site = "india"
-
-    with pytest.raises(InvalidSiteError):
-        result = verify_site(site=site)
+    site = "mars"
+    result = verify_site(site=site)
+    assert result is None
 
 
 def test_to_lowercase():
@@ -95,9 +91,9 @@ def test_to_lowercase():
 
 
 def test_site_code_finder():
-    assert site_code_finder("heathfield") == "HFD"
-    assert site_code_finder("monte_cimone") == "CMN"
-    assert site_code_finder("cape verde") == "CVO"
-    assert site_code_finder("jungfraujoch") == "JFJ"
+    assert site_code_finder("heathfield") == "hfd"
+    assert site_code_finder("monte_cimone") == "cmn"
+    assert site_code_finder("shangdianzi") == "sdz"
+    assert site_code_finder("jungfraujoch") == "jfj"
 
     assert site_code_finder("nonsensical") is None

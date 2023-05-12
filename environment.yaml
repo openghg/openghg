@@ -15,7 +15,7 @@ dependencies:
   - numexpr
   - numpy
   - nc-time-axis
-  - pandas
+  - pandas < 2.0
   - plotly
   - pyvis
   - rapidfuzz
@@ -27,6 +27,7 @@ dependencies:
   - xarray
   - urllib3 >= 1.26.3
   - pip
-  - xesmf
+  - xesmf >= 0.7
   - pip:
     - icoscp
+    - openghg_defs @ git+https://github.com/openghg/supplementary_data

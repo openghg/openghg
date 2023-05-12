@@ -14,9 +14,21 @@ from ._errors import (
     FunctionError,
     ObjectStoreError,
     DatasourceLookupError,
+    DatasourceCombineError,
     EncodingError,
     MutexTimeoutError,
     RequestBucketError,
     SearchError,
+    AttrMismatchError,
+    construct_xesmf_import_error,
 )
-from ._types import multiPathType, pathType, resultsType
+from ._types import (
+    multiPathType,
+    pathType,
+    optionalPathType,
+    resultsType,
+    ArrayLike,
+    ArrayLikeMatch,
+    XrDataLike,
+    XrDataLikeMatch,
+)

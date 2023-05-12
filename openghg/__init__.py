@@ -44,9 +44,6 @@ __revisionid__ = v.get("full-revisionid")
 
 del v, get_versions
 
-
-from .util import create_default_config  # type: ignore
-
 cloud_env = _os.environ.get("OPENGHG_CLOUD", False)
 hub_env = _os.environ.get("OPENGHG_HUB", False)
 
@@ -59,7 +56,6 @@ if cloud_env or hub_env:
     logfile_path = "/tmp/openghg.log"
 else:
     logfile_path = str(_Path.home().joinpath("openghg.log"))
-    create_default_config()
 
 # Create file handler for log file - set to DEBUG (maximum detail)
 fileHandler = logging.FileHandler(logfile_path)  # May want to update this to user area
@@ -72,7 +68,7 @@ logger.addHandler(fileHandler)
 consoleHandler = logging.StreamHandler()
 consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
 consoleHandler.setFormatter(consoleFormatter)
-consoleHandler.setLevel(logging.WARNING)
+consoleHandler.setLevel(logging.INFO)
 logger.addHandler(consoleHandler)
 
-del logfile_path, hub_env, cloud_env, create_default_config
+del logfile_path, hub_env, cloud_env

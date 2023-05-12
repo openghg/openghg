@@ -8,10 +8,11 @@ from ._tutorial import (
     populate_bc_ch4,
     populate_footprint_co2,
     populate_footprint_inert,
+    download_edgar_data,
     retrieve_example_data,
+    retrieve_example_obspack,
     clear_example_cache,
     example_extract_path,
-    bilsdale_datapaths,
     use_tutorial_store,
     unpack_example_archive,
 )

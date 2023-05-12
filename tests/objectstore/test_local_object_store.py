@@ -1,23 +1,24 @@
-from pathlib import Path
+# from pathlib import Path
 
 import pytest
-from openghg.objectstore import get_local_objectstore_path, get_tutorial_store_path
+from openghg.objectstore import get_local_objectstore_path, get_tutorial_store_path, get_bucket
+import tempfile
 
 # @pytest.fixture(scope="session")
 # def setup_config():
-@pytest.fixture()
-def mock_read_config(mocker):
-    mock_config = {"object_store": {"local_store": "/tmp/example_store"}}
-    mocker.patch("toml.loads", return_value=mock_config)
+# @pytest.fixture()
+# def mock_read_config(mocker):
+#     mock_config = {"object_store": {"local_store": "/tmp/example_store"}}
+#     mocker.patch("toml.loads", return_value=mock_config)
 
 
-def test_get_local_object_store(mock_read_config):
-    path = get_local_objectstore_path()
-    assert path == Path("/tmp/example_store")
+# def test_get_local_object_store(mock_read_config):
+#     path = get_local_objectstore_path()
+#     assert path == Path("/tmp/example_store")
 
-def test_get_tutorial_store_path(mock_read_config):
-    path = get_tutorial_store_path()
-    assert path == Path("/tmp/example_store/tutorial_store")
+# def test_get_tutorial_store_path(mock_read_config):
+#     path = get_tutorial_store_path()
+#     assert path == Path("/tmp/example_store/tutorial_store")
 
 
 # def test_get_tutorial_store(mocker):
@@ -30,3 +31,9 @@ def test_get_tutorial_store_path(mock_read_config):
 #     data = query_store()
 
 # print(data)
+
+
+def test_get_bucket():
+    tmpdir = tempfile.gettempdir()
+    b = get_bucket()
+    assert tmpdir in b

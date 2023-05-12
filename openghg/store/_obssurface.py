@@ -3,10 +3,11 @@ from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
+from pandas import Timedelta
+from xarray import Dataset
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, resultsType
-from xarray import Dataset
+from openghg.types import multiPathType, pathType, resultsType, optionalPathType
 
 __all__ = ["ObsSurface"]
 
@@ -31,7 +32,11 @@ class ObsSurface(BaseStore):
 
     @staticmethod
     def read_data(
-        binary_data: bytes, metadata: Dict, file_metadata: Dict, precision_data: Optional[bytes] = None
+        binary_data: bytes,
+        metadata: Dict,
+        file_metadata: Dict,
+        precision_data: Optional[bytes] = None,
+        site_filepath: optionalPathType = None,
     ) -> Dict:
         """Reads binary data passed in by serverless function.
         The data dictionary should contain sub-dictionaries that contain
@@ -45,6 +50,8 @@ class ObsSurface(BaseStore):
             metadata: Metadata
             file_metadata: File metadata such as original filename
             precision_data: GCWERKS precision data
+            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+                Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         Returns:
             dict: Dictionary of result
         """
@@ -91,7 +98,9 @@ class ObsSurface(BaseStore):
                 precision_filepath = tmpdir_path.joinpath("precision_data.C")
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
-                result = ObsSurface.read_file(filepath=(filepath, precision_filepath), **meta_kwargs)
+                result = ObsSurface.read_file(
+                    filepath=(filepath, precision_filepath), site_filepath=site_filepath, **meta_kwargs
+                )
 
         return result
 
@@ -104,11 +113,12 @@ class ObsSurface(BaseStore):
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         instrument: Optional[str] = None,
-        sampling_period: Optional[str] = None,
+        sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
         overwrite: bool = False,
         verify_site_code: bool = True,
+        site_filepath: optionalPathType = None,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -129,6 +139,8 @@ class ObsSurface(BaseStore):
             measurement_type: Type of measurement e.g. insitu, flask
             overwrite: Overwrite previously uploaded data
             verify_site_code: Verify the site code
+            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+                Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -141,7 +153,6 @@ class ObsSurface(BaseStore):
         from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import SurfaceTypes
         from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
-        from pandas import Timedelta
         from tqdm import tqdm
 
         if not isinstance(filepath, list):
@@ -155,14 +166,21 @@ class ObsSurface(BaseStore):
         # Test that the passed values are valid
         # Check validity of site, instrument, inlet etc in 'site_info.json'
         # Clean the strings
-        site = verify_site(site=site) if verify_site_code else clean_string(site)
+        if verify_site_code:
+            verified_site = verify_site(site=site)
+            if verified_site is None:
+                raise ValueError("Unable to validate site")
+            else:
+                site = verified_site
+        else:
+            site = clean_string(site)
+
         network = clean_string(network)
         instrument = clean_string(instrument)
-        # sampling_period = clean_string(sampling_period)
 
         # Check if alias `height` is included instead of `inlet`
         if inlet is None and height is not None:
-            inlet = height        
+            inlet = height
 
         # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
         inlet = clean_string(inlet)
@@ -171,12 +189,35 @@ class ObsSurface(BaseStore):
         sampling_period_seconds: Union[str, None] = None
         # If we have a sampling period passed we want the number of seconds
         if sampling_period is not None:
-            sampling_period_seconds = str(float(Timedelta(sampling_period).total_seconds()))
+            # Check value passed is not just a number with no units
+            try:
+                float(sampling_period)
+            except (ValueError, TypeError):
+                # If this cannot be evaluated to a float assume this is correct form.
+                pass
+            else:
+                raise ValueError(
+                    f"Invalid sampling period: '{sampling_period}'. Must be specified as a string with unit (e.g. 1m for 1 minute)."
+                )
 
+            # Check string passed can be evaluated as a Timedelta object
+            # and extract this in seconds.
+            try:
+                sampling_period_td = Timedelta(sampling_period)
+            except ValueError:
+                raise ValueError(
+                    f"Could not evaluate sampling period: '{sampling_period}'. Must be specified as a string with valid unit (e.g. 1m for 1 minute)."
+                )
+
+            sampling_period_seconds = str(float(sampling_period_td.total_seconds()))
+
+            # Check if sampling period has resolved to 0 seconds.
             if sampling_period_seconds == "0.0":
                 raise ValueError(
-                    "Invalid sampling period result, please pass a valid pandas time such as 1m for 1 minute."
+                    f"Sampling period resolves to <= 0.0 seconds. Please check input: '{sampling_period}'"
                 )
+
+            # TODO: May want to add check for NaT or NaN
 
         # Load the data retrieve object
         parser_fn = load_surface_parser(source_format=source_format)
@@ -225,6 +266,7 @@ class ObsSurface(BaseStore):
                         instrument=instrument,
                         sampling_period=sampling_period_seconds,
                         measurement_type=measurement_type,
+                        site_filepath=site_filepath,
                     )
                 else:
                     data = parser_fn(
@@ -236,6 +278,7 @@ class ObsSurface(BaseStore):
                         sampling_period=sampling_period_seconds,
                         measurement_type=measurement_type,
                         calibration_scale=calibration_scale,
+                        site_filepath=site_filepath,
                     )
 
                 # Current workflow: if any species fails, whole filepath fails
@@ -314,7 +357,7 @@ class ObsSurface(BaseStore):
                 progress_bar.update(1)
 
                 logger.info(f"Completed processing: {data_filepath.name}.")
-                logger.info(f"\tUUIDs: {datasource_uuids}")
+                # logger.info(f"\tUUIDs: {datasource_uuids}")
 
         # Ensure we explicitly close the metadata store
         # as we're using the cached storage method

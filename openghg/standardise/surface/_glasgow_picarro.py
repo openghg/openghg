@@ -23,6 +23,8 @@ def parse_glasow_picarro(
     Returns:
         dict: Dictionary of processed data
     """
+    from openghg.util import format_inlet
+
     warn(message="Temporary function used to read Glasgow Science Tower Picarro data")
 
     df = pd.read_csv(data_filepath, index_col=[0], parse_dates=True)
@@ -44,13 +46,15 @@ def parse_glasow_picarro(
     for s in species:
         gas_data[s]["data"] = df[[s]].to_xarray()
 
+        inlet = format_inlet("124m")
+
         gas_data[s]["metadata"] = {
             "species": s,
             "long_name": long_site_name,
             "latitude": 55.859238,
             "longitude": -4.296180,
             "network": "npl_picarro",
-            "inlet": "124m",
+            "inlet": inlet,
             "sampling_period": sampling_period,
             "site": site,
             "instrument": "picarro",

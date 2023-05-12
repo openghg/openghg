@@ -74,6 +74,7 @@ def test_read_file_thd():
         site="thd",
         network="agage",
         instrument="gcmd",
+        sampling_period="75",  # Checking this can be compared successfully
     )
 
     parsed_surface_metachecker(data=gas_data)

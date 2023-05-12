@@ -8,21 +8,13 @@ import tarfile
 import warnings
 from pathlib import Path
 from typing import List, Union
-
+import logging
 from openghg.standardise import standardise_footprint, standardise_flux, standardise_bc
 
-__all__ = ["bilsdale_datapaths"]
+logger = logging.getLogger("openghg.tutorial")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-# def _suppress_output(func):
-#     def wrapper(*a, **ka):
-#         with warnings.catch_warnings():
-#             warnings.simplefilter("ignore")
-#             with open(os.devnull, "w") as devnull:
-#                 with contextlib.redirect_stdout(devnull):
-#                     return func(*a, **ka)
-
-#     return wrapper
 def populate_footprint_data() -> None:
     """Adds all footprint data to the tutorial object store
 
@@ -47,7 +39,7 @@ def populate_footprint_inert() -> None:
 
     tac_inert_path = retrieve_example_data(url=tac_fp_inert)[0]
 
-    print("Standardising footprint data...")
+    logger.info("Standardising footprint data...")
     # TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -73,10 +65,10 @@ def populate_footprint_co2() -> None:
     """
     tac_fp_co2 = "https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_co2_201707.tar.gz"
 
-    print("Retrieving example data...")
+    logger.info("Retrieving example data...")
     tac_co2_path = retrieve_example_data(url=tac_fp_co2)[0]
 
-    print("Standardising footprint data...")
+    logger.info("Standardising footprint data...")
     # TODO - GJ - 2022-10-05 - This feels messy, how can we do this in a neater way?
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -100,7 +92,7 @@ def populate_footprint_co2() -> None:
                     species=species,
                 )
 
-    print("Done.")
+    logger.info("Done.")
 
 
 def populate_flux_data() -> None:
@@ -153,7 +145,7 @@ def populate_flux_ch4() -> None:
     """
     use_tutorial_store()
 
-    print("Retrieving data...")
+    logger.info("Retrieving data...")
     eur_2016_flux = "https://github.com/openghg/example_data/raw/main/flux/ch4-ukghg-all_EUROPE_2016.tar.gz"
     flux_data = retrieve_example_data(url=eur_2016_flux)
 
@@ -163,7 +155,7 @@ def populate_flux_ch4() -> None:
     flux_data_waste = [filename for filename in flux_data if source_waste in str(filename)][0]
     flux_data_energyprod = [filename for filename in flux_data if source_energyprod in str(filename)][0]
 
-    print("Standardising flux...")
+    logger.info("Standardising flux...")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
@@ -181,7 +173,7 @@ def populate_flux_ch4() -> None:
                     domain=domain,
                 )
 
-    print("Done.")
+    logger.info("Done.")
 
 
 def populate_bc() -> None:
@@ -198,7 +190,7 @@ def populate_bc_ch4() -> None:
     """
     use_tutorial_store()
 
-    print("Retrieving data...")
+    logger.info("Retrieving data...")
     eur_2016_bc = (
         "https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz"
     )
@@ -208,15 +200,14 @@ def populate_bc_ch4() -> None:
     domain = "EUROPE"
     species = "ch4"
 
-    print("Standardising boundary conditions...")
+    logger.info("Standardising boundary conditions...")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
-                print("bc_data_path", bc_data_path)
                 standardise_bc(filepath=bc_data_path, bc_input=bc_input, species=species, domain=domain)
 
-    print("Done.")
+    logger.info("Done.")
 
 
 def populate_surface_data() -> None:
@@ -234,7 +225,7 @@ def populate_surface_data() -> None:
     tac_data = "https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz"
     capegrim_data = "https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz"
 
-    print("Retrieving example data...")
+    logger.info("Retrieving example data...")
     bsd_paths = retrieve_example_data(url=bsd_data)
     tac_paths = retrieve_example_data(url=tac_data)
     capegrim_paths = sorted(retrieve_example_data(url=capegrim_data))
@@ -242,7 +233,7 @@ def populate_surface_data() -> None:
     # Create the tuple required
     capegrim_tuple = (capegrim_paths[0], capegrim_paths[1])
 
-    print("Standardising data...")
+    logger.info("Standardising data...")
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -258,19 +249,28 @@ def populate_surface_data() -> None:
                     network="agage",
                 )
 
-    print("Done.")
+    logger.info("Done.")
 
 
-def bilsdale_datapaths() -> List:
-    """Return a list of paths to the Tacolneston data for use in the ranking
-    tutorial
-
-    Returns:
-        list: List of paths
+def download_edgar_data() -> Path:
     """
-    crds_path = Path(__file__).resolve().parent.parent.parent.joinpath("tests/data/proc_test_data/CRDS")
+    Download edgar data to tutorial store to be used within parse_edgar transform
+    tutorial.
 
-    return list(crds_path.glob("bsd.picarro.1minute.*.min.*"))
+    This is currently a limited subset of v6.0 CH4 data (2014-2015)
+
+    TODO: Upgrade to use v7.0 data when this has been checked and added into workflow.
+    """
+
+    use_tutorial_store()
+
+    edgar_v60_database = "https://github.com/openghg/example_data/raw/main/databases/TOTALS_nc.tar.gz"
+
+    logger.info("Retrieving example database...")
+    edgar_database_path = retrieve_example_data(url=edgar_v60_database)[0]
+    logger.info("Done.")
+
+    return edgar_database_path
 
 
 def use_tutorial_store() -> None:
@@ -310,6 +310,20 @@ def clear_example_cache() -> None:
     if example_cache_path.exists():
         shutil.rmtree(example_cache_path, ignore_errors=True)
         shutil.rmtree(extracted_examples, ignore_errors=True)
+
+
+def retrieve_example_obspack(extract_dir: Union[str, Path, None] = None) -> Path:
+    """Retrieves our example ObsPack dataset, extracts it and returns the path to the folder.
+
+    Args:
+        url: URL to retrieve.
+        extract_dir: Folder to extract example tarballs to
+    Returns:
+        Path: Path to directory
+    """
+    url = "https://github.com/openghg/example_data/raw/main/obspack/obspack_ch4_example.tar.gz"
+    files = retrieve_example_data(url=url, extract_dir=extract_dir)
+    return files[0].parent
 
 
 def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) -> List[Path]:
@@ -407,4 +421,4 @@ def clear_tutorial_store() -> None:
 
     shutil.rmtree(path=path, ignore_errors=True)
 
-    print(f"Tutorial store at {path} cleared.")
+    logger.info(f"Tutorial store at {path} cleared.")

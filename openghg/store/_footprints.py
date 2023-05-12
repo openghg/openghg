@@ -2,7 +2,6 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
-
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -212,7 +211,7 @@ class Footprints(BaseStore):
             domain: Domain of footprints
             model: Model used to create footprint (e.g. NAME or FLEXPART)
             inlet: Height above ground level in metres. Format 'NUMUNIT' e.g. "10m"
-            height: Alias for inlet. One of height or inlet must be included.
+            height: Alias for inlet. One of height or inlet MUST be included.
             metmodel: Underlying meteorlogical model used (e.g. UKV)
             species: Species name. Only needed if footprint is for a specific species e.g. co2 (and not inert)
             network: Network name
@@ -235,7 +234,7 @@ class Footprints(BaseStore):
             datasource_lookup,
             infer_date_range,
             update_zero_dim,
-            load_metastore
+            load_metastore,
         )
         from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
 
@@ -275,7 +274,7 @@ class Footprints(BaseStore):
         if species == "co2":
             # Expect co2 data to have high time resolution
             if not high_time_res:
-                print("Updating high_time_res to True for co2 data")
+                logger.info("Updating high_time_res to True for co2 data")
                 high_time_res = True
 
         if short_lifetime and not species:
@@ -286,7 +285,7 @@ class Footprints(BaseStore):
             lifetime = species_lifetime(species)
             if lifetime is not None:
                 # TODO: May want to add a check on length of lifetime here
-                print("Updating short_lifetime to True since species has an associated lifetime")
+                logger.info("Updating short_lifetime to True since species has an associated lifetime")
                 short_lifetime = True
 
         # Checking against expected format for footprints
