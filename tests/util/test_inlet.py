@@ -1,5 +1,5 @@
 import pytest
-from openghg.util import format_inlet
+from openghg.util import format_inlet, extract_height_name
 
 
 @pytest.mark.parametrize(
@@ -60,3 +60,21 @@ def test_format_inlet_special():
 
     output = format_inlet(special_keyword, special_keywords=[special_keyword])
     assert output == special_keyword
+
+
+@pytest.mark.parametrize(
+    "site,network,inlet,expected",
+    [
+        ("POCN25", None, None, None),  # height_name not present
+        ("BAO", None, None, "300magl"), # 1 network, 1 height_name value
+        ("MHD", "AGAGE", None, "10magl"), # 1 height_name value
+        ("cgo", "AGAGE", "10m", "10magl"), # Multiple height_name values
+    ],
+)
+def test_extract_height_name(site, network, inlet, expected):
+    """
+    """
+    height_name = extract_height_name(site, network, inlet)
+
+    assert height_name == expected
+

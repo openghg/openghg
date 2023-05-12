@@ -285,7 +285,6 @@ def get_obs_surface_local(
         retrieved_data.metadata["inlet"] = "multiple"
 
     if start_date is not None and end_date is not None:
-
         # Check if underlying data is timezone aware.
         data_time_index = data.indexes["time"]
         tzinfo = data_time_index.tzinfo
@@ -769,9 +768,13 @@ def _metadata_difference(
         if print_output:
             logger.info(f" {param}: ")
         for m in metadata:
-            summary_difference[param].append(m[param])
+            if param in m:
+                value: Optional[str] = m[param]
+            else:
+                value = "NOT PRESENT"
+            summary_difference[param].append(value)
             if print_output:
-                logger.info(f" '{m[param]}', ")
+                logger.info(f" '{value}', ")
         if print_output:
             logger.info("\n")  # print new line
 

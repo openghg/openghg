@@ -101,6 +101,7 @@ class ModelScenario:
         domain: Optional[str] = None,
         model: Optional[str] = None,
         metmodel: Optional[str] = None,
+        fp_inlet: Optional[str] = None,
         source: Optional[str] = None,
         sources: Optional[Union[str, Sequence]] = None,
         bc_input: Optional[str] = None,
@@ -132,6 +133,7 @@ class ModelScenario:
             domain : Domain name e.g. "EUROPE"
             model : Model name used in creation of footprint e.g. "NAME"
             metmodel : Name of met model used in creation of footprint e.g. "UKV"
+            fp_inlet : Specify footprint release height if this doesn't not match to site value.
             sources : Emissions sources
             bc_input : Input keyword for boundary conditions e.g. "mozart" or "cams"
             start_date : Start of date range to use. Note for flux this may not be applied
@@ -185,6 +187,7 @@ class ModelScenario:
             domain=domain,
             model=model,
             metmodel=metmodel,
+            fp_inlet=fp_inlet,
             start_date=start_date,
             end_date=end_date,
             species=species,
@@ -313,6 +316,7 @@ class ModelScenario:
         if self.obs is not None:
             self.site = self.obs.metadata["site"]
             self.species = self.obs.metadata["species"]
+            self.inlet = self.obs.metadata["inlet"]
 
     def add_footprint(
         self,
@@ -325,37 +329,49 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         species: Optional[str] = None,
+        fp_inlet: Optional[str] = None,
+        network: Optional[str] = None,
         footprint: Optional[FootprintData] = None,
     ) -> None:
         """
         Add footprint data based on keywords or direct FootprintData object.
         """
-        from openghg.util import clean_string, format_inlet, species_lifetime
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            species_lifetime,
+            extract_height_name,
+        )
 
         # Search for footprint data based on keywords
-        # - site, domain, inlet (can extract from obs), model, metmodel
+        # - site, domain, inlet (can extract from obs / height_name), model, metmodel
         if site is not None and footprint is None:
             site = clean_string(site)
-            if inlet is None and self.obs is not None:
-                inlet = self.obs.metadata["inlet"]
-            elif inlet is None and height is not None:
-                inlet = height
-                inlet = clean_string(inlet)
-                inlet = format_inlet(inlet)
-            else:
-                inlet = clean_string(inlet)
-                inlet = format_inlet(inlet)
+
+            if fp_inlet is None:
+                height_name = extract_height_name(site, network, inlet)
+                if height_name is not None:
+                    fp_inlet = height_name
+                    logger.info(f"Using height_name value for footprint inlet: {fp_inlet}")
+                elif inlet is None and self.obs is not None:
+                    fp_inlet = self.obs.metadata["inlet"]
+                elif inlet is None and height is not None:
+                    fp_inlet = clean_string(height)
+                else:
+                    fp_inlet = clean_string(inlet)
+
+            fp_inlet = format_inlet(fp_inlet)
 
             # TODO: Add case to deal with "multiple" inlets
-            if inlet == "multiple":
+            if fp_inlet == "multiple":
                 raise ValueError(
                     "Unable to deal with multiple inlets yet:\n Please change date range or specify a specific inlet"
                 )
 
             footprint_keywords = {
                 "site": site,
-                "height": inlet,
-                "inlet": inlet,
+                "height": fp_inlet,
+                "inlet": fp_inlet,
                 "domain": domain,
                 "model": model,  # Not currently used in get_footprint - should be added
                 # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
@@ -375,8 +391,10 @@ class ModelScenario:
 
         self.footprint = footprint
 
-        if self.footprint is not None and not hasattr(self, "site"):
-            self.site = self.footprint.metadata["site"]
+        if self.footprint is not None:
+            self.fp_inlet = fp_inlet
+            if not hasattr(self, "site"):
+                self.site = self.footprint.metadata["site"]
 
     def add_flux(
         self,

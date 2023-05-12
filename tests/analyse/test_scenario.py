@@ -265,6 +265,9 @@ def test_scenario_infer_inlet():
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None
 
+    assert model_scenario.inlet == "100m"
+    assert model_scenario.fp_inlet == "100m"
+
 
 def test_scenario_mult_fluxes():
     """
@@ -304,6 +307,33 @@ def test_scenario_too_few_inputs():
     model_scenario = ModelScenario(site=site)
 
     assert model_scenario.obs is None
+    assert model_scenario.footprint is None
+
+
+def test_scenario_uses_fp_inlet():
+    """
+    Test ModelScenario is using fp_inlet in place of inlet if this is passed.
+    In this case we expect the observation data to be found but the footprint
+    data to be missing.
+    """
+    start_date = "2012-01-01"
+    end_date = "2013-01-01"
+
+    site = "tac"
+    domain = "EUROPE"
+    species = "ch4"
+    inlet = "100m"  # Correct inlet
+    fp_inlet = "999m"  # Incorrect inlet
+
+    model_scenario = ModelScenario(
+        site=site, species=species, inlet=inlet, domain=domain, fp_inlet=fp_inlet, start_date=start_date, end_date=end_date
+    )
+
+    # Expect observation data to be found
+    assert model_scenario.obs is not None
+
+    # Expect footprint data to be missing in this case
+    assert not hasattr(model_scenario, fp_inlet)
     assert model_scenario.footprint is None
 
 
