@@ -599,9 +599,9 @@ def footprint_dummy():
     data = xr.Dataset(data_vars, coords=coords)
 
     # Potential metadata:
-    # - site, height, domain, model, network, start_date, end_date, heights, ...
+    # - site, inlet, domain, model, network, start_date, end_date, heights, ...
     # - data_type="footprints"
-    metadata = {"site": "TESTSITE", "height": "10m", "domain": "TESTDOMAIN", "data_type": "footprints"}
+    metadata = {"site": "TESTSITE", "inlet": "10m", "domain": "TESTDOMAIN", "data_type": "footprints"}
 
     footprintdata = FootprintData(data=data, metadata=metadata)
 
@@ -908,13 +908,13 @@ def footprint_co2_dummy():
     )
 
     # Potential metadata:
-    # - site, height, domain, model, network, start_date, end_date, heights, ...
+    # - site, inlet, domain, model, network, start_date, end_date, heights, ...
     # - species (if applicable)
     # - data_type="footprints"
     species = "co2"
     metadata = {
         "site": "TESTSITE",
-        "height": "10m",
+        "inlet": "10m",
         "domain": "TESTDOMAIN",
         "data_type": "footprints",
         "species": species,

@@ -353,7 +353,9 @@ class ModelScenario:
                 if height_name is not None:
                     fp_inlet = height_name
                     logger.info(f"Using height_name option(s) for footprint inlet: {fp_inlet}")
-                elif inlet is None and self.obs is not None:
+
+            if fp_inlet is None:
+                if inlet is None and self.obs is not None:
                     fp_inlet = self.obs.metadata["inlet"]
                 elif inlet is None and height is not None:
                     fp_inlet = clean_string(height)
@@ -367,10 +369,10 @@ class ModelScenario:
                     "Unable to deal with multiple inlets yet:\n Please change date range or specify a specific inlet"
                 )
 
-            if isinstance(fp_inlet, str):
-                fp_inlet_options = [fp_inlet]
-            elif isinstance(fp_inlet, list):
+            if isinstance(fp_inlet, list):
                 fp_inlet_options = fp_inlet
+            else:
+                fp_inlet_options = [fp_inlet]
 
             fp_inlet_options = [format_inlet(value) for value in fp_inlet_options]
 
