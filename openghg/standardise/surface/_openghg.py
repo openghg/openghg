@@ -93,7 +93,7 @@ def parse_openghg(
             # If attributes are present, check these match to inputs passed
             if key in attributes:
                 attributes_value = attributes[key]
-                if value != attributes_value:
+                if str(value).lower() != str(attributes_value).lower():
                     # If inputs do not match attribute values, raise a ValueError
                     raise ValueError(
                         f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
