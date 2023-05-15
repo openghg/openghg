@@ -371,7 +371,7 @@ class ModelScenario:
                 fp_inlet_options = [fp_inlet]
             elif isinstance(fp_inlet, list):
                 fp_inlet_options = fp_inlet
-            
+
             fp_inlet_options = [format_inlet(value) for value in fp_inlet_options]
 
             footprint_keyword_options = []
