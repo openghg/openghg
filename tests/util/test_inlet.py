@@ -69,12 +69,13 @@ def test_format_inlet_special():
         ("BAO", None, None, "300magl"), # 1 network, 1 height_name value
         ("MHD", "AGAGE", None, "10magl"), # 1 height_name value
         ("cgo", "AGAGE", "10m", "10magl"), # Multiple height_name values
+        ("WAO", "ICOS", "10m", ["10magl", "20magl"]) # height_name is dictionary
     ],
 )
 def test_extract_height_name(site, network, inlet, expected):
     """
+    Test 'height_name' variable can be extracted from site_info file.
     """
     height_name = extract_height_name(site, network, inlet)
 
     assert height_name == expected
-

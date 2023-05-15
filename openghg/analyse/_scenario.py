@@ -101,7 +101,7 @@ class ModelScenario:
         domain: Optional[str] = None,
         model: Optional[str] = None,
         metmodel: Optional[str] = None,
-        fp_inlet: Optional[str] = None,
+        fp_inlet: Optional[Union[str, list]] = None,
         source: Optional[str] = None,
         sources: Optional[Union[str, Sequence]] = None,
         bc_input: Optional[str] = None,
@@ -133,7 +133,7 @@ class ModelScenario:
             domain : Domain name e.g. "EUROPE"
             model : Model name used in creation of footprint e.g. "NAME"
             metmodel : Name of met model used in creation of footprint e.g. "UKV"
-            fp_inlet : Specify footprint release height if this doesn't not match to site value.
+            fp_inlet : Specify footprint release height optionsif this doesn't not match to site value.
             sources : Emissions sources
             bc_input : Input keyword for boundary conditions e.g. "mozart" or "cams"
             start_date : Start of date range to use. Note for flux this may not be applied
@@ -329,7 +329,7 @@ class ModelScenario:
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
         species: Optional[str] = None,
-        fp_inlet: Optional[str] = None,
+        fp_inlet: Optional[Union[str, list]] = None,
         network: Optional[str] = None,
         footprint: Optional[FootprintData] = None,
     ) -> None:
@@ -352,7 +352,7 @@ class ModelScenario:
                 height_name = extract_height_name(site, network, inlet)
                 if height_name is not None:
                     fp_inlet = height_name
-                    logger.info(f"Using height_name value for footprint inlet: {fp_inlet}")
+                    logger.info(f"Using height_name option(s) for footprint inlet: {fp_inlet}")
                 elif inlet is None and self.obs is not None:
                     fp_inlet = self.obs.metadata["inlet"]
                 elif inlet is None and height is not None:
@@ -360,38 +360,50 @@ class ModelScenario:
                 else:
                     fp_inlet = clean_string(inlet)
 
-            fp_inlet = format_inlet(fp_inlet)
-
             # TODO: Add case to deal with "multiple" inlets
+            # In this case would need to find different footprints for different inlet values
             if fp_inlet == "multiple":
                 raise ValueError(
                     "Unable to deal with multiple inlets yet:\n Please change date range or specify a specific inlet"
                 )
 
-            footprint_keywords = {
-                "site": site,
-                "height": fp_inlet,
-                "inlet": fp_inlet,
-                "domain": domain,
-                "model": model,  # Not currently used in get_footprint - should be added
-                # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
-                "start_date": start_date,
-                "end_date": end_date,
-            }
+            if isinstance(fp_inlet, str):
+                fp_inlet_options = [fp_inlet]
+            elif isinstance(fp_inlet, list):
+                fp_inlet_options = fp_inlet
+            
+            fp_inlet_options = [format_inlet(value) for value in fp_inlet_options]
 
-            # Check whether general inert footprint should be extracted (suitable for long-lived species)
-            # or species specific footprint
-            #  - needed for short-lived species (includes additional parameters for age of particles)
-            #  - needed for carbon dioxide (include high time resolution footprint)
-            species_lifetime_value = species_lifetime(species)
-            if species_lifetime_value is not None or species == "co2":
-                footprint_keywords["species"] = species
+            footprint_keyword_options = []
+            for fp_inlet_option in fp_inlet_options:
 
-            footprint = self._get_data(footprint_keywords, data_type="footprint")
+                footprint_keywords = {
+                    "site": site,
+                    "height": fp_inlet_option,
+                    "inlet": fp_inlet_option,
+                    "domain": domain,
+                    "model": model,
+                    # "metmodel": metmodel,  # Should be added to inputs for get_footprint()
+                    "start_date": start_date,
+                    "end_date": end_date,
+                }
+
+                # Check whether general inert footprint should be extracted (suitable for long-lived species)
+                # or species specific footprint
+                #  - needed for short-lived species (includes additional parameters for age of particles)
+                #  - needed for carbon dioxide (include high time resolution footprint)
+                species_lifetime_value = species_lifetime(species)
+                if species_lifetime_value is not None or species == "co2":
+                    footprint_keywords["species"] = species
+
+                footprint_keyword_options.append(footprint_keywords)
+
+            footprint = self._get_data(footprint_keyword_options, data_type="footprint")
 
         self.footprint = footprint
 
         if self.footprint is not None:
+            fp_inlet = self.footprint.metadata["inlet"]
             self.fp_inlet = fp_inlet
             if not hasattr(self, "site"):
                 self.site = self.footprint.metadata["site"]

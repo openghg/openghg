@@ -416,24 +416,24 @@
   },
   "WAO": {
     "ICOS": {
-      "height": ["21m"],
-      "height_name": ["20magl"],
+      "height": ["10m"],
+      "height_name": {"10m": ["10magl", "20magl"]},
       "height_station_masl": 10.0,
       "latitude": 52.95042,
       "long_name": "Weybourne Observatory, UK",
       "longitude": 1.12194
     },
     "UCAM": {
-      "height": ["21m"],
-      "height_name": ["20magl"],
+      "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 10.0,
       "latitude": 52.95042,
       "long_name": "Weybourne Observatory, UK",
       "longitude": 1.12194
     },
     "UEA": {
-      "height": ["21m"],
-      "height_name": ["20magl"],
+      "height": ["10m"],
+      "height_name": ["10magl"],
       "height_station_masl": 10.0,
       "latitude": 52.95042,
       "long_name": "Weybourne Observatory, UK",

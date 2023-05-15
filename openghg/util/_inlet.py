@@ -1,7 +1,11 @@
-from typing import Optional, cast, overload
+from typing import Optional, Union, cast, overload
+import logging
 from openghg.types import optionalPathType
 
 __all__ = ["format_inlet", "extract_height_name"]
+
+logger = logging.getLogger("openghg.util")
+logger.setLevel(logging.INFO)  # Have to set level for logger as well as handler
 
 
 @overload
@@ -142,9 +146,15 @@ def extract_height_name(
     network: Optional[str] = None,
     inlet: Optional[str] = None,
     site_filepath: optionalPathType = None,
-) -> Optional[str]:
+) -> Optional[Union[str, list]]:
     """
-    Extract the "height_name" variable, if present from site_info data.
+    Extract the relevant height associated with NAME from the
+    "height_name" variable, if present from site_info data.
+
+    This expects the "height_name" variable to be one of:
+      - list containing the same number of items as inlets for the site
+      - dictionary containing the mapping between inlets and heights
+        used in NAME.
 
     Args:
         site : Site code
@@ -153,6 +163,7 @@ def extract_height_name(
         site_filepath: Alternative site info file. Defaults to openghg_defs input.
     Returns:
         str : appropriate height name value extracted from site_info
+        list: multiple height name options extracted from site_info
         None: if value not found or ambiguous.
     """
     from openghg.util import get_site_info
@@ -191,19 +202,25 @@ def extract_height_name(
                             index = height_values.index(inlet)
                             height_name = height_name_extracted[index]
                         else:
-                            # TODO: Create appropriate logger and add to this
-                            print(
+                            logger.warning(
                                 f"Ambiguous '{height_name_attr}' in site_info. "
                                 f"Unable to extract from: height_name = {height_name_extracted} using height = {inlet}"
                             )
                             height_name = None
                     else:
-                        # TODO: Create appropriate logger and add to this
-                        print(
+                        logger.warning(
                             f"Ambiguous '{height_name_attr}' in site_info. "
                             f"Unable to extract from: height_name = {height_name_extracted}"
                         )
                         height_name = None
+            elif isinstance(height_name_extracted, dict):
+                if (inlet is not None) and (inlet in height_name_extracted):
+                    height_name = height_name_extracted[inlet]
+                else:
+                    logger.warning(
+                        f"Unable to interpret {height_name_extracted}. Please supply or check supplied inlet value: {inlet}"
+                    )
+                    height_name = None
         else:
             height_name = None
     else:
