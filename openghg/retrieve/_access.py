@@ -607,6 +607,7 @@ def get_footprint(
         domain : Domain name for the footprints
         inlet: Height above ground level in metres
         height: Alias for inlet
+        model: Model used to create footprint (e.g. NAME or FLEXPART)
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
         species: Species identifier e.g. "co2" for carbon dioxide. Only needed

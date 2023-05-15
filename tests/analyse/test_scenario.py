@@ -337,6 +337,46 @@ def test_scenario_uses_fp_inlet():
     assert model_scenario.footprint is None
 
 
+def test_scenario_matches_fp_inlet():
+    """
+    Test ModelScenario is able to use "height_name" data from site_info file to
+    map between different inlet values for observation data and footprints.
+
+    In this case for "WAO" data we want to be able to use a dictionary to allow
+    older footprints at which were run at 20m to be used for 10m inlet e.g.
+
+    "WAO": {
+        "ICOS": {
+            "height": ["10m"],
+            "height_name": {"10m": ["10magl", "20magl"]},
+            ...
+    },
+    """
+    start_date = "2021-12-01"
+    end_date = "2022-01-01"
+
+    site = "wao"
+    domain = "TEST"
+    species = "rn"
+    inlet = "10m"
+
+    model_scenario = ModelScenario(
+        site=site, species=species, inlet=inlet, domain=domain, start_date=start_date, end_date=end_date
+    )
+
+    expected_obs_inlet = inlet # inlet for observation data
+    expected_fp_inlet = "20m"  # inlet for footprint data
+
+    # Check obs and footprint data is found and inlets are expected values
+    assert model_scenario.obs is not None
+    assert model_scenario.footprint is not None
+    assert model_scenario.obs.metadata["inlet"] == expected_obs_inlet
+    assert model_scenario.footprint.metadata["inlet"] == expected_fp_inlet
+
+    assert model_scenario.inlet == expected_obs_inlet
+    assert model_scenario.fp_inlet == expected_fp_inlet
+
+
 def test_add_data():
     """
     Test add_* functions can be used to add new data after initalisation step.
