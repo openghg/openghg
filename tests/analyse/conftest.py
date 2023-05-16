@@ -8,7 +8,6 @@ from helpers import (
 from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
 from helpers import clear_test_store
 
-from helpers import clear_test_store
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
@@ -24,12 +23,12 @@ def data_read():
     #  - Includes CH4 and CO2 data
     site = "tac"
     network = "DECC"
-    data_type = "CRDS"
+    source_format = "CRDS"
 
     tac_path1 = get_surface_datapath(filename="tac.picarro.1minute.100m.201208.dat", source_format="CRDS")
     tac_path2 = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
     tac_filepaths = [tac_path1, tac_path2]
-    ObsSurface.read_file(filepath=tac_filepaths, source_format=data_type, site=site, network=network)
+    ObsSurface.read_file(filepath=tac_filepaths, source_format=source_format, site=site, network=network)
 
     # Emissions data
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE
@@ -74,11 +73,11 @@ def data_read():
     )
 
     # Ocean flux for CO2
-    #  - monthly (cut down data to 1 month)
+    #  - monthly (cut down data to 1 month) - need to specify period for this.
     source4 = "ocean"
 
-    emissions_datapath4a = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
-    emissions_datapath4b = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
+    emissions_datapath4a = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
+    emissions_datapath4b = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
 
     Emissions.read_file(
         filepath=emissions_datapath4a,
@@ -86,6 +85,7 @@ def data_read():
         source=source4,
         domain="TEST",
         high_time_resolution=False,
+        period="1 month",
     )
 
     Emissions.read_file(
@@ -94,6 +94,7 @@ def data_read():
         source=source4,
         domain="TEST",
         high_time_resolution=False,
+        period="1 month",
     )
 
     # Boundary conditions data

@@ -137,7 +137,7 @@ def test_versioning(capfd):
 
     detailed_ch4_data = detailed_data["ch4"]["data"]
 
-    d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="surface")
+    d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="surface", overwrite=True)
 
     d.save()
 

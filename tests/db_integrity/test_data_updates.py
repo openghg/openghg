@@ -10,6 +10,7 @@ from openghg.store.base import Datasource
 from openghg.retrieve import get_obs_surface, get_flux
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
+from openghg.types import DataOverlapError
 
 
 from helpers import clear_test_store
@@ -121,7 +122,7 @@ def bsd_data_read_gcmd():
                          instrument=instrument)
 
 
-def bsd_small_edit_data_read():
+def bsd_small_edit_data_read(overwrite=False):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Same data
@@ -139,7 +140,8 @@ def bsd_small_edit_data_read():
                          source_format=source_format2,
                          site=site,
                          network=network,
-                         instrument=instrument)
+                         instrument=instrument,
+                         overwrite=overwrite)
 
 
 def bsd_diff_data_read(overwrite=False):
@@ -207,6 +209,24 @@ def read_gcmd_file_pd(filename):
 def test_obs_data_read_header_diff():
     """
     Test adding new file for GC data (same data as original file but different header).
+     - expect DataOverlapError to be raised without additional flags
+    """
+    clear_test_store()
+    # Load BSD data - CRDS data
+    bsd_data_read_crds()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+
+    with pytest.raises(DataOverlapError) as excinfo:
+        # Try to load *new* BSD data - GCMD data (GCWERKS) with small edit in header
+        bsd_small_edit_data_read()
+
+        assert "Unable to add new data" in excinfo
+
+
+def test_obs_data_read_header_diff_update():
+    """
+    Test adding new file for GC data (same data as original file but different header).
     Steps:
      - BSD CRDS minutely data added
      - BSD GCMD data added
@@ -219,7 +239,7 @@ def test_obs_data_read_header_diff():
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with small edit in header
-    bsd_small_edit_data_read()
+    bsd_small_edit_data_read(overwrite=True)
 
     # Search for expected species
     # CRDS data
@@ -561,3 +581,6 @@ def bsd_data_read_crds_overwrite():
 
 #     # TODO: Can we check if this has been saved as a new version?
 
+#%% Deleting data
+
+# TODO: Add test to check data deletion and then adding the same data back
