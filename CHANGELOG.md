@@ -5,7 +5,26 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.5.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.5.1...HEAD)
+
+## [0.5.1] - 2023-05-10
+
+### Fixed
+
+- Fix for the sampling period of data files being read incorrectly - [PR #584](https://github.com/openghg/openghg/pull/584)
+- Fix for overlapping dateranges being created when adding new data to a Datasource. This introduced errors when keys were being removed and updated - [PR #570](https://github.com/openghg/openghg/pull/570)
+- Incorrect data being retrieved by the ICOS retrieval function - [PR #611](https://github.com/openghg/openghg/pull/611)
+- Error raised on attempt to delete object store after it wasn't created by some tests - [PR #626](https://github.com/openghg/openghg/pull/626)
+- Very small (nanosecond) changes in period between measurements resulting in error due to `pandas.infer_period` not being able to return a period - [PR #634](https://github.com/openghg/openghg/pull/634)
+- Processing of ObsPack resulted in errors due to limited metadata read and data overwrite, temporary fix in place for now - [PR #642](https://github.com/openghg/openghg/pull/642)
+
+### Changed
+
+- Mock for `openghg_defs` data to remove external dependency for tests - [PR #582](https://github.com/openghg/openghg/pull/582)
+- Removed use of environment variable for test store, moved to mock - [PR # 580](https://github.com/openghg/openghg/pull/580)
+- Temporary pinning of pandas < 2.0 due to changes that introduced errors - [PR #619](https://github.com/openghg/openghg/pull/619)
+- `ObsData.plot_timeseries` now uses `openghg.plotting.plot_timeseries` to avoid duplication in efforts/code - [PR #624](https://github.com/openghg/openghg/pull/624)
+
 
 ## [0.5.0] - 2023-03-14
 

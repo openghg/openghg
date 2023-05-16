@@ -186,7 +186,6 @@ def _split_inlets(
 
     gas_data: Dict[str, Dict] = {}
     if height_var in obspack_ds.data_vars:
-
         if inlet is not None:
             # TODO: Add to logging?
             logger.warning(
@@ -200,7 +199,6 @@ def _split_inlets(
 
         # For each group standardise and store with id based on species and inlet height
         for ht, obspack_ds_ht in obspack_ds_grouped:
-
             # Creating id keys of the form "<species>_<inlet>" e.g. "ch4_40m" or "co_12.5m"
             inlet_str = format_inlet(str(ht), key_name="inlet")
             inlet_magl_str = format_inlet(str(ht), key_name="inlet_height_magl")
@@ -363,6 +361,7 @@ def _read_obspack(
     metadata["units"] = units
     metadata["sampling_period"] = sampling_period
     metadata["data_source"] = "noaa_obspack"
+    metadata["data_type"] = "surface"
 
     # Add additional sampling_period_estimate if sampling_period is not set
     if sampling_period_estimate >= 0.0:

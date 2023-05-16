@@ -260,7 +260,7 @@ def download_edgar_data() -> Path:
     This is currently a limited subset of v6.0 CH4 data (2014-2015)
 
     TODO: Upgrade to use v7.0 data when this has been checked and added into workflow.
-    """    
+    """
 
     use_tutorial_store()
 
@@ -310,6 +310,20 @@ def clear_example_cache() -> None:
     if example_cache_path.exists():
         shutil.rmtree(example_cache_path, ignore_errors=True)
         shutil.rmtree(extracted_examples, ignore_errors=True)
+
+
+def retrieve_example_obspack(extract_dir: Union[str, Path, None] = None) -> Path:
+    """Retrieves our example ObsPack dataset, extracts it and returns the path to the folder.
+
+    Args:
+        url: URL to retrieve.
+        extract_dir: Folder to extract example tarballs to
+    Returns:
+        Path: Path to directory
+    """
+    url = "https://github.com/openghg/example_data/raw/main/obspack/obspack_ch4_example.tar.gz"
+    files = retrieve_example_data(url=url, extract_dir=extract_dir)
+    return files[0].parent
 
 
 def retrieve_example_data(url: str, extract_dir: Union[str, Path, None] = None) -> List[Path]:
