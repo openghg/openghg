@@ -11,7 +11,9 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 def metadata_default_keys() -> List:
     """
-    Define default values expected within ObsSurface metadata
+    Defines default values expected within ObsSurface metadata.
+    Returns:
+        list: keys required in metadata
     """
     default_keys = [
         "site",
@@ -35,8 +37,10 @@ def metadata_default_keys() -> List:
 
 def metadata_keys_as_floats() -> List:
     """
-    Define which keys should be consistently stored as numbers in the metadata
+    Defines which keys should be consistently stored as numbers in the metadata
     (even if they are not numbers within the attributes).
+    Returns:
+        list: keys required to be floats in metadata
     """
 
     values_as_floats = [
@@ -55,7 +59,8 @@ def sync_surface_metadata(
     keys_to_add: Optional[List] = None,
     update_mismatch: str = "never",
 ) -> Tuple[Dict, Dict]:
-    """Makes sure any duplicated keys between the metadata and attributes
+    """
+    Makes sure any duplicated keys between the metadata and attributes
     dictionaries match and that certain keys are present in the metadata.
 
     Args:
