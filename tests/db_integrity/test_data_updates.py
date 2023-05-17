@@ -323,6 +323,20 @@ def test_obs_data_read_data_diff():
     assert bool(search_sf6) == True
     assert bool(search_n2o) == True
 
+    # Find uuid values and use this to extract the Datasources to look at stored versions
+    # Make sure that updated data (using overwrite flag) has a new version.
+    search_sf6_results = search_sf6.results
+    search_n2o_results = search_n2o.results
+    uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
+    uuid_n2o = search_n2o_results.iloc[0]["uuid"]
+
+    d_sf6 = Datasource.load(uuid=uuid_sf6)
+    d_n2o = Datasource.load(uuid=uuid_n2o)
+
+    assert d_sf6._latest_version == "v2"
+    assert d_n2o._latest_version == "v2"
+
+    # Compare against data from files
     crds_file_data = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
 
     obs_data_ch4 = search_ch4.retrieve()
@@ -344,8 +358,6 @@ def test_obs_data_read_data_diff():
     sf6 = data_sf6["sf6"].values
     expected_sf6 = gcwerks_file_data["SF6"].values
     np.testing.assert_allclose(sf6, expected_sf6)
-
-    # TODO: Can we check if this has been saved as a new version?
 
 
 # TODO: Add test for different time values as well.
@@ -422,8 +434,8 @@ def test_obs_data_read_two_frequencies():
     np.testing.assert_allclose(co_hourly, expected_co_hourly)
 
     # data_co_minutely = get_obs_surface(site="bsd", species="ch4", sampling_period="60.0").data
-    data_co_hourly = search_co.retrieve(sampling_period="60.0").data
-    co_minutely = data_co_hourly["co"].values
+    data_co_minutely = search_co.retrieve(sampling_period="60.0").data
+    co_minutely = data_co_minutely["co"].values
     expected_co_minutely = crds_file_data_minutely["co"].values
     np.testing.assert_allclose(co_minutely, expected_co_minutely)
 
@@ -437,7 +449,17 @@ def test_obs_data_read_two_frequencies():
     expected_sf6 = gcwerks_file_data["SF6"].values
     np.testing.assert_allclose(sf6, expected_sf6)
 
-    # TODO: Can we check if this has been saved as a new version?
+    # Find uuid values and use this to extract the Datasources to look at stored versions
+    search_co_results = search_co.results
+    uuid_co_hourly = search_co_results[search_co_results["sampling_period"] == "3600.0"].iloc[0]["uuid"]
+    uuid_co_minutely = search_co_results[search_co_results["sampling_period"] == "60.0"].iloc[0]["uuid"]
+
+    d_co_hourly = Datasource.load(uuid=uuid_co_hourly)
+    d_co_minutely = Datasource.load(uuid=uuid_co_minutely)
+
+    assert d_co_hourly._latest_version == "v1"
+    assert d_co_minutely._latest_version == "v1"
+
 
 
 #%% Look at replacing data with different / overlapping internal time stamps

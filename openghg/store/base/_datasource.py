@@ -45,8 +45,7 @@ class Datasource:
         self._data_keys: dataKeyType = defaultdict(dict)
         self._data_type: str = ""
         # Hold information regarding the versions of the data
-        # Currently unused
-        self._latest_version: str = "latest"
+        self._latest_version: str = ""
         self._versions: Dict[str, List] = {}
 
     def start_date(self) -> Timestamp:
@@ -586,11 +585,12 @@ class Datasource:
 
         return d
 
-    def save(self, bucket: Optional[str] = None) -> None:
+    def save(self, bucket: Optional[str] = None, overwrite: Optional[bool] = False) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
             bucket: Bucket to hold data
+            overwrite: Whether to add new version
         Returns:
             None
         """
@@ -608,8 +608,13 @@ class Datasource:
             if "latest" not in self._data_keys:
                 self._data_keys["latest"] = {}
 
-            # Backup the old data keys at "latest"
-            version_str = f"v{str(len(self._data_keys))}"
+            # Add data to same version as previous unless overwrite is True
+            if self._latest_version and not overwrite:
+                version_str = self._latest_version
+            else:
+                # Backup the old data keys at "latest"
+                version_str = f"v{str(len(self._data_keys))}"
+
             # Store the keys for the new data
             new_keys = {}
 

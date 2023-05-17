@@ -137,9 +137,10 @@ def test_versioning(capfd):
 
     detailed_ch4_data = detailed_data["ch4"]["data"]
 
+    # Check new version can be created and stored (using appropriate flag)
     d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="surface", overwrite=True)
 
-    d.save()
+    d.save(overwrite=True)
 
     detailed_keys = d.versions()
 
