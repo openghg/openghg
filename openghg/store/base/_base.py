@@ -4,7 +4,7 @@
 from typing import Dict, List, Optional, Type, TypeVar, Union
 
 from pandas import Timestamp
-from tinydb import TinyDB
+from tinydb import TinyDB, Query
 
 __all__ = ["BaseStore"]
 
@@ -179,17 +179,34 @@ class BaseStore:
         from openghg.util import to_lowercase
 
         for key, uuid_data in uuids.items():
+            meta_copy = data[key]["metadata"].copy()
+
+            uid = uuid_data["uuid"]
             new = uuid_data["new"]
-            # Only add if this is a new Datasource
+
+            if "update" in uuid_data:
+                update = uuid_data["update"]
+            else:
+                update = {}
+
+            if new and "version" in uuid_data:
+                meta_copy["latest_version"] = uuid_data["version"]
+            elif "version" in uuid_data:
+                update["latest_version"] = uuid_data["version"]
+
+            # Add new entry if this is a new Datasource
             if new:
-                meta_copy = data[key]["metadata"].copy()
-                uid = uuid_data["uuid"]
                 meta_copy["uuid"] = uuid_data["uuid"]
 
                 # Make sure all the metadata is lowercase for easier searching later
                 meta_copy = to_lowercase(d=meta_copy)
                 metastore.insert(meta_copy)
                 self._datasource_uuids[uid] = key
+
+            # Update keys in metastore as appropriate
+            if update:
+                q = Query()
+                metastore.upsert(update, q.uuid == uid)
 
     def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range

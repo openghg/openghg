@@ -80,9 +80,9 @@ def test_read_data(mocker):
     expected = {
         "processed": {
             "bsd.picarro.1minute.248m.min.dat": {
-                "ch4": {"uuid": "test-uuid-1", "new": True},
-                "co2": {"uuid": "test-uuid-9", "new": True},
-                "co": {"uuid": "test-uuid-17", "new": True},
+                "ch4": {"uuid": "test-uuid-1", "new": True, "version": "v1"},
+                "co2": {"uuid": "test-uuid-9", "new": True, "version": "v1"},
+                "co": {"uuid": "test-uuid-17", "new": True, "version": "v1"},
             }
         }
     }
@@ -763,7 +763,7 @@ def test_store_icos_carbonportal_data(mocker):
 
     first_result = ObsSurface.store_data(data=data)
 
-    assert first_result == {"co2": {"uuid": "test-uuid-2", "new": True}}
+    assert first_result == {"co2": {"uuid": "test-uuid-2", "new": True, "version": "v1"}}
 
     second_result = ObsSurface.store_data(data=data)
 

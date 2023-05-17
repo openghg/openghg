@@ -1,16 +1,22 @@
 """ Segment the data into Datasources
 
 """
-from typing import Dict
+from typing import Dict, List, Optional
+import logging
 
 __all__ = ["assign_data"]
+
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def assign_data(
     data_dict: Dict,
     lookup_results: Dict,
-    overwrite: bool,
     data_type: str,
+    overwrite: bool,
+    update_keys: Optional[List] = None,
 ) -> Dict[str, Dict]:
     """Assign data to a Datasource. This will either create a new Datasource
     Create or get an existing Datasource for each gas in the file
@@ -18,7 +24,9 @@ def assign_data(
         Args:
             data_dict: Dictionary containing data and metadata for species
             lookup_results: Dictionary of lookup results]
+            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
             overwrite: If True overwrite current data stored
+            update_keys: Keys from datasource which should be updated.
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """
@@ -51,7 +59,28 @@ def assign_data(
         datasource.save()
 
         new_datasource = uuid is False
-        uuids[key] = {"uuid": datasource.uuid(), "new": new_datasource}
+        uuids[key] = {"uuid": datasource.uuid(),
+                      "new": new_datasource}
+
+        # Only add "version" if this is missing or changed
+        version = datasource.latest_version()
+        version_key = "latest_version"
+        if version_key not in metadata or version != metadata[version_key]:
+            uuids[key]["version"] = version
+
+        # Only add "update" if datasource is not new and keys should be updated
+        if not new_datasource and update_keys is not None:
+            update_metadata = {}
+            for key_to_update in update_keys:
+                d_meta = datasource._metadata
+                if key_to_update in d_meta:
+                    update_metadata[key_to_update] = d_meta[key_to_update]
+                else:
+                    logger.warning(f"Unable to update '{key_to_update}' key in metastore."
+                                   " Not present on Datasource.")
+
+            if update_metadata:
+                uuids[key]["update"] = update_metadata
 
     return uuids
 
