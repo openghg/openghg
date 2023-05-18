@@ -22,8 +22,14 @@ class ObsSurface(BaseStore):
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    @staticmethod
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.save()
+
     def read_data(
+        self,
         binary_data: bytes,
         metadata: Dict,
         file_metadata: Dict,
@@ -83,21 +89,21 @@ class ObsSurface(BaseStore):
                 raise ValueError("No valid metadata arguments passed, please check documentation.")
 
             if precision_data is None:
-                result = ObsSurface.read_file(filepath=filepath, **meta_kwargs)
+                result = self.read_file(filepath=filepath, **meta_kwargs)
             else:
                 # We'll assume that if we have precision data it's GCWERKS
                 # We don't read anything from the precision filepath so it's name doesn't matter
                 precision_filepath = tmpdir_path.joinpath("precision_data.C")
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
-                result = ObsSurface.read_file(
+                result = self.read_file(
                     filepath=(filepath, precision_filepath), site_filepath=site_filepath, **meta_kwargs
                 )
 
         return result
 
-    @staticmethod
     def read_file(
+        self,
         filepath: multiPathType,
         source_format: str,
         network: str,
@@ -214,12 +220,10 @@ class ObsSurface(BaseStore):
         # Load the data retrieve object
         parser_fn = load_surface_parser(source_format=source_format)
 
-        obs = ObsSurface.load()
-
         results: resultsType = defaultdict(dict)
 
         # Load the store for the metadata
-        metastore = load_metastore(key=obs._metakey)
+        # metastore = load_metastore(key=self._metakey)
 
         # Create a progress bar object using the filepaths, iterate over this below
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
@@ -239,10 +243,10 @@ class ObsSurface(BaseStore):
                     data_filepath = Path(fp)
 
                 file_hash = hash_file(filepath=data_filepath)
-                if file_hash in obs._file_hashes and overwrite is False:
+                if file_hash in self._file_hashes and overwrite is False:
                     logger.warning(
                         "This file has been uploaded previously with the filename : "
-                        f"{obs._file_hashes[file_hash]} - skipping."
+                        f"{self._file_hashes[file_hash]} - skipping."
                     )
                     break
 
@@ -338,11 +342,11 @@ class ObsSurface(BaseStore):
                 results["processed"][data_filepath.name] = datasource_uuids
 
                 # Record the Datasources we've created / appended to
-                obs.add_datasources(uuids=datasource_uuids, data=data, metastore=metastore)
+                self.add_datasources(uuids=datasource_uuids, data=data, metastore=metastore)
 
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
-                obs._file_hashes[file_hash] = data_filepath.name
+                self._file_hashes[file_hash] = data_filepath.name
                 # except Exception:
                 #     results["error"][data_filepath.name] = traceback.format_exc()
 
@@ -355,7 +359,7 @@ class ObsSurface(BaseStore):
         # as we're using the cached storage method
         metastore.close()
         # Save this object back to the object store
-        obs.save()
+        # obs.save()
 
         return dict(results)
 

@@ -8,6 +8,7 @@ from tinydb import TinyDB
 from openghg.objectstore import get_object_from_json, exists, get_bucket, set_object_from_json
 from openghg.util import timestamp_tzaware, timestamp_now
 
+
 __all__ = ["BaseStore"]
 
 T = TypeVar("T", bound="BaseStore")
@@ -18,9 +19,10 @@ class BaseStore:
     _uuid = "root_uuid"
 
     def __init__(self, bucket: str) -> None:
+        from openghg.store import load_metastore
+
         self._creation_datetime = str(timestamp_now())
         self._stored = False
-
         # Keyed by Datasource UUID
         self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
@@ -30,25 +32,23 @@ class BaseStore:
         # Where we'll store this object
         self._bucket = bucket
 
+        self._metastore = load_metastore(key=self.metakey())
+
         if exists(bucket=bucket, key=self.key()):
             data = get_object_from_json(bucket=bucket, key=self.key())
             # Update myself
             self.__dict__.update(data)
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        self.save()
+    @classmethod
+    def metakey(cls):
+        return cls._metakey
 
     @classmethod
     def key(cls):
         return f"{cls._root}/uuid/{cls._uuid}"
 
     def save(self):
-        if not self._bucket:
-            raise ValueError("Attempting to save without a bucket set.")
-
+        self._metastore.close()
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
     def to_data(self):
