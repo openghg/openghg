@@ -343,7 +343,7 @@ def test_scenario_matches_fp_inlet():
     map between different inlet values for observation data and footprints.
 
     In this case for "WAO" data we want to be able to use a dictionary to allow
-    older footprints at which were run at 20m to be used for 10m inlet e.g.
+    older footprints which were run at 20m to be used for 10m inlet e.g.
 
     "WAO": {
         "ICOS": {
