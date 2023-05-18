@@ -17,7 +17,7 @@ def retrieve_atmospheric(
     force_retrieval: bool = False,
     data_level: int = 2,
     dataset_source: Optional[str] = None,
-    update_metadata_mismatch: bool = False,
+    update_mismatch: bool = False,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -37,8 +37,8 @@ def retrieve_atmospheric(
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
-        update_metadata_mismatch: If metadata derived from ICOS Header does not match
-            to derived attributes, update metadata to match to attributes.
+        update_mismatch: If metadata derived from stored data does not match
+            to attributes derived from ICOS Header, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
     Returns:
         ObsData, list[ObsData] or None
@@ -52,7 +52,7 @@ def retrieve_atmospheric(
         force_retrieval=force_retrieval,
         data_level=data_level,
         dataset_source=dataset_source,
-        update_metadata_mismatch=update_metadata_mismatch,
+        update_mismatch=update_mismatch,
     )
 
 
@@ -77,8 +77,8 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
                         to be distributed through the Carbon Portal.
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
-        update_metadata_mismatch: If metadata derived from ICOS Header does not match
-            to derived attributes, update metadata to match to attributes.
+        update_mismatch: If metadata derived from stored data does not match
+            to attributes derived from ICOS Header, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
     Returns:
         ObsData, list[ObsData] or None
@@ -129,7 +129,7 @@ def local_retrieve(
     force_retrieval: bool = False,
     data_level: int = 2,
     dataset_source: Optional[str] = None,
-    update_metadata_mismatch: bool = False,
+    update_mismatch: bool = False,
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -150,8 +150,8 @@ def local_retrieve(
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
-        update_metadata_mismatch: If metadata derived from ICOS Header does not match
-            to derived attributes, update metadata to match to attributes.
+        update_mismatch: If metadata derived from stored data does not match
+            to attributes derived from ICOS Header, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
     Returns:
         ObsData, list[ObsData] or None
@@ -185,8 +185,8 @@ def local_retrieve(
             species=species,
             data_level=data_level,
             dataset_source=dataset_source,
-            update_metadata_mismatch=update_metadata_mismatch,
             sampling_height=sampling_height,
+            update_mismatch=update_mismatch,
         )
 
         if standardised_data is None:
@@ -215,7 +215,7 @@ def _retrieve_remote(
     species: Optional[Union[str, List]] = None,
     sampling_height: Optional[str] = None,
     dataset_source: Optional[str] = None,
-    update_metadata_mismatch: bool = False,
+    update_mismatch: bool = False,
 ) -> Optional[Dict]:
     """Retrieve ICOS data from the ICOS Carbon Portal and standardise it into
     a format expected by OpenGHG. A dictionary of metadata and Datasets
@@ -232,8 +232,8 @@ def _retrieve_remote(
         species: Species name
         sampling_height: Sampling height in metres
         dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
-        update_metadata_mismatch: If metadata derived from ICOS Header does not match
-            to derived attributes, update metadata to match to attributes.
+        update_mismatch: If metadata derived from stored data does not match
+            to attributes derived from ICOS Header, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
     Returns:
         dict or None: Dictionary of processed data and metadata if found
@@ -393,11 +393,14 @@ def _retrieve_remote(
         metadata["station_long_name"] = station_long_name
         metadata["station_latitude"] = str(loc_data["lat"])
         metadata["station_longitude"] = str(loc_data["lon"])
-        metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
+
+        # 03/05/2023: Updated metadata to include altitude for "station_height_masl" explicitly.
+        # metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
+        # metadata["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
+        metadata["station_height_masl"] = format_inlet(loc_data["alt"], key_name="station_height_masl")
 
         metadata["data_owner"] = f"{stat.firstName} {stat.lastName}"
         metadata["data_owner_email"] = str(stat.email)
-        metadata["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
 
         metadata["citation_string"] = dobj_info["references"]["citationString"]
         metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
@@ -455,7 +458,7 @@ def _retrieve_remote(
         }
 
     standardised_data = assign_attributes(
-        data=standardised_data, update_metadata_mismatch=update_metadata_mismatch
+        data=standardised_data, update_mismatch=update_mismatch
     )
 
     return standardised_data

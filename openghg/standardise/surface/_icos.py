@@ -17,6 +17,7 @@ def parse_icos(
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
     header_type: str = "large",
+    update_mismatch: bool = False,
     site_filepath: optionalPathType = None,
     **kwargs: Dict,
 ) -> Dict:
@@ -32,6 +33,10 @@ def parse_icos(
         measurement_type: Measurement type e.g. insitu, flask
         header_type: ICOS data file with large (40 line) header or shorter single line header
             Options: large, small
+        update_mismatch: This determines whether mismatches between the internal data
+            attributes and the supplied / derived metadata can be updated or whether
+            this should raise an AttrMismatchError.
+            If True, currently updates metadata with attribute value.        
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
@@ -76,9 +81,11 @@ def parse_icos(
         )
 
     # Ensure the data is CF compliant
-    gas_data = assign_attributes(
-        data=gas_data, site=site, sampling_period=sampling_period, site_filepath=site_filepath
-    )
+    gas_data = assign_attributes(data=gas_data,
+                                 site=site,
+                                 sampling_period=sampling_period,
+                                 update_mismatch=update_mismatch,
+                                 site_filepath=site_filepath)
 
     return gas_data
 

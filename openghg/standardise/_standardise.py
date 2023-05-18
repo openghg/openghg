@@ -15,6 +15,7 @@ def standardise_surface(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     calibration_scale: Optional[str] = None,
+    update_mismatch: bool = False,
     site_filepath: optionalPathType = None,
     overwrite: bool = False,
 ) -> Optional[Dict]:
@@ -28,6 +29,10 @@ def standardise_surface(
         inlet: Inlet height in metres
         instrument: Instrument name
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
+        update_mismatch: This determines whether mismatches between the internal data
+                attributes and the supplied / derived metadata can be updated or whether
+                this should raise an AttrMismatchError.
+                If True, currently updates metadata with attribute value.
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         overwrite: Overwrite data currently present in the object store
@@ -124,6 +129,7 @@ def standardise_surface(
             instrument=instrument,
             sampling_period=sampling_period,
             inlet=inlet,
+            update_mismatch=update_mismatch,
             site_filepath=site_filepath,
             overwrite=overwrite,
         )
