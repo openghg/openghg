@@ -1,6 +1,8 @@
 import json
-from typing import Dict, Optional, Sequence
+from typing import Dict, List, Optional, Sequence
+import logging
 from openghg.objectstore import exists, get_bucket, get_object, set_object_from_json
+from openghg.store.base import Datasource
 
 # from openghg.dataobjects import DataHandler
 # DHType = TypeVar('U', bound=DataHandler)
@@ -8,6 +10,8 @@ from openghg.objectstore import exists, get_bucket, get_object, set_object_from_
 from tinydb import Storage, TinyDB
 from tinydb.middlewares import CachingMiddleware
 
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 def load_metastore(key: str) -> TinyDB:
     """Load the metastore. This can be used as a context manager
@@ -104,3 +108,68 @@ def data_handler_lookup(data_type: str, **kwargs: Dict):  # type: ignore
     res = search(data_type=data_type, **kwargs)
     metadata = res.metadata
     return DataHandler(metadata=metadata)
+
+
+def _update_meta_from_datasource(metadata: Dict,
+                                 datasource: Datasource,
+                                 update_keys: Optional[List] = None) -> Dict:
+    """Update the metadata entries based on internal metadata from the Datasource.
+
+    Args:
+        metadata : Dictionary of metadata
+        datasource: Datasource object
+        update_keys: List of keys to update within metadata using Datasource object.
+    Returns:
+        dict: Updated metadata dictionary
+    """
+
+    meta_copy = metadata.copy()
+    d_meta = datasource._metadata
+
+    if update_keys is not None:
+        for key in update_keys:
+            if key in d_meta:
+                try:
+                    meta_value = metadata[key]
+                except KeyError:
+                    meta_copy[key] = d_meta[key]
+                else:
+                    d_value = d_meta[key]
+                    if d_value != meta_value:
+                        meta_copy[key] = d_meta[key]
+            else:
+                logger.warning(f"Unable to update '{key}' key in metastore."
+                               " Not present on Datasource.")
+
+    return meta_copy
+
+
+def update_metadata(data_dict: Dict,
+                    uuid_dict: Dict,
+                    update_keys: Optional[List] = None) -> Dict:
+    """Update metadata (to be saved to metastore) for each source using
+    details from the Datasource. See openghg.store.base.Datasource object
+    for details of metadata stored on this object.
+
+    For example this could include:
+     - ["start_date", "end_date", "latest_version"]
+
+    Args:
+        data_dict : Dictionary containing data and metadata for species
+        uuid_dict : Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
+        update_keys : List of keys to update within metadata using Datasource object.
+    Returns:
+        dict: data_dict with metadata updated where appropriate.
+    """
+
+    for key in data_dict:
+        metadata = data_dict[key]["metadata"]
+        uuid = uuid_dict[key]["uuid"]
+
+        datasource = Datasource.load(uuid=uuid)
+
+        data_dict[key]["metadata"] = _update_meta_from_datasource(metadata,
+                                                                  datasource,
+                                                                  update_keys=update_keys)
+
+    return data_dict

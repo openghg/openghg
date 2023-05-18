@@ -635,6 +635,7 @@ class Datasource:
             # Link latest to the newest version
             self._data_keys["latest"] = self._data_keys[version_str]
             self._latest_version = version_str
+            self.add_metadata_key(key="latest_version", value=version_str)
 
         self._stored = True
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"

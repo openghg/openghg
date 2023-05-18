@@ -166,13 +166,18 @@ class BaseStore:
         """
         del self._datasource_uuids[uuid]
 
-    def add_datasources(self, uuids: Dict, data: Dict, metastore: TinyDB) -> None:
+    def add_datasources(self,
+                        uuids: Dict,
+                        data: Dict,
+                        metastore: TinyDB,
+                        update_keys: Optional[dict] = None) -> None:
         """Add the passed list of Datasources to the current list
 
         Args:
             datasource_uuids: Datasource UUIDs
             metadata: Metadata for each species
             metastore: TinyDB metadata store
+            update_keys: List of keys to update within metastore for existing data.
         Returns:
             None
         """
@@ -184,16 +189,6 @@ class BaseStore:
             uid = uuid_data["uuid"]
             new = uuid_data["new"]
 
-            if "update" in uuid_data:
-                update = uuid_data["update"]
-            else:
-                update = {}
-
-            if new and "version" in uuid_data:
-                meta_copy["latest_version"] = uuid_data["version"]
-            elif "version" in uuid_data:
-                update["latest_version"] = uuid_data["version"]
-
             # Add new entry if this is a new Datasource
             if new:
                 meta_copy["uuid"] = uuid_data["uuid"]
@@ -202,9 +197,9 @@ class BaseStore:
                 meta_copy = to_lowercase(d=meta_copy)
                 metastore.insert(meta_copy)
                 self._datasource_uuids[uid] = key
-
             # Update keys in metastore as appropriate
-            if update:
+            elif update_keys is not None:
+                update = {key: value for key, value in meta_copy.items() if key in update_keys}
                 q = Query()
                 metastore.upsert(update, q.uuid == uid)
 
