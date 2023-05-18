@@ -133,7 +133,7 @@ class ModelScenario:
             domain : Domain name e.g. "EUROPE"
             model : Model name used in creation of footprint e.g. "NAME"
             metmodel : Name of met model used in creation of footprint e.g. "UKV"
-            fp_inlet : Specify footprint release height optionsif this doesn't not match to site value.
+            fp_inlet : Specify footprint release height options if this doesn't match to site value.
             sources : Emissions sources
             bc_input : Input keyword for boundary conditions e.g. "mozart" or "cams"
             start_date : Start of date range to use. Note for flux this may not be applied
