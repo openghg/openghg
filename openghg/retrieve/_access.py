@@ -778,7 +778,7 @@ def _metadata_difference(
             logger.info(f" {param}: ")
         for m in metadata:
             if param in m:
-                value: Optional[str] = m[param]
+                value = m[param]
             else:
                 value = "NOT PRESENT"
             summary_difference[param].append(value)
