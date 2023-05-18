@@ -235,6 +235,7 @@ class Footprints(BaseStore):
             infer_date_range,
             update_zero_dim,
             load_metastore,
+            update_metadata,
         )
         from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
 
@@ -387,6 +388,9 @@ class Footprints(BaseStore):
             overwrite=overwrite,
             data_type=data_type,
         )
+
+        update_keys = ["start_date", "end_date", "latest_version"]
+        footprint_data = update_metadata(data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys)
 
         fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
 
