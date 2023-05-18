@@ -170,7 +170,7 @@ class BaseStore:
                         uuids: Dict,
                         data: Dict,
                         metastore: TinyDB,
-                        update_keys: Optional[dict] = None) -> None:
+                        update_keys: Optional[list] = None) -> None:
         """Add the passed list of Datasources to the current list
 
         Args:

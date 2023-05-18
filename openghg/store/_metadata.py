@@ -1,5 +1,6 @@
 import json
-from typing import Dict, List, Optional, Sequence
+from typing import DefaultDict, Dict, List, Optional, Sequence, Union, cast
+from xarray import Dataset
 import logging
 from openghg.objectstore import exists, get_bucket, get_object, set_object_from_json
 from openghg.store.base import Datasource
@@ -12,6 +13,8 @@ from tinydb.middlewares import CachingMiddleware
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+DataDictType = DefaultDict[str, Dict[str, Union[Dict, Dataset]]]
 
 
 def load_metastore(key: str) -> TinyDB:
@@ -145,9 +148,9 @@ def _update_meta_from_datasource(metadata: Dict,
     return meta_copy
 
 
-def update_metadata(data_dict: Dict,
+def update_metadata(data_dict: DataDictType,
                     uuid_dict: Dict,
-                    update_keys: Optional[List] = None) -> Dict:
+                    update_keys: Optional[List] = None) -> DataDictType:
     """Update metadata (to be saved to metastore) for each source using
     details from the Datasource. See openghg.store.base.Datasource object
     for details of metadata stored on this object.
@@ -164,13 +167,17 @@ def update_metadata(data_dict: Dict,
     """
 
     for key in data_dict:
-        metadata = data_dict[key]["metadata"]
-        uuid = uuid_dict[key]["uuid"]
 
+        uuid = uuid_dict[key]["uuid"]
         datasource = Datasource.load(uuid=uuid)
 
-        data_dict[key]["metadata"] = _update_meta_from_datasource(metadata,
-                                                                  datasource,
-                                                                  update_keys=update_keys)
+        if isinstance(data_dict[key]["metadata"], Dict):
+            metadata = cast(Dict, data_dict[key]["metadata"])
+            metadata = _update_meta_from_datasource(metadata,
+                                                    datasource,
+                                                    update_keys=update_keys)
+            data_dict[key]["metadata"] = metadata
+        else:
+            logger.warning(f"Unable to update keys: {update_keys} within metadata")
 
     return data_dict
