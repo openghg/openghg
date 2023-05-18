@@ -735,15 +735,21 @@ def _metadata_difference(
         logger.exception(err_msg)
         raise ValueError(err_msg)
 
+    # Creating multiple metadata dictionaries to be compared
+    # - Check if only selected parameters be included
     if params is not None:
         metadata = [{param: m[param] for param in params} for m in metadata]
 
+    # - Check if some parameters should be explicitly ignored and not compared
     ignore_params = ["uuid", "data_owner", "data_owner_email"]
     if ignore_params is not None:
         metadata = [{key: value for key, value in m.items() if key not in ignore_params} for m in metadata]
 
+    # - Extract string values  only from the underlying metadata dictionaries
     metadata = [{key: value for key, value in m.items() if isinstance(value, str)} for m in metadata]
-
+    
+    # Select first metadata dictionary from list and use this to compare to others
+    # - Look at difference between first metadata dict and other metadata dicts
     metadata0 = metadata[0]
     difference = []
     for metadata_compare in metadata[1:]:
@@ -754,6 +760,7 @@ def _metadata_difference(
             return {}
         else:
             difference.extend(list(metadata_diff))
+    # - Select parameter names for values which are different between metadata dictionaries
     param_difference = list(set([d[0] for d in difference]))
 
     # ignore_params = ["data_owner", "data_owner_email"]
@@ -763,6 +770,7 @@ def _metadata_difference(
     #     except ValueError:
     #         continue
 
+    # - Collate summary of differences as a dictionary which maps as param: list of values
     summary_difference: Dict[str, list] = {}
     for param in param_difference:
         summary_difference[param] = []
