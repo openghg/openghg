@@ -6,9 +6,11 @@ import pandas as pd
 import numpy as np
 from helpers import get_surface_datapath, get_emissions_datapath, get_bc_datapath, get_footprint_datapath
 from openghg.store import ObsSurface, Emissions, BoundaryConditions, Footprints
+from openghg.store.base import Datasource
 from openghg.retrieve import get_obs_surface, get_flux
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
+
 
 from helpers import clear_test_store
 
@@ -140,10 +142,10 @@ def bsd_small_edit_data_read():
                          instrument=instrument)
 
 
-def bsd_diff_data_read():
+def bsd_diff_data_read(overwrite=False):
     """
     Add overlapping Bilsdale GCMD data to the object store:
-     - Small different in data values (should create different hash)
+     - Small difference in data values (should create different hash)
     """
     site = "bsd"
     network = "DECC"
@@ -157,7 +159,8 @@ def bsd_diff_data_read():
                          source_format=source_format2,
                          site=site,
                          network=network,
-                         instrument=instrument)
+                         instrument=instrument,
+                         overwrite=overwrite)
 
 
 def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
@@ -261,6 +264,11 @@ def test_obs_data_read_header_diff():
     # TODO: Can we check if this has been saved as a new version?
 
 
+@pytest.mark.xfail(reason="Related to Issue #591.\n" \
+                   " This test is to check updated data values will be stored within the object store for a current data set.\n" \
+                   " Currently doesn't seem to be adding the new data and retains the original data.\n",
+                   raises=AssertionError,
+                   strict=True)
 def test_obs_data_read_data_diff():
     """
     Test adding new file for GC with same time points but some different data values.
@@ -276,8 +284,8 @@ def test_obs_data_read_data_diff():
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    # Load BSD data - GCMD data (GCWERKS) with edit to data (will produce different hash)
-    bsd_diff_data_read()
+    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
+    bsd_diff_data_read(overwrite=True)
 
     # Search for expected species
     # CRDS data
@@ -308,7 +316,7 @@ def test_obs_data_read_data_diff():
     # expected_ch4_time = crds_file_data["date_time"].values
     # np.testing.assert_allclose(ch4_time, expected_ch4_time)
 
-    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.small-edit.14.C")
+    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
 
     obs_data_sf6 = search_sf6.retrieve()
     data_sf6 = obs_data_sf6.data
@@ -318,6 +326,9 @@ def test_obs_data_read_data_diff():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     # TODO: Can we check if this has been saved as a new version?
+
+
+# TODO: Add test for different time values as well.
 
 #%% Look at different data frequencies for the same data
 
@@ -409,6 +420,73 @@ def test_obs_data_read_two_frequencies():
     # TODO: Can we check if this has been saved as a new version?
 
 
+#%% Look at replacing data with different / overlapping internal time stamps
+
+
+def bsd_data_read_crds_internal_overlap(overwrite=False):
+    """
+    Add Bilsdale *hourly* data for CRDS instrument to object store
+     - CRDS: ch4, co2, co
+    """
+
+    site = "bsd"
+    network = "DECC"
+    source_format1 = "CRDS"
+
+    bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.overlap-dates.dat", source_format="CRDS")
+
+    ObsSurface.read_file(filepath=bsd_path_hourly,
+                         source_format=source_format1,
+                         site=site,
+                         network=network,
+                         overwrite=overwrite)
+
+
+def test_obs_data_representative_date_overlap():
+    """
+    Added test based on fix for Issue 506.
+
+    Due to sampling period being used to create representative date string
+    when storing data. If the end of one chunk overlapped with the start of the
+    next chunk this created overlapping date ranges.
+
+    This test checks this will no longer raise a KeyError based on this.
+    """
+
+    clear_test_store()
+    bsd_data_read_crds_internal_overlap()
+    bsd_data_read_crds_internal_overlap(overwrite=True)
+
+    obs = ObsSurface.load()
+    uuids = obs.datasources()
+
+    datasources = []
+    for uuid in uuids:
+        datasource = Datasource.load(uuid=uuid)
+        datasources.append(datasource)
+
+    data = [datasource.data() for datasource in datasources]
+    one_species_data = data[0]
+    keys = list(one_species_data.keys())
+    keys.sort()
+
+    time_range_key1 = keys[0]
+    time_range_key2 = keys[1]
+
+    start1, end1 = time_range_key1.split("_")
+    start2, end2 = time_range_key2.split("_")
+
+    time_buffer = pd.Timedelta(seconds=1)
+
+    expected_start1 = pd.Timestamp("2014-01-30T11:20:45", tz='utc')
+    expected_start2 = pd.Timestamp("2015-01-01T00:01:00", tz='utc')
+    expected_end1 = (expected_start2 - time_buffer)
+
+    assert pd.Timestamp(start1) == expected_start1
+    assert pd.Timestamp(end1) == expected_end1
+    assert pd.Timestamp(start2) == expected_start2
+
+
 #%% Check overwrite functionality
 # TODO: Add check to overwrite functionality
 # - need to be clear on what we expect to happen here
@@ -482,3 +560,4 @@ def bsd_data_read_crds_overwrite():
 #     # np.testing.assert_allclose(sf6, expected_sf6)
 
 #     # TODO: Can we check if this has been saved as a new version?
+

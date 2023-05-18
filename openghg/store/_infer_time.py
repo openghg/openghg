@@ -128,7 +128,9 @@ def infer_date_range(
         period_str = create_frequency_str(time_value, time_unit)
 
     else:
-        timestamps = pd.to_datetime([timestamp_tzaware(t) for t in time.values])
+        # Here we trim the timestamps to millisecond precision to reduce the likelihood of
+        # floating point errors result in ns differences in period
+        timestamps = pd.to_datetime(time.values.astype("datetime64[ms]"), utc=True)
         timestamps = timestamps.sort_values()
 
         inferred_period = pd.infer_freq(timestamps)

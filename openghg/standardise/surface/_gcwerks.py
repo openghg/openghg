@@ -61,7 +61,9 @@ def parse_gcwerks(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    update_mismatch: bool = False,
     site_filepath: optionalPathType = None,
+
 ) -> Dict:
     """Reads a GC data file by creating a GC object and associated datasources
 
@@ -71,6 +73,10 @@ def parse_gcwerks(
         site: Three letter code or name for site
         instrument: Instrument name
         network: Network name
+        update_mismatch: This determines whether mismatches between the internal data
+            attributes and the supplied / derived metadata can be updated or whether
+            this should raise an AttrMismatchError.
+            If True, currently updates metadata with attribute value.
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
@@ -128,7 +134,10 @@ def parse_gcwerks(
     )
 
     # Assign attributes to the data for CF compliant NetCDFs
-    gas_data = assign_attributes(data=gas_data, site=site, site_filepath=site_filepath)
+    gas_data = assign_attributes(data=gas_data,
+                                 site=site,
+                                 update_mismatch=update_mismatch,
+                                 site_filepath=site_filepath)
 
     return gas_data
 
@@ -255,8 +264,9 @@ def _read_data(
 
     if sampling_period is not None:
         # Compare input to definition within json file
-        file_sampling_period = pd_Timedelta(seconds=extracted_sampling_period)
-        comparison_seconds = abs(sampling_period - file_sampling_period).total_seconds()
+        file_sampling_period_td = pd_Timedelta(seconds=float(extracted_sampling_period))
+        sampling_period_td = pd_Timedelta(seconds=float(sampling_period))
+        comparison_seconds = abs(sampling_period_td - file_sampling_period_td).total_seconds()
         tolerance_seconds = 1
 
         if comparison_seconds > tolerance_seconds:
