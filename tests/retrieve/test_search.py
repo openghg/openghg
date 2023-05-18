@@ -54,13 +54,12 @@ def test_search_surface(inlet_keyword, inlet_value):
 
 
 def test_search_surface_range():
-    # TODO: Work out what's going on here
 
     res = search_surface(site='TAC',
                          species='co2',
                          inlet='185',
-                         # start_date='2013-02-01',
-                         # end_date='2013-03-01'
+                         start_date='2013-02-01',
+                         end_date='2013-03-01'
                          )
     
     assert res is not None
@@ -139,6 +138,17 @@ def test_search_site():
     res = search(site="atlantis")
 
     assert not res
+
+
+def test_search_site_data_version():
+    """Test that latest version value is added to metadata"""
+
+    res = search(site="bsd", species="co2", inlet="42m")
+    key = next(iter(res.metadata))
+    metadata = res.metadata[key]
+
+    assert "latest_version" in metadata
+    assert metadata["latest_version"] == "v1"
 
 
 def test_multi_type_search():
