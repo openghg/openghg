@@ -12,6 +12,7 @@ def parse_tmb(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    update_mismatch: bool = False,
     site_filepath: optionalPathType = None,
     **kwargs: Dict,
 ) -> Dict:
@@ -26,6 +27,10 @@ def parse_tmb(
         instrument: Instrument name
         sampling_period: Sampling period
         measurement_type: Type of measurement taken e.g."flask", "insitu"
+        update_mismatch: This determines whether mismatches between the internal data
+            attributes and the supplied / derived metadata can be updated or whether
+            this should raise an AttrMismatchError.
+            If True, currently updates metadata with attribute value.
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
@@ -127,6 +132,9 @@ def parse_tmb(
             "attributes": attributes,
         }
 
-    gas_data = assign_attributes(data=gas_data, site=site, site_filepath=site_filepath)
+    gas_data = assign_attributes(data=gas_data,
+                                 site=site,
+                                 update_mismatch=update_mismatch,
+                                 site_filepath=site_filepath)
 
     return gas_data

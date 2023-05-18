@@ -1,8 +1,11 @@
 from pathlib import Path
+import pytest
 
 from helpers import get_emissions_datapath, get_footprint_datapath, get_surface_datapath
 from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
 from openghg.util import compress
+from openghg.types import AttrMismatchError
+from openghg.retrieve import get_obs_surface
 
 
 # Test local functions
@@ -63,6 +66,81 @@ def test_local_obs_openghg():
 
     assert "error" not in results
     assert "co2" in results
+
+
+def test_local_obs_metadata_mismatch():
+    """
+    Test a mismatch between the derived attributes and derived metadata can be 
+    updated and data added to the object store.
+
+    At present, this will use the attributes data and update the metadata.
+
+    Difference:
+        - 'station_long_name'
+            - Metadata (from mocked site_info) - 'Tacolneston Tower, UK'
+            - Attributes (from file) - 'ATTRIBUTE DATA'
+    
+    Note: using fake height of 999m to not intefere with previous data at 185m
+    """
+
+    filename = "DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc"
+    filepath = get_surface_datapath(filename=filename, source_format="OPENGHG")
+
+    # Include update_mismatch=True flag
+    results = standardise_surface(
+        filepaths=filepath,
+        site="TAC",
+        network="DECC",
+        inlet="999m",
+        instrument="picarro",
+        source_format="openghg",
+        sampling_period="1H",
+        update_mismatch=True,
+        overwrite=True,
+    )
+
+    # Check data has been successfully processed
+    results = results["processed"][filename]
+
+    assert "error" not in results
+    assert "co2" in results
+
+    # Check retrieved data from the object store contains the updated metadata
+    data = get_obs_surface(site="TAC", inlet="999m", species="co2")
+    metadata = data.metadata
+
+    # Check attribute value has been used for this key
+    assert metadata["station_long_name"] == "ATTRIBUTE DATA"
+
+
+def test_local_obs_metadata_mismatch_fail():
+    """
+    Test that a mismatch between attributes and metadata raises a AttrMismatchError
+    when update_mismatch is set to False.
+
+    Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'.
+    """
+    filepath = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc", source_format="OPENGHG")
+
+    with pytest.raises(AttrMismatchError) as e_info:
+        standardise_surface(
+            filepaths=filepath,
+            site="TAC",
+            network="DECC",
+            inlet="999m",
+            instrument="picarro",
+            source_format="openghg",
+            sampling_period="1H",
+            update_mismatch=False,
+            overwrite=True,
+        )
+
+        # Check different values are reported in error message
+        assert "Tacolneston Tower, UK" in e_info
+        assert "ATTRIBUTE DATA" in e_info
+
+        # Check error message contains advice on how to bypass this error
+        assert "update_mismatch=True" in e_info
 
 
 def test_standardise_footprint():
