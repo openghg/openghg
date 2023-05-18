@@ -13,6 +13,7 @@ from tinydb.middlewares import CachingMiddleware
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+
 def load_metastore(key: str) -> TinyDB:
     """Load the metastore. This can be used as a context manager
     otherwise the database must be closed using the close method

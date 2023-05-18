@@ -1,7 +1,7 @@
 """ Segment the data into Datasources
 
 """
-from typing import Dict, List, Optional
+from typing import Dict
 import logging
 
 __all__ = ["assign_data"]
