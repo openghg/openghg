@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.5.1...HEAD)
 
 ### Added
- - The 'height_name' definition from the [openghg/supplementary_data repository](https://github.com/openghg/supplementary_data) for each site can now be accessed, used and interpreted - [PR #648](https://github.com/openghg/openghg/pull/648)
+
+- Added `standardise_column()` wrapper function - [PR #569](https://github.com/openghg/openghg/pull/643)
+- The 'height_name' definition from the [openghg/supplementary_data repository](https://github.com/openghg/supplementary_data) for each site can now be accessed, used and interpreted - [PR #648](https://github.com/openghg/openghg/pull/648)
 
 ## [0.5.1] - 2023-05-10
 

@@ -16,6 +16,7 @@ def parse_npl(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     measurement_type: Optional[str] = None,
+    update_mismatch: bool = False,
 ) -> Dict:
     """Reads NPL data files and returns the UUIDS of the Datasources
     the processed data has been assigned to
@@ -28,6 +29,10 @@ def parse_npl(
         instrument: Instrument name
         sampling_period: Sampling period
         measurement_type: Type of measurement taken e.g."flask", "insitu"
+        update_mismatch: This determines whether mismatches between the internal data
+            attributes and the supplied / derived metadata can be updated or whether
+            this should raise an AttrMismatchError.
+            If True, currently updates metadata with attribute value.
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
@@ -119,6 +124,9 @@ def parse_npl(
             "attributes": attributes,
         }
 
-    gas_data = assign_attributes(data=gas_data, site=site, network=network)
+    gas_data = assign_attributes(data=gas_data,
+                                 site=site,
+                                 network=network,
+                                 update_mismatch=update_mismatch)
 
     return gas_data
