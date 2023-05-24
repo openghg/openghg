@@ -23,9 +23,11 @@ class ObsSurface(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     def __enter__(self):
+        # TODO - add metastore here?
         return self
 
     def __exit__(self, *args, **kwargs):
+        # TODO - add metastore here?
         self.save()
 
     def read_data(
@@ -223,7 +225,7 @@ class ObsSurface(BaseStore):
         results: resultsType = defaultdict(dict)
 
         # Load the store for the metadata
-        # metastore = load_metastore(key=self._metakey)
+        metastore = load_metastore(key=self._metakey)
 
         # Create a progress bar object using the filepaths, iterate over this below
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
@@ -380,6 +382,7 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
+        raise NotImplementedError
         from collections import defaultdict
 
         from openghg.standardise.surface import parse_aqmesh

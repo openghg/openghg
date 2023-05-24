@@ -52,7 +52,10 @@ class BaseStore:
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
     def to_data(self):
-        return self.__dict__
+        # We don't need to store the metadata store, it has its own location
+        # QUESTION - Is this cleaner than the previous specifying
+        do_not_store = ["_metastore"]
+        return {k: v for k, v in self.__dict__.items() if k not in do_not_store}
 
     # @classmethod
     # def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
