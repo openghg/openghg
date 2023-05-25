@@ -2,7 +2,7 @@ import logging
 import os
 import platform
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple, Optional
 import uuid
 import toml
 
@@ -62,12 +62,13 @@ def get_user_config_path() -> Path:
 def create_config(silent: bool = False) -> None:
     """Creates a user config.
 
+    Args:
+        silent: Creates the basic configuration file with only
+        the user's object store in a default location.
     Returns:
         None
     """
-    if silent:
-        raise NotImplementedError
-    else:
+    if not silent:
         print("\nOpenGHG configuration")
         print("---------------------\n")
 
@@ -77,12 +78,10 @@ def create_config(silent: bool = False) -> None:
     config_version = "2"
     positive_responses = ("y", "yes")
 
-    updated = False
     # If the config file exists we might need to update it due to the introduction
     # of the user ID and new object store path handling for multiple stores
     if user_config_path.exists():
         if silent:
-            raise NotImplementedError
             logger.error("Error: cannot overwrite an existing configuration. Please run interactively.")
             return
 
@@ -105,7 +104,7 @@ def create_config(silent: bool = False) -> None:
         logger.info(f"Current user object store path: {user_store_path}")
 
         # Store the object store info
-        stores = []
+        stores = {}
 
         update_input = input("Would you like to update the path? (y/n): ")
         if update_input.lower() in positive_responses:
@@ -116,76 +115,71 @@ def create_config(silent: bool = False) -> None:
                 return
 
             new_path = Path(new_path_input).expanduser().resolve()
-            stores.append(("user", str(new_path), "rw"))
-            updated = True
+            stores["user"] = {"path": str(new_path), "permissions": "rw"}
         else:
-            stores.append(("user", str(user_store_path), "rw"))
+            stores["user"] = {"path": str(user_store_path), "permissions": "rw"}
 
+        # Copy in exisiting shared stores
+        if recent:
+            stores.update({k: v for k, v in config["object_store"].items() if k != "user"})
+
+        # Now ask the user if they want to add new stores
         new_shared_stores = _user_multstore_input()
 
         if new_shared_stores:
-            stores.extend(new_shared_stores)
-            updated = True
+            existing = [k for k in new_shared_stores if k in stores]
+            if existing:
+                print(f"Some names match those of existing stoers: {existing}, please update manually.")
+
+            stores.update(new_shared_stores)
 
         # Some users may not have a user ID if they've used previous versions of OpenGHG
-        try:
-            user_id = config["user_id"]
-            uuid.UUID(user_id, version=4)
-        except (KeyError, ValueError):
-            user_id = str(uuid.uuid4())
-            updated = True
+        user_id = config.get("user_id")
+        config = _combine_config(config_version=config_version, object_stores=stores, user_id=user_id)
     else:
-        updated = True
-        stores = []
+        stores = {}
 
-        # 1. Create the user's object store
-        print("We'll first create your user object store.\n")
+        # 1. Create the user's object store first
+        if not silent:
+            logger.info("We'll first create your user object store.\n")
 
         obj_store_path = get_default_objectstore_path()
 
-        obj_store_input = input(f"Enter path for object store (default {obj_store_path}): ")
-        if obj_store_input:
-            obj_store_path = Path(obj_store_input).expanduser().resolve()
+        if silent:
+            obj_store_path = get_default_objectstore_path()
+        else:
+            obj_store_input = input(f"Enter path for object store (default {obj_store_path}): ")
+            if obj_store_input:
+                obj_store_path = Path(obj_store_input).expanduser().resolve()
 
         # Let's create the store to make sure it's a valid path
         obj_store_path.mkdir(parents=True, exist_ok=True)
 
-        stores.append(("user", str(obj_store_path), "rw"))
+        stores["user"] = {"path": str(obj_store_path), "permissions": "rw"}
 
-        shared_stores = _user_multstore_input()
-        if shared_stores:
-            stores.extend(shared_stores)
+        if not silent:
+            shared_stores = _user_multstore_input()
+            stores.update(shared_stores)
 
-    # Create the object store dictionary
-    object_store_info = {}
-    for name, path, perm in stores:
-        path = str(Path(path).expanduser().resolve())
-        perm = perm.strip()
-
-        object_store_info[name] = {"path": path, "permissions": perm}
-
-    user_id = str(uuid.uuid4())
-
-    config = {"user_id": user_id, "config_version": config_version, "object_store": object_store_info}
+        config = _combine_config(config_version=config_version, object_stores=stores)
 
     # Make the .config/openghg folder
     user_config_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if updated:
+    if not silent:
         logger.info(f"Configuration written to {user_config_path}")
-        user_config_path.write_text(toml.dumps(config))
-    else:
-        logger.info("Configuration unchanged.")
+
+    user_config_path.write_text(toml.dumps(config))
 
 
-def _user_multstore_input() -> List[Tuple[str, str, str]]:
+def _user_multstore_input() -> Dict:
     """Ask the user to input data about shared object stores
 
     Returns:
-        list: A list of tuples containing the object store name, path and permissions
+        dict: Dictionary of object store paths and permissions
     """
     positive_responses = ("y", "yes")
-    stores = []
+    stores = {}
     # 2. Ask the user to enter other object store paths
     while True:
         response = input("Would you like to add another object store? (y/n): ")
@@ -199,11 +193,33 @@ def _user_multstore_input() -> List[Tuple[str, str, str]]:
             while store_permissions not in ("r", "rw"):
                 store_permissions = input("\nEnter object store permissions: ")
 
-            stores.append((store_name, store_path, store_permissions))
+            stores[store_name] = {"path": store_path, "permissions": store_permissions}
         else:
             break
 
     return stores
+
+
+def _combine_config(config_version: str, object_stores: Dict, user_id: Optional[str] = None) -> Dict:
+    """Combine parts required into the proper dictionary format
+
+    Args:
+        config_version: Configuration version number
+        object_stores: Object store configuration dictionary
+        user_id: User ID
+    """
+    # Create the object store dictionary
+    object_store_info = {}
+    for name, data in object_stores.items():
+        path = str(Path(data["path"]).expanduser().resolve())
+        permissions = data["permissions"].strip()
+
+        object_store_info[name] = {"path": path, "permissions": permissions}
+
+    if user_id is None:
+        user_id = str(uuid.uuid4())
+
+    return {"user_id": user_id, "config_version": config_version, "object_store": object_store_info}
 
 
 def update_config_file(path: Path):
