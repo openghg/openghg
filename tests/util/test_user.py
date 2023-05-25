@@ -1,22 +1,17 @@
-from openghg.util import create_config, get_user_id, check_config
+from openghg.util import create_config, check_config
 import toml
 from pathlib import Path
 import pytest
+import logging
 
 
-@pytest.fixture
-def mock_config(mocker, scope="module"):
-    mock_path = str(Path().home().joinpath("openghg_store"))
-    mock_conf = {"object_store": {"local_store": mock_path}, "user_id": "test-uuid-100"}
-    mocker.patch("openghg.util._user.read_local_config", return_value=mock_conf)
+@pytest.fixture(scope="module")
+def mock_conf_path(mocker, tmpdir):
+    mock_config_path = Path(tmpdir).joinpath("mock_config.conf")
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
 
 
-def test_get_user_id(mock_config):
-    user_id = get_user_id()
-    assert user_id == "test-uuid-100"
-
-
-def test_create_config(mocker, tmpdir):
+def test_create_config_no_exisiting(mocker, tmpdir):
     mock_config_path = Path(tmpdir).joinpath("mock_config.conf")
     mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
     mock_uuids = [f"test-uuid-{x}" for x in range(100, 110)]
@@ -29,18 +24,29 @@ def test_create_config(mocker, tmpdir):
     config = toml.loads(mock_config_path.read_text())
 
     assert config["user_id"] == "test-uuid-100"
-    assert config["object_store"]["local_store"] == str(user_obj_expected)
+    assert config["config_version"] == "2"
+    assert config["object_store"]["user"]["path"] == str(user_obj_expected)
+    assert config["object_store"]["user"]["permissions"] == "rw"
 
 
-def test_check_config(mock_config, mocker, caplog):
-    with pytest.raises(ValueError):
-        check_config()
+def test_create_config_existing_file(mocker, tmpdir, caplog):
+    caplog.set_level(logging.DEBUG, logger="openghg.util")
 
-    mock_uuid = "179dcd5f-d5bb-439d-a3c2-9f690ac6d3b8"
-    mock_path = "/tmp/mock_store"
-    mock_conf = {"object_store": {"local_store": mock_path}, "user_id": mock_uuid}
-    mocker.patch("openghg.util._user.read_local_config", return_value=mock_conf)
+    mock_config_path = Path(tmpdir).joinpath("mock_config.conf")
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
 
-    check_config()
+    create_config(silent=True)
 
-    assert " /tmp/mock_store does not exist but will be created." in caplog.text
+    assert "Error: cannot overwrite an existing configuration. Please run interactively." not in caplog.text
+
+    create_config(silent=True)
+
+    assert "Error: cannot overwrite an existing configuration. Please run interactively." in caplog.text
+
+
+def test_check_config_valid(tmpdir, mocker, caplog):
+    mock_config_path = Path(tmpdir).joinpath("mock_config.conf")
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
+
+    create_config(silent=True)
+    assert check_config() is True

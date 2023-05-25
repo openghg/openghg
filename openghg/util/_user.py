@@ -2,7 +2,7 @@ import logging
 import os
 import platform
 from pathlib import Path
-from typing import Dict, Tuple, Optional
+from typing import Dict, Optional
 import uuid
 import toml
 
@@ -129,7 +129,7 @@ def create_config(silent: bool = False) -> None:
         if new_shared_stores:
             existing = [k for k in new_shared_stores if k in stores]
             if existing:
-                print(f"Some names match those of existing stoers: {existing}, please update manually.")
+                print(f"Some names match those of existing stores: {existing}, please update manually.")
 
             stores.update(new_shared_stores)
 
@@ -249,28 +249,41 @@ def read_local_config() -> Dict:
     return config
 
 
-def check_config() -> None:
+def check_config() -> bool:
     """Check that the user config file is valid and the paths
     given in it exist.
 
     Returns:
-        bool
+        bool: True if config OK, else False
     """
+    valid = True
+
     config_path = get_user_config_path()
 
     if not config_path.exists():
         logger.warning("Configuration file does not exist. Please create it by running openghg --quickstart.")
+        valid = False
 
     config = read_local_config()
     uid = config["user_id"]
+    config_version = config.get("config_version")
+    if config_version is None:
+        logger.warn(
+            "Your configuration file is not in the latest format, please run openghg --quickstart to update it."
+        )
+        valid = False
+
     object_stores = config["object_store"]
 
     try:
         uuid.UUID(uid, version=4)
     except ValueError:
-        logger.exception("Invalid user ID. Please re-run quickstart to setup a valid config file.")
-        raise
+        valid = False
+        logger.warn("Invalid user ID, please run openghg --quickstart to update it.")
 
-    for path in object_stores.values():
-        if not Path(path).exists():
-            logger.info(f"{path} does not exist but will be created.")
+    for name, data in object_stores.items():
+        p = Path(data["path"])
+        if not p.exists():
+            logger.info(f"The path for object store {name} at {p} does not exist but will be created.")
+
+    return valid
