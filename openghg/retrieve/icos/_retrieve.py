@@ -323,7 +323,7 @@ def _retrieve_remote(
         # This is the metadata, dobj.info and dobj.meta are equal
         dobj_info = dobj.meta
 
-        metadata = {}
+        attributes = {}
 
         specific_info = dobj_info["specificInfo"]
         col_data = specific_info["columns"]
@@ -338,30 +338,30 @@ def _retrieve_remote(
 
         species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
 
-        metadata["species"] = the_species
+        attributes["species"] = the_species
         acq_data = specific_info["acquisition"]
         station_data = acq_data["station"]
 
         to_store: Dict[str, Any] = {}
         try:
-            instrument_metadata = acq_data["instrument"]
+            instrument_attributes = acq_data["instrument"]
         except KeyError:
             to_store["instrument"] = "NA"
             to_store["instrument_data"] = "NA"
         else:
-            # Do some tidying of the instrument metadata
+            # Do some tidying of the instrument attributes
             instruments = set()
-            cleaned_instrument_metadata = []
+            cleaned_instrument_attributes = []
 
-            if not isinstance(instrument_metadata, list):
-                instrument_metadata = [instrument_metadata]
+            if not isinstance(instrument_attributes, list):
+                instrument_attributes = [instrument_attributes]
 
-            for inst in instrument_metadata:
+            for inst in instrument_attributes:
                 instrument_name = inst["label"]
                 instruments.add(instrument_name)
                 uri = inst["uri"]
 
-                cleaned_instrument_metadata.extend([instrument_name, uri])
+                cleaned_instrument_attributes.extend([instrument_name, uri])
 
             if len(instruments) == 1:
                 instrument = instruments.pop()
@@ -369,51 +369,66 @@ def _retrieve_remote(
                 instrument = "multiple"
 
             to_store["instrument"] = instrument
-            to_store["instrument_data"] = cleaned_instrument_metadata
+            to_store["instrument_data"] = cleaned_instrument_attributes
 
-        metadata.update(to_store)
+        attributes.update(to_store)
 
-        metadata["site"] = station_data["id"]
-        metadata["measurement_type"] = measurement_type
-        metadata["units"] = units
+        attributes["site"] = station_data["id"]
+        attributes["measurement_type"] = measurement_type
+        attributes["units"] = units
 
         _sampling_height = acq_data["samplingHeight"]
-        metadata["sampling_height"] = format_inlet(_sampling_height, key_name="sampling_height")
-        metadata["sampling_height_units"] = "metres"
-        metadata["inlet"] = format_inlet(_sampling_height, key_name="inlet")
-        metadata["inlet_height_magl"] = format_inlet(_sampling_height, key_name="inlet_height_magl")
+        attributes["sampling_height"] = format_inlet(_sampling_height, key_name="sampling_height")
+        attributes["sampling_height_units"] = "metres"
+        attributes["inlet"] = format_inlet(_sampling_height, key_name="inlet")
+        attributes["inlet_height_magl"] = format_inlet(_sampling_height, key_name="inlet_height_magl")
 
         loc_data = station_data["location"]
 
+        attributes["station_long_name"] = loc_data["label"]
+        attributes["station_latitude"] = str(loc_data["lat"])
+        attributes["station_longitude"] = str(loc_data["lon"])
+
+        # 03/05/2023: Updated attributes to include altitude for "station_height_masl" explicitly.
+        # attributes["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
+        # attributes["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
+        attributes["station_height_masl"] = format_inlet(loc_data["alt"], key_name="station_height_masl")
+
+        attributes["data_owner"] = f"{stat.firstName} {stat.lastName}"
+        attributes["data_owner_email"] = str(stat.email)
+
+        attributes["citation_string"] = dobj_info["references"]["citationString"]
+        attributes["licence_name"] = dobj_info["references"]["licence"]["name"]
+        attributes["licence_info"] = dobj_info["references"]["licence"]["url"]
+
+        metadata = {}
+
+        network = "ICOS"
+
         try:
-            station_long_name = openghg_site_metadata[site.upper()]["ICOS"]["long_name"]
+            site_info = openghg_site_metadata[site.upper()][network]
         except KeyError:
-            station_long_name = loc_data["label"]
+            pass
+        else:
+            metadata["station_long_name"] = site_info["long_name"]
+            metadata["station_latitude"] = site_info["latitude"]
+            metadata["station_longitude"] = site_info["longitude"]
 
-        metadata["station_long_name"] = station_long_name
-        metadata["station_latitude"] = str(loc_data["lat"])
-        metadata["station_longitude"] = str(loc_data["lon"])
-
-        # 03/05/2023: Updated metadata to include altitude for "station_height_masl" explicitly.
-        # metadata["station_altitude"] = format_inlet(loc_data["alt"], key_name="station_altitude")
-        # metadata["station_height_masl"] = format_inlet(str(stat.eas), key_name="station_height_masl")
-        metadata["station_height_masl"] = format_inlet(loc_data["alt"], key_name="station_height_masl")
-
-        metadata["data_owner"] = f"{stat.firstName} {stat.lastName}"
-        metadata["data_owner_email"] = str(stat.email)
-
-        metadata["citation_string"] = dobj_info["references"]["citationString"]
-        metadata["licence_name"] = dobj_info["references"]["licence"]["name"]
-        metadata["licence_info"] = dobj_info["references"]["licence"]["url"]
+        # Add some values directly for attributes (for now)
+        metadata["species"] = attributes["species"]
 
         # Add ICOS in directly here for now
-        metadata["network"] = "ICOS"
-        metadata["data_type"] = "surface"
-        metadata["data_source"] = "icoscp"
-        metadata["source_format"] = "icos"
-        metadata["icos_data_level"] = str(data_level)
+        additional_data = {}
+        additional_data["network"] = network
+        additional_data["data_type"] = "surface"
+        additional_data["data_source"] = "icoscp"
+        additional_data["source_format"] = "icos"
+        additional_data["icos_data_level"] = str(data_level)
+        additional_data["dataset_source"] = dobj_dataset_source
+        additional_data["site"] = site
 
-        metadata["dataset_source"] = dobj_dataset_source
+        attributes.update(additional_data)
+        metadata.update(additional_data)
 
         dataframe.columns = [x.lower() for x in dataframe.columns]
         dataframe = dataframe.dropna(axis="index")
@@ -421,7 +436,7 @@ def _retrieve_remote(
         if not dataframe.index.is_monotonic_increasing:
             dataframe = dataframe.sort_index()
 
-        spec = metadata["species"]
+        spec = attributes["species"]
 
         rename_cols = {
             "stdev": spec + " variability",
@@ -444,7 +459,7 @@ def _retrieve_remote(
         dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
 
         dataset = dataframe.to_xarray()
-        dataset.attrs.update(metadata)
+        dataset.attrs.update(attributes)
 
         # So there isn't an easy way of getting a hash of a Dataset, can we do something
         # simple here we can compare data that's being added? Then we'll be able to make sure
@@ -454,7 +469,7 @@ def _retrieve_remote(
         standardised_data[data_key] = {
             "metadata": metadata,
             "data": dataset,
-            "attributes": metadata,
+            "attributes": attributes,
         }
 
     standardised_data = assign_attributes(
