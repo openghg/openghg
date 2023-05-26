@@ -44,7 +44,7 @@ Development
 
    development/index_devel
 
-Devloper API Reference
+Developer API Reference
 ======================
 
 .. toctree::
