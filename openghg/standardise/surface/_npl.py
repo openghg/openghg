@@ -30,11 +30,11 @@ def parse_npl(
         sampling_period: Sampling period
         measurement_type: Type of measurement taken e.g."flask", "insitu"
         update_mismatch: This determines how mismatches between the internal data
-            attributes and the supplied / derived metadata are handled.
+            "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
-                - "never" - don't update mismatches and raise an AttrMismatchError
-                - "attributes" - update mismatches based on input attributes
-                - "metadata" - update mismatches based on input metadata
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """

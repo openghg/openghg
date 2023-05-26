@@ -289,11 +289,11 @@ def _read_obspack(
         inlet: Inlet height, if no height use measurement type e.g. flask
         instrument: Instrument name
         update_mismatch: This determines how mismatches between the internal data
-            attributes and the supplied / derived metadata are handled.
+            "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
-                - "never" - don't update mismatches and raise an AttrMismatchError
-                - "attributes" - update mismatches based on input attributes
-                - "metadata" - update mismatches based on input metadata
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
     Returns:
@@ -432,11 +432,11 @@ def _read_raw_file(
         inlet: Inlet height, if no height use measurement type e.g. flask
         instrument: Instrument name
         update_mismatch: This determines how mismatches between the internal data
-            attributes and the supplied / derived metadata are handled.
+            "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
-                - "never" - don't update mismatches and raise an AttrMismatchError
-                - "attributes" - update mismatches based on input attributes
-                - "metadata" - update mismatches based on input metadata
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
 

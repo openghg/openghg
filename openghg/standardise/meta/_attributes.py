@@ -37,12 +37,12 @@ def assign_attributes(
         sampling_period: Number of seconds for which air
                          sample is taken. Only for time variable attribute
         network: Network name
-        update_mismatch: If case insensitive mismatch is found between an
-            attribute and a metadata value, this determines the function behaviour.
+        update_mismatch: This determines how mismatches between the internal data
+            "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
-             - "never" - don't update mismatches and raise an AttrMismatchError
-             - "attributes" - update mistmatches based on attributes within data
-             - "metadata" - update mistmatches based on metadata within data
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
         site_filepath: Alternative site info file
         species_filepath: Alternative species info file
 

@@ -21,11 +21,11 @@ def parse_eurocom(
         Inlet: Inlet height in metres
         Instrument: Instrument name
         update_mismatch: This determines how mismatches between the internal data
-            attributes and the supplied / derived metadata are handled.
+            "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
-                - "never" - don't update mismatches and raise an AttrMismatchError
-                - "attributes" - update mismatches based on input attributes
-                - "metadata" - update mismatches based on input metadata
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
     Returns:
         dict: Dictionary of measurement data
     """

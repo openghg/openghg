@@ -70,22 +70,27 @@ def sync_surface_metadata(
         the attribute values. Note: this skips any keys which can't be
         copied from the attribute values.
         update_mismatch: If case insensitive mismatch is found between an
-            attribute and a metadata value, this determines the function behaviour.
-            This includes the options:
-             - "never" - don't update mismatches and raise an AttrMismatchError
-             - "attributes" - update mismatches based on input attributes
-             - "metadata" - update mismatches based on input metadata
+          attribute and a metadata value, this determines the function behaviour.
+          This includes the options:
+            - "never" - don't update mismatches and raise an AttrMismatchError
+            - "from_source" / "attributes" - update mismatches based on input attributes
+            - "from_definition" / "metadata" - update mismatches based on input metadata
     Returns:
         dict, dict: Aligned metadata, attributes
     """
     meta_copy = deepcopy(metadata)
     attrs_copy = deepcopy(attributes)
 
-    mismatch_keys = ["never", "attributes", "metadata"]
-    if update_mismatch.lower() not in mismatch_keys:
-        raise ValueError(f"Input for 'update_mismatch' should be one of {mismatch_keys}")
+    mismatch_keys = {"never": ["never"],
+                     "attributes": ["attributes", "from_source"],
+                     "metadata": ["metadata", "from_definition"]}
+
+    for key, options in mismatch_keys.items():
+        if update_mismatch.lower() in options:
+            update_mismatch = key.lower()
+            break
     else:
-        update_mismatch = update_mismatch.lower()
+        raise ValueError(f"Input for 'update_mismatch' should be one of {mismatch_keys}")
 
     attr_mismatches = {}
 

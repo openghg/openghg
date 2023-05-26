@@ -139,12 +139,12 @@ class ObsSurface(BaseStore):
             instrument: Instrument name
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
-            update_mismatch: This determines how mismatches between the internal data
-                attributes and the supplied / derived metadata are handled.
-                This includes the options:
-                    - "never" - don't update mismatches and raise an AttrMismatchError
-                    - "attributes" - update mismatches based on input attributes
-                    - "metadata" - update mismatches based on input metadata
+        update_mismatch: This determines how mismatches between the internal data
+            "attributes" and the supplied / derived "metadata" are handled.
+            This includes the options:
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
       overwrite: Overwrite previously uploaded data
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).

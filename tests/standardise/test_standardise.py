@@ -86,7 +86,9 @@ def test_local_obs_metadata_mismatch_attr():
     filename = "DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc"
     filepath = get_surface_datapath(filename=filename, source_format="OPENGHG")
 
-    # Include update_mismatch="attributes"
+    # Define update_mismatch as "from_source" / "attributes"
+    update_mismatch = "from_source"
+
     results = standardise_surface(
         filepaths=filepath,
         site="TAC",
@@ -95,7 +97,7 @@ def test_local_obs_metadata_mismatch_attr():
         instrument="picarro",
         source_format="openghg",
         sampling_period="1H",
-        update_mismatch="attributes",
+        update_mismatch=update_mismatch,
         overwrite=True,
     )
 
@@ -142,7 +144,9 @@ def test_local_obs_metadata_mismatch_meta():
     filename = "DECC-picarro_TAC_20130131_co2-998m-20220929_mismatch.nc"
     filepath = get_surface_datapath(filename=filename, source_format="OPENGHG")
 
-    # Include update_mismatch="metadata"
+    # Define update_mismatch as "from_definition" / "metadata"
+    update_mismatch = "from_definition"
+
     results = standardise_surface(
         filepaths=filepath,
         site="TAC",
@@ -151,7 +155,7 @@ def test_local_obs_metadata_mismatch_meta():
         instrument="picarro",
         source_format="openghg",
         sampling_period="1H",
-        update_mismatch="metadata",
+        update_mismatch=update_mismatch,
         overwrite=True,
     )
 

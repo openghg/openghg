@@ -50,11 +50,11 @@ def parse_openghg(
         data_owner: Name of data owner.
         data_owner_email: Email address for data owner.
         update_mismatch: This determines how mismatches between the internal data
-            attributes and the supplied / derived metadata are handled.
+            "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
-                - "never" - don't update mismatches and raise an AttrMismatchError
-                - "attributes" - update mismatches based on input attributes
-                - "metadata" - update mismatches based on input metadata
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         kwargs: Any additional attributes to be associated with the data.
