@@ -1,8 +1,8 @@
 from pathlib import Path
 import pytest
 
-from helpers import get_emissions_datapath, get_footprint_datapath, get_surface_datapath
-from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
+from helpers import get_emissions_datapath, get_footprint_datapath, get_column_datapath, get_surface_datapath
+from openghg.standardise import standardise_flux, standardise_footprint, standardise_column, standardise_surface
 from openghg.util import compress
 from openghg.types import AttrMismatchError
 from openghg.retrieve import get_obs_surface, search_surface
@@ -211,6 +211,26 @@ def test_local_obs_metadata_mismatch_fail():
 
         # Check error message contains advice on how to bypass this error
         assert "update_mismatch" in e_info
+
+
+def test_standardise_column():
+    filepath = get_column_datapath(filename="gosat-fts_gosat_20170318_ch4-column.nc")
+
+    satellite = "GOSAT"
+    domain = "BRAZIL"
+    species = "methane"
+
+    results = standardise_column(
+        filepath=filepath,
+        source_format="OPENGHG",
+        satellite=satellite,
+        domain=domain,
+        species=species,
+        overwrite=True,
+    )
+
+    assert "error" not in results
+    assert "ch4" in results  # Should this be a more descriprive key?
 
 
 def test_standardise_footprint():
