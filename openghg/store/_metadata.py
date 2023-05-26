@@ -169,7 +169,7 @@ def update_metadata(data_dict: DataDictType,
     for key in data_dict:
 
         uuid = uuid_dict[key]["uuid"]
-        datasource = Datasource.load(uuid=uuid)
+        datasource = Datasource.load(uuid=uuid, shallow=True)
 
         if isinstance(data_dict[key]["metadata"], Dict):
             metadata = cast(Dict, data_dict[key]["metadata"])
