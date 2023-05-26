@@ -265,6 +265,9 @@ def test_scenario_infer_inlet():
     assert model_scenario.footprint is not None
     assert model_scenario.fluxes is not None
 
+    assert model_scenario.inlet == "100m"
+    assert model_scenario.fp_inlet == "100m"
+
 
 def test_scenario_mult_fluxes():
     """
@@ -305,6 +308,73 @@ def test_scenario_too_few_inputs():
 
     assert model_scenario.obs is None
     assert model_scenario.footprint is None
+
+
+def test_scenario_uses_fp_inlet():
+    """
+    Test ModelScenario is using fp_inlet in place of inlet if this is passed.
+    In this case we expect the observation data to be found but the footprint
+    data to be missing.
+    """
+    start_date = "2012-01-01"
+    end_date = "2013-01-01"
+
+    site = "tac"
+    domain = "EUROPE"
+    species = "ch4"
+    inlet = "100m"  # Correct inlet
+    fp_inlet = "999m"  # Incorrect inlet
+
+    model_scenario = ModelScenario(
+        site=site, species=species, inlet=inlet, domain=domain, fp_inlet=fp_inlet, start_date=start_date, end_date=end_date
+    )
+
+    # Expect observation data to be found
+    assert model_scenario.obs is not None
+
+    # Expect footprint data to be missing in this case
+    assert not hasattr(model_scenario, fp_inlet)
+    assert model_scenario.footprint is None
+
+
+def test_scenario_matches_fp_inlet():
+    """
+    Test ModelScenario is able to use "height_name" data from site_info file to
+    map between different inlet values for observation data and footprints.
+
+    In this case for "WAO" data we want to be able to use a dictionary to allow
+    older footprints which were run at 20m to be used for 10m inlet e.g.
+
+    "WAO": {
+        "ICOS": {
+            "height": ["10m"],
+            "height_name": {"10m": ["10magl", "20magl"]},
+            ...
+    },
+    """
+    start_date = "2021-12-01"
+    end_date = "2022-01-01"
+
+    site = "wao"
+    domain = "TEST"
+    species = "rn"
+    inlet = "10m"
+
+    model_scenario = ModelScenario(
+        site=site, species=species, inlet=inlet, domain=domain, start_date=start_date, end_date=end_date
+    )
+
+    expected_obs_inlet = inlet # inlet for observation data
+    expected_fp_inlet = "20m"  # inlet for footprint data
+
+    # Check obs and footprint data is found and inlets are expected values
+    assert model_scenario.obs is not None
+    assert model_scenario.footprint is not None
+    assert model_scenario.obs.metadata["inlet"] == expected_obs_inlet
+    assert model_scenario.footprint.metadata["inlet"] == expected_fp_inlet
+
+    assert model_scenario.inlet == expected_obs_inlet
+    assert model_scenario.fp_inlet == expected_fp_inlet
 
 
 def test_add_data():
@@ -569,9 +639,9 @@ def footprint_dummy():
     data = xr.Dataset(data_vars, coords=coords)
 
     # Potential metadata:
-    # - site, height, domain, model, network, start_date, end_date, heights, ...
+    # - site, inlet, domain, model, network, start_date, end_date, heights, ...
     # - data_type="footprints"
-    metadata = {"site": "TESTSITE", "height": "10m", "domain": "TESTDOMAIN", "data_type": "footprints"}
+    metadata = {"site": "TESTSITE", "inlet": "10m", "domain": "TESTDOMAIN", "data_type": "footprints"}
 
     footprintdata = FootprintData(data=data, metadata=metadata)
 
@@ -878,13 +948,13 @@ def footprint_co2_dummy():
     )
 
     # Potential metadata:
-    # - site, height, domain, model, network, start_date, end_date, heights, ...
+    # - site, inlet, domain, model, network, start_date, end_date, heights, ...
     # - species (if applicable)
     # - data_type="footprints"
     species = "co2"
     metadata = {
         "site": "TESTSITE",
-        "height": "10m",
+        "inlet": "10m",
         "domain": "TESTDOMAIN",
         "data_type": "footprints",
         "species": species,

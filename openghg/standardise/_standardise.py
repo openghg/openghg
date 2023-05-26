@@ -15,6 +15,7 @@ def standardise_surface(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     calibration_scale: Optional[str] = None,
+    update_mismatch: bool = False,
     site_filepath: optionalPathType = None,
     overwrite: bool = False,
 ) -> Optional[Dict]:
@@ -28,6 +29,10 @@ def standardise_surface(
         inlet: Inlet height in metres
         instrument: Instrument name
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
+        update_mismatch: This determines whether mismatches between the internal data
+                attributes and the supplied / derived metadata can be updated or whether
+                this should raise an AttrMismatchError.
+                If True, currently updates metadata with attribute value.
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         overwrite: Overwrite data currently present in the object store
@@ -124,11 +129,96 @@ def standardise_surface(
             instrument=instrument,
             sampling_period=sampling_period,
             inlet=inlet,
+            update_mismatch=update_mismatch,
             site_filepath=site_filepath,
             overwrite=overwrite,
         )
 
         return results
+
+
+def standardise_column(
+    filepath: Union[str, Path],
+    satellite: Optional[str] = None,
+    domain: Optional[str] = None,
+    selection: Optional[str] = None,
+    site: Optional[str] = None,
+    species: Optional[str] = None,
+    network: Optional[str] = None,
+    instrument: Optional[str] = None,
+    platform: str = "satellite",
+    source_format: str = "openghg",
+    overwrite: bool = False,
+) -> Optional[Dict]:
+    """Read column observation file
+
+    Args:
+        filepath: Path of observation file
+        satellite: Name of satellite (if relevant)
+        domain: For satellite only. If data has been selected on an area include the
+            identifier name for domain covered. This can map to previously defined domains
+            (see openghg_defs "domain_info.json" file) or a newly defined domain.
+        selection: For satellite only, identifier for any data selection which has been
+            performed on satellite data. This can be based on any form of filtering, binning etc.
+            but should be unique compared to other selections made e.g. "land", "glint", "upperlimit".
+            If not specified, domain will be used.
+        site : Site code/name (if relevant). Can include satellite OR site.
+        species: Species name or synonym e.g. "ch4"
+        instrument: Instrument name e.g. "TANSO-FTS"
+        network: Name of in-situ or satellite network e.g. "TCCON", "GOSAT"
+        platform: Type of platform. Should be one of:
+            - "satellite"
+            - "site"
+        source_format : Type of data being input e.g. openghg (internal format)
+        overwrite: Should this data overwrite currently stored data.
+    Returns:
+        dict: Dictionary containing confirmation of standardisation process.
+    """
+    from openghg.cloud import call_function
+    from openghg.store import ObsColumn
+
+    filepath = Path(filepath)
+
+    if running_on_hub():
+        compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
+
+        metadata = {
+            "site": site,
+            "satellite": satellite,
+            "domain": domain,
+            "selection": selection,
+            "site": site,
+            "species": species,
+            "network": network,
+            "instrument": instrument,
+            "platform": platform,
+            "source_format": source_format,
+            "overwrite": overwrite,
+        }
+
+        metadata = {k: v for k, v in metadata.items() if v is not None}
+
+        to_post = create_post_dict(
+            function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
+        )
+
+        fn_response = call_function(data=to_post)
+        response_content: Dict = fn_response["content"]
+        return response_content
+    else:
+        return ObsColumn.read_file(
+            filepath=filepath,
+            satellite=satellite,
+            domain=domain,
+            selection=selection,
+            site=site,
+            species=species,
+            network=network,
+            instrument=instrument,
+            platform=platform,
+            source_format=source_format,
+            overwrite=overwrite,
+        )
 
 
 def standardise_bc(
