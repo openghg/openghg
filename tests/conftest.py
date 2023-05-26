@@ -18,7 +18,7 @@ tmp_store_path = temporary_store_path()
 @pytest.fixture(scope="session", autouse=True)
 def default_session_fixture() -> Iterator[None]:
     mock_config = {
-        "object_store": {"local_store": str(tmp_store_path)},
+        "object_store": {"user": {"path": str(tmp_store_path), "permissions": "rw"}},
         "user_id": "test-id-123",
     }
 

@@ -874,3 +874,8 @@ def test_gcwerks_fp_not_a_tuple_raises():
         with ObsSurface(bucket=bucket) as obs:
             obs.read_file(filepath=filepath, source_format="GCWERKS", site="cgo", network="agage")
             obs.read_file(filepath=filepath, source_format="gc", site="cgo", network="agage")
+
+
+def test_get_store_path():
+    bucket = get_bucket()
+    print(bucket)
