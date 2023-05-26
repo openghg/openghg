@@ -23,11 +23,9 @@ class ObsSurface(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     def __enter__(self):
-        # TODO - add metastore here?
         return self
 
     def __exit__(self, *args, **kwargs):
-        # TODO - add metastore here?
         self.save()
 
     def read_data(
@@ -507,9 +505,8 @@ class ObsSurface(BaseStore):
         data_schema = ObsSurface.schema(species)
         data_schema.validate_data(data)
 
-    @staticmethod
     def store_data(
-        data: Dict, overwrite: bool = False, required_metakeys: Optional[Sequence] = None
+        self, data: Dict, overwrite: bool = False, required_metakeys: Optional[Sequence] = None
     ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
@@ -527,13 +524,12 @@ class ObsSurface(BaseStore):
         from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.util import hash_retrieved_data
 
-        obs = ObsSurface.load()
-        metastore = load_metastore(key=obs._metakey)
+        metastore = self._metastore
 
         # Very rudimentary hash of the data and associated metadata
         hashes = hash_retrieved_data(to_hash=data)
         # Find the keys in data we've seen before
-        seen_before = {next(iter(v)) for k, v in hashes.items() if k in obs._retrieved_hashes}
+        seen_before = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
 
         if len(seen_before) == len(data):
             logger.warning("Note: There is no new data to process.")
@@ -577,11 +573,8 @@ class ObsSurface(BaseStore):
         )
 
         # Record the Datasources we've created / appended to
-        obs.add_datasources(uuids=datasource_uuids, data=to_process, metastore=metastore)
-        obs.store_hashes(hashes=hashes)
-
-        metastore.close()
-        obs.save()
+        self.add_datasources(uuids=datasource_uuids, data=to_process, metastore=metastore)
+        self.store_hashes(hashes=hashes)
 
         return datasource_uuids
 

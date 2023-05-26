@@ -54,8 +54,8 @@ class BaseStore:
     def to_data(self):
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
-        do_not_store = ["_metastore"]
-        return {k: v for k, v in self.__dict__.items() if k not in do_not_store}
+        DO_NOT_STORE = ["_metastore"]
+        return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
     # @classmethod
     # def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
@@ -200,6 +200,8 @@ class BaseStore:
                 # Make sure all the metadata is lowercase for easier searching later
                 meta_copy = to_lowercase(d=meta_copy)
                 metastore.insert(meta_copy)
+                # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
+                # so we can have rapid
                 self._datasource_uuids[uid] = key
 
     def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
