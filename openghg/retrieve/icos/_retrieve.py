@@ -182,6 +182,7 @@ def local_retrieve(
         site=site,
         species=species,
         inlet=inlet,
+        sampling_height=sampling_height,
         network="ICOS",
         data_source="icoscp",
         start_date=start_date,
@@ -200,6 +201,7 @@ def local_retrieve(
             data_level=data_level,
             dataset_source=dataset_source,
             inlet=inlet,
+            sampling_height=sampling_height,
             update_mismatch=update_mismatch,
         )
 
