@@ -11,6 +11,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 def retrieve_atmospheric(
     site: str,
     species: Optional[Union[str, List]] = None,
+    inlet: Optional[str] = None,
     sampling_height: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
@@ -27,6 +28,8 @@ def retrieve_atmospheric(
     Args:
         site: Site code
         species: Species name
+        inlet: Height of the inlet for sampling in metres.
+        sampling_height: Alias for inlet
         start_date: Start date
         end_date: End date
         force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
@@ -46,6 +49,7 @@ def retrieve_atmospheric(
     return retrieve(
         site=site,
         species=species,
+        inlet=inlet,
         sampling_height=sampling_height,
         start_date=start_date,
         end_date=end_date,
@@ -70,6 +74,8 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
         species: Species name
         start_date: Start date
         end_date: End date
+        inlet: Height of the inlet for sampling in metres.
+        sampling_height: Alias for inlet
         force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
         data_level: ICOS data level (1, 2)
         - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
@@ -123,6 +129,7 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
 def local_retrieve(
     site: str,
     species: Optional[Union[str, List]] = None,
+    inlet: Optional[str] = None,
     sampling_height: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
@@ -140,6 +147,8 @@ def local_retrieve(
     Args:
         site: Site code
         species: Species name
+        inlet: Height of the inlet for sampling in metres.
+        sampling_height: Alias for inlet
         start_date: Start date
         end_date: End date
         force_retrieval: Force the retrieval of data from the ICOS Carbon Portal
@@ -163,11 +172,16 @@ def local_retrieve(
     if not 1 <= data_level <= 2:
         logger.error("Error: data level must be 1 or 2.")
 
+    if sampling_height and inlet is None:
+        inlet = sampling_height
+    elif sampling_height and inlet:
+        logger.warning(f"Both sampling height and inlet specified. Using inlet value of {inlet}")
+
     # NOTE - we skip ranking here, will we be ranking ICOS data?
     results = search_surface(
         site=site,
         species=species,
-        sampling_height=sampling_height,
+        inlet=inlet,
         network="ICOS",
         data_source="icoscp",
         start_date=start_date,
@@ -185,7 +199,7 @@ def local_retrieve(
             species=species,
             data_level=data_level,
             dataset_source=dataset_source,
-            sampling_height=sampling_height,
+            inlet=inlet,
             update_mismatch=update_mismatch,
         )
 
@@ -213,6 +227,7 @@ def _retrieve_remote(
     site: str,
     data_level: int,
     species: Optional[Union[str, List]] = None,
+    inlet: Optional[str] = None,
     sampling_height: Optional[str] = None,
     dataset_source: Optional[str] = None,
     update_mismatch: bool = False,
@@ -230,7 +245,8 @@ def _retrieve_remote(
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         species: Species name
-        sampling_height: Sampling height in metres
+        inlet: Height of the inlet for sampling in metres.
+        sampling_height: Alias for inlet
         dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
         update_mismatch: If metadata derived from stored data does not match
             to attributes derived from ICOS Header, update metadata to match to attributes.
@@ -258,6 +274,11 @@ def _retrieve_remote(
     if not isinstance(species, list):
         species = [species]
 
+    if sampling_height and inlet is None:
+        inlet = sampling_height
+    elif sampling_height and inlet:
+        logger.warning(f"Both sampling height and inlet specified. Using inlet value of {inlet}")
+
     # We should first check if it's stored in the object store
     # Will need to make sure ObsSurface can accept the datasets we
     # create from the ICOS data
@@ -276,9 +297,9 @@ def _retrieve_remote(
     # Now filter the dataframe so we can extract the PIDS
     filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
 
-    if sampling_height is not None:
-        sampling_height = str(float(sampling_height.rstrip("m")))
-        height_filter = [sampling_height in str(x) for x in filtered_sources["samplingheight"]]
+    if inlet is not None:
+        inlet = str(float(inlet.rstrip("m")))
+        height_filter = [inlet in str(x) for x in filtered_sources["samplingheight"]]
         filtered_sources = filtered_sources[height_filter]
 
     if filtered_sources.empty:
@@ -375,6 +396,8 @@ def _retrieve_remote(
 
         attributes["site"] = station_data["id"]
         attributes["measurement_type"] = measurement_type
+        # TODO: Remove this from general attributes but make sure this is 
+        # included as a specific value on the appropriate variable.
         attributes["units"] = units
 
         _sampling_height = acq_data["samplingHeight"]
