@@ -11,7 +11,9 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 def metadata_default_keys() -> List:
     """
-    Define default values expected within ObsSurface metadata
+    Defines default values expected within ObsSurface metadata.
+    Returns:
+        list: keys required in metadata
     """
     default_keys = [
         "site",
@@ -33,13 +35,32 @@ def metadata_default_keys() -> List:
     return default_keys
 
 
+def metadata_keys_as_floats() -> List:
+    """
+    Defines which keys should be consistently stored as numbers in the metadata
+    (even if they are not numbers within the attributes).
+    Returns:
+        list: keys required to be floats in metadata
+    """
+
+    values_as_floats = [
+        # "inlet_height_magl",
+        "station_longitude",
+        "station_latitude",
+        "station_height_masl",
+    ]
+
+    return values_as_floats
+
+
 def sync_surface_metadata(
     metadata: Dict,
     attributes: Dict,
     keys_to_add: Optional[List] = None,
     update_mismatch: bool = False,
 ) -> Dict:
-    """Makes sure any duplicated keys between the metadata and attributes
+    """
+    Makes sure any duplicated keys between the metadata and attributes
     dictionaries match and that certain keys are present in the metadata.
 
     Args:
@@ -48,9 +69,10 @@ def sync_surface_metadata(
         keys_to_add: Add these keys to the metadata, if not present, based on
         the attribute values. Note: this skips any keys which can't be
         copied from the attribute values.
-        update_mismatch: If case insensitive mismatch is found between an
-            attribute and a metadata value, update the metadata to contain
-            the attribute value. By default this will raise an AttrMismatchError.
+        update_mismatch: If True, if case insensitive mismatch is found between
+            an attribute and a metadata value, update the metadata to contain
+            the attribute value.
+            If False (and by default) this will raise an AttrMismatchError.
     Returns:
         dict: Copy of metadata updated with attributes
     """
@@ -101,6 +123,7 @@ def sync_surface_metadata(
         raise AttrMismatchError(f"Metadata mismatch / value not within tolerance for the following keys:\n{mismatch_str}")
 
     default_keys_to_add = metadata_default_keys()
+    keys_as_floats = metadata_keys_as_floats()
 
     if keys_to_add is None:
         keys_to_add = default_keys_to_add
@@ -112,5 +135,8 @@ def sync_surface_metadata(
                 meta_copy[key] = attributes[key]
             except KeyError:
                 logger.warning(f"{key} key not in attributes or metadata")
+            else:
+                if key in keys_as_floats:
+                    meta_copy[key] = float(meta_copy[key])
 
     return meta_copy
