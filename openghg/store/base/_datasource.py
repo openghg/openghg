@@ -23,13 +23,17 @@ class Datasource:
     _datasource_root = "datasource"
     _data_root = "data"
 
-    def __init__(self) -> None:
+    def __init__(self, uuid: Optional[str] = None) -> None:
         from collections import defaultdict
         from uuid import uuid4
 
         from openghg.util import timestamp_now
 
-        self._uuid: str = str(uuid4())
+        if uuid is None:
+            self._uuid: str = str(uuid4())
+        else:
+            self._uuid = uuid
+
         self._creation_datetime = timestamp_now()
         self._metadata: Dict[str, str] = {}
         # Dictionary keyed by daterange of data in each Dataset
@@ -553,8 +557,12 @@ class Datasource:
         """
         from openghg.util import timestamp_tzaware
 
-        d = cls()
-        d._uuid = data["UUID"]
+        uuid = data["UUID"]
+        d = cls(uuid=uuid)
+
+        # TODO: May want to merge these steps within the @classmethod
+        # into __init__() so this is not added twice.
+
         d._creation_datetime = timestamp_tzaware(data["creation_datetime"])
         d._metadata = data["metadata"]
         d._stored = data["stored"]
@@ -635,6 +643,7 @@ class Datasource:
             # Link latest to the newest version
             self._data_keys["latest"] = self._data_keys[version_str]
             self._latest_version = version_str
+            self.add_metadata_key(key="latest_version", value=version_str)
 
         self._stored = True
         datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"

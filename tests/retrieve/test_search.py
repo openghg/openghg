@@ -54,13 +54,12 @@ def test_search_surface(inlet_keyword, inlet_value):
 
 
 def test_search_surface_range():
-    # TODO: Work out what's going on here
 
     res = search_surface(site='TAC',
                          species='co2',
                          inlet='185',
-                         # start_date='2013-02-01',
-                         # end_date='2013-03-01'
+                         start_date='2013-02-01',
+                         end_date='2013-03-01'
                          )
     
     assert res is not None
@@ -141,6 +140,17 @@ def test_search_site():
     assert not res
 
 
+def test_search_site_data_version():
+    """Test that latest version value is added to metadata"""
+
+    res = search(site="bsd", species="co2", inlet="42m")
+    key = next(iter(res.metadata))
+    metadata = res.metadata[key]
+
+    assert "latest_version" in metadata
+    assert metadata["latest_version"] == "v1"
+
+
 def test_multi_type_search():
     res = search(species="ch4")
 
@@ -204,6 +214,10 @@ def test_nonsense_terms():
     ],
 )
 def test_search_footprints(inlet_keyword,inlet_value):
+    """
+    Test search for footprint data which has been added to the object store.
+    This has been stored using one footprint file which represents a year of data.
+    """
 
     if inlet_keyword == "inlet":
         res = search_footprints(site="TMB", network="LGHG", inlet=inlet_value, domain="EUROPE", model="test_model")
@@ -224,6 +238,62 @@ def test_search_footprints(inlet_keyword,inlet_value):
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_footprints_multiple():
+    """
+    Test search for footprint source which is comprised of multiple uploaded files.
+    Each file contains cutdown hourly data and covers 1 month:
+        - 2016-07-01 (3 time points)
+        - 2016-08-01 (3 time points)
+    """
+    res = search_footprints(site="TAC", network="DECC", height="100m", domain="TEST", model="NAME")
+
+    key = next(iter(res.metadata))
+    partial_metadata = {
+        "data_type": "footprints",
+        "site": "tac",
+        "height": "100m",
+        "domain": "test",
+        "model": "name",
+        "metmodel": "ukv",
+        "network": "decc",
+        "time_period": "1 hour",
+    }
+
+    assert partial_metadata.items() <= res.metadata[key].items()
+
+    # Test retrieved footprint data found from the search contains data spanning
+    # the whole range.
+    footprint_data = res.retrieve()
+    data = footprint_data.data
+    time = data["time"]
+    assert time[0] == Timestamp("2016-07-01T00:00:00")
+    assert time[-1] == Timestamp("2016-08-01T02:00:00")
+
+
+def test_search_footprints_select():
+    """
+    Test limited date range can be searched for footprint source.
+    (Same data as previous test)
+    """
+    res = search_footprints(
+        site="TAC",
+        network="DECC",
+        height="100m",
+        domain="TEST",
+        model="NAME",
+        start_date="2016-01-01",
+        end_date="2016-08-01",
+    )
+
+    # Test retrieved footprint data found from the search contains data
+    # spanning the reduced date range
+    footprint_data = res.retrieve()
+    data = footprint_data.data
+    time = data["time"]
+    assert time[0] == Timestamp("2016-07-01T00:00:00")
+    assert time[-1] == Timestamp("2016-07-01T02:00:00")
 
 
 def test_search_flux():

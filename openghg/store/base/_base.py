@@ -4,7 +4,7 @@
 from typing import Dict, List, Optional, Type, TypeVar, Union
 
 from pandas import Timestamp
-from tinydb import TinyDB
+from tinydb import TinyDB, Query
 
 __all__ = ["BaseStore"]
 
@@ -166,30 +166,42 @@ class BaseStore:
         """
         del self._datasource_uuids[uuid]
 
-    def add_datasources(self, uuids: Dict, data: Dict, metastore: TinyDB) -> None:
+    def add_datasources(self,
+                        uuids: Dict,
+                        data: Dict,
+                        metastore: TinyDB,
+                        update_keys: Optional[list] = None) -> None:
         """Add the passed list of Datasources to the current list
 
         Args:
             datasource_uuids: Datasource UUIDs
             metadata: Metadata for each species
             metastore: TinyDB metadata store
+            update_keys: List of keys to update within metastore for existing data.
         Returns:
             None
         """
         from openghg.util import to_lowercase
 
         for key, uuid_data in uuids.items():
+            meta_copy = data[key]["metadata"].copy()
+
+            uid = uuid_data["uuid"]
             new = uuid_data["new"]
-            # Only add if this is a new Datasource
+
+            # Add new entry if this is a new Datasource
             if new:
-                meta_copy = data[key]["metadata"].copy()
-                uid = uuid_data["uuid"]
                 meta_copy["uuid"] = uuid_data["uuid"]
 
                 # Make sure all the metadata is lowercase for easier searching later
                 meta_copy = to_lowercase(d=meta_copy)
                 metastore.insert(meta_copy)
                 self._datasource_uuids[uid] = key
+            # Update keys in metastore as appropriate
+            elif update_keys is not None:
+                update = {key: value for key, value in meta_copy.items() if key in update_keys}
+                q = Query()
+                metastore.update(update, q.uuid == uid)
 
     def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range

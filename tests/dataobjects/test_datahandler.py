@@ -137,6 +137,9 @@ def test_find_modify_metadata():
             "station_latitude": 52.51775,
             "station_long_name": "tacolneston tower, uk",
             "station_height_masl": 50.0,
+            "start_date": "2012-07-31 14:50:30+00:00",
+            "end_date": "2019-06-26 15:54:29+00:00",
+            "latest_version": "v1",
             "uuid": "test-uuid-101",
         }
     }
@@ -179,6 +182,9 @@ def test_modify_multiple_uuids():
             "station_latitude": 52.51775,
             "station_long_name": "tacolneston tower, uk",
             "station_height_masl": 50.0,
+            "start_date": "2012-07-31 14:50:30+00:00",
+            "end_date": "2019-06-26 15:54:29+00:00",
+            "latest_version": "v1",
             "uuid": uuids[0],
         },
         uuids[1]: {
@@ -200,6 +206,9 @@ def test_modify_multiple_uuids():
             "station_latitude": 52.51775,
             "station_long_name": "tacolneston tower, uk",
             "station_height_masl": 50.0,
+            "start_date": "2012-07-31 14:50:30+00:00",
+            "end_date": "2019-06-26 15:54:29+00:00",
+            "latest_version": "v1",
             "uuid": uuids[1],
         },
     }
@@ -246,6 +255,9 @@ def test_delete_metadata_keys():
         "station_latitude": 52.51775,
         "station_long_name": "tacolneston tower, uk",
         "station_height_masl": 50.0,
+        "start_date": "2012-07-31 14:50:30+00:00",
+        "end_date": "2019-06-26 15:54:29+00:00",
+        "latest_version": "v1",
         "uuid": "test-uuid-100",
     }
 
@@ -271,6 +283,9 @@ def test_delete_metadata_keys():
         "station_latitude": 52.51775,
         "station_long_name": "tacolneston tower, uk",
         "station_height_masl": 50.0,
+        "start_date": "2012-07-31 14:50:30+00:00",
+        "end_date": "2019-06-26 15:54:29+00:00",
+        "latest_version": "v1",
         "uuid": "test-uuid-100",
     }
 
