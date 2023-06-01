@@ -201,7 +201,7 @@ class BaseStore:
             elif update_keys is not None:
                 update = {key: value for key, value in meta_copy.items() if key in update_keys}
                 q = Query()
-                metastore.upsert(update, q.uuid == uid)
+                metastore.update(update, q.uuid == uid)
 
     def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range
