@@ -36,6 +36,7 @@ else:
         set_object_from_file,
         set_object_from_json,
         visualise_store,
+        get_writable_bucket,
     )
 
 from ._encoding import bytes_to_string, datetime_to_datetime, get_datetime_now, string_to_bytes

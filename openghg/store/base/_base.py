@@ -5,8 +5,8 @@ from typing import Dict, List, Optional, Type, TypeVar, Union
 from pandas import Timestamp
 from tinydb import TinyDB
 
-from openghg.objectstore import get_object_from_json, exists, get_bucket, set_object_from_json
-from openghg.util import timestamp_tzaware, timestamp_now
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.util import timestamp_now
 
 
 __all__ = ["BaseStore"]

@@ -32,6 +32,55 @@ logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
+# # TODO - move this to _user.py
+# def get_writable_stores() -> Dict[str, str]:
+#     """Read the writable object stores from the user's configuration file
+
+#     Returns:
+#         dict: Dictionary of writable object stores
+#     """
+#     config = read_local_config()
+#     object_stores = config["object_store"]
+
+#     return {name: data["path"] for name, data in object_stores.items() if "w" in data["permissions"]}
+
+
+def get_writable_bucket(name: Optional[str] = None) -> str:
+    """Get the path to a writable bucket, passing in the name of a bucket if
+    more than one writable bucket available.
+
+    Args:
+        name: Name of writable bucket
+    Returns:
+        str: Path to writable bucket
+    """
+    config = read_local_config()
+    object_stores = config["object_store"]
+
+    writable_buckets = {
+        store_name: data["path"] for store_name, data in object_stores.items() if "w" in data["permissions"]
+    }
+
+    if not writable_buckets:
+        raise ObjectStoreError("No writable object stores found. Check configuration file.")
+
+    if len(writable_buckets) == 1:
+        return next(iter(writable_buckets.values()))
+    elif len(writable_buckets) > 1 and name is None:
+        raise ObjectStoreError(
+            f"More than one writable store, stores we can write to are: {','.join(writable_buckets)}."
+        )
+
+    try:
+        bucket_path = writable_buckets[name]
+    except KeyError:
+        raise ObjectStoreError(
+            f"Invalid object store name, stores we can write to are: {','.join(writable_buckets)}"
+        )
+
+    return bucket_path
+
+
 def get_tutorial_store_path() -> Path:
     """Get the path to the local tutorial store
 

@@ -104,7 +104,7 @@ def test_read_data(mocker):
         with ObsSurface(bucket=bucket) as obs:
             obs.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         file_metadata = {}
         with ObsSurface(bucket=bucket) as obs:
             obs.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)

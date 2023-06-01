@@ -2,7 +2,12 @@ from pathlib import Path
 import pytest
 
 from helpers import get_emissions_datapath, get_footprint_datapath, get_column_datapath, get_surface_datapath
-from openghg.standardise import standardise_flux, standardise_footprint, standardise_column, standardise_surface
+from openghg.standardise import (
+    standardise_flux,
+    standardise_footprint,
+    standardise_column,
+    standardise_surface,
+)
 from openghg.util import compress
 from openghg.types import AttrMismatchError
 from openghg.retrieve import get_obs_surface
@@ -49,7 +54,9 @@ def test_local_obs_openghg():
      - "inlet_height_magl" in metadata was just being set to "inlet" from metadata ("185m")
      - sync_surface_metadata was trying to compare the two values of 185.0 and "185m" but "185m" could not be converted to a float - ValueError
     """
-    filepath = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG")
+    filepath = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
+    )
 
     results = standardise_surface(
         filepaths=filepath,
@@ -70,7 +77,7 @@ def test_local_obs_openghg():
 
 def test_local_obs_metadata_mismatch():
     """
-    Test a mismatch between the derived attributes and derived metadata can be 
+    Test a mismatch between the derived attributes and derived metadata can be
     updated and data added to the object store.
 
     At present, this will use the attributes data and update the metadata.
@@ -79,7 +86,7 @@ def test_local_obs_metadata_mismatch():
         - 'station_long_name'
             - Metadata (from mocked site_info) - 'Tacolneston Tower, UK'
             - Attributes (from file) - 'ATTRIBUTE DATA'
-    
+
     Note: using fake height of 999m to not intefere with previous data at 185m
     """
 
@@ -120,7 +127,9 @@ def test_local_obs_metadata_mismatch_fail():
 
     Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'.
     """
-    filepath = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc", source_format="OPENGHG")
+    filepath = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc", source_format="OPENGHG"
+    )
 
     with pytest.raises(AttrMismatchError) as e_info:
         standardise_surface(
@@ -203,7 +212,6 @@ def test_standardise_flux():
 
 
 def test_standardise_flux_additional_keywords():
-
     test_datapath = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
     proc_results = standardise_flux(

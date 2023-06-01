@@ -20,9 +20,10 @@ def default_session_fixture() -> Iterator[None]:
     mock_config = {
         "object_store": {"user": {"path": str(tmp_store_path), "permissions": "rw"}},
         "user_id": "test-id-123",
+        "config_version": "2",
     }
 
-    with patch("openghg.util.read_local_config", return_value=mock_config):
+    with patch("openghg.objectstore._local_store.read_local_config", return_value=mock_config):
         yield
 
 

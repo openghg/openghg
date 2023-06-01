@@ -109,6 +109,7 @@ class ObsSurface(BaseStore):
         source_format: str,
         network: str,
         site: str,
+        store: Optional[str] = None,
         inlet: Optional[str] = None,
         height: Optional[str] = None,
         instrument: Optional[str] = None,
@@ -272,9 +273,7 @@ class ObsSurface(BaseStore):
 
                 # Collect together optional parameters (not required but
                 # may be accepted by underlying parser function)
-                optional_parameters = {
-                    "update_mismatch" : update_mismatch
-                }
+                optional_parameters = {"update_mismatch": update_mismatch}
                 # TODO: extend optional_parameters to include kwargs when added
 
                 input_parameters = required_parameters.copy()

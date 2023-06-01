@@ -3,7 +3,9 @@ from typing import Dict, List, Literal, Optional, Tuple, Union
 from pandas import Timedelta
 
 from openghg.store import ObsSurface
-from openghg.util import read_local_config
+
+# from openghg.util import read_local_config
+from openghg.objectstore import get_writable_bucket
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.util import running_on_hub
 from openghg.types import optionalPathType, multiPathType, ObjectStoreError
@@ -35,7 +37,8 @@ def standardise_surface(
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         overwrite: Overwrite data currently present in the object store
-        store: Store to write data to
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -129,19 +132,8 @@ def standardise_surface(
             inlet=inlet,
             site_filepath=site_filepath,
             overwrite=overwrite,
+            store=store,
         )
-
-
-def get_writable_stores() -> Dict[str, str]:
-    """Read the writable object stores from the user's configuration file
-
-    Returns:
-        dict: Dictionary of writable object stores
-    """
-    config = read_local_config()
-    object_stores = config["object_store"]
-
-    return {name: data["path"] for name, data in object_stores.items() if "w" in data["access"]}
 
 
 def _local_standardise_surface(
@@ -158,6 +150,7 @@ def _local_standardise_surface(
     overwrite: bool = False,
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
+    store: Optional[str] = None,
 ):
     """The local version of standardise_surface
 
@@ -180,31 +173,30 @@ def _local_standardise_surface(
         verify_site_code: Verify the site code
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
     Returns:
         dict: Dictionary of result data
 
     TODO - do we still want to return this dictionary of UUIDs the user might not care about?
     """
-    # Here we can load in the ObsSurface we require depending on the object store
-    writable_stores = get_writable_stores()
+    bucket = get_writable_bucket(name=store)
 
-    if writable_stores and len(writable_stores) > 1:
-        raise ObjectStoreError("Please specify which object store to write to.")
-
-    results = ObsSurface.read_file(
-        filepath=filepath,
-        source_format=source_format,
-        network=network,
-        site=site,
-        inlet=inlet,
-        height=height,
-        instrument=instrument,
-        sampling_period=sampling_period,
-        calibration_scale=calibration_scale,
-        measurement_type=measurement_type,
-        overwrite=overwrite,
-        verify_site_code=verify_site_code,
-        site_filepath=site_filepath,
-    )
+    with ObsSurface(bucket=bucket) as obs:
+        results = obs.read_file(
+            filepath=filepath,
+            source_format=source_format,
+            network=network,
+            site=site,
+            inlet=inlet,
+            height=height,
+            instrument=instrument,
+            sampling_period=sampling_period,
+            calibration_scale=calibration_scale,
+            measurement_type=measurement_type,
+            overwrite=overwrite,
+            verify_site_code=verify_site_code,
+            site_filepath=site_filepath,
+        )
 
     return results
