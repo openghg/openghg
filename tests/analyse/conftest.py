@@ -9,8 +9,6 @@ from openghg.objectstore import get_bucket
 from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
 from helpers import clear_test_store
 
-from helpers import clear_test_store
-
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
     """
@@ -57,86 +55,88 @@ def data_read():
 
     emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
 
-    Emissions.read_file(
-        filepath=emissions_datapath1,
-        species="ch4",
-        source=source1,
-        domain=domain,
-        high_time_resolution=False,
-    )
+    with Emissions(bucket=bucket) as ems:
+        ems.read_file(
+            filepath=emissions_datapath1,
+            species="ch4",
+            source=source1,
+            domain=domain,
+            high_time_resolution=False,
+        )
 
-    # Waste data for CH4 (from UKGHG model)
-    source2 = "waste"
+        # Waste data for CH4 (from UKGHG model)
+        source2 = "waste"
 
-    emissions_datapath2 = get_emissions_datapath("ch4-ukghg-waste_EUROPE_2012.nc")
+        emissions_datapath2 = get_emissions_datapath("ch4-ukghg-waste_EUROPE_2012.nc")
 
-    Emissions.read_file(
-        filepath=emissions_datapath2,
-        species="ch4",
-        source=source2,
-        domain=domain,
-        high_time_resolution=False,
-    )
+        ems.read_file(
+            filepath=emissions_datapath2,
+            species="ch4",
+            source=source2,
+            domain=domain,
+            high_time_resolution=False,
+        )
 
-    # Natural sources for CO2 (R-total from Cardamom)
-    #  - 2 hourly (high resolution?)
-    source3 = "natural-rtot"
+        # Natural sources for CO2 (R-total from Cardamom)
+        #  - 2 hourly (high resolution?)
+        source3 = "natural-rtot"
 
-    emissions_datapath3 = get_emissions_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
+        emissions_datapath3 = get_emissions_datapath("co2-rtot-cardamom-2hr_TEST_2014.nc")
 
-    Emissions.read_file(
-        filepath=emissions_datapath3,
-        species="co2",
-        source=source3,
-        domain="TEST",
-        high_time_resolution=True,
-    )
+        ems.read_file(
+            filepath=emissions_datapath3,
+            species="co2",
+            source=source3,
+            domain="TEST",
+            high_time_resolution=True,
+        )
 
-    # Ocean flux for CO2
-    #  - monthly (cut down data to 1 month)
-    source4 = "ocean"
+        # Ocean flux for CO2
+        #  - monthly (cut down data to 1 month)
+        source4 = "ocean"
 
-    emissions_datapath4a = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
-    emissions_datapath4b = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
+        emissions_datapath4a = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
+        emissions_datapath4b = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
 
-    Emissions.read_file(
-        filepath=emissions_datapath4a,
-        species="co2",
-        source=source4,
-        domain="TEST",
-        high_time_resolution=False,
-    )
+        ems.read_file(
+            filepath=emissions_datapath4a,
+            species="co2",
+            source=source4,
+            domain="TEST",
+            high_time_resolution=False,
+        )
 
-    Emissions.read_file(
-        filepath=emissions_datapath4b,
-        species="co2",
-        source=source4,
-        domain="TEST",
-        high_time_resolution=False,
-    )
+        ems.read_file(
+            filepath=emissions_datapath4b,
+            species="co2",
+            source=source4,
+            domain="TEST",
+            high_time_resolution=False,
+        )
 
     # Boundary conditions data
     # CH4
     bc_filepath1 = get_bc_datapath("ch4_EUROPE_201208.nc")
 
-    BoundaryConditions.read_file(
-        filepath=bc_filepath1,
-        species="ch4",
-        domain="EUROPE",
-        bc_input="MOZART",
-        period="monthly",
-    )
+    with BoundaryConditions(bucket=bucket) as bcs:
+        bcs.read_file(
+            filepath=bc_filepath1,
+            species="ch4",
+            domain="EUROPE",
+            bc_input="MOZART",
+            period="monthly",
+        )
 
-    # CO2
-    bc_filepath1 = get_bc_datapath("co2_TEST_201407.nc")
+        # CO2
+        bc_filepath1 = get_bc_datapath("co2_TEST_201407.nc")
 
-    BoundaryConditions.read_file(
-        filepath=bc_filepath1,
-        species="co2",
-        domain="TEST",
-        bc_input="MOZART",
-        period="monthly",
-    )
+        bcs.read_file(
+            filepath=bc_filepath1,
+            species="co2",
+            domain="TEST",
+            bc_input="MOZART",
+            period="monthly",
+        )
 
     # Footprint data
     # TAC footprint from 2012-08 - 2012-09 at 100m
@@ -145,30 +145,31 @@ def data_read():
 
     fp_datapath1 = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
 
-    Footprints.read_file(
-        filepath=fp_datapath1, site=site1, model=model1, network=network1,
-        height=height1, domain=domain
-    )
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=fp_datapath1, site=site1, model=model1, network=network1,
+            height=height1, domain=domain
+        )
 
-    # TAC footprint from 2014-07 - 2014-09 at 100m for CO2 (high time resolution)
-    fp_datapath2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+        # TAC footprint from 2014-07 - 2014-09 at 100m for CO2 (high time resolution)
+        fp_datapath2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
 
-    Footprints.read_file(
-        filepath=fp_datapath2, site=site1, model=model1, network=network1, metmodel="UKV",
-        height=height1, domain="TEST", species="co2"
-    )
+        fps.read_file(
+            filepath=fp_datapath2, site=site1, model=model1, network=network1, metmodel="UKV",
+            height=height1, domain="TEST", species="co2"
+        )
 
-    # WAO radon footprint from 2021-12-04
-    # - cut down from full file to one day
-    # - cut down to only include TEST domain rather than full EUROPE
-    fp_height2 = "20m"
-    model2 = "NAME"
-    domain2 = "TEST"
-    species2 = "rn"  # Species-specific footprint for short-lived species.
+        # WAO radon footprint from 2021-12-04
+        # - cut down from full file to one day
+        # - cut down to only include TEST domain rather than full EUROPE
+        fp_height2 = "20m"
+        model2 = "NAME"
+        domain2 = "TEST"
+        species2 = "rn"  # Species-specific footprint for short-lived species.
 
-    fp_datapath2 = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_202112.nc")
+        fp_datapath2 = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_202112.nc")
 
-    Footprints.read_file(
-        filepath=fp_datapath2, site=site2, model=model2, network=network2,
-        height=fp_height2, domain=domain2, species=species2,
-    )
+        fps.read_file(
+            filepath=fp_datapath2, site=site2, model=model2, network=network2,
+            height=fp_height2, domain=domain2, species=species2,
+        )

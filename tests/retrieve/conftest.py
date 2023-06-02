@@ -79,6 +79,7 @@ def data_read():
         obs.set_rank(uuid=uid_42, rank=1, date_range="2019-01-01_2021-01-01")
 
     bucket = get_bucket()
+
     with ObsSurface(bucket=bucket) as obs:
     # Obs Surface - openghg pre-formatted data
     # - This shouldn't conflict with TAC data above as this is for 185m rather than 100m
@@ -97,13 +98,14 @@ def data_read():
     # Obs Column data
     column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
 
-    ObsColumn.read_file(
-        filepath=column_datapath,
-        source_format="OPENGHG",
-        satellite="GOSAT",
-        domain="BRAZIL",
-        species="methane",
-    )
+    with ObsColumn(bucket=bucket) as obscol:
+        obscol.read_file(
+            filepath=column_datapath,
+            source_format="OPENGHG",
+            satellite="GOSAT",
+            domain="BRAZIL",
+            species="methane",
+        )
 
     # Emissions data - added consecutive data for 2012-2013
     # This will be seen as "yearly" data and each file only contains one time point.
@@ -114,21 +116,22 @@ def data_read():
     source = "gpp-cardamom"
     domain = "europe"
 
-    Emissions.read_file(
-        filepath=test_datapath1,
-        species=species,
-        source=source,
-        domain=domain,
-        high_time_resolution=False,
-    )
+    with Emissions(bucket=bucket) as ems:
+        ems.read_file(
+            filepath=test_datapath1,
+            species=species,
+            source=source,
+            domain=domain,
+            high_time_resolution=False,
+        )
 
-    Emissions.read_file(
-        filepath=test_datapath2,
-        species=species,
-        source=source,
-        domain=domain,
-        high_time_resolution=False,
-    )
+        ems.read_file(
+            filepath=test_datapath2,
+            species=species,
+            source=source,
+            domain=domain,
+            high_time_resolution=False,
+        )
 
     # Footprint data
     datapath = get_footprint_datapath("footprint_test.nc")
@@ -139,15 +142,16 @@ def data_read():
     domain = "EUROPE"
     model = "test_model"
 
-    Footprints.read_file(
-        filepath=datapath,
-        site=site,
-        model=model,
-        network=network,
-        height=height,
-        domain=domain,
-        high_spatial_res=True,
-    )
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=datapath,
+            site=site,
+            model=model,
+            network=network,
+            height=height,
+            domain=domain,
+            high_spatial_res=True,
+        )
 
     test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
 
@@ -155,13 +159,15 @@ def data_read():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    BoundaryConditions.read_file(
-        filepath=test_datapath,
-        species=species,
-        bc_input=bc_input,
-        domain=domain,
-    )
+    with BoundaryConditions(bucket=bucket) as bcs:
+        bcs.read_file(
+            filepath=test_datapath,
+            species=species,
+            bc_input=bc_input,
+            domain=domain,
+        )
 
     test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
-    proc_results = EulerianModel.read_file(filepath=test_datapath, model="GEOSChem", species="ch4")
+    with EulerianModel(bucket=bucket) as em:
+        em.read_file(filepath=test_datapath, model="GEOSChem", species="ch4")

@@ -209,19 +209,21 @@ def standardise_column(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        return ObsColumn.read_file(
-            filepath=filepath,
-            satellite=satellite,
-            domain=domain,
-            selection=selection,
-            site=site,
-            species=species,
-            network=network,
-            instrument=instrument,
-            platform=platform,
-            source_format=source_format,
-            overwrite=overwrite,
-        )
+        bucket = get_bucket()
+        with ObsColumn(bucket=bucket) as obs_col:
+            return obs_col.read_file(
+                filepath=filepath,
+                satellite=satellite,
+                domain=domain,
+                selection=selection,
+                site=site,
+                species=species,
+                network=network,
+                instrument=instrument,
+                platform=platform,
+                source_format=source_format,
+                overwrite=overwrite,
+            )
 
 
 def standardise_bc(
@@ -275,15 +277,17 @@ def standardise_bc(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        return BoundaryConditions.read_file(
-            filepath=filepath,
-            species=species,
-            bc_input=bc_input,
-            domain=domain,
-            period=period,
-            continuous=continuous,
-            overwrite=overwrite,
-        )
+        bucket = get_bucket()
+        with BoundaryConditions(bucket=bucket) as bcs:
+            bcs.read_file(
+                filepath=filepath,
+                species=species,
+                bc_input=bc_input,
+                domain=domain,
+                period=period,
+                continuous=continuous,
+                overwrite=overwrite,
+            )
 
 
 def standardise_footprint(
@@ -365,24 +369,26 @@ def standardise_footprint(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        return Footprints.read_file(
-            filepath=filepath,
-            site=site,
-            domain=domain,
-            model=model,
-            inlet=inlet,
-            height=height,
-            metmodel=metmodel,
-            species=species,
-            network=network,
-            period=period,
-            chunks=chunks,
-            continuous=continuous,
-            retrieve_met=retrieve_met,
-            high_spatial_res=high_spatial_res,
-            high_time_res=high_time_res,
-            overwrite=overwrite,
-        )
+        bucket = get_bucket()
+        with Footprints(bucket=bucket) as fps:
+            fps.read_file(
+                filepath=filepath,
+                site=site,
+                domain=domain,
+                model=model,
+                inlet=inlet,
+                height=height,
+                metmodel=metmodel,
+                species=species,
+                network=network,
+                period=period,
+                chunks=chunks,
+                continuous=continuous,
+                retrieve_met=retrieve_met,
+                high_spatial_res=high_spatial_res,
+                high_time_res=high_time_res,
+                overwrite=overwrite,
+            )
 
 
 def standardise_flux(
@@ -449,20 +455,22 @@ def standardise_flux(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        return Emissions.read_file(
-            filepath=filepath,
-            species=species,
-            source=source,
-            domain=domain,
-            database=database,
-            database_version=database_version,
-            model=model,
-            high_time_resolution=high_time_resolution,
-            period=period,
-            continuous=continuous,
-            chunks=chunks,
-            overwrite=overwrite,
-        )
+        bucket = get_bucket()
+        with Emissions(bucket=bucket) as ems:
+            return ems.read_file(
+                filepath=filepath,
+                species=species,
+                source=source,
+                domain=domain,
+                database=database,
+                database_version=database_version,
+                model=model,
+                high_time_resolution=high_time_resolution,
+                period=period,
+                continuous=continuous,
+                chunks=chunks,
+                overwrite=overwrite,
+            )
 
 
 # def upload_to_par(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:

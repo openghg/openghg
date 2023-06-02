@@ -39,16 +39,18 @@ def footprint_read(mocker):
     domain = "EUROPE"
     model = "test_model"
 
-    Footprints.read_file(
-        filepath=datapath,
-        site=site,
-        model=model,
-        network=network,
-        height=height,
-        domain=domain,
-        period="monthly",
-        high_spatial_res=True,
-    )
+    bucket = get_bucket()
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=datapath,
+            site=site,
+            model=model,
+            network=network,
+            height=height,
+            domain=domain,
+            period="monthly",
+            high_spatial_res=True,
+        )
 
 
 def test_footprint_metadata_modification(footprint_read):
@@ -81,32 +83,32 @@ def test_footprint_metadata_modification(footprint_read):
 def test_delete_footprint_data(footprint_read):
     res = data_handler_lookup(data_type="footprints", site="tmb")
 
-    fp_obj = Footprints.load()
+    bucket = get_bucket()
+    with Footprints(bucket=bucket) as fps:
+        uuid = fps.datasources()[0]
+        ds = Datasource.load(uuid=uuid, shallow=True)
+        key = ds.key()
+        datasource_path = key_to_local_filepath(key=key)
 
-    uuid = fp_obj.datasources()[0]
-    ds = Datasource.load(uuid=uuid, shallow=True)
-    key = ds.key()
-    datasource_path = key_to_local_filepath(key=key)
+        assert datasource_path[0].exists()
 
-    assert datasource_path[0].exists()
+        all_keys = all_datasource_keys(keys=ds._data_keys)
+        filepaths = key_to_local_filepath(key=all_keys)
+        for k in filepaths:
+            assert k.exists()
 
-    all_keys = all_datasource_keys(keys=ds._data_keys)
-    filepaths = key_to_local_filepath(key=all_keys)
-    for k in filepaths:
-        assert k.exists()
+        assert uuid in fps._datasource_uuids
 
-    assert uuid in fp_obj._datasource_uuids
+        res.delete_datasource(uuid=uuid)
 
-    res.delete_datasource(uuid=uuid)
+        assert not datasource_path[0].exists()
 
-    assert not datasource_path[0].exists()
+        for k in filepaths:
+            assert not k.exists()
 
-    for k in filepaths:
-        assert not k.exists()
-
-    fp_obj = Footprints.load()
-
-    assert uuid not in fp_obj._datasource_uuids
+    bucket = get_bucket()
+    with Footprints(bucket=bucket) as fps:
+        assert uuid not in fps._datasource_uuids
 
 
 def test_find_modify_metadata():

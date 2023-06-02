@@ -26,6 +26,12 @@ class ObsColumn(BaseStore):
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.save()
+
     def read_file(
         self,
         filepath: Union[str, Path],

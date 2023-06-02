@@ -25,6 +25,12 @@ class EulerianModel(BaseStore):
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.save()
+
     def read_file(
         self,
         filepath: Union[str, Path],
