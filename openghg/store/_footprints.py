@@ -20,8 +20,7 @@ class Footprints(BaseStore):
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    @staticmethod
-    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
 
         Args:
@@ -181,8 +180,8 @@ class Footprints(BaseStore):
 
     #     """
 
-    @staticmethod
     def read_file(
+        self,
         filepath: Union[str, Path],
         site: str,
         domain: str,
@@ -234,7 +233,6 @@ class Footprints(BaseStore):
             datasource_lookup,
             infer_date_range,
             update_zero_dim,
-            load_metastore,
         )
         from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
 
@@ -256,15 +254,10 @@ class Footprints(BaseStore):
         inlet = format_inlet(inlet)
         inlet = cast(str, inlet)
 
-        fp = Footprints.load()
-
-        # Load in the metadata store
-        metastore = load_metastore(key=fp._metakey)
-
         file_hash = hash_file(filepath=filepath)
-        if file_hash in fp._file_hashes and not overwrite:
+        if file_hash in self._file_hashes and not overwrite:
             logger.warning(
-                f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]} - skipping."
+                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
             )
             return None
 
@@ -368,6 +361,7 @@ class Footprints(BaseStore):
 
         # This might seem longwinded now but will help when we want to read
         # more than one footprints at a time
+        # TODO - remove this once assign_attributes has been refactored
         key = "_".join((site, domain, model, inlet))
 
         footprint_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
@@ -378,7 +372,9 @@ class Footprints(BaseStore):
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
         required = ("site", "model", "inlet", "domain")
-        lookup_results = datasource_lookup(metastore=metastore, data=footprint_data, required_keys=required)
+        lookup_results = datasource_lookup(
+            metastore=self._metastore, data=footprint_data, required_keys=required
+        )
 
         data_type = "footprints"
         datasource_uuids: Dict[str, Dict] = assign_data(
@@ -388,15 +384,9 @@ class Footprints(BaseStore):
             data_type=data_type,
         )
 
-        fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
-
+        self.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=self._metastore)
         # Record the file hash in case we see this file again
-        fp._file_hashes[file_hash] = filepath.name
-
-        fp.save()
-
-        fp_data.close()
-        metastore.close()
+        self._file_hashes[file_hash] = filepath.name
 
         return datasource_uuids
 

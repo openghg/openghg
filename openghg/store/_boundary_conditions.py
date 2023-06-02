@@ -26,22 +26,13 @@ class BoundaryConditions(BaseStore):
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def save(self) -> None:
-        """Save the object to the object store
+    def __enter__(self):
+        return self
 
-        Returns:
-            None
-        """
-        from openghg.objectstore import get_bucket, set_object_from_json
+    def __exit__(self, *args, **kwargs):
+        self.save()
 
-        bucket = get_bucket()
-        obs_key = f"{BoundaryConditions._root}/uuid/{BoundaryConditions._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
-
-    @staticmethod
-    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
 
         Args:
@@ -62,10 +53,10 @@ class BoundaryConditions(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return BoundaryConditions.read_file(filepath=filepath, **metadata)
+            return self.read_file(filepath=filepath, **metadata)
 
-    @staticmethod
     def read_file(
+        self,
         filepath: Union[str, Path],
         species: str,
         bc_input: str,
@@ -100,7 +91,6 @@ class BoundaryConditions(BaseStore):
             datasource_lookup,
             infer_date_range,
             update_zero_dim,
-            load_metastore,
         )
         from openghg.util import clean_string, hash_file, timestamp_now
         from xarray import open_dataset
@@ -111,16 +101,11 @@ class BoundaryConditions(BaseStore):
 
         filepath = Path(filepath)
 
-        bc_store = BoundaryConditions.load()
-
-        # Load in the metadata store
-        metastore = load_metastore(key=bc_store._metakey)
-
         file_hash = hash_file(filepath=filepath)
-        if file_hash in bc_store._file_hashes and not overwrite:
+        if file_hash in self._file_hashes and not overwrite:
             logger.warning(
                 "This file has been uploaded previously with the filename : "
-                f"{bc_store._file_hashes[file_hash]} - skipping."
+                f"{self._file_hashes[file_hash]} - skipping."
             )
             return None
 
@@ -185,7 +170,7 @@ class BoundaryConditions(BaseStore):
 
         required_keys = ("species", "bc_input", "domain")
         lookup_results = datasource_lookup(
-            metastore=metastore, data=boundary_conditions_data, required_keys=required_keys
+            metastore=self._metastore, data=boundary_conditions_data, required_keys=required_keys
         )
 
         datasource_uuids = assign_data(
@@ -195,14 +180,10 @@ class BoundaryConditions(BaseStore):
             data_type=data_type,
         )
 
-        bc_store.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=metastore)
+        self.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=self._metastore)
 
         # Record the file hash in case we see this file again
-        bc_store._file_hashes[file_hash] = filepath.name
-
-        bc_store.save()
-
-        metastore.close()
+        self._file_hashes[file_hash] = filepath.name
 
         return datasource_uuids
 

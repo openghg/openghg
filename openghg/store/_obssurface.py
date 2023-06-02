@@ -155,7 +155,7 @@ class ObsSurface(BaseStore):
         import sys
         from collections import defaultdict
 
-        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.store import assign_data, datasource_lookup
         from openghg.types import SurfaceTypes
         from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
         from tqdm import tqdm
@@ -228,9 +228,6 @@ class ObsSurface(BaseStore):
         parser_fn = load_surface_parser(source_format=source_format)
 
         results: resultsType = defaultdict(dict)
-
-        # Load the store for the metadata
-        metastore = load_metastore(key=self._metakey)
 
         # Create a progress bar object using the filepaths, iterate over this below
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
@@ -347,7 +344,7 @@ class ObsSurface(BaseStore):
                 )
 
                 lookup_results = datasource_lookup(
-                    metastore=metastore, data=data, required_keys=required_keys, min_keys=5
+                    metastore=self._metastore, data=data, required_keys=required_keys, min_keys=5
                 )
 
                 # Create Datasources, save them to the object store and get their UUIDs
@@ -362,7 +359,7 @@ class ObsSurface(BaseStore):
                 results["processed"][data_filepath.name] = datasource_uuids
 
                 # Record the Datasources we've created / appended to
-                self.add_datasources(uuids=datasource_uuids, data=data, metastore=metastore)
+                self.add_datasources(uuids=datasource_uuids, data=data, metastore=self._metastore)
 
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
@@ -374,12 +371,6 @@ class ObsSurface(BaseStore):
 
                 logger.info(f"Completed processing: {data_filepath.name}.")
                 # logger.info(f"\tUUIDs: {datasource_uuids}")
-
-        # Ensure we explicitly close the metadata store
-        # as we're using the cached storage method
-        metastore.close()
-        # Save this object back to the object store
-        # obs.save()
 
         return dict(results)
 
@@ -541,10 +532,8 @@ class ObsSurface(BaseStore):
         Returns:
             Dict or None:
         """
-        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.store import assign_data, datasource_lookup
         from openghg.util import hash_retrieved_data
-
-        metastore = self._metastore
 
         # Very rudimentary hash of the data and associated metadata
         hashes = hash_retrieved_data(to_hash=data)
@@ -580,7 +569,7 @@ class ObsSurface(BaseStore):
             min_keys = len(required_metakeys)
 
         lookup_results = datasource_lookup(
-            metastore=metastore, data=to_process, required_keys=required_metakeys, min_keys=min_keys
+            metastore=self._metastore, data=to_process, required_keys=required_metakeys, min_keys=min_keys
         )
 
         # Create Datasources, save them to the object store and get their UUIDs
@@ -593,7 +582,7 @@ class ObsSurface(BaseStore):
         )
 
         # Record the Datasources we've created / appended to
-        self.add_datasources(uuids=datasource_uuids, data=to_process, metastore=metastore)
+        self.add_datasources(uuids=datasource_uuids, data=to_process, metastore=self._metastore)
         self.store_hashes(hashes=hashes)
 
         return datasource_uuids
@@ -622,7 +611,6 @@ class ObsSurface(BaseStore):
             None
         """
         from openghg.objectstore import delete_object, get_bucket
-        from openghg.store import load_metastore
         from openghg.store.base import Datasource
         from tinydb import where
 
@@ -645,9 +633,7 @@ class ObsSurface(BaseStore):
         delete_object(bucket=bucket, key=key)
 
         # Delete the UUID from the metastore
-        metastore = load_metastore(key=self._metakey)
-        metastore.remove(where("uuid") == uuid)
-        metastore.close
+        self._metastore.remove(where("uuid") == uuid)
 
         del self._datasource_uuids[uuid]
 

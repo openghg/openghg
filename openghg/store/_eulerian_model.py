@@ -25,8 +25,8 @@ class EulerianModel(BaseStore):
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    @staticmethod
     def read_file(
+        self,
         filepath: Union[str, Path],
         model: str,
         species: str,
@@ -50,8 +50,7 @@ class EulerianModel(BaseStore):
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
         from collections import defaultdict
-
-        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.store import assign_data, datasource_lookup
         from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from pandas import Timestamp as pd_Timestamp
         from xarray import open_dataset
@@ -64,13 +63,10 @@ class EulerianModel(BaseStore):
 
         filepath = Path(filepath)
 
-        em_store = EulerianModel.load()
-        metastore = load_metastore(key=em_store._metakey)
-
         file_hash = hash_file(filepath=filepath)
-        if file_hash in em_store._file_hashes and not overwrite:
+        if file_hash in self._file_hashes and not overwrite:
             raise ValueError(
-                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]}."
+                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}."
             )
 
         em_data = open_dataset(filepath)
@@ -152,7 +148,7 @@ class EulerianModel(BaseStore):
         model_data[key]["metadata"] = metadata
 
         required = ("model", "species", "date")
-        lookup_results = datasource_lookup(metastore=metastore, data=model_data, required_keys=required)
+        lookup_results = datasource_lookup(metastore=self._metastore, data=model_data, required_keys=required)
 
         data_type = "eulerian_model"
         datasource_uuids = assign_data(
@@ -162,12 +158,9 @@ class EulerianModel(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(uuids=datasource_uuids, data=model_data, metastore=metastore)
+        self.add_datasources(uuids=datasource_uuids, data=model_data, metastore=self._metastore)
 
         # Record the file hash in case we see this file again
-        em_store._file_hashes[file_hash] = filepath.name
-
-        em_store.save()
-        metastore.close()
+        self._file_hashes[file_hash] = filepath.name
 
         return datasource_uuids
