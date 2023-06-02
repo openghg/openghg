@@ -1,6 +1,8 @@
 from openghg.store import data_handler_lookup, ObsSurface, Footprints
 from openghg.store.base import Datasource
 from openghg.retrieve import search_surface
+from openghg.standardise import standardise_surface
+from openghg.objectstore import get_bucket
 
 import pytest
 from helpers import (
@@ -19,15 +21,13 @@ def add_data(mocker):
     mocker.patch("uuid.uuid4", side_effect=mock_uuids)
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
 
-    ObsSurface.read_file(filepath=one_min, site="tac", network="decc", source_format="CRDS")
+    standardise_surface(filepaths=one_min, site="tac", network="decc", source_format="CRDS")
 
 
 @pytest.fixture()
 def footprint_read(mocker):
     clear_test_store()
     datapath = get_footprint_datapath("footprint_test.nc")
-
-    print(datapath)
 
     mock_uuids = [f"test-uuid-{n}" for n in range(100, 188)]
     mocker.patch("uuid.uuid4", side_effect=mock_uuids)
@@ -334,6 +334,9 @@ def test_delete_data():
     d = Datasource.load(uuid=uid)
     key = d.key()
 
+    bucket = get_bucket()
+
+    with ObsSurface(bucket)
     obs = ObsSurface.load()
 
     assert uid in obs._datasource_uuids

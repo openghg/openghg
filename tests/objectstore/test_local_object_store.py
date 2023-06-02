@@ -3,40 +3,22 @@
 import pytest
 from openghg.objectstore import (
     get_local_objectstore_path,
-    get_tutorial_store_path,
     get_bucket,
     get_writable_bucket,
 )
 from openghg.types import ObjectStoreError
 import tempfile
 
-# @pytest.fixture(scope="session")
-# def setup_config():
-# @pytest.fixture()
-# def mock_read_config(mocker):
-#     mock_config = {"object_store": {"local_store": "/tmp/example_store"}}
-#     mocker.patch("toml.loads", return_value=mock_config)
 
+def test_get_bucket_tutorial_store_works(monkeypatch):
+    bucket = get_bucket()
+    tmpdir = tempfile.gettempdir()
+    assert tmpdir in bucket
 
-# def test_get_local_object_store(mock_read_config):
-#     path = get_local_objectstore_path()
-#     assert path == Path("/tmp/example_store")
+    monkeypatch.setenv("OPENGHG_TUT_STORE", "1")
 
-# def test_get_tutorial_store_path(mock_read_config):
-#     path = get_tutorial_store_path()
-#     assert path == Path("/tmp/example_store/tutorial_store")
-
-
-# def test_get_tutorial_store(mocker):
-
-#     mocker.patch("toml.load", )
-
-
-# @pytest.mark.skip(reason="Unfinished")
-# def test_query_store(populate_store):
-#     data = query_store()
-
-# print(data)
+    bucket = get_bucket()
+    assert "tutorial_store" in bucket
 
 
 def test_get_writable_bucket(mocker):
