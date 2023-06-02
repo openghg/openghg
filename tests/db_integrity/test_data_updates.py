@@ -122,7 +122,7 @@ def bsd_data_read_gcmd():
                          instrument=instrument)
 
 
-def bsd_small_edit_data_read(overwrite=False):
+def bsd_small_edit_data_read(if_exists=None):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Same data
@@ -141,10 +141,10 @@ def bsd_small_edit_data_read(overwrite=False):
                          site=site,
                          network=network,
                          instrument=instrument,
-                         overwrite=overwrite)
+                         if_exists=if_exists)
 
 
-def bsd_diff_data_read(overwrite=False):
+def bsd_diff_data_read(if_exists=None):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data values (should create different hash)
@@ -162,7 +162,7 @@ def bsd_diff_data_read(overwrite=False):
                          site=site,
                          network=network,
                          instrument=instrument,
-                         overwrite=overwrite)
+                         if_exists=if_exists)
 
 
 def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
@@ -239,7 +239,7 @@ def test_obs_data_read_header_diff_update():
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with small edit in header
-    bsd_small_edit_data_read(overwrite=True)
+    bsd_small_edit_data_read(if_exists="new")
 
     # Search for expected species
     # CRDS data
@@ -284,11 +284,6 @@ def test_obs_data_read_header_diff_update():
     # TODO: Can we check if this has been saved as a new version?
 
 
-@pytest.mark.xfail(reason="Related to Issue #591.\n" \
-                   " This test is to check updated data values will be stored within the object store for a current data set.\n" \
-                   " Currently doesn't seem to be adding the new data and retains the original data.\n",
-                   raises=AssertionError,
-                   strict=True)
 def test_obs_data_read_data_diff():
     """
     Test adding new file for GC with same time points but some different data values.
@@ -305,7 +300,7 @@ def test_obs_data_read_data_diff():
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    bsd_diff_data_read(overwrite=True)
+    bsd_diff_data_read(if_exists="new")
 
     # Search for expected species
     # CRDS data
@@ -324,7 +319,7 @@ def test_obs_data_read_data_diff():
     assert bool(search_n2o) == True
 
     # Find uuid values and use this to extract the Datasources to look at stored versions
-    # Make sure that updated data (using overwrite flag) has a new version.
+    # Make sure that updated data (using if_exists="new" flag) has a new version.
     search_sf6_results = search_sf6.results
     search_n2o_results = search_n2o.results
     uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
@@ -465,7 +460,7 @@ def test_obs_data_read_two_frequencies():
 #%% Look at replacing data with different / overlapping internal time stamps
 
 
-def bsd_data_read_crds_internal_overlap(overwrite=False):
+def bsd_data_read_crds_internal_overlap(if_exists="new"):
     """
     Add Bilsdale *hourly* data for CRDS instrument to object store
      - CRDS: ch4, co2, co
@@ -481,7 +476,7 @@ def bsd_data_read_crds_internal_overlap(overwrite=False):
                          source_format=source_format1,
                          site=site,
                          network=network,
-                         overwrite=overwrite)
+                         if_exists=if_exists)
 
 
 def test_obs_data_representative_date_overlap():
@@ -497,7 +492,7 @@ def test_obs_data_representative_date_overlap():
 
     clear_test_store()
     bsd_data_read_crds_internal_overlap()
-    bsd_data_read_crds_internal_overlap(overwrite=True)
+    bsd_data_read_crds_internal_overlap(if_exists="new")
 
     obs = ObsSurface.load()
     uuids = obs.datasources()
@@ -534,19 +529,19 @@ def test_obs_data_representative_date_overlap():
 # - need to be clear on what we expect to happen here
 
 
-def bsd_data_read_crds_overwrite():
-    """
-    Add Bilsdale data for CRDS instrument to object store.
-     - CRDS: ch4, co2, co
-    """
+# def bsd_data_read_crds_overwrite():
+#     """
+#     Add Bilsdale data for CRDS instrument to object store.
+#      - CRDS: ch4, co2, co
+#     """
 
-    site = "bsd"
-    network = "DECC"
-    source_format1 = "CRDS"
+#     site = "bsd"
+#     network = "DECC"
+#     source_format1 = "CRDS"
 
-    bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+#     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
 
-    ObsSurface.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True)
+#     ObsSurface.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True)
 
 
 # def test_obs_data_read_overwrite():

@@ -1,7 +1,7 @@
 """ Segment the data into Datasources
 
 """
-from typing import Dict
+from typing import Dict, Optional
 
 __all__ = ["assign_data"]
 
@@ -9,8 +9,9 @@ __all__ = ["assign_data"]
 def assign_data(
     data_dict: Dict,
     lookup_results: Dict,
-    overwrite: bool,
     data_type: str,
+    if_exists: Optional[str] = None,
+    overwrite: bool = False,
 ) -> Dict[str, Dict]:
     """Assign data to a Datasource. This will either create a new Datasource
     Create or get an existing Datasource for each gas in the file
@@ -18,7 +19,13 @@ def assign_data(
         Args:
             data_dict: Dictionary containing data and metadata for species
             lookup_results: Dictionary of lookup results]
-            overwrite: If True overwrite current data stored
+            if_exists: What to do if existing data is present.
+                - None - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - creates new version with just new data
+                - "replace" - replace and insert new data into current timeseries
+            overwrite: Deprecated. This will use options for if_exists="new".
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """
@@ -46,9 +53,9 @@ def assign_data(
             datasource = Datasource.load(uuid=uuid)
 
         # Add the dataframe to the datasource
-        datasource.add_data(metadata=metadata, data=data, overwrite=overwrite, data_type=data_type)
+        datasource.add_data(metadata=metadata, data=data, if_exists=if_exists, overwrite=overwrite, data_type=data_type)
         # Save Datasource to object store
-        datasource.save(overwrite=overwrite)
+        datasource.save(if_exists=if_exists, overwrite=overwrite)
 
         new_datasource = uuid is False
         uuids[key] = {"uuid": datasource.uuid(), "new": new_datasource}
