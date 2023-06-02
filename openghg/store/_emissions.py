@@ -191,7 +191,7 @@ class Emissions(BaseStore):
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
-        from openghg.store import assign_data, datasource_lookup,
+        from openghg.store import assign_data, datasource_lookup
         from openghg.types import EmissionsDatabases
         from openghg.util import load_emissions_database_parser
 

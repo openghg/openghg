@@ -217,22 +217,19 @@ class DataHandler:
 
         dtype = self._check_datatypes(uuid=uuid)
         data_objs = define_data_type_classes()
-        data_obj = data_objs[dtype].load()
-        metakey = data_obj._metakey
+        obs_class = data_objs[dtype]
 
-        with load_metastore(key=metakey) as store:
-            for u in uuid:
+        with obs_class(bucket=bucket) as obs:
+            for uid in uuid:
                 # First remove the data from the metadata store
-                store.remove(tinydb.where("uuid") == u)
+                obs._metastore.remove(tinydb.where("uuid") == uid)
                 # Delete all the data associated with a Datasource
-                d = Datasource.load(uuid=u)
+                d = Datasource.load(uuid=uid)
                 d.delete_all_data()
                 # Then delete the Datasource itself
                 key = d.key()
                 delete_object(bucket=bucket, key=key)
                 # Remove from the list of Datasources the object knows about
-                data_obj.remove_datasource(uuid=u)
+                obs.remove_datasource(uuid=uid)
 
-            print(f"Deleted Datasource with UUID {u}.")
-
-        data_obj.save()
+                logger.info(f"Deleted Datasource with UUID {uid}.")
