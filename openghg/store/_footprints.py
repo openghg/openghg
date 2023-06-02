@@ -226,7 +226,6 @@ class Footprints(BaseStore):
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
-        # from xarray import load_dataset
         import xarray as xr
         from openghg.store import (
             assign_data,
