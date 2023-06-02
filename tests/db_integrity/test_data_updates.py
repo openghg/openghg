@@ -1,7 +1,5 @@
-import os
-import tempfile
+
 import pytest
-import datetime
 import pandas as pd
 import numpy as np
 from helpers import get_surface_datapath, get_emissions_datapath, get_bc_datapath, get_footprint_datapath
@@ -97,7 +95,9 @@ def bsd_data_read_crds():
 
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
 
-    ObsSurface.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network)
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network)
 
 
 def bsd_data_read_gcmd():
@@ -114,7 +114,9 @@ def bsd_data_read_gcmd():
     bsd_path2 = get_surface_datapath(filename="bilsdale-md.14.C", source_format="GC")
     bsd_prec_path2 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    ObsSurface.read_file(filepath=(bsd_path2, bsd_prec_path2),
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=(bsd_path2, bsd_prec_path2),
                          source_format=source_format2,
                          site=site,
                          network=network,
@@ -135,7 +137,9 @@ def bsd_small_edit_data_read():
     bsd_path3 = get_surface_datapath(filename="bilsdale-md.small-edit.14.C", source_format="GC")
     bsd_prec_path3 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    ObsSurface.read_file(filepath=(bsd_path3, bsd_prec_path3),
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=(bsd_path3, bsd_prec_path3),
                          source_format=source_format2,
                          site=site,
                          network=network,
@@ -155,7 +159,9 @@ def bsd_diff_data_read(overwrite=False):
     bsd_path4 = get_surface_datapath(filename="bilsdale-md.diff-value.14.C", source_format="GC")
     bsd_prec_path4 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    ObsSurface.read_file(filepath=(bsd_path4, bsd_prec_path4),
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=(bsd_path4, bsd_prec_path4),
                          source_format=source_format2,
                          site=site,
                          network=network,
@@ -344,7 +350,9 @@ def bsd_data_read_crds_diff_frequency():
 
     bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.min.dat", source_format="CRDS")
 
-    ObsSurface.read_file(filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
 
 
 def test_obs_data_read_two_frequencies():
@@ -435,7 +443,9 @@ def bsd_data_read_crds_internal_overlap(overwrite=False):
 
     bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.overlap-dates.dat", source_format="CRDS")
 
-    ObsSurface.read_file(filepath=bsd_path_hourly,
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=bsd_path_hourly,
                          source_format=source_format1,
                          site=site,
                          network=network,
@@ -457,8 +467,9 @@ def test_obs_data_representative_date_overlap():
     bsd_data_read_crds_internal_overlap()
     bsd_data_read_crds_internal_overlap(overwrite=True)
 
-    obs = ObsSurface.load()
-    uuids = obs.datasources()
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        uuids = obs.datasources()
 
     datasources = []
     for uuid in uuids:
@@ -504,7 +515,9 @@ def bsd_data_read_crds_overwrite():
 
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
 
-    ObsSurface.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True)
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True)
 
 
 # def test_obs_data_read_overwrite():
@@ -560,4 +573,3 @@ def bsd_data_read_crds_overwrite():
 #     # np.testing.assert_allclose(sf6, expected_sf6)
 
 #     # TODO: Can we check if this has been saved as a new version?
-

@@ -336,10 +336,8 @@ def test_delete_data():
 
     bucket = get_bucket()
 
-    with ObsSurface(bucket)
-    obs = ObsSurface.load()
-
-    assert uid in obs._datasource_uuids
+    with ObsSurface(bucket) as obs:
+        assert uid in obs._datasource_uuids
 
     datasource_path = key_to_local_filepath(key=key)[0]
 
@@ -360,8 +358,8 @@ def test_delete_data():
     for k in key_paths:
         assert not k.exists()
 
-    obs = ObsSurface.load()
-    assert uid not in obs._datasource_uuids
+    with ObsSurface(bucket) as obs:
+        assert uid not in obs._datasource_uuids
 
 
 def test_metadata_backup_restore():
