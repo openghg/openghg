@@ -8,7 +8,6 @@ from helpers import (
 from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
 from helpers import clear_test_store
 
-from helpers import clear_test_store
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
@@ -88,11 +87,11 @@ def data_read():
     )
 
     # Ocean flux for CO2
-    #  - monthly (cut down data to 1 month)
+    #  - monthly (cut down data to 1 month) - need to specify period for this.
     source4 = "ocean"
 
-    emissions_datapath4a = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
-    emissions_datapath4b = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
+    emissions_datapath4a = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2013.nc")
+    emissions_datapath4b = get_emissions_datapath("co2-nemo-ocean-mth_TEST_2014.nc")
 
     Emissions.read_file(
         filepath=emissions_datapath4a,
@@ -100,6 +99,7 @@ def data_read():
         source=source4,
         domain="TEST",
         high_time_resolution=False,
+        period="1 month",
     )
 
     Emissions.read_file(
@@ -108,6 +108,7 @@ def data_read():
         source=source4,
         domain="TEST",
         high_time_resolution=False,
+        period="1 month",
     )
 
     # Boundary conditions data

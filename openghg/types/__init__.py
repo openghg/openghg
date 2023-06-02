@@ -20,6 +20,7 @@ from ._errors import (
     RequestBucketError,
     SearchError,
     AttrMismatchError,
+    DataOverlapError,
     construct_xesmf_import_error,
 )
 from ._types import (

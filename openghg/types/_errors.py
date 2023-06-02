@@ -50,6 +50,9 @@ class AttrMismatchError(OpenGHGError):
     """Mismatch between attributes of input file and derived metadata"""
 
 
+class DataOverlapError(OpenGHGError):
+    """New data overlaps with current data stored"""
+
 def construct_xesmf_import_error(exception: Optional[ImportError] = None) -> str:
     xesmf_error_message = (
         "Unable to import xesmf for use with regridding algorithms."

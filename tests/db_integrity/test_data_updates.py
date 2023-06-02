@@ -10,6 +10,7 @@ from openghg.store.base import Datasource
 from openghg.retrieve import get_obs_surface, get_flux
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
+from openghg.types import DataOverlapError
 
 
 from helpers import clear_test_store
@@ -121,7 +122,7 @@ def bsd_data_read_gcmd():
                          instrument=instrument)
 
 
-def bsd_small_edit_data_read():
+def bsd_small_edit_data_read(overwrite=False):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Same data
@@ -139,7 +140,8 @@ def bsd_small_edit_data_read():
                          source_format=source_format2,
                          site=site,
                          network=network,
-                         instrument=instrument)
+                         instrument=instrument,
+                         overwrite=overwrite)
 
 
 def bsd_diff_data_read(overwrite=False):
@@ -207,6 +209,24 @@ def read_gcmd_file_pd(filename):
 def test_obs_data_read_header_diff():
     """
     Test adding new file for GC data (same data as original file but different header).
+     - expect DataOverlapError to be raised without additional flags
+    """
+    clear_test_store()
+    # Load BSD data - CRDS data
+    bsd_data_read_crds()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+
+    with pytest.raises(DataOverlapError) as excinfo:
+        # Try to load *new* BSD data - GCMD data (GCWERKS) with small edit in header
+        bsd_small_edit_data_read()
+
+        assert "Unable to add new data" in excinfo
+
+
+def test_obs_data_read_header_diff_update():
+    """
+    Test adding new file for GC data (same data as original file but different header).
     Steps:
      - BSD CRDS minutely data added
      - BSD GCMD data added
@@ -219,7 +239,7 @@ def test_obs_data_read_header_diff():
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with small edit in header
-    bsd_small_edit_data_read()
+    bsd_small_edit_data_read(overwrite=True)
 
     # Search for expected species
     # CRDS data
@@ -303,6 +323,20 @@ def test_obs_data_read_data_diff():
     assert bool(search_sf6) == True
     assert bool(search_n2o) == True
 
+    # Find uuid values and use this to extract the Datasources to look at stored versions
+    # Make sure that updated data (using overwrite flag) has a new version.
+    search_sf6_results = search_sf6.results
+    search_n2o_results = search_n2o.results
+    uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
+    uuid_n2o = search_n2o_results.iloc[0]["uuid"]
+
+    d_sf6 = Datasource.load(uuid=uuid_sf6)
+    d_n2o = Datasource.load(uuid=uuid_n2o)
+
+    assert d_sf6._latest_version == "v2"
+    assert d_n2o._latest_version == "v2"
+
+    # Compare against data from files
     crds_file_data = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
 
     obs_data_ch4 = search_ch4.retrieve()
@@ -324,8 +358,6 @@ def test_obs_data_read_data_diff():
     sf6 = data_sf6["sf6"].values
     expected_sf6 = gcwerks_file_data["SF6"].values
     np.testing.assert_allclose(sf6, expected_sf6)
-
-    # TODO: Can we check if this has been saved as a new version?
 
 
 # TODO: Add test for different time values as well.
@@ -402,8 +434,8 @@ def test_obs_data_read_two_frequencies():
     np.testing.assert_allclose(co_hourly, expected_co_hourly)
 
     # data_co_minutely = get_obs_surface(site="bsd", species="ch4", sampling_period="60.0").data
-    data_co_hourly = search_co.retrieve(sampling_period="60.0").data
-    co_minutely = data_co_hourly["co"].values
+    data_co_minutely = search_co.retrieve(sampling_period="60.0").data
+    co_minutely = data_co_minutely["co"].values
     expected_co_minutely = crds_file_data_minutely["co"].values
     np.testing.assert_allclose(co_minutely, expected_co_minutely)
 
@@ -417,7 +449,17 @@ def test_obs_data_read_two_frequencies():
     expected_sf6 = gcwerks_file_data["SF6"].values
     np.testing.assert_allclose(sf6, expected_sf6)
 
-    # TODO: Can we check if this has been saved as a new version?
+    # Find uuid values and use this to extract the Datasources to look at stored versions
+    search_co_results = search_co.results
+    uuid_co_hourly = search_co_results[search_co_results["sampling_period"] == "3600.0"].iloc[0]["uuid"]
+    uuid_co_minutely = search_co_results[search_co_results["sampling_period"] == "60.0"].iloc[0]["uuid"]
+
+    d_co_hourly = Datasource.load(uuid=uuid_co_hourly)
+    d_co_minutely = Datasource.load(uuid=uuid_co_minutely)
+
+    assert d_co_hourly._latest_version == "v1"
+    assert d_co_minutely._latest_version == "v1"
+
 
 
 #%% Look at replacing data with different / overlapping internal time stamps
@@ -561,3 +603,6 @@ def bsd_data_read_crds_overwrite():
 
 #     # TODO: Can we check if this has been saved as a new version?
 
+#%% Deleting data
+
+# TODO: Add test to check data deletion and then adding the same data back

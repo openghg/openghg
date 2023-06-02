@@ -5,10 +5,12 @@ from openghg.retrieve import search
 from openghg.store import ObsSurface
 from openghg.util import split_daterange_str
 from pandas import Timestamp
-
+from helpers import clear_test_store
 
 @pytest.fixture(scope="session", autouse=True)
 def load_CRDS():
+    clear_test_store()
+
     tac_100m = get_surface_datapath("tac.picarro.1minute.100m.min.dat", source_format="CRDS")
     hfd_50m = get_surface_datapath("hfd.picarro.1minute.50m.min.dat", source_format="CRDS")
     bsd_42m = get_surface_datapath("bsd.picarro.1minute.42m.min.dat", source_format="CRDS")
