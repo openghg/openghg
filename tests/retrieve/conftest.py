@@ -85,7 +85,7 @@ def data_read():
         openghg_path = get_surface_datapath(
             filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
         )
-        ObsSurface.read_file(
+        obs.read_file(
             filepath=openghg_path,
             source_format="OPENGHG",
             site="tac",

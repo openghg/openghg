@@ -5,6 +5,7 @@ from helpers import (
     get_footprint_datapath,
     get_surface_datapath,
 )
+from openghg.objectstore import get_bucket
 from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
 from helpers import clear_test_store
 
@@ -29,21 +30,25 @@ def data_read():
     tac_path1 = get_surface_datapath(filename="tac.picarro.1minute.100m.201208.dat", source_format="CRDS")
     tac_path2 = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
     tac_filepaths = [tac_path1, tac_path2]
-    ObsSurface.read_file(filepath=tac_filepaths, source_format=source_format1, site=site1, network=network1)
 
-    # WAO data for radon from 2021-12-04 (data level 1 (NRT product) from ICOS)
-    # - This has been standardised through openghg already from download.
-    # - This data was then output to a netcdf file we can read.
-    site2 = "wao"
-    network2 = "ICOS"
-    source_format2 = "OPENGHG"
+    bucket = get_bucket()
 
-    wao_path = get_surface_datapath(filename="wao_rn_icos_standardised_2021-12-04.nc", source_format="OPENGHG")
-    ObsSurface.read_file(filepath=wao_path,
-                         source_format=source_format2,
-                         site=site2,
-                         network=network2,
-                         inlet="10m")
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=tac_filepaths, source_format=source_format1, site=site1, network=network1)
+
+        # WAO data for radon from 2021-12-04 (data level 1 (NRT product) from ICOS)
+        # - This has been standardised through openghg already from download.
+        # - This data was then output to a netcdf file we can read.
+        site2 = "wao"
+        network2 = "ICOS"
+        source_format2 = "OPENGHG"
+
+        wao_path = get_surface_datapath(filename="wao_rn_icos_standardised_2021-12-04.nc", source_format="OPENGHG")
+        obs.read_file(filepath=wao_path,
+                            source_format=source_format2,
+                            site=site2,
+                            network=network2,
+                            inlet="10m")
 
     # Emissions data
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE

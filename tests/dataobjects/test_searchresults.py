@@ -15,9 +15,12 @@ def load_CRDS():
     bsd_108m = get_surface_datapath("bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
     bsd_248m = get_surface_datapath("bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
-    ObsSurface.read_file(filepath=tac_100m, source_format="CRDS", site="tac", network="DECC")
-    ObsSurface.read_file(filepath=hfd_50m, source_format="CRDS", site="hfd", network="DECC")
-    ObsSurface.read_file(filepath=[bsd_42m, bsd_108m, bsd_248m], source_format="CRDS", site="bsd", network="DECC")
+    bucket = get_bucket()
+
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=tac_100m, source_format="CRDS", site="tac", network="DECC")
+        obs.read_file(filepath=hfd_50m, source_format="CRDS", site="hfd", network="DECC")
+        obs.read_file(filepath=[bsd_42m, bsd_108m, bsd_248m], source_format="CRDS", site="bsd", network="DECC")
 
 
 def test_retrieve_all():

@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
 from openghg.cloud import create_file_package, create_post_dict
+from openghg.objectstore import get_bucket
 from openghg.util import running_on_hub
 from openghg.types import optionalPathType
 
@@ -121,18 +122,20 @@ def standardise_surface(
     else:
         from openghg.store import ObsSurface
 
-        results = ObsSurface.read_file(
-            filepath=filepaths,
-            source_format=source_format,
-            site=site,
-            network=network,
-            instrument=instrument,
-            sampling_period=sampling_period,
-            inlet=inlet,
-            update_mismatch=update_mismatch,
-            site_filepath=site_filepath,
-            overwrite=overwrite,
-        )
+        bucket = get_bucket()
+        with ObsSurface(bucket=bucket) as obs:
+            results = obs.read_file(
+                filepath=filepaths,
+                source_format=source_format,
+                site=site,
+                network=network,
+                instrument=instrument,
+                sampling_period=sampling_period,
+                inlet=inlet,
+                update_mismatch=update_mismatch,
+                site_filepath=site_filepath,
+                overwrite=overwrite,
+            )
 
         return results
 
