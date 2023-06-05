@@ -40,18 +40,18 @@ class BaseStore:
             self.__dict__.update(data)
 
     @classmethod
-    def metakey(cls):
+    def metakey(cls) -> str:
         return cls._metakey
 
     @classmethod
-    def key(cls):
+    def key(cls) -> str:
         return f"{cls._root}/uuid/{cls._uuid}"
 
-    def save(self):
+    def save(self) -> None:
         self._metastore.close()
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
-    def to_data(self):
+    def to_data(self) -> Dict:
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
         DO_NOT_STORE = ["_metastore"]
@@ -150,7 +150,7 @@ class BaseStore:
     #     self._stored = True
     #     set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
-    def uuid(self: Type[T]) -> str:
+    def uuid(self) -> str:
         """Return the UUID of this object
 
         Returns:
@@ -158,7 +158,7 @@ class BaseStore:
         """
         return self._uuid
 
-    def datasources(self: T) -> List[str]:
+    def datasources(self) -> List[str]:
         """Return the list of Datasources UUIDs associated with this object
 
         Returns:
@@ -166,7 +166,7 @@ class BaseStore:
         """
         return list(self._datasource_uuids.keys())
 
-    def remove_datasource(self: T, uuid: str) -> None:
+    def remove_datasource(self, uuid: str) -> None:
         """Remove the Datasource with the given uuid from the list
         of Datasources
 

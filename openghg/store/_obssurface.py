@@ -9,8 +9,7 @@ import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
-
-__all__ = ["ObsSurface"]
+from types import TracebackType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -23,10 +22,15 @@ class ObsSurface(BaseStore):
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def __enter__(self):
+    def __enter__(self) -> ObsSurface:
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(
+        self,
+        exc_type: Optional[BaseException],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         self.save()
 
     def read_data(

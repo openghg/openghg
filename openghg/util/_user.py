@@ -222,15 +222,6 @@ def _combine_config(config_version: str, object_stores: Dict, user_id: Optional[
     return {"user_id": user_id, "config_version": config_version, "object_store": object_store_info}
 
 
-def update_config_file(path: Path):
-    """Update the user's configuration file
-
-    Returns:
-        None
-    """
-    raise NotImplementedError
-
-
 # @lru_cache
 def read_local_config() -> Dict:
     """Reads the local config file.
