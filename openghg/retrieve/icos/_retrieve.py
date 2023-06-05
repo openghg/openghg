@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
+from openghg.objectstore import get_bucket
 from openghg.util import running_on_hub, load_json
 import openghg_defs
 import logging
@@ -192,7 +193,9 @@ def local_retrieve(
         if standardised_data is None:
             return None
 
-        ObsSurface.store_data(data=standardised_data)
+        bucket = get_bucket()
+        with ObsSurface(bucket=bucket) as obs:
+            obs.store_data(data=standardised_data)
 
         # Create the expected ObsData type
         obs_data = []
@@ -457,9 +460,7 @@ def _retrieve_remote(
             "attributes": metadata,
         }
 
-    standardised_data = assign_attributes(
-        data=standardised_data, update_mismatch=update_mismatch
-    )
+    standardised_data = assign_attributes(data=standardised_data, update_mismatch=update_mismatch)
 
     return standardised_data
 

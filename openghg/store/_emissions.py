@@ -89,7 +89,7 @@ class Emissions(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.store import assign_data, datasource_lookup
         from openghg.types import EmissionsTypes
         from openghg.util import clean_string, hash_file, load_emissions_parser
 
@@ -128,9 +128,7 @@ class Emissions(BaseStore):
             "chunks": chunks,
         }
 
-        optional_keywords = {"database": database,
-                             "database_version": database_version,
-                             "model": model}
+        optional_keywords = {"database": database, "database_version": database_version, "model": model}
 
         param.update(optional_keywords)
 
@@ -147,7 +145,9 @@ class Emissions(BaseStore):
                 min_required.append(key)
 
         required = tuple(min_required)
-        lookup_results = datasource_lookup(metastore=self._metastore, data=emissions_data, required_keys=required)
+        lookup_results = datasource_lookup(
+            metastore=self._metastore, data=emissions_data, required_keys=required
+        )
 
         data_type = "emissions"
         datasource_uuids = assign_data(
@@ -220,7 +220,9 @@ class Emissions(BaseStore):
             Emissions.validate_data(em_data)
 
         required = ("species", "source", "domain")
-        lookup_results = datasource_lookup(metastore=self._metastore, data=emissions_data, required_keys=required)
+        lookup_results = datasource_lookup(
+            metastore=self._metastore, data=emissions_data, required_keys=required
+        )
 
         data_type = "emissions"
         overwrite = False

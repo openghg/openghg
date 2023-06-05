@@ -371,7 +371,7 @@ def standardise_footprint(
     else:
         bucket = get_bucket()
         with Footprints(bucket=bucket) as fps:
-            fps.read_file(
+            result = fps.read_file(
                 filepath=filepath,
                 site=site,
                 domain=domain,
@@ -389,6 +389,8 @@ def standardise_footprint(
                 high_time_res=high_time_res,
                 overwrite=overwrite,
             )
+
+        return result
 
 
 def standardise_flux(

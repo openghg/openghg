@@ -175,7 +175,7 @@ class DataHandler:
                         )
                     except KeyError:
                         raise ValueError(
-                            "Unable to remove keys from metadaa store, please ensure they exist."
+                            "Unable to remove keys from metadata store, please ensure they exist."
                         )
 
                 if to_update is not None:

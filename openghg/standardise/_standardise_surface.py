@@ -1,14 +1,12 @@
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 from pandas import Timedelta
 
 from openghg.store import ObsSurface
-
-# from openghg.util import read_local_config
 from openghg.objectstore import get_writable_bucket
-from openghg.cloud import create_file_package, create_post_dict
+from openghg.cloud import create_file_package
 from openghg.util import running_on_hub
-from openghg.types import optionalPathType, multiPathType, ObjectStoreError
+from openghg.types import optionalPathType, multiPathType
 
 
 def standardise_surface(

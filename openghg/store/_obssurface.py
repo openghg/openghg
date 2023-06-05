@@ -374,8 +374,8 @@ class ObsSurface(BaseStore):
 
         return dict(results)
 
-    @staticmethod
     def read_multisite_aqmesh(
+        self,
         data_filepath: pathType,
         metadata_filepath: pathType,
         network: str = "aqmesh_glasgow",
@@ -391,21 +391,15 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
-        raise NotImplementedError
         from collections import defaultdict
-
         from openghg.standardise.surface import parse_aqmesh
-        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.store import assign_data, datasource_lookup
         from openghg.util import hash_file
         from tqdm import tqdm
 
         data_filepath = Path(data_filepath)
         metadata_filepath = Path(metadata_filepath)
 
-        # Load the ObsSurface object for retrieve
-        obs = ObsSurface.load()
-        # Load the metadata store
-        metastore = load_metastore(key=obs._metakey)
         # Get a dict of data and metadata
         processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
@@ -416,9 +410,9 @@ class ObsSurface(BaseStore):
 
             file_hash = hash_file(filepath=data_filepath)
 
-            if obs.seen_hash(file_hash=file_hash) and overwrite is False:
+            if self.seen_hash(file_hash=file_hash) and overwrite is False:
                 raise ValueError(
-                    f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
+                    f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}."
                 )
                 break
 
@@ -435,7 +429,7 @@ class ObsSurface(BaseStore):
             )
 
             lookup_results = datasource_lookup(
-                metastore=metastore, data=combined, required_keys=required_keys, min_keys=5
+                metastore=self._metastore, data=combined, required_keys=required_keys, min_keys=5
             )
 
             uuid = lookup_results[site]
@@ -457,15 +451,11 @@ class ObsSurface(BaseStore):
             results[site] = datasource_uuids
 
             # Record the Datasources we've created / appended to
-            obs.add_datasources(uuids=datasource_uuids, data=combined, metastore=metastore)
+            self.add_datasources(uuids=datasource_uuids, data=combined, metastore=self._metastore)
 
             # Store the hash as the key for easy searching, store the filename as well for
             # ease of checking by user
-            obs.set_hash(file_hash=file_hash, filename=data_filepath.name)
-
-        obs.save()
-        # Close the metadata store and write new records
-        metastore.close()
+            self.set_hash(file_hash=file_hash, filename=data_filepath.name)
 
         return results
 

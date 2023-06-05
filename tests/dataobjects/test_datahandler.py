@@ -86,27 +86,27 @@ def test_delete_footprint_data(footprint_read):
     bucket = get_bucket()
     with Footprints(bucket=bucket) as fps:
         uuid = fps.datasources()[0]
-        ds = Datasource.load(uuid=uuid, shallow=True)
-        key = ds.key()
-        datasource_path = key_to_local_filepath(key=key)
 
-        assert datasource_path[0].exists()
+    ds = Datasource.load(uuid=uuid, shallow=True)
+    key = ds.key()
+    datasource_path = key_to_local_filepath(key=key)
 
-        all_keys = all_datasource_keys(keys=ds._data_keys)
-        filepaths = key_to_local_filepath(key=all_keys)
-        for k in filepaths:
-            assert k.exists()
+    assert datasource_path[0].exists()
 
-        assert uuid in fps._datasource_uuids
+    all_keys = all_datasource_keys(keys=ds._data_keys)
+    filepaths = key_to_local_filepath(key=all_keys)
+    for k in filepaths:
+        assert k.exists()
 
-        res.delete_datasource(uuid=uuid)
+    assert uuid in fps._datasource_uuids
 
-        assert not datasource_path[0].exists()
+    res.delete_datasource(uuid=uuid)
 
-        for k in filepaths:
-            assert not k.exists()
+    assert not datasource_path[0].exists()
 
-    bucket = get_bucket()
+    for k in filepaths:
+        assert not k.exists()
+
     with Footprints(bucket=bucket) as fps:
         assert uuid not in fps._datasource_uuids
 

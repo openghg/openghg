@@ -65,20 +65,18 @@ def data_read():
             instrument="GCMD",
         )
 
-    with ObsSurface(bucket=bucket) as obs:
+    # with ObsSurface(bucket=bucket) as obs:
 
-        uid_248 = bsd_results["processed"]["bsd.picarro.1minute.248m.min.dat"]["ch4"]["uuid"]
-        obs.set_rank(uuid=uid_248, rank=1, date_range="2014-01-30_2015-01-01")
+    #     uid_248 = bsd_results["processed"]["bsd.picarro.1minute.248m.min.dat"]["ch4"]["uuid"]
+    #     obs.set_rank(uuid=uid_248, rank=1, date_range="2014-01-30_2015-01-01")
 
-        uid_108 = bsd_results["processed"]["bsd.picarro.1minute.108m.min.dat"]["ch4"]["uuid"]
-        obs.set_rank(uuid=uid_108, rank=1, date_range="2015-01-02_2015-11-01")
+    #     uid_108 = bsd_results["processed"]["bsd.picarro.1minute.108m.min.dat"]["ch4"]["uuid"]
+    #     obs.set_rank(uuid=uid_108, rank=1, date_range="2015-01-02_2015-11-01")
 
-        obs.set_rank(uuid=uid_248, rank=1, date_range="2016-04-01_2017-11-01")
+    #     obs.set_rank(uuid=uid_248, rank=1, date_range="2016-04-01_2017-11-01")
 
-        uid_42 = bsd_results["processed"]["bsd.picarro.1minute.42m.min.dat"]["ch4"]["uuid"]
-        obs.set_rank(uuid=uid_42, rank=1, date_range="2019-01-01_2021-01-01")
-
-    bucket = get_bucket()
+    #     uid_42 = bsd_results["processed"]["bsd.picarro.1minute.42m.min.dat"]["ch4"]["uuid"]
+    #     obs.set_rank(uuid=uid_42, rank=1, date_range="2019-01-01_2021-01-01")
 
     with ObsSurface(bucket=bucket) as obs:
     # Obs Surface - openghg pre-formatted data

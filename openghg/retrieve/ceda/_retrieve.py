@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
+from openghg.objectstore import get_bucket
 from openghg.util import running_on_hub
 import logging
 
@@ -222,6 +223,8 @@ def local_retrieve_surface(
 
     to_store = {key: {"data": dataset, "metadata": metadata}}
 
-    ObsSurface.store_data(data=to_store)
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        obs.store_data(data=to_store)
 
     return ObsData(data=dataset, metadata=metadata)

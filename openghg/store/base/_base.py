@@ -214,6 +214,7 @@ class BaseStore:
         Returns:
             dict: Dictionary of rank and daterange covered by that rank
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from collections import defaultdict
         from openghg.util import create_daterange_str, daterange_overlap
 
@@ -240,6 +241,7 @@ class BaseStore:
         Returns:
             None
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         if uuid in self._rank_data:
             del self._rank_data[uuid]
             self.save()
@@ -269,6 +271,7 @@ class BaseStore:
         Returns:
             None
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from copy import deepcopy
 
         from openghg.util import (
@@ -396,6 +399,7 @@ class BaseStore:
             Returns:
                 dict: Dictionary of rank data
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         rank_dict: Dict = self._rank_data.to_dict()
         return rank_dict
 

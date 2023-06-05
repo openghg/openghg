@@ -1,10 +1,8 @@
 import pytest
 from helpers import get_surface_datapath
-from openghg.dataobjects import SearchResults
 from openghg.retrieve import search
+from openghg.objectstore import get_bucket
 from openghg.store import ObsSurface
-from openghg.util import split_daterange_str
-from pandas import Timestamp
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -20,7 +18,9 @@ def load_CRDS():
     with ObsSurface(bucket=bucket) as obs:
         obs.read_file(filepath=tac_100m, source_format="CRDS", site="tac", network="DECC")
         obs.read_file(filepath=hfd_50m, source_format="CRDS", site="hfd", network="DECC")
-        obs.read_file(filepath=[bsd_42m, bsd_108m, bsd_248m], source_format="CRDS", site="bsd", network="DECC")
+        obs.read_file(
+            filepath=[bsd_42m, bsd_108m, bsd_248m], source_format="CRDS", site="bsd", network="DECC"
+        )
 
 
 def test_retrieve_all():
