@@ -1,15 +1,13 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
-from typing import Dict, List, Optional, Type, TypeVar, Union
+from typing import Dict, List, Optional, TypeVar, Union
 from pandas import Timestamp
 from tinydb import TinyDB
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.util import timestamp_now
 
-
-__all__ = ["BaseStore"]
 
 T = TypeVar("T", bound="BaseStore")
 
@@ -31,7 +29,7 @@ class BaseStore:
         self._retrieved_hashes: Dict[str, Dict] = {}
         # Where we'll store this object
         self._bucket = bucket
-
+        self._metakey = ""
         self._metastore = load_metastore(key=self.metakey())
 
         if exists(bucket=bucket, key=self.key()):
@@ -41,7 +39,7 @@ class BaseStore:
 
     @classmethod
     def metakey(cls) -> str:
-        return cls._metakey
+        return str(cls._metakey)
 
     @classmethod
     def key(cls) -> str:
@@ -204,7 +202,7 @@ class BaseStore:
                 # so we can have rapid
                 self._datasource_uuids[uid] = key
 
-    def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
+    def get_rank(self, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range
 
         Args:
@@ -233,7 +231,7 @@ class BaseStore:
 
         return ranked
 
-    def clear_rank(self: T, uuid: str) -> None:
+    def clear_rank(self, uuid: str) -> None:
         """Clear the ranking data for a Datasource
 
         Args:
@@ -249,7 +247,7 @@ class BaseStore:
             raise ValueError("No ranking data set for that UUID.")
 
     def set_rank(
-        self: T,
+        self,
         uuid: str,
         rank: Union[int, str],
         date_range: Union[str, List[str]],
@@ -392,7 +390,7 @@ class BaseStore:
 
         self.save()
 
-    def rank_data(self: T) -> Dict:
+    def rank_data(self) -> Dict:
         """Return a dictionary of rank data keyed
         by UUID
 
@@ -403,12 +401,11 @@ class BaseStore:
         rank_dict: Dict = self._rank_data.to_dict()
         return rank_dict
 
-    def clear_datasources(self: T) -> None:
+    def clear_datasources(self) -> None:
         """Remove all Datasources from the object
 
         Returns:
             None
         """
-        self._datasource_table.clear()
         self._datasource_uuids.clear()
         self._file_hashes.clear()

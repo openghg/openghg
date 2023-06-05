@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Literal, Optional, Tuple, Union
@@ -7,10 +8,8 @@ from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
+from types import TracebackType
 import warnings
-
-__all__ = ["Emissions"]
-
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -22,10 +21,15 @@ class Emissions(BaseStore):
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def __enter__(self):
+    def __enter__(self) -> Emissions:
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(
+        self,
+        exc_type: Optional[BaseException],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         self.save()
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:

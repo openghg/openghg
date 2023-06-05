@@ -211,7 +211,7 @@ def standardise_column(
     else:
         bucket = get_bucket()
         with ObsColumn(bucket=bucket) as obs_col:
-            return obs_col.read_file(
+            result = obs_col.read_file(
                 filepath=filepath,
                 satellite=satellite,
                 domain=domain,
@@ -224,6 +224,8 @@ def standardise_column(
                 source_format=source_format,
                 overwrite=overwrite,
             )
+
+        return result
 
 
 def standardise_bc(
@@ -279,7 +281,7 @@ def standardise_bc(
     else:
         bucket = get_bucket()
         with BoundaryConditions(bucket=bucket) as bcs:
-            bcs.read_file(
+            result = bcs.read_file(
                 filepath=filepath,
                 species=species,
                 bc_input=bc_input,
@@ -288,6 +290,8 @@ def standardise_bc(
                 continuous=continuous,
                 overwrite=overwrite,
             )
+
+        return result
 
 
 def standardise_footprint(

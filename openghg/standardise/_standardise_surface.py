@@ -149,7 +149,7 @@ def _local_standardise_surface(
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
     store: Optional[str] = None,
-):
+) -> Dict:
     """The local version of standardise_surface
 
     TODO - do we want to pass all these args in?

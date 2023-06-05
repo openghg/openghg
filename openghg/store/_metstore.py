@@ -36,8 +36,7 @@ class METStore(BaseStore):
         self._stored = True
         set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
 
-    @staticmethod
-    def retrieve(site: str, network: str, years: Union[str, List[str]]) -> METData:
+    def retrieve(self, site: str, network: str, years: Union[str, List[str]]) -> METData:
         """Retrieve data from either the local METStore or from a
         remote store if we don't have it locally
 
@@ -56,19 +55,17 @@ class METStore(BaseStore):
         else:
             years = sorted(years)
 
-        store = METStore.load()
-
         # We'll just do full years for now, I don't think it's a huge amount of data (currently)
         start_date = Timestamp(f"{years[0]}-1-1")
         end_date = Timestamp(f"{years[-1]}-12-31")
 
-        result = store.search(site=site, network=network, start_date=start_date, end_date=end_date)
+        result = self.search(site=site, network=network, start_date=start_date, end_date=end_date)
 
         # Retrieve from the Copernicus store
         if result is None:
             result = retrieve_met(site=site, network=network, years=years)
 
-            store._store(met_data=result)
+            self._store(met_data=result)
 
         return result
 
