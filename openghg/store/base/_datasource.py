@@ -83,7 +83,6 @@ class Datasource:
         data: Dataset,
         data_type: str,
         if_exists: Optional[str] = None,
-        overwrite: Optional[bool] = False,
     ) -> None:
         """Add data to this Datasource and segment the data by size.
         The data is stored as a tuple of the data and the daterange it covers.
@@ -98,7 +97,6 @@ class Datasource:
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "replace" - replace and insert new data into current timeseries
-            overwrite: Deprecated. This will use options for if_exists="new".
         Returns:
             None
         """
@@ -111,14 +109,13 @@ class Datasource:
         self.add_metadata(metadata=metadata)
 
         if "time" in data.coords:
-            return self.add_timed_data(data=data, data_type=data_type, if_exists=if_exists, overwrite=overwrite)
+            return self.add_timed_data(data=data, data_type=data_type, if_exists=if_exists)
         else:
             raise NotImplementedError()
 
     def add_timed_data(self, data: Dataset,
                        data_type: str,
-                       if_exists: Optional[str] = None,
-                       overwrite: bool = False) -> None:
+                       if_exists: Optional[str] = None) -> None:
         """Add data to this Datasource, splitting along the time axis
 
         Args:
@@ -131,18 +128,12 @@ class Datasource:
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "replace" - replace and insert new data into current timeseries
-            overwrite: Deprecated. This will use options for if_exists="new".
         Returns:
             None
         """
         from numpy import unique as np_unique
         from openghg.util import daterange_overlap
         from xarray import concat as xr_concat
-
-        if overwrite:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` input."
-                           "See documentation for details of this input and options.")
-            if_exists = "new"
 
         # Extract period associated with data from metadata
         # TODO: May want to add period as a potential data variable so would need to extract from there if needed
@@ -171,19 +162,19 @@ class Datasource:
                     if daterange_overlap(daterange_a=existing_daterange, daterange_b=new_daterange):
                         overlapping.append((existing_daterange, new_daterange))
 
-            # If we have overlapping data, we raise a DataOverlapError by default
-            # or print a warning and then combine the datasets in overwrite is True
+            # If we have overlapping data we raise a DataOverlapError by default
+            # or print a warning and then combine the datasets if_exists is "replace"
             # if we have duplicate timestamps, we first check if the data is just the same
             # or if it's not, we keep the first value and drop the others, we also
             # print that we've done this
 
-            if overlapping:
-                if if_exists == "new":
-                    # Delete all current data on Datasource and add new data
-                    # self._data is a dictionary containing datestr: Dataset values
-                    logger.info("New data daterange overlaps with previous data. Creating new version with new data only.")
-                    self._data = new_data
-                elif if_exists is not None and "replace" in if_exists:
+            if if_exists == "new":
+                # Remove all current data on Datasource and add new data
+                # self._data is a dictionary containing datestr: Dataset values
+                logger.info("Creating new version with new data only.")
+                self._data = new_data
+            elif overlapping:
+                if if_exists == "replace":
                     combined_datasets = {}
                     for existing_daterange, new_daterange in overlapping:
                         ex = self._data.pop(existing_daterange)
@@ -614,16 +605,13 @@ class Datasource:
 
     def save(self,
              bucket: Optional[str] = None,
-             if_exists: Optional[str] = None,
-             overwrite: Optional[bool] = False) -> None:
+             new_version: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
             bucket: Bucket to hold data
-            if_exists: What to do if existing data is present.
-                - None / "replace" - keep current version
-                - "new" - create new version
-            overwrite: Deprecated. This will use options for if_exists="new".
+            new_version: Create a new version for the data and save current
+                data to a previous version.
         Returns:
             None
         """
@@ -636,22 +624,12 @@ class Datasource:
         if bucket is None:
             bucket = get_bucket()
 
-        if overwrite and if_exists is None:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` input."
-                           "See documentation for details of this input and options.")
-            if_exists = "new"
-
-        if if_exists is not None and "new" in if_exists:
-            new_version = True
-        else:
-            new_version = False
-
         if self._data:
             # Ensure we have the latest key
             if "latest" not in self._data_keys:
                 self._data_keys["latest"] = {}
 
-            # Add data to same version as previous unless overwrite is True
+            # Add data to same version as previous unless save_current is True
             if self._latest_version and not new_version:
                 version_str = self._latest_version
             else:

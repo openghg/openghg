@@ -72,6 +72,8 @@ class BoundaryConditions(BaseStore):
         domain: str,
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
+        if_exists: Optional[str] = None,
+        save_current: Optional[bool] = None,
         overwrite: bool = False,
     ) -> Optional[Dict]:
         """Read boundary conditions file
@@ -89,7 +91,15 @@ class BoundaryConditions(BaseStore):
                      - suitable pandas Offset Alias
                      - tuple of (value, unit) as would be passed to pandas.Timedelta function
             continuous: Whether time stamps have to be continuous.
-            overwrite: Should this data overwrite currently stored data.
+            if_exists: What to do if existing data is present.
+                - None - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "replace" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input (None -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -102,12 +112,25 @@ class BoundaryConditions(BaseStore):
             update_zero_dim,
             load_metastore,
         )
-        from openghg.util import clean_string, hash_file, timestamp_now
+        from openghg.util import (
+            clean_string,
+            hash_file,
+            timestamp_now,
+            check_if_need_new_version,
+        )            
+
         from xarray import open_dataset
 
         species = clean_string(species)
         bc_input = clean_string(bc_input)
         domain = clean_string(domain)
+
+        if overwrite and if_exists is None:
+            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                           "See documentation for details of these inputs and options.")
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
 
         filepath = Path(filepath)
 
@@ -117,7 +140,7 @@ class BoundaryConditions(BaseStore):
         metastore = load_metastore(key=bc_store._metakey)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in bc_store._file_hashes and not overwrite:
+        if file_hash in bc_store._file_hashes and if_exists is None:
             logger.warning(
                 "This file has been uploaded previously with the filename : "
                 f"{bc_store._file_hashes[file_hash]} - skipping."
@@ -191,7 +214,8 @@ class BoundaryConditions(BaseStore):
         datasource_uuids = assign_data(
             data_dict=boundary_conditions_data,
             lookup_results=lookup_results,
-            overwrite=overwrite,
+            if_exists=if_exists,
+            new_version=new_version,
             data_type=data_type,
         )
 

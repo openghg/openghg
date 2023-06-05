@@ -76,4 +76,4 @@ from ._util import (
     unanimous,
     verify_site,
 )
-from ._versions import show_versions
+from ._versions import show_versions, check_if_need_new_version

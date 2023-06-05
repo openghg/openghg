@@ -67,6 +67,8 @@ class ObsSurface(BaseStore):
             "sampling_period",
             "measurement_type",
             "overwrite",
+            "if_exists",
+            "save_current",
             "source_format",
             "data_type",
         }
@@ -119,6 +121,7 @@ class ObsSurface(BaseStore):
         measurement_type: str = "insitu",
         update_mismatch: bool = False,
         if_exists: Optional[str] = None,
+        save_current: Optional[bool] = None,
         overwrite: bool = False,
         verify_site_code: bool = True,
         site_filepath: optionalPathType = None,
@@ -148,9 +151,11 @@ class ObsSurface(BaseStore):
                 - None - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
-                - "new" - creates new version with just new data
+                - "new" - just include new data and ignore previous
                 - "replace" - replace and insert new data into current timeseries
-            overwrite: Deprecated. This will use options for if_exists="new".
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input (None -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
@@ -165,7 +170,14 @@ class ObsSurface(BaseStore):
 
         from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import SurfaceTypes
-        from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            hash_file,
+            load_surface_parser,
+            verify_site,
+            check_if_need_new_version,
+        )
         from tqdm import tqdm
 
         if not isinstance(filepath, list):
@@ -200,9 +212,11 @@ class ObsSurface(BaseStore):
         inlet = format_inlet(inlet)
 
         if overwrite and if_exists is None:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` input."
-                           "See documentation for details of this input and options.")
+            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                           "See documentation for details of these inputs and options.")
             if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
 
         sampling_period_seconds: Union[str, None] = None
         # If we have a sampling period passed we want the number of seconds
@@ -373,6 +387,7 @@ class ObsSurface(BaseStore):
                     data_dict=data,
                     lookup_results=lookup_results,
                     if_exists=if_exists,
+                    new_version=new_version,
                     data_type=data_type,
                 )
 

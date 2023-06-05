@@ -199,6 +199,8 @@ class Footprints(BaseStore):
         high_spatial_res: bool = False,
         high_time_res: bool = False,
         short_lifetime: bool = False,
+        if_exists: Optional[str] = None,
+        save_current: Optional[bool] = None,
         overwrite: bool = False,
         # model_params: Optional[Dict] = None,
     ) -> Optional[Dict]:
@@ -223,7 +225,15 @@ class Footprints(BaseStore):
                            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
-            overwrite: Overwrite any currently stored data
+            if_exists: What to do if existing data is present.
+                - None - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "replace" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input (None -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -236,7 +246,14 @@ class Footprints(BaseStore):
             update_zero_dim,
             load_metastore,
         )
-        from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            hash_file,
+            species_lifetime,
+            timestamp_now,
+            check_if_need_new_version,
+        )            
 
         filepath = Path(filepath)
 
@@ -256,13 +273,20 @@ class Footprints(BaseStore):
         inlet = format_inlet(inlet)
         inlet = cast(str, inlet)
 
+        if overwrite and if_exists is None:
+            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                           "See documentation for details of these inputs and options.")
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
         fp = Footprints.load()
 
         # Load in the metadata store
         metastore = load_metastore(key=fp._metakey)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in fp._file_hashes and not overwrite:
+        if file_hash in fp._file_hashes and if_exists is None:
             logger.warning(
                 f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]} - skipping."
             )
@@ -384,7 +408,8 @@ class Footprints(BaseStore):
         datasource_uuids: Dict[str, Dict] = assign_data(
             data_dict=footprint_data,
             lookup_results=lookup_results,
-            overwrite=overwrite,
+            if_exists=if_exists,
+            new_version=new_version,
             data_type=data_type,
         )
 

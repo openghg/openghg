@@ -33,6 +33,8 @@ class EulerianModel(BaseStore):
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
+        if_exists: Optional[str] = None,
+        save_current: Optional[bool] = None,
         overwrite: bool = False,
     ) -> Dict:
         """Read Eulerian model output
@@ -44,7 +46,15 @@ class EulerianModel(BaseStore):
             start_date: Start date (inclusive) associated with model run
             end_date: End date (exclusive) associated with model run
             setup: Additional setup details for run
-            overwrite: Should this data overwrite currently stored data.
+            if_exists: What to do if existing data is present.
+                - None - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "replace" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input (None -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
         """
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
@@ -52,7 +62,13 @@ class EulerianModel(BaseStore):
         from collections import defaultdict
 
         from openghg.store import assign_data, datasource_lookup, load_metastore
-        from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
+        from openghg.util import (
+            clean_string,
+            hash_file,
+            timestamp_now,
+            timestamp_tzaware,
+            check_if_need_new_version,
+        )
         from pandas import Timestamp as pd_Timestamp
         from xarray import open_dataset
 
@@ -62,13 +78,20 @@ class EulerianModel(BaseStore):
         end_date = clean_string(end_date)
         setup = clean_string(setup)
 
+        if overwrite and if_exists is None:
+            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                           "See documentation for details of these inputs and options.")
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
         filepath = Path(filepath)
 
         em_store = EulerianModel.load()
         metastore = load_metastore(key=em_store._metakey)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in em_store._file_hashes and not overwrite:
+        if file_hash in em_store._file_hashes and if_exists is None:
             raise ValueError(
                 f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]}."
             )
@@ -158,7 +181,8 @@ class EulerianModel(BaseStore):
         datasource_uuids = assign_data(
             data_dict=model_data,
             lookup_results=lookup_results,
-            overwrite=overwrite,
+            if_exists=if_exists,
+            new_version=new_version,
             data_type=data_type,
         )
 

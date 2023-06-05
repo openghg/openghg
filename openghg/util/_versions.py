@@ -13,7 +13,9 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import List, IO, Union, Tuple
+from typing import List, IO, Union, Tuple, Optional, cast
+
+__all__ = ["show_versions", "check_if_need_new_version"]
 
 
 def get_sys_info() -> List:
@@ -162,3 +164,26 @@ def show_versions(file: IO = sys.stdout) -> None:
     print("", file=file)
     for k, stat in deps_blob:
         print(f"{k}: {stat}", file=file)
+
+
+def check_if_need_new_version(if_exists: Optional[str] = None,
+                              save_current: Optional[bool] = None) -> bool:
+    """
+    Check combination of if_exists and save_current keywords to determine
+    whether a new version should be created.
+    Args:
+
+    """
+    # Determining whether a new version should be created based on inputs.
+    if if_exists is None and save_current is None:
+        # Add new (non-overlapping) data on the same version
+        new_version = False
+    elif if_exists is not None and save_current is None:
+        # If data could be modified based on if_exists input
+        # default to creating a new version.
+        new_version = True
+    elif save_current is not None:
+        # Otherwise match new version to the save_current input.
+        new_version = cast(bool, save_current)
+    
+    return new_version

@@ -140,7 +140,7 @@ def test_versioning(capfd):
     # Check new version can be created and stored (using appropriate flag)
     d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="surface", if_exists="new")
 
-    d.save(if_exists="new")
+    d.save(new_version=True)
 
     detailed_keys = d.versions()
 
@@ -157,6 +157,8 @@ def test_versioning(capfd):
     }
 
     assert detailed_keys["v2"]["keys"] == expected_v2
+
+    # TODO: Add case for if_exists="replace" which should look more like original case above after updates
 
 
 def test_get_dataframe_daterange():

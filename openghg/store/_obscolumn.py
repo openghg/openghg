@@ -38,6 +38,8 @@ class ObsColumn(BaseStore):
         instrument: Optional[str] = None,
         platform: str = "satellite",
         source_format: str = "openghg",
+        if_exists: Optional[str] = None,
+        save_current: Optional[bool] = None,
         overwrite: bool = False,
     ) -> Optional[Dict]:
         """Read column observation file
@@ -60,13 +62,26 @@ class ObsColumn(BaseStore):
                 - "satellite"
                 - "site"
             source_format : Type of data being input e.g. openghg (internal format)
-            overwrite: Should this data overwrite currently stored data.
+            if_exists: What to do if existing data is present.
+                - None - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "replace" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input (None -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import ColumnTypes
-        from openghg.util import clean_string, hash_file, load_column_parser
+        from openghg.util import (
+            clean_string,
+            hash_file,
+            load_column_parser,
+            check_if_need_new_version,
+        )
 
         # TODO: Evaluate which inputs need cleaning (if any)
         satellite = clean_string(satellite)
@@ -76,6 +91,13 @@ class ObsColumn(BaseStore):
         network = clean_string(network)
         instrument = clean_string(instrument)
         platform = clean_string(platform)
+
+        if overwrite and if_exists is None:
+            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                           "See documentation for details of these inputs and options.")
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
 
         filepath = Path(filepath)
 
@@ -93,7 +115,7 @@ class ObsColumn(BaseStore):
         metastore = load_metastore(key=obs_store._metakey)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in obs_store._file_hashes and not overwrite:
+        if file_hash in obs_store._file_hashes and if_exists is None:
             logger.warning(
                 "This file has been uploaded previously with the filename : "
                 f"{obs_store._file_hashes[file_hash]} - skipping."
@@ -134,7 +156,8 @@ class ObsColumn(BaseStore):
         datasource_uuids = assign_data(
             data_dict=obs_data,
             lookup_results=lookup_results,
-            overwrite=overwrite,
+            if_exists=if_exists,
+            new_version=new_version,
             data_type=data_type,
         )
 
