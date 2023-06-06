@@ -113,6 +113,7 @@ class BoundaryConditions(BaseStore):
             infer_date_range,
             update_zero_dim,
             load_metastore,
+            update_metadata,
         )
         from openghg.util import (
             clean_string,
@@ -226,7 +227,10 @@ class BoundaryConditions(BaseStore):
             data_type=data_type,
         )
 
-        bc_store.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=metastore)
+        update_keys = ["start_date", "end_date", "latest_version"]
+        boundary_conditions_data = update_metadata(data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys)
+
+        bc_store.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=metastore, update_keys=update_keys)
 
         # Record the file hash in case we see this file again
         bc_store._file_hashes[file_hash] = filepath.name

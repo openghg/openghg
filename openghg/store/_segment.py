@@ -1,9 +1,15 @@
 """ Segment the data into Datasources
 
 """
+import logging
 from typing import Dict, Optional
 
+
 __all__ = ["assign_data"]
+
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def assign_data(
@@ -19,6 +25,7 @@ def assign_data(
         Args:
             data_dict: Dictionary containing data and metadata for species
             lookup_results: Dictionary of lookup results]
+            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
             if_exists: What to do if existing data is present.
                 - None - checks new and current data for timeseries overlap
                    - adds data if no overlap

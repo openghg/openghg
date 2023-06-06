@@ -165,6 +165,27 @@ def bsd_diff_data_read(if_exists=None):
                          if_exists=if_exists)
 
 
+def bsd_diff_date_range_read(overwrite=False):
+    """
+    Add overlapping Bilsdale GCMD data to the object store:
+     - Small difference in data date range (should create different hash)
+    """
+    site = "bsd"
+    network = "DECC"
+    source_format2 = "GCWERKS"
+    instrument = "GCMD"
+
+    bsd_path5 = get_surface_datapath(filename="bilsdale-md.diff-date-range.14.C", source_format="GC")
+    bsd_prec_path5 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
+
+    ObsSurface.read_file(filepath=(bsd_path5, bsd_prec_path5),
+                         source_format=source_format2,
+                         site=site,
+                         network=network,
+                         instrument=instrument,
+                         overwrite=overwrite)
+
+
 def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
     """
     Read CRDS data file using pandas (to create expected values).
@@ -522,6 +543,48 @@ def test_obs_data_representative_date_overlap():
     assert pd.Timestamp(start1) == expected_start1
     assert pd.Timestamp(end1) == expected_end1
     assert pd.Timestamp(start2) == expected_start2
+
+
+#%% Check appropriate metadata is updated when data is added to data sources
+
+def test_metadata_update():
+    """
+    Add data and then update this to check that the version is both added to the original
+    metadata and subsequently updated when the datasource is updated.
+    """
+    clear_test_store()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+
+    # Search for expected species
+    # GCMD data
+    search_sf6_1 = search(site="bsd", species="sf6")
+
+    # Set expectations for start and end date (for GC data this is altered from file details
+    # based on known sampling period).
+    sampling_period = 75
+    sampling_period_td = pd.Timedelta(seconds=int(sampling_period))
+    time_buffer = pd.Timedelta(seconds=1)  # Buffer subtracted from end to make this exclusive end.
+    expected_start_1 = str(pd.Timestamp("2014-01-01T00:13", tz="utc") - sampling_period_td / 2.0)
+    expected_end_1 = str(pd.Timestamp("2014-12-03T02:18", tz="utc") - sampling_period_td / 2.0 + sampling_period_td - time_buffer)
+
+    sf6_metadata_1 = search_sf6_1.retrieve().metadata
+    assert sf6_metadata_1["latest_version"] == "v1"
+    assert sf6_metadata_1["start_date"] == expected_start_1
+    assert sf6_metadata_1["end_date"] == expected_end_1
+
+    # Load BSD data - GCMD data (GCWERKS) with small change in date range
+    bsd_diff_date_range_read(overwrite=True)
+
+    search_sf6_2 = search(site="bsd", species="sf6")
+
+    expected_start_2 = expected_start_1
+    expected_end_2 = str(pd.Timestamp("2014-12-06T10:48", tz="utc") - sampling_period_td / 2.0 + sampling_period_td - time_buffer)
+
+    sf6_metadata_2 = search_sf6_2.retrieve().metadata
+    assert sf6_metadata_2["latest_version"] == "v2"
+    assert sf6_metadata_2["start_date"] == expected_start_2
+    assert sf6_metadata_2["end_date"] == expected_end_2
 
 
 #%% Check overwrite functionality
