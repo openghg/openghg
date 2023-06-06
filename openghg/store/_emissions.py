@@ -93,7 +93,7 @@ class Emissions(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.store import assign_data, datasource_lookup
+        from openghg.store import assign_data
         from openghg.types import EmissionsTypes
         from openghg.util import clean_string, hash_file, load_emissions_parser
 
@@ -149,20 +149,11 @@ class Emissions(BaseStore):
                 min_required.append(key)
 
         required = tuple(min_required)
-        lookup_results = datasource_lookup(
-            metastore=self._metastore, data=emissions_data, required_keys=required
-        )
 
         data_type = "emissions"
-        datasource_uuids = assign_data(
-            data_dict=emissions_data,
-            lookup_results=lookup_results,
-            overwrite=overwrite,
-            data_type=data_type,
+        datasource_uuids = self.assign_data(
+            data=emissions_data, overwrite=overwrite, data_type=data_type, required_keys=required
         )
-
-        self.add_datasources(uuids=datasource_uuids, data=emissions_data, metastore=self._metastore)
-
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
 
@@ -195,7 +186,7 @@ class Emissions(BaseStore):
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
-        from openghg.store import assign_data, datasource_lookup
+        from openghg.store import assign_data
         from openghg.types import EmissionsDatabases
         from openghg.util import load_emissions_database_parser
 

@@ -2,7 +2,7 @@ import pytest
 from helpers import get_emissions_datapath
 from openghg.retrieve import search, search_flux
 from openghg.objectstore import get_bucket
-from openghg.store import Emissions, datasource_lookup, load_metastore
+from openghg.store import Emissions, load_metastore
 from openghg.util import hash_bytes
 from openghg.types import DatasourceLookupError
 from xarray import open_dataset
@@ -426,36 +426,6 @@ def test_transform_and_add_edgar_database():
     }
 
     assert metadata.items() >= expected_metadata.items()
-
-
-@pytest.mark.skip(reason="Fix needed for new storage class loading")
-def test_datasource_add_lookup():
-    bucket = get_bucket()
-    e = Emissions(bucket=bucket)
-
-    fake_datasource = {"co2_gppcardamom_europe_2012": {"uuid": "mock-uuid-123456", "new": True}}
-
-    mock_data = {
-        "co2_gppcardamom_europe_2012": {
-            "metadata": {
-                "species": "co2",
-                "domain": "europe",
-                "source": "gppcardamom",
-                "date": "2012",
-            }
-        }
-    }
-
-    with Emissions(bucket=bucket) as e:
-        e.clear_datasources()
-        e.add_datasources(uuids=fake_datasource, data=mock_data, metastore=e._metastore)
-
-        assert e.datasources() == ["mock-uuid-123456"]
-
-        required = ["species", "domain", "source", "date"]
-        lookup = datasource_lookup(metastore=e._metastore, data=mock_data, required_keys=required)
-
-        assert lookup["co2_gppcardamom_europe_2012"] == fake_datasource["co2_gppcardamom_europe_2012"]["uuid"]
 
 
 def test_flux_schema():

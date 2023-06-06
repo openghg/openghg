@@ -242,7 +242,6 @@ class Footprints(BaseStore):
         import xarray as xr
         from openghg.store import (
             assign_data,
-            datasource_lookup,
             infer_date_range,
             update_zero_dim,
         )
@@ -384,19 +383,12 @@ class Footprints(BaseStore):
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
         required = ("site", "model", "inlet", "domain")
-        lookup_results = datasource_lookup(
-            metastore=self._metastore, data=footprint_data, required_keys=required
-        )
 
         data_type = "footprints"
-        datasource_uuids: Dict[str, Dict] = assign_data(
-            data_dict=footprint_data,
-            lookup_results=lookup_results,
-            overwrite=overwrite,
-            data_type=data_type,
+        datasource_uuids = self.assign_data(
+            data=footprint_data, overwrite=overwrite, data_type=data_type, required_keys=required
         )
 
-        self.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=self._metastore)
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
 

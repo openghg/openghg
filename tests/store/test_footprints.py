@@ -2,7 +2,7 @@ import pytest
 from helpers import get_footprint_datapath
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
-from openghg.store import Footprints, datasource_lookup, load_metastore
+from openghg.store import Footprints, load_metastore
 from openghg.util import hash_bytes
 
 
@@ -416,35 +416,6 @@ def test_read_footprint_short_lived():
 
     for key in expected_attrs:
         assert footprint_data.attrs[key] == expected_attrs[key]
-
-@pytest.mark.skip("Fix needed for new storage class loading")
-def test_datasource_add_lookup():
-    bucket = get_bucket()
-    f = Footprints(bucket=bucket)
-
-    fake_datasource = {"tmb_lghg_10m_europe": {"uuid": "mock-uuid-123456", "new": True}}
-
-    mock_data = {
-        "tmb_lghg_10m_europe": {
-            "metadata": {
-                "data_type": "footprints",
-                "site": "tmb",
-                "inlet": "10m",
-                "domain": "europe",
-                "model": "test_model",
-                "network": "lghg",
-            }
-        }
-    }
-
-    with load_metastore(key="test-metastore-123") as metastore:
-        f.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
-
-        assert f.datasources() == ["mock-uuid-123456"]
-        required = ["site", "inlet", "domain", "model"]
-        lookup = datasource_lookup(data=mock_data, metastore=metastore, required_keys=required)
-
-        assert lookup["tmb_lghg_10m_europe"] == fake_datasource["tmb_lghg_10m_europe"]["uuid"]
 
 
 def test_footprint_schema():

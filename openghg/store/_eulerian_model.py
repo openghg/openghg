@@ -63,7 +63,7 @@ class EulerianModel(BaseStore):
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
         from collections import defaultdict
-        from openghg.store import assign_data, datasource_lookup
+        from openghg.store import assign_data
         from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from pandas import Timestamp as pd_Timestamp
         from xarray import open_dataset
@@ -161,17 +161,11 @@ class EulerianModel(BaseStore):
         model_data[key]["metadata"] = metadata
 
         required = ("model", "species", "date")
-        lookup_results = datasource_lookup(metastore=self._metastore, data=model_data, required_keys=required)
 
         data_type = "eulerian_model"
-        datasource_uuids = assign_data(
-            data_dict=model_data,
-            lookup_results=lookup_results,
-            overwrite=overwrite,
-            data_type=data_type,
+        datasource_uuids = self.assign_data(
+            data=model_data, overwrite=overwrite, data_type=data_type, required_keys=required
         )
-
-        self.add_datasources(uuids=datasource_uuids, data=model_data, metastore=self._metastore)
 
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name

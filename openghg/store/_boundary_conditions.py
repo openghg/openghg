@@ -183,8 +183,6 @@ class BoundaryConditions(BaseStore):
             required_keys=required_keys,
         )
 
-        self.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=self._metastore)
-
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
 

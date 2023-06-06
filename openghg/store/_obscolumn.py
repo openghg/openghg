@@ -72,7 +72,7 @@ class ObsColumn(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.store import assign_data, datasource_lookup
+        from openghg.store import assign_data
         from openghg.types import ColumnTypes
         from openghg.util import clean_string, hash_file, load_column_parser
 
@@ -131,19 +131,11 @@ class ObsColumn(BaseStore):
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
         required = ("satellite", "selection", "domain", "site", "species", "network")
-        lookup_results = datasource_lookup(
-            metastore=self._metastore, data=obs_data, required_keys=required, min_keys=3
-        )
 
         data_type = "column"
-        datasource_uuids = assign_data(
-            data_dict=obs_data,
-            lookup_results=lookup_results,
-            overwrite=overwrite,
-            data_type=data_type,
+        datasource_uuids = self.assign_data(
+            data=obs_data, overwrite=overwrite, data_type=data_type, required_keys=required
         )
-
-        self.add_datasources(uuids=datasource_uuids, data=obs_data, metastore=self._metastore)
 
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
