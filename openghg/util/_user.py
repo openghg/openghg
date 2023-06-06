@@ -229,9 +229,6 @@ def read_local_config() -> Dict:
     Returns:
         dict: OpenGHG configurations
     """
-    # TODO - have to see how much this slows things down and if we should just cache its response
-    check_config()
-
     config_path = get_user_config_path()
 
     if not config_path.exists():

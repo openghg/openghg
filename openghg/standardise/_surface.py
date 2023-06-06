@@ -10,35 +10,49 @@ from openghg.types import optionalPathType, multiPathType
 
 
 def standardise_surface(
-    filepaths: Union[str, Path, List, Tuple],
+    filepaths: multiPathType,
     source_format: str,
-    site: str,
     network: str,
+    site: str,
     inlet: Optional[str] = None,
+    height: Optional[str] = None,
     instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    sampling_period: Optional[Union[Timedelta, str]] = None,
     calibration_scale: Optional[str] = None,
-    site_filepath: optionalPathType = None,
+    update_mismatch: bool = False,
+    measurement_type: str = "insitu",
     overwrite: bool = False,
+    verify_site_code: bool = True,
+    site_filepath: optionalPathType = None,
     store: Optional[str] = None,
 ) -> Optional[Dict]:
     """Standardise surface measurements and store the data in the object store.
 
     Args:
-        filepaths: Path of file(s) to process
-        source_format: Format of data i.e. GCWERKS, CRDS, ICOS
-        site: Site code
+        filepath: Filepath(s)
+        source_format: Data format, for example CRDS, GCWERKS
+        site: Site code/name
         network: Network name
-        inlet: Inlet height in metres
+        inlet: Inlet height. Format 'NUMUNIT' e.g. "10m".
+            If retrieve multiple files pass None, OpenGHG will attempt to
+            extract this from the file.
+        height: Alias for inlet.
         instrument: Instrument name
-        sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
+        sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
+        calibration_scale: Calibration scale for data
+        update_mismatch: This determines whether mismatches between the internal data
+        attributes and the supplied / derived metadata can be updated or whether
+        this should raise an AttrMismatchError.
+        If True, currently updates metadata with attribute value.
+        measurement_type: Type of measurement e.g. insitu, flask
+        overwrite: Overwrite previously uploaded data
+        verify_site_code: Verify the site code
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
-        overwrite: Overwrite data currently present in the object store
         store: Name of object store to write to, required if user has access to more than one
         writable store
     Returns:
-        dict: Dictionary containing confirmation of standardisation process.
+        dict: Dictionary of result data
     """
     from openghg.cloud import call_function
 
@@ -120,81 +134,24 @@ def standardise_surface(
 
         return responses
     else:
-        return _local_standardise_surface(
-            filepath=filepaths,
-            source_format=source_format,
-            site=site,
-            network=network,
-            instrument=instrument,
-            sampling_period=sampling_period,
-            inlet=inlet,
-            site_filepath=site_filepath,
-            overwrite=overwrite,
-            store=store,
-        )
+        bucket = get_writable_bucket(name=store)
 
+        with ObsSurface(bucket=bucket) as obs:
+            results = obs.read_file(
+                filepath=filepaths,
+                source_format=source_format,
+                network=network,
+                site=site,
+                inlet=inlet,
+                height=height,
+                instrument=instrument,
+                sampling_period=sampling_period,
+                calibration_scale=calibration_scale,
+                measurement_type=measurement_type,
+                overwrite=overwrite,
+                verify_site_code=verify_site_code,
+                site_filepath=site_filepath,
+                update_mismatch=update_mismatch,
+            )
 
-def _local_standardise_surface(
-    filepath: multiPathType,
-    source_format: str,
-    network: str,
-    site: str,
-    inlet: Optional[str] = None,
-    height: Optional[str] = None,
-    instrument: Optional[str] = None,
-    sampling_period: Optional[Union[Timedelta, str]] = None,
-    calibration_scale: Optional[str] = None,
-    measurement_type: str = "insitu",
-    overwrite: bool = False,
-    verify_site_code: bool = True,
-    site_filepath: optionalPathType = None,
-    store: Optional[str] = None,
-) -> Dict:
-    """The local version of standardise_surface
-
-    TODO - do we want to pass all these args in?
-
-    Args:
-        filepath: Filepath(s)
-        source_format: Data format, for example CRDS, GCWERKS
-        site: Site code/name
-        network: Network name
-        inlet: Inlet height. Format 'NUMUNIT' e.g. "10m".
-            If retrieve multiple files pass None, OpenGHG will attempt to
-            extract this from the file.
-        height: Alias for inlet.
-        read inlets from data.
-        instrument: Instrument name
-        sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
-        measurement_type: Type of measurement e.g. insitu, flask
-        overwrite: Overwrite previously uploaded data
-        verify_site_code: Verify the site code
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
-            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
-        store: Name of object store to write to, required if user has access to more than one
-        writable store
-    Returns:
-        dict: Dictionary of result data
-
-    TODO - do we still want to return this dictionary of UUIDs the user might not care about?
-    """
-    bucket = get_writable_bucket(name=store)
-
-    with ObsSurface(bucket=bucket) as obs:
-        results = obs.read_file(
-            filepath=filepath,
-            source_format=source_format,
-            network=network,
-            site=site,
-            inlet=inlet,
-            height=height,
-            instrument=instrument,
-            sampling_period=sampling_period,
-            calibration_scale=calibration_scale,
-            measurement_type=measurement_type,
-            overwrite=overwrite,
-            verify_site_code=verify_site_code,
-            site_filepath=site_filepath,
-        )
-
-    return results
+        return results

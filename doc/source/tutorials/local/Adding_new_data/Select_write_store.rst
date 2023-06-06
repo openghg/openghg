@@ -1,70 +1,53 @@
 Select a store to write to
 ==========================
 
-This tutorial demonstrates how OpenGHG can be used to process new
-measurement data, search the data present and to retrieve this for
-analysis and visualisation.
+This tutorial assumes you have write priviliges to multiple object stores and for the purposes of the
+tutorial we'll create a new config file with multiple stores to detail this process.
 
-0. Using the tutorial object store
-----------------------------------
+0. Backing up your config file
+------------------------------
 
-To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we'll call the tutorial store. To do this we use the
-``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
-``OPENGHG_TUT_STORE`` environment variable for this session and won't
-affect your use of OpenGHG outside of this tutorial.
+To avoid deletion of your current config file we'll first create a backup
 
-.. code:: ipython3
+.. code:: bash
 
-    from openghg.tutorial import use_tutorial_store
+    $ cp ~/.config/openghg/openghg.conf $ cp ~/.config/openghg/openghg.conf.bak
 
-    use_tutorial_store()
 
-1. Adding and standardising data
---------------------------------
+1. Create a new config
+-----------------------
 
-Source formats
-~~~~~~~~~~~~~~
+We'll now run ``openghg --quickstart`` and create a new configuration file with two object stores,
+both in our home directory.
 
-Within OpenGHG there are several source formats which can be processed and
-stored within the object store. This includes data from the AGAGE, DECC,
-NOAA, LondonGHG, BEAC2ON networks.
+.. code-block:: bash
 
-When uploading a new data file, the data type must be specified
-alongside some additional details so OpenGHG can recognise the format
-and the correct standardisation can occur. The details needed will vary
-by the type of data being uploaded but will often include the
-measurement reference (e.g. a site code) and the name of any network.
+    $ openghg --quickstart
 
-For the full list of accepted observation inputs and source formats, there
-is a summary function which can be called:
+    OpenGHG configuration
+    ---------------------
 
-.. code:: ipython3
+    INFO:openghg.util:We'll first create your user object store.
 
-    from openghg.standardise import summary_source_formats
+    Enter path for your local object store (default /home/gareth/openghg_store):
+    Would you like to add another object store? (y/n): y
+    Enter the name of the store: shared
+    Enter the object store path: /home/gareth/openghg_shared
 
-    summary = summary_source_formats()
+    You will now be asked for read/write permissions for the store.
+    For read only enter r, for read and write enter rw.
 
-    ## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES
-    # import pandas as pd; pd.set_option('display.max_rows', None)
+    Enter object store permissions: rw
+    Would you like to add another object store? (y/n): n
+    INFO:openghg.util:Configuration written to /home/gareth/.config/openghg/openghg.conf
 
-    summary
+Now that we have two object stores we have write permissions to we can try standardising some surface
+measurements from the DECC network.
 
-Note: there may be multiple source formats applicable for a give site. This
-is can be dependent on various factors including the instrument type
-used to measure the data e.g. for Tacolneston (“TAC”):
+2. Standardising data
+---------------------
 
-.. code:: ipython3
-
-    summary[summary["Site code"] == "TAC"]
-
-DECC network
-~~~~~~~~~~~~
-
-We will start by adding data to the object store from a surface site
-within the DECC network. Here we have accessed a subset of data from the
-Tacolneston site (site code “TAC”) in the UK.
+We'll retrieve some surface data from the Tacolneston site from our example data repository.
 
 .. code:: ipython3
 
@@ -74,24 +57,21 @@ Tacolneston site (site code “TAC”) in the UK.
 
     tac_data = retrieve_example_data(url=data_url)
 
-As this data is measured in-situ, this is classed as a surface site and
-we need to use the ``ObsSurface`` class to interpret this data. We can
-pass our list of files to the ``read_file`` method associated within the
-``ObsSurface`` class, also providing details on: - site code - ``"TAC"``
-for Tacolneston - type of data we want to process, known as the data
-type - ``"CRDS"`` - network - ``"DECC"``
-
-This is shown below:
+First we'll try using the :func:`openghg.standardise.standardise_surface` function to standardise this data.
 
 .. code:: ipython3
 
     from openghg.standardise import standardise_surface
 
-    decc_results = standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC")
+    tac_result = standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC")
 
-.. code:: ipython3
+    ...
+    ObjectStoreError: More than one writable store, stores we can write to are: user, shared.
 
-    print(decc_results)
+The whole error has been removed above but the result is the same, OpenGHG doesn't know which store to write to.
+We want to write this data to the shared store so everyone in our group can access it.
+Let's call ``standardise_surface`` again but this time pass in the ``store`` argument so OpenGHG knows where to write
+the data to.
 
 Here this extracts the data (and metadata) from the supplied files,
 standardises them and adds these to our created object store.

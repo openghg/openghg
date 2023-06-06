@@ -68,14 +68,14 @@ def get_writable_bucket(name: Optional[str] = None) -> str:
         return next(iter(writable_buckets.values()))
     elif len(writable_buckets) > 1 and name is None:
         raise ObjectStoreError(
-            f"More than one writable store, stores we can write to are: {','.join(writable_buckets)}."
+            f"More than one writable store, stores we can write to are: {', '.join(writable_buckets)}."
         )
 
     try:
         bucket_path = writable_buckets[name]
     except KeyError:
         raise ObjectStoreError(
-            f"Invalid object store name, stores we can write to are: {','.join(writable_buckets)}"
+            f"Invalid object store name, stores we can write to are: {', '.join(writable_buckets)}"
         )
 
     return bucket_path
