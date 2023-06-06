@@ -66,9 +66,10 @@ class ObsSurface(BaseStore):
             "instrument",
             "sampling_period",
             "measurement_type",
-            "overwrite",
             "if_exists",
             "save_current",
+            "overwrite",
+            "force",
             "source_format",
             "data_type",
         }
@@ -119,12 +120,13 @@ class ObsSurface(BaseStore):
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
+        verify_site_code: bool = True,
+        site_filepath: optionalPathType = None,
         update_mismatch: bool = False,
         if_exists: Optional[str] = None,
         save_current: Optional[bool] = None,
         overwrite: bool = False,
-        verify_site_code: bool = True,
-        site_filepath: optionalPathType = None,
+        force: bool = False,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -143,7 +145,10 @@ class ObsSurface(BaseStore):
             instrument: Instrument name
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
-            update_mismatch: This determines whether mismatches between the internal data
+            verify_site_code: Verify the site code
+            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+                Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+                        update_mismatch: This determines whether mismatches between the internal data
                 attributes and the supplied / derived metadata can be updated or whether
                 this should raise an AttrMismatchError.
                 If True, currently updates metadata with attribute value.
@@ -156,9 +161,7 @@ class ObsSurface(BaseStore):
             save_current: Whether to save data in current form and create a new version.
                 If None, this will depend on if_exists input (None -> True), (other -> False)
             overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
-            verify_site_code: Verify the site code
-            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
-                Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+            force: Force adding of data even if this is identical to data stored.
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -214,6 +217,10 @@ class ObsSurface(BaseStore):
         if overwrite and if_exists is None:
             logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                            "See documentation for details of these inputs and options.")
+            if_exists = "new"
+
+        # Making sure data can be force overwritten if force keyword is included.
+        if force and if_exists is None:
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
@@ -279,10 +286,11 @@ class ObsSurface(BaseStore):
                     data_filepath = Path(fp)
 
                 file_hash = hash_file(filepath=data_filepath)
-                if file_hash in obs._file_hashes and if_exists is None:
+                if file_hash in obs._file_hashes and not force:
                     logger.warning(
                         "This file has been uploaded previously with the filename : "
-                        f"{obs._file_hashes[file_hash]} - skipping."
+                        f"{obs._file_hashes[file_hash]} - skipping.\n"
+                        "If necessary, use force=True to bypass this to add this data."
                     )
                     break
 

@@ -45,7 +45,7 @@ def test_read_file():
         source="gpp-cardamom",
         domain="europe",
         high_time_resolution=False,
-        overwrite=True,
+        force=True,  # For ease, make sure we can add the same data.
     )
 
     assert "co2_gpp-cardamom_europe" in proc_results

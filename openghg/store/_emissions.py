@@ -68,6 +68,7 @@ class Emissions(BaseStore):
         if_exists: Optional[str] = None,
         save_current: Optional[bool] = None,
         overwrite: bool = False,
+        force: bool = False,
     ) -> Optional[Dict]:
         """Read emissions file
 
@@ -96,6 +97,7 @@ class Emissions(BaseStore):
             save_current: Whether to save data in current form and create a new version.
                 If None, this will depend on if_exists input (None -> True), (other -> False)
             overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+            force: Force adding of data even if this is identical to data stored.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -117,6 +119,10 @@ class Emissions(BaseStore):
                            "See documentation for details of these inputs and options.")
             if_exists = "new"
 
+        # Making sure data can be force overwritten if force keyword is included.
+        if force and if_exists is None:
+            if_exists = "new"
+
         new_version = check_if_need_new_version(if_exists, save_current)
 
         filepath = Path(filepath)
@@ -135,9 +141,10 @@ class Emissions(BaseStore):
         metastore = load_metastore(key=em_store._metakey)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in em_store._file_hashes and if_exists is None:
+        if file_hash in em_store._file_hashes and not force:
             warnings.warn(
-                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
+                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping.\n"
+                "If necessary, use force=True to bypass this to add this data."
             )
             return None
 

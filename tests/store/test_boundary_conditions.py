@@ -43,7 +43,7 @@ def test_read_file_monthly():
         bc_input="MOZART",
         domain="EUROPE",
         period="monthly",
-        overwrite=True,
+        force=True,  # For ease, make sure we can add the same data.
     )
 
     assert "ch4_mozart_europe" in proc_results

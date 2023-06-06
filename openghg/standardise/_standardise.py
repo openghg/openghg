@@ -15,9 +15,13 @@ def standardise_surface(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     calibration_scale: Optional[str] = None,
-    update_mismatch: bool = False,
+    verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
+    update_mismatch: bool = False,
+    if_exists: Optional[str] = None,
+    save_current: Optional[bool] = None,
     overwrite: bool = False,
+    force: bool = False,
 ) -> Optional[Dict]:
     """Standardise surface measurements and store the data in the object store.
 
@@ -29,13 +33,23 @@ def standardise_surface(
         inlet: Inlet height in metres
         instrument: Instrument name
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
+        verify_site_code: Verify the site code
+        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         update_mismatch: This determines whether mismatches between the internal data
                 attributes and the supplied / derived metadata can be updated or whether
                 this should raise an AttrMismatchError.
                 If True, currently updates metadata with attribute value.
-        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
-            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
-        overwrite: Overwrite data currently present in the object store
+        if_exists: What to do if existing data is present.
+            - None - checks new and current data for timeseries overlap
+                - adds data if no overlap
+                - raises DataOverlapError if there is an overlap
+            - "new" - just include new data and ignore previous
+            - "replace" - replace and insert new data into current timeseries
+        save_current: Whether to save data in current form and create a new version.
+            If None, this will depend on if_exists input (None -> True), (other -> False)
+        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+        force: Force adding of data even if this is identical to data stored.
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -129,9 +143,13 @@ def standardise_surface(
             instrument=instrument,
             sampling_period=sampling_period,
             inlet=inlet,
-            update_mismatch=update_mismatch,
+            verify_site_code=verify_site_code,
             site_filepath=site_filepath,
+            update_mismatch=update_mismatch,
+            if_exists=if_exists,
+            save_current=save_current,
             overwrite=overwrite,
+            force=force,
         )
 
         return results
@@ -148,7 +166,10 @@ def standardise_column(
     instrument: Optional[str] = None,
     platform: str = "satellite",
     source_format: str = "openghg",
+    if_exists: Optional[str] = None,
+    save_current: Optional[bool] = None,
     overwrite: bool = False,
+    force: bool = False,
 ) -> Optional[Dict]:
     """Read column observation file
 
@@ -170,7 +191,16 @@ def standardise_column(
             - "satellite"
             - "site"
         source_format : Type of data being input e.g. openghg (internal format)
-        overwrite: Should this data overwrite currently stored data.
+        if_exists: What to do if existing data is present.
+            - None - checks new and current data for timeseries overlap
+                - adds data if no overlap
+                - raises DataOverlapError if there is an overlap
+            - "new" - just include new data and ignore previous
+            - "replace" - replace and insert new data into current timeseries
+        save_current: Whether to save data in current form and create a new version.
+            If None, this will depend on if_exists input (None -> True), (other -> False)
+        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+        force: Force adding of data even if this is identical to data stored.
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -217,7 +247,10 @@ def standardise_column(
             instrument=instrument,
             platform=platform,
             source_format=source_format,
+            if_exists=if_exists,
+            save_current=save_current,
             overwrite=overwrite,
+            force=force,
         )
 
 
@@ -228,7 +261,10 @@ def standardise_bc(
     domain: str,
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
+    if_exists: Optional[str] = None,
+    save_current: Optional[bool] = None,
     overwrite: bool = False,
+    force: bool = False,
 ) -> Optional[Dict]:
     """Standardise boundary condition data and store it in the object store.
 
@@ -241,7 +277,16 @@ def standardise_bc(
         domain: Region for boundary conditions
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
-        overwrite: Should this data overwrite currently stored data.
+        if_exists: What to do if existing data is present.
+            - None - checks new and current data for timeseries overlap
+                - adds data if no overlap
+                - raises DataOverlapError if there is an overlap
+            - "new" - just include new data and ignore previous
+            - "replace" - replace and insert new data into current timeseries
+        save_current: Whether to save data in current form and create a new version.
+            If None, this will depend on if_exists input (None -> True), (other -> False)
+        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+        force: Force adding of data even if this is identical to data stored.
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -279,7 +324,10 @@ def standardise_bc(
             domain=domain,
             period=period,
             continuous=continuous,
+            if_exists=if_exists,
+            save_current=save_current,
             overwrite=overwrite,
+            force=force,
         )
 
 
@@ -299,7 +347,10 @@ def standardise_footprint(
     retrieve_met: bool = False,
     high_spatial_res: bool = False,
     high_time_res: bool = False,
+    if_exists: Optional[str] = None,
+    save_current: Optional[bool] = None,
     overwrite: bool = False,
+    force: bool = False,
 ) -> Optional[Dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -321,7 +372,16 @@ def standardise_footprint(
         high_spatial_res : Indicate footprints include both a low and high spatial resolution.
         high_time_res: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically for Carbon Dioxide data.
-        overwrite: Overwrite any currently stored data
+        if_exists: What to do if existing data is present.
+            - None - checks new and current data for timeseries overlap
+                - adds data if no overlap
+                - raises DataOverlapError if there is an overlap
+            - "new" - just include new data and ignore previous
+            - "replace" - replace and insert new data into current timeseries
+        save_current: Whether to save data in current form and create a new version.
+            If None, this will depend on if_exists input (None -> True), (other -> False)
+        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+        force: Force adding of data even if this is identical to data stored.
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -378,7 +438,10 @@ def standardise_footprint(
             retrieve_met=retrieve_met,
             high_spatial_res=high_spatial_res,
             high_time_res=high_time_res,
+            if_exists=if_exists,
+            save_current=save_current,
             overwrite=overwrite,
+            force=force,
         )
 
 
@@ -394,7 +457,10 @@ def standardise_flux(
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
+    if_exists: Optional[str] = None,
+    save_current: Optional[bool] = None,
     overwrite: bool = False,
+    force: bool = False,
 ) -> Optional[Dict]:
     """Process flux data
 
@@ -408,7 +474,16 @@ def standardise_flux(
         high_time_resolution: If this is a high resolution file
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
-        overwrite: Should this data overwrite currently stored data.
+        if_exists: What to do if existing data is present.
+            - None - checks new and current data for timeseries overlap
+                - adds data if no overlap
+                - raises DataOverlapError if there is an overlap
+            - "new" - just include new data and ignore previous
+            - "replace" - replace and insert new data into current timeseries
+        save_current: Whether to save data in current form and create a new version.
+            If None, this will depend on if_exists input (None -> True), (other -> False)
+        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+        force: Force adding of data even if this is identical to data stored.
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
@@ -458,7 +533,10 @@ def standardise_flux(
             period=period,
             continuous=continuous,
             chunks=chunks,
+            if_exists=if_exists,
+            save_current=save_current,
             overwrite=overwrite,
+            force=force,
         )
 
 

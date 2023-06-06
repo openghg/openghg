@@ -18,7 +18,7 @@ def test_local_obs():
         instrument="picarro",
         network="DECC",
         source_format="CRDS",
-        overwrite=True,
+        force=True,
     )
 
     results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
@@ -36,7 +36,6 @@ def test_local_obs():
         instrument="g2401",
         network="ICOS",
         source_format="ICOS",
-        overwrite=True,
     )
 
     assert "co" in results["processed"]["mhd.co.hourly.g2401.15m.dat"]
@@ -59,7 +58,7 @@ def test_local_obs_openghg():
         instrument="picarro",
         source_format="openghg",
         sampling_period="1H",
-        overwrite=True,
+        force=True,
     )
 
     results = results["processed"]["DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc"]
@@ -96,7 +95,6 @@ def test_local_obs_metadata_mismatch():
         source_format="openghg",
         sampling_period="1H",
         update_mismatch=True,
-        overwrite=True,
     )
 
     # Check data has been successfully processed
@@ -132,7 +130,7 @@ def test_local_obs_metadata_mismatch_fail():
             source_format="openghg",
             sampling_period="1H",
             update_mismatch=False,
-            overwrite=True,
+            force=True,
         )
 
         # Check different values are reported in error message
@@ -156,7 +154,7 @@ def test_standardise_column():
         satellite=satellite,
         domain=domain,
         species=species,
-        overwrite=True,
+        force=True,
     )
 
     assert "error" not in results
@@ -180,7 +178,7 @@ def test_standardise_footprint():
         height=height,
         domain=domain,
         high_spatial_res=True,
-        overwrite=True,
+        force=True,
     )
 
     assert "error" not in results
@@ -196,7 +194,7 @@ def test_standardise_flux():
         source="gpp-cardamom",
         domain="europe",
         high_time_resolution=False,
-        overwrite=True,
+        force=True,
     )
 
     assert "co2_gpp-cardamom_europe" in proc_results
@@ -235,7 +233,6 @@ def test_standardise(monkeypatch, mocker, tmpdir):
         source_format="crds",
         sampling_period="1m",
         instrument="picarro",
-        overwrite=True,
     )
 
     assert call_fn_mock.call_args == mocker.call(

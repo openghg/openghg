@@ -202,6 +202,7 @@ class Footprints(BaseStore):
         if_exists: Optional[str] = None,
         save_current: Optional[bool] = None,
         overwrite: bool = False,
+        force: bool = False,
         # model_params: Optional[Dict] = None,
     ) -> Optional[Dict]:
         """Reads footprints data files and returns the UUIDS of the Datasources
@@ -234,6 +235,7 @@ class Footprints(BaseStore):
             save_current: Whether to save data in current form and create a new version.
                 If None, this will depend on if_exists input (None -> True), (other -> False)
             overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+            force: Force adding of data even if this is identical to data stored.
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -278,6 +280,10 @@ class Footprints(BaseStore):
                            "See documentation for details of these inputs and options.")
             if_exists = "new"
 
+        # Making sure data can be force overwritten if force keyword is included.
+        if force and if_exists is None:
+            if_exists = "new"
+
         new_version = check_if_need_new_version(if_exists, save_current)
 
         fp = Footprints.load()
@@ -286,9 +292,10 @@ class Footprints(BaseStore):
         metastore = load_metastore(key=fp._metakey)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in fp._file_hashes and if_exists is None:
+        if file_hash in fp._file_hashes and not force:
             logger.warning(
-                f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]} - skipping."
+                f"This file has been uploaded previously with the filename : {fp._file_hashes[file_hash]} - skipping.\n"
+                "If necessary, use force=True to bypass this to add this data."
             )
             return None
 
