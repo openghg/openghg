@@ -2,15 +2,20 @@
 
 """
 from typing import Dict
+import logging
 
 __all__ = ["assign_data"]
+
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def assign_data(
     data_dict: Dict,
     lookup_results: Dict,
-    overwrite: bool,
     data_type: str,
+    overwrite: bool,
 ) -> Dict[str, Dict]:
     """Assign data to a Datasource. This will either create a new Datasource
     Create or get an existing Datasource for each gas in the file
@@ -18,6 +23,7 @@ def assign_data(
         Args:
             data_dict: Dictionary containing data and metadata for species
             lookup_results: Dictionary of lookup results]
+            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
             overwrite: If True overwrite current data stored
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name

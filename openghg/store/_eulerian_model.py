@@ -51,7 +51,7 @@ class EulerianModel(BaseStore):
 
         from collections import defaultdict
 
-        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.store import assign_data, datasource_lookup, load_metastore, update_metadata
         from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from pandas import Timestamp as pd_Timestamp
         from xarray import open_dataset
@@ -162,7 +162,10 @@ class EulerianModel(BaseStore):
             data_type=data_type,
         )
 
-        em_store.add_datasources(uuids=datasource_uuids, data=model_data, metastore=metastore)
+        update_keys = ["start_date", "end_date", "latest_version"]
+        model_data = update_metadata(data_dict=model_data, uuid_dict=datasource_uuids, update_keys=update_keys)
+
+        em_store.add_datasources(uuids=datasource_uuids, data=model_data, metastore=metastore, update_keys=update_keys)
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
