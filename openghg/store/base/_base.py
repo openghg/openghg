@@ -109,7 +109,6 @@ class BaseStore:
 
         return uuids
 
-    # This is only used by the storage classes
     def datasource_lookup(
         self, data: Dict, required_keys: Sequence[str], min_keys: Optional[int] = None
     ) -> Dict:
@@ -141,7 +140,9 @@ class BaseStore:
                     f"The given metadata doesn't contain enough information, we need: {required_keys}"
                 )
 
-            search_attrs = [getattr(Query(), k) == v for k, v in metadata.items()]
+            q = Query()
+
+            search_attrs = [getattr(q, k) == v for k, v in required_metadata.items()]
             required_result = self._metastore.search(reduce(_find_and, search_attrs))
 
             if not required_result:

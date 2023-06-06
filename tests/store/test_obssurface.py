@@ -745,6 +745,7 @@ def test_rank_daterange_start_overlap_overwrite():
     assert o._rank_data == expected
 
 
+@pytest.mark.skip(reason="Function needs refactor or removing.")
 def test_read_multiside_aqmesh():
     bucket = get_bucket()
     datafile = get_surface_datapath(filename="co2_data.csv", source_format="AQMESH")

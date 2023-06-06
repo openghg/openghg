@@ -386,9 +386,12 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
+        raise NotImplementedError(
+            "This needs reworking for the new data storage method or removing as unused."
+        )
         from collections import defaultdict
         from openghg.standardise.surface import parse_aqmesh
-        from openghg.store import assign_data, datasource_lookup
+        from openghg.store import assign_data
         from openghg.util import hash_file
         from tqdm import tqdm
 
@@ -421,10 +424,6 @@ class ObsSurface(BaseStore):
                 "instrument",
                 "sampling_period",
                 "measurement_type",
-            )
-
-            lookup_results = datasource_lookup(
-                metastore=self._metastore, data=combined, required_keys=required_keys, min_keys=5
             )
 
             uuid = lookup_results[site]
@@ -548,21 +547,11 @@ class ObsSurface(BaseStore):
                 "data_source",
                 "icos_data_level",
             )
-            min_keys = 5
-        else:
-            min_keys = len(required_metakeys)
-
-        lookup_results = datasource_lookup(
-            metastore=self._metastore, data=to_process, required_keys=required_metakeys, min_keys=min_keys
-        )
 
         # Create Datasources, save them to the object store and get their UUIDs
         data_type = "surface"
-        datasource_uuids = assign_data(
-            data_dict=to_process,
-            lookup_results=lookup_results,
-            overwrite=overwrite,
-            data_type=data_type,
+        datasource_uuids = self.assign_data(
+            data=to_process, overwrite=overwrite, data_type=data_type, required_keys=required_metakeys
         )
 
         # Record the Datasources we've created / appended to
