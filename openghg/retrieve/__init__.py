@@ -10,7 +10,6 @@ from ._export import get_ceda_file
 from ._search import (
     local_search,
     meta_search,
-    metadata_lookup,
     search,
     search_bc,
     search_column,

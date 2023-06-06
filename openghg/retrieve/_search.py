@@ -69,37 +69,38 @@ def meta_search(search_terms: Dict, database: TinyDB) -> Dict:
     return {s["uuid"]: s for s in result}
 
 
-def metadata_lookup(
-    metadata: Dict, database: TinyDB, additional_metadata: Optional[Dict] = None
-) -> Union[bool, str]:
-    """Searches the passed database for the given metadata
+# # This is only used by datasource lookup
+# def metadata_lookup(
+#     metadata: Dict, database: TinyDB, additional_metadata: Optional[Dict] = None
+# ) -> Union[bool, str]:
+#     """Searches the passed database for the given metadata
 
-    Args:
-        metadata: Keys we are required to find
-        database: The tinydb database for the storage object
-        additional: Keys we'd like to find (currently unused)
-    Returns:
-        str or bool: UUID string if matching Datasource found, otherwise False
-    """
-    from functools import reduce
+#     Args:
+#         metadata: Keys we are required to find
+#         database: The tinydb database for the storage object
+#         additional: Keys we'd like to find (currently unused)
+#     Returns:
+#         str or bool: UUID string if matching Datasource found, otherwise False
+#     """
+#     from functools import reduce
 
-    from openghg.types import DatasourceLookupError
-    from tinydb import Query
+#     from openghg.types import DatasourceLookupError
+#     from tinydb import Query
 
-    q = Query()
+#     q = Query()
 
-    search_attrs = [getattr(q, k) == v for k, v in metadata.items()]
-    required_result = database.search(reduce(_find_and, search_attrs))
+#     search_attrs = [getattr(q, k) == v for k, v in metadata.items()]
+#     required_result = database.search(reduce(_find_and, search_attrs))
 
-    if not required_result:
-        return False
+#     if not required_result:
+#         return False
 
-    if len(required_result) > 1:
-        raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
+#     if len(required_result) > 1:
+#         raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
 
-    uuid: str = required_result[0]["uuid"]
+#     uuid: str = required_result[0]["uuid"]
 
-    return uuid
+#     return uuid
 
 
 def search_bc(

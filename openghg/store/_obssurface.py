@@ -159,8 +159,7 @@ class ObsSurface(BaseStore):
         """
         import sys
         from collections import defaultdict
-
-        from openghg.store import assign_data, datasource_lookup
+        from openghg.store import assign_data
         from openghg.types import SurfaceTypes
         from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
         from tqdm import tqdm
@@ -348,17 +347,10 @@ class ObsSurface(BaseStore):
                     "data_type",
                 )
 
-                lookup_results = datasource_lookup(
-                    metastore=self._metastore, data=data, required_keys=required_keys, min_keys=5
-                )
-
                 # Create Datasources, save them to the object store and get their UUIDs
                 data_type = "surface"
-                datasource_uuids = assign_data(
-                    data_dict=data,
-                    lookup_results=lookup_results,
-                    overwrite=overwrite,
-                    data_type=data_type,
+                datasource_uuids = self.assign_data(
+                    data=data, overwrite=overwrite, data_type=data_type, required_keys=required_keys
                 )
 
                 results["processed"][data_filepath.name] = datasource_uuids
@@ -368,14 +360,12 @@ class ObsSurface(BaseStore):
 
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
+                # TODO - maybe add a timestamp to this string?
                 self._file_hashes[file_hash] = data_filepath.name
-                # except Exception:
-                #     results["error"][data_filepath.name] = traceback.format_exc()
 
                 progress_bar.update(1)
 
                 logger.info(f"Completed processing: {data_filepath.name}.")
-                # logger.info(f"\tUUIDs: {datasource_uuids}")
 
         return dict(results)
 
@@ -527,7 +517,6 @@ class ObsSurface(BaseStore):
         Returns:
             Dict or None:
         """
-        from openghg.store import assign_data, datasource_lookup
         from openghg.util import hash_retrieved_data
 
         # Very rudimentary hash of the data and associated metadata

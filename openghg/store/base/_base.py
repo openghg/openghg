@@ -1,15 +1,20 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
-from typing import Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 from pandas import Timestamp
-from tinydb import TinyDB
-
+from tinydb import TinyDB, Query
+from functools import reduce
+from openghg.types import DatasourceLookupError
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.util import timestamp_now
 
 
 T = TypeVar("T", bound="BaseStore")
+
+
+def _find_and(x: Any, y: Any) -> Any:
+    return x & y
 
 
 class BaseStore:
@@ -55,98 +60,98 @@ class BaseStore:
         DO_NOT_STORE = ["_metastore"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-    # @classmethod
-    # def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
-    #     """Check if the object is already saved in the object
-    #     store
+    def assign_data(
+        self, data: Dict, overwrite: bool, data_type: str, required_keys: Sequence[str]
+    ) -> Dict[str, Dict]:
+        """Assign data to a Datasource. This will either create a new Datasource
+        Create or get an existing Datasource for each gas in the file
 
-    #     Args:
-    #         bucket: Bucket for data storage
-    #     Returns:
-    #         bool: True if object exists
-    #     """
-    #     if bucket is None:
-    #         bucket = get_bucket()
+            Args:
+                data: Dictionary containing data and metadata for species
+                overwrite: If True overwrite current data stored
+                data_type: Type of data, timeseries etc
+                required_keys: Required minimum keys to lookup unique Datasource
+            Returns:
+                dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
+        """
+        from openghg.store.base import Datasource
 
-    #     key = f"{cls._root}/uuid/{cls._uuid}"
+        uuids = {}
 
-    #     does_exist: bool = exists(bucket=bucket, key=key)
+        lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=5)
 
-    #     return does_exist
+        for key, parsed_data in data.items():
+            metadata = parsed_data["metadata"]
+            _data = parsed_data["data"]
 
-    # @classmethod
-    # def from_data(cls: Type[T], data: Dict) -> T:
-    #     """Create an object from data
+            # Our lookup results and gas data have the same keys
+            uuid = lookup_results[key]
 
-    #     Args:
-    #         data: JSON data
-    #     Returns:
-    #         cls: Class object of cls type
-    #     """
-    #     if not data:
-    #         raise ValueError("Unable to create object with empty dictionary")
+            # Add the read metadata to the Dataset attributes being careful
+            # not to overwrite any attributes that are already there
+            to_add = {k: v for k, v in metadata.items() if k not in _data.attrs}
+            _data.attrs.update(to_add)
 
-    #     c = cls()
-    #     c._creation_datetime = timestamp_tzaware(data["creation_datetime"])
-    #     c._datasource_uuids = data["datasource_uuids"]
-    #     c._file_hashes = data["file_hashes"]
-    #     c._retrieved_hashes = data.get("retrieved_hashes", {})
-    #     c._datasource_table = aDict(data["datasource_table"])
-    #     c._rank_data = aDict(data["rank_data"])
-    #     c._stored = False
+            # If we have a UUID for this Datasource load the existing object
+            # from the object store
+            if uuid is False:
+                datasource = Datasource()
+            else:
+                datasource = Datasource.load(uuid=uuid)
 
-    #     return c
+            # Add the dataframe to the datasource
+            datasource.add_data(metadata=metadata, data=_data, overwrite=overwrite, data_type=data_type)
+            # Save Datasource to object store
+            datasource.save()
 
-    # def to_data(self) -> Dict:
-    #     """Return a JSON-serialisable dictionary of object
-    #     for storage in object store
+            new_datasource = uuid is False
+            uuids[key] = {"uuid": datasource.uuid(), "new": new_datasource}
 
-    #     Returns:
-    #         dict: Dictionary version of object
-    #     """
-    #     data: Dict[str, Union[str, bool, Dict]] = {}
-    #     data["creation_datetime"] = str(self._creation_datetime)
-    #     data["stored"] = self._stored
-    #     data["datasource_table"] = self._datasource_table
-    #     data["datasource_uuids"] = self._datasource_uuids
-    #     data["file_hashes"] = self._file_hashes
-    #     data["retrieved_hashes"] = self._retrieved_hashes
-    #     data["rank_data"] = self._rank_data
+        return uuids
 
-    #     return data
+    # This is only used by the storage classes
+    def datasource_lookup(
+        self, data: Dict, required_keys: Sequence[str], min_keys: Optional[int] = None
+    ) -> Dict:
+        """Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys
+        to be present and will require at leas min_keys of these to be present when searching.
 
-    # @classmethod
-    # def load(cls: Type[T]) -> T:
-    #     """Load an object from the datastore using the passed
-    #     bucket and UUID
+        As some metadata value might change (such as data owners etc) we don't want to do an exact
+        search on *all* the metadata so we extract a subset (the required keys) and search for these.
 
-    #     Args:
-    #         bucket: Bucket to store object
-    #     Returns:
-    #         class: Class created from JSON data
-    #     """
-    #     if not cls.exists():
-    #         return cls()
+        Args:
+            metastore: Metadata database
+            data: Combined data dictionary of form {key: {data: Dataset, metadata: Dict}}
+            required_keys: Iterable of keys to extract from metadata
+            min_keys: The minimum number of required keys, if not given it will be set
+            to the length of required_keys
+        Return:
+            dict: Dictionary of datasource information
+        """
+        if min_keys is None:
+            min_keys = len(required_keys)
 
-    #     key = f"{cls._root}/uuid/{cls._uuid}"
-    #     data = get_object_from_json(bucket=cls._bucket_name, key=key)
+        results = {}
+        for key, _data in data.items():
+            metadata = _data["metadata"]
+            required_metadata = {k.lower(): str(v).lower() for k, v in metadata.items() if k in required_keys}
 
-    #     return cls.from_data(data=data)
+            if len(required_metadata) < min_keys:
+                raise ValueError(
+                    f"The given metadata doesn't contain enough information, we need: {required_keys}"
+                )
 
-    # def save(self) -> None:
-    #     """Save the object to the object store
+            search_attrs = [getattr(Query(), k) == v for k, v in metadata.items()]
+            required_result = self._metastore.search(reduce(_find_and, search_attrs))
 
-    #     Args:
-    #         bucket: Bucket for data
-    #     Returns:
-    #         None
-    #     """
-    #     bucket = get_bucket()
+            if not required_result:
+                results[key] = False
+            elif len(required_result) > 1:
+                raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
+            else:
+                results[key] = required_result[0]["uuid"]
 
-    #     obs_key = f"{self._root}/uuid/{self._uuid}"
-
-    #     self._stored = True
-    #     set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
+        return results
 
     def uuid(self) -> str:
         """Return the UUID of this object
