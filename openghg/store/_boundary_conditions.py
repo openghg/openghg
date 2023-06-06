@@ -93,7 +93,6 @@ class BoundaryConditions(BaseStore):
 
         from openghg.store import (
             assign_data,
-            datasource_lookup,
             infer_date_range,
             update_zero_dim,
         )
@@ -174,15 +173,14 @@ class BoundaryConditions(BaseStore):
         boundary_conditions_data[key]["metadata"] = metadata
 
         required_keys = ("species", "bc_input", "domain")
-        lookup_results = datasource_lookup(
-            metastore=self._metastore, data=boundary_conditions_data, required_keys=required_keys
-        )
 
-        datasource_uuids = assign_data(
-            data_dict=boundary_conditions_data,
-            lookup_results=lookup_results,
+        # This performs the lookup and assignment of data to new or
+        # exisiting Datasources
+        datasource_uuids = self.assign_data(
+            data=boundary_conditions_data,
             overwrite=overwrite,
             data_type=data_type,
+            required_keys=required_keys,
         )
 
         self.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=self._metastore)

@@ -75,6 +75,7 @@ class BaseStore:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
         from openghg.store.base import Datasource
+        from openghg.util import to_lowercase
 
         uuids = {}
 
@@ -94,8 +95,21 @@ class BaseStore:
 
             # If we have a UUID for this Datasource load the existing object
             # from the object store
+            # If we haven't stored data with this metadata before we create a new Datasource
+            # and add the metadata to our metastore
             if uuid is False:
                 datasource = Datasource()
+                meta_copy = metadata.copy()
+                uid = datasource.uuid()
+                meta_copy["uuid"] = uid
+
+                # Make sure all the metadata is lowercase for easier searching later
+                # TODO - do we want to do this or should be just perform lowercase comparisons?
+                meta_copy = to_lowercase(d=meta_copy)
+                self._metastore.insert(meta_copy)
+                # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
+                # so we can have rapid
+                self._datasource_uuids[uid] = key
             else:
                 datasource = Datasource.load(uuid=uuid)
 
@@ -180,33 +194,6 @@ class BaseStore:
             None
         """
         del self._datasource_uuids[uuid]
-
-    def add_datasources(self, uuids: Dict, data: Dict, metastore: TinyDB) -> None:
-        """Add the passed list of Datasources to the current list
-
-        Args:
-            datasource_uuids: Datasource UUIDs
-            metadata: Metadata for each species
-            metastore: TinyDB metadata store
-        Returns:
-            None
-        """
-        from openghg.util import to_lowercase
-
-        for key, uuid_data in uuids.items():
-            new = uuid_data["new"]
-            # Only add if this is a new Datasource
-            if new:
-                meta_copy = data[key]["metadata"].copy()
-                uid = uuid_data["uuid"]
-                meta_copy["uuid"] = uuid_data["uuid"]
-
-                # Make sure all the metadata is lowercase for easier searching later
-                meta_copy = to_lowercase(d=meta_copy)
-                metastore.insert(meta_copy)
-                # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
-                # so we can have rapid
-                self._datasource_uuids[uid] = key
 
     def get_rank(self, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range

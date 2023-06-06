@@ -355,9 +355,6 @@ class ObsSurface(BaseStore):
 
                 results["processed"][data_filepath.name] = datasource_uuids
 
-                # Record the Datasources we've created / appended to
-                self.add_datasources(uuids=datasource_uuids, data=data, metastore=self._metastore)
-
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
                 # TODO - maybe add a timestamp to this string?
@@ -550,12 +547,12 @@ class ObsSurface(BaseStore):
 
         # Create Datasources, save them to the object store and get their UUIDs
         data_type = "surface"
+        # This adds the parsed data to new or existing Datasources by performing a lookup
+        # in the metastore
         datasource_uuids = self.assign_data(
             data=to_process, overwrite=overwrite, data_type=data_type, required_keys=required_metakeys
         )
 
-        # Record the Datasources we've created / appended to
-        self.add_datasources(uuids=datasource_uuids, data=to_process, metastore=self._metastore)
         self.store_hashes(hashes=hashes)
 
         return datasource_uuids
