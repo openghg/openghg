@@ -61,7 +61,12 @@ class BaseStore:
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
     def assign_data(
-        self, data: Dict, overwrite: bool, data_type: str, required_keys: Sequence[str]
+        self,
+        data: Dict,
+        overwrite: bool,
+        data_type: str,
+        required_keys: Sequence[str],
+        min_keys: Optional[int] = None,
     ) -> Dict[str, Dict]:
         """Assign data to a Datasource. This will either create a new Datasource
         Create or get an existing Datasource for each gas in the file
@@ -71,6 +76,7 @@ class BaseStore:
                 overwrite: If True overwrite current data stored
                 data_type: Type of data, timeseries etc
                 required_keys: Required minimum keys to lookup unique Datasource
+                min_keys: Minimum number of metadata keys needed to uniquely match a Datasource
             Returns:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
@@ -79,7 +85,7 @@ class BaseStore:
 
         uuids = {}
 
-        lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=5)
+        lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
 
         for key, parsed_data in data.items():
             metadata = parsed_data["metadata"]

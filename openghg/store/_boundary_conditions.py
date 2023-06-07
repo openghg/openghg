@@ -92,7 +92,6 @@ class BoundaryConditions(BaseStore):
         from collections import defaultdict
 
         from openghg.store import (
-            assign_data,
             infer_date_range,
             update_zero_dim,
         )
