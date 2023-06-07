@@ -350,7 +350,11 @@ class ObsSurface(BaseStore):
                 # Create Datasources, save them to the object store and get their UUIDs
                 data_type = "surface"
                 datasource_uuids = self.assign_data(
-                    data=data, overwrite=overwrite, data_type=data_type, required_keys=required_keys
+                    data=data,
+                    overwrite=overwrite,
+                    data_type=data_type,
+                    required_keys=required_keys,
+                    min_keys=5,
                 )
 
                 results["processed"][data_filepath.name] = datasource_uuids
