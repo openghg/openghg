@@ -241,7 +241,6 @@ class Footprints(BaseStore):
         """
         import xarray as xr
         from openghg.store import (
-            assign_data,
             infer_date_range,
             update_zero_dim,
         )

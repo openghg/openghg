@@ -1,9 +1,6 @@
 import json
-from typing import Dict, Optional, Sequence
+from typing import Dict, Optional
 from openghg.objectstore import exists, get_bucket, get_object, set_object_from_json
-
-# from openghg.dataobjects import DataHandler
-# DHType = TypeVar('U', bound=DataHandler)
 
 from tinydb import Storage, TinyDB
 from tinydb.middlewares import CachingMiddleware

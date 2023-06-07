@@ -159,7 +159,6 @@ class ObsSurface(BaseStore):
         """
         import sys
         from collections import defaultdict
-        from openghg.store import assign_data
         from openghg.types import SurfaceTypes
         from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
         from tqdm import tqdm
@@ -390,69 +389,69 @@ class ObsSurface(BaseStore):
         raise NotImplementedError(
             "This needs reworking for the new data storage method or removing as unused."
         )
-        from collections import defaultdict
-        from openghg.standardise.surface import parse_aqmesh
-        from openghg.store import assign_data
-        from openghg.util import hash_file
-        from tqdm import tqdm
+        # from collections import defaultdict
+        # from openghg.standardise.surface import parse_aqmesh
+        # from openghg.store import assign_data
+        # from openghg.util import hash_file
+        # from tqdm import tqdm
 
-        data_filepath = Path(data_filepath)
-        metadata_filepath = Path(metadata_filepath)
+        # data_filepath = Path(data_filepath)
+        # metadata_filepath = Path(metadata_filepath)
 
-        # Get a dict of data and metadata
-        processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
+        # # Get a dict of data and metadata
+        # processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
-        results: resultsType = defaultdict(dict)
-        for site, site_data in tqdm(processed_data.items()):
-            metadata = site_data["metadata"]
-            measurement_data = site_data["data"]
+        # results: resultsType = defaultdict(dict)
+        # for site, site_data in tqdm(processed_data.items()):
+        #     metadata = site_data["metadata"]
+        #     measurement_data = site_data["data"]
 
-            file_hash = hash_file(filepath=data_filepath)
+        #     file_hash = hash_file(filepath=data_filepath)
 
-            if self.seen_hash(file_hash=file_hash) and overwrite is False:
-                raise ValueError(
-                    f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}."
-                )
-                break
+        #     if self.seen_hash(file_hash=file_hash) and overwrite is False:
+        #         raise ValueError(
+        #             f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}."
+        #         )
+        #         break
 
-            combined = {site: {"data": measurement_data, "metadata": metadata}}
+        #     combined = {site: {"data": measurement_data, "metadata": metadata}}
 
-            required_keys = (
-                "site",
-                "species",
-                "inlet",
-                "network",
-                "instrument",
-                "sampling_period",
-                "measurement_type",
-            )
+        #     required_keys = (
+        #         "site",
+        #         "species",
+        #         "inlet",
+        #         "network",
+        #         "instrument",
+        #         "sampling_period",
+        #         "measurement_type",
+        #     )
 
-            uuid = lookup_results[site]
+        #     uuid = lookup_results[site]
 
-            # Jump through these hoops until we can rework the data assignment functionality to split it out
-            # into more sensible functions
-            # TODO - fix the assign data function to avoid this kind of hoop jumping
-            lookup_result = {site: uuid}
+        #     # Jump through these hoops until we can rework the data assignment functionality to split it out
+        #     # into more sensible functions
+        #     # TODO - fix the assign data function to avoid this kind of hoop jumping
+        #     lookup_result = {site: uuid}
 
-            # Create Datasources, save them to the object store and get their UUIDs
-            data_type = "surface"
-            datasource_uuids = assign_data(
-                data_dict=combined,
-                lookup_results=lookup_result,
-                overwrite=overwrite,
-                data_type=data_type,
-            )
+        #     # Create Datasources, save them to the object store and get their UUIDs
+        #     data_type = "surface"
+        #     datasource_uuids = assign_data(
+        #         data_dict=combined,
+        #         lookup_results=lookup_result,
+        #         overwrite=overwrite,
+        #         data_type=data_type,
+        #     )
 
-            results[site] = datasource_uuids
+        #     results[site] = datasource_uuids
 
-            # Record the Datasources we've created / appended to
-            self.add_datasources(uuids=datasource_uuids, data=combined, metastore=self._metastore)
+        #     # Record the Datasources we've created / appended to
+        #     self.add_datasources(uuids=datasource_uuids, data=combined, metastore=self._metastore)
 
-            # Store the hash as the key for easy searching, store the filename as well for
-            # ease of checking by user
-            self.set_hash(file_hash=file_hash, filename=data_filepath.name)
+        #     # Store the hash as the key for easy searching, store the filename as well for
+        #     # ease of checking by user
+        #     self.set_hash(file_hash=file_hash, filename=data_filepath.name)
 
-        return results
+        # return results
 
     @staticmethod
     def schema(species: str) -> DataSchema:
@@ -554,7 +553,11 @@ class ObsSurface(BaseStore):
         # This adds the parsed data to new or existing Datasources by performing a lookup
         # in the metastore
         datasource_uuids = self.assign_data(
-            data=to_process, overwrite=overwrite, data_type=data_type, required_keys=required_metakeys
+            data=to_process,
+            overwrite=overwrite,
+            data_type=data_type,
+            required_keys=required_metakeys,
+            min_keys=5,
         )
 
         self.store_hashes(hashes=hashes)

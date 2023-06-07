@@ -3,7 +3,7 @@
 """
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 from pandas import Timestamp
-from tinydb import TinyDB, Query
+from tinydb import Query
 from functools import reduce
 from openghg.types import DatasourceLookupError
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json

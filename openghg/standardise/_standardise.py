@@ -1,10 +1,9 @@
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, Literal, Optional, Union
 
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_bucket
 from openghg.util import running_on_hub
-from openghg.types import optionalPathType
 
 
 # def standardise_surface(
