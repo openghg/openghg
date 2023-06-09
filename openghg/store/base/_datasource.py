@@ -1,8 +1,10 @@
+import os
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
 from pandas import DataFrame, Timestamp, Timedelta
 from xarray import Dataset
+from pathlib import Path
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError
 
@@ -44,6 +46,7 @@ class Datasource:
         self._end_date = None
 
         self._stored = False
+        self._status: Optional[dict] = None
         # This dictionary stored the keys for each version of data uploaded
         # data_key = d._data_keys["latest"]["keys"][date_key]
         self._data_keys: dataKeyType = defaultdict(dict)
@@ -158,6 +161,9 @@ class Datasource:
         # (this can occur due to representative date strings)
         new_data = self._clip_daterange_label(new_data)
 
+        # Save details of current Datasource status
+        self._status = {}
+
         if self._data:
             # We need to remove them from the current daterange
             overlapping = []
@@ -172,10 +178,13 @@ class Datasource:
             # or if it's not, we keep the first value and drop the others, we also
             # print that we've done this
 
+            self._status["current_data"] = True
+            self._status["overlapping"] = overlapping
+
             if if_exists == "new":
                 # Remove all current data on Datasource and add new data
                 # self._data is a dictionary containing datestr: Dataset values
-                logger.info("Creating new version with new data only.")
+                logger.info("Updating store to include new added data only.")
                 self._data = new_data
             elif overlapping:
                 if if_exists == "replace":
@@ -230,6 +239,7 @@ class Datasource:
                     combined_datasets = self._clip_daterange_label(combined_datasets)
 
                     self._data.update(combined_datasets)
+                    # self._delete_version = True
                 else:
                     date_chunk_str = ""
                     for existing_daterange, new_daterange in overlapping:
@@ -240,6 +250,8 @@ class Datasource:
                 self._data.update(new_data)
         else:
             self._data = new_data
+            self._status["current_data"] = False
+            self._status["overlapping"] = False
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
@@ -249,11 +261,14 @@ class Datasource:
         self.add_metadata_key(key="start_date", value=str(start))
         self.add_metadata_key(key="end_date", value=str(end))
 
-    def delete_all_data(self) -> None:
+        self._status["updates"] = True
+        self._status["if_exists"] = if_exists
+
+    def delete_all_data(self) -> bool:
         """Delete the data associated with this Datasource
 
         Returns:
-            None
+            bool: True is all deleted, False otherwise
         """
         from openghg.objectstore import delete_object, get_bucket
 
@@ -264,34 +279,58 @@ class Datasource:
             keys = list(key_data["keys"].values())
             to_delete.extend(keys)
 
+        keys_deleted = []
         for key in set(to_delete):
-            delete_object(bucket=bucket, key=key)
+            key_deleted = delete_object(bucket=bucket, key=key)
+            keys_deleted.append(key_deleted)
 
-    def delete_data(self, keys: List) -> None:
+        deleted = np.all(keys_deleted)
+        return deleted
+
+    def delete_data(self, keys: List) -> bool:
         """Delete specific keys
 
         Args:
             keys: List of keys to delete
+        Returns:
+            bool: True is all deleted, False otherwise
         """
         from openghg.objectstore import delete_object, get_bucket
 
         bucket = get_bucket()
 
+        keys_deleted = []
         for key in set(keys):
-            delete_object(bucket=bucket, key=key)
+            key_deleted = delete_object(bucket=bucket, key=key)
+            keys_deleted.append(key_deleted)
 
-    # def delete_version(self, version: str) -> None:
-    #     """Delete a specific version of data.
+        deleted = np.all(keys_deleted)
+        return deleted
 
-    #     Args:
-    #         version: Version string
-    #     Returns:
-    #         None
-    #     """
-    #     if version not in self._data_keys:
-    #         raise KeyError("Invalid version.")
+    def delete_version(self, version: str) -> bool:
+        """Delete a specific version of data.
 
-    #     # keys =
+        Args:
+            version: Version string
+        Returns:
+            bool: True is all deleted, False otherwise
+        """
+        if version not in self._data_keys:
+            raise KeyError("Invalid version.")
+
+        # Could delete version like this - one key at a time
+        data_keys = list(self._data_keys[version]["keys"].values())
+
+        deleted = self.delete_data(data_keys)
+
+        if deleted:
+            self._data_keys.pop(version)
+        else:
+            logger.warning("Unable to delete all version files")
+
+        # Or could just try and delete the whole version folder?
+
+        return deleted
 
     def add_metadata(self, metadata: Dict) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -611,6 +650,32 @@ class Datasource:
 
         return d
 
+    def define_datasource_key(self) -> str:
+        """Define key for Datasource
+        """
+        datasource_key = f"{Datasource._data_root}/uuid/{self._uuid}"
+        return datasource_key
+
+    def define_version_key(self, version: str) -> str:
+        """Define key for version on Datasource
+        """
+        datasource_key = self.define_datasource_key()
+        version_key = f"{datasource_key}/{version}"
+        return version_key
+
+    def define_data_key(self, version: str, daterange: str):
+        """Define data key for data element split by daterange on Datasource
+        """
+        version_key = self.define_version_key(version)
+        data_key = f"{version_key}/{daterange}"
+        return data_key
+
+    def define_backup_version(self, version: str):
+        """Define backup name for version folder
+        """
+        version_backup = f"{version}_backup"
+        return version_backup
+
     def save(self,
              bucket: Optional[str] = None,
              new_version: bool = True) -> None:
@@ -624,7 +689,6 @@ class Datasource:
             None
         """
         from copy import deepcopy
-        from pathlib import Path
 
         from openghg.objectstore import get_bucket, set_object_from_json
         from openghg.util import timestamp_now
@@ -644,22 +708,71 @@ class Datasource:
                 # Backup the old data keys at "latest"
                 version_str = f"v{str(len(self._data_keys))}"
 
+            if self._status:
+                if_exists = self._status["if_exists"]
+                overlapping = self._status["overlapping"]
+            else:
+                if_exists = None
+                overlapping = False
+
             # Store the keys for the new data
             new_keys = {}
 
+            version_key = self.define_version_key(version_str)
+            version_folder = Path(bucket) / version_key
+
+            # If version is already present, and we are not creating a new version
+            # we may need to delete the previous data.
+            if version_folder.exists() and not new_version:
+                # Check update mode and whether data was overlapping.
+                if (if_exists == "replace" and overlapping) or if_exists == "new":
+                    logger.info("Previous version of the data will be deleted.")
+                    delete_version = True
+                else:
+                    delete_version = False
+            else:
+                delete_version = False                
+
+            # if delete_version:
+            #     # If replacing data in version write to temporary directory first
+            #     version_str_temp = f"{version_str}_temp"
+            #     version_key_temp = self.define_version_key(version_str_temp)
+            #     version_folder_temp = Path(bucket) / version_key_temp
+            #     parent_folder = version_folder_temp
+            # else:
+            #     # Otherwise can write directly to new version folder
+            #     parent_folder = version_folder
+
+            if delete_version:
+                version_str_backup = self.define_backup_version(version_str)
+                version_key_backup = self.define_version_key(version_str_backup)
+                version_folder_backup = Path(bucket) / version_key_backup
+                version_folder.rename(version_folder_backup)
+                self._data_keys[version_str_backup] = self._data_keys[version_str].copy()
+                self._data_keys[version_str_backup]["keys"] = {key: value.replace(f"{version_str}/", f"{version_str_backup}/") for key, value in self._data_keys[version_str]["keys"].items()}
+                self._data_keys[version_str_backup]["timestamp"] = str(timestamp_now())  # type: ignore
+
+            # if not version_folder.exists():
+            version_folder.mkdir(parents=True, exist_ok=True)
+
             # Iterate over the keys (daterange string) of the data dictionary
             for daterange in self._data:
-                data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
+                # data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
+                data_key = self.define_data_key(version_str, daterange)
 
                 new_keys[daterange] = data_key
                 data = self._data[daterange]
 
-                filepath = Path(f"{bucket}/{data_key}._data")
-                parent_folder = filepath.parent
-                if not parent_folder.exists():
-                    parent_folder.mkdir(parents=True, exist_ok=True)
+                filepath = version_folder / f"{daterange}._data"
 
-                data.to_netcdf(filepath, engine="netcdf4")
+                try:
+                    data.to_netcdf(filepath, engine="netcdf4")
+                except IOError:
+                    os.removedirs(version_folder)
+                    if delete_version:
+                        version_folder_backup.rename(version_folder)
+                    raise Exception("Unable to write new data. Restored previous data.")
+                    # break
 
                 # Can we just take the bytes from the data here and then write then straight?
                 # TODO - for now just create a temporary directory - will have to update Acquire
@@ -669,6 +782,15 @@ class Datasource:
                 #     data.to_netcdf(filepath)
                 #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
                 # path = f"{bucket_path}/data"
+
+            if delete_version:
+                if version_folder_backup.exists():
+                    logger.warning(f"Deleting previous stored data for this version: {version_str}")
+                    self.delete_version(version_str_backup)
+                    os.rmdir(version_folder_backup)
+
+            # Make sure status is reset now this has been saved
+            self._status = None
 
             # Copy the last version
             if "latest" in self._data_keys:

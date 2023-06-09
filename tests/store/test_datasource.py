@@ -162,6 +162,47 @@ def test_versioning(capfd):
     # TODO: Add case for if_exists="replace" which should look more like original case above after updates
 
 
+def test_replace_version():
+    """Test that new data can replace previous data. This involves deleting the previous version
+    data and copying across the new data.
+    """
+    min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
+    detailed_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
+
+    min_data = parse_crds(data_filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
+
+    min_ch4_data = min_data["ch4"]["data"]
+    metadata = {"foo": "bar"}
+
+    d = Datasource()
+    # Fix the UUID for the tests
+    d._uuid = "4b91f73e-3d57-47e4-aa13-cb28c35d3b3d"
+    d.add_data(metadata=metadata, data=min_ch4_data, data_type="surface")
+
+    # Save initial data
+    d.save()
+
+    detailed_data = parse_crds(data_filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
+
+    detailed_ch4_data = detailed_data["ch4"]["data"]
+
+    # Check new version can be created and stored (using appropriate flag)
+    d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="surface", if_exists="new")
+
+    # Save and overwrite with new data
+    d.save(new_version=False)
+
+    detailed_keys = d.versions()
+
+    expected_new_v1 = {
+        "2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00",
+    }
+
+    assert detailed_keys["v1"]["keys"] == expected_new_v1
+
+    # TODO: Add case for if_exists="replace" which should look more like original case above after updates
+
+
 def test_get_dataframe_daterange():
     n_days = 100
     epoch = datetime.datetime(1970, 1, 1, 1, 1)
