@@ -106,7 +106,7 @@ def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_pref
     return object_names
 
 
-def delete_object(bucket: str, key: str) -> bool:
+def delete_object(bucket: str, key: str) -> None:
     """Remove object at key in bucket
 
     Args:
@@ -119,9 +119,7 @@ def delete_object(bucket: str, key: str) -> bool:
     try:
         os.remove(key)
     except FileNotFoundError:
-        return False
-    else:
-        return True
+        pass
 
 
 def get_object_names(bucket: str, prefix: Optional[str] = None) -> List[str]:

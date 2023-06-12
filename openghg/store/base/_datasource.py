@@ -264,7 +264,7 @@ class Datasource:
         self._status["updates"] = True
         self._status["if_exists"] = if_exists
 
-    def delete_all_data(self) -> bool:
+    def delete_all_data(self) -> None:
         """Delete the data associated with this Datasource
 
         Returns:
@@ -279,15 +279,10 @@ class Datasource:
             keys = list(key_data["keys"].values())
             to_delete.extend(keys)
 
-        keys_deleted = []
         for key in set(to_delete):
-            key_deleted = delete_object(bucket=bucket, key=key)
-            keys_deleted.append(key_deleted)
+           delete_object(bucket=bucket, key=key)
 
-        deleted = np.all(keys_deleted)
-        return deleted
-
-    def delete_data(self, keys: List) -> bool:
+    def delete_data(self, keys: List) -> None:
         """Delete specific keys
 
         Args:
@@ -299,15 +294,10 @@ class Datasource:
 
         bucket = get_bucket()
 
-        keys_deleted = []
         for key in set(keys):
-            key_deleted = delete_object(bucket=bucket, key=key)
-            keys_deleted.append(key_deleted)
+            delete_object(bucket=bucket, key=key)
 
-        deleted = np.all(keys_deleted)
-        return deleted
-
-    def delete_version(self, version: str) -> bool:
+    def delete_version(self, version: str) -> None:
         """Delete a specific version of data.
 
         Args:
@@ -321,16 +311,9 @@ class Datasource:
         # Could delete version like this - one key at a time
         data_keys = list(self._data_keys[version]["keys"].values())
 
-        deleted = self.delete_data(data_keys)
-
-        if deleted:
-            self._data_keys.pop(version)
-        else:
-            logger.warning("Unable to delete all version files")
+        self.delete_data(data_keys)
 
         # Or could just try and delete the whole version folder?
-
-        return deleted
 
     def add_metadata(self, metadata: Dict) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -663,14 +646,14 @@ class Datasource:
         version_key = f"{datasource_key}/{version}"
         return version_key
 
-    def define_data_key(self, version: str, daterange: str):
+    def define_data_key(self, version: str, daterange: str) -> str:
         """Define data key for data element split by daterange on Datasource
         """
         version_key = self.define_version_key(version)
         data_key = f"{version_key}/{daterange}"
         return data_key
 
-    def define_backup_version(self, version: str):
+    def define_backup_version(self, version: str) -> str:
         """Define backup name for version folder
         """
         version_backup = f"{version}_backup"
