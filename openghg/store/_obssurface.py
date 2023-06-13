@@ -158,7 +158,7 @@ class ObsSurface(BaseStore):
         import sys
         from collections import defaultdict
 
-        from openghg.store import assign_data, datasource_lookup, load_metastore
+        from openghg.store import assign_data, datasource_lookup, load_metastore, update_metadata
         from openghg.types import SurfaceTypes
         from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
         from tqdm import tqdm
@@ -366,10 +366,13 @@ class ObsSurface(BaseStore):
                     data_type=data_type,
                 )
 
+                update_keys = ["start_date", "end_date", "latest_version"]
+                data = update_metadata(data_dict=data, uuid_dict=datasource_uuids, update_keys=update_keys)
+
                 results["processed"][data_filepath.name] = datasource_uuids
 
                 # Record the Datasources we've created / appended to
-                obs.add_datasources(uuids=datasource_uuids, data=data, metastore=metastore)
+                obs.add_datasources(uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys)
 
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user

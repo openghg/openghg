@@ -4,7 +4,7 @@ from ._emissions import Emissions
 from ._eulerian_model import EulerianModel
 from ._footprints import Footprints
 from ._infer_time import infer_date_range, update_zero_dim
-from ._metadata import ObjectStorage, datasource_lookup, load_metastore, data_handler_lookup
+from ._metadata import ObjectStorage, datasource_lookup, load_metastore, data_handler_lookup, update_metadata
 from ._metstore import METStore
 from ._obsmobile import ObsMobile
 from ._obscolumn import ObsColumn

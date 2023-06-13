@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
- - Added `standardise_column()` wrapper function - [PR #569](https://github.com/openghg/openghg/pull/643)
+- Added `standardise_column()` wrapper function - [PR #569](https://github.com/openghg/openghg/pull/643)
+- The 'height_name' definition from the [openghg/supplementary_data repository](https://github.com/openghg/supplementary_data) for each site can now be accessed, used and interpreted - [PR #648](https://github.com/openghg/openghg/pull/648)
+- Allow metadata within metastore to be updated for existing data sources for the latest version, start and end dates of the data - [PR #652](https://github.com/openghg/openghg/pull/652)
 
 ## [0.5.1] - 2023-05-10
 

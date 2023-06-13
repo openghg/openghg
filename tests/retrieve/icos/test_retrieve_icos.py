@@ -102,10 +102,8 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     )
 
     # 05/01/2023: Added update_mismatch to account for WAO difference
-    #  - 04/05/2023: Took out for now but may need to add back if/when ICOS
-    #    metadata / attribute alignment is updated.
     data_first_retrieval = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", # update_mismatch="metadata"
+        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata"
     )
 
     meta1 = data_first_retrieval[0].metadata
@@ -114,38 +112,28 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "species": "co2",
         "instrument": "ftir",
         "site": "wao",
-        "measurement_type": "co2 mixing ratio (dry mole fraction)",
-        "units": "µmol mol-1",
-        "sampling_height": "10m",
-        "sampling_height_units": "metres",
+        # REMOVED sampling_height from metadata --> included inlet
+        # - This was to better align with metadata within the obs_surface data_type
+        # "sampling_height": "10m",
+        # "sampling_height_units": "metres",
         "inlet": "10m",
         "inlet_height_magl": "10",
         "station_long_name": "weybourne observatory, uk",
-        "station_latitude": "52.95",
-        "station_longitude": "1.121",
-        # TODO: Will need to be updated once metadata / attributes checking
-        # is better aligned for ICOS.
+        "station_latitude": 52.95042,
+        "station_longitude": 1.12194,
+        # TODO: May need to be updated if station_height versus height_station naming is corrected.
         # "station_altitude": "31m",
         # "station_height_masl": 10.0,
-        "station_height_masl": "31",
-        "licence_name": "icos ccby4 data licence",
-        "licence_info": "http://meta.icos-cp.eu/ontologies/cpmeta/icoslicence",
+        "station_height_masl": 31.0,
         "network": "icos",
         "data_type": "surface",
         "data_source": "icoscp",
         "source_format": "icos",
         "icos_data_level": "2",
-        "conditions_of_use": "ensure that you contact the data owner at the outset of your project.",
-        "source": "in situ measurements of air",
-        "conventions": "cf-1.8",
-        "processed_by": "openghg_cloud",
-        "calibration_scale": "unknown",
-        "sampling_period": "not_set",
-        "sampling_period_unit": "s",
-        "instrument_data": ["FTIR", "http://meta.icos-cp.eu/resources/instruments/ATC_505"],
-        "citation_string": "Forster, G., Manning, A. (2022). ICOS ATC CO2 Release, Weybourne (10.0 m), 2021-10-21–2022-02-28, ICOS RI, https://hdl.handle.net/11676/NR9p9jxC7B7M46MdGuCOrzD3",
+        "calibration_scale": "unknown",  # Update when possible (icoscp Issue - ICOS-Carbon-Portal/pylib#148)
+        "sampling_period": "not_set",  # Update when possible (icoscp Issue - ICOS-Carbon-Portal/pylib#148)
         "dataset_source": "ICOS",
-        "Conventions": "CF-1.8",
+
     }
 
     assert meta1_expected.items() <= meta1.items()
@@ -159,11 +147,28 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     assert retrieve_all.call_count == 0
     assert get_mock.call_count == 2
 
+    # Check attributes within stored Dataset contain extra keys
+    attr1_expected_additional = {
+        "measurement_type": "co2 mixing ratio (dry mole fraction)",
+        "sampling_height": "10m",
+        "sampling_height_units": "metres",
+        "licence_name": "ICOS CCBY4 Data Licence",
+        "licence_info": "http://meta.icos-cp.eu/ontologies/cpmeta/icosLicence",
+        "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+        "source": "In situ measurements of air",
+        "sampling_period_unit": "s",
+        "instrument_data": ["FTIR", "http://meta.icos-cp.eu/resources/instruments/ATC_505"],
+        "citation_string": "Forster, G., Manning, A. (2022). ICOS ATC CO2 Release, Weybourne (10.0 m), 2021-10-21–2022-02-28, ICOS RI, https://hdl.handle.net/11676/NR9p9jxC7B7M46MdGuCOrzD3",
+        "Conventions": "CF-1.8",
+    }
+
+    data1_attrs = data1.attrs
+
+    assert attr1_expected_additional.items() <= data1_attrs.items()
+
     # 05/01/2023: Added update_mismatch to account for WAO difference
-    #  - 04/05/2023: Took out for now but may need to add back if/when ICOS
-    #    metadata / attribute alignment is updated.
     data_second_retrieval = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", # update_mismatch="metadata"
+        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata"
     )
 
     data2 = data_second_retrieval[0].data
@@ -180,10 +185,8 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     )
 
     # 05/01/2023: Added update_mismatch to account for WAO difference
-    #  - 04/05/2023: Took out for now but may need to add back if/when ICOS
-    #    metadata / attribute alignment is updated.
     retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", force_retrieval=True, # update_mismatch="metadata",
+        site="WAO", species="co2", sampling_height="10m", force_retrieval=True, update_mismatch="metadata",
     )
 
     assert "There is no new data to process." in caplog.text
