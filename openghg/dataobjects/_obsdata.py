@@ -91,11 +91,11 @@ class ObsData(_BaseData, abc.Mapping):
 
         fig = general_plot_timeseries(
             self,
-            title = title,
-            xlabel = xlabel,
-            ylabel = ylabel,
-            units = units,
-            logo = logo,
+            title=title,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            units=units,
+            logo=logo,
         )
 
         return fig
