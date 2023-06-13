@@ -197,7 +197,6 @@ def plot_timeseries(
 
     species_strings = []
     unit_strings = []
-    ascending = []
 
     # Loop through inlets/species
     for i, to_plot in enumerate(data):
@@ -248,15 +247,6 @@ def plot_timeseries(
 
         unit_string = attributes_data["unit_print"][unit_value]
 
-        # Determine whether data is ascending or descending (positioning of legend)
-        ny = len(y_data)
-        data_left = y_data.isel(time=slice(int(ny * 0.9), -1)).mean()
-        data_right = y_data.isel(time=slice(0, int(ny * 0.1))).mean()
-        if data_left > data_right:
-            ascending.append(True)
-        else:
-            ascending.append(False)
-
         # Add NaNs where there are large data gaps
         x_data_plot, y_data_plot = _plot_remove_gaps(x_data.values, y_data.values)
 
@@ -278,6 +268,13 @@ def plot_timeseries(
         unit_strings.append(unit_string_html)
         species_strings.append(species_string)
 
+    # Determine whether data is ascending or descending (positioning of legend)
+    y_data_diff = y_data.diff(dim="time").mean()
+    if y_data_diff >= 0:
+        ascending = True
+    else:
+        ascending = False    
+
     if len(set(unit_strings)) > 1:
         raise NotImplementedError("Can't plot two different units yet")
 
@@ -292,7 +289,7 @@ def plot_timeseries(
         fig.update_xaxes(title=xlabel)
 
     # Position the legend
-    legend_pos, logo_pos = _plot_legend_position(True in ascending)
+    legend_pos, logo_pos = _plot_legend_position(ascending)
     fig.update_layout(legend=legend_pos,
                       template="seaborn")
 
