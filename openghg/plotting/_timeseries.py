@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional, Union, Dict, Tuple
 import plotly.graph_objects as go
 import numpy as np
@@ -5,6 +6,10 @@ import base64
 
 from openghg.dataobjects import ObsData
 from openghg.util import get_species_info, synonyms, get_datapath
+
+
+logger = logging.getLogger("openghg.plotting")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def _latex2html(
@@ -156,7 +161,7 @@ def plot_timeseries(
     from openghg.util import load_internal_json
 
     if not data:
-        print("No data to plot, returning")
+        logger.warning("No data to plot, returning")
         return None
 
     if not isinstance(data, list):
