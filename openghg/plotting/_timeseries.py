@@ -177,10 +177,20 @@ def plot_timeseries(
         "b": 20
     }
 
-    layout = go.Layout(
-        font=font,
-        margin=margin
-    )
+    if title is not None:
+        title_layout = {"text": title, "y": 0.9, "x": 0.5, "xanchor": "center", "yanchor": "top"}
+        layout = go.Layout(
+            title=title_layout,
+            xaxis=dict(title=xlabel),
+            yaxis=dict(title=ylabel),
+            font=font,
+            margin=margin
+        )
+    else:
+        layout = go.Layout(
+            font=font,
+            margin=margin
+        )
 
     # Create a single figure
     fig = go.Figure(layout=layout)
