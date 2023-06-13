@@ -120,14 +120,12 @@ class Datasource:
         else:
             raise NotImplementedError()
 
-    def add_timed_data(self, data: Dataset,
-                       data_type: str,
-                       if_exists: Optional[str] = None) -> None:
+    def add_timed_data(self, data: Dataset, data_type: str, if_exists: Optional[str] = None) -> None:
         """Add data to this Datasource, splitting along the time axis
 
         Args:
             data: An xarray.Dataset
-            data_type: Name of data_type defined by 
+            data_type: Name of data_type defined by
                 openghg.store.spec.define_data_types()
             if_exists: What to do if existing data is present.
                 - None - checks new and current data for timeseries overlap
@@ -244,8 +242,10 @@ class Datasource:
                     date_chunk_str = ""
                     for existing_daterange, new_daterange in overlapping:
                         date_chunk_str += f" - current: {existing_daterange}; new: {new_daterange}\n"
-                    raise DataOverlapError(f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
-                                           f"To update current data in object store use `if_exists` input (see options in documentation)")
+                    raise DataOverlapError(
+                        f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
+                        f"To update current data in object store use `if_exists` input (see options in documentation)"
+                    )
             else:
                 self._data.update(new_data)
         else:
@@ -280,7 +280,7 @@ class Datasource:
             to_delete.extend(keys)
 
         for key in set(to_delete):
-           delete_object(bucket=bucket, key=key)
+            delete_object(bucket=bucket, key=key)
 
     def delete_data(self, keys: List) -> None:
         """Delete specific keys
@@ -419,9 +419,7 @@ class Datasource:
 
         return daterange_str
 
-    def clip_daterange(self,
-                       end_date: Timestamp,
-                       start_date_next: Timestamp) -> Timestamp:
+    def clip_daterange(self, end_date: Timestamp, start_date_next: Timestamp) -> Timestamp:
         """
         Clip any end_date greater than the next start date (start_date_next) to be
         1 second less.
@@ -634,34 +632,30 @@ class Datasource:
         return d
 
     def define_datasource_key(self) -> str:
-        """Define key for Datasource
-        """
+        """Define key for Datasource"""
         datasource_key = f"{Datasource._data_root}/uuid/{self._uuid}"
         return datasource_key
 
     def define_version_key(self, version: str) -> str:
-        """Define key for version on Datasource
-        """
+        """Define key for version on Datasource"""
         datasource_key = self.define_datasource_key()
         version_key = f"{datasource_key}/{version}"
         return version_key
 
-    def define_data_key(self, version: str, daterange: str) -> str:
-        """Define data key for data element split by daterange on Datasource
+    def define_data_key(self, label: str, version: str) -> str:
+        """Define data key for internally split data element
+        (e.g. by daterange) on Datasource
         """
         version_key = self.define_version_key(version)
-        data_key = f"{version_key}/{daterange}"
+        data_key = f"{version_key}/{label}"
         return data_key
 
     def define_backup_version(self, version: str) -> str:
-        """Define backup name for version folder
-        """
+        """Define backup name for version folder"""
         version_backup = f"{version}_backup"
         return version_backup
 
-    def save(self,
-             bucket: Optional[str] = None,
-             new_version: bool = True) -> None:
+    def save(self, bucket: Optional[str] = None, new_version: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
@@ -714,25 +708,25 @@ class Datasource:
                 else:
                     delete_version = False
             else:
-                delete_version = False                
+                delete_version = False
 
-            # if delete_version:
-            #     # If replacing data in version write to temporary directory first
-            #     version_str_temp = f"{version_str}_temp"
-            #     version_key_temp = self.define_version_key(version_str_temp)
-            #     version_folder_temp = Path(bucket) / version_key_temp
-            #     parent_folder = version_folder_temp
-            # else:
-            #     # Otherwise can write directly to new version folder
-            #     parent_folder = version_folder
-
+            # Create back up of original data in case writing new data is unsuccessful
             if delete_version:
                 version_str_backup = self.define_backup_version(version_str)
                 version_key_backup = self.define_version_key(version_str_backup)
+
+                # Create full path to back up folder and move current version folder
                 version_folder_backup = Path(bucket) / version_key_backup
                 version_folder.rename(version_folder_backup)
+
+                version_keys = self._data_keys[version_str]["keys"]
+                labels = version_keys.keys()
+
+                # Add record of backup version to self._data_keys
                 self._data_keys[version_str_backup] = self._data_keys[version_str].copy()
-                self._data_keys[version_str_backup]["keys"] = {key: value.replace(f"{version_str}/", f"{version_str_backup}/") for key, value in self._data_keys[version_str]["keys"].items()}
+                self._data_keys[version_str_backup]["keys"] = {
+                    label: self.define_data_key(label, version_str_backup) for label in labels
+                }
                 self._data_keys[version_str_backup]["timestamp"] = str(timestamp_now())  # type: ignore
 
             # if not version_folder.exists():
@@ -741,7 +735,7 @@ class Datasource:
             # Iterate over the keys (daterange string) of the data dictionary
             for daterange in self._data:
                 # data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
-                data_key = self.define_data_key(version_str, daterange)
+                data_key = self.define_data_key(label=daterange, version=version_str)
 
                 new_keys[daterange] = data_key
                 data = self._data[daterange]
@@ -751,9 +745,11 @@ class Datasource:
                 try:
                     data.to_netcdf(filepath, engine="netcdf4")
                 except IOError:
+                    # If unable to write, return original data from back up.
                     os.removedirs(version_folder)
                     if delete_version:
                         version_folder_backup.rename(version_folder)
+                        self._data_keys.pop(version_str_backup)
                     raise Exception("Unable to write new data. Restored previous data.")
                     # break
 
@@ -766,6 +762,7 @@ class Datasource:
                 #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
                 # path = f"{bucket_path}/data"
 
+            # If write has been successful, remove any back up data.
             if delete_version:
                 if version_folder_backup.exists():
                     logger.warning(f"Deleting previous stored data for this version: {version_str}")
