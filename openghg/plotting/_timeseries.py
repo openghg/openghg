@@ -15,7 +15,9 @@ def _latex2html(
     (works in Notebooks, but not VC Code at the moment).
 
     Args:
-        latex_string: 
+        latex_string: String containing LaTeX math mode (including $$)
+    Returns:
+        str: string with matched sub-strings replaced with equivalent html.
     """
 
     replacements = {"$^2$": "<sup>2</sup>",
@@ -67,7 +69,7 @@ def _plot_legend_position(
     depending on whether data is ascending or descending
 
     Args:
-        ascending (bool): Is the data ascending
+        ascending: Is the data ascending
 
     Returns:
         Dict, Dict: Plotly legend and logo position parameters
@@ -112,7 +114,7 @@ def _plot_logo(
         logo_pos: Dictionary containing the position of the logo
 
     Returns:
-        Dictionary containing logo + position parameters
+        dict: Dictionary containing logo + position parameters
     """
 
     logo = base64.b64encode(open(get_datapath("OpenGHG_Logo_NoText_transparent_200x200.png"), 'rb').read())
