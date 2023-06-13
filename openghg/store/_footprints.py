@@ -256,7 +256,7 @@ class Footprints(BaseStore):
             species_lifetime,
             timestamp_now,
             check_if_need_new_version,
-        )            
+        )
 
         filepath = Path(filepath)
 
@@ -277,8 +277,10 @@ class Footprints(BaseStore):
         inlet = cast(str, inlet)
 
         if overwrite and if_exists is None:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                           "See documentation for details of these inputs and options.")
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
             if_exists = "new"
 
         # Making sure data can be force overwritten if force keyword is included.
@@ -422,7 +424,9 @@ class Footprints(BaseStore):
         )
 
         update_keys = ["start_date", "end_date", "latest_version"]
-        footprint_data = update_metadata(data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys)
+        footprint_data = update_metadata(
+            data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
+        )
 
         fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
 

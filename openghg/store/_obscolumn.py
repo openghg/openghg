@@ -95,8 +95,10 @@ class ObsColumn(BaseStore):
         platform = clean_string(platform)
 
         if overwrite and if_exists is None:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                           "See documentation for details of these inputs and options.")
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
             if_exists = "new"
 
         # Making sure data can be force overwritten if force keyword is included.
@@ -171,10 +173,9 @@ class ObsColumn(BaseStore):
         update_keys = ["start_date", "end_date", "latest_version"]
         obs_data = update_metadata(data_dict=obs_data, uuid_dict=datasource_uuids, update_keys=update_keys)
 
-        obs_store.add_datasources(uuids=datasource_uuids,
-                                  data=obs_data,
-                                  metastore=metastore,
-                                  update_keys=update_keys)
+        obs_store.add_datasources(
+            uuids=datasource_uuids, data=obs_data, metastore=metastore, update_keys=update_keys
+        )
 
         # Record the file hash in case we see this file again
         obs_store._file_hashes[file_hash] = filepath.name

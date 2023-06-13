@@ -215,8 +215,10 @@ class ObsSurface(BaseStore):
         inlet = format_inlet(inlet)
 
         if overwrite and if_exists is None:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                           "See documentation for details of these inputs and options.")
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
             if_exists = "new"
 
         # Making sure data can be force overwritten if force keyword is included.
@@ -310,9 +312,7 @@ class ObsSurface(BaseStore):
 
                 # Collect together optional parameters (not required but
                 # may be accepted by underlying parser function)
-                optional_parameters = {
-                    "update_mismatch" : update_mismatch
-                }
+                optional_parameters = {"update_mismatch": update_mismatch}
                 # TODO: extend optional_parameters to include kwargs when added
 
                 input_parameters = required_parameters.copy()
@@ -405,7 +405,9 @@ class ObsSurface(BaseStore):
                 results["processed"][data_filepath.name] = datasource_uuids
 
                 # Record the Datasources we've created / appended to
-                obs.add_datasources(uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys)
+                obs.add_datasources(
+                    uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys
+                )
 
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
@@ -455,8 +457,10 @@ class ObsSurface(BaseStore):
         metadata_filepath = Path(metadata_filepath)
 
         if overwrite and if_exists is None:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` input."
-                           "See documentation for details of this input and options.")
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` input."
+                "See documentation for details of this input and options."
+            )
             if_exists = "new"
 
         # Load the ObsSurface object for retrieve
@@ -578,7 +582,7 @@ class ObsSurface(BaseStore):
         data: Dict,
         if_exists: Optional[str] = None,
         overwrite: bool = False,
-        required_metakeys: Optional[Sequence] = None
+        required_metakeys: Optional[Sequence] = None,
     ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
@@ -602,8 +606,10 @@ class ObsSurface(BaseStore):
         from openghg.util import hash_retrieved_data
 
         if overwrite and if_exists is None:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` input."
-                           "See documentation for details of this input and options.")
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` input."
+                "See documentation for details of this input and options."
+            )
             if_exists = "new"
 
         obs = ObsSurface.load()

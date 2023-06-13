@@ -140,7 +140,7 @@ def show_versions(file: IO = sys.stdout) -> None:
     ]
 
     deps_blob: List[Tuple] = []
-    for (modname, ver_f) in deps:
+    for modname, ver_f in deps:
         try:
             if modname in sys.modules:
                 mod = sys.modules[modname]
@@ -166,8 +166,7 @@ def show_versions(file: IO = sys.stdout) -> None:
         print(f"{k}: {stat}", file=file)
 
 
-def check_if_need_new_version(if_exists: Optional[str] = None,
-                              save_current: Optional[bool] = None) -> bool:
+def check_if_need_new_version(if_exists: Optional[str] = None, save_current: Optional[bool] = None) -> bool:
     """
     Check combination of if_exists and save_current keywords to determine
     whether a new version should be created.
@@ -188,7 +187,7 @@ def check_if_need_new_version(if_exists: Optional[str] = None,
         - if_exists=None/"replace"/"new", save_current=False
            - new_version=False - If save_current is explicitly set
              to False, allow previous version to be overwritten.
-    
+
     Args:
         if_exists: How to combine new and current data, if present.
         save_current: Whether to save current data or replace this.
@@ -206,5 +205,5 @@ def check_if_need_new_version(if_exists: Optional[str] = None,
     elif save_current is not None:
         # Otherwise match new version to the save_current input.
         new_version = cast(bool, save_current)
-    
+
     return new_version

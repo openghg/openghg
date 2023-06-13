@@ -75,7 +75,7 @@ class BoundaryConditions(BaseStore):
         if_exists: Optional[str] = None,
         save_current: Optional[bool] = None,
         overwrite: bool = False,
-        force: bool = False,        
+        force: bool = False,
     ) -> Optional[Dict]:
         """Read boundary conditions file
 
@@ -120,7 +120,7 @@ class BoundaryConditions(BaseStore):
             hash_file,
             timestamp_now,
             check_if_need_new_version,
-        )            
+        )
 
         from xarray import open_dataset
 
@@ -129,8 +129,10 @@ class BoundaryConditions(BaseStore):
         domain = clean_string(domain)
 
         if overwrite and if_exists is None:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                           "See documentation for details of these inputs and options.")
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
             if_exists = "new"
 
         # Making sure data can be force overwritten if force keyword is included.
@@ -228,9 +230,16 @@ class BoundaryConditions(BaseStore):
         )
 
         update_keys = ["start_date", "end_date", "latest_version"]
-        boundary_conditions_data = update_metadata(data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys)
+        boundary_conditions_data = update_metadata(
+            data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
+        )
 
-        bc_store.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=metastore, update_keys=update_keys)
+        bc_store.add_datasources(
+            uuids=datasource_uuids,
+            data=boundary_conditions_data,
+            metastore=metastore,
+            update_keys=update_keys,
+        )
 
         # Record the file hash in case we see this file again
         bc_store._file_hashes[file_hash] = filepath.name

@@ -78,8 +78,10 @@ class EulerianModel(BaseStore):
         setup = clean_string(setup)
 
         if overwrite and if_exists is None:
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                           "See documentation for details of these inputs and options.")
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
@@ -186,9 +188,13 @@ class EulerianModel(BaseStore):
         )
 
         update_keys = ["start_date", "end_date", "latest_version"]
-        model_data = update_metadata(data_dict=model_data, uuid_dict=datasource_uuids, update_keys=update_keys)
+        model_data = update_metadata(
+            data_dict=model_data, uuid_dict=datasource_uuids, update_keys=update_keys
+        )
 
-        em_store.add_datasources(uuids=datasource_uuids, data=model_data, metastore=metastore, update_keys=update_keys)
+        em_store.add_datasources(
+            uuids=datasource_uuids, data=model_data, metastore=metastore, update_keys=update_keys
+        )
 
         # Record the file hash in case we see this file again
         em_store._file_hashes[file_hash] = filepath.name
