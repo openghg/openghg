@@ -217,10 +217,12 @@ def parse_openghg(
 
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
-    gas_data = assign_attributes(data=gas_data,
-                                 site=site,
-                                 network=network,
-                                 update_mismatch=update_mismatch,
-                                 site_filepath=site_filepath)
+    gas_data = assign_attributes(
+        data=gas_data,
+        site=site,
+        network=network,
+        update_mismatch=update_mismatch,
+        site_filepath=site_filepath,
+    )
 
     return gas_data

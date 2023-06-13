@@ -63,7 +63,6 @@ def parse_gcwerks(
     measurement_type: Optional[str] = None,
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
-
 ) -> Dict:
     """Reads a GC data file by creating a GC object and associated datasources
 
@@ -136,10 +135,9 @@ def parse_gcwerks(
     )
 
     # Assign attributes to the data for CF compliant NetCDFs
-    gas_data = assign_attributes(data=gas_data,
-                                 site=site,
-                                 update_mismatch=update_mismatch,
-                                 site_filepath=site_filepath)
+    gas_data = assign_attributes(
+        data=gas_data, site=site, update_mismatch=update_mismatch, site_filepath=site_filepath
+    )
 
     return gas_data
 

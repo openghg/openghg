@@ -409,7 +409,7 @@ def _retrieve_remote(
 
         attributes["site"] = station_data["id"]
         attributes["measurement_type"] = measurement_type
-        # TODO: Remove this from general attributes but make sure this is 
+        # TODO: Remove this from general attributes but make sure this is
         # included as a specific value on the appropriate variable.
         attributes["units"] = units
 
@@ -508,9 +508,7 @@ def _retrieve_remote(
             "attributes": attributes,
         }
 
-    standardised_data = assign_attributes(
-        data=standardised_data, update_mismatch=update_mismatch
-    )
+    standardised_data = assign_attributes(data=standardised_data, update_mismatch=update_mismatch)
 
     return standardised_data
 

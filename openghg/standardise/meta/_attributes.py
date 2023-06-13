@@ -83,7 +83,7 @@ def assign_attributes(
         metadata = gas_data["metadata"]
 
         attrs = measurement_data.attrs
-        
+
         metadata_aligned, attrs_aligned = sync_surface_metadata(
             metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
         )
@@ -213,7 +213,7 @@ def get_attributes(
         global_attributes["sampling_period"] = str(sampling_period)
         global_attributes["sampling_period_unit"] = "s"
 
-    # 04/2023: Switched around global and site attributes so 
+    # 04/2023: Switched around global and site attributes so
     # global attributes now supercede site attributes.
     # Add some site attributes
     site_attributes = _site_info_attributes(site.upper(), network, site_filepath)
@@ -260,7 +260,6 @@ def get_attributes(
 
             # If units are required for variable, add attribute
             if key == species_label or any(word in key for word in match_words):
-
                 if units in unit_interpret:
                     ds[key].attrs["units"] = unit_interpret[units]
                     # If units are non-standard, add details
@@ -585,7 +584,6 @@ def get_flux_attributes(
         # For composite emissions files this may contain > 1 prior input
         global_attributes["number_of_prior_files_used"] = len(prior_info_dict.keys())
         for i, source_key in enumerate(prior_info_dict.keys()):
-
             prior_number = i + 1
             label_start = f"prior_file_{prior_number}"
             global_attributes[label_start] = source_key

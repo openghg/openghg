@@ -81,9 +81,11 @@ def sync_surface_metadata(
     meta_copy = deepcopy(metadata)
     attrs_copy = deepcopy(attributes)
 
-    mismatch_keys = {"never": ["never"],
-                     "attributes": ["attributes", "from_source"],
-                     "metadata": ["metadata", "from_definition"]}
+    mismatch_keys = {
+        "never": ["never"],
+        "attributes": ["attributes", "from_source"],
+        "metadata": ["metadata", "from_definition"],
+    }
 
     for key, options in mismatch_keys.items():
         if update_mismatch.lower() in options:
@@ -104,23 +106,25 @@ def sync_surface_metadata(
 
             if is_number(attr_value) and is_number(meta_value):
                 if not math.isclose(float(attr_value), float(meta_value), rel_tol=relative_tolerance):
-                    err_warn_num = (
-                        f"Value of {key} not within tolerance, metadata: {meta_value} - attributes: {attr_value}"
-                    )
+                    err_warn_num = f"Value of {key} not within tolerance, metadata: {meta_value} - attributes: {attr_value}"
                     if update_mismatch == "never":
                         attr_mismatches[key] = (meta_value, attr_value)
                     elif update_mismatch == "attributes":
                         logger.warning(
-                            f"{err_warn_num}\nUpdating metadata to use attribute value of {key} = {attr_value}")
+                            f"{err_warn_num}\nUpdating metadata to use attribute value of {key} = {attr_value}"
+                        )
                         meta_copy[key] = str(attr_value)
                     elif update_mismatch == "metadata":
                         logger.warning(
-                            f"{err_warn_num}\nUpdating attributes to use metadata value of {key} = {meta_value}")
-                        attrs_copy[key] = str(meta_value)                    
+                            f"{err_warn_num}\nUpdating attributes to use metadata value of {key} = {meta_value}"
+                        )
+                        attrs_copy[key] = str(meta_value)
             else:
                 # Here we don't care about case. Within the Datasource we'll store the
                 # metadata as all lowercase, within the attributes we'll keep the case.                err_warn_str = f"Metadata mismatch for '{key}', metadata: {meta_value} - attributes: {attr_value}"
-                err_warn_str = f"Metadata mismatch for '{key}', metadata: {meta_value} - attributes: {attr_value}"
+                err_warn_str = (
+                    f"Metadata mismatch for '{key}', metadata: {meta_value} - attributes: {attr_value}"
+                )
                 if str(meta_value).lower() != str(attr_value).lower():
                     if update_mismatch == "never":
                         attr_mismatches[key] = (meta_value, attr_value)
@@ -133,15 +137,20 @@ def sync_surface_metadata(
                         logger.warning(
                             f"{err_warn_str}\nUpdating attributes to use metadata value: {key} = {meta_value}"
                         )
-                        attrs_copy[key] = meta_value                   
+                        attrs_copy[key] = meta_value
         except KeyError:
             # Key wasn't in attributes for comparison
             pass
 
     if attr_mismatches:
-        mismatch_details = [f" - '{key}', metadata: {values[0]}, attributes: {values[1]}" for key, values in attr_mismatches.items()]
+        mismatch_details = [
+            f" - '{key}', metadata: {values[0]}, attributes: {values[1]}"
+            for key, values in attr_mismatches.items()
+        ]
         mismatch_str = "\n".join(mismatch_details)
-        raise AttrMismatchError(f"Metadata mismatch / value not within tolerance for the following keys:\n{mismatch_str}")
+        raise AttrMismatchError(
+            f"Metadata mismatch / value not within tolerance for the following keys:\n{mismatch_str}"
+        )
 
     default_keys_to_add = metadata_default_keys()
     keys_as_floats = metadata_keys_as_floats()

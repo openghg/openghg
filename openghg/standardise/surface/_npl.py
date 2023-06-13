@@ -126,9 +126,6 @@ def parse_npl(
             "attributes": attributes,
         }
 
-    gas_data = assign_attributes(data=gas_data,
-                                 site=site,
-                                 network=network,
-                                 update_mismatch=update_mismatch)
+    gas_data = assign_attributes(data=gas_data, site=site, network=network, update_mismatch=update_mismatch)
 
     return gas_data

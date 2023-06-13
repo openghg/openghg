@@ -134,9 +134,8 @@ def parse_tmb(
             "attributes": attributes,
         }
 
-    gas_data = assign_attributes(data=gas_data,
-                                 site=site,
-                                 update_mismatch=update_mismatch,
-                                 site_filepath=site_filepath)
+    gas_data = assign_attributes(
+        data=gas_data, site=site, update_mismatch=update_mismatch, site_filepath=site_filepath
+    )
 
     return gas_data

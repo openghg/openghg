@@ -141,9 +141,8 @@ def parse_eurocom(
         "attributes": global_attributes,
     }
 
-    combined_data = assign_attributes(data=combined_data,
-                                      site=site,
-                                      sampling_period=sampling_period,
-                                      update_mismatch=update_mismatch)
+    combined_data = assign_attributes(
+        data=combined_data, site=site, sampling_period=sampling_period, update_mismatch=update_mismatch
+    )
 
     return combined_data
