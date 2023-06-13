@@ -12,9 +12,7 @@ logger = logging.getLogger("openghg.plotting")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-def _latex2html(
-    latex_string: str
-) -> str:
+def _latex2html(latex_string: str) -> str:
     """Replace latex sub/superscript formatting with html.
     Written because the latex formatting in Plotly seems inconsistent
     (works in Notebooks, but not VC Code at the moment).
@@ -25,30 +23,28 @@ def _latex2html(
         str: string with matched sub-strings replaced with equivalent html.
     """
 
-    replacements = {"$^2$": "<sup>2</sup>",
-                    "$^{-1}$": "<sup>-1</sup>",
-                    "$^{-2}$": "<sup>-2</sup>",
-                    "$_2$": "<sub>2</sub>",
-                    "$_3$": "<sub>3</sub>",
-                    "$_4$": "<sub>4</sub>",
-                    "$_5$": "<sub>5</sub>",
-                    "$_6$": "<sub>6</sub>",
-                    }
+    replacements = {
+        "$^2$": "<sup>2</sup>",
+        "$^{-1}$": "<sup>-1</sup>",
+        "$^{-2}$": "<sup>-2</sup>",
+        "$_2$": "<sub>2</sub>",
+        "$_3$": "<sub>3</sub>",
+        "$_4$": "<sub>4</sub>",
+        "$_5$": "<sub>5</sub>",
+        "$_6$": "<sub>6</sub>",
+    }
 
     html_string = latex_string
     for rep in replacements:
-        html_string = html_string.replace(rep,
-                                        replacements[rep])
+        html_string = html_string.replace(rep, replacements[rep])
 
     return html_string
 
 
 def _plot_remove_gaps(
-        x_data: np.ndarray,
-        y_data: np.ndarray,
-        gap: Optional[int] = 24 * 60 * 60 * 1000000000
+    x_data: np.ndarray, y_data: np.ndarray, gap: Optional[int] = 24 * 60 * 60 * 1000000000
 ) -> Tuple[np.ndarray, np.ndarray]:
-    '''Insert NaNs between big gaps in the data. 
+    """Insert NaNs between big gaps in the data.
     Prevents connecting lines being drawn
 
     Args:
@@ -58,7 +54,7 @@ def _plot_remove_gaps(
 
     Returns:
         x, y: x and y arrays to plot
-    '''
+    """
 
     gap_idx = np.where(np.diff(x_data.astype(int)) > gap)[0]
     x_data_plot = np.insert(x_data, gap_idx + 1, values=x_data[0])
@@ -67,9 +63,7 @@ def _plot_remove_gaps(
     return x_data_plot, y_data_plot
 
 
-def _plot_legend_position(
-        ascending: bool
-) -> Tuple[Dict, Dict]:
+def _plot_legend_position(ascending: bool) -> Tuple[Dict, Dict]:
     """Position of legend and logo,
     depending on whether data is ascending or descending
 
@@ -81,37 +75,17 @@ def _plot_legend_position(
     """
 
     if ascending:
-        legend_pos = {
-            "yanchor": "top",
-            "xanchor": "left",
-            "y": 0.99,
-            "x": 0.01
-        }
-        logo_pos = {
-            "yanchor": "bottom",
-            "xanchor": "right",
-            "y": 0.01,
-            "x": 0.99
-        }
+        legend_pos = {"yanchor": "top", "xanchor": "left", "y": 0.99, "x": 0.01}
+        logo_pos = {"yanchor": "bottom", "xanchor": "right", "y": 0.01, "x": 0.99}
     else:
-        legend_pos = {
-            "yanchor": "top",
-            "xanchor": "right",
-            "y": 0.99,
-            "x": 0.99
-        }
-        logo_pos = {
-            "yanchor": "bottom",
-            "xanchor": "left",
-            "y": 0.01,
-            "x": 0.01
-        }
+        legend_pos = {"yanchor": "top", "xanchor": "right", "y": 0.99, "x": 0.99}
+        logo_pos = {"yanchor": "bottom", "xanchor": "left", "y": 0.01, "x": 0.01}
 
     return legend_pos, logo_pos
 
 
 def _plot_logo(
-        logo_pos: Dict,    
+    logo_pos: Dict,
 ) -> Dict:
     """Create Plotly dictionary for logo
 
@@ -122,13 +96,14 @@ def _plot_logo(
         dict: Dictionary containing logo + position parameters
     """
 
-    logo = base64.b64encode(open(get_datapath("OpenGHG_Logo_NoText_transparent_200x200.png"), 'rb').read())
+    logo = base64.b64encode(open(get_datapath("OpenGHG_Logo_NoText_transparent_200x200.png"), "rb").read())
     logo_dict = dict(
-        source='data:image/png;base64,{}'.format(logo.decode()),
+        source="data:image/png;base64,{}".format(logo.decode()),
         xref="x domain",
         yref="y domain",
         sizex=0.1,
-        sizey=0.1)
+        sizey=0.1,
+    )
     logo_dict.update(logo_pos)
 
     return logo_dict
@@ -175,27 +150,15 @@ def plot_timeseries(
 
     font = {"size": 14}
 
-    margin = {
-        "l": 20,
-        "r": 20,
-        "t": 20,
-        "b": 20
-    }
+    margin = {"l": 20, "r": 20, "t": 20, "b": 20}
 
     if title is not None:
         title_layout = {"text": title, "y": 0.9, "x": 0.5, "xanchor": "center", "yanchor": "top"}
         layout = go.Layout(
-            title=title_layout,
-            xaxis=dict(title=xlabel),
-            yaxis=dict(title=ylabel),
-            font=font,
-            margin=margin
+            title=title_layout, xaxis=dict(title=xlabel), yaxis=dict(title=ylabel), font=font, margin=margin
         )
     else:
-        layout = go.Layout(
-            font=font,
-            margin=margin
-        )
+        layout = go.Layout(font=font, margin=margin)
 
     # Create a single figure
     fig = go.Figure(layout=layout)
@@ -212,9 +175,7 @@ def plot_timeseries(
         site = metadata["site"]
         inlet = metadata["inlet"]
 
-        species_string = _latex2html(
-            species_info[synonyms(species, lower=False)]["print_string"]
-        )
+        species_string = _latex2html(species_info[synonyms(species, lower=False)]["print_string"])
 
         legend_text = f"{species_string} - {site.upper()} ({inlet})"
 
@@ -265,7 +226,7 @@ def plot_timeseries(
                 x=x_data_plot,
                 y=y_data_plot,
                 mode="lines",
-                hovertemplate="%{x|%Y-%m-%d %H:%M}<br> %{y:.1f} " + unit_string_html
+                hovertemplate="%{x|%Y-%m-%d %H:%M}<br> %{y:.1f} " + unit_string_html,
             )
         )
 
@@ -278,25 +239,26 @@ def plot_timeseries(
     if y_data_diff >= 0:
         ascending = True
     else:
-        ascending = False    
+        ascending = False
 
     if len(set(unit_strings)) > 1:
         raise NotImplementedError("Can't plot two different units yet")
 
     # Write species and units on y-axis
-    if ylabel:
+    if ylabel is not None:
         fig.update_yaxes(title=ylabel)
     else:
         ytitle = ", ".join(set(species_strings)) + " (" + unit_strings[0] + ")"
         fig.update_yaxes(title=ytitle)
 
-    if xlabel:
-        fig.update_xaxes(title=xlabel)
+    if xlabel is None:
+        xlabel = "Date"
+
+    fig.update_xaxes(title=xlabel)
 
     # Position the legend
     legend_pos, logo_pos = _plot_legend_position(ascending)
-    fig.update_layout(legend=legend_pos,
-                      template="seaborn")
+    fig.update_layout(legend=legend_pos, template="seaborn")
 
     # Add OpenGHG logo
     if logo:
