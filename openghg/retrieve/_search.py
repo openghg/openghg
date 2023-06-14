@@ -4,7 +4,6 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
-from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
@@ -630,8 +629,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
         keyed_metadata = {r["uuid"]: r for r in general_results}
 
         data_keys = {}
-
-        readable_buckets = get_readable_buckets()
         # Narrow the search to a daterange if dates passed
         if start_date is not None or end_date is not None:
             if start_date is None:

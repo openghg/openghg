@@ -35,7 +35,9 @@ def test_read_openghg_format():
     assert "ch4" in results
     uuid = results["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
+    bucket = get_bucket()
+
+    ch4_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
     ch4_data = ch4_data['2017-03-18-15:32:54+00:00_2017-03-18-17:22:23+00:00']
 
     assert ch4_data.time[0] == Timestamp("2017-03-18T15:32:54")

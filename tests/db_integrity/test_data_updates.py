@@ -498,7 +498,7 @@ def test_obs_data_representative_date_overlap():
 
     datasources = []
     for uuid in uuids:
-        datasource = Datasource.load(uuid=uuid)
+        datasource = Datasource.load(bucket=bucket, uuid=uuid)
         datasources.append(datasource)
 
     data = [datasource.data() for datasource in datasources]

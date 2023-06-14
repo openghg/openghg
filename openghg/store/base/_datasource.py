@@ -5,7 +5,6 @@ from openghg.store.spec import define_data_types
 from pandas import DataFrame, Timestamp, Timedelta
 from xarray import Dataset
 from collections import defaultdict
-from uuid import uuid4
 
 
 logger = logging.getLogger("openghg.store.base")
@@ -28,6 +27,7 @@ class Datasource:
 
     def __init__(self) -> None:
         from openghg.util import timestamp_now
+        from uuid import uuid4
 
         self._uuid: str = str(uuid4())
         self._creation_datetime = timestamp_now()

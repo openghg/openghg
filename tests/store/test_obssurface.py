@@ -72,6 +72,7 @@ def test_read_data(mocker):
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     bucket = get_bucket()
+
     # Get some bytes
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     binary_bsd = filepath.read_bytes()
@@ -145,7 +146,7 @@ def test_read_CRDS():
 
     uid = data["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(uuid=uid).data()
+    ch4_data = Datasource.load(bucket=bucket, uuid=uid).data()
     ch4_data = ch4_data["2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"]
 
     assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
@@ -156,7 +157,7 @@ def test_read_CRDS():
 
     with ObsSurface(bucket=bucket) as obs:
         uuid_one = obs.datasources()[0]
-        datasource = Datasource.load(uuid=uuid_one)
+        datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
 
         first_set_datasources = obs.datasources()
 
@@ -181,7 +182,7 @@ def test_read_CRDS():
         assert len(obs.datasources()) == 3
 
         uuid_one = obs.datasources()[0]
-        datasource = Datasource.load(uuid=uuid_one)
+        datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
         data_keys = sorted(list(datasource.data().keys()))
 
         assert first_set_datasources == obs.datasources()
@@ -278,7 +279,7 @@ def test_read_GC():
     # Load in some data
     uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]["uuid"]
 
-    hfc152a_data = Datasource.load(uuid=uuid, shallow=False).data()
+    hfc152a_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
     hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
 
     assert hfc152a_data.time[0] == Timestamp("2018-01-01T02:24:00")
@@ -307,7 +308,7 @@ def test_read_GC():
         # # Now test that if we add more data it adds it to the same Datasource
         uuid_one = obs.datasources()[0]
 
-    datasource = Datasource.load(uuid=uuid_one)
+    datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
 
     data_one = datasource.data()
     assert list(data_one.keys()) == ["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
@@ -322,7 +323,7 @@ def test_read_GC():
             filepath=(data_filepath, precision_filepath), source_format="GCWERKS", site="CGO", network="AGAGE"
         )
 
-    datasource = Datasource.load(uuid=uuid_one)
+    datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
     data_one = datasource.data()
 
     assert sorted(list(data_one.keys())) == [
@@ -348,7 +349,7 @@ def test_read_cranfield():
 
     uuid = results["processed"]["THB_hourly_means_test.csv"]["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
+    ch4_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
     ch4_data = ch4_data["2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"]
 
     assert ch4_data.time[0] == Timestamp("2018-05-05")
@@ -374,7 +375,7 @@ def test_read_beaco2n():
 
     uuid = results["processed"]["Charlton_Community_Center.csv"]["co2"]["uuid"]
 
-    co2_data = Datasource.load(uuid=uuid, shallow=False).data()
+    co2_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
     co2_data = co2_data["2015-04-18-04:00:00+00:00_2015-04-18-10:00:00+00:00"]
 
     assert co2_data.time[0] == Timestamp("2015-04-18T04:00:00")
@@ -399,7 +400,7 @@ def test_read_openghg_format():
 
     uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
 
-    co2_data = Datasource.load(uuid=uuid, shallow=False).data()
+    co2_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
     co2_data = co2_data["2012-07-30-17:03:08+00:00_2012-08-03-22:43:07+00:00"]
 
     assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
@@ -422,7 +423,7 @@ def test_read_noaa_raw():
 
     uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]["uuid"]
 
-    co_data = Datasource.load(uuid=uuid, shallow=False).data()
+    co_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
 
     assert sorted(list(co_data.keys())) == [
         "1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00",
@@ -464,7 +465,7 @@ def test_read_noaa_obspack():
 
     uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(uuid=uuid, shallow=False).data()
+    ch4_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
 
     assert sorted(list(ch4_data.keys())) == [
         "1993-06-17-00:12:30+00:00_1993-11-20-21:50:00+00:00",
@@ -508,7 +509,7 @@ def test_read_thames_barrier():
 
     uuid = results["processed"]["thames_test_20190707.csv"]["co2"]["uuid"]
 
-    data = Datasource.load(uuid=uuid, shallow=False).data()
+    data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
     data = data["2019-07-01-00:39:55+00:00_2019-08-01-01:10:29+00:00"]
 
     assert data.time[0] == Timestamp("2019-07-01T00:39:55")
@@ -541,7 +542,7 @@ def test_delete_Datasource():
 
         uuid = datasources[0]
 
-        datasource = Datasource.load(uuid=uuid)
+        datasource = Datasource.load(bucket=bucket, uuid=uuid)
 
         data_keys = datasource.data_keys()
 
@@ -757,7 +758,7 @@ def test_read_multiside_aqmesh():
     # This crazy structure will be fixed when add_datsources is updated
     raith_uuid = result["raith"]["raith"]["uuid"]
 
-    d = Datasource.load(uuid=raith_uuid, shallow=False)
+    d = Datasource.load(bucket=bucket, uuid=raith_uuid, shallow=False)
 
     data = d.data()["2021-06-18-05:00:00+00:00_2021-06-21-13:00:00+00:00"]
 

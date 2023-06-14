@@ -87,7 +87,7 @@ def test_delete_footprint_data(footprint_read):
     with Footprints(bucket=bucket) as fps:
         uuid = fps.datasources()[0]
 
-    ds = Datasource.load(uuid=uuid, shallow=True)
+    ds = Datasource.load(bucket=bucket, uuid=uuid, shallow=True)
     key = ds.key()
     datasource_path = key_to_local_filepath(key=key)
 
@@ -147,9 +147,7 @@ def test_find_modify_metadata():
 
     res = search_surface(site="tac", species="co2")
 
-    diff_d = {
-        k: v for k, v in res.metadata[uuid].items() if k not in start_metadata[uuid]
-    }
+    diff_d = {k: v for k, v in res.metadata[uuid].items() if k not in start_metadata[uuid]}
 
     assert diff_d == {"forgotten_key": "tis_but_a_scratch", "another_key": "swallow", "a_third": "parrot"}
 
@@ -333,10 +331,10 @@ def test_delete_data():
     res = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
 
     uid = next(iter(res.metadata))
-    d = Datasource.load(uuid=uid)
-    key = d.key()
 
     bucket = get_bucket()
+    d = Datasource.load(bucket=bucket, uuid=uid)
+    key = d.key()
 
     with ObsSurface(bucket) as obs:
         assert uid in obs._datasource_uuids

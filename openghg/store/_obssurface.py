@@ -594,7 +594,7 @@ class ObsSurface(BaseStore):
         bucket = get_bucket()
         # Load the Datasource and get all its keys
         # iterate over these keys and delete them
-        datasource = Datasource.load(uuid=uuid)
+        datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
         data_keys = datasource.raw_keys()
 

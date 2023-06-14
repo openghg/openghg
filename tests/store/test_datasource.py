@@ -208,7 +208,7 @@ def test_save_footprint():
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
     objs = get_object_names(bucket, prefix)
 
-    datasource_2 = Datasource.load(bucket=bucket, key=objs[0])
+    datasource_2 = Datasource.load(bucket=bucket, uuid=datasource._uuid)
 
     date_key = "2013-06-02-00:00:00+00:00_2013-06-30-00:00:00+00:00"
 
@@ -476,7 +476,9 @@ def test_shallow_then_load_data(data):
     d.add_data(metadata=metadata, data=data, data_type="surface")
     d.save()
 
-    new_d = Datasource.load(uuid=d.uuid(), shallow=True)
+    bucket = get_bucket()
+
+    new_d = Datasource.load(bucket=bucket, uuid=d.uuid(), shallow=True)
 
     assert not new_d._data
 

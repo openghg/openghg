@@ -34,7 +34,7 @@ def get_sources(args: Dict) -> Dict:
     species = args["species"]
 
     # Shallow load the Datasources (only get their JSON metadata)
-    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+    datasources = (Datasource.load(bucket=bucket, uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
     matching_sources = [d for d in datasources if d.search_metadata(site=site, species=species)]
 
