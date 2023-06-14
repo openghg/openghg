@@ -4,6 +4,9 @@ import numpy as np
 from openghg.store.spec import define_data_types
 from pandas import DataFrame, Timestamp, Timedelta
 from xarray import Dataset
+from collections import defaultdict
+from uuid import uuid4
+
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -24,9 +27,6 @@ class Datasource:
     _data_root = "data"
 
     def __init__(self) -> None:
-        from collections import defaultdict
-        from uuid import uuid4
-
         from openghg.util import timestamp_now
 
         self._uuid: str = str(uuid4())
@@ -38,9 +38,9 @@ class Datasource:
         self._start_date = None
         self._end_date = None
 
+        self._bucket = ""
+
         self._stored = False
-        # This dictionary stored the keys for each version of data uploaded
-        # data_key = d._data_keys["latest"]["keys"][date_key]
         self._data_keys: dataKeyType = defaultdict(dict)
         self._data_type: str = ""
         # Hold information regarding the versions of the data
@@ -364,9 +364,7 @@ class Datasource:
 
         return daterange_str
 
-    def clip_daterange(self,
-                       end_date: Timestamp,
-                       start_date_next: Timestamp) -> Timestamp:
+    def clip_daterange(self, end_date: Timestamp, start_date_next: Timestamp) -> Timestamp:
         """
         Clip any end_date greater than the next start date (start_date_next) to be
         1 second less.
@@ -529,17 +527,6 @@ class Datasource:
 
         return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
 
-        # # TODO - is there a cleaner way of doing this?
-        # with tempfile.TemporaryDirectory() as tmpdir:
-        #     tmp_path = Path(tmpdir).joinpath("tmp.nc")
-
-        #     with open(tmp_path, "wb") as f:
-        #         f.write(data)
-
-        #     ds: Dataset = xr_load_dataset(tmp_path)
-
-        #     return ds
-
     @classmethod
     def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:
         """Construct a Datasource from JSON
@@ -562,6 +549,7 @@ class Datasource:
         d._data = {}
         d._data_type = data["data_type"]
         d._latest_version = data["latest_version"]
+        d._bucket = bucket
 
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
@@ -652,9 +640,8 @@ class Datasource:
     @classmethod
     def load(
         cls: Type[T],
-        bucket: Optional[str] = None,
-        uuid: Optional[str] = None,
-        key: Optional[str] = None,
+        bucket: str,
+        uuid: str,
         shallow: bool = False,
     ) -> T:
         """Load a Datasource from the object store either by name or UUID
@@ -668,22 +655,12 @@ class Datasource:
         Returns:
             Datasource: Datasource object created from JSON
         """
-        from openghg.objectstore import get_bucket, get_object_from_json
+        from openghg.objectstore import get_object_from_json
 
-        if uuid is None and key is None:
-            raise ValueError("Both uuid and key cannot be None")
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        if key is None:
-            key = f"{Datasource._datasource_root}/uuid/{uuid}"
-
+        key = f"{Datasource._datasource_root}/uuid/{uuid}"
         data = get_object_from_json(bucket=bucket, key=key)
 
-        datasource = cls.from_data(bucket=bucket, data=data, shallow=shallow)
-
-        return datasource
+        return cls.from_data(bucket=bucket, data=data, shallow=shallow)
 
     def data(self) -> Dict:
         """Get the data stored in this Datasource

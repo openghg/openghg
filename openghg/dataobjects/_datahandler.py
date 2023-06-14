@@ -13,6 +13,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 class DataHandler:
     def __init__(self, metadata: Optional[Dict[str, Dict]] = None):
+        raise NotImplementedError("This needs reworking to handle multiple object stores.")
         self.metadata = metadata if metadata is not None else {}
         self._backup: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict)
         self._latest = "latest"
@@ -92,7 +93,7 @@ class DataHandler:
             store.remove(tinydb.where("uuid") == uuid)
             store.insert(backup)
 
-            d = Datasource.load(uuid=uuid)
+            d = Datasource.load(bucket=bucket, uuid=uuid)
             d._metadata = backup
 
     def view_backup(self, uuid: Optional[str] = None, version: Optional[str] = None) -> Dict:

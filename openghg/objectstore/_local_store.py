@@ -45,7 +45,21 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 #     return {name: data["path"] for name, data in object_stores.items() if "w" in data["permissions"]}
 
 
-def get_writable_bucket(name: Optional[str] = None) -> str:
+def get_readable_buckets() -> Dict:
+    """Get a list of readable buckets
+
+    Returns:
+        list: List of readable buckets
+    """
+    config = read_local_config()
+    object_stores = config["object_store"]
+
+    return {
+        store_name: data["path"] for store_name, data in object_stores.items() if "r" in data["permissions"]
+    }
+
+
+def get_writable_buckets(name: Optional[str] = None) -> str:
     """Get the path to a writable bucket, passing in the name of a bucket if
     more than one writable bucket available.
 

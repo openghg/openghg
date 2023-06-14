@@ -117,7 +117,7 @@ class BaseStore:
                 # so we can have rapid
                 self._datasource_uuids[uid] = key
             else:
-                datasource = Datasource.load(uuid=uuid)
+                datasource = Datasource.load(uuid=uuid, bucket=self._bucket)
 
             # Add the dataframe to the datasource
             datasource.add_data(metadata=metadata, data=_data, overwrite=overwrite, data_type=data_type)

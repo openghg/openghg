@@ -6,6 +6,7 @@ import logging
 from typing import Any, Dict, List, Optional, Union
 from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
+from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
 from tinydb.database import TinyDB
 from openghg.dataobjects import SearchResults
@@ -484,20 +485,12 @@ def search(**kwargs: Any) -> SearchResults:
         else:
             sr = SearchResults()
     else:
-        sr = local_search(**kwargs)
+        sr = _base_search(**kwargs)
 
     return sr
 
 
-# TODO
-# GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
-# facing interfaces to a more general search function, this would also make it easier to enforce types
-# TODO - rename this function!
-# 2.
-# _base_search()
-# 1.
-# _store_search()
-def local_search(**kwargs: Any) -> SearchResults:
+def _base_search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
 
@@ -521,7 +514,6 @@ def local_search(**kwargs: Any) -> SearchResults:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
     import itertools
-
     from openghg.store.base import Datasource
     from openghg.dataobjects import SearchResults
     from openghg.util import (
@@ -609,59 +601,69 @@ def local_search(**kwargs: Any) -> SearchResults:
         expanded_search.append(not_a_list)
 
     general_results = []
-    for data_type_class in types_to_search:
-        meta_key = data_type_class._metakey
 
-        with load_metastore(key=meta_key) as metastore:
-            for v in expanded_search:
-                res = metastore.search(Query().fragment(v))
-                if res:
-                    general_results.extend(res)
+    # Get a dictionary of all the readable buckets available
+    # We'll iterate over each of them
+    readable_buckets = get_readable_buckets()
 
-    # Add in a quick check to make sure we don't have dupes
-    uuids = [s["uuid"] for s in general_results]
-    # TODO - remove this once a more thorough tests are added
-    if len(uuids) != len(set(uuids)):
-        error_msg = "Multiple results found with same UUID!"
-        logger.exception(msg=error_msg)
-        raise ValueError(error_msg)
+    for bucket_name, bucket in readable_buckets.items():
+        for data_type_class in types_to_search:
+            with data_type_class(bucket=bucket) as dclass:
+                metastore = dclass._metastore
 
-    # Here we create a dictionary of the metadata keyed by the Datasource UUID
-    # we'll create a pandas DataFrame out of this in the SearchResult object
-    # for better printing / searching within a notebook
-    keyed_metadata = {r["uuid"]: r for r in general_results}
+                for v in expanded_search:
+                    res = metastore.search(Query().fragment(v))
+                    if res:
+                        general_results.extend(res)
 
-    data_keys = {}
-    # Narrow the search to a daterange if dates passed
-    if start_date is not None or end_date is not None:
-        if start_date is None:
-            start_date = timestamp_epoch()
+        # Add in a quick check to make sure we don't have dupes
+        uuids = [s["uuid"] for s in general_results]
+        # TODO - remove this once a more thorough tests are added
+        if len(uuids) != len(set(uuids)):
+            error_msg = "Multiple results found with same UUID!"
+            logger.exception(msg=error_msg)
+            raise ValueError(error_msg)
+
+        # Here we create a dictionary of the metadata keyed by the Datasource UUID
+        # we'll create a pandas DataFrame out of this in the SearchResult object
+        # for better printing / searching within a notebook
+        keyed_metadata = {r["uuid"]: r for r in general_results}
+
+        data_keys = {}
+
+        readable_buckets = get_readable_buckets()
+        # Narrow the search to a daterange if dates passed
+        if start_date is not None or end_date is not None:
+            if start_date is None:
+                start_date = timestamp_epoch()
+            else:
+                start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
+
+            if end_date is None:
+                end_date = timestamp_now()
+            else:
+                end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
+
+            metadata_in_daterange = {}
+
+            for uid, record in keyed_metadata.items():
+                _keys = Datasource.load(bucket=bucket, uuid=uid, shallow=True).keys_in_daterange(
+                    start_date=start_date, end_date=end_date
+                )
+
+                if _keys:
+                    metadata_in_daterange[uid] = record
+                    data_keys[uid] = _keys
+
+            if not data_keys:
+                logger.warning(
+                    f"No data found for the dates given in the {bucket_name} store, please try a wider search."
+                )
+            # Update the metadata we'll use to create the SearchResults object
+            keyed_metadata = metadata_in_daterange
         else:
-            start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
-
-        if end_date is None:
-            end_date = timestamp_now()
-        else:
-            end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
-
-        metadata_in_daterange = {}
-
-        for uid, record in keyed_metadata.items():
-            _keys = Datasource.load(uuid=uid, shallow=True).keys_in_daterange(
-                start_date=start_date, end_date=end_date
-            )
-
-            if _keys:
-                metadata_in_daterange[uid] = record
-                data_keys[uid] = _keys
-
-        if not data_keys:
-            logger.warning("No data found for the dates given, please try a wider search.")
-        # Update the metadata we'll use to create the SearchResults object
-        keyed_metadata = metadata_in_daterange
-    else:
-        # Here we only need to retrieve the keys
-        for uid in keyed_metadata:
-            data_keys[uid] = Datasource.load(uuid=uid, shallow=True).data_keys()
+            # Here we only need to retrieve the keys
+            for uid in keyed_metadata:
+                data_keys[uid] = Datasource.load(bucket=bucket, uuid=uid, shallow=True).data_keys()
 
     return SearchResults(keys=data_keys, metadata=dict(keyed_metadata), start_result="data_type")
