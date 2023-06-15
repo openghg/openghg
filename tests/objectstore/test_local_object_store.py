@@ -4,7 +4,7 @@ import pytest
 from openghg.objectstore import (
     get_local_objectstore_path,
     get_bucket,
-    get_writable_buckets,
+    get_writable_bucket,
 )
 from openghg.types import ObjectStoreError
 import tempfile
@@ -25,7 +25,7 @@ def test_get_writable_buckets(mocker):
     # First use the mocked config file with only a single user bucket
     user_store = get_local_objectstore_path()
 
-    bucket = get_writable_buckets()
+    bucket = get_writable_bucket()
 
     tmpdir = tempfile.gettempdir()
     assert tmpdir in bucket
@@ -47,13 +47,13 @@ def test_get_writable_buckets(mocker):
     mocker.patch("openghg.objectstore._local_store.read_local_config", return_value=mock_config)
 
     with pytest.raises(ObjectStoreError):
-        get_writable_buckets()
+        get_writable_bucket()
 
-    shared_path = get_writable_buckets(name="shared")
+    shared_path = get_writable_bucket(name="shared")
     assert shared_path == "/tmp/mock_path"
 
     with pytest.raises(ObjectStoreError):
-        get_writable_buckets(name="badger")
+        get_writable_bucket(name="badger")
 
 
 def test_get_writable_buckets_no_writable(mocker):
@@ -71,7 +71,7 @@ def test_get_writable_buckets_no_writable(mocker):
     mocker.patch("openghg.objectstore._local_store.read_local_config", return_value=mock_config)
 
     with pytest.raises(ObjectStoreError):
-        get_writable_buckets()
+        get_writable_bucket()
 
 
 def test_get_bucket():

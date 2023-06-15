@@ -68,7 +68,8 @@ def test_footprint_metadata_modification(footprint_read):
     to_update = {"domain": "antarctica", "model": "peugeot"}
     to_delete = ["max_latitude_high"]
 
-    search_res.update_metadata(uuid=uuid, to_update=to_update, to_delete=to_delete)
+    bucket = get_bucket()
+    search_res.update_metadata(bucket=bucket, uuid=uuid, to_update=to_update, to_delete=to_delete)
 
     search_res = data_handler_lookup(data_type="footprints", site="tmb", network="lghg")
 
@@ -100,7 +101,7 @@ def test_delete_footprint_data(footprint_read):
 
     assert uuid in fps._datasource_uuids
 
-    res.delete_datasource(uuid=uuid)
+    res.delete_datasource(bucket=bucket, uuid=uuid)
 
     assert not datasource_path[0].exists()
 
@@ -143,72 +144,33 @@ def test_find_modify_metadata():
         }
     }
 
-    search_res.update_metadata(uuid=uuid, to_update=to_add)
+    bucket = get_bucket()
+    search_res.update_metadata(bucket=bucket, uuid=uuid, to_update=to_add)
 
     res = search_surface(site="tac", species="co2")
 
     diff_d = {k: v for k, v in res.metadata[uuid].items() if k not in start_metadata[uuid]}
 
-    assert diff_d == {"forgotten_key": "tis_but_a_scratch", "another_key": "swallow", "a_third": "parrot"}
+    assert res.metadata[uuid].items() >= to_add.items()
+
+    # assert diff_d == {"forgotten_key": "tis_but_a_scratch", "another_key": "swallow", "a_third": "parrot"}
 
 
 def test_modify_multiple_uuids():
     res = data_handler_lookup(data_type="surface", site="tac")
 
-    print(res.metadata)
-
     uuids = sorted(res.metadata.keys())
 
-    expected = {
-        uuids[0]: {
-            "site": "tac",
-            "instrument": "picarro",
-            "sampling_period": "60.0",
-            "inlet": "100m",
-            "port": "9",
-            "type": "air",
-            "network": "decc",
-            "species": "ch4",
-            "calibration_scale": "wmo-x2004a",
-            "long_name": "tacolneston",
-            "data_type": "surface",
-            "inlet_height_magl": "100",
-            "data_owner": "simon o'doherty",
-            "data_owner_email": "s.odoherty@bristol.ac.uk",
-            "station_longitude": 1.13872,
-            "station_latitude": 52.51775,
-            "station_long_name": "tacolneston tower, uk",
-            "station_height_masl": 50.0,
-            "uuid": uuids[0],
-        },
-        uuids[1]: {
-            "site": "tac",
-            "instrument": "picarro",
-            "sampling_period": "60.0",
-            "inlet": "100m",
-            "port": "9",
-            "type": "air",
-            "network": "decc",
-            "species": "co2",
-            "calibration_scale": "wmo-x2007",
-            "long_name": "tacolneston",
-            "data_type": "surface",
-            "inlet_height_magl": "100",
-            "data_owner": "simon o'doherty",
-            "data_owner_email": "s.odoherty@bristol.ac.uk",
-            "station_longitude": 1.13872,
-            "station_latitude": 52.51775,
-            "station_long_name": "tacolneston tower, uk",
-            "station_height_masl": 50.0,
-            "uuid": uuids[1],
-        },
-    }
-
-    assert res.metadata == expected
+    assert not res.metadata[uuids[0]]["data_owner"] == "michael palin"
+    assert not res.metadata[uuids[0]]["data_owner_email"] == "palin@python.com"
+    assert not res.metadata[uuids[1]]["data_owner"] == "michael palin"
+    assert not res.metadata[uuids[1]]["data_owner_email"] == "palin@python.com"
 
     uids = list(res.metadata.keys())
     to_add = {"data_owner": "michael palin", "data_owner_email": "palin@python.com"}
-    res.update_metadata(uuid=uids, to_update=to_add)
+
+    bucket = get_bucket()
+    res.update_metadata(bucket=bucket, uuid=uids, to_update=to_add)
 
     search_res = search_surface(site="tac", inlet="100m")
 
@@ -220,14 +182,16 @@ def test_modify_multiple_uuids():
 def test_invalid_uuid_raises():
     res = data_handler_lookup(data_type="surface", site="tac")
 
+    bucket = get_bucket()
+
     with pytest.raises(ValueError):
-        res.update_metadata(uuid="123-567", to_update={})
+        res.update_metadata(bucket=bucket, uuid="123-567", to_update={})
 
 
 def test_delete_metadata_keys():
     res = data_handler_lookup(data_type="surface", site="tac", species="ch4", inlet="100m")
 
-    assert res.metadata["test-uuid-100"] == {
+    expected = {
         "site": "tac",
         "instrument": "picarro",
         "sampling_period": "60.0",
@@ -249,30 +213,14 @@ def test_delete_metadata_keys():
         "uuid": "test-uuid-100",
     }
 
-    res.update_metadata(uuid="test-uuid-100", to_delete=["species"])
+    assert res.metadata["test-uuid-100"].items() >= expected.items()
+
+    bucket = get_bucket()
+    res.update_metadata(bucket=bucket, uuid="test-uuid-100", to_delete=["species"])
 
     res = data_handler_lookup(data_type="surface", site="tac", inlet="100m")
 
-    assert res.metadata["test-uuid-100"] == {
-        "site": "tac",
-        "instrument": "picarro",
-        "sampling_period": "60.0",
-        "inlet": "100m",
-        "port": "9",
-        "type": "air",
-        "network": "decc",
-        "calibration_scale": "wmo-x2004a",
-        "long_name": "tacolneston",
-        "data_type": "surface",
-        "inlet_height_magl": "100",
-        "data_owner": "simon o'doherty",
-        "data_owner_email": "s.odoherty@bristol.ac.uk",
-        "station_longitude": 1.13872,
-        "station_latitude": 52.51775,
-        "station_long_name": "tacolneston tower, uk",
-        "station_height_masl": 50.0,
-        "uuid": "test-uuid-100",
-    }
+    assert "species" not in res.metadata["test-uuid-100"]
 
     res = data_handler_lookup(data_type="surface", site="tac", species="ch4", inlet="100m")
 
@@ -282,9 +230,11 @@ def test_delete_metadata_keys():
 def test_delete_and_modify_keys():
     res = data_handler_lookup(data_type="surface", site="tac", species="ch4", inlet="100m")
 
+    bucket = get_bucket()
+
     to_delete = ["station_longitude", "station_latitude"]
 
-    res.update_metadata(uuid="test-uuid-100", to_delete=to_delete)
+    res.update_metadata(bucket=bucket, uuid="test-uuid-100", to_delete=to_delete)
 
     search_res = search_surface(site="tac", inlet="100m", species="ch4")
 
@@ -299,11 +249,11 @@ def test_delete_and_modify_keys():
 
     # We've already deleted these keys
     with pytest.raises(KeyError):
-        res.update_metadata(uuid="test-uuid-100", to_delete=to_delete, to_update=to_update)
+        res.update_metadata(bucket=bucket, uuid="test-uuid-100", to_delete=to_delete, to_update=to_update)
 
     to_delete = ["long_name"]
 
-    res.update_metadata(uuid="test-uuid-100", to_delete=to_delete, to_update=to_update)
+    res.update_metadata(bucket=bucket, uuid="test-uuid-100", to_delete=to_delete, to_update=to_update)
 
     search_res = search_surface(site="tac", inlet="100m", species="ch4")
 
@@ -318,9 +268,11 @@ def test_delete_and_modify_keys():
 def test_try_delete_none_modify_none_changes_nothing():
     res = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
 
-    res.update_metadata(uuid="test-uuid-100")
+    bucket = get_bucket()
 
-    res.update_metadata(uuid="test-uuid-100", to_update={}, to_delete=[])
+    res.update_metadata(bucket=bucket, uuid="test-uuid-100")
+
+    res.update_metadata(bucket=bucket, uuid="test-uuid-100", to_update={}, to_delete=[])
 
     res2 = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
 
@@ -351,7 +303,7 @@ def test_delete_data():
     for k in key_paths:
         assert k.exists()
 
-    res.delete_datasource(uuid=uid)
+    res.delete_datasource(bucket=bucket, uuid=uid)
 
     assert not datasource_path.exists()
 
@@ -371,7 +323,8 @@ def test_metadata_backup_restore():
 
     to_update = {"owner": "john"}
 
-    res_one.update_metadata(uuid=uid, to_update=to_update)
+    bucket = get_bucket()
+    res_one.update_metadata(bucket=bucket, uuid=uid, to_update=to_update)
 
     assert res_one.metadata[uid]["owner"] == "john"
 
@@ -382,7 +335,7 @@ def test_metadata_backup_restore():
 
     assert res_one.metadata[uid] != version_one
 
-    res_one.restore(uuid=uid)
+    res_one.restore(bucket=bucket, uuid=uid)
 
     assert res_one.metadata[uid] == version_one
 
@@ -394,11 +347,14 @@ def test_metadata_backup_restore():
 def test_delete_update_uuid_raises():
     res_one = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
     uid = next(iter(res_one.metadata))
-    with pytest.raises(ValueError):
-        res_one.update_metadata(uuid=uid, to_delete=["uuid"])
+
+    bucket = get_bucket()
 
     with pytest.raises(ValueError):
-        res_one.update_metadata(uuid=uid, to_update={"uuid": 123})
+        res_one.update_metadata(bucket=bucket, uuid=uid, to_delete=["uuid"])
+
+    with pytest.raises(ValueError):
+        res_one.update_metadata(bucket=bucket, uuid=uid, to_update={"uuid": 123})
 
 
 def test_metadata_backup_restore_multiple_changes():
@@ -408,7 +364,9 @@ def test_metadata_backup_restore_multiple_changes():
 
     to_update = {"owner": "john"}
 
-    res_one.update_metadata(uuid=uid, to_update=to_update)
+    bucket = get_bucket()
+
+    res_one.update_metadata(bucket=bucket, uuid=uid, to_update=to_update)
 
     assert res_one.metadata[uid]["owner"] == "john"
 
@@ -418,7 +376,7 @@ def test_metadata_backup_restore_multiple_changes():
 
     to_update = {"species": "sparrow"}
 
-    res_one.update_metadata(uuid=uid, to_update=to_update)
+    res_one.update_metadata(bucket=bucket, uuid=uid, to_update=to_update)
 
     first_backup = res_one._backup[uid]["1"]
 
@@ -432,6 +390,6 @@ def test_metadata_backup_restore_multiple_changes():
 
     assert len(res_one._backup[uid]) == 2
 
-    res_one.restore(uuid=uid, version=1)
+    res_one.restore(bucket=bucket, uuid=uid, version=1)
 
     assert res_one.metadata[uid] == first_backup

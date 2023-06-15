@@ -3,7 +3,7 @@ from typing import Dict, Optional, Union
 from pandas import Timedelta
 
 from openghg.store import ObsSurface
-from openghg.objectstore import get_writable_buckets
+from openghg.objectstore import get_writable_bucket
 from openghg.cloud import create_file_package
 from openghg.util import running_on_hub
 from openghg.types import optionalPathType, multiPathType
@@ -134,7 +134,7 @@ def standardise_surface(
 
         return responses
     else:
-        bucket = get_writable_buckets(name=store)
+        bucket = get_writable_bucket(name=store)
 
         with ObsSurface(bucket=bucket) as obs:
             results = obs.read_file(

@@ -59,7 +59,16 @@ def get_readable_buckets() -> Dict:
     }
 
 
-def get_writable_buckets(name: Optional[str] = None) -> str:
+def get_writable_buckets() -> Dict[str, str]:
+    config = read_local_config()
+    object_stores = config["object_store"]
+
+    return {
+        store_name: data["path"] for store_name, data in object_stores.items() if "w" in data["permissions"]
+    }
+
+
+def get_writable_bucket(name: Optional[str] = None) -> str:
     """Get the path to a writable bucket, passing in the name of a bucket if
     more than one writable bucket available.
 
@@ -68,12 +77,7 @@ def get_writable_buckets(name: Optional[str] = None) -> str:
     Returns:
         str: Path to writable bucket
     """
-    config = read_local_config()
-    object_stores = config["object_store"]
-
-    writable_buckets = {
-        store_name: data["path"] for store_name, data in object_stores.items() if "w" in data["permissions"]
-    }
+    writable_buckets = get_writable_buckets()
 
     if not writable_buckets:
         raise ObjectStoreError("No writable object stores found. Check configuration file.")

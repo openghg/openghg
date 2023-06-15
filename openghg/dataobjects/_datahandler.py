@@ -3,6 +3,8 @@ import copy
 from openghg.store.base import Datasource
 from openghg.store.spec import define_data_type_classes
 from openghg.store import load_metastore
+from openghg.objectstore import get_writable_buckets, delete_object
+from openghg.types import ObjectStoreError
 import logging
 import tinydb
 from typing import DefaultDict, Dict, List, Set, Optional, Union
@@ -16,6 +18,9 @@ class DataHandler:
         self.metadata = metadata
         self._backup: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict)
         self._latest = "latest"
+        # We need to know if we can actually modify the data
+        buckets = get_writable_buckets()
+        self._writable_buckets = list(buckets.values())
 
     def __str__(self) -> str:
         return str(self.metadata)
@@ -77,6 +82,9 @@ class DataHandler:
         if version == "latest":
             version = self._latest
 
+        if bucket not in self._writable_buckets:
+            raise ObjectStoreError(f"You do not have write access to {bucket}")
+
         version = str(version)
 
         dtype = self._check_datatypes(uuid=uuid)
@@ -132,6 +140,9 @@ class DataHandler:
             None
         """
         from tinydb.operations import delete as tinydb_delete
+
+        if bucket not in self._writable_buckets:
+            raise ObjectStoreError(f"You do not have write access to {bucket}")
 
         if to_update is None and to_delete is None:
             return None
@@ -208,7 +219,8 @@ class DataHandler:
         Returns:
             None
         """
-        from openghg.objectstore import delete_object
+        if bucket not in self._writable_buckets:
+            raise ObjectStoreError(f"You do not have write access to {bucket}")
 
         # Add in ability to delete metadata keys
         if not isinstance(uuid, list):
