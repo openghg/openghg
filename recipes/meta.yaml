@@ -35,6 +35,7 @@ requirements:
     - pyvis
     - rapidfuzz
     - requests >=2.25
+    - rich
     - scipy
     - tinydb
     - tqdm
