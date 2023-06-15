@@ -40,7 +40,7 @@ def download_data(
 
     import requests
     from requests.adapters import HTTPAdapter
-    from tqdm.auto import tqdm  # type: ignore
+    from rich.progress import wrap_file
     from urllib3.util.retry import Retry  # type: ignore
 
     retriable_status_codes = [
@@ -85,7 +85,7 @@ def download_data(
     desc = f"Downloading {filename}"
     r.raw.read = functools.partial(r.raw.read, decode_content=True)
 
-    with tqdm.wrapattr(r.raw, "read", total=file_size, desc=desc) as r_raw:
+    with wrap_file(r.raw, total=file_size, description=desc) as r_raw:
         with io.BytesIO() as buf:
             shutil.copyfileobj(r_raw, buf)
 
