@@ -1216,8 +1216,7 @@ class ModelScenario:
             elif flux_res_H > highest_res_H:
                 # Upsample flux to match footprints frequency and forward fill
                 flux_ds_high_freq = flux_ds_high_freq.resample(
-                    {"time": highest_resolution}, base=base
-                ).ffill()
+                    {"time": highest_resolution}, base=base).ffill()
             # Reindex to match to correct values
             flux_ds_high_freq = flux_ds_high_freq.reindex({"time": full_dates}, method="ffill")
         elif flux_res_H > 24:
