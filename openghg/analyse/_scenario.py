@@ -1183,7 +1183,7 @@ class ModelScenario:
         # ____ Flux time data ____
         date_start_flux = time_array_flux[0]
         date_start_back_flux = date_start_flux - np.timedelta64(max_h_back, "h")
-        date_end_flux = time_array_flux[-1] + np.timedelta64(1,"s")
+        date_end_flux = time_array_flux[-1] + np.timedelta64(1, "s")
 
         start = {
             dd: getattr(np.datetime64(time_array[0].values, "h").astype(object), dd)
