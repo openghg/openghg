@@ -2,6 +2,7 @@ addict
 dask
 h5netcdf
 icoscp
+ipywidgets
 matplotlib
 msgpack
 netcdf4
