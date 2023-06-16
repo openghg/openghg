@@ -1160,6 +1160,8 @@ class ModelScenario:
         # create time array to loop through, with the required resolution
         # fp_HiTRes.time is the release time of particles into the model
         time_array = fp_HiTRes["time"]
+        time_array_flux = flux_ds["time"]
+
         lat = fp_HiTRes["lat"]
         lon = fp_HiTRes["lon"]
         hback = fp_HiTRes["H_back"]
@@ -1173,9 +1175,15 @@ class ModelScenario:
         max_h_back = int(hback.values[-1])
 
         # Define full range of dates to select from the flux input
+        # ____ Footprints time data ____
         date_start = time_array[0]
         date_start_back = date_start - np.timedelta64(max_h_back, "h")
         date_end = time_array[-1] + np.timedelta64(1, "s")
+
+        # ____ Flux time data ____
+        date_start_flux = time_array_flux[0]
+        date_start_back_flux = date_start_flux - np.timedelta64(max_h_back, "h")
+        date_end_flux = time_array_flux[-1] + np.timedelta64(1,"s")
 
         start = {
             dd: getattr(np.datetime64(time_array[0].values, "h").astype(object), dd)
@@ -1188,11 +1196,14 @@ class ModelScenario:
         ).to_numpy()
 
         # Create low frequency flux data (monthly)
-        flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
+        #flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
+        flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back_flux, date_end_flux))
         flux_ds_low_freq = flux_ds_low_freq.transpose(*("lat", "lon", "time"))
 
         # Select and align high frequency flux data
-        flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
+        #flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
+        flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back_flux, date_end_flux))
+
         if flux_res_H <= 24:
             base = (
                 date_start_back.dt.hour.data
