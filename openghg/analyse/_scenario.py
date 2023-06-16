@@ -1196,12 +1196,12 @@ class ModelScenario:
         ).to_numpy()
 
         # Create low frequency flux data (monthly)
-        #flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
+        # flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back, date_end))
         flux_ds_low_freq = flux_ds.resample({"time": "1MS"}).mean().sel(time=slice(date_start_back_flux, date_end_flux))
         flux_ds_low_freq = flux_ds_low_freq.transpose(*("lat", "lon", "time"))
 
         # Select and align high frequency flux data
-        #flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
+        # flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back, date_end))
         flux_ds_high_freq = flux_ds.sel(time=slice(date_start_back_flux, date_end_flux))
 
         if flux_res_H <= 24:
