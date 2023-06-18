@@ -236,7 +236,7 @@ class ObsSurface(BaseStore):
         metastore = load_metastore(key=obs._metakey)
 
         # Create a progress bar object using the filepaths, iterate over this below
-        progress_bar = Progress(transient=False)
+        progress_bar = Progress(transient=True)
         with progress_bar as p:
             for fp in filepath:
                 if source_format == "GCWERKS":
