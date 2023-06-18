@@ -1263,7 +1263,7 @@ class ModelScenario:
         # at each release time we disaggregate the particles backwards over the previous 24hrs
         # The final value then contains the 29-day integrated residual footprints
         logger.info("Calculating modelled timeseries comparison:")
-        iters = track(time_array.values)
+        iters = track(time_array.values, description="Calculating modelled timeseries comparison: ")
         for tt, time in enumerate(iters):
             # Get correct index for low resolution data based on start and current date
             current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
