@@ -236,7 +236,7 @@ class ObsSurface(BaseStore):
         metastore = load_metastore(key=obs._metakey)
 
         # Create a progress bar object using the filepaths, iterate over this below
-        progress_bar = Progress(transient=True)
+        progress_bar = Progress(transient=False)
         with progress_bar as p:
             for fp in filepath:
                 if source_format == "GCWERKS":
@@ -377,8 +377,7 @@ class ObsSurface(BaseStore):
                 # except Exception:
                 #     results["error"][data_filepath.name] = traceback.format_exc()
             for i in p.track(range(len(filepath)), description=f"Processing: {data_filepath.name}."):
-                sleep(0.1)
-        sleep(0.4)
+                sleep(1)
         # logger.info(f"Completed processing: {data_filepath.name}.")
         # logger.info(f"\tUUIDs: {datasource_uuids}")
 
@@ -408,7 +407,6 @@ class ObsSurface(BaseStore):
         This data is different in that it contains multiple sites in the same file.
         """
         from collections import defaultdict
-        from time import sleep
 
         from openghg.standardise.surface import parse_aqmesh
         from openghg.store import assign_data, datasource_lookup, load_metastore
@@ -427,7 +425,6 @@ class ObsSurface(BaseStore):
 
         results: resultsType = defaultdict(dict)
         for site, site_data in track(processed_data.items(), description="Reading AQMesh data"):
-            sleep(0.5)
             metadata = site_data["metadata"]
             measurement_data = site_data["data"]
 
