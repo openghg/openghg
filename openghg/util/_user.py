@@ -33,9 +33,10 @@ def get_default_objectstore_path() -> Path:
 
 # @lru_cache
 def get_user_config_path() -> Path:
-    """Checks if a config file has already been create for
-    OpenGHG to use. This file is created in the user's home directory
-    in  ~/.config/openghg/user.conf on Linux / macOS or
+    """ Returns path to user config file.
+
+    This file is created in the user's home directory
+    in  ~/.ghgconfig/openghg/user.conf on Linux / macOS or
     in LOCALAPPDATA/openghg/openghg.conf on Windows.
 
     Returns:
@@ -52,7 +53,7 @@ def get_user_config_path() -> Path:
 
         config_path = Path(appdata_path).joinpath("openghg", openghg_config_filename)
     elif user_platform in ("Linux", "Darwin"):
-        config_path = Path.home().joinpath(".config", "openghg", openghg_config_filename)
+        config_path = Path.home().joinpath(".ghgconfig", "openghg", openghg_config_filename)
     else:
         raise ValueError(f"Unknown platform: {user_platform}")
 
