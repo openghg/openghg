@@ -1,6 +1,8 @@
 from openghg.util import create_config, get_user_id, check_config
+from openghg.util._user import migrate_config
 import toml
 from pathlib import Path
+import os
 import pytest
 
 
@@ -44,3 +46,31 @@ def test_check_config(mock_config, mocker, caplog):
     check_config()
 
     assert " /tmp/mock_store does not exist but will be created." in caplog.text
+
+
+def test_migrate_config_success(mocker, monkeypatch, tmp_path):
+    monkeypatch.setitem(os.environ, 'HOME', str(tmp_path))
+
+    # make config file at tmp_path/.config/openghg/openghg.conf
+    mock_old_config_path = tmp_path / ".config" / "openghg" / "openghg.conf"
+    mock_old_config_path.parent.mkdir(parents=True)
+    mock_config_content = "This is just a mock config file."
+    mock_old_config_path.write_text(mock_config_content)
+
+    mock_new_config_path = tmp_path / ".ghgconfig" / "openghg" / "openghg.conf"
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_new_config_path)
+
+    migrate_config()
+
+    assert not mock_old_config_path.exists()
+    assert not mock_old_config_path.parent.exists() # openghg dir deleted
+    assert mock_old_config_path.parent.parent.exists() # don't delete .config
+    assert mock_new_config_path.exists()
+    assert mock_new_config_path.read_text() == mock_config_content
+
+
+def test_migrate_config_fail(monkeypatch, tmp_path):
+    monkeypatch.setitem(os.environ, 'HOME', str(tmp_path))
+
+    with pytest.raises(FileNotFoundError):
+        migrate_config()
