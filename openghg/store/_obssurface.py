@@ -295,7 +295,7 @@ class ObsSurface(BaseStore):
                     progress.log(
                         Warning(
                             f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                            f"This is not accepted by the current standardisation function: {parser_fn}"
+                            f"This is not accepted by the current standardisation functions: {parser_fn}"
                         )
                     )
 
