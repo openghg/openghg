@@ -599,13 +599,12 @@ def _base_search(**kwargs: Any) -> SearchResults:
     else:
         expanded_search.append(not_a_list)
 
-    general_results = []
-
     # Get a dictionary of all the readable buckets available
     # We'll iterate over each of them
     readable_buckets = get_readable_buckets()
 
     for bucket_name, bucket in readable_buckets.items():
+        general_results = []
         for data_type_class in types_to_search:
             with data_type_class(bucket=bucket) as dclass:
                 metastore = dclass._metastore

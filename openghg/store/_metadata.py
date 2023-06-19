@@ -1,12 +1,12 @@
 import json
 from typing import Dict, Optional
-from openghg.objectstore import exists, get_bucket, get_object, set_object_from_json
+from openghg.objectstore import exists, get_object, set_object_from_json
 
 from tinydb import Storage, TinyDB
 from tinydb.middlewares import CachingMiddleware
 
 
-def load_metastore(key: str) -> TinyDB:
+def load_metastore(bucket: str, key: str) -> TinyDB:
     """Load the metastore. This can be used as a context manager
     otherwise the database must be closed using the close method
     otherwise records are not written to file.
@@ -16,21 +16,21 @@ def load_metastore(key: str) -> TinyDB:
     Returns:
         TinyDB: instance of metadata database
     """
-    return TinyDB(key, storage=CachingMiddleware(ObjectStorage))
+    return TinyDB(bucket, key, storage=CachingMiddleware(ObjectStorage))
 
 
 class ObjectStorage(Storage):
-    def __init__(self, key: str) -> None:
+    def __init__(self, bucket: str, key: str) -> None:
         self._key = key
+        self._bucket = bucket
 
     def read(self) -> Optional[Dict]:
-        bucket = get_bucket()
         key = self._key
 
-        if not exists(bucket=bucket, key=key):
+        if not exists(bucket=self._bucket, key=key):
             return None
 
-        data = get_object(bucket=bucket, key=self._key)
+        data = get_object(bucket=self._bucket, key=self._key)
 
         try:
             json_data: Dict = json.loads(data)
@@ -39,10 +39,9 @@ class ObjectStorage(Storage):
             return None
 
     def write(self, data: Dict) -> None:
-        bucket = get_bucket()
         key = self._key
 
-        set_object_from_json(bucket=bucket, key=key, data=data)
+        set_object_from_json(bucket=self._bucket, key=key, data=data)
 
     def close(self) -> None:
         pass

@@ -35,7 +35,7 @@ class BaseStore:
         # Where we'll store this object
         self._bucket = bucket
         self._metakey = ""
-        self._metastore = load_metastore(key=self.metakey())
+        self._metastore = load_metastore(bucket=bucket, key=self.metakey())
 
         if exists(bucket=bucket, key=self.key()):
             data = get_object_from_json(bucket=bucket, key=self.key())

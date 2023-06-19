@@ -22,6 +22,9 @@ def load_CRDS():
             filepath=[bsd_42m, bsd_108m, bsd_248m], source_format="CRDS", site="bsd", network="DECC"
         )
 
+def test_retrieve_single_species():
+    results = search(site="bsd", inlet="108m", species="co2")
+
 
 def test_retrieve_all():
     results = search(site="bsd")

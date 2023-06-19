@@ -7,7 +7,7 @@ from openghg.objectstore import get_bucket
 import pytest
 from helpers import (
     get_surface_datapath,
-    clear_test_store,
+    clear_test_stores,
     key_to_local_filepath,
     all_datasource_keys,
     get_footprint_datapath,
@@ -16,7 +16,7 @@ from helpers import (
 
 @pytest.fixture(autouse=True)
 def add_data(mocker):
-    clear_test_store()
+    clear_test_stores()
     mock_uuids = [f"test-uuid-{n}" for n in range(100, 150)]
     mocker.patch("uuid.uuid4", side_effect=mock_uuids)
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
@@ -26,7 +26,7 @@ def add_data(mocker):
 
 @pytest.fixture()
 def footprint_read(mocker):
-    clear_test_store()
+    clear_test_stores()
     datapath = get_footprint_datapath("footprint_test.nc")
 
     mock_uuids = [f"test-uuid-{n}" for n in range(100, 188)]

@@ -5,7 +5,7 @@
 # from openghg.store import METStore
 # from requests_mock import ANY
 
-# from helpers import clear_test_store
+# from helpers import clear_test_stores
 
 # @pytest.fixture(scope="session")
 # def mock_data():
@@ -30,7 +30,7 @@
 #     met = met_object
 
 #     # Empty the object store to force retrieval
-#     clear_test_store()
+#     clear_test_stores()
 
 #     expected_metadata = {
 #         "product_type": "reanalysis",

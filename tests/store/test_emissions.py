@@ -8,11 +8,11 @@ from openghg.types import DatasourceLookupError
 from xarray import open_dataset
 from pandas import Timestamp
 
-from helpers import clear_test_store
+from helpers import clear_test_stores
 
 
 def test_read_binary_data(mocker):
-    clear_test_store()
+    clear_test_stores()
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
@@ -120,7 +120,7 @@ def test_read_file_additional_keys():
 
     Should produce 2 search results.
     """
-    clear_test_store()
+    clear_test_stores()
 
     test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
@@ -186,7 +186,7 @@ def test_read_file_align_correct_datasource():
 
     Should produce 2 search results.
     """
-    clear_test_store()
+    clear_test_stores()
 
     test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
@@ -257,7 +257,7 @@ def test_read_file_fails_ambiguous():
      - same as test_read_file_align_correct_datasource() but doesn't pass
      `database_version` keyword at all for final file.
     """
-    clear_test_store()
+    clear_test_stores()
 
     test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
@@ -301,7 +301,7 @@ def test_read_file_fails_ambiguous():
 
 def test_add_edgar_database():
     """Test edgar can be added to object store (default domain)"""
-    clear_test_store()
+    clear_test_stores()
     bucket = get_bucket()
 
     folder = "v6.0_CH4"

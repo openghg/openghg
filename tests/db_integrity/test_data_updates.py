@@ -9,7 +9,7 @@ from openghg.retrieve import search
 from openghg.objectstore import get_bucket
 
 
-from helpers import clear_test_store
+from helpers import clear_test_stores
 
 
 def flux_data_read():
@@ -41,7 +41,7 @@ def test_database_update_repeat():
     """
 
     # Attempt to add same data to the database twice
-    clear_test_store()
+    clear_test_stores()
     flux_data_read()
     flux_data_read()
 
@@ -237,7 +237,7 @@ def test_obs_data_read_header_diff():
      - BSD GCMD different data added - header changed so hash will be different but data will be the same
     Expect that GCMD (and CRDS) data can still be accessed.
     """
-    clear_test_store()
+    clear_test_stores()
     # Load BSD data - CRDS data
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
@@ -305,7 +305,7 @@ def test_obs_data_read_data_diff():
     Expect that different GCMD will be retrieved from search (as latest version).
     Expect CRDS data can still be accessed.
     """
-    clear_test_store()
+    clear_test_stores()
     # Load BSD data - CRDS
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
@@ -387,7 +387,7 @@ def test_obs_data_read_two_frequencies():
     Expect hourly data to be found as "latest" version to be retrieved (is this what we want?).
     Expect GCMD data to still be available.
     """
-    clear_test_store()
+    clear_test_stores()
     # Load BSD data - CRDS minutely frequency (and GCWERKS data)
     bsd_data_read_crds()
     # Load BSD data - CRDS hourly frequency
@@ -488,7 +488,7 @@ def test_obs_data_representative_date_overlap():
     This test checks this will no longer raise a KeyError based on this.
     """
 
-    clear_test_store()
+    clear_test_stores()
     bsd_data_read_crds_internal_overlap()
     bsd_data_read_crds_internal_overlap(overwrite=True)
 
@@ -551,7 +551,7 @@ def bsd_data_read_crds_overwrite():
 #     """
 #     Test adding new file for GC with same time points but some different data values
 #     """
-#     clear_test_store()
+#     clear_test_stores()
 #     # Load BSD data - CRDS minutely frequency
 #     bsd_data_read_crds()
 #     # Load BSD data - CRDS hourly frequency

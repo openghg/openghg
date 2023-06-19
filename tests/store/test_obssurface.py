@@ -2,7 +2,7 @@ import json
 
 import pytest
 import xarray as xr
-from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_store
+from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_stores
 from openghg.objectstore import exists, get_bucket
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
@@ -11,7 +11,7 @@ from pandas import Timestamp
 
 
 def test_different_sampling_periods_diff_datasources():
-    clear_test_store()
+    clear_test_stores()
 
     bucket = get_bucket()
 
@@ -67,7 +67,7 @@ def test_same_source_data_same_datasource():
 
 
 def test_read_data(mocker):
-    clear_test_store()
+    clear_test_stores()
     fake_uuids = [f"test-uuid-{i}" for i in range(1, 101)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
@@ -113,7 +113,7 @@ def test_read_data(mocker):
 
 @pytest.mark.parametrize("sampling_period", ["60", 60, "60000000000", "twelve-thousand"])
 def test_read_CRDS_incorrect_sampling_period_raises(sampling_period):
-    clear_test_store()
+    clear_test_stores()
     bucket = get_bucket()
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
@@ -202,7 +202,7 @@ def test_read_CRDS():
 
 
 def test_read_GC():
-    clear_test_store()
+    clear_test_stores()
     bucket = get_bucket()
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
@@ -333,7 +333,7 @@ def test_read_GC():
 
 
 def test_read_cranfield():
-    clear_test_store()
+    clear_test_stores()
     bucket = get_bucket()
 
     data_filepath = get_surface_datapath(filename="THB_hourly_means_test.csv", source_format="Cranfield_CRDS")
@@ -409,7 +409,7 @@ def test_read_openghg_format():
 
 
 def test_read_noaa_raw():
-    clear_test_store()
+    clear_test_stores()
     bucket = get_bucket()
 
     data_filepath = get_surface_datapath(
@@ -489,7 +489,7 @@ def test_read_noaa_obspack():
 
 
 def test_read_thames_barrier():
-    clear_test_store()
+    clear_test_stores()
     bucket = get_bucket()
 
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
@@ -558,7 +558,7 @@ def test_delete_Datasource():
 
 
 def test_add_new_data_correct_datasource():
-    clear_test_store()
+    clear_test_stores()
     bucket = get_bucket()
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.05.C", source_format="GC")

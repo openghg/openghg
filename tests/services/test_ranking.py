@@ -13,7 +13,7 @@
 
 # @pytest.fixture(scope="session")
 # def load_crds(authenticated_user):
-#     clear_test_store()
+#     clear_test_stores()
 
 #     files = [
 #         "hfd.picarro.1minute.100m.min.dat",

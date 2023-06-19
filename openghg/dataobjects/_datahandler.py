@@ -156,7 +156,7 @@ class DataHandler:
         data_objs = define_data_type_classes()
         metakey = data_objs[dtype]._metakey
 
-        with load_metastore(key=metakey) as store:
+        with load_metastore(bucket=bucket, key=metakey) as store:
             for u in uuid:
                 d = Datasource.load(bucket=bucket, uuid=u, shallow=True)
                 # Save a backup of the metadata for now
