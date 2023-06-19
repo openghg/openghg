@@ -380,7 +380,7 @@ class ObsSurface(BaseStore):
             # except Exception:
             #     results["error"][data_filepath.name] = traceback.format_exc()
 
-        # logger.info(f"Completed processing: {data_filepath.name}.")
+            progress.log(f"Completed processing: {data_filepath.name}.")
         # logger.info(f"\tUUIDs: {datasource_uuids}")
 
         # Ensure we explicitly close the metadata store
