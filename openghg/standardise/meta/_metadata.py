@@ -76,6 +76,9 @@ def sync_surface_metadata(
     Returns:
         dict: Copy of metadata updated with attributes
     """
+    from rich.progress import Progress
+
+    progress = Progress()
     meta_copy = deepcopy(metadata)
 
     attr_mismatches = {}
@@ -118,9 +121,14 @@ def sync_surface_metadata(
             pass
 
     if attr_mismatches:
-        mismatch_details = [f" - '{key}', metadata: {values[0]}, attributes: {values[1]}" for key, values in attr_mismatches.items()]
+        mismatch_details = [
+            f" - '{key}', metadata: {values[0]}, attributes: {values[1]}"
+            for key, values in attr_mismatches.items()
+        ]
         mismatch_str = "\n".join(mismatch_details)
-        raise AttrMismatchError(f"Metadata mismatch / value not within tolerance for the following keys:\n{mismatch_str}")
+        raise AttrMismatchError(
+            f"Metadata mismatch / value not within tolerance for the following keys:\n{mismatch_str}"
+        )
 
     default_keys_to_add = metadata_default_keys()
     keys_as_floats = metadata_keys_as_floats()
@@ -134,7 +142,7 @@ def sync_surface_metadata(
             try:
                 meta_copy[key] = attributes[key]
             except KeyError:
-                logger.warning(f"{key} key not in attributes or metadata")
+                progress.log(Warning(f"{key} key not in attributes or metadata"))
             else:
                 if key in keys_as_floats:
                     meta_copy[key] = float(meta_copy[key])

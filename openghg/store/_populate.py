@@ -37,8 +37,11 @@ def add_noaa_obspack(
     yet e.g. aircraft, shipboard, aircorenoaa. These should be updated once
     this functionality has been added.
     """
+    from rich.progress import Progress
 
     # Options which we can process at the moment (ObsSurface)
+    progress = Progress(transient=True)
+
     project_options = {"surface": ["flask", "insitu", "pfp"], "tower": ["insitu"]}
 
     project_names = _create_project_names(project_options)
@@ -81,16 +84,18 @@ def add_noaa_obspack(
     files_with_errors = []
     # Find relevant details for each file and call parse_noaa() function
     processed_summary: Dict[str, Dict] = {}
-    for filepath in files:
-        param = _param_from_filename(filepath)
+    progress.start()
+    task1 = progress.add_task("[red]Downloading...", total=len(files))
+    for filepath_index in range(len(files)):
+        progress.update(task_id=task1, advance=1, refresh=True)
+        param = _param_from_filename(files[filepath_index])
         site = param["site"]
         _project = param["project"]
         measurement_type = param["measurement_type"]
-
         if _project in projects_to_read:
             try:
                 processed = ObsSurface.read_file(
-                    filepath,
+                    files[filepath_index],
                     site=site,
                     measurement_type=measurement_type,
                     network="NOAA",
@@ -98,12 +103,17 @@ def add_noaa_obspack(
                     overwrite=overwrite,
                 )
             except Exception:
-                files_with_errors.append(filepath.name)
+                files_with_errors.append(files[filepath_index].name)
 
         elif _project in project_names_not_implemented:
-            logger.warning(
-                f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
+            progress.log(
+                Warning(
+                    f"Not processing {files[filepath_index].name} - no standardisation for {_project} data implemented yet."
+                )
             )
+            # logger.warning(
+            #     f"Not processing {files[filepath_index].name} - no standardisation for {_project} data implemented yet."
+            # )
             processed = {}
         else:
             processed = {}
@@ -118,7 +128,7 @@ def add_noaa_obspack(
     if files_with_errors:
         err_string = "\n".join(files_with_errors)
         logger.info(f"We were unable to process {len(files_with_errors)} files - these were:\n {err_string}.")
-
+    progress.stop()
     return processed_summary
 
 

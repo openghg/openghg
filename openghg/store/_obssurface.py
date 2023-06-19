@@ -159,7 +159,6 @@ class ObsSurface(BaseStore):
         from openghg.types import SurfaceTypes
         from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
         from rich.progress import Progress
-        from time import sleep
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -236,148 +235,151 @@ class ObsSurface(BaseStore):
         metastore = load_metastore(key=obs._metakey)
 
         # Create a progress bar object using the filepaths, iterate over this below
-        progress_bar = Progress(transient=True)
-        with progress_bar as p:
-            for fp in filepath:
-                if source_format == "GCWERKS":
-                    if not isinstance(fp, tuple):
-                        raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
+        progress = Progress()
+        # with progress_bar as p:
+        for fp in filepath:
+            if source_format == "GCWERKS":
+                if not isinstance(fp, tuple):
+                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
 
-                    try:
-                        data_filepath = Path(fp[0])
-                        precision_filepath = Path(fp[1])
-                    except (ValueError, TypeError):
-                        raise TypeError(
-                            "For GCWERKS data both data and precision filepaths must be given as a tuple."
-                        )
-                else:
-                    data_filepath = Path(fp)
+                try:
+                    data_filepath = Path(fp[0])
+                    precision_filepath = Path(fp[1])
+                except (ValueError, TypeError):
+                    raise TypeError(
+                        "For GCWERKS data both data and precision filepaths must be given as a tuple."
+                    )
+            else:
+                data_filepath = Path(fp)
 
-                file_hash = hash_file(filepath=data_filepath)
-                if file_hash in obs._file_hashes and overwrite is False:
-                    logger.warning(
+            file_hash = hash_file(filepath=data_filepath)
+            if file_hash in obs._file_hashes and overwrite is False:
+                progress.log(
+                    Warning(
                         "This file has been uploaded previously with the filename : "
                         f"{obs._file_hashes[file_hash]} - skipping."
                     )
-                    break
+                )
+                break
 
-                # Define required input parameters for parser function
-                required_parameters = {
-                    "data_filepath": data_filepath,
-                    "site": site,
-                    "network": network,
-                    "inlet": inlet,
-                    "instrument": instrument,
-                    "sampling_period": sampling_period_seconds,
-                    "measurement_type": measurement_type,
-                    "site_filepath": site_filepath,
-                }
-                if source_format == "GCWERKS":
-                    required_parameters["precision_filepath"] = precision_filepath
+            # Define required input parameters for parser function
+            required_parameters = {
+                "data_filepath": data_filepath,
+                "site": site,
+                "network": network,
+                "inlet": inlet,
+                "instrument": instrument,
+                "sampling_period": sampling_period_seconds,
+                "measurement_type": measurement_type,
+                "site_filepath": site_filepath,
+            }
+            if source_format == "GCWERKS":
+                required_parameters["precision_filepath"] = precision_filepath
 
-                # Collect together optional parameters (not required but
-                # may be accepted by underlying parser function)
-                optional_parameters = {"update_mismatch": update_mismatch}
-                # TODO: extend optional_parameters to include kwargs when added
+            # Collect together optional parameters (not required but
+            # may be accepted by underlying parser function)
+            optional_parameters = {"update_mismatch": update_mismatch}
+            # TODO: extend optional_parameters to include kwargs when added
 
-                input_parameters = required_parameters.copy()
+            input_parameters = required_parameters.copy()
 
-                # Find parameters that parser_fn accepts (must accept all required arguments already)
-                signature = inspect.signature(parser_fn)
-                fn_accepted_parameters = [param.name for param in signature.parameters.values()]
+            # Find parameters that parser_fn accepts (must accept all required arguments already)
+            signature = inspect.signature(parser_fn)
+            fn_accepted_parameters = [param.name for param in signature.parameters.values()]
 
-                # Check if optional parameters are present in function call and only use those which are.
-                for param, param_value in optional_parameters.items():
-                    if param in fn_accepted_parameters:
-                        input_parameters[param] = param_value
-                    else:
-                        logger.warning(
+            # Check if optional parameters are present in function call and only use those which are.
+            for param, param_value in optional_parameters.items():
+                if param in fn_accepted_parameters:
+                    input_parameters[param] = param_value
+                else:
+                    progress.log(
+                        Warning(
                             f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
                             f"This is not accepted by the current standardisation function: {parser_fn}"
                         )
+                    )
 
-                # Call appropriate standardisation function with input parameters
-                data = parser_fn(**input_parameters)
+            # Call appropriate standardisation function with input parameters
+            data = parser_fn(**input_parameters)
 
-                # Current workflow: if any species fails, whole filepath fails
-                for key, value in data.items():
-                    species = key.split("_")[0]
-                    try:
-                        ObsSurface.validate_data(value["data"], species=species)
-                    except ValueError:
-                        logger.error(
-                            f"Unable to validate and store data from file: {data_filepath.name}.",
-                            f" Problem with species: {species}\n",
-                        )
-                        validated = False
-                        break
-                else:
-                    validated = True
+            # Current workflow: if any species fails, whole filepath fails
+            for key, value in data.items():
+                species = key.split("_")[0]
+                try:
+                    ObsSurface.validate_data(value["data"], species=species)
+                except ValueError:
+                    logger.error(
+                        f"Unable to validate and store data from file: {data_filepath.name}.",
+                        f" Problem with species: {species}\n",
+                    )
+                    validated = False
+                    break
+            else:
+                validated = True
 
-                if not validated:
-                    continue
+            if not validated:
+                continue
 
-                # Alternative workflow: Would only stops certain species within a
-                # file being written to the object store.
-                # to_remove = []
-                # for key, value in data.items():
-                #     species = key.split('_')[0]
-                #     try:
-                #         ObsSurface.validate_data(value["data"], species=species)
-                #     except ValueError:
-                #         print(f"WARNING: standardised data for '{source_format}' is not in expected OpenGHG format.")
-                #         print(f"Check data for {species}")
-                #         print(value["data"])
-                #         print("Not writing to object store.")
-                #         to_remove.append(key)
-                #
-                # for remove in to_remove:
-                #     data.pop(remove)
+            # Alternative workflow: Would only stops certain species within a
+            # file being written to the object store.
+            # to_remove = []
+            # for key, value in data.items():
+            #     species = key.split('_')[0]
+            #     try:
+            #         ObsSurface.validate_data(value["data"], species=species)
+            #     except ValueError:
+            #         print(f"WARNING: standardised data for '{source_format}' is not in expected OpenGHG format.")
+            #         print(f"Check data for {species}")
+            #         print(value["data"])
+            #         print("Not writing to object store.")
+            #         to_remove.append(key)
+            #
+            # for remove in to_remove:
+            #     data.pop(remove)
 
-                required_keys = (
-                    "species",
-                    "site",
-                    "sampling_period",
-                    "station_long_name",
-                    "inlet",
-                    "instrument",
-                    "network",
-                    "source_format",
-                    "data_source",
-                    "icos_data_level",
-                    "data_type",
-                )
+            required_keys = (
+                "species",
+                "site",
+                "sampling_period",
+                "station_long_name",
+                "inlet",
+                "instrument",
+                "network",
+                "source_format",
+                "data_source",
+                "icos_data_level",
+                "data_type",
+            )
 
-                lookup_results = datasource_lookup(
-                    metastore=metastore, data=data, required_keys=required_keys, min_keys=5
-                )
+            lookup_results = datasource_lookup(
+                metastore=metastore, data=data, required_keys=required_keys, min_keys=5
+            )
 
-                # Create Datasources, save them to the object store and get their UUIDs
-                data_type = "surface"
-                datasource_uuids = assign_data(
-                    data_dict=data,
-                    lookup_results=lookup_results,
-                    overwrite=overwrite,
-                    data_type=data_type,
-                )
+            # Create Datasources, save them to the object store and get their UUIDs
+            data_type = "surface"
+            datasource_uuids = assign_data(
+                data_dict=data,
+                lookup_results=lookup_results,
+                overwrite=overwrite,
+                data_type=data_type,
+            )
 
-                update_keys = ["start_date", "end_date", "latest_version"]
-                data = update_metadata(data_dict=data, uuid_dict=datasource_uuids, update_keys=update_keys)
+            update_keys = ["start_date", "end_date", "latest_version"]
+            data = update_metadata(data_dict=data, uuid_dict=datasource_uuids, update_keys=update_keys)
 
-                results["processed"][data_filepath.name] = datasource_uuids
+            results["processed"][data_filepath.name] = datasource_uuids
 
-                # Record the Datasources we've created / appended to
-                obs.add_datasources(
-                    uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys
-                )
+            # Record the Datasources we've created / appended to
+            obs.add_datasources(
+                uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys
+            )
 
-                # Store the hash as the key for easy searching, store the filename as well for
-                # ease of checking by user
-                obs._file_hashes[file_hash] = data_filepath.name
-                # except Exception:
-                #     results["error"][data_filepath.name] = traceback.format_exc()
-            for i in p.track(range(len(filepath)), description=f"Processing: {data_filepath.name}."):
-                sleep(1)
+            # Store the hash as the key for easy searching, store the filename as well for
+            # ease of checking by user
+            obs._file_hashes[file_hash] = data_filepath.name
+            # except Exception:
+            #     results["error"][data_filepath.name] = traceback.format_exc()
+
         # logger.info(f"Completed processing: {data_filepath.name}.")
         # logger.info(f"\tUUIDs: {datasource_uuids}")
 
