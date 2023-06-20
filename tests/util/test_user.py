@@ -38,7 +38,7 @@ def test_create_config(monkeypatch, mocker, tmpdir):
 
 
 def test_create_config_migrate(mocker, monkeypatch, tmp_path, caplog):
-    monkeypatch.setitem(os.environ, 'HOME', str(tmp_path))
+    monkeypatch.setitem(os.environ, "HOME", str(tmp_path))
 
     # make config file at tmp_path/.config/openghg/openghg.conf
     mock_old_config_path = tmp_path / ".config" / "openghg" / "openghg.conf"
@@ -52,7 +52,8 @@ def test_create_config_migrate(mocker, monkeypatch, tmp_path, caplog):
     create_config()
 
     assert f"create_config moved configuration file to {str(mock_new_config_path)}" in caplog.text
-    assert  mock_new_config_path.read_text() == mock_config_content
+    assert mock_new_config_path.read_text() == mock_config_content
+
 
 def test_check_config(mock_config, mocker, caplog):
     with pytest.raises(ValueError):
@@ -69,7 +70,7 @@ def test_check_config(mock_config, mocker, caplog):
 
 
 def test_migrate_config_success(mocker, monkeypatch, tmp_path):
-    monkeypatch.setitem(os.environ, 'HOME', str(tmp_path))
+    monkeypatch.setitem(os.environ, "HOME", str(tmp_path))
 
     # make config file at tmp_path/.config/openghg/openghg.conf
     mock_old_config_path = tmp_path / ".config" / "openghg" / "openghg.conf"
@@ -83,14 +84,14 @@ def test_migrate_config_success(mocker, monkeypatch, tmp_path):
     migrate_config()
 
     assert not mock_old_config_path.exists()
-    assert not mock_old_config_path.parent.exists() # openghg dir deleted
-    assert mock_old_config_path.parent.parent.exists() # don't delete .config
+    assert not mock_old_config_path.parent.exists()  # openghg dir deleted
+    assert mock_old_config_path.parent.parent.exists()  # don't delete .config
     assert mock_new_config_path.exists()
     assert mock_new_config_path.read_text() == mock_config_content
 
 
 def test_migrate_config_fail(monkeypatch, tmp_path):
-    monkeypatch.setitem(os.environ, 'HOME', str(tmp_path))
+    monkeypatch.setitem(os.environ, "HOME", str(tmp_path))
 
     with pytest.raises(FileNotFoundError):
         migrate_config()
