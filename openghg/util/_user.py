@@ -12,6 +12,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 openghg_config_filename = "openghg.conf"
 
+
 # @lru_cache
 def get_user_id() -> str:
     """Return the user's ID
@@ -35,7 +36,7 @@ def get_default_objectstore_path() -> Path:
 
 # @lru_cache
 def get_user_config_path() -> Path:
-    """ Returns path to user config file.
+    """Returns path to user config file.
 
     This file is created in the user's home directory
     in  ~/.ghgconfig/openghg/user.conf on Linux / macOS or
@@ -152,7 +153,8 @@ def read_local_config() -> Dict:
         except FileNotFoundError as e:
             raise FileNotFoundError(
                 "Unable to read configuration file, please see the installation instructions \
-                or run openghg --quickstart") from e
+                or run openghg --quickstart"
+            ) from e
 
     config: Dict = toml.loads(config_path.read_text())
     return config
@@ -192,11 +194,11 @@ def migrate_config() -> None:
     """
     old_config_path = Path.home().joinpath(".config", "openghg", openghg_config_filename)
 
-    if not old_config_path.exists() or  platform.system() == "Windows":
+    if not old_config_path.exists() or platform.system() == "Windows":
         raise FileNotFoundError
     else:
         new_config_path = get_user_config_path()
         new_config_path.parent.mkdir(parents=True)
         shutil.move(str(old_config_path), str(new_config_path))
         logger.info(f"Moved user config file from {str(old_config_path)} to {str(new_config_path)}.")
-        shutil.rmtree(old_config_path.parent) # remove "openghg" dir from ~/.config
+        shutil.rmtree(old_config_path.parent)  # remove "openghg" dir from ~/.config
