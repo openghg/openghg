@@ -40,7 +40,7 @@ def add_noaa_obspack(
     from rich.progress import Progress
 
     # Options which we can process at the moment (ObsSurface)
-    progress = Progress(transient=True)
+    progress = Progress()
 
     project_options = {"surface": ["flask", "insitu", "pfp"], "tower": ["insitu"]}
 
