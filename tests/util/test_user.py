@@ -18,11 +18,14 @@ def test_get_user_id(mock_config):
     assert user_id == "test-uuid-100"
 
 
-def test_create_config(mocker, tmpdir):
+def test_create_config(monkeypatch, mocker, tmpdir):
     mock_config_path = Path(tmpdir).joinpath("mock_config.conf")
     mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_config_path)
     mock_uuids = [f"test-uuid-{x}" for x in range(100, 110)]
     mocker.patch("openghg.util._user.uuid.uuid4", side_effect=mock_uuids)
+
+    # monkeypatch home dir to avoid confusing 'migrate_config'
+    monkeypatch.setitem(os.environ, "HOME", str(tmpdir))
 
     create_config(silent=True)
 
@@ -33,6 +36,23 @@ def test_create_config(mocker, tmpdir):
     assert config["user_id"] == "test-uuid-100"
     assert config["object_store"]["local_store"] == str(user_obj_expected)
 
+
+def test_create_config_migrate(mocker, monkeypatch, tmp_path, caplog):
+    monkeypatch.setitem(os.environ, 'HOME', str(tmp_path))
+
+    # make config file at tmp_path/.config/openghg/openghg.conf
+    mock_old_config_path = tmp_path / ".config" / "openghg" / "openghg.conf"
+    mock_old_config_path.parent.mkdir(parents=True)
+    mock_config_content = "This is just a mock config file."
+    mock_old_config_path.write_text(mock_config_content)
+
+    mock_new_config_path = tmp_path / ".ghgconfig" / "openghg" / "openghg.conf"
+    mocker.patch("openghg.util._user.get_user_config_path", return_value=mock_new_config_path)
+
+    create_config()
+
+    assert f"create_config moved configuration file to {str(mock_new_config_path)}" in caplog.text
+    assert  mock_new_config_path.read_text() == mock_config_content
 
 def test_check_config(mock_config, mocker, caplog):
     with pytest.raises(ValueError):

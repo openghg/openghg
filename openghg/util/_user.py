@@ -106,30 +106,35 @@ def create_config(silent: bool = False) -> None:
         except (KeyError, ValueError):
             config["user_id"] = str(uuid.uuid4())
             updated = True
+
+        if updated:
+            logger.info(f"Updated configuration written to {user_config_path}")
+            user_config_path.write_text(toml.dumps(config))
     else:
-        updated = True
-        default_objstore_path = get_default_objectstore_path()
+        try:
+            # if config file is in ~/.config, move it
+            migrate_config()
+        except FileNotFoundError:  # no config found
+            updated = True
+            default_objstore_path = get_default_objectstore_path()
 
-        obj_store_path = default_objstore_path
-        if not silent:
-            obj_store_input = input(f"Enter path for object store (default {default_objstore_path}): ")
-            if obj_store_input:
-                obj_store_path = Path(obj_store_input).expanduser().resolve()
+            obj_store_path = default_objstore_path
+            if not silent:
+                obj_store_input = input(f"Enter path for object store (default {default_objstore_path}): ")
+                if obj_store_input:
+                    obj_store_path = Path(obj_store_input).expanduser().resolve()
 
-        user_config_path.parent.mkdir(parents=True, exist_ok=True)
+            user_config_path.parent.mkdir(parents=True, exist_ok=True)
 
-        user_id = str(uuid.uuid4())
-        config = {"object_store": {"local_store": str(obj_store_path)}, "user_id": user_id}
+            user_id = str(uuid.uuid4())
+            config = {"object_store": {"local_store": str(obj_store_path)}, "user_id": user_id}
 
-        obj_store_path.mkdir(exist_ok=True)
+            obj_store_path.mkdir(exist_ok=True)
 
-        logger.info(f"Creating config at {str(user_config_path)}\n")
-
-    if updated:
-        logger.info(f"Configuration written to {user_config_path}")
-        user_config_path.write_text(toml.dumps(config))
-    else:
-        logger.info("Configuration unchanged.")
+            logger.info(f"Creating config at {str(user_config_path)}\n")
+            user_config_path.write_text(toml.dumps(config))
+        else:
+            logger.info(f"create_config moved configuration file to {str(user_config_path)}\n")
 
 
 # @lru_cache
