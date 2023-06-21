@@ -28,6 +28,19 @@ class DataHandler:
     def __bool__(self) -> bool:
         return bool(self.metadata)
 
+    def _check_bucket(self, bucket: str) -> None:
+        """Check if bucket is writable, raises error if it isn't.
+
+        TODO - update to use bucket (store) name.
+
+        Args:
+            bucket: Local bucket path
+        Returns:
+            None
+        """
+        if bucket not in self._writable_buckets:
+            raise ObjectStoreError(f"You do not have write access to {bucket}")
+
     def _check_datatypes(self, uuid: Union[str, List]) -> str:
         """Check the UUIDs are correct and ensure they all
         belong to a single data type
