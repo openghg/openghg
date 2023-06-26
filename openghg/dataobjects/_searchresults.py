@@ -20,6 +20,7 @@ class SearchResults:
     Args:
         keys: Dictionary of keys keyed by Datasource UUID
         metadata: Dictionary of metadata keyed by Datasource UUID
+        start_result: ?
     """
 
     def __init__(
@@ -130,7 +131,6 @@ class SearchResults:
             sort: Sort by time. Note that this may be very memory hungry for large Datasets.
             elevate_inlet: Elevate inlet to a variable within the Dataset, useful
             for ranked data.
-
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """

@@ -84,19 +84,18 @@ def get_writable_bucket(name: Optional[str] = None) -> str:
 
     if len(writable_buckets) == 1:
         return next(iter(writable_buckets.values()))
-    elif len(writable_buckets) > 1 and name is None:
+    elif name is not None:
+        try:
+            bucket_path = writable_buckets[name]
+        except KeyError:
+            raise ObjectStoreError(
+                f"Invalid object store name, stores we can write to are: {', '.join(writable_buckets)}"
+            )
+        return bucket_path
+    else:
         raise ObjectStoreError(
             f"More than one writable store, stores we can write to are: {', '.join(writable_buckets)}."
         )
-
-    try:
-        bucket_path = writable_buckets[name]
-    except KeyError:
-        raise ObjectStoreError(
-            f"Invalid object store name, stores we can write to are: {', '.join(writable_buckets)}"
-        )
-
-    return bucket_path
 
 
 def get_tutorial_store_path() -> Path:
@@ -309,12 +308,23 @@ def exists(bucket: str, key: str) -> bool:
     return len(names) > 0
 
 
-def get_bucket() -> str:
-    """Find and return the local object store path (bucket)
+def get_bucket(name: Optional[str] = None) -> str:
+    """Find and return the local object store path. This will return
+    the path to the user's local object store if no name is given.
 
+    Args:
+        name: Object store name in config file
     Returns:
         str: Path to object store
     """
+    config = read_local_config()
+
+    if name is not None:
+        try:
+            return config["object_store"][name]["path"]
+        except KeyError:
+            raise ObjectStoreError("Invalid object store name.")
+
     tutorial_store = os.getenv("OPENGHG_TUT_STORE")
 
     if tutorial_store is not None:

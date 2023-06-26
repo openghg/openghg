@@ -124,7 +124,7 @@ class BaseStore:
             # Add the dataframe to the datasource
             datasource.add_data(metadata=metadata, data=_data, overwrite=overwrite, data_type=data_type)
             # Save Datasource to object store
-            datasource.save()
+            datasource.save(bucket=self._bucket)
 
             new_datasource = uuid is False
             uuids[key] = {"uuid": datasource.uuid(), "new": new_datasource}

@@ -1,6 +1,7 @@
 import pytest
 from helpers import get_surface_datapath
 from openghg.retrieve import search
+from openghg.standardise import standardise_surface
 from openghg.objectstore import get_bucket
 from openghg.store import ObsSurface
 
@@ -13,17 +14,15 @@ def load_CRDS():
     bsd_108m = get_surface_datapath("bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
     bsd_248m = get_surface_datapath("bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
-    bucket = get_bucket()
-
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(filepath=tac_100m, source_format="CRDS", site="tac", network="DECC")
-        obs.read_file(filepath=hfd_50m, source_format="CRDS", site="hfd", network="DECC")
-        obs.read_file(
-            filepath=[bsd_42m, bsd_108m, bsd_248m], source_format="CRDS", site="bsd", network="DECC"
-        )
-
-def test_retrieve_single_species():
-    results = search(site="bsd", inlet="108m", species="co2")
+    standardise_surface(filepaths=tac_100m, source_format="CRDS", site="tac", network="DECC", store="user")
+    standardise_surface(filepaths=hfd_50m, source_format="CRDS", site="hfd", network="DECC", store="user")
+    standardise_surface(
+        filepaths=[bsd_42m, bsd_108m, bsd_248m],
+        source_format="CRDS",
+        site="bsd",
+        network="DECC",
+        store="user",
+    )
 
 
 def test_retrieve_all():

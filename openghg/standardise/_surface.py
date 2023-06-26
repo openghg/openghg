@@ -152,6 +152,7 @@ def standardise_surface(
                 verify_site_code=verify_site_code,
                 site_filepath=site_filepath,
                 update_mismatch=update_mismatch,
+                store=store,
             )
 
         return results

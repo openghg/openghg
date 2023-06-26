@@ -467,7 +467,7 @@ class Datasource:
         return period
 
     @staticmethod
-    def exists(datasource_id: str, bucket: Optional[str] = None) -> bool:
+    def exists(datasource_id: str, bucket: str) -> bool:
         """Check if a datasource with this ID is already stored in the object store
 
         Args:
@@ -475,10 +475,7 @@ class Datasource:
         Returns:
             bool: True if Datasource exists
         """
-        from openghg.objectstore import exists, get_bucket
-
-        if bucket is None:
-            bucket = get_bucket()
+        from openghg.objectstore import exists
 
         key = f"{Datasource._datasource_root}/uuid/{datasource_id}"
 
@@ -562,7 +559,7 @@ class Datasource:
 
         return d
 
-    def save(self, bucket: Optional[str] = None) -> None:
+    def save(self, bucket: str) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
@@ -572,12 +569,8 @@ class Datasource:
         """
         from copy import deepcopy
         from pathlib import Path
-
-        from openghg.objectstore import get_bucket, set_object_from_json
+        from openghg.objectstore import set_object_from_json
         from openghg.util import timestamp_now
-
-        if bucket is None:
-            bucket = get_bucket()
 
         if self._data:
             # Ensure we have the latest key
