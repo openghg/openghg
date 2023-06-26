@@ -54,7 +54,7 @@ def get_user_config_path() -> Path:
 
         config_path = Path(appdata_path).joinpath("openghg", openghg_config_filename)
     elif user_platform in ("Linux", "Darwin"):
-        config_path = Path.home().joinpath(".ghgconfig", "openghg", openghg_config_filename)
+        config_path = Path.home().joinpath(".openghg", openghg_config_filename)
     else:
         raise ValueError(f"Unknown platform: {user_platform}")
 
@@ -188,7 +188,7 @@ def check_config() -> None:
 
 
 def migrate_config() -> None:
-    """If user config file is in ~/.config, move it to ~/.ghgconfig.
+    """If user config file is in ~/.config, move it to ~/.openghg.
 
     If no config is found in ~/.config or system is Windows, raise FileNotFoundError.
     """
