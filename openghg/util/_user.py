@@ -128,7 +128,10 @@ def create_config(silent: bool = False) -> None:
             user_config_path.parent.mkdir(parents=True, exist_ok=True)
 
             user_id = str(uuid.uuid4())
-            config = {"object_store": {"local_store": str(obj_store_path)}, "user_id": user_id}
+            config = {
+                "object_store": {"local_store": str(obj_store_path)},
+                "user_id": user_id,
+            }
 
             obj_store_path.mkdir(exist_ok=True)
 
@@ -191,6 +194,9 @@ def migrate_config() -> None:
     """If user config file is in ~/.config, move it to ~/.openghg.
 
     If no config is found in ~/.config or system is Windows, raise FileNotFoundError.
+
+    Returns:
+        None
     """
     old_config_path = Path.home().joinpath(".config", "openghg", openghg_config_filename)
 
