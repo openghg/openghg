@@ -1,11 +1,15 @@
+from __future__ import annotations
 import logging
 from typing import List, Optional, Union, Dict, Tuple
 import plotly.graph_objects as go
 import numpy as np
 import base64
+from typing import TYPE_CHECKING
 
-from openghg.dataobjects import ObsData
 from openghg.util import get_species_info, synonyms, get_datapath
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import ObsData
 
 
 logger = logging.getLogger("openghg.plotting")
@@ -15,7 +19,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 def _latex2html(latex_string: str) -> str:
     """Replace latex sub/superscript formatting with html.
     Written because the latex formatting in Plotly seems inconsistent
-    (works in Notebooks, but not VC Code at the moment).
+    (works in Notebooks, but not VSCode at the moment).
 
     Args:
         latex_string: String containing LaTeX math mode (including $$)
@@ -42,7 +46,7 @@ def _latex2html(latex_string: str) -> str:
 
 
 def _plot_remove_gaps(
-    x_data: np.ndarray, y_data: np.ndarray, gap: Optional[int] = 24 * 60 * 60 * 1000000000
+    x_data: np.ndarray, y_data: np.ndarray, gap: Optional[int] = None
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Insert NaNs between big gaps in the data.
     Prevents connecting lines being drawn
@@ -50,11 +54,13 @@ def _plot_remove_gaps(
     Args:
         x_data: plot timeseries (numpy timestamp)
         y_data: data array
-        gap: gap beyond which a NaN is introducted (nanoseconds, default=1 day)
-
+        gap: gap beyond which a NaN is introducted (nanoseconds, defaults to 1 day)
     Returns:
         x, y: x and y arrays to plot
     """
+    if gap is None:
+        # ns in a day
+        gap = 24 * 60 * 60 * 1000000000
 
     gap_idx = np.where(np.diff(x_data.astype(int)) > gap)[0]
     x_data_plot = np.insert(x_data, gap_idx + 1, values=x_data[0])
@@ -69,11 +75,9 @@ def _plot_legend_position(ascending: bool) -> Tuple[Dict, Dict]:
 
     Args:
         ascending: Is the data ascending
-
     Returns:
         Dict, Dict: Plotly legend and logo position parameters
     """
-
     if ascending:
         legend_pos = {"yanchor": "top", "xanchor": "left", "y": 0.99, "x": 0.01}
         logo_pos = {"yanchor": "bottom", "xanchor": "right", "y": 0.01, "x": 0.99}
@@ -91,12 +95,12 @@ def _plot_logo(
 
     Args:
         logo_pos: Dictionary containing the position of the logo
-
     Returns:
         dict: Dictionary containing logo + position parameters
     """
+    logo_bytes = get_datapath("OpenGHG_Logo_NoText_transparent_200x200.png").read_bytes()
+    logo = base64.b64encode(logo_bytes)
 
-    logo = base64.b64encode(open(get_datapath("OpenGHG_Logo_NoText_transparent_200x200.png"), "rb").read())
     logo_dict = dict(
         source="data:image/png;base64,{}".format(logo.decode()),
         xref="x domain",
