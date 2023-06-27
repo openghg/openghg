@@ -4,7 +4,7 @@ from json import dumps
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Dict, Iterator, Union, Optional
-
+from openghg.plotting import plot_timeseries as general_plot_timeseries
 import plotly.graph_objects as go
 
 from ._basedata import _BaseData
@@ -87,15 +87,12 @@ class ObsData(_BaseData, abc.Mapping):
         logo: Optional[bool] = True,
     ) -> go.Figure:
         """Plot a timeseries"""
-        from openghg.plotting import plot_timeseries as general_plot_timeseries
 
-        fig = general_plot_timeseries(
-            self,
+        return general_plot_timeseries(
+            data=self,
             title=title,
             xlabel=xlabel,
             ylabel=ylabel,
             units=units,
             logo=logo,
         )
-
-        return fig
