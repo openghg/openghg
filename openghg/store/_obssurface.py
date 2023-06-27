@@ -236,7 +236,7 @@ class ObsSurface(BaseStore):
 
         # Create a progress bar object using the filepaths, iterate over this below
         progress = Progress()
-        # with progress_bar as p:
+
         for fp in filepath:
             if source_format == "GCWERKS":
                 if not isinstance(fp, tuple):
