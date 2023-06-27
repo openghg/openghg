@@ -40,8 +40,6 @@ def add_noaa_obspack(
     from rich.progress import Progress
 
     # Options which we can process at the moment (ObsSurface)
-    progress = Progress()
-
     project_options = {"surface": ["flask", "insitu", "pfp"], "tower": ["insitu"]}
 
     project_names = _create_project_names(project_options)
@@ -84,8 +82,12 @@ def add_noaa_obspack(
     files_with_errors = []
     # Find relevant details for each file and call parse_noaa() function
     processed_summary: Dict[str, Dict] = {}
+
+    # Object to generate progress bar
+    progress = Progress()
     progress.start()
     task1 = progress.add_task("[red]Downloading...", total=len(files))
+
     for filepath_index in range(len(files)):
         progress.update(task_id=task1, advance=1, refresh=True)
         param = _param_from_filename(files[filepath_index])
@@ -111,9 +113,6 @@ def add_noaa_obspack(
                     f"Not processing {files[filepath_index].name} - no standardisation for {_project} data implemented yet."
                 )
             )
-            # logger.warning(
-            #     f"Not processing {files[filepath_index].name} - no standardisation for {_project} data implemented yet."
-            # )
             processed = {}
         else:
             processed = {}
@@ -130,6 +129,8 @@ def add_noaa_obspack(
         progress.log(
             f"[red]We were unable to process {len(files_with_errors)} files - these were:\n {err_string}."
         )
+
+    # Stops the progress bar task
     progress.stop()
     return processed_summary
 
