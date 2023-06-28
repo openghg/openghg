@@ -22,9 +22,9 @@ class SearchResults:
         metadata: Dictionary of metadata keyed by Datasource UUID
     """
 
-    def __init__(self, keys: Optional[Dict] = None,
-                 metadata: Optional[Dict] = None,
-                 start_result: Optional[str] = None):
+    def __init__(
+        self, keys: Optional[Dict] = None, metadata: Optional[Dict] = None, start_result: Optional[str] = None
+    ):
         if metadata is not None:
             self.metadata = metadata
         else:
@@ -39,11 +39,12 @@ class SearchResults:
                     metadata[uuid_key] = {key: uuid_metadata[key] for key in reorder}
 
         if metadata is not None:
-            self.results = (
-                DataFrame.from_dict(data=metadata, orient="index").reset_index().drop(columns="index")
-            )
+            data = DataFrame.from_dict(data=metadata).reset_index().to_dict(orient="list")
+
+            self.results = SearchResults.console_output(data)  # ignore
+            # self.results = (DataFrame.from_dict(data=metadata, orient="index").reset_index().drop(columns="index"))
         else:
-            self.results = {}
+            self.results = {}  # type: ignore
 
         if keys is not None:
             self.key_data = keys
@@ -249,3 +250,38 @@ class SearchResults:
             return recombine_datasets(
                 keys=keys, sort=sort, elevate_inlet=elevate_inlet, attrs_to_check=attrs_to_check
             )
+
+    @staticmethod
+    def console_output(data: Dict) -> None:
+        """
+        Prints a dictionary as a Rich Table in the console.
+
+        Args:
+            data (Dict): The dictionary containing the data to be displayed in the table.
+
+        Returns:
+            None: This function does not return any value.
+
+        Raises:
+            None: This function does not raise any exceptions.
+        """
+        from rich.console import Console
+        from rich.table import Table, box
+
+        # Create a Rich Table
+        table = Table(show_header=False, header_style="bold Magenta", box=box.HORIZONTALS)
+
+        # Adding the headers
+        table.add_column("Columns", justify="left", style="cyan")
+        for column in data.keys():
+            table.add_column(column, justify="left")
+
+        # Adding the rows
+        num_rows = len(list(data.values())[0])
+        for i in range(num_rows):
+            row_values = [str(list(data[column])[i]) for column in data.keys()]
+            table.add_row(str(i + 1), *row_values)
+
+        # Render the table
+        console = Console()
+        console.print(table)
