@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, Literal, Optional, Union
 
 from openghg.cloud import create_file_package, create_post_dict
-from openghg.objectstore import get_bucket
+from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
 
 
@@ -210,7 +210,8 @@ def standardise_column(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_bucket(name=store)
+        bucket = get_writable_bucket(name=store)
+
         with ObsColumn(bucket=bucket) as obs_col:
             result = obs_col.read_file(
                 filepath=filepath,
@@ -282,7 +283,7 @@ def standardise_bc(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_bucket(name=store)
+        bucket = get_writable_bucket(name=store)
         with BoundaryConditions(bucket=bucket) as bcs:
             result = bcs.read_file(
                 filepath=filepath,
@@ -378,7 +379,7 @@ def standardise_footprint(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_bucket(name=store)
+        bucket = get_writable_bucket(name=store)
         with Footprints(bucket=bucket) as fps:
             result = fps.read_file(
                 filepath=filepath,
@@ -468,7 +469,7 @@ def standardise_flux(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_bucket(name=store)
+        bucket = get_writable_bucket(name=store)
         with Emissions(bucket=bucket) as ems:
             return ems.read_file(
                 filepath=filepath,

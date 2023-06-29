@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 import logging
-from openghg.objectstore import get_bucket
+from openghg.objectstore import get_writable_bucket
 from openghg.store import ObsSurface
 
 logger = logging.getLogger("openghg.store")
@@ -82,7 +82,7 @@ def add_noaa_obspack(
     if not files:
         files = _find_noaa_files(data_directory=data_directory, ext=".txt")
 
-    bucket = get_bucket(name=store)
+    bucket = get_writable_bucket(name=store)
 
     # TODO - remove this once we can ensure all files will be processed correctly
     files_with_errors = []

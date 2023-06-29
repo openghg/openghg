@@ -42,3 +42,4 @@ else:
     )
 
 from ._encoding import bytes_to_string, datetime_to_datetime, get_datetime_now, string_to_bytes
+from ._integrity import integrity_check
