@@ -9,9 +9,10 @@ import pytest
 import xarray as xr
 from addict import Dict as aDict
 from helpers import get_surface_datapath, get_footprint_datapath
-from openghg.objectstore import get_bucket, get_object_names
+from openghg.objectstore import get_bucket, get_object_names, delete_object
 from openghg.standardise.surface import parse_crds
 from openghg.store.base import Datasource
+from openghg.types import ObjectStoreError
 from openghg.util import create_daterange_str, daterange_overlap, pairwise, timestamp_tzaware
 
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
@@ -488,3 +489,27 @@ def test_key_date_compare():
 
     with pytest.raises(ValueError):
         in_date = d.key_date_compare(keys=error_key, start_date=start, end_date=end)
+
+def test_integrity_check(data, bucket):
+    d = Datasource()
+
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    assert ch4_data["ch4"][0] == pytest.approx(1959.55)
+    assert ch4_data["ch4_variability"][0] == pytest.approx(0.79)
+    assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
+
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+    d.save(bucket=bucket)
+
+    uid = d.uuid()
+
+    d = Datasource.load(bucket=bucket, uuid=uid)
+    d.integrity_check()
+
+    for key in d.data_keys():
+        delete_object(bucket=bucket, key=key)
+
+    with pytest.raises(ObjectStoreError):
+        d.integrity_check()

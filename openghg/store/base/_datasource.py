@@ -969,3 +969,18 @@ class Datasource:
             str: Latest version
         """
         return self._latest_version
+
+    def integrity_check(self) -> None:
+        """Checks to ensure all data stored by this Datasource exists in the object store.
+
+        Returns:
+            None
+        """
+        from openghg.objectstore import exists
+
+        for version, key_data in self._data_keys.items():
+            for key in key_data["keys"].values():
+                if not exists(bucket=self._bucket, key=key):
+                    raise ObjectStoreError(
+                        f"The key {key} for version {version} of this Datasource does not exist in the object store {self._bucket}"
+                    )
