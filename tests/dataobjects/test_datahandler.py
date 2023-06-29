@@ -1,7 +1,7 @@
 from openghg.store import data_handler_lookup, ObsSurface, Footprints
 from openghg.store.base import Datasource
 from openghg.retrieve import search_surface
-from openghg.standardise import standardise_surface
+from openghg.standardise import standardise_surface, standardise_footprint
 from openghg.objectstore import get_bucket
 
 import pytest
@@ -21,7 +21,7 @@ def add_data(mocker):
     mocker.patch("uuid.uuid4", side_effect=mock_uuids)
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
 
-    standardise_surface(filepaths=one_min, site="tac", network="decc", source_format="CRDS")
+    standardise_surface(filepaths=one_min, site="tac", network="decc", source_format="CRDS", store="user")
 
 
 @pytest.fixture()
@@ -39,18 +39,31 @@ def footprint_read(mocker):
     domain = "EUROPE"
     model = "test_model"
 
-    bucket = get_bucket()
-    with Footprints(bucket=bucket) as fps:
-        fps.read_file(
-            filepath=datapath,
-            site=site,
-            model=model,
-            network=network,
-            height=height,
-            domain=domain,
-            period="monthly",
-            high_spatial_res=True,
-        )
+    # bucket = get_bucket(name="user")
+    # with Footprints(bucket=bucket) as fps:
+    #     fps.read_file(
+    #         filepath=datapath,
+    #         site=site,
+    #         model=model,
+    #         network=network,
+    #         height=height,
+    #         domain=domain,
+    #         period="monthly",
+    #         high_spatial_res=True,
+    #         # store="user",
+    #     )
+
+    standardise_footprint(
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        period="monthly",
+        high_spatial_res=True,
+        store="user",
+    )
 
 
 def test_footprint_metadata_modification(footprint_read):

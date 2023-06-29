@@ -587,11 +587,10 @@ class ObsSurface(BaseStore):
         Returns:
             None
         """
-        from openghg.objectstore import delete_object, get_bucket
+        from openghg.objectstore import delete_object
         from openghg.store.base import Datasource
         from tinydb import where
 
-        bucket = get_bucket()
         # Load the Datasource and get all its keys
         # iterate over these keys and delete them
         datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
@@ -603,11 +602,11 @@ class ObsSurface(BaseStore):
 
             for daterange in key_data:
                 key = key_data[daterange]
-                delete_object(bucket=bucket, key=key)
+                delete_object(bucket=self._bucket, key=key)
 
         # Then delete the Datasource itself
         key = f"{Datasource._datasource_root}/uuid/{uuid}"
-        delete_object(bucket=bucket, key=key)
+        delete_object(bucket=self._bucket, key=key)
 
         # Delete the UUID from the metastore
         self._metastore.remove(where("uuid") == uuid)

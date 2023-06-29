@@ -19,6 +19,7 @@ def retrieve_atmospheric(
     data_level: int = 2,
     dataset_source: Optional[str] = None,
     update_mismatch: bool = False,
+    store: Optional[str] = None,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -41,6 +42,7 @@ def retrieve_atmospheric(
         update_mismatch: If metadata derived from stored data does not match
             to attributes derived from ICOS Header, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
+        store: Name of object to search/store data to
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -54,6 +56,7 @@ def retrieve_atmospheric(
         data_level=data_level,
         dataset_source=dataset_source,
         update_mismatch=update_mismatch,
+        store=store,
     )
 
 
@@ -131,6 +134,7 @@ def local_retrieve(
     data_level: int = 2,
     dataset_source: Optional[str] = None,
     update_mismatch: bool = False,
+    store: Optional[str] = None,
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -154,6 +158,7 @@ def local_retrieve(
         update_mismatch: If metadata derived from stored data does not match
             to attributes derived from ICOS Header, update metadata to match to attributes.
             Otherwise a AttrMismatchError will be raised.
+        store: Name of object to search/store data to
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -175,6 +180,7 @@ def local_retrieve(
         end_date=end_date,
         icos_data_level=data_level,
         dataset_source=dataset_source,
+        store=store,
     )
 
     if results and not force_retrieval:
@@ -193,7 +199,7 @@ def local_retrieve(
         if standardised_data is None:
             return None
 
-        bucket = get_bucket()
+        bucket = get_bucket(name=store)
         with ObsSurface(bucket=bucket) as obs:
             obs.store_data(data=standardised_data)
 

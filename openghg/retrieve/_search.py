@@ -536,7 +536,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
 
     # If we're given a store then we'll just read from that one
     try:
-        store = kwargs["store"]
+        store = search_kwargs["store"]
     except KeyError:
         pass
     else:

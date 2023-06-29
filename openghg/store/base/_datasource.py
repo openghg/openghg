@@ -1,10 +1,11 @@
+from pandas import DataFrame, Timestamp, Timedelta
+from xarray import Dataset
+from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
 from openghg.store.spec import define_data_types
-from pandas import DataFrame, Timestamp, Timedelta
-from xarray import Dataset
-from collections import defaultdict
+from openghg.types import ObjectStoreError
 
 
 logger = logging.getLogger("openghg.store.base")
@@ -222,9 +223,10 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.objectstore import delete_object, get_bucket
+        from openghg.objectstore import delete_object
 
-        bucket = get_bucket()
+        if not self._bucket:
+            raise ObjectStoreError("No bucket set, has this Datasource been previously saved?")
 
         to_delete = []
         for key_data in self._data_keys.values():
@@ -232,33 +234,18 @@ class Datasource:
             to_delete.extend(keys)
 
         for key in set(to_delete):
-            delete_object(bucket=bucket, key=key)
+            delete_object(bucket=self._bucket, key=key)
 
-    def delete_data(self, keys: List) -> None:
+    def delete_data(self, bucket: str, keys: List) -> None:
         """Delete specific keys
 
         Args:
             keys: List of keys to delete
         """
-        from openghg.objectstore import delete_object, get_bucket
-
-        bucket = get_bucket()
+        from openghg.objectstore import delete_object
 
         for key in set(keys):
             delete_object(bucket=bucket, key=key)
-
-    # def delete_version(self, version: str) -> None:
-    #     """Delete a specific version of data.
-
-    #     Args:
-    #         version: Version string
-    #     Returns:
-    #         None
-    #     """
-    #     if version not in self._data_keys:
-    #         raise KeyError("Invalid version.")
-
-    #     # keys =
 
     def add_metadata(self, metadata: Dict) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -646,14 +633,10 @@ class Datasource:
         Returns:
             dict: Dictionary of data keyed by daterange
         """
-        from openghg.objectstore import get_bucket
-
         if not self._data:
-            bucket = get_bucket()
-
             for date_key in self._data_keys["latest"]["keys"]:
                 data_key = self._data_keys["latest"]["keys"][date_key]
-                self._data[date_key] = Datasource.load_dataset(bucket=bucket, key=data_key)
+                self._data[date_key] = Datasource.load_dataset(bucket=self._bucket, key=data_key)
 
         return self._data
 

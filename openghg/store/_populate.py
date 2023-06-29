@@ -9,7 +9,10 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def add_noaa_obspack(
-    data_directory: Union[str, Path], project: Optional[str] = None, overwrite: bool = False
+    data_directory: Union[str, Path],
+    project: Optional[str] = None,
+    overwrite: bool = False,
+    store: Optional[str] = None,
 ) -> Dict:
     """
     Function to detect and add files from the NOAA ObsPack to the object store.
@@ -19,6 +22,7 @@ def add_noaa_obspack(
         project (optional) : Can specify project or type to process only e.g. "surface"
         or "surface-flask"
         overwrite : Whether to overwrite existing entries in the object store
+        store: Name of object store to write to
     Returns:
         Dict: Details of data which has been processed into the object store
     Examples:
@@ -78,7 +82,7 @@ def add_noaa_obspack(
     if not files:
         files = _find_noaa_files(data_directory=data_directory, ext=".txt")
 
-    bucket = get_bucket()
+    bucket = get_bucket(name=store)
 
     # TODO - remove this once we can ensure all files will be processed correctly
     files_with_errors = []
@@ -93,7 +97,7 @@ def add_noaa_obspack(
         if _project in projects_to_read:
             try:
                 # TODO - can we streamline this a bit to save repeated loads?
-                with ObsSurface(bucket=bucket) as obs: 
+                with ObsSurface(bucket=bucket) as obs:
                     processed = obs.read_file(
                         filepath,
                         site=site,

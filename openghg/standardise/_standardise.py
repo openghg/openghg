@@ -151,6 +151,7 @@ def standardise_column(
     platform: str = "satellite",
     source_format: str = "openghg",
     overwrite: bool = False,
+    store: Optional[str] = None,
 ) -> Optional[Dict]:
     """Read column observation file
 
@@ -173,6 +174,7 @@ def standardise_column(
             - "site"
         source_format : Type of data being input e.g. openghg (internal format)
         overwrite: Should this data overwrite currently stored data.
+        store: Name of store to write to
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -208,7 +210,7 @@ def standardise_column(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_bucket()
+        bucket = get_bucket(name=store)
         with ObsColumn(bucket=bucket) as obs_col:
             result = obs_col.read_file(
                 filepath=filepath,
@@ -235,6 +237,7 @@ def standardise_bc(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     overwrite: bool = False,
+    store: Optional[str] = None,
 ) -> Optional[Dict]:
     """Standardise boundary condition data and store it in the object store.
 
@@ -248,6 +251,7 @@ def standardise_bc(
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
+        store: Name of store to write to
     returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -278,7 +282,7 @@ def standardise_bc(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_bucket()
+        bucket = get_bucket(name=store)
         with BoundaryConditions(bucket=bucket) as bcs:
             result = bcs.read_file(
                 filepath=filepath,
@@ -304,12 +308,13 @@ def standardise_footprint(
     species: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = "auto",
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
     retrieve_met: bool = False,
     high_spatial_res: bool = False,
     high_time_res: bool = False,
     overwrite: bool = False,
+    store: Optional[str] = None,
 ) -> Optional[Dict]:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -332,6 +337,7 @@ def standardise_footprint(
         high_time_res: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically for Carbon Dioxide data.
         overwrite: Overwrite any currently stored data
+        store: Name of store to write to
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -372,7 +378,7 @@ def standardise_footprint(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_bucket()
+        bucket = get_bucket(name=store)
         with Footprints(bucket=bucket) as fps:
             result = fps.read_file(
                 filepath=filepath,
@@ -409,6 +415,7 @@ def standardise_flux(
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
     overwrite: bool = False,
+    store: Optional[str] = None,
 ) -> Optional[Dict]:
     """Process flux data
 
@@ -423,6 +430,7 @@ def standardise_flux(
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
+        store: Name of store to write to
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
@@ -460,7 +468,7 @@ def standardise_flux(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_bucket()
+        bucket = get_bucket(name=store)
         with Emissions(bucket=bucket) as ems:
             return ems.read_file(
                 filepath=filepath,
