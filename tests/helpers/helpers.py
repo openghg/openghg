@@ -5,16 +5,6 @@ from pathlib import Path
 import tempfile
 from typing import Dict, List, Union
 
-__all__ = [
-    "get_surface_datapath",
-    "get_emissions_datapath",
-    "get_bc_datapath",
-    "get_footprint_datapath",
-    "glob_files",
-    "clear_test_stores",
-    "all_datasource_keys",
-]
-
 
 def temporary_store_paths() -> Dict[str, Path]:
     return {

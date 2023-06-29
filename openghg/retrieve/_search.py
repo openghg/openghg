@@ -665,12 +665,12 @@ def _base_search(**kwargs: Any) -> SearchResults:
             for uid in metadata:
                 data_keys[uid] = Datasource.load(bucket=bucket, uuid=uid, shallow=True).data_keys()
 
-        general_metadata.update(metadata)
-
         # TODO - adding this to make sure everything is working correctly
         # Remove once more comprehensive tests are done
         dupe_uuids = [k for k in metadata if k in general_metadata]
         if dupe_uuids:
             raise ObjectStoreError("Duplicate UUIDs found between buckets.")
+
+        general_metadata.update(metadata)
 
     return SearchResults(keys=dict(data_keys), metadata=dict(general_metadata), start_result="data_type")

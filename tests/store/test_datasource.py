@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 from addict import Dict as aDict
-from helpers import get_surface_datapath
+from helpers import get_surface_datapath, get_footprint_datapath
 from openghg.objectstore import get_bucket, get_object_names
 from openghg.standardise.surface import parse_crds
 from openghg.store.base import Datasource
@@ -50,7 +50,12 @@ def mock_uuid2(monkeypatch):
     monkeypatch.setattr(uuid, "uuid4", mock_uuid)
 
 
-def test_add_data(data):
+@pytest.fixture
+def bucket():
+    return get_bucket()
+
+
+def test_add_data(data, bucket):
     d = Datasource()
 
     metadata = data["ch4"]["metadata"]
@@ -61,8 +66,7 @@ def test_add_data(data):
     assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
-    d.save()
-    bucket = get_bucket()
+    d.save(bucket=bucket)
 
     data_chunks = [Datasource.load_dataset(bucket=bucket, key=k) for k in d.data_keys()]
 
@@ -97,9 +101,11 @@ def test_add_data(data):
     assert d.metadata() == expected_metadata
 
 
-def test_versioning(capfd):
+def test_versioning(capfd, bucket):
     min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
-    detailed_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
+    detailed_tac_filepath = get_surface_datapath(
+        filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS"
+    )
 
     min_data = parse_crds(data_filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
 
@@ -114,8 +120,7 @@ def test_versioning(capfd):
     min_ch4_data = min_data["ch4"]["data"]
 
     d.add_data(metadata=metadata, data=min_ch4_data, data_type="surface")
-
-    d.save()
+    d.save(bucket=bucket)
 
     min_keys = d.versions()
 
@@ -139,7 +144,7 @@ def test_versioning(capfd):
 
     d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="surface")
 
-    d.save()
+    d.save(bucket=bucket)
 
     detailed_keys = d.versions()
 
@@ -175,35 +180,32 @@ def test_get_dataframe_daterange():
     assert end == pd.Timestamp("1970-04-10 01:01:00+0000")
 
 
-def test_save(mock_uuid2):
+def test_save(mock_uuid2, bucket):
     bucket = get_bucket()
 
     datasource = Datasource()
     datasource.add_metadata_key(key="data_type", value="surface")
-    datasource.save(bucket)
+    datasource.save(bucket=bucket)
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
 
-    objs = get_object_names(bucket, prefix)
+    objs = get_object_names(bucket=bucket, prefix=prefix)
 
     assert objs[0].split("/")[-1] == mocked_uuid2
 
 
-def test_save_footprint():
-    bucket = get_bucket()
-
+def test_save_footprint(bucket):
     metadata = {"test": "testing123", "start_date": "2013-06-02", "end_date": "2013-06-30"}
 
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/emissions"
-    filename = "WAO-20magl_EUROPE_201306_downsampled.nc"
-    filepath = os.path.join(dir_path, test_data, filename)
+    filepath = get_footprint_datapath(filename="WAO-20magl_EUROPE_201306_downsampled.nc")
 
     data = xr.open_dataset(filepath)
 
+    bucket = get_bucket()
+
     datasource = Datasource()
     datasource.add_data(data=data, metadata=metadata, data_type="footprints")
-    datasource.save()
+    datasource.save(bucket=bucket)
 
     prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
     objs = get_object_names(bucket, prefix)
@@ -247,15 +249,6 @@ def test_add_metadata_lowercases_correctly(datasource):
     }
 
 
-def test_exists():
-    d = Datasource()
-    d.save()
-
-    exists = Datasource.exists(datasource_id=d.uuid())
-
-    assert exists == True
-
-
 def test_to_data(data):
     d = Datasource()
 
@@ -275,18 +268,16 @@ def test_to_data(data):
     assert len(obj_data["data_keys"]) == 0
 
 
-def test_from_data(data):
+def test_from_data(data, bucket):
     d = Datasource()
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
-    d.save()
+    d.save(bucket=bucket)
 
     obj_data = d.to_data()
-
-    bucket = get_bucket()
 
     # Create a new object with the data from d
     d_2 = Datasource.from_data(bucket=bucket, data=obj_data, shallow=False)
@@ -333,11 +324,8 @@ def test_update_daterange_replacement(data):
     assert d._end_date == pd.Timestamp("2016-04-02 06:55:30+00:00")
 
 
-def test_load_dataset():
-    filename = "WAO-20magl_EUROPE_201306_small.nc"
-    dir_path = os.path.dirname(__file__)
-    test_data = "../data/emissions"
-    filepath = os.path.join(dir_path, test_data, filename)
+def test_load_dataset(bucket):
+    filepath = get_footprint_datapath(filename="WAO-20magl_EUROPE_201306_small.nc")
 
     ds = xr.load_dataset(filepath)
 
@@ -347,7 +335,7 @@ def test_load_dataset():
 
     d.add_data(metadata=metadata, data=ds, data_type="footprints")
 
-    d.save()
+    d.save(bucket=bucket)
 
     keys = d._data_keys["latest"]["keys"]
 
@@ -386,22 +374,17 @@ def test_dated_metadata_search():
 
     assert d.search_metadata(inlet="100m", instrument="violin") == True
 
-    assert (
-        d.search_metadata(
-            search_terms=["100m", "violin"],
-            start_date=pd.Timestamp("2015-01-01"),
-            end_date=pd.Timestamp("2021-01-01"),
-        )
-        == False
+    assert not d.search_metadata(
+        search_terms=["100m", "violin"],
+        start_date=pd.Timestamp("2015-01-01"),
+        end_date=pd.Timestamp("2021-01-01"),
     )
-    assert (
-        d.search_metadata(
-            inlet="100m",
-            instrument="violin",
-            start_date=pd.Timestamp("2001-01-01"),
-            end_date=pd.Timestamp("2002-01-01"),
-        )
-        == True
+
+    assert d.search_metadata(
+        inlet="100m",
+        instrument="violin",
+        start_date=pd.Timestamp("2001-01-01"),
+        end_date=pd.Timestamp("2002-01-01"),
     )
 
 
@@ -419,33 +402,14 @@ def test_search_metadata_find_all():
     assert result is False
 
 
-@pytest.mark.skip(reason="We don't currently have recursive search functionality")
-def test_search_metadata_finds_recursively():
-    d = Datasource()
-
-    d._metadata = {"car": "toyota", "inlets": {"inlet_a": "45m", "inlet_b": "3580m"}}
-
-    result = d.search_metadata(search_terms=["45m", "3580m", "toyota"], find_all=True)
-
-    assert result is True
-
-    result = d.search_metadata(search_terms=["100m", "violin", "toyota", "swallow"], find_all=True)
-
-    assert result is False
-
-    result = d.search_metadata(search_terms=["100m", "violin", "toyota", "swallow"], find_all=False)
-
-    assert result is True
-
-
-def test_in_daterange(data):
+def test_in_daterange(data, bucket):
     metadata = data["ch4"]["metadata"]
     data = data["ch4"]["data"]
 
     d = Datasource()
     d._uuid = "test-id-123"
     d.add_data(metadata=metadata, data=data, data_type="surface")
-    d.save()
+    d.save(bucket=bucket)
 
     expected_keys = [
         "data/uuid/test-id-123/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
@@ -468,15 +432,13 @@ def test_in_daterange(data):
     assert dated_keys[0].split("/")[-1] == "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"
 
 
-def test_shallow_then_load_data(data):
+def test_shallow_then_load_data(data, bucket):
     metadata = data["ch4"]["metadata"]
     data = data["ch4"]["data"]
 
     d = Datasource()
     d.add_data(metadata=metadata, data=data, data_type="surface")
-    d.save()
-
-    bucket = get_bucket()
+    d.save(bucket=bucket)
 
     new_d = Datasource.load(bucket=bucket, uuid=d.uuid(), shallow=True)
 

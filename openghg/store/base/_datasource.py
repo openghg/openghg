@@ -466,21 +466,6 @@ class Datasource:
 
         return period
 
-    @staticmethod
-    def exists(datasource_id: str, bucket: str) -> bool:
-        """Check if a datasource with this ID is already stored in the object store
-
-        Args:
-            datasource_id (str): ID of datasource created from data
-        Returns:
-            bool: True if Datasource exists
-        """
-        from openghg.objectstore import exists
-
-        key = f"{Datasource._datasource_root}/uuid/{datasource_id}"
-
-        return exists(bucket=bucket, key=key)
-
     def to_data(self) -> Dict:
         """Return a JSON-serialisable dictionary of object
         for storage in object store
