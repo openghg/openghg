@@ -117,41 +117,43 @@ class ObsSurface(BaseStore):
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
-        update_mismatch: bool = False,
+        update_mismatch: str = "never",
         overwrite: bool = False,
         verify_site_code: bool = True,
         site_filepath: optionalPathType = None,
     ) -> Dict:
         """Process files and store in the object store. This function
-            utilises the process functions of the other classes in this submodule
-            to handle each data type.
+              utilises the process functions of the other classes in this submodule
+              to handle each data type.
 
-        Args:
-            filepath: Filepath(s)
-            source_format: Data format, for example CRDS, GCWERKS
-            site: Site code/name
-            network: Network name
-            inlet: Inlet height. Format 'NUMUNIT' e.g. "10m".
-                If retrieve multiple files pass None, OpenGHG will attempt to
-                extract this from the file.
-            height: Alias for inlet.
-            read inlets from data.
-            instrument: Instrument name
-            sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
-            measurement_type: Type of measurement e.g. insitu, flask
-            update_mismatch: This determines whether mismatches between the internal data
-                attributes and the supplied / derived metadata can be updated or whether
-                this should raise an AttrMismatchError.
-                If True, currently updates metadata with attribute value.
-            overwrite: Overwrite previously uploaded data
-            verify_site_code: Verify the site code
-            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
-                Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
-        Returns:
-            dict: Dictionary of Datasource UUIDs
+          Args:
+              filepath: Filepath(s)
+              source_format: Data format, for example CRDS, GCWERKS
+              site: Site code/name
+              network: Network name
+              inlet: Inlet height. Format 'NUMUNIT' e.g. "10m".
+                  If retrieve multiple files pass None, OpenGHG will attempt to
+                  extract this from the file.
+              height: Alias for inlet.
+              read inlets from data.
+              instrument: Instrument name
+              sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
+              measurement_type: Type of measurement e.g. insitu, flask
+          update_mismatch: This determines how mismatches between the internal data
+              "attributes" and the supplied / derived "metadata" are handled.
+              This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+                - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
+        overwrite: Overwrite previously uploaded data
+              verify_site_code: Verify the site code
+              site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+                  Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+          Returns:
+              dict: Dictionary of Datasource UUIDs
 
-        TODO: Should "measurement_type" be changed to "platform" to align
-        with ModelScenario and ObsColumn?
+          TODO: Should "measurement_type" be changed to "platform" to align
+          with ModelScenario and ObsColumn?
         """
         import sys
         from collections import defaultdict
@@ -276,9 +278,7 @@ class ObsSurface(BaseStore):
 
                 # Collect together optional parameters (not required but
                 # may be accepted by underlying parser function)
-                optional_parameters = {
-                    "update_mismatch" : update_mismatch
-                }
+                optional_parameters = {"update_mismatch": update_mismatch}
                 # TODO: extend optional_parameters to include kwargs when added
 
                 input_parameters = required_parameters.copy()
@@ -370,7 +370,9 @@ class ObsSurface(BaseStore):
                 results["processed"][data_filepath.name] = datasource_uuids
 
                 # Record the Datasources we've created / appended to
-                obs.add_datasources(uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys)
+                obs.add_datasources(
+                    uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys
+                )
 
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
