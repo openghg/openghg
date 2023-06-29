@@ -5,8 +5,10 @@ This tutorial demonstrates how OpenGHG can be used to process new
 measurement data, search the data present and to retrieve this for
 analysis and visualisation.
 
-0. Using the tutorial object store
-----------------------------------
+.. _using-the-tutorial-object-store:
+
+Using the tutorial object store
+-------------------------------
 
 To avoid adding the example data we use in this tutorial to your normal
 object store, we need to tell OpenGHG to use a separate sandboxed object
@@ -15,7 +17,7 @@ store that we'll call the tutorial store. To do this we use the
 ``OPENGHG_TUT_STORE`` environment variable for this session and won't
 affect your use of OpenGHG outside of this tutorial.
 
-.. ipython:: python
+.. code:: ipython3
 
     from openghg.tutorial import use_tutorial_store
 
@@ -62,7 +64,7 @@ in the DECC network. (Data at surface sites is measured in-situ.)
 
 First we retrieve the raw data.
 
-.. ipython:: python
+.. code:: ipython3
 
     from openghg.tutorial import retrieve_example_data
 
@@ -70,7 +72,6 @@ First we retrieve the raw data.
 
     tac_data = retrieve_example_data(url=data_url)
 
-    tac_data
 
 Now we add this data to the object store using ``standardise_surface``, passing the
 following arguments:
