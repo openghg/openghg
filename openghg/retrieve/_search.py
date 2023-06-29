@@ -2,12 +2,12 @@
     the object store
 
 """
-from collections import defaultdict
 import logging
 from typing import Any, Dict, List, Optional, Union
 from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
+from openghg.types import ObjectStoreError
 from tinydb.database import TinyDB
 from openghg.dataobjects import SearchResults
 
@@ -660,19 +660,17 @@ def _base_search(**kwargs: Any) -> SearchResults:
                     f"No data found for the dates given in the {bucket_name} store, please try a wider search."
                 )
             # Update the metadata we'll use to create the SearchResults object
-            general_metadata = metadata_in_daterange
+            metadata = metadata_in_daterange
         else:
-
-
-        dupe_uuids = [k for k in _keyed_metadata if k in keyed_metadata]
-        # Make sure
-        keyed_metadata.update(_keyed_metadata)
-
-            # Here we only need to retrieve the keys
-            for uid in bucket_metadata:
-
-
-
+            for uid in metadata:
                 data_keys[uid] = Datasource.load(bucket=bucket, uuid=uid, shallow=True).data_keys()
 
-    return SearchResults(keys=dict(data_keys), metadata=dict(keyed_metadata), start_result="data_type")
+        general_metadata.update(metadata)
+
+        # TODO - adding this to make sure everything is working correctly
+        # Remove once more comprehensive tests are done
+        dupe_uuids = [k for k in metadata if k in general_metadata]
+        if dupe_uuids:
+            raise ObjectStoreError("Duplicate UUIDs found between buckets.")
+
+    return SearchResults(keys=dict(data_keys), metadata=dict(general_metadata), start_result="data_type")

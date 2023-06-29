@@ -214,7 +214,7 @@ class DataHandler:
                     if not response:
                         raise ValueError("Unable to update metadata, possible metadata sync error.")
 
-                d.save()
+                d.save(bucket=bucket)
 
                 # Update the metadata stored internally so we're up to date
                 self.metadata[u] = internal_copy
