@@ -197,7 +197,7 @@ def test_save(mock_uuid2, bucket):
 def test_save_footprint(bucket):
     metadata = {"test": "testing123", "start_date": "2013-06-02", "end_date": "2013-06-30"}
 
-    filepath = get_footprint_datapath(filename="WAO-20magl_EUROPE_201306_downsampled.nc")
+    filepath = get_footprint_datapath(filename="WAO-20magl_UKV_rn_TEST_202112.nc")
 
     data = xr.open_dataset(filepath)
 
@@ -207,18 +207,15 @@ def test_save_footprint(bucket):
     datasource.add_data(data=data, metadata=metadata, data_type="footprints")
     datasource.save(bucket=bucket)
 
-    prefix = f"{Datasource._datasource_root}/uuid/{datasource._uuid}"
-    objs = get_object_names(bucket, prefix)
-
     datasource_2 = Datasource.load(bucket=bucket, uuid=datasource._uuid)
 
-    date_key = "2013-06-02-00:00:00+00:00_2013-06-30-00:00:00+00:00"
+    date_key = "2021-12-04-00:00:00+00:00_2021-12-05-00:00:00+00:00"
 
     data = datasource_2._data[date_key]
 
-    assert float(data.pressure[0].values) == pytest.approx(1023.971)
-    assert float(data.pressure[2].values) == pytest.approx(1009.940)
-    assert float(data.pressure[-1].values) == pytest.approx(1021.303)
+    assert float(data.pressure[0].values) == pytest.approx(994.39172)
+    assert float(data.pressure[2].values) == pytest.approx(993.38031)
+    assert float(data.pressure[-1].values) == pytest.approx(991.29168)
 
     assert datasource_2._data_type == "footprints"
 
@@ -325,7 +322,7 @@ def test_update_daterange_replacement(data):
 
 
 def test_load_dataset(bucket):
-    filepath = get_footprint_datapath(filename="WAO-20magl_EUROPE_201306_small.nc")
+    filepath = get_footprint_datapath(filename="WAO-20magl_UKV_rn_TEST_202112.nc")
 
     ds = xr.load_dataset(filepath)
 
