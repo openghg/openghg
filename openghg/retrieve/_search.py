@@ -604,11 +604,11 @@ def _base_search(**kwargs: Any) -> SearchResults:
     # We'll iterate over each of them
     readable_buckets = get_readable_buckets()
 
-    general_results = defaultdict(list)
-    data_keys = defaultdict(dict)
-    keyed_metadata = defaultdict(dict)
+    data_keys = {}
+    general_metadata = {}
 
     for bucket_name, bucket in readable_buckets.items():
+        metastore_records = []
         for data_type_class in types_to_search:
             with data_type_class(bucket=bucket) as dclass:
                 metastore = dclass._metastore
@@ -616,11 +616,11 @@ def _base_search(**kwargs: Any) -> SearchResults:
                 for v in expanded_search:
                     res = metastore.search(Query().fragment(v))
                     if res:
-                        general_results[bucket_name].extend(res)
+                        metastore_records.extend(res)
 
         # Add in a quick check to make sure we don't have dupes
         # TODO - remove this once a more thorough tests are added
-        uuids = [s["uuid"] for s in general_results]
+        uuids = [s["uuid"] for s in metastore_records]
         if len(uuids) != len(set(uuids)):
             error_msg = "Multiple results found with same UUID!"
             logger.exception(msg=error_msg)
@@ -629,9 +629,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
         # Here we create a dictionary of the metadata keyed by the Datasource UUID
         # we'll create a pandas DataFrame out of this in the SearchResult object
         # for better printing / searching within a notebook
-        for r in general_results[bucket_name]:
-
-        keyed_metadata = {r["uuid"]: r for r in general_results[bucket_name]}
+        metadata = {r["uuid"]: r for r in metastore_records}
 
         # Narrow the search to a daterange if dates passed
         if start_date is not None or end_date is not None:
@@ -647,24 +645,34 @@ def _base_search(**kwargs: Any) -> SearchResults:
 
             metadata_in_daterange = {}
 
-            for uid, record in keyed_metadata[bucket].items():
+            # TODO - we can remove this now the metastore contains the start and end dates of the Datasources
+            for uid, record in metadata.items():
                 _keys = Datasource.load(bucket=bucket, uuid=uid, shallow=True).keys_in_daterange(
                     start_date=start_date, end_date=end_date
                 )
 
                 if _keys:
                     metadata_in_daterange[uid] = record
-                    data_keys[bucket_name][uid] = _keys
+                    data_keys[uid] = _keys
 
             if not data_keys:
                 logger.warning(
                     f"No data found for the dates given in the {bucket_name} store, please try a wider search."
                 )
             # Update the metadata we'll use to create the SearchResults object
-            keyed_metadata[bucket] = metadata_in_daterange
+            general_metadata = metadata_in_daterange
         else:
+
+
+        dupe_uuids = [k for k in _keyed_metadata if k in keyed_metadata]
+        # Make sure
+        keyed_metadata.update(_keyed_metadata)
+
             # Here we only need to retrieve the keys
-            for uid in keyed_metadata:
-                data_keys[bucket_name][uid] = Datasource.load(bucket=bucket, uuid=uid, shallow=True).data_keys()
+            for uid in bucket_metadata:
+
+
+
+                data_keys[uid] = Datasource.load(bucket=bucket, uuid=uid, shallow=True).data_keys()
 
     return SearchResults(keys=dict(data_keys), metadata=dict(keyed_metadata), start_result="data_type")
