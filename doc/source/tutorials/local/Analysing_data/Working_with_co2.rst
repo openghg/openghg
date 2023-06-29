@@ -1,32 +1,35 @@
 Working with carbon dioxide
 ===========================
 
+In this tutorial, we will compare carbon dioxide (:math:`\mathrm{CO_2}`)
+emissions with flux data.
 For carbon dioxide data, the natural diurnal cycle must be taken into
 account when comparing any expected measurements against our
 observations.
 
-In order to compare our measurements to modelled data for carbon dioxide
-(:math:`\mathrm{CO_2}`), we need high frequency inputs for both the
+In order to compare our measurements to modelled data for carbon dioxide,
+we need high frequency inputs for both the
 footprint and flux files. For NAME footprints these should contain an
 additional “H_back” dimension to store hourly footprints overall an
 initial time period for each release time. For any natural flux data to
 compare against, this should have a frequency of less than 24 hours.
 
-*Operations around :math:`CO_2` and high resolution data may run slow at
-the moment, the plan is to profile this so we can optimise performance.*
 
-   **NOTE:** Plots created within this tutorial may not show up on the
-   online documentation version of this notebook.
+.. note::
 
-0. Using the tutorial object store
-----------------------------------
+   Operations involving :math:`\mathrm{CO}_2` and high resolution data may
+   run slowly at the moment.
 
-To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we'll call the tutorial store. To do this we use the
-``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
-``OPENGHG_TUT_STORE`` environment variable for this session and won't
-affect your use of OpenGHG outside of this tutorial.
+.. note::
+   Plots created within this tutorial may not show up on the
+   online documentation.
+
+Using the tutorial object store
+-------------------------------
+
+As in the :ref:`previous tutorial <using-the-tutorial-object-store>`,
+we will use the tutorial object store to avoid cluttering your personal
+object store.
 
 .. code:: ipython3
 
@@ -37,42 +40,29 @@ affect your use of OpenGHG outside of this tutorial.
 1. Loading data sources into the object store
 ---------------------------------------------
 
-For this tutorial we will again use a helper function from the
-``openghg.tutorial`` submodule to add some data to your local object
-store. As we're going to be comparing CO2 emissions with flux data here,
-we'll add surface, flux and footprint data to the object store. Don't
-worry if you get a message telling you the file has already been added,
-this might happen if you've been through one of the other tutorials
-previously.
+We will use a helper function from the ``openghg.tutorial`` submodule
+to add surface, flux, and footprint data to the object store.
+
+You might get a message telling you that a file has already been added
+if you've been through one of the other tutorials previously.
 
 .. code:: ipython3
 
     from openghg.tutorial import populate_flux_data, populate_surface_data, populate_footprint_data
 
-First we'll add some surface measurment data
-
 .. code:: ipython3
 
     populate_surface_data()
 
-Next we'll add some flux data.
-
-.. code:: ipython3
-
     populate_flux_data()
-
-And finally some footprint data
-
-.. code:: ipython3
 
     populate_footprint_data()
 
 2. Creating a model scenario
 ----------------------------
 
-To link together our observations to our ancillary data we can create a
-``ModelScenario`` object, as shown in the previous tutorial
-`3_Comparing_with_emissions.ipynb <3_Comparing_with_emissions.ipynb>`__,
+To link our observations to our ancillary data we can create a
+``ModelScenario`` object, as shown in the :ref:`previous tutorial <Comparing observations to emissions>`,
 using suitable keywords to grab the data from the object store.
 
 .. code:: ipython3
@@ -125,7 +115,7 @@ between the sources and our measurement data.
 
 As in the previous tutorial, multiple fluxes can be linked to your
 ``ModelScenario`` object if required. This can include additional high
-frequency (<24 hourly) or low frequency flux data. In this case we have
+frequency (less than 24 hourly) or low frequency flux data. In this case we have
 added monthly “fossil fuel” emissions:
 
 .. code:: ipython3
