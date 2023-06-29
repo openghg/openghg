@@ -15,7 +15,7 @@ rlock = threading.RLock()
 
 __all__ = [
     "delete_object",
-    "get_local_objectstore_path",
+    "get_user_objectstore_path",
     "get_tutorial_store_path",
     "get_all_object_names",
     "get_object_names",
@@ -104,20 +104,18 @@ def get_tutorial_store_path() -> Path:
     Returns:
         pathlib.Path: Path of tutorial store
     """
-    return get_local_objectstore_path() / "tutorial_store"
+    return get_user_objectstore_path() / "tutorial_store"
 
 
 # @lru_cache
-def get_local_objectstore_path() -> Path:
+def get_user_objectstore_path() -> Path:
     """Returns the path of the user's local object store
 
     Returns:
         pathlib.Path: Path of object store
     """
     config = read_local_config()
-    object_store_path = Path(config["object_store"]["user"]["path"])
-
-    return object_store_path
+    return Path(config["object_store"]["user"]["path"])
 
 
 def get_objectstore_info() -> Dict:
@@ -330,7 +328,7 @@ def get_bucket(name: Optional[str] = None) -> str:
     if tutorial_store is not None:
         return str(get_tutorial_store_path())
 
-    local_store = get_local_objectstore_path()
+    local_store = get_user_objectstore_path()
 
     return str(local_store)
 
@@ -342,7 +340,7 @@ def clear_object_store() -> None:
     Returns:
         None
     """
-    local_store = str(get_local_objectstore_path())
+    local_store = str(get_user_objectstore_path())
     logger.warning(f"You have requested to delete {local_store}.")
 
     confirmed_path = input("Please enter the full path of the store: ")

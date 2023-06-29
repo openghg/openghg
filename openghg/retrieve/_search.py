@@ -70,40 +70,6 @@ def meta_search(search_terms: Dict, database: TinyDB) -> Dict:
     return {s["uuid"]: s for s in result}
 
 
-# # This is only used by datasource lookup
-# def metadata_lookup(
-#     metadata: Dict, database: TinyDB, additional_metadata: Optional[Dict] = None
-# ) -> Union[bool, str]:
-#     """Searches the passed database for the given metadata
-
-#     Args:
-#         metadata: Keys we are required to find
-#         database: The tinydb database for the storage object
-#         additional: Keys we'd like to find (currently unused)
-#     Returns:
-#         str or bool: UUID string if matching Datasource found, otherwise False
-#     """
-#     from functools import reduce
-
-#     from openghg.types import DatasourceLookupError
-#     from tinydb import Query
-
-#     q = Query()
-
-#     search_attrs = [getattr(q, k) == v for k, v in metadata.items()]
-#     required_result = database.search(reduce(_find_and, search_attrs))
-
-#     if not required_result:
-#         return False
-
-#     if len(required_result) > 1:
-#         raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
-
-#     uuid: str = required_result[0]["uuid"]
-
-#     return uuid
-
-
 def search_bc(
     species: Optional[str] = None,
     bc_input: Optional[str] = None,
@@ -564,6 +530,23 @@ def _base_search(**kwargs: Any) -> SearchResults:
     else:
         types_to_search.extend(data_type_classes.values())
 
+    # Get a dictionary of all the readable buckets available
+    # We'll iterate over each of them
+    readable_buckets = get_readable_buckets()
+
+    # If we're given a store then we'll just read from that one
+    try:
+        store = kwargs["store"]
+    except KeyError:
+        pass
+    else:
+        del search_kwargs["store"]
+
+        try:
+            readable_buckets = {store: readable_buckets[store]}
+        except KeyError:
+            raise ObjectStoreError(f"Invalid store: {store}")
+
     try:
         start_date = search_kwargs["start_date"]
     except KeyError:
@@ -599,10 +582,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
             expanded_search.append(d)
     else:
         expanded_search.append(not_a_list)
-
-    # Get a dictionary of all the readable buckets available
-    # We'll iterate over each of them
-    readable_buckets = get_readable_buckets()
 
     data_keys = {}
     general_metadata = {}

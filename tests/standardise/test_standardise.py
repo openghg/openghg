@@ -1,7 +1,13 @@
 from pathlib import Path
 import pytest
 
-from helpers import get_emissions_datapath, get_footprint_datapath, get_column_datapath, get_surface_datapath
+from helpers import (
+    get_emissions_datapath,
+    get_footprint_datapath,
+    get_column_datapath,
+    get_surface_datapath,
+    clear_test_stores,
+)
 from openghg.standardise import (
     standardise_flux,
     standardise_footprint,
@@ -9,12 +15,26 @@ from openghg.standardise import (
     standardise_surface,
 )
 from openghg.util import compress
-from openghg.types import AttrMismatchError
-from openghg.retrieve import get_obs_surface
+from openghg.types import AttrMismatchError, ObjectStoreError
+from openghg.retrieve import search, get_obs_surface
 
 
-# Test local functions
-def test_local_obs():
+def test_standardise_to_read_only_store():
+    hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
+
+    with pytest.raises(ObjectStoreError):
+        standardise_surface(
+            filepaths=hfd_path,
+            site="hfd",
+            instrument="picarro",
+            network="DECC",
+            source_format="CRDS",
+            overwrite=True,
+            store="shared",
+        )
+
+
+def test_standardise_obs_two_writable_stores():
     hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
     results = standardise_surface(
@@ -24,6 +44,7 @@ def test_local_obs():
         network="DECC",
         source_format="CRDS",
         overwrite=True,
+        store="user",
     )
 
     results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
@@ -31,6 +52,11 @@ def test_local_obs():
     assert "error" not in results
     assert "ch4" in results
     assert "co2" in results
+
+    results = search(site="hfd", inlet="100m", store="user")
+    assert results
+    results = search(site="hfd", inlet="100m", store="group")
+    assert not results
 
     mhd_path = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
 
@@ -42,12 +68,18 @@ def test_local_obs():
         network="ICOS",
         source_format="ICOS",
         overwrite=True,
+        store="group",
     )
 
     assert "co" in results["processed"]["mhd.co.hourly.g2401.15m.dat"]
 
+    results = search(site="mhd", instrument="g2401", store="group")
+    assert results
+    results = search(site="mhd", instrument="g2401", store="user")
+    assert not results
 
-def test_local_obs_openghg():
+
+def test_standardise_obs_openghg():
     """
     Based on reported Issue #477 where ValueError is raised when synchronising the metadata and attributes.
      - "inlet" and "inlet_height_magl" attribute within netcdf file was a float; "inlet" within metadata is converted to a string with "m" ("185m")
@@ -67,6 +99,7 @@ def test_local_obs_openghg():
         source_format="openghg",
         sampling_period="1H",
         overwrite=True,
+        store="user",
     )
 
     results = results["processed"]["DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc"]
@@ -75,7 +108,7 @@ def test_local_obs_openghg():
     assert "co2" in results
 
 
-def test_local_obs_metadata_mismatch():
+def test_standardise_obs_metadata_mismatch():
     """
     Test a mismatch between the derived attributes and derived metadata can be
     updated and data added to the object store.
@@ -104,6 +137,7 @@ def test_local_obs_metadata_mismatch():
         sampling_period="1H",
         update_mismatch=True,
         overwrite=True,
+        store="user",
     )
 
     # Check data has been successfully processed
@@ -142,6 +176,7 @@ def test_local_obs_metadata_mismatch_fail():
             sampling_period="1H",
             update_mismatch=False,
             overwrite=True,
+            store="user"
         )
 
         # Check different values are reported in error message
@@ -226,7 +261,7 @@ def test_standardise_flux_additional_keywords():
     assert "ch4_anthro_globaledgar" in proc_results
 
 
-def test_standardise(monkeypatch, mocker, tmpdir):
+def test_cloud_standardise(monkeypatch, mocker, tmpdir):
     monkeypatch.setenv("OPENGHG_HUB", "1")
     call_fn_mock = mocker.patch("openghg.cloud.call_function", autospec=True)
     test_string = "some_text"

@@ -10,6 +10,7 @@ def temporary_store_paths() -> Dict[str, Path]:
     return {
         "user": Path(tempfile.gettempdir(), "openghg_testing_store"),
         "group": Path(tempfile.gettempdir(), "openghg_testing_group_store"),
+        "shared": Path(tempfile.gettempdir(), "openghg_testing_shared_store"),
     }
 
 
