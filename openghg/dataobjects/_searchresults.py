@@ -39,8 +39,9 @@ class SearchResults:
                     metadata[uuid_key] = {key: uuid_metadata[key] for key in reorder}
 
         if metadata is not None:
-            df_metadata = DataFrame.from_dict(data=metadata)
-            self.results = SearchResults.df_to_table_console_output(df=df_metadata)
+            self.results = (
+                DataFrame.from_dict(data=metadata, orient="index").reset_index().drop(columns="index")
+            )
         else:
             self.results = {}  # type: ignore
 
@@ -52,6 +53,8 @@ class SearchResults:
         self.hub = running_on_hub()
 
     def __str__(self) -> str:
+        SearchResults.df_to_table_console_output(df=DataFrame.from_dict(data=self.metadata))
+
         return f"Found {len(self.results)} results.\nView the results DataFrame using the results property."
 
     def __repr__(self) -> str:
