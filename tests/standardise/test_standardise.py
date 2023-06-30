@@ -5,8 +5,8 @@ from helpers import get_emissions_datapath, get_footprint_datapath, get_column_d
 from openghg.standardise import standardise_flux, standardise_footprint, standardise_column, standardise_surface
 from openghg.util import compress
 from openghg.types import AttrMismatchError
-from openghg.retrieve import get_obs_surface
-
+from openghg.retrieve import get_obs_surface, search_surface
+from openghg.store import ObsSurface
 
 # Test local functions
 def test_local_obs():
@@ -68,12 +68,12 @@ def test_local_obs_openghg():
     assert "co2" in results
 
 
-def test_local_obs_metadata_mismatch():
+def test_local_obs_metadata_mismatch_attr():
     """
     Test a mismatch between the derived attributes and derived metadata can be 
     updated and data added to the object store.
 
-    At present, this will use the attributes data and update the metadata.
+    This will use the attributes data and update the metadata.
 
     Difference:
         - 'station_long_name'
@@ -86,7 +86,9 @@ def test_local_obs_metadata_mismatch():
     filename = "DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc"
     filepath = get_surface_datapath(filename=filename, source_format="OPENGHG")
 
-    # Include update_mismatch=True flag
+    # Define update_mismatch as "from_source" / "attributes"
+    update_mismatch = "from_source"
+
     results = standardise_surface(
         filepaths=filepath,
         site="TAC",
@@ -95,7 +97,7 @@ def test_local_obs_metadata_mismatch():
         instrument="picarro",
         source_format="openghg",
         sampling_period="1H",
-        update_mismatch=True,
+        update_mismatch=update_mismatch,
         overwrite=True,
     )
 
@@ -112,11 +114,79 @@ def test_local_obs_metadata_mismatch():
     # Check attribute value has been used for this key
     assert metadata["station_long_name"] == "ATTRIBUTE DATA"
 
+    attrs = data.data.attrs
+    assert attrs["station_long_name"] == "ATTRIBUTE DATA"
+
+    # # Find and delete dummy Datasource so we can add this again below.
+    # results = search_surface(site="TAC", inlet="999m", species="co2")
+    # uuid = results.results.loc[0, "uuid"]
+
+    # obs = ObsSurface.load()
+    # obs.delete(uuid=uuid)
+
+
+def test_local_obs_metadata_mismatch_meta():
+    """
+    Test a mismatch between the derived attributes and derived metadata can be 
+    updated and data added to the object store.
+
+    This will use the metadata values and update the attributes.
+
+    Difference:
+        - 'station_long_name'
+            - Metadata (from mocked site_info) - 'Tacolneston Tower, UK'
+            - Attributes (from file) - 'ATTRIBUTE DATA'
+    
+    Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'
+    but slightly different height used to not clash with previous data.
+    """
+
+    filename = "DECC-picarro_TAC_20130131_co2-998m-20220929_mismatch.nc"
+    filepath = get_surface_datapath(filename=filename, source_format="OPENGHG")
+
+    # Define update_mismatch as "from_definition" / "metadata"
+    update_mismatch = "from_definition"
+
+    results = standardise_surface(
+        filepaths=filepath,
+        site="TAC",
+        network="DECC",
+        inlet="998m",
+        instrument="picarro",
+        source_format="openghg",
+        sampling_period="1H",
+        update_mismatch=update_mismatch,
+        overwrite=True,
+    )
+
+    # Check data has been successfully processed
+    results = results["processed"][filename]
+
+    assert "error" not in results
+    assert "co2" in results
+
+    # Check retrieved data from the object store contains the updated metadata
+    data = get_obs_surface(site="TAC", inlet="998m", species="co2")
+    metadata = data.metadata
+
+    # Check attribute value has been used for this key
+    assert metadata["station_long_name"] == "Tacolneston Tower, UK"
+
+    attrs = data.data.attrs
+    assert attrs["station_long_name"] == "Tacolneston Tower, UK"
+
+    # # Find and delete dummy Datasource so we can add this again below.
+    # results = search_surface(site="TAC", inlet="998m", species="co2")
+    # uuid = results.results.loc[0, "uuid"]
+
+    # obs = ObsSurface.load()
+    # obs.delete(uuid=uuid)
+
 
 def test_local_obs_metadata_mismatch_fail():
     """
     Test that a mismatch between attributes and metadata raises a AttrMismatchError
-    when update_mismatch is set to False.
+    when update_mismatch is set to 'never'.
 
     Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'.
     """
@@ -131,7 +201,7 @@ def test_local_obs_metadata_mismatch_fail():
             instrument="picarro",
             source_format="openghg",
             sampling_period="1H",
-            update_mismatch=False,
+            update_mismatch="never",
             overwrite=True,
         )
 
@@ -140,7 +210,7 @@ def test_local_obs_metadata_mismatch_fail():
         assert "ATTRIBUTE DATA" in e_info
 
         # Check error message contains advice on how to bypass this error
-        assert "update_mismatch=True" in e_info
+        assert "update_mismatch" in e_info
 
 
 def test_standardise_column():
