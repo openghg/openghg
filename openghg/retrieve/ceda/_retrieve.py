@@ -16,6 +16,7 @@ def retrieve_surface(
     url: Optional[str] = None,
     force_retrieval: bool = False,
     additional_metadata: Optional[Dict] = None,
+    store: Optional[str] = None,
 ) -> Union[List[ObsData], ObsData, None]:
     """Retrieve surface measurements from the CEDA archive. This function will route the call
     to either local or cloud functions based on the environment.
@@ -31,6 +32,7 @@ def retrieve_surface(
         keys if they aren't found in the dataset's attributes.
         For example:
             {"site": "AAA", "inlet": "10m"}
+        store: Name of object store to use
     Returns:
         ObsData or None: ObsData if data found / retrieved successfully.
 
@@ -48,6 +50,7 @@ def retrieve_surface(
         url=url,
         force_retrieval=force_retrieval,
         additional_metadata=additional_metadata,
+        store=store,
     )
 
 

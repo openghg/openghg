@@ -201,6 +201,7 @@ def test_standardise_column():
         domain=domain,
         species=species,
         overwrite=True,
+        store="user"
     )
 
     assert "error" not in results
@@ -225,6 +226,7 @@ def test_standardise_footprint():
         domain=domain,
         high_spatial_res=True,
         overwrite=True,
+        store="user"
     )
 
     assert "error" not in results
@@ -241,6 +243,7 @@ def test_standardise_flux():
         domain="europe",
         high_time_resolution=False,
         overwrite=True,
+        store="user"
     )
 
     assert "co2_gpp-cardamom_europe" in proc_results
@@ -256,6 +259,7 @@ def test_standardise_flux_additional_keywords():
         domain="globaledgar",
         database="EDGAR",
         database_version="v50",
+        store="user"
     )
 
     assert "ch4_anthro_globaledgar" in proc_results

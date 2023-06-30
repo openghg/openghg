@@ -1,3 +1,4 @@
+.. _managing-object-stores:
 Managing object stores
 ======================
 
@@ -82,7 +83,7 @@ Your configuration file will now look something like this
 
 With a single object store with read/write permissions any data you standardise with OpenGHG will be added to that
 store. When you use the search and retrieve functions both object stores will be searched. We document how to
-select which store to write data to in TODO: ADD LINK TO MULTISTORE STANDARDISE HERE
+select which store to write data to in :ref:`addings-obs-data`.
 
 Migrating to the new configuration file
 ---------------------------------------

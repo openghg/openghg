@@ -83,7 +83,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
 
     # Mock the dobj values, here we'll get two values we read and the third dobj contains
     # ObsPack GlobalView data that should currently be skipped
-    dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", side_effect=dobjs)
+    mocker.patch("icoscp.cpb.dobj.Dobj", side_effect=dobjs)
 
     # Note that we get an extra Unamed column in these dataframes due to the trip to csv and back
     data_dobj1 = pd.read_csv(get_retrieval_datapath(filename="df_1.csv.bz2"))
@@ -105,7 +105,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     #  - 04/05/2023: Took out for now but may need to add back if/when ICOS
     #    metadata / attribute alignment is updated.
     data_first_retrieval = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", # update_mismatch=True
+        site="WAO", species="co2", sampling_height="10m", store="user"
     )
 
     meta1 = data_first_retrieval[0].metadata
@@ -163,7 +163,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     #  - 04/05/2023: Took out for now but may need to add back if/when ICOS
     #    metadata / attribute alignment is updated.
     data_second_retrieval = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", # update_mismatch=True
+        site="WAO", species="co2", sampling_height="10m", store="user"  # update_mismatch=True
     )
 
     data2 = data_second_retrieval[0].data
@@ -183,7 +183,11 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     #  - 04/05/2023: Took out for now but may need to add back if/when ICOS
     #    metadata / attribute alignment is updated.
     retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", force_retrieval=True, # update_mismatch=True, 
+        site="WAO",
+        species="co2",
+        sampling_height="10m",
+        force_retrieval=True,  # update_mismatch=True,
+        store="user",
     )
 
     assert "There is no new data to process." in caplog.text

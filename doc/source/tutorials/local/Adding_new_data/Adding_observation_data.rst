@@ -1,3 +1,4 @@
+.. _adding-obs-data:
 Adding observation data
 =======================
 
