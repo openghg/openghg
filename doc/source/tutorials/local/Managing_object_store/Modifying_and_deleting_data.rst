@@ -9,7 +9,7 @@ Data can also be deleted from the object store.
 
 .. code:: ipython3
 
-    from openghg.store import data_handler_lookup
+    from openghg.store import data_manager
     from openghg.tutorial import populate_footprint_inert
 
 We'll first add some footprint data to the object store.
@@ -20,15 +20,15 @@ We'll first add some footprint data to the object store.
 
 .. code:: ipython3
 
-    result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
+    result = data_manager(data_type="footprints", site="TAC", height="100m")
 
 .. code:: ipython3
 
     result.metadata
 
 We want to update the model name so we'll use the ``update_metadata``
-method of the ``DataHandler`` object. To do this we need to take the
-UUID of the Datasource returned by the ``data_handler_lookup`` function,
+method of the ``DataManager`` object. To do this we need to take the
+UUID of the Datasource returned by the ``data_manager`` function,
 this is the key of the metadata dictionary.
 
    **NOTE:** Each time an object is added to the object store it is
@@ -105,14 +105,14 @@ Restore from backup
 -------------------
 
 If you've accidentally pushed some bad metadata you can fix this easily
-by restoring from backup. Each ``DataHandler`` object stores a backup of
+by restoring from backup. Each ``DataManager`` object stores a backup of
 the current metadata each time you run ``update_metadata``. Let's add
 some bad metadata, have a quick look at the backup and then restore it.
-We'll start with a fresh ``DataHandler`` object.
+We'll start with a fresh ``DataManager`` object.
 
 .. code:: ipython3
 
-    result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
+    result = data_manager(data_type="footprints", site="TAC", height="100m")
 
 .. code:: ipython3
 
@@ -166,10 +166,10 @@ Then check again
 Multiple backups
 ----------------
 
-The ``DataHandler`` object will store a backup each time you run
+The ``DataManager`` object will store a backup each time you run
 ``update_metadata``. This means you can restore any version of the
 metadata since you started editing. Do note that the backups, currently,
-only exist in memory belonging to the ``DataHandler`` object.
+only exist in memory belonging to the ``DataManager`` object.
 
 .. code:: ipython3
 
@@ -205,12 +205,12 @@ We're now back to where we want to be.
 Deleting data
 -------------
 
-To remove data from the object store we use ``data_handler_lookup``
+To remove data from the object store we use ``data_manager``
 again
 
 .. code:: ipython3
 
-    result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
+    result = data_manager(data_type="footprints", site="TAC", height="100m")
 
 .. code:: ipython3
 
@@ -233,7 +233,7 @@ To make sure it's gone let's run the search again
 
 .. code:: ipython3
 
-    result = data_handler_lookup(data_type="footprints", site="TAC", height="100m")
+    result = data_manager(data_type="footprints", site="TAC", height="100m")
 
 .. code:: ipython3
 

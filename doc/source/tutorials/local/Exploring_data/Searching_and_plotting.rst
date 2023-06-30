@@ -1,11 +1,11 @@
 Searching and plotting
 ======================
 
-In this short tutorial we’ll show how to retrieve some data and create a
+In this short tutorial we'll show how to retrieve some data and create a
 simple plot using one of our plotting functions.
 
 As in the `previous tutorial <Adding_observation_data.ipynb>`__, we will
-start by setting up our temporary object store for our data. If you’ve
+start by setting up our temporary object store for our data. If you've
 already create your own local object store you can skip the next few
 steps and move onto the **Searching** section.
 
@@ -20,7 +20,7 @@ steps and move onto the **Searching** section.
 Searching
 ---------
 
-Let’s search for all the methane data from Tacolneston to do this we
+Let's search for all the methane data from Tacolneston to do this we
 need to know the site code. We can see a summary of known site codes
 using the ``summary_site_codes()`` function
 
@@ -102,6 +102,18 @@ this is displayed:
 
     plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
 
+Searching a specific store
+--------------------------
+
+If you only want to search for data from a specific object store you can pass the store name to the ``store`` argument of the search functions.
+To search for Tacolneston data from out ``group`` object store you could do
+
+.. code:: ipython3
+
+    tac_data_search = search(site="tac", store="group")
+
+This will then only search for data in the ``group`` object store.
+
 Plot all the data
 -----------------
 
@@ -127,7 +139,7 @@ Compare different sites
 -----------------------
 
 We can easily compare data for the same species from different sites by
-doing a quick search to see what’s available
+doing a quick search to see what's available
 
 .. code:: ipython3
 

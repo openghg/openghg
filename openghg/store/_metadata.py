@@ -119,18 +119,18 @@ class ObjectStorage(Storage):
 #     return uuid
 
 
-def data_handler_lookup(data_type: str, **kwargs: Dict):  # type: ignore
+def data_manager(data_type: str, **kwargs: Dict):  # type: ignore
     """Lookup the data / metadata you'd like to modify.
 
     Args:
         data_type: Type of data, for example surface, flux, footprint
         kwargs: Any pair of keyword arguments for searching
     Returns:
-        DataHandler: A handler object to help modify the metadata
+        DataManager: A handler object to help modify the metadata
     """
     from openghg.retrieve import search
-    from openghg.dataobjects import DataHandler
+    from openghg.dataobjects import DataManager
 
     res = search(data_type=data_type, **kwargs)
     metadata = res.metadata
-    return DataHandler(metadata=metadata)
+    return DataManager(metadata=metadata)

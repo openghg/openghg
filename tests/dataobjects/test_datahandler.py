@@ -1,4 +1,4 @@
-from openghg.store import data_handler_lookup, ObsSurface, Footprints
+from openghg.store import data_manager, ObsSurface, Footprints
 from openghg.store.base import Datasource
 from openghg.retrieve import search_surface
 from openghg.standardise import standardise_surface, standardise_footprint
@@ -67,7 +67,7 @@ def footprint_read(mocker):
 
 
 def test_footprint_metadata_modification(footprint_read):
-    search_res = data_handler_lookup(data_type="footprints", site="tmb", network="lghg")
+    search_res = data_manager(data_type="footprints", site="tmb", network="lghg")
 
     assert len(search_res.metadata) == 1
     uuid = next(iter(search_res.metadata))
@@ -84,7 +84,7 @@ def test_footprint_metadata_modification(footprint_read):
     bucket = get_bucket()
     search_res.update_metadata(bucket=bucket, uuid=uuid, to_update=to_update, to_delete=to_delete)
 
-    search_res = data_handler_lookup(data_type="footprints", site="tmb", network="lghg")
+    search_res = data_manager(data_type="footprints", site="tmb", network="lghg")
 
     metadata = search_res.metadata[uuid]
 
@@ -95,7 +95,7 @@ def test_footprint_metadata_modification(footprint_read):
 
 
 def test_delete_footprint_data(footprint_read):
-    res = data_handler_lookup(data_type="footprints", site="tmb")
+    res = data_manager(data_type="footprints", site="tmb")
 
     bucket = get_bucket()
     with Footprints(bucket=bucket) as fps:
@@ -126,7 +126,7 @@ def test_delete_footprint_data(footprint_read):
 
 
 def test_find_modify_metadata():
-    search_res = data_handler_lookup(data_type="surface", site="tac", species="co2")
+    search_res = data_manager(data_type="surface", site="tac", species="co2")
 
     assert len(search_res.metadata) == 1
     uuid = next(iter(search_res.metadata))
@@ -170,7 +170,7 @@ def test_find_modify_metadata():
 
 
 def test_modify_multiple_uuids():
-    res = data_handler_lookup(data_type="surface", site="tac")
+    res = data_manager(data_type="surface", site="tac")
 
     uuids = sorted(res.metadata.keys())
 
@@ -193,7 +193,7 @@ def test_modify_multiple_uuids():
 
 
 def test_invalid_uuid_raises():
-    res = data_handler_lookup(data_type="surface", site="tac")
+    res = data_manager(data_type="surface", site="tac")
 
     bucket = get_bucket()
 
@@ -202,7 +202,7 @@ def test_invalid_uuid_raises():
 
 
 def test_delete_metadata_keys():
-    res = data_handler_lookup(data_type="surface", site="tac", species="ch4", inlet="100m")
+    res = data_manager(data_type="surface", site="tac", species="ch4", inlet="100m")
 
     expected = {
         "site": "tac",
@@ -231,17 +231,17 @@ def test_delete_metadata_keys():
     bucket = get_bucket()
     res.update_metadata(bucket=bucket, uuid="test-uuid-100", to_delete=["species"])
 
-    res = data_handler_lookup(data_type="surface", site="tac", inlet="100m")
+    res = data_manager(data_type="surface", site="tac", inlet="100m")
 
     assert "species" not in res.metadata["test-uuid-100"]
 
-    res = data_handler_lookup(data_type="surface", site="tac", species="ch4", inlet="100m")
+    res = data_manager(data_type="surface", site="tac", species="ch4", inlet="100m")
 
     assert not res
 
 
 def test_delete_and_modify_keys():
-    res = data_handler_lookup(data_type="surface", site="tac", species="ch4", inlet="100m")
+    res = data_manager(data_type="surface", site="tac", species="ch4", inlet="100m")
 
     bucket = get_bucket()
 
@@ -256,7 +256,7 @@ def test_delete_and_modify_keys():
     assert "station_longitude" not in fresh_metadata
     assert "station_latitide" not in fresh_metadata
 
-    res = data_handler_lookup(data_type="surface", site="tac", species="ch4")
+    res = data_manager(data_type="surface", site="tac", species="ch4")
 
     to_update = {"sampling_period": "12H", "tasty_dish": "pasta"}
 
@@ -279,7 +279,7 @@ def test_delete_and_modify_keys():
 
 
 def test_try_delete_none_modify_none_changes_nothing():
-    res = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
+    res = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4")
 
     bucket = get_bucket()
 
@@ -287,13 +287,13 @@ def test_try_delete_none_modify_none_changes_nothing():
 
     res.update_metadata(bucket=bucket, uuid="test-uuid-100", to_update={}, to_delete=[])
 
-    res2 = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
+    res2 = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4")
 
     assert res.metadata == res2.metadata
 
 
 def test_delete_data():
-    res = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
+    res = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4")
 
     uid = next(iter(res.metadata))
 
@@ -328,7 +328,7 @@ def test_delete_data():
 
 
 def test_metadata_backup_restore():
-    res_one = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
+    res_one = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4")
 
     uid = next(iter(res_one.metadata))
 
@@ -358,7 +358,7 @@ def test_metadata_backup_restore():
 
 
 def test_delete_update_uuid_raises():
-    res_one = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
+    res_one = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4")
     uid = next(iter(res_one.metadata))
 
     bucket = get_bucket()
@@ -371,7 +371,7 @@ def test_delete_update_uuid_raises():
 
 
 def test_metadata_backup_restore_multiple_changes():
-    res_one = data_handler_lookup(data_type="surface", site="tac", inlet="100m", species="ch4")
+    res_one = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4")
 
     uid = next(iter(res_one.metadata))
 
