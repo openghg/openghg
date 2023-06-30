@@ -39,10 +39,8 @@ class SearchResults:
                     metadata[uuid_key] = {key: uuid_metadata[key] for key in reorder}
 
         if metadata is not None:
-            data = DataFrame.from_dict(data=metadata).reset_index().to_dict(orient="list")
-
-            self.results = SearchResults.console_output(data)  # ignore
-            # self.results = (DataFrame.from_dict(data=metadata, orient="index").reset_index().drop(columns="index"))
+            df_metadata = DataFrame.from_dict(data=metadata)
+            self.results = SearchResults.df_to_table_console_output(df=df_metadata)
         else:
             self.results = {}  # type: ignore
 
@@ -252,36 +250,39 @@ class SearchResults:
             )
 
     @staticmethod
-    def console_output(data: Dict) -> None:
+    def df_to_table_console_output(df: DataFrame) -> None:
         """
-        Prints a dictionary as a Rich Table in the console.
+        Process the DataFrame and display it as a formatted table in the console.
 
         Args:
-            data (Dict): The dictionary containing the data to be displayed in the table.
+            df (DataFrame): The DataFrame to be processed and displayed.
 
         Returns:
-            None: This function does not return any value.
-
-        Raises:
-            None: This function does not raise any exceptions.
+            None
         """
-        from rich.console import Console
+        from rich import print
         from rich.table import Table, box
 
-        # Create a Rich Table
-        table = Table(show_header=False, header_style="bold Magenta", box=box.HORIZONTALS)
+        # Split columns into sets
+        column_sets = [df.columns[i : i + 4] for i in range(0, len(df.columns), 4)]
 
-        # Adding the headers
-        table.add_column("Columns", justify="left", style="cyan")
-        for column in data.keys():
-            table.add_column(column, justify="left")
+        # Iterate over the column sets
+        for columns in column_sets:
+            # Create a table instance
+            table = Table(show_header=False, header_style="bold", box=box.HORIZONTALS)
 
-        # Adding the rows
-        num_rows = len(list(data.values())[0])
-        for i in range(num_rows):
-            row_values = [str(list(data[column])[i]) for column in data.keys()]
-            table.add_row(str(i + 1), *row_values)
+            # Add table headers
+            for i, column in enumerate(columns, start=1):
+                if i == 1:
+                    table.add_column(column, style="bold")
+                else:
+                    table.add_column(column)
 
-        # Render the table
-        console = Console()
-        console.print(table)
+            # Add table data
+            for index, row in df.iterrows():
+                row_data = [str(index)] + [str(row[column]) for column in columns]
+                table.add_row(*row_data)
+
+            # Print the table
+            print(table)
+            print()
