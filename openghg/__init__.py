@@ -57,18 +57,7 @@ if cloud_env or hub_env:
 else:
     logfile_path = str(_Path.home().joinpath("openghg.log"))
 
-# Create file handler for log file - set to DEBUG (maximum detail)
-fileHandler = logging.FileHandler(logfile_path)  # May want to update this to user area
-fileFormatter = logging.Formatter("%(asctime)s:%(levelname)s:%(name)s:%(message)s")
-fileHandler.setFormatter(fileFormatter)
-fileHandler.setLevel(logging.DEBUG)
-logger.addHandler(fileHandler)
-
-# Create console handler - set to WARNING (lower level)
-consoleHandler = logging.StreamHandler()
-consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
-consoleHandler.setFormatter(consoleFormatter)
-consoleHandler.setLevel(logging.INFO)
-logger.addHandler(consoleHandler)
+util.add_file_handler(logger, logfile_path)
+util.add_stream_handler(logger)
 
 del logfile_path, hub_env, cloud_env
