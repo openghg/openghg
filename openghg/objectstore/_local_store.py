@@ -32,24 +32,11 @@ logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-# # TODO - move this to _user.py
-# def get_writable_stores() -> Dict[str, str]:
-#     """Read the writable object stores from the user's configuration file
-
-#     Returns:
-#         dict: Dictionary of writable object stores
-#     """
-#     config = read_local_config()
-#     object_stores = config["object_store"]
-
-#     return {name: data["path"] for name, data in object_stores.items() if "w" in data["permissions"]}
-
-
-def get_readable_buckets() -> Dict:
-    """Get a list of readable buckets
+def get_readable_buckets() -> Dict[str, str]:
+    """Get a dictionary of readable buckets - {store_name: store_path, ...}
 
     Returns:
-        list: List of readable buckets
+        dict: List of readable buckets
     """
     config = read_local_config()
     object_stores = config["object_store"]
@@ -60,6 +47,11 @@ def get_readable_buckets() -> Dict:
 
 
 def get_writable_buckets() -> Dict[str, str]:
+    """Get a dictionary of writable buckets - {store_name: store_path, ...}
+
+    Returns:
+        dict: Dictionary of buckets this user can write to
+    """
     config = read_local_config()
     object_stores = config["object_store"]
 
@@ -77,6 +69,9 @@ def get_writable_bucket(name: Optional[str] = None) -> str:
     Returns:
         str: Path to writable bucket
     """
+    if os.getenv("OPENGHG_TUT_STORE") is not None:
+        return str(get_tutorial_store_path())
+
     writable_buckets = get_writable_buckets()
 
     if not writable_buckets:
@@ -89,12 +84,12 @@ def get_writable_bucket(name: Optional[str] = None) -> str:
             bucket_path = writable_buckets[name]
         except KeyError:
             raise ObjectStoreError(
-                f"Invalid object store name, stores we can write to are: {', '.join(writable_buckets)}"
+                f"Invalid object store name, stores you can write to are: {', '.join(writable_buckets)}"
             )
         return bucket_path
     else:
         raise ObjectStoreError(
-            f"More than one writable store, stores we can write to are: {', '.join(writable_buckets)}."
+            f"More than one writable store, stores you can write to are: {', '.join(writable_buckets)}."
         )
 
 

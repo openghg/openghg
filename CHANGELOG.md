@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `standardise_column()` wrapper function - [PR #569](https://github.com/openghg/openghg/pull/643)
 - The 'height_name' definition from the [openghg/supplementary_data repository](https://github.com/openghg/supplementary_data) for each site can now be accessed, used and interpreted - [PR #648](https://github.com/openghg/openghg/pull/648)
+- Multiple object stores are now supported. Any number of stores may be accessed and read from and written to - [PR #664](https://github.com/openghg/openghg/pull/664)
+
+### Changed
+
+- The `openghg --quickstart` functionality has been updated to allow multiple objects stores to be added and migrate users from the previous version of the configuration file.
+- Configuration file format has been changed to support the multiple object store functionality.
+
+### Removed
+
+- Reading multi-site AQMesh data is no longer possible. This may be reintroduced if required.
 
 ## [0.5.1] - 2023-05-10
 
