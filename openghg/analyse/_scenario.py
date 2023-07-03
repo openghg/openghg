@@ -63,6 +63,8 @@ from openghg.util import synonyms
 from openghg.types import SearchError
 from pandas import Timestamp
 from xarray import DataArray, Dataset
+import datetime as dt
+from pandas import to_datetime
 
 __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution", "match_dataset_dims"]
 
@@ -1063,6 +1065,12 @@ class ModelScenario:
         flux = self.combine_flux_sources(sources)
         scenario, flux = match_dataset_dims([scenario, flux], dims=["lat", "lon"])
 
+        new_month_slice = dt.datetime(to_datetime(flux.time.values[-1]).year,
+                                          to_datetime(scenario.time.values[0]).month,1,0,0)    
+        print(f'Extracting fluxes from {new_month_slice} to match month of the first timestamp in obs.')      
+        flux = flux.sel(time=new_month_slice, method = 'ffill')
+        flux = flux.expand_dims('time',axis=-1)        
+        
         flux = flux.reindex_like(scenario, "ffill")
         flux_modelled: DataArray = scenario["fp"] * flux["flux"]
         timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
@@ -1400,7 +1408,13 @@ class ModelScenario:
 
         scenario = cast(Dataset, self.scenario)
         bc_data = bc.data
-
+        
+        new_month_slice = dt.datetime(to_datetime(bc_data.time.values[-1]).year,
+                                          to_datetime(scenario.time.values[0]).month,1,0,0)
+        print(f'Extracting bc from {new_month_slice} to match month of the first timestamp in obs.')      
+        bc_data = bc_data.sel(time=new_month_slice, method = 'ffill')
+        bc_data = bc_data.expand_dims('time',axis=-1)    
+        
         bc_data = bc_data.reindex_like(scenario, "ffill")
 
         lifetime_value = species_lifetime(self.species)
