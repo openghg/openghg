@@ -11,6 +11,8 @@ from typing import List, Union
 import logging
 from openghg.standardise import standardise_footprint, standardise_flux, standardise_bc
 
+# TODO: Decide whether we want any of the tutorial output to add to the log file?
+# - May be better to include a print statement instead in this case?
 logger = logging.getLogger("openghg.tutorial")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
