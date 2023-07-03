@@ -3,7 +3,7 @@ import math
 from copy import deepcopy
 from typing import Dict, List, Optional
 from openghg.types import AttrMismatchError
-from openghg.util import is_number
+from openghg.util import is_number, remove_stream_handler
 
 logger = logging.getLogger("openghg.standardise.metadata")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -79,6 +79,7 @@ def sync_surface_metadata(
     from rich.progress import Progress
 
     progress = Progress()
+    remove_stream_handler(logger)  # Stop console output when using progress bar
     meta_copy = deepcopy(metadata)
 
     attr_mismatches = {}
@@ -142,7 +143,9 @@ def sync_surface_metadata(
             try:
                 meta_copy[key] = attributes[key]
             except KeyError:
-                progress.log(Warning(f"{key} key not in attributes or metadata"))
+                message_key = f"Warning: {key} key not in attributes or metadata"
+                logger.info(message_key)  # Add to log file
+                progress.log(Warning(message_key))  # Include with progress bar
             else:
                 if key in keys_as_floats:
                     meta_copy[key] = float(meta_copy[key])

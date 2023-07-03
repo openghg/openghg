@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 import logging
 from openghg.store import ObsSurface
+from openghg.util import remove_stream_handler, add_stream_handler
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -87,6 +88,7 @@ def add_noaa_obspack(
     progress = Progress()
     progress.start()
     task1 = progress.add_task("[red]Downloading...", total=len(files))
+    remove_stream_handler(logger)  # Stop console output when using progress bar
 
     for filepath_index in range(len(files)):
         progress.update(task_id=task1, advance=1, refresh=True)
@@ -108,11 +110,9 @@ def add_noaa_obspack(
                 files_with_errors.append(files[filepath_index].name)
 
         elif _project in project_names_not_implemented:
-            progress.log(
-                Warning(
-                    f"Not processing {files[filepath_index].name} - no standardisation for {_project} data implemented yet."
-                )
-            )
+            message = f"Not processing {files[filepath_index].name} - no standardisation for {_project} data implemented yet."
+            logger.warning(message)
+            progress.log(Warning(message))
             processed = {}
         else:
             processed = {}
@@ -126,12 +126,13 @@ def add_noaa_obspack(
 
     if files_with_errors:
         err_string = "\n".join(files_with_errors)
-        progress.log(
-            f"[red]We were unable to process {len(files_with_errors)} files - these were:\n {err_string}."
-        )
+        message_err = f"[red]We were unable to process {len(files_with_errors)} files - these were:\n {err_string}."
+        progress.log(message_err)  # Add error to progress bar
+        logger.error(message_err)  # Include error in log file
 
     # Stops the progress bar task
     progress.stop()
+    add_stream_handler(logger)  # Add back console output once progress bar is completed.
     return processed_summary
 
 

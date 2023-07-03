@@ -9,6 +9,7 @@ import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
+from openghg.util import remove_stream_handler, add_stream_handler
 
 __all__ = ["ObsSurface"]
 
@@ -236,6 +237,7 @@ class ObsSurface(BaseStore):
 
         # Create a progress bar object using the filepaths, iterate over this below
         progress = Progress()
+        remove_stream_handler(logger)  # Stop console output when using progress bar
 
         for fp in filepath:
             if source_format == "GCWERKS":
@@ -254,12 +256,10 @@ class ObsSurface(BaseStore):
 
             file_hash = hash_file(filepath=data_filepath)
             if file_hash in obs._file_hashes and overwrite is False:
-                progress.log(
-                    Warning(
-                        "This file has been uploaded previously with the filename : "
-                        f"{obs._file_hashes[file_hash]} - skipping."
-                    )
-                )
+                message_hash = "Warning: This file has been uploaded previously with the filename : " \
+                               f"{obs._file_hashes[file_hash]} - skipping."
+                logger.info(message_hash)  # Add to log file
+                progress.log(Warning(message_hash))  # Include with progress bar
                 break
 
             # Define required input parameters for parser function
@@ -292,12 +292,10 @@ class ObsSurface(BaseStore):
                 if param in fn_accepted_parameters:
                     input_parameters[param] = param_value
                 else:
-                    progress.log(
-                        Warning(
-                            f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                            f"This is not accepted by the current standardisation functions: {parser_fn}"
-                        )
-                    )
+                    message_std = f"Warning: Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process." \
+                                  f"This is not accepted by the current standardisation functions: {parser_fn}"
+                    logger.info(message_std)
+                    progress.log(Warning(message_std))
 
             # Call appropriate standardisation function with input parameters
             data = parser_fn(**input_parameters)
@@ -380,6 +378,7 @@ class ObsSurface(BaseStore):
             # except Exception:
             #     results["error"][data_filepath.name] = traceback.format_exc()
 
+            logger.info(f"Completed processing: {data_filepath.name}.")
             progress.log(f"Completed processing: {data_filepath.name}.")
         # logger.info(f"\tUUIDs: {datasource_uuids}")
 

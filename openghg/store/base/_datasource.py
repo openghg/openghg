@@ -4,6 +4,7 @@ import numpy as np
 from openghg.store.spec import define_data_types
 from pandas import DataFrame, Timestamp, Timedelta
 from xarray import Dataset
+from openghg.util import remove_stream_handler, add_stream_handler
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -126,6 +127,7 @@ class Datasource:
         from rich.progress import Progress
 
         progress = Progress()
+        remove_stream_handler(logger)  # Stop console output when using progress bar
         # Extract period associated with data from metadata
         # TODO: May want to add period as a potential data variable so would need to extract from there if needed
         period = self.get_period()
@@ -163,7 +165,9 @@ class Datasource:
                     ex = self._data.pop(existing_daterange)
                     new = new_data.pop(new_daterange)
 
-                    progress.log("Combining overlapping data dateranges")
+                    message = "Combining overlapping data dateranges"
+                    logger.info(message)  # Add to log file
+                    progress.log(message)  # Include with progress bar
                     # Concatenate datasets along time dimension
                     try:
                         combined = xr_concat((ex, new), dim=time_coord)

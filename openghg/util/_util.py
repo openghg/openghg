@@ -4,6 +4,7 @@
 from collections.abc import Iterable
 from typing import Any, Dict, Iterator, Optional, Tuple
 import logging
+from openghg.util import remove_stream_handler
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -198,6 +199,7 @@ def verify_site(site: str) -> Optional[str]:
     from openghg_defs import site_info_file
 
     progress = Progress()
+    remove_stream_handler(logger)  # Stop console output when using progress bar
     site_data = load_json(path=site_info_file)
 
     if site.upper() in site_data:
@@ -205,7 +207,10 @@ def verify_site(site: str) -> Optional[str]:
     else:
         site_code = site_code_finder(site_name=site)
         if site_code is None:
-            progress.log(Warning(f"Unable to find site code for {site}, please provide additional metadata."))
+            message = f"Warning: Unable to find site code for {site}, please provide additional metadata."
+            logger.info(message)
+            progress.log(message)
+
         return site_code
 
 
