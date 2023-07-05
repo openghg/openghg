@@ -3,7 +3,8 @@
 """
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 from pandas import Timestamp
-from tinydb import Query
+import tinydb
+import logging
 from functools import reduce
 from openghg.types import DatasourceLookupError
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
@@ -11,6 +12,9 @@ from openghg.util import timestamp_now
 
 
 T = TypeVar("T", bound="BaseStore")
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def _find_and(x: Any, y: Any) -> Any:
@@ -67,6 +71,7 @@ class BaseStore:
         data_type: str,
         required_keys: Sequence[str],
         min_keys: Optional[int] = None,
+        update_keys: Optional[List] = None,
     ) -> Dict[str, Dict]:
         """Assign data to a Datasource. This will either create a new Datasource
         Create or get an existing Datasource for each gas in the file
@@ -103,9 +108,14 @@ class BaseStore:
             # from the object store
             # If we haven't stored data with this metadata before we create a new Datasource
             # and add the metadata to our metastore
-            if uuid is False:
+
+            # Take a copy of the metadata so we can update it
+            meta_copy = metadata.copy()
+
+            new_ds = uuid is False
+
+            if new_ds:
                 datasource = Datasource()
-                meta_copy = metadata.copy()
                 uid = datasource.uuid()
                 meta_copy["uuid"] = uid
                 # For retrieval later we'll need to know which bucket this is stored in
@@ -114,7 +124,6 @@ class BaseStore:
                 # Make sure all the metadata is lowercase for easier searching later
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
                 meta_copy = to_lowercase(d=meta_copy)
-                self._metastore.insert(meta_copy)
                 # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
                 # so we can have rapid
                 self._datasource_uuids[uid] = key
@@ -122,7 +131,15 @@ class BaseStore:
                 datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
             # Add the dataframe to the datasource
-            datasource.add_data(metadata=metadata, data=_data, overwrite=overwrite, data_type=data_type)
+            datasource.add_data(metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type)
+            # Add the metadata to the metastore and make sure it's up to date with the metadata stored
+            # in the Datasource
+            datasource_metadata = datasource.metadata()
+            if new_ds:
+                self._metastore.insert(datasource_metadata)
+            else:
+                self._metastore.update(datasource_metadata, tinydb.where("uuid") == datasource.uuid())
+
             # Save Datasource to object store
             datasource.save(bucket=self._bucket)
 
@@ -162,8 +179,7 @@ class BaseStore:
                     f"The given metadata doesn't contain enough information, we need: {required_keys}"
                 )
 
-            q = Query()
-
+            q = tinydb.Query()
             search_attrs = [getattr(q, k) == v for k, v in required_metadata.items()]
             required_result = self._metastore.search(reduce(_find_and, search_attrs))
 
@@ -197,7 +213,7 @@ class BaseStore:
         of Datasources
 
         Args:
-            uuid (str): UUID of Datasource to be removed
+            uuid: UUID of Datasource to be removed
         Returns:
             None
         """

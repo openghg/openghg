@@ -104,7 +104,7 @@ class SearchResults:
     def retrieve(
         self,
         dataframe: Optional[DataFrame] = None,
-        sort: bool = False,
+        sort: bool = True,
         elevate_inlet: bool = False,
         **kwargs: Any,
     ) -> Union[ObsData, List[ObsData]]:

@@ -97,6 +97,7 @@ def test_add_data(data, bucket):
         "data_type": "surface",
         "start_date": "2014-01-30 11:12:30+00:00",
         "end_date": "2020-12-01 22:32:29+00:00",
+        "latest_version": "v1",
     }
 
     assert d.metadata() == expected_metadata

@@ -36,7 +36,10 @@ def test_read_binary_data(mocker):
     with Emissions(bucket=bucket) as ems:
         results = ems.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
 
-    assert results == {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2", "new": True}}
+    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2",
+                                                    "new": True}}
+
+    assert results == expected_results
 
 
 def test_read_file():
@@ -240,11 +243,17 @@ def test_read_file_align_correct_datasource():
     assert len(search_results_2) == 1
 
     # Check both time points are found within the retrieved data for v5.0
-    edgar_v5_data = search_results_1.retrieve().data
+    # and date range has been extended.
+    edgar_v5_retrieve = search_results_1.retrieve()
+    edgar_v5_data = edgar_v5_retrieve.data
+    edgar_v5_metadata = edgar_v5_retrieve.metadata
 
     assert edgar_v5_data.dims["time"] == 2
     assert edgar_v5_data["time"][0] == Timestamp("2014-01-01")
     assert edgar_v5_data["time"][1] == Timestamp("2015-01-01")
+
+    assert edgar_v5_metadata["start_date"] == "2014-01-01 00:00:00+00:00"
+    assert edgar_v5_metadata["end_date"] == "2015-12-31 23:59:59+00:00"
 
 
 def test_read_file_fails_ambiguous():

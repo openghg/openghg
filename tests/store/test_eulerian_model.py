@@ -33,11 +33,14 @@ def test_read_file():
     assert orig_data["lev"].equals(eulerian_data["lev"])
     assert orig_data["SpeciesConc_CH4"].equals(eulerian_data["SpeciesConc_CH4"])
 
+    # TODO: Update Eulerian model input to run through same time recognition as
+    # other similiar data types. Add period as input.
+
     expected_metadata_values = {
         "species": "ch4",
         "date": "2015-01-01",
-        "start_date": "2015-01-01 00:00:00+00:00",
-        "end_date": "2016-01-01 00:00:00+00:00",
+        "start_date": "2015-01-16 12:00:00+00:00",
+        "end_date": "2015-01-16 12:00:01+00:00",  # Update as appropriate.
         "max_longitude": 175.0,
         "min_longitude": -180.0,
         "max_latitude": 89.0,

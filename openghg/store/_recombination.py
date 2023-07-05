@@ -31,7 +31,7 @@ def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
 def recombine_datasets(
     bucket: str,
     keys: List[str],
-    sort: Optional[bool] = False,
+    sort: Optional[bool] = True,
     attrs_to_check: Optional[Dict[str, str]] = None,
     elevate_inlet: bool = False,
 ) -> xr.Dataset:
@@ -99,8 +99,8 @@ def recombine_datasets(
                 else:
                     combined.attrs.pop(attr)
 
-    # if sort:
-    #     combined = combined.sortby("time")
+    if sort:
+        combined = combined.sortby("time")
 
     # This is modified from https://stackoverflow.com/a/51077784/1303032
     unique, index, count = np.unique(combined.time, return_counts=True, return_index=True)

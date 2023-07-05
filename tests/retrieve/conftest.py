@@ -151,6 +151,37 @@ def data_read():
             high_spatial_res=True,
         )
 
+    # Add two footprints with the same inputs but covering different time periods
+    fp_datapath2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    fp_datapath3 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    site = "TAC"
+    network = "DECC"
+    height = "100m"
+    domain = "TEST"
+    model = "NAME"
+    metmodel = "UKV"
+
+    Footprints.read_file(
+        filepath=fp_datapath2,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        metmodel=metmodel,
+    )
+
+    Footprints.read_file(
+        filepath=fp_datapath3,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        metmodel=metmodel,
+    )
+
     test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
 
     species = "n2o"
