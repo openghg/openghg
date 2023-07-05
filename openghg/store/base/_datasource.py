@@ -26,7 +26,7 @@ class Datasource:
     _datasource_root = "datasource"
     _data_root = "data"
 
-    def __init__(self, uuid: Optional[str] = None) -> None:
+    def __init__(self) -> None:
         from openghg.util import timestamp_now
         from uuid import uuid4
 
@@ -510,12 +510,10 @@ class Datasource:
         """
         from openghg.util import timestamp_tzaware
 
-        uuid = data["UUID"]
-        d = cls(uuid=uuid)
-
+        d = cls()
         # TODO: May want to merge these steps within the @classmethod
         # into __init__() so this is not added twice.
-
+        d._uuid = data["UUID"]
         d._creation_datetime = timestamp_tzaware(data["creation_datetime"])
         d._metadata = data["metadata"]
         d._stored = data["stored"]

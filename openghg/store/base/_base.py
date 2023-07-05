@@ -132,6 +132,9 @@ class BaseStore:
 
             # Add the dataframe to the datasource
             datasource.add_data(metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type)
+            # Save Datasource to object store
+            datasource.save(bucket=self._bucket)
+
             # Add the metadata to the metastore and make sure it's up to date with the metadata stored
             # in the Datasource
             datasource_metadata = datasource.metadata()
@@ -140,11 +143,7 @@ class BaseStore:
             else:
                 self._metastore.update(datasource_metadata, tinydb.where("uuid") == datasource.uuid())
 
-            # Save Datasource to object store
-            datasource.save(bucket=self._bucket)
-
-            new_datasource = uuid is False
-            uuids[key] = {"uuid": datasource.uuid(), "new": new_datasource}
+            uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
 
         return uuids
 

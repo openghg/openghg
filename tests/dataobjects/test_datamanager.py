@@ -126,7 +126,7 @@ def test_find_modify_metadata():
         "type": "air",
         "network": "decc",
         "species": "co2",
-        "calibration_scale": "wmo-x2007",
+        "calibration_scale": "wmo-x2019",
         "long_name": "tacolneston",
         "inlet_height_magl": "100",
         "data_owner": "simon o'doherty",
@@ -136,6 +136,9 @@ def test_find_modify_metadata():
         "station_long_name": "tacolneston tower, uk",
         "station_height_masl": 50.0,
         "uuid": "test-uuid-105",
+        "start_date": "2012-07-31 14:50:30+00:00",
+        "end_date": "2019-06-26 15:54:29+00:00",
+        "latest_version": "v1",
     }
 
     assert search_res.metadata[uuid].items() >= start_metadata.items()

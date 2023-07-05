@@ -162,25 +162,27 @@ def data_read():
     model = "NAME"
     metmodel = "UKV"
 
-    Footprints.read_file(
-        filepath=fp_datapath2,
-        site=site,
-        model=model,
-        network=network,
-        height=height,
-        domain=domain,
-        metmodel=metmodel,
-    )
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=fp_datapath2,
+            site=site,
+            model=model,
+            network=network,
+            height=height,
+            domain=domain,
+            metmodel=metmodel,
+        )
 
-    Footprints.read_file(
-        filepath=fp_datapath3,
-        site=site,
-        model=model,
-        network=network,
-        height=height,
-        domain=domain,
-        metmodel=metmodel,
-    )
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=fp_datapath3,
+            site=site,
+            model=model,
+            network=network,
+            height=height,
+            domain=domain,
+            metmodel=metmodel,
+        )
 
     test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
 

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 from openghg.objectstore import exists, get_object, set_object_from_json, get_writable_buckets
 from typing import DefaultDict, Dict, Optional, Union, TYPE_CHECKING
