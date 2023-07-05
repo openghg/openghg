@@ -105,7 +105,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     #  - 04/05/2023: Took out for now but may need to add back if/when ICOS
     #    metadata / attribute alignment is updated.
     data_first_retrieval = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", store="user"
+        site="WAO", species="co2", sampling_height="10m", store="user"  # update_mismatch=True
     )
 
     meta1 = data_first_retrieval[0].metadata

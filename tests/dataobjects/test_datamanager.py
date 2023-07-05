@@ -39,20 +39,6 @@ def footprint_read(mocker):
     domain = "EUROPE"
     model = "test_model"
 
-    # bucket = get_bucket(name="user")
-    # with Footprints(bucket=bucket) as fps:
-    #     fps.read_file(
-    #         filepath=datapath,
-    #         site=site,
-    #         model=model,
-    #         network=network,
-    #         height=height,
-    #         domain=domain,
-    #         period="monthly",
-    #         high_spatial_res=True,
-    #         # store="user",
-    #     )
-
     standardise_footprint(
         filepath=datapath,
         site=site,
@@ -130,33 +116,35 @@ def test_find_modify_metadata():
     assert len(search_res.metadata) == 1
     uuid = next(iter(search_res.metadata))
 
-    to_add = {"forgotten_key": "tis_but_a_scratch", "another_key": "swallow", "a_third": "parrot"}
-
     start_metadata = {
-        uuid: {
-            "site": "tac",
-            "instrument": "picarro",
-            "sampling_period": "60.0",
-            "inlet": "100m",
-            "port": "9",
-            "type": "air",
-            "network": "decc",
-            "species": "co2",
-            "calibration_scale": "wmo-x2007",
-            "long_name": "tacolneston",
-            "data_type": "surface",
-            "inlet_height_magl": "100m",
-            "data_owner": "simon o'doherty",
-            "data_owner_email": "s.odoherty@bristol.ac.uk",
-            "station_longitude": 1.13872,
-            "station_latitude": 52.51775,
-            "station_long_name": "tacolneston tower, uk",
-            "station_height_masl": 50.0,
-            "uuid": "test-uuid-101",
-        }
+        "data_type": "surface",
+        "site": "tac",
+        "instrument": "picarro",
+        "sampling_period": "60.0",
+        "inlet": "100m",
+        "port": "9",
+        "type": "air",
+        "network": "decc",
+        "species": "co2",
+        "calibration_scale": "wmo-x2007",
+        "long_name": "tacolneston",
+        "inlet_height_magl": "100",
+        "data_owner": "simon o'doherty",
+        "data_owner_email": "s.odoherty@bristol.ac.uk",
+        "station_longitude": 1.13872,
+        "station_latitude": 52.51775,
+        "station_long_name": "tacolneston tower, uk",
+        "station_height_masl": 50.0,
+        "uuid": "test-uuid-105",
     }
 
+    assert search_res.metadata[uuid].items() >= start_metadata.items()
+
+    to_add = {"forgotten_key": "tis_but_a_scratch", "another_key": "swallow", "a_third": "parrot"}
+
     search_res.update_metadata(uuid=uuid, to_update=to_add)
+
+    assert search_res.metadata[uuid].items() >= to_add.items()
 
     res = search_surface(site="tac", species="co2")
 
