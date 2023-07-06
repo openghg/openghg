@@ -77,7 +77,7 @@ def create_config(silent: bool = False) -> None:
 
     user_config_path = get_user_config_path()
 
-    # Current config version as of version 0.5.1
+    # Current config version as of version 0.6.0
     config_version = "2"
     positive_responses = ("y", "yes")
 
@@ -85,7 +85,7 @@ def create_config(silent: bool = False) -> None:
     # of the user ID and new object store path handling for multiple stores
     if user_config_path.exists():
         if silent:
-            logger.error("Error: cannot overwrite an existing configuration. Please run interactively.")
+            logger.error("Cannot update an existing configuration silently. Please run interactively.")
             return
 
         logger.info(f"User config exists at {str(user_config_path)}, checking...")
@@ -143,7 +143,8 @@ def create_config(silent: bool = False) -> None:
         except FileNotFoundError:
             pass
         else:
-            create_config()
+            create_config(silent=silent)
+            return
 
         stores = {}
 
@@ -261,44 +262,46 @@ def read_local_config() -> Dict:
     return config
 
 
-def check_config() -> bool:
+def check_config() -> None:
     """Check that the user config file is valid and the paths
-    given in it exist.
+    given in it exist. Raises ConfigFileError if problems found.
 
     Returns:
-        bool: True if config OK, else False
+        None
     """
-    valid = True
-
     config_path = get_user_config_path()
+    please_update = "please run openghg --quickstart to update it."
 
     if not config_path.exists():
-        logger.warning("Configuration file does not exist. Please create it by running openghg --quickstart.")
-        valid = False
+        raise ConfigFileError(
+            "Configuration file does not exist. Please create it by running openghg --quickstart."
+        )
 
     config = read_local_config()
-    uid = config["user_id"]
-    config_version = config.get("config_version")
-    if config_version is None:
-        logger.warn(
-            "Your configuration file is not in the latest format, please run openghg --quickstart to update it."
-        )
-        valid = False
-
-    object_stores = config["object_store"]
+    try:
+        uid = config["user_id"]
+    except KeyError:
+        raise ConfigFileError("Unable to read user ID, ")
 
     try:
         uuid.UUID(uid, version=4)
     except ValueError:
-        valid = False
-        logger.warn("Invalid user ID, please run openghg --quickstart to update it.")
+        raise ConfigFileError(f"Invalid user ID, {please_update}")
+
+    try:
+        _ = config["config_version"]
+    except KeyError:
+        raise ConfigFileError(f"Invalid config file, {please_update}")
+
+    try:
+        object_stores = config["object_store"]
+    except KeyError:
+        raise ConfigFileError(f"Unable to read object store data, {please_update}")
 
     for name, data in object_stores.items():
         p = Path(data["path"])
         if not p.exists():
             logger.info(f"The path for object store {name} at {p} does not exist but will be created.")
-
-    return valid
 
 
 def _migrate_config() -> None:

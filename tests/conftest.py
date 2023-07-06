@@ -61,7 +61,7 @@ def pytest_sessionfinish(session, exitstatus):
     """Called after whole test run finished, right before
     returning the exit status to the system.
     """
-    print(f"\n\nCleaning up testing stores.")
+    print("\n\nCleaning up testing stores.")
     clear_test_stores()
 
 
