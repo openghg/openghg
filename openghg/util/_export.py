@@ -1,9 +1,11 @@
+from __future__ import annotations
 from json import dump, loads
 from pathlib import Path
-from typing import Dict, List, Union, Optional
-
+from typing import Dict, List, Union, Optional, TYPE_CHECKING
 from addict import Dict as aDict
-from openghg.dataobjects import ObsData
+
+if TYPE_CHECKING:
+    from openghg.dataobjects import ObsData
 
 __all__ = ["to_dashboard", "to_dashboard_mobile"]
 

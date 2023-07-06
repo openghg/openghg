@@ -17,7 +17,7 @@ def standardise_surface(
     calibration_scale: Optional[str] = None,
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
     if_exists: Optional[str] = None,
     save_current: Optional[bool] = None,
     overwrite: bool = False,
@@ -36,10 +36,12 @@ def standardise_surface(
         verify_site_code: Verify the site code
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
-        update_mismatch: This determines whether mismatches between the internal data
-                attributes and the supplied / derived metadata can be updated or whether
-                this should raise an AttrMismatchError.
-                If True, currently updates metadata with attribute value.
+        update_mismatch: This determines how mismatches between the internal data
+            "attributes" and the supplied / derived "metadata" are handled.
+            This includes the options:
+                - "never" - don't update mismatches and raise an AttrMismatchError
+                - "from_source" / "attributes" - update mismatches based on input attributes
+                - "from_definition" / "metadata" - update mismatches based on input metadata
         if_exists: What to do if existing data is present.
             - None - checks new and current data for timeseries overlap
                 - adds data if no overlap

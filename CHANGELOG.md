@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `standardise_column()` wrapper function - [PR #569](https://github.com/openghg/openghg/pull/643)
 - The 'height_name' definition from the [openghg/supplementary_data repository](https://github.com/openghg/supplementary_data) for each site can now be accessed, used and interpreted - [PR #648](https://github.com/openghg/openghg/pull/648)
 - Allow metadata within metastore to be updated for existing data sources for the latest version, start and end dates of the data - [PR #652](https://github.com/openghg/openghg/pull/652)
+- Allow mismatches between values in metadata and data attributes to be updated to
+either match to the metadata or attribute collated details - [PR #682](https://github.com/openghg/openghg/pull/682)
 
 ## [0.5.1] - 2023-05-10
 
@@ -30,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed use of environment variable for test store, moved to mock - [PR # 580](https://github.com/openghg/openghg/pull/580)
 - Temporary pinning of pandas < 2.0 due to changes that introduced errors - [PR #619](https://github.com/openghg/openghg/pull/619)
 - `ObsData.plot_timeseries` now uses `openghg.plotting.plot_timeseries` to avoid duplication in efforts/code - [PR #624](https://github.com/openghg/openghg/pull/624)
+- `openghg.util._user.get_user_config_path` now creates `openghg.conf` in ~/.openghg -  [PR #690](https://github.com/openghg/openghg/pull/690) 
 
 
 ## [0.5.0] - 2023-03-14
