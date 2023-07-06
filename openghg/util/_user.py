@@ -5,9 +5,13 @@ from pathlib import Path
 from typing import Dict, Optional
 import uuid
 import toml
+import shutil
+from openghg.types import ConfigFileError
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+openghg_config_filename = "openghg.conf"
 
 
 # @lru_cache
@@ -33,17 +37,16 @@ def get_default_objectstore_path() -> Path:
 
 # @lru_cache
 def get_user_config_path() -> Path:
-    """Checks if a config file has already been create for
-    OpenGHG to use. This file is created in the user's home directory
-    in  ~/.config/openghg/user.conf on Linux / macOS or
+    """Returns path to user config file.
+
+    This file is created in the user's home directory
+    in  ~/.ghgconfig/openghg/user.conf on Linux / macOS or
     in LOCALAPPDATA/openghg/openghg.conf on Windows.
 
     Returns:
         pathlib.Path: Path to user config file
     """
     user_platform = platform.system()
-
-    openghg_config_filename = "openghg.conf"
 
     if user_platform == "Windows":
         appdata_path = os.getenv("LOCALAPPDATA")
@@ -52,7 +55,7 @@ def get_user_config_path() -> Path:
 
         config_path = Path(appdata_path).joinpath("openghg", openghg_config_filename)
     elif user_platform in ("Linux", "Darwin"):
-        config_path = Path.home().joinpath(".config", "openghg", openghg_config_filename)
+        config_path = Path.home().joinpath(".openghg", openghg_config_filename)
     else:
         raise ValueError(f"Unknown platform: {user_platform}")
 
@@ -89,12 +92,7 @@ def create_config(silent: bool = False) -> None:
 
         config = toml.loads(user_config_path.read_text())
 
-        recent = False
-        try:
-            _ = config["config_version"]
-            recent = True
-        except KeyError:
-            pass
+        recent = "config_version" in config
 
         if recent:
             user_store_path = Path(config["object_store"]["user"]["path"])
@@ -137,6 +135,16 @@ def create_config(silent: bool = False) -> None:
         user_id = config.get("user_id")
         config = _combine_config(config_version=config_version, object_stores=stores, user_id=user_id)
     else:
+        # Let's try migrating the old config
+        # If it works we call this function again
+        # otherwise continue on to create a new config
+        try:
+            _migrate_config()
+        except FileNotFoundError:
+            pass
+        else:
+            create_config()
+
         stores = {}
 
         # 1. Create the user's object store first
@@ -232,11 +240,24 @@ def read_local_config() -> Dict:
     config_path = get_user_config_path()
 
     if not config_path.exists():
-        raise FileNotFoundError(
-            "Unable to read configuration file, please see the installation instructions or run openghg --quickstart"
-        )
+        try:
+            _migrate_config()
+        except FileNotFoundError as e:
+            raise ConfigFileError(
+                "Unable to read configuration file, please see the installation instructions \
+                or run openghg --quickstart"
+            ) from e
 
     config: Dict = toml.loads(config_path.read_text())
+
+    try:
+        _ = config["object_store"]["user"]
+    except KeyError:
+        raise ConfigFileError(
+            "Invalid config file detected, please please see the installation instructions \
+                or run openghg --quickstart"
+        )
+
     return config
 
 
@@ -278,3 +299,23 @@ def check_config() -> bool:
             logger.info(f"The path for object store {name} at {p} does not exist but will be created.")
 
     return valid
+
+
+def _migrate_config() -> None:
+    """If user config file is in ~/.config, move it to ~/.openghg.
+
+    If no config is found in ~/.config or system is Windows, raise FileNotFoundError.
+
+    Returns:
+        None
+    """
+    old_config_path = Path.home().joinpath(".config", "openghg", openghg_config_filename)
+
+    if old_config_path.exists():
+        new_config_path = get_user_config_path()
+        new_config_path.parent.mkdir(parents=True)
+        shutil.move(str(old_config_path), str(new_config_path))
+        logger.info(f"Moved user config file from {str(old_config_path)} to {str(new_config_path)}.")
+        shutil.rmtree(old_config_path.parent)  # remove "openghg" dir from ~/.config
+    else:
+        raise FileNotFoundError("Configuration file not found.")
