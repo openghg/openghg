@@ -437,12 +437,10 @@ def clear_tutorial_store() -> None:
     Returns:
         None
     """
-    from rich.progress import Progress
     from openghg.objectstore import get_tutorial_store_path
 
-    progress = Progress()
     path = get_tutorial_store_path()
 
     shutil.rmtree(path=path, ignore_errors=True)
 
-    progress.log(f"Tutorial store at {path} cleared.")
+    logger.info(f"Tutorial store at {path} cleared.")
