@@ -233,6 +233,6 @@ class DataHandler:
                 # Remove from the list of Datasources the object knows about
                 data_obj.remove_datasource(uuid=u)
 
-            print(f"Deleted Datasource with UUID {u}.")
+                print(f"Deleted Datasource with UUID {u}.")
 
         data_obj.save()

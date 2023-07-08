@@ -152,8 +152,8 @@ class ObsSurface(BaseStore):
           Returns:
               dict: Dictionary of Datasource UUIDs
 
-        TODO: Should "measurement_type" be changed to "platform" to align
-        with ModelScenario and ObsColumn?
+          TODO: Should "measurement_type" be changed to "platform" to align
+          with ModelScenario and ObsColumn?
         """
         from collections import defaultdict
 
@@ -283,10 +283,10 @@ class ObsSurface(BaseStore):
             if source_format == "GCWERKS":
                 required_parameters["precision_filepath"] = precision_filepath
 
-            # Collect together optional parameters (not required but
-            # may be accepted by underlying parser function)
-            optional_parameters = {"update_mismatch": update_mismatch}
-            # TODO: extend optional_parameters to include kwargs when added
+                # Collect together optional parameters (not required but
+                # may be accepted by underlying parser function)
+                optional_parameters = {"update_mismatch": update_mismatch}
+                # TODO: extend optional_parameters to include kwargs when added
 
             input_parameters = required_parameters.copy()
 
@@ -376,10 +376,7 @@ class ObsSurface(BaseStore):
 
             # Record the Datasources we've created / appended to
             obs.add_datasources(
-                uuids=datasource_uuids,
-                data=data,
-                metastore=metastore,
-                update_keys=update_keys,
+                uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys
             )
 
             # Store the hash as the key for easy searching, store the filename as well for
