@@ -15,7 +15,7 @@ def standardise_surface(
     instrument: Optional[str] = None,
     sampling_period: Optional[str] = None,
     calibration_scale: Optional[str] = None,
-    update_mismatch: bool = False,
+    update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
     overwrite: bool = False,
 ) -> Optional[Dict]:
