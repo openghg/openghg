@@ -93,17 +93,17 @@ def add_noaa_obspack(
     progress.start()
     task1 = progress.add_task("Downloading...", total=len(files))
 
-    for filepath_index in range(len(files)):
+    for filepath in files:
         progress.update(task_id=task1, advance=1, refresh=True)
         progress.refresh()
-        param = _param_from_filename(files[filepath_index])
+        param = _param_from_filename(filepath)
         site = param["site"]
         _project = param["project"]
         measurement_type = param["measurement_type"]
         if _project in projects_to_read:
             try:
                 processed = ObsSurface.read_file(
-                    files[filepath_index],
+                    filepath,
                     site=site,
                     measurement_type=measurement_type,
                     network="NOAA",
@@ -111,11 +111,11 @@ def add_noaa_obspack(
                     overwrite=overwrite,
                 )
             except Exception:
-                files_with_errors.append(files[filepath_index].name)
+                files_with_errors.append(filepath.name)
 
         elif _project in project_names_not_implemented:
             logger.warning(
-                f"Not processing {files[filepath_index].name} - no standardisation for {_project} data implemented yet."
+                f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
             )
             processed = {}
         else:
