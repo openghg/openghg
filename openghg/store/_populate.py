@@ -8,7 +8,9 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 def add_noaa_obspack(
-    data_directory: Union[str, Path], project: Optional[str] = None, overwrite: bool = False
+    data_directory: Union[str, Path],
+    project: Optional[str] = None,
+    overwrite: bool = False,
 ) -> Dict:
     """
     Function to detect and add files from the NOAA ObsPack to the object store.
@@ -86,10 +88,11 @@ def add_noaa_obspack(
     # Object to generate progress bar
     progress = Progress()
     progress.start()
-    task1 = progress.add_task("[red]Downloading...", total=len(files))
+    task1 = progress.add_task("Downloading...", total=len(files))
 
     for filepath_index in range(len(files)):
         progress.update(task_id=task1, advance=1, refresh=True)
+        progress.refresh()
         param = _param_from_filename(files[filepath_index])
         site = param["site"]
         _project = param["project"]
@@ -108,10 +111,8 @@ def add_noaa_obspack(
                 files_with_errors.append(files[filepath_index].name)
 
         elif _project in project_names_not_implemented:
-            progress.log(
-                Warning(
-                    f"Not processing {files[filepath_index].name} - no standardisation for {_project} data implemented yet."
-                )
+            logger.warning(
+                f"Not processing {files[filepath_index].name} - no standardisation for {_project} data implemented yet."
             )
             processed = {}
         else:

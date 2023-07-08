@@ -100,7 +100,9 @@ class ObsSurface(BaseStore):
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
                 result = ObsSurface.read_file(
-                    filepath=(filepath, precision_filepath), site_filepath=site_filepath, **meta_kwargs
+                    filepath=(filepath, precision_filepath),
+                    site_filepath=site_filepath,
+                    **meta_kwargs,
                 )
 
         return result
@@ -155,10 +157,20 @@ class ObsSurface(BaseStore):
         """
         from collections import defaultdict
 
-        from openghg.store import assign_data, datasource_lookup, load_metastore, update_metadata
+        from openghg.store import (
+            assign_data,
+            datasource_lookup,
+            load_metastore,
+            update_metadata,
+        )
         from openghg.types import SurfaceTypes
-        from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
-        from rich.progress import Progress
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            hash_file,
+            load_surface_parser,
+            verify_site,
+        )
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -234,9 +246,6 @@ class ObsSurface(BaseStore):
         # Load the store for the metadata
         metastore = load_metastore(key=obs._metakey)
 
-        # Create a progress bar object using the filepaths, iterate over this below
-        progress = Progress()
-
         for fp in filepath:
             if source_format == "GCWERKS":
                 if not isinstance(fp, tuple):
@@ -254,11 +263,9 @@ class ObsSurface(BaseStore):
 
             file_hash = hash_file(filepath=data_filepath)
             if file_hash in obs._file_hashes and overwrite is False:
-                progress.log(
-                    Warning(
-                        "This file has been uploaded previously with the filename : "
-                        f"{obs._file_hashes[file_hash]} - skipping."
-                    )
+                logger.info(
+                    "This file has been uploaded previously with the filename : "
+                    f"{obs._file_hashes[file_hash]} - skipping."
                 )
                 break
 
@@ -292,11 +299,9 @@ class ObsSurface(BaseStore):
                 if param in fn_accepted_parameters:
                     input_parameters[param] = param_value
                 else:
-                    progress.log(
-                        Warning(
-                            f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                            f"This is not accepted by the current standardisation function: {parser_fn}"
-                        )
+                    logger.warning(
+                        f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
+                        f"This is not accepted by the current standardisation functions: {parser_fn}"
                     )
 
             # Call appropriate standardisation function with input parameters
@@ -371,7 +376,10 @@ class ObsSurface(BaseStore):
 
             # Record the Datasources we've created / appended to
             obs.add_datasources(
-                uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys
+                uuids=datasource_uuids,
+                data=data,
+                metastore=metastore,
+                update_keys=update_keys,
             )
 
             # Store the hash as the key for easy searching, store the filename as well for
@@ -380,7 +388,7 @@ class ObsSurface(BaseStore):
             # except Exception:
             #     results["error"][data_filepath.name] = traceback.format_exc()
 
-        # logger.info(f"Completed processing: {data_filepath.name}.")
+            logger.info(f"Completed processing: {data_filepath.name}.")
         # logger.info(f"\tUUIDs: {datasource_uuids}")
 
         # Ensure we explicitly close the metadata store
@@ -451,7 +459,10 @@ class ObsSurface(BaseStore):
             )
 
             lookup_results = datasource_lookup(
-                metastore=metastore, data=combined, required_keys=required_keys, min_keys=5
+                metastore=metastore,
+                data=combined,
+                required_keys=required_keys,
+                min_keys=5,
             )
 
             uuid = lookup_results[site]
@@ -534,7 +545,9 @@ class ObsSurface(BaseStore):
 
     @staticmethod
     def store_data(
-        data: Dict, overwrite: bool = False, required_metakeys: Optional[Sequence] = None
+        data: Dict,
+        overwrite: bool = False,
+        required_metakeys: Optional[Sequence] = None,
     ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
@@ -589,7 +602,10 @@ class ObsSurface(BaseStore):
             min_keys = len(required_metakeys)
 
         lookup_results = datasource_lookup(
-            metastore=metastore, data=to_process, required_keys=required_metakeys, min_keys=min_keys
+            metastore=metastore,
+            data=to_process,
+            required_keys=required_metakeys,
+            min_keys=min_keys,
         )
 
         # Create Datasources, save them to the object store and get their UUIDs

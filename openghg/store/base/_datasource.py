@@ -123,9 +123,7 @@ class Datasource:
         from numpy import unique as np_unique
         from openghg.util import daterange_overlap
         from xarray import concat as xr_concat
-        from rich.progress import Progress
 
-        progress = Progress()
         # Extract period associated with data from metadata
         # TODO: May want to add period as a potential data variable so would need to extract from there if needed
         period = self.get_period()
@@ -163,7 +161,7 @@ class Datasource:
                     ex = self._data.pop(existing_daterange)
                     new = new_data.pop(new_daterange)
 
-                    progress.log("Combining overlapping data dateranges")
+                    logger.info("Combining overlapping data dateranges")
                     # Concatenate datasets along time dimension
                     try:
                         combined = xr_concat((ex, new), dim=time_coord)
@@ -871,7 +869,10 @@ class Datasource:
         end_date = timestamp_tzaware(end_date)
 
         return _in_daterange(
-            start_a=start_date, end_a=end_date, start_b=self._start_date, end_b=self._end_date
+            start_a=start_date,
+            end_a=end_date,
+            start_b=self._start_date,
+            end_b=self._end_date,
         )
 
     def keys_in_daterange(

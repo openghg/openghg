@@ -52,7 +52,11 @@ def populate_footprint_inert() -> None:
                 model = "NAME"
 
                 standardise_footprint(
-                    filepath=tac_inert_path, site=site, inlet=inlet, domain=domain, model=model
+                    filepath=tac_inert_path,
+                    site=site,
+                    inlet=inlet,
+                    domain=domain,
+                    model=model,
                 )
 
 
@@ -164,7 +168,10 @@ def populate_flux_ch4() -> None:
                 species = "ch4"
 
                 standardise_flux(
-                    filepath=flux_data_waste, species=species, source=source_waste, domain=domain
+                    filepath=flux_data_waste,
+                    species=species,
+                    source=source_waste,
+                    domain=domain,
                 )
                 standardise_flux(
                     filepath=flux_data_energyprod,
@@ -205,7 +212,12 @@ def populate_bc_ch4() -> None:
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
-                standardise_bc(filepath=bc_data_path, bc_input=bc_input, species=species, domain=domain)
+                standardise_bc(
+                    filepath=bc_data_path,
+                    bc_input=bc_input,
+                    species=species,
+                    domain=domain,
+                )
 
     logger.info("Done.")
 
@@ -239,8 +251,18 @@ def populate_surface_data() -> None:
         warnings.simplefilter("ignore")
         with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stdout(devnull):
-                standardise_surface(filepaths=bsd_paths, source_format="crds", site="bsd", network="decc")
-                standardise_surface(filepaths=tac_paths, source_format="crds", site="tac", network="decc")
+                standardise_surface(
+                    filepaths=bsd_paths,
+                    source_format="crds",
+                    site="bsd",
+                    network="decc",
+                )
+                standardise_surface(
+                    filepaths=tac_paths,
+                    source_format="crds",
+                    site="tac",
+                    network="decc",
+                )
                 standardise_surface(
                     filepaths=capegrim_tuple,
                     instrument="medusa",

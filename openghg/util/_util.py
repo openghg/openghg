@@ -193,11 +193,9 @@ def verify_site(site: str) -> Optional[str]:
     Returns:
         str: Verified three letter site code if valid site
     """
-    from rich.progress import Progress
     from openghg.util import load_json
     from openghg_defs import site_info_file
 
-    progress = Progress()
     site_data = load_json(path=site_info_file)
 
     if site.upper() in site_data:
@@ -205,7 +203,7 @@ def verify_site(site: str) -> Optional[str]:
     else:
         site_code = site_code_finder(site_name=site)
         if site_code is None:
-            progress.log(Warning(f"Unable to find site code for {site}, please provide additional metadata."))
+            logger.info(f"Unable to find site code for {site}, please provide additional metadata.")
         return site_code
 
 
