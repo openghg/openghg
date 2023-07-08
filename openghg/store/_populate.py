@@ -87,6 +87,9 @@ def add_noaa_obspack(
 
     # Object to generate progress bar
     progress = Progress()
+
+    # Object to generate progress bar
+    progress = Progress()
     progress.start()
     task1 = progress.add_task("Downloading...", total=len(files))
 
@@ -127,7 +130,11 @@ def add_noaa_obspack(
 
     if files_with_errors:
         err_string = "\n".join(files_with_errors)
-        logger.info(f"We were unable to process {len(files_with_errors)} files - these were:\n {err_string}.")
+        progress.log(
+            f"[red]We were unable to process {len(files_with_errors)} files - these were:\n {err_string}."
+        )
+
+    # Stops the progress bar task
     progress.stop()
     return processed_summary
 
