@@ -5,25 +5,20 @@ from pathlib import Path
 import tempfile
 from typing import Dict, List, Union
 
-__all__ = [
-    "get_surface_datapath",
-    "get_emissions_datapath",
-    "get_bc_datapath",
-    "get_footprint_datapath",
-    "glob_files",
-    "clear_test_store",
-    "all_datasource_keys",
-]
+
+def temporary_store_paths() -> Dict[str, Path]:
+    return {
+        "user": Path(tempfile.gettempdir(), "openghg_testing_store"),
+        "group": Path(tempfile.gettempdir(), "openghg_testing_group_store"),
+        "shared": Path(tempfile.gettempdir(), "openghg_testing_shared_store"),
+    }
 
 
-def temporary_store_path():
-    return Path(tempfile.gettempdir(), "openghg_testing_store")
-
-
-def clear_test_store():
-    # Clears the testing object store
-    tmp_store = temporary_store_path()
-    shutil.rmtree(path=tmp_store, ignore_errors=True)
+def clear_test_stores() -> None:
+    # Clears the testing object stores
+    tmp_stores = temporary_store_paths()
+    for path in tmp_stores.values():
+        shutil.rmtree(path=path, ignore_errors=True)
 
 
 def get_surface_datapath(filename: str, source_format: str) -> Path:

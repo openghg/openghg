@@ -1,7 +1,8 @@
 import pytest
 from helpers import get_footprint_datapath
 from openghg.retrieve import search
-from openghg.store import Footprints, datasource_lookup, load_metastore, recombine_datasets
+from openghg.objectstore import get_bucket
+from openghg.store import Footprints, load_metastore
 from openghg.util import hash_bytes
 
 
@@ -31,8 +32,9 @@ def test_read_footprint_co2_from_data(mocker):
 
     # Expect co2 data to be high time resolution
     # - could include high_time_res=True but don't need to as this will be set automatically
-
-    result = Footprints.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+    bucket = get_bucket()
+    with Footprints(bucket=bucket) as fps:
+        result = fps.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
 
     assert result == {"tac_test_NAME_100m": {"uuid": "test-uuid-1", "new": True}}
 
@@ -60,22 +62,25 @@ def test_read_footprint_standard(keyword, value):
     domain = "EUROPE"
     model = "NAME"
 
+    bucket = get_bucket()
     if keyword == "inlet":
-        Footprints.read_file(
-            filepath=datapath,
-            site=site,
-            model=model,
-            inlet=value,
-            domain=domain,
-        )
+        with Footprints(bucket=bucket) as fps:
+            fps.read_file(
+                filepath=datapath,
+                site=site,
+                model=model,
+                inlet=value,
+                domain=domain,
+            )
     elif keyword == "height":
-        Footprints.read_file(
-            filepath=datapath,
-            site=site,
-            model=model,
-            height=value,
-            domain=domain,
-        )
+        with Footprints(bucket=bucket) as fps:
+            fps.read_file(
+                filepath=datapath,
+                site=site,
+                model=model,
+                height=value,
+                domain=domain,
+            )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
@@ -132,16 +137,18 @@ def test_read_footprint_high_spatial_res():
     domain = "EUROPE"
     model = "test_model"
 
-    Footprints.read_file(
-        filepath=datapath,
-        site=site,
-        model=model,
-        network=network,
-        inlet=inlet,
-        domain=domain,
-        period="monthly",
-        high_spatial_res=True,
-    )
+    bucket = get_bucket()
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=datapath,
+            site=site,
+            model=model,
+            network=network,
+            inlet=inlet,
+            domain=domain,
+            period="monthly",
+            high_spatial_res=True,
+        )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
@@ -289,15 +296,17 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
     # Expect co2 data to be high time resolution
     # - could include high_time_res=True but don't need to as this will be set automatically
 
-    Footprints.read_file(
-        filepath=datapath,
-        site=site,
-        model=model,
-        metmodel=metmodel,
-        inlet=inlet,
-        species=species,
-        domain=domain,
-    )
+    bucket = get_bucket()
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=datapath,
+            site=site,
+            model=model,
+            metmodel=metmodel,
+            inlet=inlet,
+            species=species,
+            domain=domain,
+        )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
@@ -353,15 +362,17 @@ def test_read_footprint_short_lived():
     # Expect rn data to be short lived
     # - could include short_lifetime=True but shouldn't need to as this will be set automatically
 
-    Footprints.read_file(
-        filepath=datapath,
-        site=site,
-        model=model,
-        metmodel=metmodel,
-        inlet=inlet,
-        species=species,
-        domain=domain,
-    )
+    bucket = get_bucket()
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=datapath,
+            site=site,
+            model=model,
+            metmodel=metmodel,
+            inlet=inlet,
+            species=species,
+            domain=domain,
+        )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
@@ -405,34 +416,6 @@ def test_read_footprint_short_lived():
 
     for key in expected_attrs:
         assert footprint_data.attrs[key] == expected_attrs[key]
-
-
-def test_datasource_add_lookup():
-    f = Footprints()
-
-    fake_datasource = {"tmb_lghg_10m_europe": {"uuid": "mock-uuid-123456", "new": True}}
-
-    mock_data = {
-        "tmb_lghg_10m_europe": {
-            "metadata": {
-                "data_type": "footprints",
-                "site": "tmb",
-                "inlet": "10m",
-                "domain": "europe",
-                "model": "test_model",
-                "network": "lghg",
-            }
-        }
-    }
-
-    with load_metastore(key="test-metastore-123") as metastore:
-        f.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
-
-        assert f.datasources() == ["mock-uuid-123456"]
-        required = ["site", "inlet", "domain", "model"]
-        lookup = datasource_lookup(data=mock_data, metastore=metastore, required_keys=required)
-
-        assert lookup["tmb_lghg_10m_europe"] == fake_datasource["tmb_lghg_10m_europe"]["uuid"]
 
 
 def test_footprint_schema():

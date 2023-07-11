@@ -10,13 +10,13 @@ The base dataclass inherited by (most of) the dataclasses below.
 .. autoclass:: openghg.dataobjects._BaseData
     :members:
 
-DataHandler
+DataManager
 ===========
 
 This ``dataclass`` is used to modify metadata stored in :ref:`Datasource<Datasource>` objects and the metadata store.
-``DataHandler`` instances are created by the :ref:`data_handler_lookup<data_handler_lookup>` function.
+``DataManager`` instances are created by the :ref:`data_manager<data_manager>` function.
 
-.. autoclass:: openghg.dataobjects.DataHandler
+.. autoclass:: openghg.dataobjects.DataManager
     :members:
 
 SearchResults

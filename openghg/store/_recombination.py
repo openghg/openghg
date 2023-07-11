@@ -20,14 +20,16 @@ def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
     Returns:
         dict: Dictionary of xarray.Datasets
     """
-    result = {}
-    for key, key_list in keys.items():
-        result[key] = recombine_datasets(keys=key_list, sort=sort)
+    raise NotImplementedError
+    # result = {}
+    # for key, key_list in keys.items():
+    #     result[key] = recombine_datasets(keys=key_list, sort=sort)
 
-    return result
+    # return result
 
 
 def recombine_datasets(
+    bucket: str,
     keys: List[str],
     sort: Optional[bool] = True,
     attrs_to_check: Optional[Dict[str, str]] = None,
@@ -37,8 +39,9 @@ def recombine_datasets(
     into a single dataset
 
     Args:
+        bucket: Object store bucket to retrieve data from
         keys: List of object store keys
-        sort: Sort the resulting Dataset by the time dimension. Default = True
+        sort: Sort the resulting Dataset by the time dimension, defaults to False
         attrs_to_check: Attributes to check for duplicates. If duplicates are present
             a new data variable will be created containing the values from each dataset
             If a dictionary is passed, the attribute(s) will be retained and the new value assigned.
@@ -47,14 +50,11 @@ def recombine_datasets(
     Returns:
         xarray.Dataset: Combined Dataset
     """
-    from openghg.objectstore import get_bucket
     from openghg.store.base import Datasource
     from xarray import concat as xr_concat
 
     if not keys:
         raise ValueError("No data keys passed.")
-
-    bucket = get_bucket()
 
     data = [Datasource.load_dataset(bucket=bucket, key=k) for k in keys]
 
@@ -118,6 +118,8 @@ def recombine_datasets(
     # Only keep the unique values if we have dupes
     # if index.size != combined.time.size:
     #    combined = combined.isel(time=index)
+    if sort:
+        combined = combined.sortby("time")
 
     return combined
 

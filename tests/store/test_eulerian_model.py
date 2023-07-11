@@ -1,5 +1,6 @@
 from helpers import get_eulerian_datapath
 from openghg.retrieve import search
+from openghg.objectstore import get_bucket
 from openghg.store import EulerianModel
 from xarray import open_dataset
 
@@ -7,7 +8,9 @@ from xarray import open_dataset
 def test_read_file():
     test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
-    proc_results = EulerianModel.read_file(filepath=test_datapath, model="GEOSChem", species="ch4")
+    bucket = get_bucket()
+    with EulerianModel(bucket=bucket) as em:
+        proc_results = em.read_file(filepath=test_datapath, model="GEOSChem", species="ch4")
 
     assert "geoschem_ch4_2015-01-01" in proc_results
 
