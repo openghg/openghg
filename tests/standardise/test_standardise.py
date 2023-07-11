@@ -1,15 +1,39 @@
 from pathlib import Path
 import pytest
 
-from helpers import get_emissions_datapath, get_footprint_datapath, get_column_datapath, get_surface_datapath
-from openghg.standardise import standardise_flux, standardise_footprint, standardise_column, standardise_surface
+from helpers import (
+    get_emissions_datapath,
+    get_footprint_datapath,
+    get_column_datapath,
+    get_surface_datapath,
+)
+from openghg.standardise import (
+    standardise_flux,
+    standardise_footprint,
+    standardise_column,
+    standardise_surface,
+)
 from openghg.util import compress
-from openghg.types import AttrMismatchError
-from openghg.retrieve import get_obs_surface, search_surface
-from openghg.store import ObsSurface
+from openghg.types import AttrMismatchError, ObjectStoreError
+from openghg.retrieve import search, get_obs_surface
 
-# Test local functions
-def test_local_obs():
+
+def test_standardise_to_read_only_store():
+    hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
+
+    with pytest.raises(ObjectStoreError):
+        standardise_surface(
+            filepaths=hfd_path,
+            site="hfd",
+            instrument="picarro",
+            network="DECC",
+            source_format="CRDS",
+            overwrite=True,
+            store="shared",
+        )
+
+
+def test_standardise_obs_two_writable_stores():
     hfd_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 
     results = standardise_surface(
@@ -19,6 +43,7 @@ def test_local_obs():
         network="DECC",
         source_format="CRDS",
         force=True,
+        store="user",
     )
 
     results = results["processed"]["hfd.picarro.1minute.100m.min.dat"]
@@ -26,6 +51,11 @@ def test_local_obs():
     assert "error" not in results
     assert "ch4" in results
     assert "co2" in results
+
+    results = search(site="hfd", inlet="100m", store="user")
+    assert results
+    results = search(site="hfd", inlet="100m", store="group")
+    assert not results
 
     mhd_path = get_surface_datapath(filename="mhd.co.hourly.g2401.15m.dat", source_format="ICOS")
 
@@ -36,19 +66,27 @@ def test_local_obs():
         instrument="g2401",
         network="ICOS",
         source_format="ICOS",
+        store="group",
     )
 
     assert "co" in results["processed"]["mhd.co.hourly.g2401.15m.dat"]
 
+    results = search(site="mhd", instrument="g2401", store="group")
+    assert results
+    results = search(site="mhd", instrument="g2401", store="user")
+    assert not results
 
-def test_local_obs_openghg():
+
+def test_standardise_obs_openghg():
     """
     Based on reported Issue #477 where ValueError is raised when synchronising the metadata and attributes.
      - "inlet" and "inlet_height_magl" attribute within netcdf file was a float; "inlet" within metadata is converted to a string with "m" ("185m")
      - "inlet_height_magl" in metadata was just being set to "inlet" from metadata ("185m")
      - sync_surface_metadata was trying to compare the two values of 185.0 and "185m" but "185m" could not be converted to a float - ValueError
     """
-    filepath = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG")
+    filepath = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
+    )
 
     results = standardise_surface(
         filepaths=filepath,
@@ -59,6 +97,7 @@ def test_local_obs_openghg():
         source_format="openghg",
         sampling_period="1H",
         force=True,
+        store="user",
     )
 
     results = results["processed"]["DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc"]
@@ -67,9 +106,9 @@ def test_local_obs_openghg():
     assert "co2" in results
 
 
-def test_local_obs_metadata_mismatch_attr():
+def test_standardise_obs_metadata_mismatch():
     """
-    Test a mismatch between the derived attributes and derived metadata can be 
+    Test a mismatch between the derived attributes and derived metadata can be
     updated and data added to the object store.
 
     This will use the attributes data and update the metadata.
@@ -78,7 +117,7 @@ def test_local_obs_metadata_mismatch_attr():
         - 'station_long_name'
             - Metadata (from mocked site_info) - 'Tacolneston Tower, UK'
             - Attributes (from file) - 'ATTRIBUTE DATA'
-    
+
     Note: using fake height of 999m to not intefere with previous data at 185m
     """
 
@@ -98,6 +137,7 @@ def test_local_obs_metadata_mismatch_attr():
         sampling_period="1H",
         update_mismatch=update_mismatch,
         overwrite=True,
+        store="user",
     )
 
     # Check data has been successfully processed
@@ -126,7 +166,7 @@ def test_local_obs_metadata_mismatch_attr():
 
 def test_local_obs_metadata_mismatch_meta():
     """
-    Test a mismatch between the derived attributes and derived metadata can be 
+    Test a mismatch between the derived attributes and derived metadata can be
     updated and data added to the object store.
 
     This will use the metadata values and update the attributes.
@@ -135,7 +175,7 @@ def test_local_obs_metadata_mismatch_meta():
         - 'station_long_name'
             - Metadata (from mocked site_info) - 'Tacolneston Tower, UK'
             - Attributes (from file) - 'ATTRIBUTE DATA'
-    
+
     Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'
     but slightly different height used to not clash with previous data.
     """
@@ -155,6 +195,7 @@ def test_local_obs_metadata_mismatch_meta():
         source_format="openghg",
         sampling_period="1H",
         update_mismatch=update_mismatch,
+        store="user",
     )
 
     # Check data has been successfully processed
@@ -188,7 +229,9 @@ def test_local_obs_metadata_mismatch_fail():
 
     Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'.
     """
-    filepath = get_surface_datapath(filename="DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc", source_format="OPENGHG")
+    filepath = get_surface_datapath(
+        filename="DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc", source_format="OPENGHG"
+    )
 
     with pytest.raises(AttrMismatchError) as e_info:
         standardise_surface(
@@ -201,6 +244,7 @@ def test_local_obs_metadata_mismatch_fail():
             sampling_period="1H",
             update_mismatch="never",
             force=True,
+            store="user",
         )
 
         # Check different values are reported in error message
@@ -225,6 +269,7 @@ def test_standardise_column():
         domain=domain,
         species=species,
         force=True,
+        store="user",
     )
 
     assert "error" not in results
@@ -249,6 +294,7 @@ def test_standardise_footprint():
         domain=domain,
         high_spatial_res=True,
         force=True,
+        store="user",
     )
 
     assert "error" not in results
@@ -265,13 +311,13 @@ def test_standardise_flux():
         domain="europe",
         high_time_resolution=False,
         force=True,
+        store="user",
     )
 
     assert "co2_gpp-cardamom_europe" in proc_results
 
 
 def test_standardise_flux_additional_keywords():
-
     test_datapath = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
     proc_results = standardise_flux(
@@ -281,12 +327,13 @@ def test_standardise_flux_additional_keywords():
         domain="globaledgar",
         database="EDGAR",
         database_version="v50",
+        store="user",
     )
 
     assert "ch4_anthro_globaledgar" in proc_results
 
 
-def test_standardise(monkeypatch, mocker, tmpdir):
+def test_cloud_standardise(monkeypatch, mocker, tmpdir):
     monkeypatch.setenv("OPENGHG_HUB", "1")
     call_fn_mock = mocker.patch("openghg.cloud.call_function", autospec=True)
     test_string = "some_text"

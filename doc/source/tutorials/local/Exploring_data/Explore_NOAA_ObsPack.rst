@@ -51,6 +51,11 @@ Now we have the data retrieved and extracted we can ask OpenGHG to process it an
 Process and store the data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. note::
+    Outside of this tutorial, if you have write access to multiple object stores you
+    will need to pass the name of the object store you wish to write to to
+    the ``store`` argument of the ``add_noaa_obspack`` function.
+
 We pass the directory containing the ObsPack data to ``add_noaa_obspack`` which processes each of the files it finds in the directory.
 
 .. code:: ipython3

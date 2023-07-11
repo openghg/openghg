@@ -1,3 +1,4 @@
+from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
@@ -9,8 +10,7 @@ import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
-
-__all__ = ["ObsSurface"]
+from types import TracebackType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -23,16 +23,19 @@ class ObsSurface(BaseStore):
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    # @staticmethod
-    # def load_metastore() -> TinyDB:
-    #     """ Load the ObsSurface metadata store
+    def __enter__(self) -> ObsSurface:
+        return self
 
-    #     Returns:
-    #         TinyDB: TinyDB object
-    #     """
+    def __exit__(
+        self,
+        exc_type: Optional[BaseException],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        self.save()
 
-    @staticmethod
     def read_data(
+        self,
         binary_data: bytes,
         metadata: Dict,
         file_metadata: Dict,
@@ -95,21 +98,21 @@ class ObsSurface(BaseStore):
                 raise ValueError("No valid metadata arguments passed, please check documentation.")
 
             if precision_data is None:
-                result = ObsSurface.read_file(filepath=filepath, **meta_kwargs)
+                result = self.read_file(filepath=filepath, **meta_kwargs)
             else:
                 # We'll assume that if we have precision data it's GCWERKS
                 # We don't read anything from the precision filepath so it's name doesn't matter
                 precision_filepath = tmpdir_path.joinpath("precision_data.C")
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
-                result = ObsSurface.read_file(
+                result = self.read_file(
                     filepath=(filepath, precision_filepath), site_filepath=site_filepath, **meta_kwargs
                 )
 
         return result
 
-    @staticmethod
     def read_file(
+        self,
         filepath: multiPathType,
         source_format: str,
         network: str,
@@ -145,6 +148,7 @@ class ObsSurface(BaseStore):
             instrument: Instrument name
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
+<<<<<<< HEAD
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
@@ -168,6 +172,18 @@ class ObsSurface(BaseStore):
                 If None, this will depend on if_exists input (None -> True), (other -> False)
             overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
             force: Force adding of data even if this is identical to data stored.
+=======
+            update_mismatch: This determines how mismatches between the internal data
+                  "attributes" and the supplied / derived "metadata" are handled.
+                  This includes the options:
+                      - "never" - don't update mismatches and raise an AttrMismatchError
+                      - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+                      - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
+            overwrite: Overwrite previously uploaded data
+                  verify_site_code: Verify the site code
+                  site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+                      Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+>>>>>>> new_object_store
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -176,8 +192,6 @@ class ObsSurface(BaseStore):
         """
         import sys
         from collections import defaultdict
-
-        from openghg.store import assign_data, datasource_lookup, load_metastore, update_metadata
         from openghg.types import SurfaceTypes
         from openghg.util import (
             clean_string,
@@ -269,12 +283,7 @@ class ObsSurface(BaseStore):
         # Load the data retrieve object
         parser_fn = load_surface_parser(source_format=source_format)
 
-        obs = ObsSurface.load()
-
         results: resultsType = defaultdict(dict)
-
-        # Load the store for the metadata
-        metastore = load_metastore(key=obs._metakey)
 
         # Create a progress bar object using the filepaths, iterate over this below
         with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
@@ -294,10 +303,10 @@ class ObsSurface(BaseStore):
                     data_filepath = Path(fp)
 
                 file_hash = hash_file(filepath=data_filepath)
-                if file_hash in obs._file_hashes and not force:
+                if file_hash in self._file_hashes and not force:
                     logger.warning(
                         "This file has been uploaded previously with the filename : "
-                        f"{obs._file_hashes[file_hash]} - skipping.\n"
+                        f"{self._file_hashes[file_hash]} - skipping.\n"
                         "If necessary, use force=True to bypass this to add this data."
                     )
                     break
@@ -391,51 +400,32 @@ class ObsSurface(BaseStore):
                     "data_type",
                 )
 
-                lookup_results = datasource_lookup(
-                    metastore=metastore, data=data, required_keys=required_keys, min_keys=5
-                )
-
                 # Create Datasources, save them to the object store and get their UUIDs
                 data_type = "surface"
-                datasource_uuids = assign_data(
-                    data_dict=data,
-                    lookup_results=lookup_results,
+                datasource_uuids = self.assign_data(
+                    data=data,
                     if_exists=if_exists,
                     new_version=new_version,
                     data_type=data_type,
+                    required_keys=required_keys,
+                    min_keys=5,
                 )
-
-                update_keys = ["start_date", "end_date", "latest_version"]
-                data = update_metadata(data_dict=data, uuid_dict=datasource_uuids, update_keys=update_keys)
 
                 results["processed"][data_filepath.name] = datasource_uuids
 
-                # Record the Datasources we've created / appended to
-                obs.add_datasources(
-                    uuids=datasource_uuids, data=data, metastore=metastore, update_keys=update_keys
-                )
-
                 # Store the hash as the key for easy searching, store the filename as well for
                 # ease of checking by user
-                obs._file_hashes[file_hash] = data_filepath.name
-                # except Exception:
-                #     results["error"][data_filepath.name] = traceback.format_exc()
+                # TODO - maybe add a timestamp to this string?
+                self._file_hashes[file_hash] = data_filepath.name
 
                 progress_bar.update(1)
 
                 logger.info(f"Completed processing: {data_filepath.name}.")
-                # logger.info(f"\tUUIDs: {datasource_uuids}")
-
-        # Ensure we explicitly close the metadata store
-        # as we're using the cached storage method
-        metastore.close()
-        # Save this object back to the object store
-        obs.save()
 
         return dict(results)
 
-    @staticmethod
     def read_multisite_aqmesh(
+        self,
         data_filepath: pathType,
         metadata_filepath: pathType,
         network: str = "aqmesh_glasgow",
@@ -452,89 +442,80 @@ class ObsSurface(BaseStore):
 
         This data is different in that it contains multiple sites in the same file.
         """
-        from collections import defaultdict
+        raise NotImplementedError(
+            "This needs reworking for the new data storage method or removing as unused."
+        )
+        # from collections import defaultdict
+        # from openghg.standardise.surface import parse_aqmesh
+        # from openghg.store import assign_data
+        # from openghg.util import hash_file
+        # from tqdm import tqdm
 
-        from openghg.standardise.surface import parse_aqmesh
-        from openghg.store import assign_data, datasource_lookup, load_metastore
-        from openghg.util import hash_file
-        from tqdm import tqdm
+        # data_filepath = Path(data_filepath)
+        # metadata_filepath = Path(metadata_filepath)
 
-        data_filepath = Path(data_filepath)
-        metadata_filepath = Path(metadata_filepath)
+        # if overwrite and if_exists is None:
+        #     logger.warning(
+        #         "Overwrite flag is deprecated in preference to `if_exists` input."
+        #         "See documentation for details of this input and options."
+        #     )
+        #     if_exists = "new"
 
-        if overwrite and if_exists is None:
-            logger.warning(
-                "Overwrite flag is deprecated in preference to `if_exists` input."
-                "See documentation for details of this input and options."
-            )
-            if_exists = "new"
+        # # Get a dict of data and metadata
+        # processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
-        # Load the ObsSurface object for retrieve
-        obs = ObsSurface.load()
-        # Load the metadata store
-        metastore = load_metastore(key=obs._metakey)
-        # Get a dict of data and metadata
-        processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
+        # results: resultsType = defaultdict(dict)
+        # for site, site_data in tqdm(processed_data.items()):
+        #     metadata = site_data["metadata"]
+        #     measurement_data = site_data["data"]
 
-        results: resultsType = defaultdict(dict)
-        for site, site_data in tqdm(processed_data.items()):
-            metadata = site_data["metadata"]
-            measurement_data = site_data["data"]
+        #     file_hash = hash_file(filepath=data_filepath)
 
-            file_hash = hash_file(filepath=data_filepath)
+        #     if self.seen_hash(file_hash=file_hash) and not force:
+        #         raise ValueError(
+        #             f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}.\n"
+        #              "If necessary, use force=True to bypass this to add this data."
+        #         )
+        #         break
 
-            if obs.seen_hash(file_hash=file_hash) and if_exists is None:
-                raise ValueError(
-                    f"This file has been uploaded previously with the filename : {obs._file_hashes[file_hash]}."
-                )
-                break
+        #     combined = {site: {"data": measurement_data, "metadata": metadata}}
 
-            combined = {site: {"data": measurement_data, "metadata": metadata}}
+        #     required_keys = (
+        #         "site",
+        #         "species",
+        #         "inlet",
+        #         "network",
+        #         "instrument",
+        #         "sampling_period",
+        #         "measurement_type",
+        #     )
 
-            required_keys = (
-                "site",
-                "species",
-                "inlet",
-                "network",
-                "instrument",
-                "sampling_period",
-                "measurement_type",
-            )
+        #     uuid = lookup_results[site]
 
-            lookup_results = datasource_lookup(
-                metastore=metastore, data=combined, required_keys=required_keys, min_keys=5
-            )
+        #     # Jump through these hoops until we can rework the data assignment functionality to split it out
+        #     # into more sensible functions
+        #     # TODO - fix the assign data function to avoid this kind of hoop jumping
+        #     lookup_result = {site: uuid}
 
-            uuid = lookup_results[site]
+        #     # Create Datasources, save them to the object store and get their UUIDs
+        #     data_type = "surface"
+        #     datasource_uuids = assign_data(
+        #         data_dict=combined,
+        #         lookup_results=lookup_result,
+        #         overwrite=overwrite,
+        #         data_type=data_type,
+        #     )
 
-            # Jump through these hoops until we can rework the data assignment functionality to split it out
-            # into more sensible functions
-            # TODO - fix the assign data function to avoid this kind of hoop jumping
-            lookup_result = {site: uuid}
+        #     results[site] = datasource_uuids
 
-            # Create Datasources, save them to the object store and get their UUIDs
-            data_type = "surface"
-            datasource_uuids = assign_data(
-                data_dict=combined,
-                lookup_results=lookup_result,
-                if_exists=if_exists,
-                data_type=data_type,
-            )
+        #     # Record the Datasources we've created / appended to
+        #     self.add_datasources(uuids=datasource_uuids, data=combined, metastore=self._metastore)
 
-            results[site] = datasource_uuids
+        #     # Store the hash as the key for easy searching, store the filename as well for
+        #     # ease of checking by user
+        #     self.set_hash(file_hash=file_hash, filename=data_filepath.name)
 
-            # Record the Datasources we've created / appended to
-            obs.add_datasources(uuids=datasource_uuids, data=combined, metastore=metastore)
-
-            # Store the hash as the key for easy searching, store the filename as well for
-            # ease of checking by user
-            obs.set_hash(file_hash=file_hash, filename=data_filepath.name)
-
-        obs.save()
-        # Close the metadata store and write new records
-        metastore.close()
-
-        return results
+        # return results
 
     @staticmethod
     def schema(species: str) -> DataSchema:
@@ -583,8 +564,8 @@ class ObsSurface(BaseStore):
         data_schema = ObsSurface.schema(species)
         data_schema.validate_data(data)
 
-    @staticmethod
     def store_data(
+        self,
         data: Dict,
         if_exists: Optional[str] = None,
         overwrite: bool = False,
@@ -608,7 +589,6 @@ class ObsSurface(BaseStore):
         Returns:
             Dict or None:
         """
-        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.util import hash_retrieved_data
 
         if overwrite and if_exists is None:
@@ -618,13 +598,14 @@ class ObsSurface(BaseStore):
             )
             if_exists = "new"
 
-        obs = ObsSurface.load()
-        metastore = load_metastore(key=obs._metakey)
+        # TODO: May need to delete
+        # obs = ObsSurface.load()
+        # metastore = load_metastore(key=obs._metakey)
 
         # Very rudimentary hash of the data and associated metadata
         hashes = hash_retrieved_data(to_hash=data)
         # Find the keys in data we've seen before
-        seen_before = {next(iter(v)) for k, v in hashes.items() if k in obs._retrieved_hashes}
+        seen_before = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
 
         if len(seen_before) == len(data):
             logger.warning("Note: There is no new data to process.")
@@ -650,29 +631,20 @@ class ObsSurface(BaseStore):
                 "data_source",
                 "icos_data_level",
             )
-            min_keys = 5
-        else:
-            min_keys = len(required_metakeys)
-
-        lookup_results = datasource_lookup(
-            metastore=metastore, data=to_process, required_keys=required_metakeys, min_keys=min_keys
-        )
 
         # Create Datasources, save them to the object store and get their UUIDs
         data_type = "surface"
-        datasource_uuids = assign_data(
-            data_dict=to_process,
-            lookup_results=lookup_results,
+        # This adds the parsed data to new or existing Datasources by performing a lookup
+        # in the metastore
+        datasource_uuids = self.assign_data(
+            data=to_process,
             if_exists=if_exists,
             data_type=data_type,
+            required_keys=required_metakeys,
+            min_keys=5,
         )
 
-        # Record the Datasources we've created / appended to
-        obs.add_datasources(uuids=datasource_uuids, data=to_process, metastore=metastore)
-        obs.store_hashes(hashes=hashes)
-
-        metastore.close()
-        obs.save()
+        self.store_hashes(hashes=hashes)
 
         return datasource_uuids
 
@@ -699,15 +671,13 @@ class ObsSurface(BaseStore):
         Returns:
             None
         """
-        from openghg.objectstore import delete_object, get_bucket
-        from openghg.store import load_metastore
+        from openghg.objectstore import delete_object
         from openghg.store.base import Datasource
         from tinydb import where
 
-        bucket = get_bucket()
         # Load the Datasource and get all its keys
         # iterate over these keys and delete them
-        datasource = Datasource.load(uuid=uuid)
+        datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
         data_keys = datasource.raw_keys()
 
@@ -716,16 +686,14 @@ class ObsSurface(BaseStore):
 
             for daterange in key_data:
                 key = key_data[daterange]
-                delete_object(bucket=bucket, key=key)
+                delete_object(bucket=self._bucket, key=key)
 
         # Then delete the Datasource itself
         key = f"{Datasource._datasource_root}/uuid/{uuid}"
-        delete_object(bucket=bucket, key=key)
+        delete_object(bucket=self._bucket, key=key)
 
         # Delete the UUID from the metastore
-        metastore = load_metastore(key=self._metakey)
-        metastore.remove(where("uuid") == uuid)
-        metastore.close
+        self._metastore.remove(where("uuid") == uuid)
 
         del self._datasource_uuids[uuid]
 

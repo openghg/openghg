@@ -1,8 +1,10 @@
+from __future__ import annotations
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Union
 import logging
 from openghg.store.base import BaseStore
 from xarray import Dataset
+from types import TracebackType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -25,8 +27,19 @@ class EulerianModel(BaseStore):
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    @staticmethod
+    def __enter__(self) -> EulerianModel:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[BaseException],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        self.save()
+
     def read_file(
+        self,
         filepath: Union[str, Path],
         model: str,
         species: str,
@@ -36,6 +49,7 @@ class EulerianModel(BaseStore):
         if_exists: Optional[str] = None,
         save_current: Optional[bool] = None,
         overwrite: bool = False,
+        force: bool = False,
     ) -> Dict:
         """Read Eulerian model output
 
@@ -55,6 +69,7 @@ class EulerianModel(BaseStore):
             save_current: Whether to save data in current form and create a new version.
                 If None, this will depend on if_exists input (None -> True), (other -> False)
             overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+            force: Force adding of data even if this is identical to data stored.
         """
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
@@ -88,13 +103,11 @@ class EulerianModel(BaseStore):
 
         filepath = Path(filepath)
 
-        em_store = EulerianModel.load()
-        metastore = load_metastore(key=em_store._metakey)
-
         file_hash = hash_file(filepath=filepath)
-        if file_hash in em_store._file_hashes and if_exists is None:
+        if file_hash in self._file_hashes and not force:
             raise ValueError(
-                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]}."
+                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}.\n"
+                "If necessary, use force=True to bypass this to add this data."
             )
 
         em_data = open_dataset(filepath)
@@ -176,30 +189,27 @@ class EulerianModel(BaseStore):
         model_data[key]["metadata"] = metadata
 
         required = ("model", "species", "date")
-        lookup_results = datasource_lookup(metastore=metastore, data=model_data, required_keys=required)
 
         data_type = "eulerian_model"
-        datasource_uuids = assign_data(
-            data_dict=model_data,
-            lookup_results=lookup_results,
+        datasource_uuids = self.assign_data(
+            data=model_data,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
+            required_keys=required
         )
 
-        update_keys = ["start_date", "end_date", "latest_version"]
-        model_data = update_metadata(
-            data_dict=model_data, uuid_dict=datasource_uuids, update_keys=update_keys
-        )
+        ## TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # update_keys = ["start_date", "end_date", "latest_version"]
+        # model_data = update_metadata(
+        #     data_dict=model_data, uuid_dict=datasource_uuids, update_keys=update_keys
+        # )
 
-        em_store.add_datasources(
-            uuids=datasource_uuids, data=model_data, metastore=metastore, update_keys=update_keys
-        )
+        # em_store.add_datasources(
+        #     uuids=datasource_uuids, data=model_data, metastore=metastore, update_keys=update_keys
+        # )
 
         # Record the file hash in case we see this file again
-        em_store._file_hashes[file_hash] = filepath.name
-
-        em_store.save()
-        metastore.close()
+        self._file_hashes[file_hash] = filepath.name
 
         return datasource_uuids

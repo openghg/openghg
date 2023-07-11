@@ -1,3 +1,4 @@
+.. _adding-obs-data:
 Adding observation data
 =======================
 
@@ -23,6 +24,11 @@ affect your use of OpenGHG outside of this tutorial.
 
 1. Adding and standardising data
 --------------------------------
+
+.. note::
+    Outside of this tutorial, if you have write access to multiple object stores you
+    will need to pass the name of the object store you wish to write to to
+    the ``store`` argument of the standardise functions.
 
 Source formats
 ~~~~~~~~~~~~~~
@@ -104,6 +110,23 @@ a *Datasource* (see below for a note on Datasources). The
 us that the data has been stored correctly. This will also tell us if
 any errors have been encountered when trying to access and standardise
 this data.
+
+Multiple stores
+~~~~~~~~~~~~~~~
+
+If you have write access to more than one object store you'll need to pass in the name of that store
+to the ``store`` argument.
+So instead of the standardise_surface call above, we'll tell it to write to our default ``user`` object store. This is our default local object store
+created when we run ``openghg --quickstart``.
+
+.. code:: ipython3
+
+    from openghg.standardise import standardise_surface
+
+    decc_results = standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC", store="user")
+
+The ``store`` argument can be passed to any of the ``standardise`` functions in OpenGHG and is required if you have write access
+to more than one store.
 
 AGAGE data
 ~~~~~~~~~~

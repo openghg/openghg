@@ -1,22 +1,27 @@
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, Literal, Optional, Union
+from pandas import Timedelta
 
 from openghg.cloud import create_file_package, create_post_dict
+from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
-from openghg.types import optionalPathType
+from openghg.types import optionalPathType, multiPathType
 
 
 def standardise_surface(
-    filepaths: Union[str, Path, List, Tuple],
+    filepaths: multiPathType,
     source_format: str,
-    site: str,
     network: str,
+    site: str,
     inlet: Optional[str] = None,
+    height: Optional[str] = None,
     instrument: Optional[str] = None,
-    sampling_period: Optional[str] = None,
+    sampling_period: Optional[Union[Timedelta, str]] = None,
     calibration_scale: Optional[str] = None,
+    measurement_type: str = "insitu",
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
+    store: Optional[str] = None,
     update_mismatch: str = "never",
     if_exists: Optional[str] = None,
     save_current: Optional[bool] = None,
@@ -26,16 +31,23 @@ def standardise_surface(
     """Standardise surface measurements and store the data in the object store.
 
     Args:
-        filepaths: Path of file(s) to process
-        source_format: Format of data i.e. GCWERKS, CRDS, ICOS
-        site: Site code
+        filepath: Filepath(s)
+        source_format: Data format, for example CRDS, GCWERKS
+        site: Site code/name
         network: Network name
-        inlet: Inlet height in metres
+        inlet: Inlet height. Format 'NUMUNIT' e.g. "10m".
+            If retrieve multiple files pass None, OpenGHG will attempt to
+            extract this from the file.
+        height: Alias for inlet.
         instrument: Instrument name
         sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour
+        calibration_scale: Calibration scale for data
+        measurement_type: Type of measurement e.g. insitu, flask
         verify_site_code: Verify the site code
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+        store: Name of object store to write to, required if user has access to more than one
+            writable store
         update_mismatch: This determines how mismatches between the internal data
             "attributes" and the supplied / derived "metadata" are handled.
             This includes the options:
@@ -53,9 +65,10 @@ def standardise_surface(
         overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
         force: Force adding of data even if this is identical to data stored.
     Returns:
-        dict: Dictionary containing confirmation of standardisation process.
+        dict: Dictionary of result data
     """
     from openghg.cloud import call_function
+    from openghg.store import ObsSurface
 
     if not isinstance(filepaths, list):
         filepaths = [filepaths]
@@ -135,24 +148,28 @@ def standardise_surface(
 
         return responses
     else:
-        from openghg.store import ObsSurface
+        bucket = get_writable_bucket(name=store)
 
-        results = ObsSurface.read_file(
-            filepath=filepaths,
-            source_format=source_format,
-            site=site,
-            network=network,
-            instrument=instrument,
-            sampling_period=sampling_period,
-            inlet=inlet,
-            verify_site_code=verify_site_code,
-            site_filepath=site_filepath,
-            update_mismatch=update_mismatch,
-            if_exists=if_exists,
-            save_current=save_current,
-            overwrite=overwrite,
-            force=force,
-        )
+        with ObsSurface(bucket=bucket) as obs:
+            results = obs.read_file(
+                filepath=filepaths,
+                source_format=source_format,
+                network=network,
+                site=site,
+                inlet=inlet,
+                height=height,
+                instrument=instrument,
+                sampling_period=sampling_period,
+                calibration_scale=calibration_scale,
+                measurement_type=measurement_type,
+                verify_site_code=verify_site_code,
+                site_filepath=site_filepath,
+                update_mismatch=update_mismatch,
+                if_exists=if_exists,
+                save_current=save_current,
+                overwrite=overwrite,
+                force=force,
+            )
 
         return results
 
@@ -168,6 +185,7 @@ def standardise_column(
     instrument: Optional[str] = None,
     platform: str = "satellite",
     source_format: str = "openghg",
+    store: Optional[str] = None,
     if_exists: Optional[str] = None,
     save_current: Optional[bool] = None,
     overwrite: bool = False,
@@ -193,6 +211,7 @@ def standardise_column(
             - "satellite"
             - "site"
         source_format : Type of data being input e.g. openghg (internal format)
+        store: Name of store to write to
         if_exists: What to do if existing data is present.
             - None - checks new and current data for timeseries overlap
                 - adds data if no overlap
@@ -238,22 +257,27 @@ def standardise_column(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        return ObsColumn.read_file(
-            filepath=filepath,
-            satellite=satellite,
-            domain=domain,
-            selection=selection,
-            site=site,
-            species=species,
-            network=network,
-            instrument=instrument,
-            platform=platform,
-            source_format=source_format,
-            if_exists=if_exists,
-            save_current=save_current,
-            overwrite=overwrite,
-            force=force,
-        )
+        bucket = get_writable_bucket(name=store)
+
+        with ObsColumn(bucket=bucket) as obs_col:
+            result = obs_col.read_file(
+                filepath=filepath,
+                satellite=satellite,
+                domain=domain,
+                selection=selection,
+                site=site,
+                species=species,
+                network=network,
+                instrument=instrument,
+                platform=platform,
+                source_format=source_format,
+                if_exists=if_exists,
+                save_current=save_current,
+                overwrite=overwrite,
+                force=force,
+            )
+
+        return result
 
 
 def standardise_bc(
@@ -263,6 +287,7 @@ def standardise_bc(
     domain: str,
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
+    store: Optional[str] = None,
     if_exists: Optional[str] = None,
     save_current: Optional[bool] = None,
     overwrite: bool = False,
@@ -279,6 +304,7 @@ def standardise_bc(
         domain: Region for boundary conditions
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
+        store: Name of store to write to
         if_exists: What to do if existing data is present.
             - None - checks new and current data for timeseries overlap
                 - adds data if no overlap
@@ -319,18 +345,22 @@ def standardise_bc(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        return BoundaryConditions.read_file(
-            filepath=filepath,
-            species=species,
-            bc_input=bc_input,
-            domain=domain,
-            period=period,
-            continuous=continuous,
-            if_exists=if_exists,
-            save_current=save_current,
-            overwrite=overwrite,
-            force=force,
-        )
+        bucket = get_writable_bucket(name=store)
+        with BoundaryConditions(bucket=bucket) as bcs:
+            result = bcs.read_file(
+                filepath=filepath,
+                species=species,
+                bc_input=bc_input,
+                domain=domain,
+                period=period,
+                continuous=continuous,
+                if_exists=if_exists,
+                save_current=save_current,
+                overwrite=overwrite,
+                force=force,
+            )
+
+        return result
 
 
 def standardise_footprint(
@@ -344,11 +374,12 @@ def standardise_footprint(
     species: Optional[str] = None,
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = "auto",
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
     retrieve_met: bool = False,
     high_spatial_res: bool = False,
     high_time_res: bool = False,
+    store: Optional[str] = None,
     if_exists: Optional[str] = None,
     save_current: Optional[bool] = None,
     overwrite: bool = False,
@@ -374,6 +405,7 @@ def standardise_footprint(
         high_spatial_res : Indicate footprints include both a low and high spatial resolution.
         high_time_res: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically for Carbon Dioxide data.
+        store: Name of store to write to
         if_exists: What to do if existing data is present.
             - None - checks new and current data for timeseries overlap
                 - adds data if no overlap
@@ -424,27 +456,31 @@ def standardise_footprint(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        return Footprints.read_file(
-            filepath=filepath,
-            site=site,
-            domain=domain,
-            model=model,
-            inlet=inlet,
-            height=height,
-            metmodel=metmodel,
-            species=species,
-            network=network,
-            period=period,
-            chunks=chunks,
-            continuous=continuous,
-            retrieve_met=retrieve_met,
-            high_spatial_res=high_spatial_res,
-            high_time_res=high_time_res,
-            if_exists=if_exists,
-            save_current=save_current,
-            overwrite=overwrite,
-            force=force,
-        )
+        bucket = get_writable_bucket(name=store)
+        with Footprints(bucket=bucket) as fps:
+            result = fps.read_file(
+                filepath=filepath,
+                site=site,
+                domain=domain,
+                model=model,
+                inlet=inlet,
+                height=height,
+                metmodel=metmodel,
+                species=species,
+                network=network,
+                period=period,
+                chunks=chunks,
+                continuous=continuous,
+                retrieve_met=retrieve_met,
+                high_spatial_res=high_spatial_res,
+                high_time_res=high_time_res,
+                if_exists=if_exists,
+                save_current=save_current,
+                overwrite=overwrite,
+                force=force,
+            )
+
+        return result
 
 
 def standardise_flux(
@@ -459,6 +495,7 @@ def standardise_flux(
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
+    store: Optional[str] = None,
     if_exists: Optional[str] = None,
     save_current: Optional[bool] = None,
     overwrite: bool = False,
@@ -476,6 +513,7 @@ def standardise_flux(
         high_time_resolution: If this is a high resolution file
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
+        store: Name of store to write to
         if_exists: What to do if existing data is present.
             - None - checks new and current data for timeseries overlap
                 - adds data if no overlap
@@ -523,23 +561,25 @@ def standardise_flux(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        return Emissions.read_file(
-            filepath=filepath,
-            species=species,
-            source=source,
-            domain=domain,
-            database=database,
-            database_version=database_version,
-            model=model,
-            high_time_resolution=high_time_resolution,
-            period=period,
-            continuous=continuous,
-            chunks=chunks,
-            if_exists=if_exists,
-            save_current=save_current,
-            overwrite=overwrite,
-            force=force,
-        )
+        bucket = get_writable_bucket(name=store)
+        with Emissions(bucket=bucket) as ems:
+            return ems.read_file(
+                filepath=filepath,
+                species=species,
+                source=source,
+                domain=domain,
+                database=database,
+                database_version=database_version,
+                model=model,
+                high_time_resolution=high_time_resolution,
+                period=period,
+                continuous=continuous,
+                chunks=chunks,
+                if_exists=if_exists,
+                save_current=save_current,
+                overwrite=overwrite,
+                force=force,
+            )
 
 
 # def upload_to_par(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:

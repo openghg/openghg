@@ -1,3 +1,4 @@
+from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -7,11 +8,7 @@ from numpy import ndarray
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray
-
-# from openghg.types import multiPathType
-
-__all__ = ["ObsColumn"]
-
+from types import TracebackType
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -26,8 +23,19 @@ class ObsColumn(BaseStore):
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    @staticmethod
+    def __enter__(self) -> ObsColumn:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[BaseException],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        self.save()
+
     def read_file(
+        self,
         filepath: Union[str, Path],
         satellite: Optional[str] = None,
         domain: Optional[str] = None,
@@ -76,7 +84,6 @@ class ObsColumn(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.store import assign_data, datasource_lookup, load_metastore, update_metadata
         from openghg.types import ColumnTypes
         from openghg.util import (
             clean_string,
@@ -117,16 +124,13 @@ class ObsColumn(BaseStore):
         # Load the data retrieve object
         parser_fn = load_column_parser(source_format=source_format)
 
-        obs_store = ObsColumn.load()
-
         # Load in the metadata store
-        metastore = load_metastore(key=obs_store._metakey)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in obs_store._file_hashes and not force:
+        if file_hash in self._file_hashes and not force:
             logger.warning(
                 "This file has been uploaded previously with the filename : "
-                f"{obs_store._file_hashes[file_hash]} - skipping.\n"
+                f"{self._file_hashes[file_hash]} - skipping.\n"
                 "If necessary, use force=True to bypass this to add this data."
             )
             return None
@@ -157,31 +161,27 @@ class ObsColumn(BaseStore):
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
         required = ("satellite", "selection", "domain", "site", "species", "network")
-        lookup_results = datasource_lookup(
-            metastore=metastore, data=obs_data, required_keys=required, min_keys=3
-        )
 
         data_type = "column"
-        datasource_uuids = assign_data(
-            data_dict=obs_data,
-            lookup_results=lookup_results,
+        datasource_uuids = self.assign_data(
+            data=obs_data,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
+            required_keys=required,
+            min_keys=3
         )
 
-        update_keys = ["start_date", "end_date", "latest_version"]
-        obs_data = update_metadata(data_dict=obs_data, uuid_dict=datasource_uuids, update_keys=update_keys)
+        ## TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # update_keys = ["start_date", "end_date", "latest_version"]
+        # obs_data = update_metadata(data_dict=obs_data, uuid_dict=datasource_uuids, update_keys=update_keys)
 
-        obs_store.add_datasources(
-            uuids=datasource_uuids, data=obs_data, metastore=metastore, update_keys=update_keys
-        )
+        # obs_store.add_datasources(
+        #     uuids=datasource_uuids, data=obs_data, metastore=metastore, update_keys=update_keys
+        # )
 
         # Record the file hash in case we see this file again
-        obs_store._file_hashes[file_hash] = filepath.name
-
-        obs_store.save()
-        metastore.close()
+        self._file_hashes[file_hash] = filepath.name
 
         return datasource_uuids
 

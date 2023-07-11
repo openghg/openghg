@@ -37,6 +37,7 @@ def assign_data(
         Returns:
             dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
     """
+    raise NotImplementedError("This will be removed.")
     from openghg.store.base import Datasource
 
     uuids = {}

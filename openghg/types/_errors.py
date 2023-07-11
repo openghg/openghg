@@ -53,6 +53,10 @@ class DataOverlapError(OpenGHGError):
     """New data overlaps with current data stored"""
 
 
+class ConfigFileError(OpenGHGError):
+    """Raised for errors with configuration file"""
+
+
 def construct_xesmf_import_error(exception: Optional[ImportError] = None) -> str:
     xesmf_error_message = (
         "Unable to import xesmf for use with regridding algorithms."
