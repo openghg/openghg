@@ -148,7 +148,6 @@ class ObsSurface(BaseStore):
             instrument: Instrument name
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
-<<<<<<< HEAD
             verify_site_code: Verify the site code
             site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
                 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
@@ -172,18 +171,6 @@ class ObsSurface(BaseStore):
                 If None, this will depend on if_exists input (None -> True), (other -> False)
             overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
             force: Force adding of data even if this is identical to data stored.
-=======
-            update_mismatch: This determines how mismatches between the internal data
-                  "attributes" and the supplied / derived "metadata" are handled.
-                  This includes the options:
-                      - "never" - don't update mismatches and raise an AttrMismatchError
-                      - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
-                      - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-            overwrite: Overwrite previously uploaded data
-                  verify_site_code: Verify the site code
-                  site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
-                      Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
->>>>>>> new_object_store
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -582,10 +569,11 @@ class ObsSurface(BaseStore):
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "replace" - replace and insert new data into current timeseries
-            overwrite: Deprecated. This will use options for if_exists="new".            required_metakeys: Keys in the metadata we should use to store this metadata in the object store
-            if None it defaults to:
-            {"species", "site", "station_long_name", "inlet", "instrument",
-            "network", "source_format", "data_source", "icos_data_level"}
+            overwrite: Deprecated. This will use options for if_exists="new".
+            required_metakeys: Keys in the metadata we should use to store this metadata in the object store
+                if None it defaults to:
+                {"species", "site", "station_long_name", "inlet", "instrument",
+                "network", "source_format", "data_source", "icos_data_level"}
         Returns:
             Dict or None:
         """

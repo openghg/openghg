@@ -439,7 +439,7 @@ def test_obs_data_read_data_new_version():
     Same data setup as test_obs_data_read_data_diff() but checking new version and correct data
     are stored when save_current=True.
     """
-    clear_test_store()
+    clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
@@ -469,7 +469,7 @@ def test_obs_data_read_data_overwrite_version():
     Same data setup as test_obs_data_read_data_diff() but checking previous version is 
     overwritten and correct data are stored when save_current=False.
     """
-    clear_test_store()
+    clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
@@ -487,8 +487,9 @@ def test_obs_data_read_data_overwrite_version():
     uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
     uuid_n2o = search_n2o_results.iloc[0]["uuid"]
 
-    d_sf6 = Datasource.load(uuid=uuid_sf6)
-    d_n2o = Datasource.load(uuid=uuid_n2o)
+    bucket = get_bucket()
+    d_sf6 = Datasource.load(bucket=bucket, uuid=uuid_sf6)
+    d_n2o = Datasource.load(bucket=bucket, uuid=uuid_n2o)
 
     assert d_sf6._latest_version == "v1"
     assert d_n2o._latest_version == "v1"
