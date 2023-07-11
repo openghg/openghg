@@ -133,7 +133,7 @@ class BaseStore:
             # Add the dataframe to the datasource
             datasource.add_data(metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type)
             # Save Datasource to object store
-            datasource.save(bucket=self._bucket)
+            datasource.save(bucket=self._bucket, overwrite=overwrite)
 
             # Add the metadata to the metastore and make sure it's up to date with the metadata stored
             # in the Datasource
