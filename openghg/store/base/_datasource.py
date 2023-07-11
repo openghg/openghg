@@ -287,6 +287,7 @@ class Datasource:
         """Delete specific keys
 
         Args:
+            bucket: Bucket containing data
             keys: List of keys to delete
         Returns:
             bool: True is all deleted, False otherwise
@@ -296,10 +297,11 @@ class Datasource:
         for key in set(keys):
             delete_object(bucket=bucket, key=key)
 
-    def delete_version(self, version: str) -> None:
+    def delete_version(self, bucket: str, version: str) -> None:
         """Delete a specific version of data.
 
         Args:
+            bucket: Bucket containing data
             version: Version string
         Returns:
             bool: True is all deleted, False otherwise
@@ -310,7 +312,7 @@ class Datasource:
         # Could delete version like this - one key at a time
         data_keys = list(self._data_keys[version]["keys"].values())
 
-        self.delete_data(data_keys)
+        self.delete_data(bucket=bucket, keys=data_keys)
 
         # Or could just try and delete the whole version folder?
 
@@ -732,7 +734,7 @@ class Datasource:
             if delete_version:
                 if version_folder_backup.exists():
                     logger.warning(f"Deleting previous stored data for this version: {version_str}")
-                    self.delete_version(version_str_backup)
+                    self.delete_version(bucket=bucket, version=version_str_backup)
                     os.rmdir(version_folder_backup)
 
             # Make sure status is reset now this has been saved

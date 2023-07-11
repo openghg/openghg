@@ -186,7 +186,8 @@ def test_replace_version():
     d.add_data(metadata=metadata, data=min_ch4_data, data_type="surface")
 
     # Save initial data
-    d.save()
+    bucket = get_bucket()
+    d.save(bucket=bucket)
 
     detailed_data = parse_crds(data_filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
 
@@ -196,7 +197,7 @@ def test_replace_version():
     d.add_data(metadata=metadata, data=detailed_ch4_data, data_type="surface", if_exists="new")
 
     # Save and overwrite with new data
-    d.save(new_version=False)
+    d.save(bucket=bucket, new_version=False)
 
     detailed_keys = d.versions()
 

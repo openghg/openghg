@@ -75,7 +75,6 @@ class EulerianModel(BaseStore):
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
         from collections import defaultdict
-        from openghg.store import assign_data, datasource_lookup, load_metastore, update_metadata
         from openghg.util import (
             clean_string,
             hash_file,
