@@ -2,12 +2,15 @@ import logging
 import os
 import platform
 from pathlib import Path
+import shutil
 from typing import Dict
 import uuid
 import toml
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+openghg_config_filename = "openghg.conf"
 
 
 # @lru_cache
@@ -33,17 +36,16 @@ def get_default_objectstore_path() -> Path:
 
 # @lru_cache
 def get_user_config_path() -> Path:
-    """Checks if a config file has already been create for
-    OpenGHG to use. This file is created in the user's home directory
-    in  ~/.config/openghg/user.conf on Linux / macOS or
+    """Returns path to user config file.
+
+    This file is created in the user's home directory
+    in  ~/.ghgconfig/openghg/user.conf on Linux / macOS or
     in LOCALAPPDATA/openghg/openghg.conf on Windows.
 
     Returns:
         pathlib.Path: Path to user config file
     """
     user_platform = platform.system()
-
-    openghg_config_filename = "openghg.conf"
 
     if user_platform == "Windows":
         appdata_path = os.getenv("LOCALAPPDATA")
@@ -52,7 +54,7 @@ def get_user_config_path() -> Path:
 
         config_path = Path(appdata_path).joinpath("openghg", openghg_config_filename)
     elif user_platform in ("Linux", "Darwin"):
-        config_path = Path.home().joinpath(".config", "openghg", openghg_config_filename)
+        config_path = Path.home().joinpath(".openghg", openghg_config_filename)
     else:
         raise ValueError(f"Unknown platform: {user_platform}")
 
@@ -105,30 +107,38 @@ def create_config(silent: bool = False) -> None:
         except (KeyError, ValueError):
             config["user_id"] = str(uuid.uuid4())
             updated = True
+
+        if updated:
+            logger.info(f"Updated configuration written to {user_config_path}")
+            user_config_path.write_text(toml.dumps(config))
     else:
-        updated = True
-        default_objstore_path = get_default_objectstore_path()
+        try:
+            # if config file is in ~/.config, move it
+            migrate_config()
+        except FileNotFoundError:  # no config found
+            updated = True
+            default_objstore_path = get_default_objectstore_path()
 
-        obj_store_path = default_objstore_path
-        if not silent:
-            obj_store_input = input(f"Enter path for object store (default {default_objstore_path}): ")
-            if obj_store_input:
-                obj_store_path = Path(obj_store_input).expanduser().resolve()
+            obj_store_path = default_objstore_path
+            if not silent:
+                obj_store_input = input(f"Enter path for object store (default {default_objstore_path}): ")
+                if obj_store_input:
+                    obj_store_path = Path(obj_store_input).expanduser().resolve()
 
-        user_config_path.parent.mkdir(parents=True, exist_ok=True)
+            user_config_path.parent.mkdir(parents=True, exist_ok=True)
 
-        user_id = str(uuid.uuid4())
-        config = {"object_store": {"local_store": str(obj_store_path)}, "user_id": user_id}
+            user_id = str(uuid.uuid4())
+            config = {
+                "object_store": {"local_store": str(obj_store_path)},
+                "user_id": user_id,
+            }
 
-        obj_store_path.mkdir(exist_ok=True)
+            obj_store_path.mkdir(exist_ok=True)
 
-        logger.info(f"Creating config at {str(user_config_path)}\n")
-
-    if updated:
-        logger.info(f"Configuration written to {user_config_path}")
-        user_config_path.write_text(toml.dumps(config))
-    else:
-        logger.info("Configuration unchanged.")
+            logger.info(f"Creating config at {str(user_config_path)}\n")
+            user_config_path.write_text(toml.dumps(config))
+        else:
+            logger.info(f"create_config moved configuration file to {str(user_config_path)}\n")
 
 
 # @lru_cache
@@ -141,9 +151,13 @@ def read_local_config() -> Dict:
     config_path = get_user_config_path()
 
     if not config_path.exists():
-        raise FileNotFoundError(
-            "Unable to read configuration file, please see the installation instructions or run openghg --quickstart"
-        )
+        try:
+            migrate_config()
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
+                "Unable to read configuration file, please see the installation instructions \
+                or run openghg --quickstart"
+            ) from e
 
     config: Dict = toml.loads(config_path.read_text())
     return config
@@ -174,3 +188,23 @@ def check_config() -> None:
     for path in object_stores.values():
         if not Path(path).exists():
             logger.info(f"{path} does not exist but will be created.")
+
+
+def migrate_config() -> None:
+    """If user config file is in ~/.config, move it to ~/.openghg.
+
+    If no config is found in ~/.config or system is Windows, raise FileNotFoundError.
+
+    Returns:
+        None
+    """
+    old_config_path = Path.home().joinpath(".config", "openghg", openghg_config_filename)
+
+    if not old_config_path.exists() or platform.system() == "Windows":
+        raise FileNotFoundError
+    else:
+        new_config_path = get_user_config_path()
+        new_config_path.parent.mkdir(parents=True)
+        shutil.move(str(old_config_path), str(new_config_path))
+        logger.info(f"Moved user config file from {str(old_config_path)} to {str(new_config_path)}.")
+        shutil.rmtree(old_config_path.parent)  # remove "openghg" dir from ~/.config

@@ -42,7 +42,7 @@ def test_search_surface(inlet_keyword, inlet_value):
         "type": "air",
         "network": "decc",
         "species": "co2",
-        "calibration_scale": "wmo-x2007",
+        "calibration_scale": "wmo-x2019",
         "long_name": "heathfield",
         "data_type": "surface",
         "inlet_height_magl": "50",
@@ -92,7 +92,7 @@ def test_search_site():
         "type": "air",
         "network": "decc",
         "species": "co2",
-        "calibration_scale": "wmo-x2007",
+        "calibration_scale": "wmo-x2019",
         "long_name": "bilsdale",
         "inlet_height_magl": "42",
         "data_owner": "simon o'doherty",
@@ -108,7 +108,7 @@ def test_search_site():
 
     assert expected.items() <= metadata.items()
 
-    res = search(site="bsd", species="co2", inlet="108m", instrument="picarro", calibration_scale="wmo-x2007")
+    res = search(site="bsd", species="co2", inlet="108m", instrument="picarro", calibration_scale="wmo-x2019")
 
     expected = {
         "site": "bsd",
@@ -119,7 +119,7 @@ def test_search_site():
         "type": "air",
         "network": "decc",
         "species": "co2",
-        "calibration_scale": "wmo-x2007",
+        "calibration_scale": "wmo-x2019",
         "long_name": "bilsdale",
         "inlet_height_magl": "108",
         "data_owner": "simon o'doherty",
