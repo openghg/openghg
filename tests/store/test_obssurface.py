@@ -18,6 +18,9 @@ def test_raising_error_doesnt_save_to_store(mocker):
         with ObsSurface(bucket=bucket) as obs:
             key = obs.key()
             assert not exists(bucket=bucket, key=key)
+            # Here we're testing to see what happens if a user does something
+            # with obs that results in an exception being raised that isn't internal
+            # to our processing functions
             raise ValueError("Oops")
 
     assert not exists(bucket=bucket, key=key)

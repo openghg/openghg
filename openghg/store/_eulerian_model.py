@@ -37,7 +37,7 @@ class EulerianModel(BaseStore):
         exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_type is not None:
-            logger.exception(msg=f"{exc_type}, {exc_tb}")
+            logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
             self.save()
 
