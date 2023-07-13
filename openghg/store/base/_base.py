@@ -40,6 +40,10 @@ class BaseStore:
         self._bucket = bucket
         self._metakey = ""
         self._metastore = load_metastore(bucket=bucket, key=self.metakey())
+        # Do I store the changes we've made to the object store in __exit__
+        # This should only be made True right before we're read to exit in case
+        # an Exception is raised
+        self._commit_changes = False
 
         if exists(bucket=bucket, key=self.key()):
             data = get_object_from_json(bucket=bucket, key=self.key())

@@ -36,7 +36,10 @@ class EulerianModel(BaseStore):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
-        self.save()
+        if exc_type is not None:
+            logger.exception(msg=f"{exc_type}, {exc_tb}")
+        else:
+            self.save()
 
     def read_file(
         self,
