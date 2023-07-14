@@ -1,3 +1,5 @@
+{% set data = load_setup_py_data() %}
+
 package:
   name: "openghg"
   version: {{ GIT_DESCRIBE_TAG }}
@@ -18,28 +20,10 @@ requirements:
     - python
     - setuptools
   run:
-    - addict
-    - cdsapi
-    - dask
-    - h5py
-    - h5netcdf
-    - lazy_import
-    - matplotlib
-    - msgpack-python
-    - netcdf4
-    - numexpr
-    - numpy
-    - nc-time-axis
-    - pandas
-    - plotly
-    - pyvis
-    - rapidfuzz
-    - requests >=2.25
-    - scipy
-    - tinydb
-    - tqdm
-    - xarray >=0.18.2
-    - urllib3 >=1.26.3
+    run:
+    {% for req in data.get('install_requires', []) %}
+      - {{ req }}
+    {% endfor %}
 
 
 test:
