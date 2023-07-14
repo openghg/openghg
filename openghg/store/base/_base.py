@@ -130,8 +130,13 @@ class BaseStore:
             else:
                 datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
+            # TODO - remove this when the lowercasing of metadata gets removed
+            # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
+            skip_keys = ["object_store"]
             # Add the dataframe to the datasource
-            datasource.add_data(metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type)
+            datasource.add_data(
+                metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type, skip_keys=skip_keys
+            )
             # Save Datasource to object store
             datasource.save(bucket=self._bucket)
 
