@@ -83,7 +83,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
 
     # Mock the dobj values, here we'll get two values we read and the third dobj contains
     # ObsPack GlobalView data that should currently be skipped
-    dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", side_effect=dobjs)
+    mocker.patch("icoscp.cpb.dobj.Dobj", side_effect=dobjs)
 
     # Note that we get an extra Unamed column in these dataframes due to the trip to csv and back
     data_dobj1 = pd.read_csv(get_retrieval_datapath(filename="df_1.csv.bz2"))
@@ -103,7 +103,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
 
     # 05/01/2023: Added update_mismatch to account for WAO difference
     data_first_retrieval = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata"
+        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata", store="user"
     )
 
     meta1 = data_first_retrieval[0].metadata
@@ -133,7 +133,6 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "calibration_scale": "unknown",  # Update when possible (icoscp Issue - ICOS-Carbon-Portal/pylib#148)
         "sampling_period": "not_set",  # Update when possible (icoscp Issue - ICOS-Carbon-Portal/pylib#148)
         "dataset_source": "ICOS",
-
     }
 
     assert meta1_expected.items() <= meta1.items()
@@ -168,7 +167,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
 
     # 05/01/2023: Added update_mismatch to account for WAO difference
     data_second_retrieval = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata"
+        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata", store="user"
     )
 
     data2 = data_second_retrieval[0].data
@@ -186,7 +185,12 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
 
     # 05/01/2023: Added update_mismatch to account for WAO difference
     retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", force_retrieval=True, update_mismatch="metadata",
+        site="WAO",
+        species="co2",
+        sampling_height="10m",
+        force_retrieval=True,
+        update_mismatch="metadata",
+        store="user",
     )
 
     assert "There is no new data to process." in caplog.text

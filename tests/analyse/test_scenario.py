@@ -8,7 +8,7 @@ from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_di
 from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
 from pandas import Timedelta, Timestamp
 from xarray import Dataset
-from helpers import clear_test_store
+from helpers import clear_test_stores
 
 def test_scenario_direct_objects():
     """
@@ -1445,7 +1445,7 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
 
 
 def test_modelscenario_doesnt_error_empty_objectstore():
-    clear_test_store()
+    clear_test_stores()
 
     site = "TAC"
     domain = "EUROPE"

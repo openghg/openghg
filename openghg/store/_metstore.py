@@ -27,6 +27,7 @@ class METStore(BaseStore):
         Returns:
             None
         """
+        raise NotImplementedError("We are working to replace the MetStore.")
         from openghg.objectstore import get_bucket, set_object_from_json
 
         bucket = get_bucket()
@@ -48,6 +49,7 @@ class METStore(BaseStore):
         Returns:
             METData: METData object holding data and metadata
         """
+        raise NotImplementedError("We are working to replace the MetStore.")
         from openghg.retrieve.met import retrieve_met
         from pandas import Timestamp
 
@@ -90,6 +92,7 @@ class METStore(BaseStore):
         Returns:
             METData or None: METData object if found else None
         """
+        raise NotImplementedError("We are working to replace the MetStore.")
         from openghg.dataobjects import METData
         from openghg.store.base import Datasource
 
@@ -116,6 +119,7 @@ class METStore(BaseStore):
         Returns:
             None
         """
+        raise NotImplementedError("We are working to replace the MetStore.")
         from openghg.store.base import Datasource
 
         metadata = met_data.metadata

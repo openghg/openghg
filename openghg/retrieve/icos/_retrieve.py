@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 from openghg.dataobjects import ObsData
+from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub, load_json
 import openghg_defs
 import logging
@@ -18,6 +19,7 @@ def retrieve_atmospheric(
     force_retrieval: bool = False,
     data_level: int = 2,
     dataset_source: Optional[str] = None,
+    store: Optional[str] = None,
     update_mismatch: str = "never",
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -40,6 +42,7 @@ def retrieve_atmospheric(
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
+        store: Name of object to search/store data to
         update_mismatch: This determines how mismatches between the "metadata" derived from
             stored data and "attributes" derived from ICOS Header are handled.
             This includes the options:
@@ -60,6 +63,7 @@ def retrieve_atmospheric(
         data_level=data_level,
         dataset_source=dataset_source,
         update_mismatch=update_mismatch,
+        store=store,
     )
 
 
@@ -142,6 +146,7 @@ def local_retrieve(
     force_retrieval: bool = False,
     data_level: int = 2,
     dataset_source: Optional[str] = None,
+    store: Optional[str] = None,
     update_mismatch: str = "never",
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
@@ -165,6 +170,7 @@ def local_retrieve(
                         This level is the ICOS-data product and free available for users.
         See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
         dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack
+        store: Name of object to search/store data to
         update_mismatch: This determines how mismatches between the "metadata" derived from
             stored data and "attributes" derived from ICOS Header are handled.
             This includes the options:
@@ -197,6 +203,7 @@ def local_retrieve(
         end_date=end_date,
         icos_data_level=data_level,
         dataset_source=dataset_source,
+        store=store,
     )
 
     if results and not force_retrieval:
@@ -216,7 +223,9 @@ def local_retrieve(
         if standardised_data is None:
             return None
 
-        ObsSurface.store_data(data=standardised_data)
+        bucket = get_writable_bucket(name=store)
+        with ObsSurface(bucket=bucket) as obs:
+            obs.store_data(data=standardised_data)
 
         # Create the expected ObsData type
         obs_data = []

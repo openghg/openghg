@@ -1,153 +1,205 @@
-""" This file contains the BaseStore class from which other retrieve
+""" This file contains the BaseStore class from which other storage
     modules inherit.
 """
-from typing import Dict, List, Optional, Type, TypeVar, Union
-
+from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 from pandas import Timestamp
-from tinydb import TinyDB, Query
+import tinydb
+import logging
+from functools import reduce
+from openghg.types import DatasourceLookupError
+from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.util import timestamp_now
 
-__all__ = ["BaseStore"]
 
 T = TypeVar("T", bound="BaseStore")
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+def _find_and(x: Any, y: Any) -> Any:
+    return x & y
 
 
 class BaseStore:
     _root = "root"
     _uuid = "root_uuid"
 
-    def __init__(self) -> None:
-        from addict import Dict as aDict
-        from openghg.util import timestamp_now
+    def __init__(self, bucket: str) -> None:
+        from openghg.store import load_metastore
 
-        self._creation_datetime = timestamp_now()
+        self._creation_datetime = str(timestamp_now())
         self._stored = False
-
-        # Use an addict Dict here for easy nested data storage
-        self._datasource_table = aDict()
         # Keyed by Datasource UUID
         self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
         self._file_hashes: Dict[str, str] = {}
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: Dict[str, Dict] = {}
-        # Keyed by UUID
-        self._rank_data = aDict()
+        # Where we'll store this object
+        self._bucket = bucket
+        self._metakey = ""
+        self._metastore = load_metastore(bucket=bucket, key=self.metakey())
+
+        if exists(bucket=bucket, key=self.key()):
+            data = get_object_from_json(bucket=bucket, key=self.key())
+            # Update myself
+            self.__dict__.update(data)
 
     @classmethod
-    def exists(cls: Type[T], bucket: Optional[str] = None) -> bool:
-        """Check if the object is already saved in the object
-        store
-
-        Args:
-            bucket: Bucket for data storage
-        Returns:
-            bool: True if object exists
-        """
-        from openghg.objectstore import exists, get_bucket
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        key = f"{cls._root}/uuid/{cls._uuid}"
-
-        does_exist: bool = exists(bucket=bucket, key=key)
-
-        return does_exist
+    def metakey(cls) -> str:
+        return str(cls._metakey)
 
     @classmethod
-    def from_data(cls: Type[T], data: Dict) -> T:
-        """Create an object from data
+    def key(cls) -> str:
+        return f"{cls._root}/uuid/{cls._uuid}"
 
-        Args:
-            data: JSON data
-        Returns:
-            cls: Class object of cls type
-        """
-        from addict import Dict as aDict
-        from openghg.util import timestamp_tzaware
-
-        if not data:
-            raise ValueError("Unable to create object with empty dictionary")
-
-        c = cls()
-        c._creation_datetime = timestamp_tzaware(data["creation_datetime"])
-        c._datasource_uuids = data["datasource_uuids"]
-        c._file_hashes = data["file_hashes"]
-        c._retrieved_hashes = data.get("retrieved_hashes", {})
-        c._datasource_table = aDict(data["datasource_table"])
-        c._rank_data = aDict(data["rank_data"])
-        c._stored = False
-
-        return c
+    def save(self) -> None:
+        self._metastore.close()
+        set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
     def to_data(self) -> Dict:
-        """Return a JSON-serialisable dictionary of object
-        for storage in object store
+        # We don't need to store the metadata store, it has its own location
+        # QUESTION - Is this cleaner than the previous specifying
+        DO_NOT_STORE = ["_metastore"]
+        return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
-        Returns:
-            dict: Dictionary version of object
+    def assign_data(
+        self,
+        data: Dict,
+        overwrite: bool,
+        data_type: str,
+        required_keys: Sequence[str],
+        min_keys: Optional[int] = None,
+        update_keys: Optional[List] = None,
+    ) -> Dict[str, Dict]:
+        """Assign data to a Datasource. This will either create a new Datasource
+        Create or get an existing Datasource for each gas in the file
+
+            Args:
+                data: Dictionary containing data and metadata for species
+                overwrite: If True overwrite current data stored
+                data_type: Type of data, timeseries etc
+                required_keys: Required minimum keys to lookup unique Datasource
+                min_keys: Minimum number of metadata keys needed to uniquely match a Datasource
+            Returns:
+                dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
-        data: Dict[str, Union[str, bool, Dict]] = {}
-        data["creation_datetime"] = str(self._creation_datetime)
-        data["stored"] = self._stored
-        data["datasource_table"] = self._datasource_table
-        data["datasource_uuids"] = self._datasource_uuids
-        data["file_hashes"] = self._file_hashes
-        data["retrieved_hashes"] = self._retrieved_hashes
-        data["rank_data"] = self._rank_data
+        from openghg.store.base import Datasource
+        from openghg.util import to_lowercase
 
-        return data
+        uuids = {}
 
-    @classmethod
-    def load(cls: Type[T], bucket: Optional[str] = None) -> T:
-        """Load an object from the datastore using the passed
-        bucket and UUID
+        lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
+
+        for key, parsed_data in data.items():
+            metadata = parsed_data["metadata"]
+            _data = parsed_data["data"]
+
+            # Our lookup results and gas data have the same keys
+            uuid = lookup_results[key]
+
+            # Add the read metadata to the Dataset attributes being careful
+            # not to overwrite any attributes that are already there
+            to_add = {k: v for k, v in metadata.items() if k not in _data.attrs}
+            _data.attrs.update(to_add)
+
+            # If we have a UUID for this Datasource load the existing object
+            # from the object store
+            # If we haven't stored data with this metadata before we create a new Datasource
+            # and add the metadata to our metastore
+
+            # Take a copy of the metadata so we can update it
+            meta_copy = metadata.copy()
+
+            new_ds = uuid is False
+
+            if new_ds:
+                datasource = Datasource()
+                uid = datasource.uuid()
+                meta_copy["uuid"] = uid
+                # For retrieval later we'll need to know which bucket this is stored in
+                meta_copy["object_store"] = self._bucket
+
+                # Make sure all the metadata is lowercase for easier searching later
+                # TODO - do we want to do this or should be just perform lowercase comparisons?
+                meta_copy = to_lowercase(d=meta_copy)
+                # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
+                # so we can have rapid
+                self._datasource_uuids[uid] = key
+            else:
+                datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
+
+            # Add the dataframe to the datasource
+            datasource.add_data(metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type)
+            # Save Datasource to object store
+            datasource.save(bucket=self._bucket)
+
+            # Add the metadata to the metastore and make sure it's up to date with the metadata stored
+            # in the Datasource
+            datasource_metadata = datasource.metadata()
+            if new_ds:
+                self._metastore.insert(datasource_metadata)
+            else:
+                self._metastore.update(datasource_metadata, tinydb.where("uuid") == datasource.uuid())
+
+            uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
+
+        return uuids
+
+    def datasource_lookup(
+        self, data: Dict, required_keys: Sequence[str], min_keys: Optional[int] = None
+    ) -> Dict:
+        """Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys
+        to be present and will require at leas min_keys of these to be present when searching.
+
+        As some metadata value might change (such as data owners etc) we don't want to do an exact
+        search on *all* the metadata so we extract a subset (the required keys) and search for these.
 
         Args:
-            bucket: Bucket to store object
-        Returns:
-            class: Class created from JSON data
+            metastore: Metadata database
+            data: Combined data dictionary of form {key: {data: Dataset, metadata: Dict}}
+            required_keys: Iterable of keys to extract from metadata
+            min_keys: The minimum number of required keys, if not given it will be set
+            to the length of required_keys
+        Return:
+            dict: Dictionary of datasource information
         """
-        from openghg.objectstore import get_bucket, get_object_from_json
+        if min_keys is None:
+            min_keys = len(required_keys)
 
-        if not cls.exists():
-            return cls()
+        results = {}
+        for key, _data in data.items():
+            metadata = _data["metadata"]
+            required_metadata = {k.lower(): str(v).lower() for k, v in metadata.items() if k in required_keys}
 
-        if bucket is None:
-            bucket = get_bucket()
+            if len(required_metadata) < min_keys:
+                raise ValueError(
+                    f"The given metadata doesn't contain enough information, we need: {required_keys}"
+                )
 
-        key = f"{cls._root}/uuid/{cls._uuid}"
-        data = get_object_from_json(bucket=bucket, key=key)
+            q = tinydb.Query()
+            search_attrs = [getattr(q, k) == v for k, v in required_metadata.items()]
+            required_result = self._metastore.search(reduce(_find_and, search_attrs))
 
-        return cls.from_data(data=data)
+            if not required_result:
+                results[key] = False
+            elif len(required_result) > 1:
+                raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
+            else:
+                results[key] = required_result[0]["uuid"]
 
-    def save(cls) -> None:
-        """Save the object to the object store
+        return results
 
-        Args:
-            bucket: Bucket for data
-        Returns:
-            None
-        """
-        from openghg.objectstore import get_bucket, set_object_from_json
-
-        bucket = get_bucket()
-
-        obs_key = f"{cls._root}/uuid/{cls._uuid}"
-
-        cls._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=cls.to_data())
-
-    @classmethod
-    def uuid(cls: Type[T]) -> str:
+    def uuid(self) -> str:
         """Return the UUID of this object
 
         Returns:
             str: UUID of object
         """
-        return cls._uuid
+        return self._uuid
 
-    def datasources(self: T) -> List[str]:
+    def datasources(self) -> List[str]:
         """Return the list of Datasources UUIDs associated with this object
 
         Returns:
@@ -155,55 +207,18 @@ class BaseStore:
         """
         return list(self._datasource_uuids.keys())
 
-    def remove_datasource(self: T, uuid: str) -> None:
+    def remove_datasource(self, uuid: str) -> None:
         """Remove the Datasource with the given uuid from the list
         of Datasources
 
         Args:
-            uuid (str): UUID of Datasource to be removed
+            uuid: UUID of Datasource to be removed
         Returns:
             None
         """
         del self._datasource_uuids[uuid]
 
-    def add_datasources(self,
-                        uuids: Dict,
-                        data: Dict,
-                        metastore: TinyDB,
-                        update_keys: Optional[list] = None) -> None:
-        """Add the passed list of Datasources to the current list
-
-        Args:
-            datasource_uuids: Datasource UUIDs
-            metadata: Metadata for each species
-            metastore: TinyDB metadata store
-            update_keys: List of keys to update within metastore for existing data.
-        Returns:
-            None
-        """
-        from openghg.util import to_lowercase
-
-        for key, uuid_data in uuids.items():
-            meta_copy = data[key]["metadata"].copy()
-
-            uid = uuid_data["uuid"]
-            new = uuid_data["new"]
-
-            # Add new entry if this is a new Datasource
-            if new:
-                meta_copy["uuid"] = uuid_data["uuid"]
-
-                # Make sure all the metadata is lowercase for easier searching later
-                meta_copy = to_lowercase(d=meta_copy)
-                metastore.insert(meta_copy)
-                self._datasource_uuids[uid] = key
-            # Update keys in metastore as appropriate
-            elif update_keys is not None:
-                update = {key: value for key, value in meta_copy.items() if key in update_keys}
-                q = Query()
-                metastore.update(update, q.uuid == uid)
-
-    def get_rank(self: T, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
+    def get_rank(self, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range
 
         Args:
@@ -213,8 +228,8 @@ class BaseStore:
         Returns:
             dict: Dictionary of rank and daterange covered by that rank
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from collections import defaultdict
-
         from openghg.util import create_daterange_str, daterange_overlap
 
         if uuid not in self._rank_data:
@@ -232,7 +247,7 @@ class BaseStore:
 
         return ranked
 
-    def clear_rank(self: T, uuid: str) -> None:
+    def clear_rank(self, uuid: str) -> None:
         """Clear the ranking data for a Datasource
 
         Args:
@@ -240,6 +255,7 @@ class BaseStore:
         Returns:
             None
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         if uuid in self._rank_data:
             del self._rank_data[uuid]
             self.save()
@@ -247,7 +263,7 @@ class BaseStore:
             raise ValueError("No ranking data set for that UUID.")
 
     def set_rank(
-        self: T,
+        self,
         uuid: str,
         rank: Union[int, str],
         date_range: Union[str, List[str]],
@@ -269,6 +285,7 @@ class BaseStore:
         Returns:
             None
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from copy import deepcopy
 
         from openghg.util import (
@@ -389,22 +406,22 @@ class BaseStore:
 
         self.save()
 
-    def rank_data(self: T) -> Dict:
+    def rank_data(self) -> Dict:
         """Return a dictionary of rank data keyed
         by UUID
 
             Returns:
                 dict: Dictionary of rank data
         """
+        raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         rank_dict: Dict = self._rank_data.to_dict()
         return rank_dict
 
-    def clear_datasources(self: T) -> None:
+    def clear_datasources(self) -> None:
         """Remove all Datasources from the object
 
         Returns:
             None
         """
-        self._datasource_table.clear()
         self._datasource_uuids.clear()
         self._file_hashes.clear()
