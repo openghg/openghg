@@ -19,11 +19,30 @@ requirements:
     - pip
     - python
     - setuptools
+  # These differ slightly from requirements as some
+  # packages such as icoscp aren't available on conda
   run:
-    run:
-    {% for req in data.get('install_requires', []) %}
-      - {{ req }}
-    {% endfor %}
+    - addict
+    - dask
+    - h5netcdf
+    - matplotlib
+    - msgpack-python
+    - netcdf4
+    - nbformat
+    - numexpr
+    - numpy
+    - nc-time-axis
+    - pandas<2.0
+    - plotly
+    - pyvis
+    - rapidfuzz
+    - requests>=2.25
+    - scipy
+    - tinydb
+    - toml
+    - tqdm
+    - xarray
+    - urllib3>=1.26.3
 
 
 test:
