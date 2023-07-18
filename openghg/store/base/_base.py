@@ -91,6 +91,9 @@ class BaseStore:
         uuids = {}
 
         lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
+        # TODO - remove this when the lowercasing of metadata gets removed
+        # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
+        skip_keys = ["object_store"]
 
         for key, parsed_data in data.items():
             metadata = parsed_data["metadata"]
@@ -123,7 +126,7 @@ class BaseStore:
 
                 # Make sure all the metadata is lowercase for easier searching later
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
-                meta_copy = to_lowercase(d=meta_copy)
+                meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
                 # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
                 # so we can have rapid
                 self._datasource_uuids[uid] = key
@@ -131,7 +134,9 @@ class BaseStore:
                 datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
             # Add the dataframe to the datasource
-            datasource.add_data(metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type)
+            datasource.add_data(
+                metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type, skip_keys=skip_keys
+            )
             # Save Datasource to object store
             datasource.save(bucket=self._bucket)
 
