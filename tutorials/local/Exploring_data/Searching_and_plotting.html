@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Searching and plotting &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Searching and plotting &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -335,9 +335,6 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
-</ul>
 </div>
 </nav></div>
     </div>
@@ -477,6 +474,15 @@ this is displayed:</p>
 </pre></div>
 </div>
 </section>
+<section id="searching-a-specific-store">
+<h2>Searching a specific store<a class="headerlink" href="#searching-a-specific-store" title="Permalink to this heading">#</a></h2>
+<p>If you only want to search for data from a specific object store you can pass the store name to the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the search functions.
+To search for Tacolneston data from out <code class="docutils literal notranslate"><span class="pre">group</span></code> object store you could do</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tac_data_search</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="s2">&quot;group&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will then only search for data in the <code class="docutils literal notranslate"><span class="pre">group</span></code> object store.</p>
+</section>
 <section id="plot-all-the-data">
 <h2>Plot all the data<a class="headerlink" href="#plot-all-the-data" title="Permalink to this heading">#</a></h2>
 <p>If there are multiple results for a given search, we can also retrieve
@@ -568,6 +574,7 @@ we want:</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#searching">Searching</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#searching-a-specific-store">Searching a specific store</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-all-the-data">Plot all the data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compare-different-sites">Compare different sites</a></li>
 </ul>

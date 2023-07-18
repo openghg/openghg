@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.retrieve.icos._retrieve &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -355,6 +355,7 @@ document.write(`
   <h1>Source code for openghg.retrieve.icos._retrieve</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
+<span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_writable_bucket</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_on_hub</span><span class="p">,</span> <span class="n">load_json</span>
 <span class="kn">import</span> <span class="nn">openghg_defs</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -366,13 +367,15 @@ document.write(`
 <div class="viewcode-block" id="retrieve_atmospheric"><a class="viewcode-back" href="../../../../api/devapi_retrieve.html#openghg.retrieve.icos.retrieve_atmospheric">[docs]</a><span class="k">def</span> <span class="nf">retrieve_atmospheric</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">force_retrieval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">data_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="n">dataset_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">update_metadata_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise</span>
 <span class="sd">    data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.</span>
@@ -382,6 +385,8 @@ document.write(`
 <span class="sd">    Args:</span>
 <span class="sd">        site: Site code</span>
 <span class="sd">        species: Species name</span>
+<span class="sd">        inlet: Height of the inlet for sampling in metres.</span>
+<span class="sd">        sampling_height: Alias for inlet</span>
 <span class="sd">        start_date: Start date</span>
 <span class="sd">        end_date: End date</span>
 <span class="sd">        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal</span>
@@ -392,22 +397,28 @@ document.write(`
 <span class="sd">                        This level is the ICOS-data product and free available for users.</span>
 <span class="sd">        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</span>
 <span class="sd">        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack</span>
-<span class="sd">        update_metadata_mismatch: If metadata derived from ICOS Header does not match</span>
-<span class="sd">            to derived attributes, update metadata to match to attributes.</span>
-<span class="sd">            Otherwise a AttrMismatchError will be raised.</span>
+<span class="sd">        store: Name of object to search/store data to</span>
+<span class="sd">        update_mismatch: This determines how mismatches between the &quot;metadata&quot; derived from</span>
+<span class="sd">            stored data and &quot;attributes&quot; derived from ICOS Header are handled.</span>
+<span class="sd">            This includes the options:</span>
+<span class="sd">                - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
+<span class="sd">                - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on attributes from ICOS Header</span>
+<span class="sd">                - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on input metadata</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsData, list[ObsData] or None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">retrieve</span><span class="p">(</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
         <span class="n">sampling_height</span><span class="o">=</span><span class="n">sampling_height</span><span class="p">,</span>
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
         <span class="n">force_retrieval</span><span class="o">=</span><span class="n">force_retrieval</span><span class="p">,</span>
         <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
         <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
-        <span class="n">update_metadata_mismatch</span><span class="o">=</span><span class="n">update_metadata_mismatch</span><span class="p">,</span>
+        <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">,</span>
+        <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -425,6 +436,8 @@ document.write(`
 <span class="sd">        species: Species name</span>
 <span class="sd">        start_date: Start date</span>
 <span class="sd">        end_date: End date</span>
+<span class="sd">        inlet: Height of the inlet for sampling in metres.</span>
+<span class="sd">        sampling_height: Alias for inlet</span>
 <span class="sd">        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal</span>
 <span class="sd">        data_level: ICOS data level (1, 2)</span>
 <span class="sd">        - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).</span>
@@ -432,9 +445,12 @@ document.write(`
 <span class="sd">                        to be distributed through the Carbon Portal.</span>
 <span class="sd">                        This level is the ICOS-data product and free available for users.</span>
 <span class="sd">        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</span>
-<span class="sd">        update_metadata_mismatch: If metadata derived from ICOS Header does not match</span>
-<span class="sd">            to derived attributes, update metadata to match to attributes.</span>
-<span class="sd">            Otherwise a AttrMismatchError will be raised.</span>
+<span class="sd">        update_mismatch: This determines how mismatches between the &quot;metadata&quot; derived from</span>
+<span class="sd">            stored data and &quot;attributes&quot; derived from ICOS Header are handled.</span>
+<span class="sd">            This includes the options:</span>
+<span class="sd">                - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
+<span class="sd">                - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on attributes from ICOS Header</span>
+<span class="sd">                - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on input metadata</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsData, list[ObsData] or None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -478,13 +494,15 @@ document.write(`
 <span class="k">def</span> <span class="nf">local_retrieve</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">force_retrieval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">data_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
     <span class="n">dataset_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">update_metadata_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise</span>
@@ -495,6 +513,8 @@ document.write(`
 <span class="sd">    Args:</span>
 <span class="sd">        site: Site code</span>
 <span class="sd">        species: Species name</span>
+<span class="sd">        inlet: Height of the inlet for sampling in metres.</span>
+<span class="sd">        sampling_height: Alias for inlet</span>
 <span class="sd">        start_date: Start date</span>
 <span class="sd">        end_date: End date</span>
 <span class="sd">        force_retrieval: Force the retrieval of data from the ICOS Carbon Portal</span>
@@ -505,9 +525,13 @@ document.write(`
 <span class="sd">                        This level is the ICOS-data product and free available for users.</span>
 <span class="sd">        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</span>
 <span class="sd">        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack</span>
-<span class="sd">        update_metadata_mismatch: If metadata derived from ICOS Header does not match</span>
-<span class="sd">            to derived attributes, update metadata to match to attributes.</span>
-<span class="sd">            Otherwise a AttrMismatchError will be raised.</span>
+<span class="sd">        store: Name of object to search/store data to</span>
+<span class="sd">        update_mismatch: This determines how mismatches between the &quot;metadata&quot; derived from</span>
+<span class="sd">            stored data and &quot;attributes&quot; derived from ICOS Header are handled.</span>
+<span class="sd">            This includes the options:</span>
+<span class="sd">                - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
+<span class="sd">                - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on attributes from ICOS Header</span>
+<span class="sd">                - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on input metadata</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsData, list[ObsData] or None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -518,17 +542,23 @@ document.write(`
     <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">data_level</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error: data level must be 1 or 2.&quot;</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">sampling_height</span> <span class="ow">and</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">sampling_height</span>
+    <span class="k">elif</span> <span class="n">sampling_height</span> <span class="ow">and</span> <span class="n">inlet</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Both sampling height and inlet specified. Using inlet value of </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="c1"># NOTE - we skip ranking here, will we be ranking ICOS data?</span>
     <span class="n">results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span>
         <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
         <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-        <span class="n">sampling_height</span><span class="o">=</span><span class="n">sampling_height</span><span class="p">,</span>
+        <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
         <span class="n">network</span><span class="o">=</span><span class="s2">&quot;ICOS&quot;</span><span class="p">,</span>
         <span class="n">data_source</span><span class="o">=</span><span class="s2">&quot;icoscp&quot;</span><span class="p">,</span>
         <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
         <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
         <span class="n">icos_data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
         <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
+        <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">results</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_retrieval</span><span class="p">:</span>
@@ -540,14 +570,17 @@ document.write(`
             <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
             <span class="n">data_level</span><span class="o">=</span><span class="n">data_level</span><span class="p">,</span>
             <span class="n">dataset_source</span><span class="o">=</span><span class="n">dataset_source</span><span class="p">,</span>
-            <span class="n">update_metadata_mismatch</span><span class="o">=</span><span class="n">update_metadata_mismatch</span><span class="p">,</span>
+            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
             <span class="n">sampling_height</span><span class="o">=</span><span class="n">sampling_height</span><span class="p">,</span>
+            <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">standardised_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="n">ObsSurface</span><span class="o">.</span><span class="n">store_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">)</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">ObsSurface</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">obs</span><span class="p">:</span>
+            <span class="n">obs</span><span class="o">.</span><span class="n">store_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">)</span>
 
         <span class="c1"># Create the expected ObsData type</span>
         <span class="n">obs_data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -568,9 +601,10 @@ document.write(`
     <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">data_level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sampling_height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">dataset_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">update_metadata_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve ICOS data from the ICOS Carbon Portal and standardise it into</span>
 <span class="sd">    a format expected by OpenGHG. A dictionary of metadata and Datasets</span>
@@ -585,11 +619,15 @@ document.write(`
 <span class="sd">                        This level is the ICOS-data product and free available for users.</span>
 <span class="sd">        See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone</span>
 <span class="sd">        species: Species name</span>
-<span class="sd">        sampling_height: Sampling height in metres</span>
+<span class="sd">        inlet: Height of the inlet for sampling in metres.</span>
+<span class="sd">        sampling_height: Alias for inlet</span>
 <span class="sd">        dataset_source: Dataset source name, for example ICOS, InGOS, European ObsPack</span>
-<span class="sd">        update_metadata_mismatch: If metadata derived from ICOS Header does not match</span>
-<span class="sd">            to derived attributes, update metadata to match to attributes.</span>
-<span class="sd">            Otherwise a AttrMismatchError will be raised.</span>
+<span class="sd">        update_mismatch: This determines how mismatches between the &quot;metadata&quot; derived from</span>
+<span class="sd">            stored data and &quot;attributes&quot; derived from ICOS Header are handled.</span>
+<span class="sd">            This includes the options:</span>
+<span class="sd">                - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
+<span class="sd">                - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on attributes from ICOS Header</span>
+<span class="sd">                - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on input metadata</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict or None: Dictionary of processed data and metadata if found</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -613,6 +651,11 @@ document.write(`
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">species</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">]</span>
 
+    <span class="k">if</span> <span class="n">sampling_height</span> <span class="ow">and</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">sampling_height</span>
+    <span class="k">elif</span> <span class="n">sampling_height</span> <span class="ow">and</span> <span class="n">inlet</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Both sampling height and inlet specified. Using inlet value of </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="c1"># We should first check if it&#39;s stored in the object store</span>
     <span class="c1"># Will need to make sure ObsSurface can accept the datasets we</span>
     <span class="c1"># create from the ICOS data</span>
@@ -631,9 +674,9 @@ document.write(`
     <span class="c1"># Now filter the dataframe so we can extract the PIDS</span>
     <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">data_pids</span><span class="p">[</span><span class="n">data_pids</span><span class="p">[</span><span class="s2">&quot;specLabel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">search_str</span><span class="p">)]</span>
 
-    <span class="k">if</span> <span class="n">sampling_height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">sampling_height</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sampling_height</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)))</span>
-        <span class="n">height_filter</span> <span class="o">=</span> <span class="p">[</span><span class="n">sampling_height</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">filtered_sources</span><span class="p">[</span><span class="s2">&quot;samplingheight&quot;</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">inlet</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)))</span>
+        <span class="n">height_filter</span> <span class="o">=</span> <span class="p">[</span><span class="n">inlet</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">filtered_sources</span><span class="p">[</span><span class="s2">&quot;samplingheight&quot;</span><span class="p">]]</span>
         <span class="n">filtered_sources</span> <span class="o">=</span> <span class="n">filtered_sources</span><span class="p">[</span><span class="n">height_filter</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">filtered_sources</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
@@ -678,7 +721,7 @@ document.write(`
         <span class="c1"># This is the metadata, dobj.info and dobj.meta are equal</span>
         <span class="n">dobj_info</span> <span class="o">=</span> <span class="n">dobj</span><span class="o">.</span><span class="n">meta</span>
 
-        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">specific_info</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;specificInfo&quot;</span><span class="p">]</span>
         <span class="n">col_data</span> <span class="o">=</span> <span class="n">specific_info</span><span class="p">[</span><span class="s2">&quot;columns&quot;</span><span class="p">]</span>
@@ -693,30 +736,30 @@ document.write(`
 
         <span class="n">species_info</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">col_data</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">the_species</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">the_species</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">the_species</span>
         <span class="n">acq_data</span> <span class="o">=</span> <span class="n">specific_info</span><span class="p">[</span><span class="s2">&quot;acquisition&quot;</span><span class="p">]</span>
         <span class="n">station_data</span> <span class="o">=</span> <span class="n">acq_data</span><span class="p">[</span><span class="s2">&quot;station&quot;</span><span class="p">]</span>
 
         <span class="n">to_store</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">instrument_metadata</span> <span class="o">=</span> <span class="n">acq_data</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+            <span class="n">instrument_attributes</span> <span class="o">=</span> <span class="n">acq_data</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
             <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NA&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Do some tidying of the instrument metadata</span>
+            <span class="c1"># Do some tidying of the instrument attributes</span>
             <span class="n">instruments</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-            <span class="n">cleaned_instrument_metadata</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">cleaned_instrument_attributes</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instrument_metadata</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">instrument_metadata</span> <span class="o">=</span> <span class="p">[</span><span class="n">instrument_metadata</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instrument_attributes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">instrument_attributes</span> <span class="o">=</span> <span class="p">[</span><span class="n">instrument_attributes</span><span class="p">]</span>
 
-            <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="n">instrument_metadata</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="n">instrument_attributes</span><span class="p">:</span>
                 <span class="n">instrument_name</span> <span class="o">=</span> <span class="n">inst</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
                 <span class="n">instruments</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">instrument_name</span><span class="p">)</span>
                 <span class="n">uri</span> <span class="o">=</span> <span class="n">inst</span><span class="p">[</span><span class="s2">&quot;uri&quot;</span><span class="p">]</span>
 
-                <span class="n">cleaned_instrument_metadata</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">instrument_name</span><span class="p">,</span> <span class="n">uri</span><span class="p">])</span>
+                <span class="n">cleaned_instrument_attributes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">instrument_name</span><span class="p">,</span> <span class="n">uri</span><span class="p">])</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">instrument</span> <span class="o">=</span> <span class="n">instruments</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
@@ -724,48 +767,68 @@ document.write(`
                 <span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;multiple&quot;</span>
 
             <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">instrument</span>
-            <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cleaned_instrument_metadata</span>
+            <span class="n">to_store</span><span class="p">[</span><span class="s2">&quot;instrument_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cleaned_instrument_attributes</span>
 
-        <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_store</span><span class="p">)</span>
+        <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">to_store</span><span class="p">)</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;measurement_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurement_type</span>
+        <span class="c1"># TODO: Remove this from general attributes but make sure this is</span>
+        <span class="c1"># included as a specific value on the appropriate variable.</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">units</span>
 
         <span class="n">_sampling_height</span> <span class="o">=</span> <span class="n">acq_data</span><span class="p">[</span><span class="s2">&quot;samplingHeight&quot;</span><span class="p">]</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">_sampling_height</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;sampling_height&quot;</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;sampling_height_units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;metres&quot;</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">_sampling_height</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet&quot;</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">_sampling_height</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">)</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">_sampling_height</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;sampling_height&quot;</span><span class="p">)</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;sampling_height_units&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;metres&quot;</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">_sampling_height</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet&quot;</span><span class="p">)</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">_sampling_height</span><span class="p">,</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;inlet_height_magl&quot;</span><span class="p">)</span>
 
         <span class="n">loc_data</span> <span class="o">=</span> <span class="n">station_data</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]</span>
 
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;station_long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">])</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;station_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">])</span>
+
+        <span class="c1"># 03/05/2023: Updated attributes to include altitude for &quot;station_height_masl&quot; explicitly.</span>
+        <span class="c1"># attributes[&quot;station_altitude&quot;] = format_inlet(loc_data[&quot;alt&quot;], key_name=&quot;station_altitude&quot;)</span>
+        <span class="c1"># attributes[&quot;station_height_masl&quot;] = format_inlet(str(stat.eas), key_name=&quot;station_height_masl&quot;)</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;alt&quot;</span><span class="p">],</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">)</span>
+
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;data_owner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stat</span><span class="o">.</span><span class="n">firstName</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">stat</span><span class="o">.</span><span class="n">lastName</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;data_owner_email&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
+
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;citation_string&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;citationString&quot;</span><span class="p">]</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;licence_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;licence&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;licence_info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;licence&quot;</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">network</span> <span class="o">=</span> <span class="s2">&quot;ICOS&quot;</span>
+
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">station_long_name</span> <span class="o">=</span> <span class="n">openghg_site_metadata</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="s2">&quot;ICOS&quot;</span><span class="p">][</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>
+            <span class="n">site_info</span> <span class="o">=</span> <span class="n">openghg_site_metadata</span><span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()][</span><span class="n">network</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">station_long_name</span> <span class="o">=</span> <span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;long_name&quot;</span><span class="p">]</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">]</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site_info</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_long_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">station_long_name</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_latitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">])</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_longitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">])</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_altitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">loc_data</span><span class="p">[</span><span class="s2">&quot;alt&quot;</span><span class="p">],</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_altitude&quot;</span><span class="p">)</span>
-
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_owner&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stat</span><span class="o">.</span><span class="n">firstName</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">stat</span><span class="o">.</span><span class="n">lastName</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_owner_email&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">email</span><span class="p">)</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">stat</span><span class="o">.</span><span class="n">eas</span><span class="p">),</span> <span class="n">key_name</span><span class="o">=</span><span class="s2">&quot;station_height_masl&quot;</span><span class="p">)</span>
-
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;citation_string&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;citationString&quot;</span><span class="p">]</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;licence_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;licence&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;licence_info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_info</span><span class="p">[</span><span class="s2">&quot;references&quot;</span><span class="p">][</span><span class="s2">&quot;licence&quot;</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>
+        <span class="c1"># Add some values directly for attributes (for now)</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
 
         <span class="c1"># Add ICOS in directly here for now</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ICOS&quot;</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data_source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;icoscp&quot;</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;source_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;icos&quot;</span>
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;icos_data_level&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_level</span><span class="p">)</span>
+        <span class="n">additional_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">network</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;data_source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;icoscp&quot;</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;source_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;icos&quot;</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;icos_data_level&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_level</span><span class="p">)</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;dataset_source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_dataset_source</span>
+        <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">site</span>
 
-        <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;dataset_source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dobj_dataset_source</span>
+        <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_data</span><span class="p">)</span>
 
         <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
         <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
@@ -773,7 +836,7 @@ document.write(`
         <span class="k">if</span> <span class="ow">not</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">:</span>
             <span class="n">dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
 
-        <span class="n">spec</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
 
         <span class="n">rename_cols</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;stdev&quot;</span><span class="p">:</span> <span class="n">spec</span> <span class="o">+</span> <span class="s2">&quot; variability&quot;</span><span class="p">,</span>
@@ -796,7 +859,7 @@ document.write(`
         <span class="n">dataframe</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">dataframe</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
 
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
-        <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
 
         <span class="c1"># So there isn&#39;t an easy way of getting a hash of a Dataset, can we do something</span>
         <span class="c1"># simple here we can compare data that&#39;s being added? Then we&#39;ll be able to make sure</span>
@@ -806,12 +869,10 @@ document.write(`
         <span class="n">standardised_data</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
             <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
-            <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
+            <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">,</span>
         <span class="p">}</span>
 
-    <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">update_metadata_mismatch</span><span class="o">=</span><span class="n">update_metadata_mismatch</span>
-    <span class="p">)</span>
+    <span class="n">standardised_data</span> <span class="o">=</span> <span class="n">assign_attributes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">standardised_data</span><span class="p">,</span> <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">standardised_data</span>
 

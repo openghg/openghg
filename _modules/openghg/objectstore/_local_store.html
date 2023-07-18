@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.objectstore._local_store &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.objectstore._local_store &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -364,12 +364,13 @@ document.write(`
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">pyvis</span>
 <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">ObjectStoreError</span>
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">read_local_config</span>
 
 <span class="n">rlock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;delete_object&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;get_local_objectstore_path&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_user_objectstore_path&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_tutorial_store_path&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_all_object_names&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_object_names&quot;</span><span class="p">,</span>
@@ -386,28 +387,96 @@ document.write(`
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
+<span class="k">def</span> <span class="nf">get_readable_buckets</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a dictionary of readable buckets - {store_name: store_path, ...}</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: List of readable buckets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
+    <span class="n">object_stores</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">store_name</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">store_name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">object_stores</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;r&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;permissions&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">get_writable_buckets</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a dictionary of writable buckets - {store_name: store_path, ...}</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of buckets this user can write to</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
+    <span class="n">object_stores</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">store_name</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">store_name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">object_stores</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;w&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;permissions&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to a writable bucket, passing in the name of a bucket if</span>
+<span class="sd">    more than one writable bucket available.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name: Name of writable bucket</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Path to writable bucket</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_TUT_STORE&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_tutorial_store_path</span><span class="p">())</span>
+
+    <span class="n">writable_buckets</span> <span class="o">=</span> <span class="n">get_writable_buckets</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">writable_buckets</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ObjectStoreError</span><span class="p">(</span><span class="s2">&quot;No writable object stores found. Check configuration file.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">writable_buckets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">writable_buckets</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bucket_path</span> <span class="o">=</span> <span class="n">writable_buckets</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ObjectStoreError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid object store name, stores you can write to are: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">writable_buckets</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">bucket_path</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ObjectStoreError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;More than one writable store, stores you can write to are: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">writable_buckets</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+
 <div class="viewcode-block" id="get_tutorial_store_path"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_tutorial_store_path">[docs]</a><span class="k">def</span> <span class="nf">get_tutorial_store_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the path to the local tutorial store</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        pathlib.Path: Path of tutorial store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">get_local_objectstore_path</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tutorial_store&quot;</span></div>
+    <span class="k">return</span> <span class="n">get_user_objectstore_path</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;tutorial_store&quot;</span></div>
 
 
 <span class="c1"># @lru_cache</span>
-<div class="viewcode-block" id="get_local_objectstore_path"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_local_objectstore_path">[docs]</a><span class="k">def</span> <span class="nf">get_local_objectstore_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read</span>
+<span class="k">def</span> <span class="nf">get_user_objectstore_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the path of the user&#39;s local object store</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        pathlib.Path: Path of object store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">read_local_config</span>
-
     <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
-    <span class="n">object_store_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">][</span><span class="s2">&quot;local_store&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">][</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
 
-    <span class="k">return</span> <span class="n">object_store_path</span></div>
+
+<span class="k">def</span> <span class="nf">get_objectstore_info</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the local config file and return the data of each of the object stores the</span>
+<span class="sd">    user has access to.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of object store data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="get_all_object_names"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_all_object_names">[docs]</a><span class="k">def</span> <span class="nf">get_all_object_names</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">without_prefix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
@@ -587,18 +656,29 @@ document.write(`
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 
-<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find and return the local object store path (bucket)</span>
+<div class="viewcode-block" id="get_bucket"><a class="viewcode-back" href="../../../api/devapi_objectstore.html#openghg.objectstore.get_bucket">[docs]</a><span class="k">def</span> <span class="nf">get_bucket</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find and return the local object store path. This will return</span>
+<span class="sd">    the path to the user&#39;s local object store if no name is given.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        name: Object store name in config file</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Path to object store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ObjectStoreError</span><span class="p">(</span><span class="s2">&quot;Invalid object store name.&quot;</span><span class="p">)</span>
+
     <span class="n">tutorial_store</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_TUT_STORE&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">tutorial_store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_tutorial_store_path</span><span class="p">())</span>
 
-    <span class="n">local_store</span> <span class="o">=</span> <span class="n">get_local_objectstore_path</span><span class="p">()</span>
+    <span class="n">local_store</span> <span class="o">=</span> <span class="n">get_user_objectstore_path</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">local_store</span><span class="p">)</span></div>
 
@@ -610,7 +690,7 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">local_store</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_local_objectstore_path</span><span class="p">())</span>
+    <span class="n">local_store</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_user_objectstore_path</span><span class="p">())</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;You have requested to delete </span><span class="si">{</span><span class="n">local_store</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="n">confirmed_path</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Please enter the full path of the store: &quot;</span><span class="p">)</span>
@@ -626,6 +706,7 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: Dictionary for data to be shown in force graph</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
     <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span>
     <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
 

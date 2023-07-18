@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Using databases to add data &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Using databases to add data &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -355,7 +355,7 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="using-databases-to-add-data">
-<h1>Using databases to add data<a class="headerlink" href="#using-databases-to-add-data" title="Permalink to this heading">#</a></h1>
+<span id="using-databases-edgar"></span><h1>Using databases to add data<a class="headerlink" href="#using-databases-to-add-data" title="Permalink to this heading">#</a></h1>
 <p>Within OpenGHG so far, we have been using the provided standardisation
 functions for known input file formats (source formats) to populate the
 object store ([see here and here] - add links to previous tutorial
@@ -428,11 +428,17 @@ of “CH4” data from 2014-2015 which can be downloaded for this tutorial.</p>
 <p>For example, this would create a new emissions map for methane, “ch4”,
 for the area over Europe, “EUROPE” domain for 2014. The edgar database
 provided is v6.0, annual, global and for methane.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Outside of this tutorial, if you have write access to multiple object stores you
+will need to pass the name of the object store you wish to write to to
+the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">transform_data</span></code> function.</p>
+</div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">Emissions</span>
 
 <span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;edgar&quot;</span>
 
-<span class="n">Emissions</span><span class="o">.</span><span class="n">transform_data</span><span class="p">(</span><span class="n">edgar_datapath</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="mi">2014</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+<span class="n">Emissions</span><span class="o">.</span><span class="n">transform_data</span><span class="p">(</span><span class="n">datapath</span><span class="o">=</span><span class="n">edgar_datapath</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="mi">2014</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><em>Note: this can take a few minutes to complete.</em></p>

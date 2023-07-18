@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Index &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -403,7 +403,7 @@ document.write(`
 </li>
         <li><a href="api/api_dataobjects.html#openghg.dataobjects.BoundaryConditionsData.__init__">(openghg.dataobjects.BoundaryConditionsData method)</a>
 </li>
-        <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataHandler.__init__">(openghg.dataobjects.DataHandler method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.__init__">[1]</a>
+        <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.__init__">(openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.__init__">[1]</a>
 </li>
         <li><a href="api/api_dataobjects.html#openghg.dataobjects.FluxData.__init__">(openghg.dataobjects.FluxData method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.FluxData.__init__">[1]</a>
 </li>
@@ -457,7 +457,7 @@ document.write(`
       <ul>
         <li><a href="api/api_dataobjects.html#openghg.dataobjects.BoundaryConditionsData.__str__">(openghg.dataobjects.BoundaryConditionsData method)</a>
 </li>
-        <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataHandler.__str__">(openghg.dataobjects.DataHandler method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.__str__">[1]</a>
+        <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.__str__">(openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.__str__">[1]</a>
 </li>
         <li><a href="api/api_dataobjects.html#openghg.dataobjects.FluxData.__str__">(openghg.dataobjects.FluxData method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.FluxData.__str__">[1]</a>
 </li>
@@ -566,9 +566,9 @@ document.write(`
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/devapi_store.html#openghg.store.data_handler_lookup">data_handler_lookup() (in module openghg.store)</a>
+      <li><a href="api/devapi_store.html#openghg.store.data_manager">data_manager() (in module openghg.store)</a>
 </li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataHandler">DataHandler (class in openghg.dataobjects)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataHandler">[1]</a>
+      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager">DataManager (class in openghg.dataobjects)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager">[1]</a>
 </li>
       <li><a href="api/api_types.html#openghg.types.DatasourceLookupError">DatasourceLookupError (class in openghg.types)</a>, <a href="api/devapi_types.html#openghg.types.DatasourceLookupError">[1]</a>
 </li>
@@ -592,7 +592,7 @@ document.write(`
 </li>
       <li><a href="api/devapi_store.html#openghg.store.ObsSurface.delete">delete() (openghg.store.ObsSurface method)</a>
 </li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataHandler.delete_datasource">delete_datasource() (openghg.dataobjects.DataHandler method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.delete_datasource">[1]</a>
+      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.delete_datasource">delete_datasource() (openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.delete_datasource">[1]</a>
 </li>
       <li><a href="api/devapi_objectstore.html#openghg.objectstore.delete_object">delete_object() (in module openghg.objectstore)</a>
 </li>
@@ -667,8 +667,6 @@ document.write(`
       <li><a href="api/api_retrieve.html#openghg.retrieve.get_flux">get_flux() (in module openghg.retrieve)</a>, <a href="api/devapi_retrieve.html#openghg.retrieve.get_flux">[1]</a>
 </li>
       <li><a href="api/api_retrieve.html#openghg.retrieve.get_footprint">get_footprint() (in module openghg.retrieve)</a>, <a href="api/devapi_retrieve.html#openghg.retrieve.get_footprint">[1]</a>
-</li>
-      <li><a href="api/devapi_objectstore.html#openghg.objectstore.get_local_objectstore_path">get_local_objectstore_path() (in module openghg.objectstore)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -876,35 +874,35 @@ document.write(`
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.read_data">read_data() (openghg.store.BoundaryConditions static method)</a>
+      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.read_data">read_data() (openghg.store.BoundaryConditions method)</a>
 
       <ul>
-        <li><a href="api/devapi_store.html#openghg.store.Emissions.read_data">(openghg.store.Emissions static method)</a>
+        <li><a href="api/devapi_store.html#openghg.store.Emissions.read_data">(openghg.store.Emissions method)</a>
 </li>
-        <li><a href="api/devapi_store.html#openghg.store.Footprints.read_data">(openghg.store.Footprints static method)</a>
+        <li><a href="api/devapi_store.html#openghg.store.Footprints.read_data">(openghg.store.Footprints method)</a>
 </li>
-        <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_data">(openghg.store.ObsSurface static method)</a>
+        <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_data">(openghg.store.ObsSurface method)</a>
 </li>
       </ul></li>
-      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.read_file">read_file() (openghg.store.BoundaryConditions static method)</a>
+      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.read_file">read_file() (openghg.store.BoundaryConditions method)</a>
 
       <ul>
-        <li><a href="api/devapi_store.html#openghg.store.Emissions.read_file">(openghg.store.Emissions static method)</a>
+        <li><a href="api/devapi_store.html#openghg.store.Emissions.read_file">(openghg.store.Emissions method)</a>
 </li>
-        <li><a href="api/devapi_store.html#openghg.store.EulerianModel.read_file">(openghg.store.EulerianModel static method)</a>
+        <li><a href="api/devapi_store.html#openghg.store.EulerianModel.read_file">(openghg.store.EulerianModel method)</a>
 </li>
-        <li><a href="api/devapi_store.html#openghg.store.Footprints.read_file">(openghg.store.Footprints static method)</a>
+        <li><a href="api/devapi_store.html#openghg.store.Footprints.read_file">(openghg.store.Footprints method)</a>
 </li>
-        <li><a href="api/devapi_store.html#openghg.store.ObsColumn.read_file">(openghg.store.ObsColumn static method)</a>
+        <li><a href="api/devapi_store.html#openghg.store.ObsColumn.read_file">(openghg.store.ObsColumn method)</a>
 </li>
-        <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_file">(openghg.store.ObsSurface static method)</a>
+        <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_file">(openghg.store.ObsSurface method)</a>
 </li>
       </ul></li>
       <li><a href="api/devapi_util.html#openghg.util.read_header">read_header() (in module openghg.util)</a>
 </li>
       <li><a href="api/devapi_util.html#openghg.util.read_local_config">read_local_config() (in module openghg.util)</a>
 </li>
-      <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_multisite_aqmesh">read_multisite_aqmesh() (openghg.store.ObsSurface static method)</a>
+      <li><a href="api/devapi_store.html#openghg.store.ObsSurface.read_multisite_aqmesh">read_multisite_aqmesh() (openghg.store.ObsSurface method)</a>
 </li>
       <li><a href="api/devapi_store.html#openghg.store.recombine_datasets">recombine_datasets() (in module openghg.store)</a>
 </li>
@@ -912,7 +910,7 @@ document.write(`
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataHandler.refresh">refresh() (openghg.dataobjects.DataHandler method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.refresh">[1]</a>
+      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.refresh">refresh() (openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.refresh">[1]</a>
 </li>
       <li><a href="api/api_transform.html#openghg.transform.regrid_uniform_cc">regrid_uniform_cc() (in module openghg.transform)</a>
 </li>
@@ -922,7 +920,7 @@ document.write(`
 </li>
       <li><a href="api/api_types.html#openghg.types.RequestBucketError">RequestBucketError (class in openghg.types)</a>, <a href="api/devapi_types.html#openghg.types.RequestBucketError">[1]</a>
 </li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataHandler.restore">restore() (openghg.dataobjects.DataHandler method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.restore">[1]</a>
+      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.restore">restore() (openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.restore">[1]</a>
 </li>
       <li><a href="api/devapi_types.html#openghg.types.resultsType">resultsType (in module openghg.types)</a>
 </li>
@@ -949,8 +947,6 @@ document.write(`
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_util.html#openghg.util.sanitise_daterange">sanitise_daterange() (in module openghg.util)</a>
-</li>
-      <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.save">save() (openghg.store.BoundaryConditions method)</a>
 </li>
       <li><a href="api/devapi_store.html#openghg.store.BoundaryConditions.schema">schema() (openghg.store.BoundaryConditions static method)</a>
 
@@ -1004,7 +1000,7 @@ document.write(`
 </li>
       <li><a href="api/api_standardise.html#openghg.standardise.standardise_surface">standardise_surface() (in module openghg.standardise)</a>
 </li>
-      <li><a href="api/devapi_store.html#openghg.store.ObsSurface.store_data">store_data() (openghg.store.ObsSurface static method)</a>
+      <li><a href="api/devapi_store.html#openghg.store.ObsSurface.store_data">store_data() (openghg.store.ObsSurface method)</a>
 </li>
       <li><a href="api/devapi_store.html#openghg.store.ObsSurface.store_hashes">store_hashes() (openghg.store.ObsSurface method)</a>
 </li>
@@ -1044,7 +1040,7 @@ document.write(`
 </li>
       <li><a href="api/api_util.html#openghg.util.to_lowercase">to_lowercase() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.to_lowercase">[1]</a>
 </li>
-      <li><a href="api/devapi_store.html#openghg.store.Emissions.transform_data">transform_data() (openghg.store.Emissions static method)</a>
+      <li><a href="api/devapi_store.html#openghg.store.Emissions.transform_data">transform_data() (openghg.store.Emissions method)</a>
 </li>
       <li><a href="api/devapi_util.html#openghg.util.trim_daterange">trim_daterange() (in module openghg.util)</a>
 </li>
@@ -1064,7 +1060,7 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/devapi_cloud.html#openghg.cloud.unpackage">unpackage() (in module openghg.cloud)</a>
 </li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataHandler.update_metadata">update_metadata() (openghg.dataobjects.DataHandler method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.update_metadata">[1]</a>
+      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.update_metadata">update_metadata() (openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.update_metadata">[1]</a>
 </li>
       <li><a href="api/api_tutorial.html#openghg.tutorial.use_tutorial_store">use_tutorial_store() (in module openghg.tutorial)</a>
 </li>
@@ -1092,7 +1088,7 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/api_util.html#openghg.util.verify_site">verify_site() (in module openghg.util)</a>, <a href="api/devapi_util.html#openghg.util.verify_site">[1]</a>
 </li>
-      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataHandler.view_backup">view_backup() (openghg.dataobjects.DataHandler method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataHandler.view_backup">[1]</a>
+      <li><a href="api/api_dataobjects.html#openghg.dataobjects.DataManager.view_backup">view_backup() (openghg.dataobjects.DataManager method)</a>, <a href="api/devapi_dataobjects.html#openghg.dataobjects.DataManager.view_backup">[1]</a>
 </li>
       <li><a href="api/devapi_objectstore.html#openghg.objectstore.visualise_store">visualise_store() (in module openghg.objectstore)</a>
 </li>

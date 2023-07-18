@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._user &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.util._user &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -357,12 +357,16 @@ document.write(`
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">platform</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">import</span> <span class="nn">toml</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">ConfigFileError</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.util&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
+
+<span class="n">openghg_config_filename</span> <span class="o">=</span> <span class="s2">&quot;openghg.conf&quot;</span>
 
 
 <span class="c1"># @lru_cache</span>
@@ -388,17 +392,16 @@ document.write(`
 
 <span class="c1"># @lru_cache</span>
 <div class="viewcode-block" id="get_user_config_path"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.get_user_config_path">[docs]</a><span class="k">def</span> <span class="nf">get_user_config_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks if a config file has already been create for</span>
-<span class="sd">    OpenGHG to use. This file is created in the user&#39;s home directory</span>
-<span class="sd">    in  ~/.config/openghg/user.conf on Linux / macOS or</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns path to user config file.</span>
+
+<span class="sd">    This file is created in the user&#39;s home directory</span>
+<span class="sd">    in  ~/.ghgconfig/openghg/user.conf on Linux / macOS or</span>
 <span class="sd">    in LOCALAPPDATA/openghg/openghg.conf on Windows.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        pathlib.Path: Path to user config file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">user_platform</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span>
-
-    <span class="n">openghg_config_filename</span> <span class="o">=</span> <span class="s2">&quot;openghg.conf&quot;</span>
 
     <span class="k">if</span> <span class="n">user_platform</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
         <span class="n">appdata_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;LOCALAPPDATA&quot;</span><span class="p">)</span>
@@ -407,7 +410,7 @@ document.write(`
 
         <span class="n">config_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">appdata_path</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;openghg&quot;</span><span class="p">,</span> <span class="n">openghg_config_filename</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">user_platform</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">):</span>
-        <span class="n">config_path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;.config&quot;</span><span class="p">,</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span> <span class="n">openghg_config_filename</span><span class="p">)</span>
+        <span class="n">config_path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;.openghg&quot;</span><span class="p">,</span> <span class="n">openghg_config_filename</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown platform: </span><span class="si">{</span><span class="n">user_platform</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -417,6 +420,9 @@ document.write(`
 <div class="viewcode-block" id="create_config"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.create_config">[docs]</a><span class="k">def</span> <span class="nf">create_config</span><span class="p">(</span><span class="n">silent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a user config.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        silent: Creates the basic configuration file with only</span>
+<span class="sd">        the user&#39;s object store in a default location.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -426,64 +432,158 @@ document.write(`
 
     <span class="n">user_config_path</span> <span class="o">=</span> <span class="n">get_user_config_path</span><span class="p">()</span>
 
-    <span class="n">updated</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># Current config version as of version 0.6.0</span>
+    <span class="n">config_version</span> <span class="o">=</span> <span class="s2">&quot;2&quot;</span>
+    <span class="n">positive_responses</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+
     <span class="c1"># If the config file exists we might need to update it due to the introduction</span>
-    <span class="c1"># of the user ID</span>
+    <span class="c1"># of the user ID and new object store path handling for multiple stores</span>
     <span class="k">if</span> <span class="n">user_config_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">silent</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error: cannot overwrite an existing configuration. Please run interactively.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot update an existing configuration silently. Please run interactively.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User config exists at </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">user_config_path</span><span class="p">)</span><span class="si">}</span><span class="s2">, checking...&quot;</span><span class="p">)</span>
 
         <span class="n">config</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">user_config_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
 
-        <span class="n">objstore_path_config</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">][</span><span class="s2">&quot;local_store&quot;</span><span class="p">])</span>
+        <span class="n">recent</span> <span class="o">=</span> <span class="s2">&quot;config_version&quot;</span> <span class="ow">in</span> <span class="n">config</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current object store path: </span><span class="si">{</span><span class="n">objstore_path_config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">update_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Would you like to update the path? (y/n): &quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">update_input</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">):</span>
-            <span class="n">new_path_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter new path for object store: &quot;</span><span class="p">)</span>
-            <span class="n">new_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">new_path_input</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-
-            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">][</span><span class="s2">&quot;local_store&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_path</span><span class="p">)</span>
-            <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">recent</span><span class="p">:</span>
+            <span class="n">user_store_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">][</span><span class="s2">&quot;user&quot;</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Matching object store path, nothing to do.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">user_store_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">][</span><span class="s2">&quot;local_store&quot;</span><span class="p">])</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current user object store path: </span><span class="si">{</span><span class="n">user_store_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Store the object store info</span>
+        <span class="n">stores</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">update_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Would you like to update the path? (y/n): &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">update_input</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">positive_responses</span><span class="p">:</span>
+            <span class="n">new_path_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter new path for object store: &quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">new_path_input</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You must enter a path. Unable to complete config setup.&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="n">new_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">new_path_input</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+            <span class="n">stores</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_path</span><span class="p">),</span> <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="s2">&quot;rw&quot;</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stores</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_store_path</span><span class="p">),</span> <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="s2">&quot;rw&quot;</span><span class="p">}</span>
+
+        <span class="c1"># Copy in exisiting shared stores</span>
+        <span class="k">if</span> <span class="n">recent</span><span class="p">:</span>
+            <span class="n">stores</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;user&quot;</span><span class="p">})</span>
+
+        <span class="c1"># Now ask the user if they want to add new stores</span>
+        <span class="n">new_shared_stores</span> <span class="o">=</span> <span class="n">_user_multstore_input</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">new_shared_stores</span><span class="p">:</span>
+            <span class="n">existing</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">new_shared_stores</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">stores</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">existing</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Some names match those of existing stores: </span><span class="si">{</span><span class="n">existing</span><span class="si">}</span><span class="s2">, please update manually.&quot;</span><span class="p">)</span>
+
+            <span class="n">stores</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_shared_stores</span><span class="p">)</span>
 
         <span class="c1"># Some users may not have a user ID if they&#39;ve used previous versions of OpenGHG</span>
-        <span class="c1"># Or if they UUID isn&#39;t valid a new one is created, the value of the UUID</span>
-        <span class="c1"># doesn&#39;t matter at the moment, it&#39;s not used for anything very important</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">user_id</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;user_id&quot;</span><span class="p">]</span>
-            <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;user_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
-            <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">_combine_config</span><span class="p">(</span><span class="n">config_version</span><span class="o">=</span><span class="n">config_version</span><span class="p">,</span> <span class="n">object_stores</span><span class="o">=</span><span class="n">stores</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">default_objstore_path</span> <span class="o">=</span> <span class="n">get_default_objectstore_path</span><span class="p">()</span>
+        <span class="c1"># Let&#39;s try migrating the old config</span>
+        <span class="c1"># If it works we call this function again</span>
+        <span class="c1"># otherwise continue on to create a new config</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_migrate_config</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">create_config</span><span class="p">(</span><span class="n">silent</span><span class="o">=</span><span class="n">silent</span><span class="p">)</span>
+            <span class="k">return</span>
 
-        <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">default_objstore_path</span>
+        <span class="n">stores</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># 1. Create the user&#39;s object store first</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
-            <span class="n">obj_store_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Enter path for object store (default </span><span class="si">{</span><span class="n">default_objstore_path</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;We&#39;ll first create your user object store.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">get_default_objectstore_path</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">silent</span><span class="p">:</span>
+            <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">get_default_objectstore_path</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">obj_store_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Enter path for your local object store (default </span><span class="si">{</span><span class="n">obj_store_path</span><span class="si">}</span><span class="s2">): &quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">obj_store_input</span><span class="p">:</span>
                 <span class="n">obj_store_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">obj_store_input</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 
-        <span class="n">user_config_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Let&#39;s create the store to make sure it&#39;s a valid path</span>
+        <span class="n">obj_store_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">user_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;object_store&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;local_store&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj_store_path</span><span class="p">)},</span> <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+        <span class="n">stores</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj_store_path</span><span class="p">),</span> <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="s2">&quot;rw&quot;</span><span class="p">}</span>
 
-        <span class="n">obj_store_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+            <span class="n">shared_stores</span> <span class="o">=</span> <span class="n">_user_multstore_input</span><span class="p">()</span>
+            <span class="n">stores</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">shared_stores</span><span class="p">)</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating config at </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">user_config_path</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">_combine_config</span><span class="p">(</span><span class="n">config_version</span><span class="o">=</span><span class="n">config_version</span><span class="p">,</span> <span class="n">object_stores</span><span class="o">=</span><span class="n">stores</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">updated</span><span class="p">:</span>
+    <span class="c1"># Make the .config/openghg folder</span>
+    <span class="n">user_config_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration written to </span><span class="si">{</span><span class="n">user_config_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">user_config_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">toml</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Configuration unchanged.&quot;</span><span class="p">)</span></div>
+
+    <span class="n">user_config_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">toml</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config</span><span class="p">))</span></div>
+
+
+<span class="k">def</span> <span class="nf">_user_multstore_input</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ask the user to input data about shared object stores</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary of object store paths and permissions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">positive_responses</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+    <span class="n">stores</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># 2. Ask the user to enter other object store paths</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Would you like to add another object store? (y/n): &quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">positive_responses</span><span class="p">:</span>
+            <span class="n">store_name</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter the name of the store: &quot;</span><span class="p">)</span>
+            <span class="n">store_path</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter the object store path: &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">You will now be asked for read/write permissions for the store.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;For read only enter r, for read and write enter rw.&quot;</span><span class="p">)</span>
+
+            <span class="n">store_permissions</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">while</span> <span class="n">store_permissions</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;rw&quot;</span><span class="p">):</span>
+                <span class="n">store_permissions</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enter object store permissions: &quot;</span><span class="p">)</span>
+
+            <span class="n">stores</span><span class="p">[</span><span class="n">store_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">store_path</span><span class="p">,</span> <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="n">store_permissions</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">stores</span>
+
+
+<span class="k">def</span> <span class="nf">_combine_config</span><span class="p">(</span><span class="n">config_version</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">object_stores</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine parts required into the proper dictionary format</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config_version: Configuration version number</span>
+<span class="sd">        object_stores: Object store configuration dictionary</span>
+<span class="sd">        user_id: User ID</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create the object store dictionary</span>
+    <span class="n">object_store_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">object_stores</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+        <span class="n">permissions</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;permissions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="n">object_store_info</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="n">permissions</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">user_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">&quot;config_version&quot;</span><span class="p">:</span> <span class="n">config_version</span><span class="p">,</span> <span class="s2">&quot;object_store&quot;</span><span class="p">:</span> <span class="n">object_store_info</span><span class="p">}</span>
 
 
 <span class="c1"># @lru_cache</span>
@@ -496,39 +596,87 @@ document.write(`
     <span class="n">config_path</span> <span class="o">=</span> <span class="n">get_user_config_path</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">config_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-            <span class="s2">&quot;Unable to read configuration file, please see the installation instructions or run openghg --quickstart&quot;</span>
-        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_migrate_config</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
+                <span class="s2">&quot;Unable to read configuration file, please see the installation instructions </span><span class="se">\</span>
+<span class="s2">                or run openghg --quickstart&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
 
     <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">config_path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">][</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid config file detected, please please see the installation instructions </span><span class="se">\</span>
+<span class="s2">                or run openghg --quickstart&quot;</span>
+        <span class="p">)</span>
+
     <span class="k">return</span> <span class="n">config</span></div>
 
 
 <div class="viewcode-block" id="check_config"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.check_config">[docs]</a><span class="k">def</span> <span class="nf">check_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check that the user config file is valid and the paths</span>
-<span class="sd">    given in it exist.</span>
+<span class="sd">    given in it exist. Raises ConfigFileError if problems found.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        bool</span>
+<span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">config_path</span> <span class="o">=</span> <span class="n">get_user_config_path</span><span class="p">()</span>
+    <span class="n">please_update</span> <span class="o">=</span> <span class="s2">&quot;please run openghg --quickstart to update it.&quot;</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">config_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Configuration file does not exist. Please create it by running openghg --quickstart.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
+            <span class="s2">&quot;Configuration file does not exist. Please create it by running openghg --quickstart.&quot;</span>
+        <span class="p">)</span>
 
     <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
-    <span class="n">uid</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;user_id&quot;</span><span class="p">]</span>
-    <span class="n">object_stores</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;user_id&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span><span class="s2">&quot;Unable to read user ID, &quot;</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">(</span><span class="n">uid</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Invalid user ID. Please re-run quickstart to setup a valid config file.&quot;</span><span class="p">)</span>
-        <span class="k">raise</span>
+        <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid user ID, </span><span class="si">{</span><span class="n">please_update</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">object_stores</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> does not exist but will be created.&quot;</span><span class="p">)</span></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;config_version&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid config file, </span><span class="si">{</span><span class="n">please_update</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">object_stores</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to read object store data, </span><span class="si">{</span><span class="n">please_update</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">object_stores</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The path for object store </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2"> does not exist but will be created.&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_migrate_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;If user config file is in ~/.config, move it to ~/.openghg.</span>
+
+<span class="sd">    If no config is found in ~/.config or system is Windows, raise FileNotFoundError.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">old_config_path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;.config&quot;</span><span class="p">,</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span> <span class="n">openghg_config_filename</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">old_config_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">new_config_path</span> <span class="o">=</span> <span class="n">get_user_config_path</span><span class="p">()</span>
+        <span class="n">new_config_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">old_config_path</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_config_path</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Moved user config file from </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">old_config_path</span><span class="p">)</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">new_config_path</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">old_config_path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>  <span class="c1"># remove &quot;openghg&quot; dir from ~/.config</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;Configuration file not found.&quot;</span><span class="p">)</span>
 </pre></div>
 
                 </article>

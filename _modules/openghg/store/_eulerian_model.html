@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._eulerian_model &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.store._eulerian_model &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -353,11 +353,13 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for openghg.store._eulerian_model</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">TracebackType</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.store&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
@@ -380,8 +382,22 @@ document.write(`
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;63ff2365-3ba2-452a-a53d-110140805d06&quot;</span>
     <span class="n">_metakey</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">/metastore&quot;</span>
 
-<div class="viewcode-block" id="EulerianModel.read_file"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.EulerianModel.read_file">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EulerianModel</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">exc_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">],</span>
+        <span class="n">exc_val</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">],</span>
+        <span class="n">exc_tb</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TracebackType</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exc_type</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">exc_tb</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<div class="viewcode-block" id="EulerianModel.read_file"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.EulerianModel.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
         <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
         <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -405,8 +421,6 @@ document.write(`
         <span class="c1"># May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.</span>
 
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">datasource_lookup</span><span class="p">,</span> <span class="n">load_metastore</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">hash_file</span><span class="p">,</span> <span class="n">timestamp_now</span><span class="p">,</span> <span class="n">timestamp_tzaware</span>
         <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timestamp</span> <span class="k">as</span> <span class="n">pd_Timestamp</span>
         <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">open_dataset</span>
@@ -419,13 +433,10 @@ document.write(`
 
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
-        <span class="n">em_store</span> <span class="o">=</span> <span class="n">EulerianModel</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-        <span class="n">metastore</span> <span class="o">=</span> <span class="n">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">em_store</span><span class="o">.</span><span class="n">_metakey</span><span class="p">)</span>
-
         <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">em_store</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">em_store</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
 
         <span class="n">em_data</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
@@ -507,23 +518,14 @@ document.write(`
         <span class="n">model_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
 
         <span class="n">required</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;date&quot;</span><span class="p">)</span>
-        <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">model_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
 
         <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;eulerian_model&quot;</span>
-        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
-            <span class="n">data_dict</span><span class="o">=</span><span class="n">model_data</span><span class="p">,</span>
-            <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-            <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">model_data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span>
         <span class="p">)</span>
 
-        <span class="n">em_store</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">model_data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
-
         <span class="c1"># Record the file hash in case we see this file again</span>
-        <span class="n">em_store</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
-
-        <span class="n">em_store</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div></div>
 </pre></div>

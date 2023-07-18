@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -456,6 +456,7 @@ document.write(`
         <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">metmodel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fp_inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">bc_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -487,6 +488,7 @@ document.write(`
 <span class="sd">            domain : Domain name e.g. &quot;EUROPE&quot;</span>
 <span class="sd">            model : Model name used in creation of footprint e.g. &quot;NAME&quot;</span>
 <span class="sd">            metmodel : Name of met model used in creation of footprint e.g. &quot;UKV&quot;</span>
+<span class="sd">            fp_inlet : Specify footprint release height options if this doesn&#39;t match to site value.</span>
 <span class="sd">            sources : Emissions sources</span>
 <span class="sd">            bc_input : Input keyword for boundary conditions e.g. &quot;mozart&quot; or &quot;cams&quot;</span>
 <span class="sd">            start_date : Start of date range to use. Note for flux this may not be applied</span>
@@ -540,6 +542,7 @@ document.write(`
             <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
             <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span>
+            <span class="n">fp_inlet</span><span class="o">=</span><span class="n">fp_inlet</span><span class="p">,</span>
             <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
             <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
             <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
@@ -667,7 +670,8 @@ document.write(`
         <span class="c1"># Add keywords to class for convenience</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="ModelScenario.add_footprint"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_footprint">[docs]</a>    <span class="k">def</span> <span class="nf">add_footprint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -680,58 +684,86 @@ document.write(`
         <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fp_inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">footprint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FootprintData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add footprint data based on keywords or direct FootprintData object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">species_lifetime</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">clean_string</span><span class="p">,</span>
+            <span class="n">format_inlet</span><span class="p">,</span>
+            <span class="n">species_lifetime</span><span class="p">,</span>
+            <span class="n">extract_height_name</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Search for footprint data based on keywords</span>
-        <span class="c1"># - site, domain, inlet (can extract from obs), model, metmodel</span>
+        <span class="c1"># - site, domain, inlet (can extract from obs / height_name), model, metmodel</span>
         <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">footprint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">site</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
-            <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="n">height</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
-                <span class="n">inlet</span> <span class="o">=</span> <span class="n">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">fp_inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">height_name</span> <span class="o">=</span> <span class="n">extract_height_name</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">inlet</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">height_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">fp_inlet</span> <span class="o">=</span> <span class="n">height_name</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using height_name option(s) for footprint inlet: </span><span class="si">{</span><span class="n">fp_inlet</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">fp_inlet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">fp_inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">inlet</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">fp_inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">fp_inlet</span> <span class="o">=</span> <span class="n">clean_string</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
 
             <span class="c1"># TODO: Add case to deal with &quot;multiple&quot; inlets</span>
-            <span class="k">if</span> <span class="n">inlet</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
+            <span class="c1"># In this case would need to find different footprints for different inlet values</span>
+            <span class="k">if</span> <span class="n">fp_inlet</span> <span class="o">==</span> <span class="s2">&quot;multiple&quot;</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;Unable to deal with multiple inlets yet:</span><span class="se">\n</span><span class="s2"> Please change date range or specify a specific inlet&quot;</span>
                 <span class="p">)</span>
 
-            <span class="n">footprint_keywords</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
-                <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">inlet</span><span class="p">,</span>
-                <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">inlet</span><span class="p">,</span>
-                <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
-                <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>  <span class="c1"># Not currently used in get_footprint - should be added</span>
-                <span class="c1"># &quot;metmodel&quot;: metmodel,  # Should be added to inputs for get_footprint()</span>
-                <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">start_date</span><span class="p">,</span>
-                <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">end_date</span><span class="p">,</span>
-            <span class="p">}</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fp_inlet</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">fp_inlet_options</span> <span class="o">=</span> <span class="n">fp_inlet</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fp_inlet_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">fp_inlet</span><span class="p">]</span>
 
-            <span class="c1"># Check whether general inert footprint should be extracted (suitable for long-lived species)</span>
-            <span class="c1"># or species specific footprint</span>
-            <span class="c1">#  - needed for short-lived species (includes additional parameters for age of particles)</span>
-            <span class="c1">#  - needed for carbon dioxide (include high time resolution footprint)</span>
-            <span class="n">species_lifetime_value</span> <span class="o">=</span> <span class="n">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">species_lifetime_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
-                <span class="n">footprint_keywords</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+            <span class="n">fp_inlet_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">format_inlet</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fp_inlet_options</span><span class="p">]</span>
 
-            <span class="n">footprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">footprint_keywords</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprint&quot;</span><span class="p">)</span>
+            <span class="n">footprint_keyword_options</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">fp_inlet_option</span> <span class="ow">in</span> <span class="n">fp_inlet_options</span><span class="p">:</span>
+
+                <span class="n">footprint_keywords</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+                    <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">fp_inlet_option</span><span class="p">,</span>
+                    <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">fp_inlet_option</span><span class="p">,</span>
+                    <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
+                    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+                    <span class="c1"># &quot;metmodel&quot;: metmodel,  # Should be added to inputs for get_footprint()</span>
+                    <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">start_date</span><span class="p">,</span>
+                    <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="n">end_date</span><span class="p">,</span>
+                <span class="p">}</span>
+
+                <span class="c1"># Check whether general inert footprint should be extracted (suitable for long-lived species)</span>
+                <span class="c1"># or species specific footprint</span>
+                <span class="c1">#  - needed for short-lived species (includes additional parameters for age of particles)</span>
+                <span class="c1">#  - needed for carbon dioxide (include high time resolution footprint)</span>
+                <span class="n">species_lifetime_value</span> <span class="o">=</span> <span class="n">species_lifetime</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">species_lifetime_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">species</span> <span class="o">==</span> <span class="s2">&quot;co2&quot;</span><span class="p">:</span>
+                    <span class="n">footprint_keywords</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">species</span>
+
+                <span class="n">footprint_keyword_options</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">footprint_keywords</span><span class="p">)</span>
+
+            <span class="n">footprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">footprint_keyword_options</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;footprint&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span> <span class="o">=</span> <span class="n">footprint</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fp_inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fp_inlet</span> <span class="o">=</span> <span class="n">fp_inlet</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="ModelScenario.add_flux"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_flux">[docs]</a>    <span class="k">def</span> <span class="nf">add_flux</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

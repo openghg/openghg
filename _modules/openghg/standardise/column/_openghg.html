@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.column._openghg &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.standardise.column._openghg &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -615,6 +615,7 @@ document.write(`
     <span class="c1"># Update attributes to match metadata after cleaning</span>
     <span class="n">attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
 
+    <span class="c1"># TODO: Decide if the key here should be more descriptive that just `species`</span>
     <span class="n">gas_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">species</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="n">attributes</span><span class="p">}}</span>
 
     <span class="c1"># gas_data = assign_attributes(data=gas_data, site=site, network=network)</span>

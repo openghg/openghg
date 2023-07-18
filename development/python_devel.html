@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Getting setup &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Getting setup &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -675,6 +675,26 @@ changes can be merged back into the development branch.
 For information, see the documentation
 <a class="reference external" href="https://help.github.com/articles/about-pull-requests">here</a>.</p>
 </section>
+<section id="creating-a-release">
+<h2>Creating a release<a class="headerlink" href="#creating-a-release" title="Permalink to this heading">#</a></h2>
+<p>The creation of the packages required by PyPI and conda is handled in the GitHub actions workflow files
+under <code class="docutils literal notranslate"><span class="pre">.github/workflows/workflow.yaml</span></code>. The package build and release workflow will only be triggered by a
+tagged commit. Before we get to this step we need to make sure everything is setup to do a release.</p>
+<ol class="arabic simple">
+<li><p>Ensure all issues in a <a class="reference external" href="https://github.com/openghg/openghg/milestones">milestone</a> are complete</p></li>
+<li><p>Ensure all tests are passing and no runners are failing</p></li>
+<li><p>Update CHANGELOG.md with notes of each fix and links to the pull requests</p></li>
+<li><p>Ensure all documentation is up to date</p></li>
+<li><p>Create a tagged commit and push it to origin</p></li>
+</ol>
+<p>For example, when I released version 0.5.1 of OpenGHG I created a tag and pushed it like so</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span><span class="m">0</span>.5.1<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;OpenGHG release v0.5.1&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span><span class="m">0</span>.5.1
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>Update the website with the new release and information about any new features or tutorials added.</p></li>
+</ol>
+</section>
 </section>
 
 
@@ -752,6 +772,7 @@ For information, see the documentation
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#documentation">Documentation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#committing">Committing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-release">Creating a release</a></li>
 </ul>
   </nav></div>
 

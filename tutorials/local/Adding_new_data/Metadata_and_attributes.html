@@ -1,0 +1,726 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Metadata and attributes &#8212; OpenGHG 0.6.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_new_data/Metadata_and_attributes';</script>
+    <script src="../../../_static/custom.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../install.html">
+                        Installation
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index.html">
+                        User API
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../development/index_devel.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../api/index_devapi.html">
+                        Developer API
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Metadata and attributes</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="metadata-and-attributes">
+<h1>Metadata and attributes<a class="headerlink" href="#metadata-and-attributes" title="Permalink to this heading">#</a></h1>
+<p><em>Note at the moment this tutorial is only applicable to surface data and not to the other data types.</em></p>
+<section id="using-the-tutorial-object-store">
+<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Permalink to this heading">#</a></h2>
+<p>To avoid adding the example data we use in this tutorial to your normal
+object store, we need to tell OpenGHG to use a separate sandboxed object
+store that we’ll call the tutorial store. To do this we use the
+<code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
+<code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
+affect your use of OpenGHG outside of this tutorial.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+
+<span class="n">use_tutorial_store</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="add-example-observation-data">
+<h2>1. Add example observation data<a class="headerlink" href="#add-example-observation-data" title="Permalink to this heading">#</a></h2>
+<p>For this tutorial, we can add some example Tacolnestion data to the tutorial object store.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+
+<span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz&quot;</span>
+
+<span class="n">tac_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">data_url</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+
+<span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We’ll also retrieve some dummy alternative data which we can use to demonstrate how to deal with
+mismatching metadata and attributes.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
+
+<span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/tac_dummy_attr_mismatch_example.tar.gz&quot;</span>
+
+<span class="n">dummy_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">data_url</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We will demonstrate how to add this to the object store below.</p>
+</section>
+<section id="id1">
+<h2>2. Metadata and attributes<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
+<p>Within OpenGHG, metadata is used as a way to categorise a data source by
+applying a unique set of keys. This is used to distinguish between stored data
+and allows this to be searchable.</p>
+<p>For CF-compliance and ease of use, we also provide a set of internal attributes
+stored alongside the data and within the netcdf file (as Dataset.attrs when using
+xarray for instance).</p>
+<p>The <em>metadata</em> and <em>attributes</em> stored do not necessarily need to be the same for
+a given data source. Indeed, we may want different information stored as tags in
+the metadata and more extensive details included in the attributes. However, for any
+overlapping tags (keys) between the metadata and the attributes these values <strong>must match</strong>.</p>
+<p>For the current observation data we have available we can retrieve the carbon dioxide data for the  Tacolneston Site
+at the 185m inlet.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
+
+<span class="n">co2_data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;185m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Previously, we have focussed on the <em class="xref py py-obj">data</em> attribute to access the stored data for this output.
+We can access the metadata details in a similiar way by looking at the <em class="xref py py-obj">metadata</em> attribute:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">co2_data</span><span class="o">.</span><span class="n">metadata</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;data_type&#39;</span><span class="p">:</span> <span class="s1">&#39;surface&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;site&#39;</span><span class="p">:</span> <span class="s1">&#39;tac&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;instrument&#39;</span><span class="p">:</span> <span class="s1">&#39;picarro&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;sampling_period&#39;</span><span class="p">:</span> <span class="s1">&#39;3600.0&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;inlet&#39;</span><span class="p">:</span> <span class="s1">&#39;185m&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;port&#39;</span><span class="p">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;air&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;network&#39;</span><span class="p">:</span> <span class="s1">&#39;decc&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;species&#39;</span><span class="p">:</span> <span class="s1">&#39;co2&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;calibration_scale&#39;</span><span class="p">:</span> <span class="s1">&#39;wmo-x2007&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;long_name&#39;</span><span class="p">:</span> <span class="s1">&#39;tacolneston&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;inlet_height_magl&#39;</span><span class="p">:</span> <span class="s1">&#39;185m&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;data_owner&#39;</span><span class="p">:</span> <span class="s2">&quot;Simon O&#39;Doherty&quot;</span><span class="p">,</span>
+ <span class="s1">&#39;data_owner_email&#39;</span><span class="p">:</span> <span class="s1">&#39;s.odoherty@bristol.ac.uk&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;station_longitude&#39;</span><span class="p">:</span> <span class="mf">1.13872</span><span class="p">,</span>
+ <span class="s1">&#39;station_latitude&#39;</span><span class="p">:</span> <span class="mf">52.51775</span><span class="p">,</span>
+ <span class="s1">&#39;station_long_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Tacolneston Tower, UK&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;station_height_masl&#39;</span><span class="p">:</span> <span class="mf">50.0</span><span class="p">,</span>
+ <span class="s1">&#39;uuid&#39;</span><span class="p">:</span> <span class="s1">&#39;f3e1ef46-8907-4096-8215-19bd6e1c55e3&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;comment&#39;</span><span class="p">:</span> <span class="s1">&#39;Cavity ring-down measurements. Output from GCWerks&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;conditions_of_use&#39;</span><span class="p">:</span> <span class="s1">&#39;Ensure that you contact the data owner at the outset of your project.&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="s1">&#39;In situ measurements of air&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;Conventions&#39;</span><span class="p">:</span> <span class="s1">&#39;CF-1.8&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;file_created&#39;</span><span class="p">:</span> <span class="s1">&#39;2022-12-13 10:23:34.956121+00:00&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;processed_by&#39;</span><span class="p">:</span> <span class="s1">&#39;OpenGHG_Cloud&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;sampling_period_unit&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="s1">&#39;WMO-X2007&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>You will see this is stored as a dictionary containing the unique keys associated with this data.
+These details are is what allows openghg to search and retrieve specific data sources.</p>
+<p>The attributes are associated internally with the data itself:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">co2_ds</span> <span class="o">=</span> <span class="n">co2_data</span><span class="o">.</span><span class="n">data</span>
+<span class="n">co2_ds</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span>
+    <span class="n">Dimensions</span><span class="p">:</span>
+    <span class="n">time</span><span class="p">:</span> <span class="mi">39114</span>
+    <span class="n">Coordinates</span><span class="p">:</span>
+    <span class="n">time</span>
+    <span class="p">(</span><span class="n">time</span><span class="p">)</span>
+    <span class="n">datetime64</span><span class="p">[</span><span class="n">ns</span><span class="p">]</span>
+    <span class="mi">2013</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">31</span><span class="n">T00</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mi">28</span> <span class="o">...</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">12</span><span class="o">-...</span>
+    <span class="n">Data</span> <span class="n">variables</span><span class="p">:</span>
+        <span class="n">mf</span>             <span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="n">float64</span> <span class="mf">401.6</span> <span class="mf">403.4</span> <span class="mf">403.1</span> <span class="o">...</span> <span class="mf">411.1</span> <span class="mf">411.1</span>
+        <span class="n">mf_variability</span> <span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="n">float64</span> <span class="mf">0.155</span> <span class="mf">0.088</span> <span class="mf">0.204</span> <span class="o">...</span> <span class="mf">0.421</span> <span class="mf">0.325</span>
+        <span class="n">mf_number_</span><span class="o">...</span>  <span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="n">float64</span> <span class="mf">259.0</span> <span class="mf">251.0</span> <span class="mf">252.0</span> <span class="o">...</span> <span class="mf">596.0</span> <span class="mf">596.0</span>
+    <span class="n">Indexes</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">Attributes</span><span class="p">:</span> <span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To access the “Attributes” we can use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">attrs</span></code> keyword for xarray Datasets.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">co2_ds</span><span class="o">.</span><span class="n">attrs</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;data_type&#39;</span><span class="p">:</span> <span class="s1">&#39;surface&#39;</span><span class="p">,</span>
+<span class="s1">&#39;site&#39;</span><span class="p">:</span> <span class="s1">&#39;tac&#39;</span><span class="p">,</span>
+<span class="s1">&#39;instrument&#39;</span><span class="p">:</span> <span class="s1">&#39;picarro&#39;</span><span class="p">,</span>
+<span class="s1">&#39;sampling_period&#39;</span><span class="p">:</span> <span class="s1">&#39;3600.0&#39;</span><span class="p">,</span>
+<span class="s1">&#39;inlet&#39;</span><span class="p">:</span> <span class="s1">&#39;185m&#39;</span><span class="p">,</span>
+<span class="s1">&#39;port&#39;</span><span class="p">:</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span>
+<span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;air&#39;</span><span class="p">,</span>
+<span class="s1">&#39;network&#39;</span><span class="p">:</span> <span class="s1">&#39;decc&#39;</span><span class="p">,</span>
+<span class="s1">&#39;species&#39;</span><span class="p">:</span> <span class="s1">&#39;co2&#39;</span><span class="p">,</span>
+<span class="s1">&#39;calibration_scale&#39;</span><span class="p">:</span> <span class="s1">&#39;wmo-x2007&#39;</span><span class="p">,</span>
+<span class="s1">&#39;long_name&#39;</span><span class="p">:</span> <span class="s1">&#39;tacolneston&#39;</span><span class="p">,</span>
+<span class="s1">&#39;inlet_height_magl&#39;</span><span class="p">:</span> <span class="s1">&#39;185m&#39;</span><span class="p">,</span>
+<span class="s1">&#39;data_owner&#39;</span><span class="p">:</span> <span class="s2">&quot;Simon O&#39;Doherty&quot;</span><span class="p">,</span>
+<span class="s1">&#39;data_owner_email&#39;</span><span class="p">:</span> <span class="s1">&#39;s.odoherty@bristol.ac.uk&#39;</span><span class="p">,</span>
+<span class="s1">&#39;station_longitude&#39;</span><span class="p">:</span> <span class="mf">1.13872</span><span class="p">,</span>
+<span class="s1">&#39;station_latitude&#39;</span><span class="p">:</span> <span class="mf">52.51775</span><span class="p">,</span>
+<span class="s1">&#39;station_long_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Tacolneston Tower, UK&#39;</span><span class="p">,</span>
+<span class="s1">&#39;station_height_masl&#39;</span><span class="p">:</span> <span class="mf">50.0</span><span class="p">,</span>
+<span class="s1">&#39;uuid&#39;</span><span class="p">:</span> <span class="s1">&#39;f3e1ef46-8907-4096-8215-19bd6e1c55e3&#39;</span><span class="p">,</span>
+<span class="s1">&#39;comment&#39;</span><span class="p">:</span> <span class="s1">&#39;Cavity ring-down measurements. Output from GCWerks&#39;</span><span class="p">,</span>
+<span class="s1">&#39;conditions_of_use&#39;</span><span class="p">:</span> <span class="s1">&#39;Ensure that you contact the data owner at the outset of your project.&#39;</span><span class="p">,</span>
+<span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="s1">&#39;In situ measurements of air&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Conventions&#39;</span><span class="p">:</span> <span class="s1">&#39;CF-1.8&#39;</span><span class="p">,</span>
+<span class="s1">&#39;file_created&#39;</span><span class="p">:</span> <span class="s1">&#39;2022-12-13 10:23:34.956121+00:00&#39;</span><span class="p">,</span>
+<span class="s1">&#39;processed_by&#39;</span><span class="p">:</span> <span class="s1">&#39;OpenGHG_Cloud&#39;</span><span class="p">,</span>
+<span class="s1">&#39;sampling_period_unit&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
+<span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="s1">&#39;WMO-X2007&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Storing attributes in this way means it’s easy to create a CF-compliant netcdf file from the standardised
+data in the object store, for example using the <em class="xref py py-obj">to_netcdf()</em> method on our Dataset:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># co2_ds.to_netcdf(...)</span>
+</pre></div>
+</div>
+<p>Here we would uncomment this and substitue <em class="xref py py-obj"></em> for a filepath.</p>
+</section>
+<section id="resolving-mismatches">
+<h2>3. Resolving mismatches<a class="headerlink" href="#resolving-mismatches" title="Permalink to this heading">#</a></h2>
+<p>When the <em>metadata</em> and <em>attributes</em> are created as part of the openghg standardisation
+process (and when using <em class="xref py py-obj">retrieve_atmospheric</em>), these sets of details are often collated
+from different sources.</p>
+<p>In general:</p>
+<ul class="simple">
+<li><p>attributes are drawn from internal attributes from the data</p></li>
+<li><p>metadata is drawn from additional external details including user inputs
+and the <a class="reference external" href="https://github.com/openghg/openghg_defs/tree/main/openghg_defs/data">openghg/openghg_defs</a></p></li>
+</ul>
+<blockquote>
+<div><p>data repository.</p>
+</div></blockquote>
+<p>Depending on the standardisation procedure, there are cases where there may be a mismatch between
+these two sets of details. For instance, you may wish to specify a station long name when adding a new data file
+as an input but this conflicts with attributes stored within the data file itself. You may also find when
+retrieving data from an external source, such as the ICOS Carbon Portal, the
+attributes stored alongside retrieved data do not match to our definitions stored within the
+openghg/openghg_defs <a class="reference external" href="https://github.com/openghg/openghg_defs/blob/main/openghg_defs/data/site_info.json">site_info details</a>
+for that site.</p>
+<p>Though overlapping details stored in the attributes and metadata must match, how these mismatches are
+handled is up to the user. When adding new data either via <em class="xref py py-obj">standardise_surface</em> (or pulling data using <em class="xref py py-obj">retrieve_atmopsheric</em>)
+this can be done through the <em class="xref py py-obj">update_mismatch</em> keyword.</p>
+<p>In Step 1, you should have already retrieved some dummy data we can use to demonstrate this. This will have
+been created as a variable called <em class="xref py py-obj">dummy_data</em> which we will use below. Check this has been
+run if you’re unable to access this variable.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">dummy_data</span><span class="p">,</span>
+                    <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
+                    <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span>
+                    <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">,</span>
+                    <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;998m&quot;</span><span class="p">,</span>
+                    <span class="n">instrument</span><span class="o">=</span><span class="s2">&quot;picarro&quot;</span><span class="p">,</span>
+                    <span class="n">sampling_period</span><span class="o">=</span><span class="s2">&quot;1H&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---------------------------------------------------------------------------</span>
+<span class="n">AttrMismatchError</span>                         <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+
+<span class="o">...</span>
+
+<span class="n">AttrMismatchError</span><span class="p">:</span> <span class="n">Metadata</span> <span class="n">mismatch</span> <span class="o">/</span> <span class="n">value</span> <span class="ow">not</span> <span class="n">within</span> <span class="n">tolerance</span> <span class="k">for</span> <span class="n">the</span> <span class="n">following</span> <span class="n">keys</span><span class="p">:</span>
+<span class="o">-</span> <span class="s1">&#39;station_long_name&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Tacolneston</span> <span class="n">Tower</span><span class="p">,</span> <span class="n">UK</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="n">ATTRIBUTE</span> <span class="n">DATA</span>
+<span class="o">-</span> <span class="s1">&#39;station_height_masl&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="n">attributes</span><span class="p">:</span> <span class="mf">50.0</span>
+<span class="n">Output</span> <span class="ow">is</span> <span class="n">truncated</span><span class="o">.</span> <span class="n">View</span> <span class="k">as</span> <span class="n">a</span> <span class="n">scrollable</span> <span class="n">element</span> <span class="ow">or</span> <span class="nb">open</span> <span class="ow">in</span> <span class="n">a</span> <span class="n">text</span> <span class="n">editor</span><span class="o">.</span> <span class="n">Adjust</span> <span class="n">cell</span> <span class="n">output</span> <span class="n">settings</span><span class="o">...</span>
+</pre></div>
+</div>
+<p>If we try to add this dummy data, we’ll see that this fails with a <em class="xref py py-obj">AttrMismatchError</em>. This is because some details stored
+within the input file (the attributes) don’t match to the details within our stored data within the openghg/openghg_defs
+[site_info details](<a class="github reference external" href="https://github.com/openghg/openghg_defs/blob/main/openghg_defs/data/site_info.json">openghg/openghg_defs</a>)
+for that site. By default <em class="xref py py-obj">update_mismatch</em> is set to <em class="xref py py-obj">“never”</em> which means this will produce an error
+rather than guessing how to resolve this.</p>
+<p>The error message above also tells us what doesn’t match:</p>
+<ul>
+<li><p>station_long_name</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>metadata: Tacolneston Tower, UK</p></li>
+<li><p>attributes: ATTRIBUTE DATA</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>station_height_masl</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>metadata: 64</p></li>
+<li><p>attributes: 50.0</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>We can choose how we want to resolve this using the options for the <em class="xref py py-obj">update_mismatch</em> keyword:</p>
+<ul class="simple">
+<li><p>“from_source” (or “attributes”) - use the value(s) included within the current attributes</p></li>
+<li><p>“from_definition” (or “metadata”) - use the value(s) included within the current metadata</p></li>
+</ul>
+<p>In this case, we choose to use the details from the metadata (derived from site_info details)
+by running <em class="xref py py-obj">standardise_surface</em> again but this time using <em class="xref py py-obj">update_mismatch=”from_definition”</em>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">dummy_data</span><span class="p">,</span>
+                    <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
+                    <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span>
+                    <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">,</span>
+                    <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">,</span>
+                    <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;998m&quot;</span><span class="p">,</span>
+                    <span class="n">instrument</span><span class="o">=</span><span class="s2">&quot;picarro&quot;</span><span class="p">,</span>
+                    <span class="n">sampling_period</span><span class="o">=</span><span class="s2">&quot;1H&quot;</span><span class="p">,</span>
+                    <span class="n">update_mismatch</span><span class="o">=</span><span class="s2">&quot;from_definition&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This should now run without error (warnings will be printed and logged instead).</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dummy_data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;998m&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can look at the <em class="xref py py-obj">station_long_name</em> stored within the metadata:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dummy_data</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;station_long_name&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Tacolneston Tower, UK&#39;</span>
+</pre></div>
+</div>
+<p>and attributes:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dummy_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;station_long_name&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;Tacolneston Tower, UK&#39;</span>
+</pre></div>
+</div>
+<p>to check this is what we expected.</p>
+</section>
+<section id="cleanup">
+<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
+<p>If you’re finished with the data in this tutorial you can cleanup the
+tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">0. Using the tutorial object store</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#add-example-observation-data">1. Add example observation data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">2. Metadata and attributes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resolving-mismatches">3. Resolving mismatches</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup">4. Cleanup</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2023 OpenGHG development team.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

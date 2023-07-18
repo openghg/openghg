@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._segment &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.store._segment &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -357,15 +357,20 @@ document.write(`
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;assign_data&quot;</span><span class="p">]</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.store&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
 <div class="viewcode-block" id="assign_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.assign_data">[docs]</a><span class="k">def</span> <span class="nf">assign_data</span><span class="p">(</span>
     <span class="n">data_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">lookup_results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Assign data to a Datasource. This will either create a new Datasource</span>
 <span class="sd">    Create or get an existing Datasource for each gas in the file</span>
@@ -373,10 +378,12 @@ document.write(`
 <span class="sd">        Args:</span>
 <span class="sd">            data_dict: Dictionary containing data and metadata for species</span>
 <span class="sd">            lookup_results: Dictionary of lookup results]</span>
+<span class="sd">            data_type: Type of data, one of [&quot;surface&quot;, &quot;emissions&quot;, &quot;met&quot;, &quot;footprints&quot;, &quot;eulerian_model&quot;].</span>
 <span class="sd">            overwrite: If True overwrite current data stored</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This will be removed.&quot;</span><span class="p">)</span>
     <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
 
     <span class="n">uuids</span> <span class="o">=</span> <span class="p">{}</span>

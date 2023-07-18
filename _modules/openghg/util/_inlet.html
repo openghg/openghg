@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._inlet &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.util._inlet &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -353,31 +353,42 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for openghg.util._inlet</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;format_inlet&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;format_inlet&quot;</span><span class="p">,</span> <span class="s2">&quot;extract_height_name&quot;</span><span class="p">]</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.util&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
-                 <span class="n">key_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+    <span class="n">key_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
-                 <span class="n">key_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+    <span class="n">key_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="o">...</span>
 
 
-<div class="viewcode-block" id="format_inlet"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.format_inlet">[docs]</a><span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span><span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-                 <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
-                 <span class="n">key_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="format_inlet"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.format_inlet">[docs]</a><span class="k">def</span> <span class="nf">format_inlet</span><span class="p">(</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+    <span class="n">key_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make sure inlet / height name conforms to standard. The standard</span>
 <span class="sd">    imposed can depend on the associated key_name itself (can</span>
@@ -483,6 +494,94 @@ document.write(`
     <span class="c1">#     raise ValueError(f&quot;Did not recognise input for inlet: {inlet}&quot;)</span>
 
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">extract_height_name</span><span class="p">(</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract the relevant height associated with NAME from the</span>
+<span class="sd">    &quot;height_name&quot; variable, if present from site_info data.</span>
+
+<span class="sd">    This expects the &quot;height_name&quot; variable to be one of:</span>
+<span class="sd">      - list containing the same number of items as inlets for the site</span>
+<span class="sd">      - dictionary containing the mapping between inlets and heights</span>
+<span class="sd">        used in NAME.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        site : Site code</span>
+<span class="sd">        network: Name of the associated network for the site</span>
+<span class="sd">        inlet: Observation inlet / height value in the specified units</span>
+<span class="sd">        site_filepath: Alternative site info file. Defaults to openghg_defs input.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str : appropriate height name value extracted from site_info</span>
+<span class="sd">        list: multiple height name options extracted from site_info</span>
+<span class="sd">        None: if value not found or ambiguous.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_site_info</span>
+
+    <span class="n">site_data</span> <span class="o">=</span> <span class="n">get_site_info</span><span class="p">(</span><span class="n">site_filepath</span><span class="o">=</span><span class="n">site_filepath</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">site</span><span class="p">:</span>
+        <span class="n">site_upper</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">network</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">site_data</span><span class="p">[</span><span class="n">site_upper</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">network</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="n">height_name_attr</span> <span class="o">=</span> <span class="s2">&quot;height_name&quot;</span>
+    <span class="n">height_attr</span> <span class="o">=</span> <span class="s2">&quot;height&quot;</span>
+
+    <span class="k">if</span> <span class="n">site_upper</span> <span class="ow">in</span> <span class="n">site_data</span><span class="p">:</span>
+        <span class="n">site_metadata</span> <span class="o">=</span> <span class="n">site_data</span><span class="p">[</span><span class="n">site_upper</span><span class="p">][</span><span class="n">network</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">height_name_attr</span> <span class="ow">in</span> <span class="n">site_metadata</span><span class="p">:</span>
+            <span class="c1"># Extract height_name variable from the site_metadata</span>
+            <span class="n">height_name_extracted</span> <span class="o">=</span> <span class="n">site_metadata</span><span class="p">[</span><span class="n">height_name_attr</span><span class="p">]</span>
+            <span class="c1"># If this is a list, check and try and extract appropriate value.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">height_name_extracted</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="c1"># Check if multiple values for height_name_extracted are present (list &gt; 1)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">height_name_extracted</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">height_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">height_name_extracted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># If this is ambiguous, check &quot;height&quot; attr to match against site inlet value</span>
+                    <span class="c1"># This assumes two lists of the same length map to each other with translating values</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">height_attr</span> <span class="ow">in</span> <span class="n">site_metadata</span><span class="p">):</span>
+                        <span class="n">height_values</span> <span class="o">=</span> <span class="n">site_metadata</span><span class="p">[</span><span class="n">height_attr</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">height_values</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">height_name_extracted</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                            <span class="n">inlet</span> <span class="ow">in</span> <span class="n">height_values</span>
+                        <span class="p">):</span>
+                            <span class="n">index</span> <span class="o">=</span> <span class="n">height_values</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span>
+                            <span class="n">height_name</span> <span class="o">=</span> <span class="n">height_name_extracted</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;Ambiguous &#39;</span><span class="si">{</span><span class="n">height_name_attr</span><span class="si">}</span><span class="s2">&#39; in site_info. &quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;Unable to extract from: height_name = </span><span class="si">{</span><span class="n">height_name_extracted</span><span class="si">}</span><span class="s2"> using height = </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="p">)</span>
+                            <span class="n">height_name</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Ambiguous &#39;</span><span class="si">{</span><span class="n">height_name_attr</span><span class="si">}</span><span class="s2">&#39; in site_info. &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Unable to extract from: height_name = </span><span class="si">{</span><span class="n">height_name_extracted</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">height_name</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">height_name_extracted</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">inlet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">inlet</span> <span class="ow">in</span> <span class="n">height_name_extracted</span><span class="p">):</span>
+                    <span class="n">height_name</span> <span class="o">=</span> <span class="n">height_name_extracted</span><span class="p">[</span><span class="n">inlet</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Unable to interpret </span><span class="si">{</span><span class="n">height_name_extracted</span><span class="si">}</span><span class="s2">. Please supply or check supplied inlet value: </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">height_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">height_name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">height_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">height_name</span>
 </pre></div>
 
                 </article>

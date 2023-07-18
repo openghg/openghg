@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.types._errors &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.types._errors &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -353,8 +353,7 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for openghg.types._errors</h1><div class="highlight"><pre>
-<span></span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
 
 <div class="viewcode-block" id="OpenGHGError"><a class="viewcode-back" href="../../../api/devapi_types.html#openghg.types.OpenGHGError">[docs]</a><span class="k">class</span> <span class="nc">OpenGHGError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -403,6 +402,10 @@ document.write(`
 
 <span class="k">class</span> <span class="nc">AttrMismatchError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Mismatch between attributes of input file and derived metadata&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">ConfigFileError</span><span class="p">(</span><span class="n">OpenGHGError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised for errors with configuraion file&quot;&quot;&quot;</span>
 
 
 <span class="k">def</span> <span class="nf">construct_xesmf_import_error</span><span class="p">(</span><span class="n">exception</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">ImportError</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

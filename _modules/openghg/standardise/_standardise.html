@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise._standardise &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.standardise._standardise &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -354,42 +354,64 @@ document.write(`
                   
   <h1>Source code for openghg.standardise._standardise</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
 
 <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">create_file_package</span><span class="p">,</span> <span class="n">create_post_dict</span>
+<span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_writable_bucket</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_on_hub</span>
-<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">optionalPathType</span><span class="p">,</span> <span class="n">multiPathType</span>
 
 
 <div class="viewcode-block" id="standardise_surface"><a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_surface">[docs]</a><span class="k">def</span> <span class="nf">standardise_surface</span><span class="p">(</span>
-    <span class="n">filepaths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">],</span>
+    <span class="n">filepaths</span><span class="p">:</span> <span class="n">multiPathType</span><span class="p">,</span>
     <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sampling_period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Timedelta</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">calibration_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">site_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+    <span class="n">measurement_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;insitu&quot;</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">verify_site_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">site_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise surface measurements and store the data in the object store.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filepaths: Path of file(s) to process</span>
-<span class="sd">        source_format: Format of data i.e. GCWERKS, CRDS, ICOS</span>
-<span class="sd">        site: Site code</span>
+<span class="sd">        filepath: Filepath(s)</span>
+<span class="sd">        source_format: Data format, for example CRDS, GCWERKS</span>
+<span class="sd">        site: Site code/name</span>
 <span class="sd">        network: Network name</span>
-<span class="sd">        inlet: Inlet height in metres</span>
+<span class="sd">        inlet: Inlet height. Format &#39;NUMUNIT&#39; e.g. &quot;10m&quot;.</span>
+<span class="sd">            If retrieve multiple files pass None, OpenGHG will attempt to</span>
+<span class="sd">            extract this from the file.</span>
+<span class="sd">        height: Alias for inlet.</span>
 <span class="sd">        instrument: Instrument name</span>
-<span class="sd">        sampling_period: Sampling period as pandas time code, e.g. 1m for 1 minute, 1h for 1 hour</span>
+<span class="sd">        sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).</span>
+<span class="sd">        calibration_scale: Calibration scale for data</span>
+<span class="sd">        update_mismatch: This determines how mismatches between the internal data</span>
+<span class="sd">            &quot;attributes&quot; and the supplied / derived &quot;metadata&quot; are handled.</span>
+<span class="sd">            This includes the options:</span>
+<span class="sd">                - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
+<span class="sd">                - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on input attributes</span>
+<span class="sd">                - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on input metadata</span>
+<span class="sd">        measurement_type: Type of measurement e.g. insitu, flask</span>
+<span class="sd">        overwrite: Overwrite previously uploaded data</span>
+<span class="sd">        verify_site_code: Verify the site code</span>
 <span class="sd">        site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).</span>
 <span class="sd">            Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</span>
-<span class="sd">        overwrite: Overwrite data currently present in the object store</span>
+<span class="sd">        store: Name of object store to write to, required if user has access to more than one</span>
+<span class="sd">        writable store</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary containing confirmation of standardisation process.</span>
+<span class="sd">        dict: Dictionary of result data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">call_function</span>
+    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepaths</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepaths</span><span class="p">]</span>
@@ -469,21 +491,118 @@ document.write(`
 
         <span class="k">return</span> <span class="n">responses</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsSurface</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
 
-        <span class="n">results</span> <span class="o">=</span> <span class="n">ObsSurface</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
-            <span class="n">filepath</span><span class="o">=</span><span class="n">filepaths</span><span class="p">,</span>
-            <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
-            <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-            <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
-            <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
-            <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
-            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-            <span class="n">site_filepath</span><span class="o">=</span><span class="n">site_filepath</span><span class="p">,</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">with</span> <span class="n">ObsSurface</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">obs</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+                <span class="n">filepath</span><span class="o">=</span><span class="n">filepaths</span><span class="p">,</span>
+                <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
+                <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+                <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+                <span class="n">sampling_period</span><span class="o">=</span><span class="n">sampling_period</span><span class="p">,</span>
+                <span class="n">calibration_scale</span><span class="o">=</span><span class="n">calibration_scale</span><span class="p">,</span>
+                <span class="n">measurement_type</span><span class="o">=</span><span class="n">measurement_type</span><span class="p">,</span>
+                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+                <span class="n">verify_site_code</span><span class="o">=</span><span class="n">verify_site_code</span><span class="p">,</span>
+                <span class="n">site_filepath</span><span class="o">=</span><span class="n">site_filepath</span><span class="p">,</span>
+                <span class="n">update_mismatch</span><span class="o">=</span><span class="n">update_mismatch</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">results</span></div>
+
+
+<span class="k">def</span> <span class="nf">standardise_column</span><span class="p">(</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">satellite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">selection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">instrument</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;satellite&quot;</span><span class="p">,</span>
+    <span class="n">source_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;openghg&quot;</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read column observation file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filepath: Path of observation file</span>
+<span class="sd">        satellite: Name of satellite (if relevant)</span>
+<span class="sd">        domain: For satellite only. If data has been selected on an area include the</span>
+<span class="sd">            identifier name for domain covered. This can map to previously defined domains</span>
+<span class="sd">            (see openghg_defs &quot;domain_info.json&quot; file) or a newly defined domain.</span>
+<span class="sd">        selection: For satellite only, identifier for any data selection which has been</span>
+<span class="sd">            performed on satellite data. This can be based on any form of filtering, binning etc.</span>
+<span class="sd">            but should be unique compared to other selections made e.g. &quot;land&quot;, &quot;glint&quot;, &quot;upperlimit&quot;.</span>
+<span class="sd">            If not specified, domain will be used.</span>
+<span class="sd">        site : Site code/name (if relevant). Can include satellite OR site.</span>
+<span class="sd">        species: Species name or synonym e.g. &quot;ch4&quot;</span>
+<span class="sd">        instrument: Instrument name e.g. &quot;TANSO-FTS&quot;</span>
+<span class="sd">        network: Name of in-situ or satellite network e.g. &quot;TCCON&quot;, &quot;GOSAT&quot;</span>
+<span class="sd">        platform: Type of platform. Should be one of:</span>
+<span class="sd">            - &quot;satellite&quot;</span>
+<span class="sd">            - &quot;site&quot;</span>
+<span class="sd">        source_format : Type of data being input e.g. openghg (internal format)</span>
+<span class="sd">        overwrite: Should this data overwrite currently stored data.</span>
+<span class="sd">        store: Name of store to write to</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary containing confirmation of standardisation process.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.cloud</span> <span class="kn">import</span> <span class="n">call_function</span>
+    <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">ObsColumn</span>
+
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">running_on_hub</span><span class="p">():</span>
+        <span class="n">compressed_data</span><span class="p">,</span> <span class="n">file_metadata</span> <span class="o">=</span> <span class="n">create_file_package</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="n">obs_type</span><span class="o">=</span><span class="s2">&quot;footprints&quot;</span><span class="p">)</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+            <span class="s2">&quot;satellite&quot;</span><span class="p">:</span> <span class="n">satellite</span><span class="p">,</span>
+            <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="n">domain</span><span class="p">,</span>
+            <span class="s2">&quot;selection&quot;</span><span class="p">:</span> <span class="n">selection</span><span class="p">,</span>
+            <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+            <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
+            <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
+            <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">instrument</span><span class="p">,</span>
+            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">platform</span><span class="p">,</span>
+            <span class="s2">&quot;source_format&quot;</span><span class="p">:</span> <span class="n">source_format</span><span class="p">,</span>
+            <span class="s2">&quot;overwrite&quot;</span><span class="p">:</span> <span class="n">overwrite</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+        <span class="n">to_post</span> <span class="o">=</span> <span class="n">create_post_dict</span><span class="p">(</span>
+            <span class="n">function_name</span><span class="o">=</span><span class="s2">&quot;standardise&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">compressed_data</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">file_metadata</span><span class="o">=</span><span class="n">file_metadata</span>
+        <span class="p">)</span>
+
+        <span class="n">fn_response</span> <span class="o">=</span> <span class="n">call_function</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">to_post</span><span class="p">)</span>
+        <span class="n">response_content</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">fn_response</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">response_content</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">ObsColumn</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">obs_col</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">obs_col</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+                <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+                <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span>
+                <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+                <span class="n">selection</span><span class="o">=</span><span class="n">selection</span><span class="p">,</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+                <span class="n">instrument</span><span class="o">=</span><span class="n">instrument</span><span class="p">,</span>
+                <span class="n">platform</span><span class="o">=</span><span class="n">platform</span><span class="p">,</span>
+                <span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">,</span>
+                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
 
 
 <div class="viewcode-block" id="standardise_bc"><a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_bc">[docs]</a><span class="k">def</span> <span class="nf">standardise_bc</span><span class="p">(</span>
@@ -494,6 +613,7 @@ document.write(`
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardise boundary condition data and store it in the object store.</span>
 
@@ -507,6 +627,7 @@ document.write(`
 <span class="sd">        period: Period of measurements, if not passed this is inferred from the time coords</span>
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
 <span class="sd">        overwrite: Should this data overwrite currently stored data.</span>
+<span class="sd">        store: Name of store to write to</span>
 <span class="sd">    returns:</span>
 <span class="sd">        dict: Dictionary containing confirmation of standardisation process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -537,15 +658,19 @@ document.write(`
         <span class="n">response_content</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">fn_response</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">response_content</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
-            <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-            <span class="n">bc_input</span><span class="o">=</span><span class="n">bc_input</span><span class="p">,</span>
-            <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-            <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-            <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">BoundaryConditions</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">bcs</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">bcs</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+                <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                <span class="n">bc_input</span><span class="o">=</span><span class="n">bc_input</span><span class="p">,</span>
+                <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
+                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="standardise_footprint"><a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_footprint">[docs]</a><span class="k">def</span> <span class="nf">standardise_footprint</span><span class="p">(</span>
@@ -559,12 +684,13 @@ document.write(`
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">period</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">retrieve_met</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads footprint data files and returns the UUIDs of the Datasources</span>
 <span class="sd">    the processed data has been assigned to</span>
@@ -587,6 +713,7 @@ document.write(`
 <span class="sd">        high_time_res: Indicate footprints are high time resolution (include H_back dimension)</span>
 <span class="sd">                        Note this will be set to True automatically for Carbon Dioxide data.</span>
 <span class="sd">        overwrite: Overwrite any currently stored data</span>
+<span class="sd">        store: Name of store to write to</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        dict / None: Dictionary containing confirmation of standardisation process. None</span>
 <span class="sd">        if file already processed.</span>
@@ -627,24 +754,28 @@ document.write(`
         <span class="n">response_content</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">fn_response</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">response_content</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Footprints</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
-            <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
-            <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-            <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-            <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
-            <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
-            <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-            <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
-            <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-            <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
-            <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
-            <span class="n">retrieve_met</span><span class="o">=</span><span class="n">retrieve_met</span><span class="p">,</span>
-            <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
-            <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">Footprints</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">fps</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">fps</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+                <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+                <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
+                <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span>
+                <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+                <span class="n">metmodel</span><span class="o">=</span><span class="n">metmodel</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
+                <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
+                <span class="n">retrieve_met</span><span class="o">=</span><span class="n">retrieve_met</span><span class="p">,</span>
+                <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
+                <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
+                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="standardise_flux"><a class="viewcode-back" href="../../../api/api_standardise.html#openghg.standardise.standardise_flux">[docs]</a><span class="k">def</span> <span class="nf">standardise_flux</span><span class="p">(</span>
@@ -660,6 +791,7 @@ document.write(`
     <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process flux data</span>
 
@@ -674,6 +806,7 @@ document.write(`
 <span class="sd">        period: Period of measurements, if not passed this is inferred from the time coords</span>
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
 <span class="sd">        overwrite: Should this data overwrite currently stored data.</span>
+<span class="sd">        store: Name of store to write to</span>
 <span class="sd">    returns:</span>
 <span class="sd">        dict: Dictionary of Datasource UUIDs data assigned to</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -711,20 +844,22 @@ document.write(`
         <span class="n">response_content</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">fn_response</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">response_content</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Emissions</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
-            <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
-            <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
-            <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
-            <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-            <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
-            <span class="n">database_version</span><span class="o">=</span><span class="n">database_version</span><span class="p">,</span>
-            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-            <span class="n">high_time_resolution</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
-            <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-            <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
-            <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">Emissions</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">ems</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ems</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+                <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span>
+                <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+                <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
+                <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+                <span class="n">database_version</span><span class="o">=</span><span class="n">database_version</span><span class="p">,</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">high_time_resolution</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
+                <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
+                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+            <span class="p">)</span></div>
 
 
 <span class="c1"># def upload_to_par(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -&gt; None:</span>

@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._boundary_conditions &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.store._boundary_conditions &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -359,7 +359,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">TracebackType</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
@@ -381,22 +381,21 @@ document.write(`
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;4e787366-be91-4fc5-ad1b-4adcb213d478&quot;</span>
     <span class="n">_metakey</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">/metastore&quot;</span>
 
-<div class="viewcode-block" id="BoundaryConditions.save"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.BoundaryConditions.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the object to the object store</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryConditions</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_bucket</span><span class="p">,</span> <span class="n">set_object_from_json</span>
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">exc_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">],</span>
+        <span class="n">exc_val</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">],</span>
+        <span class="n">exc_tb</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TracebackType</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exc_type</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">exc_tb</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
-        <span class="n">obs_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stored</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">obs_key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">to_data</span><span class="p">())</span></div>
-
-<div class="viewcode-block" id="BoundaryConditions.read_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.BoundaryConditions.read_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+<div class="viewcode-block" id="BoundaryConditions.read_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.BoundaryConditions.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ready a footprint from binary data</span>
 
 <span class="sd">        Args:</span>
@@ -417,10 +416,10 @@ document.write(`
             <span class="n">filepath</span> <span class="o">=</span> <span class="n">tmpdir_path</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
             <span class="n">filepath</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">binary_data</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BoundaryConditions.read_file"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.BoundaryConditions.read_file">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+<div class="viewcode-block" id="BoundaryConditions.read_file"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.BoundaryConditions.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
         <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
         <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">bc_input</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -451,11 +450,8 @@ document.write(`
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
         <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="p">(</span>
-            <span class="n">assign_data</span><span class="p">,</span>
-            <span class="n">datasource_lookup</span><span class="p">,</span>
             <span class="n">infer_date_range</span><span class="p">,</span>
             <span class="n">update_zero_dim</span><span class="p">,</span>
-            <span class="n">load_metastore</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">hash_file</span><span class="p">,</span> <span class="n">timestamp_now</span>
         <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">open_dataset</span>
@@ -466,16 +462,11 @@ document.write(`
 
         <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
-        <span class="n">bc_store</span> <span class="o">=</span> <span class="n">BoundaryConditions</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-
-        <span class="c1"># Load in the metadata store</span>
-        <span class="n">metastore</span> <span class="o">=</span> <span class="n">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">bc_store</span><span class="o">.</span><span class="n">_metakey</span><span class="p">)</span>
-
         <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">bc_store</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;This file has been uploaded previously with the filename : &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bc_store</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
@@ -539,25 +530,18 @@ document.write(`
         <span class="n">boundary_conditions_data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata</span>
 
         <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;bc_input&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">)</span>
-        <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span>
-            <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">boundary_conditions_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span>
-        <span class="p">)</span>
 
-        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
-            <span class="n">data_dict</span><span class="o">=</span><span class="n">boundary_conditions_data</span><span class="p">,</span>
-            <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
+        <span class="c1"># This performs the lookup and assignment of data to new or</span>
+        <span class="c1"># exisiting Datasources</span>
+        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">boundary_conditions_data</span><span class="p">,</span>
             <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
             <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+            <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">bc_store</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">boundary_conditions_data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
-
         <span class="c1"># Record the file hash in case we see this file again</span>
-        <span class="n">bc_store</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
-
-        <span class="n">bc_store</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-
-        <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 

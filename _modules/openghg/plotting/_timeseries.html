@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.plotting._timeseries &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.plotting._timeseries &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -353,64 +353,179 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for openghg.plotting._timeseries</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
-<span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_species_info</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">,</span> <span class="n">get_datapath</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.plotting&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
+
+
+<span class="k">def</span> <span class="nf">_latex2html</span><span class="p">(</span><span class="n">latex_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace latex sub/superscript formatting with html.</span>
+<span class="sd">    Written because the latex formatting in Plotly seems inconsistent</span>
+<span class="sd">    (works in Notebooks, but not VSCode at the moment).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        latex_string: String containing LaTeX math mode (including $$)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: string with matched sub-strings replaced with equivalent html.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">replacements</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;$^2$&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;sup&gt;2&lt;/sup&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;$^{-1}$&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;sup&gt;-1&lt;/sup&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;$^{-2}$&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;sup&gt;-2&lt;/sup&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;$_2$&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;sub&gt;2&lt;/sub&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;$_3$&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;sub&gt;3&lt;/sub&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;$_4$&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;sub&gt;4&lt;/sub&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;$_5$&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;sub&gt;5&lt;/sub&gt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;$_6$&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;sub&gt;6&lt;/sub&gt;&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">html_string</span> <span class="o">=</span> <span class="n">latex_string</span>
+    <span class="k">for</span> <span class="n">rep</span> <span class="ow">in</span> <span class="n">replacements</span><span class="p">:</span>
+        <span class="n">html_string</span> <span class="o">=</span> <span class="n">html_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">rep</span><span class="p">,</span> <span class="n">replacements</span><span class="p">[</span><span class="n">rep</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">html_string</span>
+
+
+<span class="k">def</span> <span class="nf">_plot_remove_gaps</span><span class="p">(</span>
+    <span class="n">x_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y_data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">gap</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Insert NaNs between big gaps in the data.</span>
+<span class="sd">    Prevents connecting lines being drawn</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x_data: plot timeseries (numpy timestamp)</span>
+<span class="sd">        y_data: data array</span>
+<span class="sd">        gap: gap beyond which a NaN is introducted (nanoseconds, defaults to 1 day)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        x, y: x and y arrays to plot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">gap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># ns in a day</span>
+        <span class="n">gap</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1000000000</span>
+
+    <span class="n">gap_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">gap</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x_data_plot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">gap_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">x_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">y_data_plot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">y_data</span><span class="p">,</span> <span class="n">gap_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x_data_plot</span><span class="p">,</span> <span class="n">y_data_plot</span>
+
+
+<span class="k">def</span> <span class="nf">_plot_legend_position</span><span class="p">(</span><span class="n">ascending</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Position of legend and logo,</span>
+<span class="sd">    depending on whether data is ascending or descending</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ascending: Is the data ascending</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict, Dict: Plotly legend and logo position parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ascending</span><span class="p">:</span>
+        <span class="n">legend_pos</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.99</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">}</span>
+        <span class="n">logo_pos</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.99</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">legend_pos</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.99</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.99</span><span class="p">}</span>
+        <span class="n">logo_pos</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">legend_pos</span><span class="p">,</span> <span class="n">logo_pos</span>
+
+
+<span class="k">def</span> <span class="nf">_plot_logo</span><span class="p">(</span>
+    <span class="n">logo_pos</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create Plotly dictionary for logo</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        logo_pos: Dictionary containing the position of the logo</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary containing logo + position parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logo_bytes</span> <span class="o">=</span> <span class="n">get_datapath</span><span class="p">(</span><span class="s2">&quot;OpenGHG_Logo_NoText_transparent_200x200.png&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
+    <span class="n">logo</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">logo_bytes</span><span class="p">)</span>
+
+    <span class="n">logo_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">source</span><span class="o">=</span><span class="s2">&quot;data:image/png;base64,</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logo</span><span class="o">.</span><span class="n">decode</span><span class="p">()),</span>
+        <span class="n">xref</span><span class="o">=</span><span class="s2">&quot;x domain&quot;</span><span class="p">,</span>
+        <span class="n">yref</span><span class="o">=</span><span class="s2">&quot;y domain&quot;</span><span class="p">,</span>
+        <span class="n">sizex</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">sizey</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">logo_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">logo_pos</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">logo_dict</span>
 
 
 <div class="viewcode-block" id="plot_timeseries"><a class="viewcode-back" href="../../../api/api_plotting.html#openghg.plotting.plot_timeseries">[docs]</a><span class="k">def</span> <span class="nf">plot_timeseries</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]],</span>
-    <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">xvar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">yvar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">xlabel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ylabel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">units</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">logo</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot a timeseries</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data: ObsData object or list of objects</span>
-<span class="sd">        title: Title for figure</span>
 <span class="sd">        xvar: x axis variable, defaults to time</span>
 <span class="sd">        yvar: y axis variable, defaults to species</span>
+<span class="sd">        title: Title for figure</span>
 <span class="sd">        xlabel: Label for x axis</span>
 <span class="sd">        ylabel: Label for y axis</span>
 <span class="sd">        units: Units for y axis</span>
+<span class="sd">        logo: Show the OpenGHG logo</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        go.Figure: Plotly Graph Object Figure</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_json</span>
+    <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_internal_json</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No data to plot, returning&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
 
+    <span class="c1"># Get species info</span>
+    <span class="n">species_info</span> <span class="o">=</span> <span class="n">get_species_info</span><span class="p">()</span>
+
+    <span class="c1"># Get some general attributes</span>
+    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_internal_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
+
     <span class="n">font</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">14</span><span class="p">}</span>
-    <span class="n">title_layout</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">}</span>
 
-    <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">margin</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;l&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}</span>
 
-    <span class="k">if</span> <span class="n">xlabel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">xlabel</span> <span class="o">=</span> <span class="s2">&quot;Date&quot;</span>
-
-    <span class="k">if</span> <span class="n">ylabel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">&quot;Concentration&quot;</span>
-
-    <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ylabel</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  (</span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">)&quot;</span>
-
-    <span class="n">layout</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span>
-        <span class="n">title</span><span class="o">=</span><span class="n">title_layout</span><span class="p">,</span>
-        <span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">xlabel</span><span class="p">),</span>
-        <span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">ylabel</span><span class="p">),</span>
-        <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">title_layout</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;xanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="s2">&quot;yanchor&quot;</span><span class="p">:</span> <span class="s2">&quot;top&quot;</span><span class="p">}</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title_layout</span><span class="p">,</span> <span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">xlabel</span><span class="p">),</span> <span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">ylabel</span><span class="p">),</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="n">margin</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="n">margin</span><span class="p">)</span>
 
     <span class="c1"># Create a single figure</span>
     <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
 
+    <span class="n">species_strings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">unit_strings</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Loop through inlets/species</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">to_plot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="n">metadata</span> <span class="o">=</span> <span class="n">to_plot</span><span class="o">.</span><span class="n">metadata</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">to_plot</span><span class="o">.</span><span class="n">data</span>
@@ -419,7 +534,9 @@ document.write(`
         <span class="n">site</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span>
         <span class="n">inlet</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span>
 
-        <span class="n">legend</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">species_string</span> <span class="o">=</span> <span class="n">_latex2html</span><span class="p">(</span><span class="n">species_info</span><span class="p">[</span><span class="n">synonyms</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">)][</span><span class="s2">&quot;print_string&quot;</span><span class="p">])</span>
+
+        <span class="n">legend_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species_string</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">site</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">inlet</span><span class="si">}</span><span class="s2">)&quot;</span>
 
         <span class="k">if</span> <span class="n">xvar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">x_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">xvar</span><span class="p">]</span>
@@ -434,14 +551,12 @@ document.write(`
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="n">y_data</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;mf&quot;</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-
+        <span class="k">if</span> <span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">data_attrs</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">attrs</span>
             <span class="n">data_units</span> <span class="o">=</span> <span class="n">data_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">units</span><span class="p">:</span>
-                    <span class="n">attributes_data</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s2">&quot;attributes.json&quot;</span><span class="p">)</span>
                     <span class="n">unit_interpret</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_interpret&quot;</span><span class="p">]</span>
                     <span class="n">unit_value</span> <span class="o">=</span> <span class="n">unit_interpret</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -450,31 +565,66 @@ document.write(`
             <span class="n">unit_conversion</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data_units</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">unit_value</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">unit_conversion</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="c1"># TODO: Not sure what is expected for unit_value here</span>
+            <span class="n">unit_value</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
 
         <span class="n">y_data</span> <span class="o">*=</span> <span class="n">unit_conversion</span>
 
-        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">legend</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_data</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">))</span>
+        <span class="n">unit_string</span> <span class="o">=</span> <span class="n">attributes_data</span><span class="p">[</span><span class="s2">&quot;unit_print&quot;</span><span class="p">][</span><span class="n">unit_value</span><span class="p">]</span>
+
+        <span class="c1"># Add NaNs where there are large data gaps</span>
+        <span class="n">x_data_plot</span><span class="p">,</span> <span class="n">y_data_plot</span> <span class="o">=</span> <span class="n">_plot_remove_gaps</span><span class="p">(</span><span class="n">x_data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="c1"># Convert unit string to html</span>
+        <span class="n">unit_string_html</span> <span class="o">=</span> <span class="n">_latex2html</span><span class="p">(</span><span class="n">unit_string</span><span class="p">)</span>
+
+        <span class="c1"># Create plot</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+            <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">legend_text</span><span class="p">,</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">x_data_plot</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">y_data_plot</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+                <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">&quot;%{x|%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M}&lt;br&gt; %</span><span class="si">{y:.1f}</span><span class="s2"> &quot;</span> <span class="o">+</span> <span class="n">unit_string_html</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Save units and species names for axis labels</span>
+        <span class="n">unit_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unit_string_html</span><span class="p">)</span>
+        <span class="n">species_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species_string</span><span class="p">)</span>
+
+    <span class="c1"># Determine whether data is ascending or descending (positioning of legend)</span>
+    <span class="n">y_data_diff</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">y_data_diff</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ascending</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ascending</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">unit_strings</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t plot two different units yet&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Write species and units on y-axis</span>
+    <span class="k">if</span> <span class="n">ylabel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">ylabel</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ytitle</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">species_strings</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="n">unit_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">ytitle</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">xlabel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">xlabel</span> <span class="o">=</span> <span class="s2">&quot;Date&quot;</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">xlabel</span><span class="p">)</span>
+
+    <span class="c1"># Position the legend</span>
+    <span class="n">legend_pos</span><span class="p">,</span> <span class="n">logo_pos</span> <span class="o">=</span> <span class="n">_plot_legend_position</span><span class="p">(</span><span class="n">ascending</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">legend</span><span class="o">=</span><span class="n">legend_pos</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;seaborn&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Add OpenGHG logo</span>
+    <span class="k">if</span> <span class="n">logo</span><span class="p">:</span>
+        <span class="n">logo_dict</span> <span class="o">=</span> <span class="n">_plot_logo</span><span class="p">(</span><span class="n">logo_pos</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_layout_image</span><span class="p">(</span><span class="n">logo_dict</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fig</span></div>
-
-
-<span class="c1"># def plot_timeseries(</span>
-<span class="c1">#     data: Union[ObsData, List[ObsData]], xvar: str, yvar: str, xlabel: str, ylabel: str</span>
-<span class="c1"># ) -&gt; None:</span>
-<span class="c1">#     &quot;&quot;&quot;Plot timeseries data using Plotly</span>
-
-<span class="c1">#     Args:</span>
-<span class="c1">#         data: One or more ObsData objects</span>
-<span class="c1">#         xvar: Variable to plot on x axis</span>
-<span class="c1">#         yvar: Variable to plot on y axis</span>
-<span class="c1">#         xlabel: Label for x axis</span>
-<span class="c1">#         ylabel: Label for y axis</span>
-<span class="c1">#     Returns:</span>
-<span class="c1">#         plot type</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-
-
-<span class="c1">#     for dat in data:</span>
 </pre></div>
 
                 </article>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Objectstore &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Objectstore &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -467,14 +467,18 @@ store functions (that create an object store on disk) or cloud object store func
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.objectstore.get_bucket">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_bucket</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_bucket" title="Permalink to this definition">#</a></dt>
-<dd><p>Find and return the local object store path (bucket)</p>
+<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_bucket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_bucket" title="Permalink to this definition">#</a></dt>
+<dd><p>Find and return the local object store path. This will return
+the path to the user’s local object store if no name is given.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Path to object store</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Object store name in config file</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to object store</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -532,20 +536,6 @@ store functions (that create an object store on disk) or cloud object store func
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="openghg.objectstore.get_local_objectstore_path">
-<span class="sig-prename descclassname"><span class="pre">openghg.objectstore.</span></span><span class="sig-name descname"><span class="pre">get_local_objectstore_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/objectstore/_local_store.html#get_local_objectstore_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.objectstore.get_local_objectstore_path" title="Permalink to this definition">#</a></dt>
-<dd><p>Read</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Path of object store</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pathlib.Path</p>
 </dd>
 </dl>
 </dd></dl>
@@ -714,7 +704,6 @@ store functions (that create an object store on disk) or cloud object store func
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.objectstore.get_object"><code class="docutils literal notranslate"><span class="pre">get_object()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.objectstore.get_object_from_json"><code class="docutils literal notranslate"><span class="pre">get_object_from_json()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.objectstore.get_object_names"><code class="docutils literal notranslate"><span class="pre">get_object_names()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.objectstore.get_local_objectstore_path"><code class="docutils literal notranslate"><span class="pre">get_local_objectstore_path()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.objectstore.get_tutorial_store_path"><code class="docutils literal notranslate"><span class="pre">get_tutorial_store_path()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.objectstore.query_store"><code class="docutils literal notranslate"><span class="pre">query_store()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openghg.objectstore.set_object"><code class="docutils literal notranslate"><span class="pre">set_object()</span></code></a></li>

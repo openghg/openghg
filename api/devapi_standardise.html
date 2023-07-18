@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Standardise - data &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Standardise - data &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -448,7 +448,7 @@ document.write(`
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.surface.parse_btt">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_btt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BTT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LGHG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_btt.html#parse_btt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_btt" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_btt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BTT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LGHG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_btt.html#parse_btt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_btt" title="Permalink to this definition">#</a></dt>
 <dd><p>Reads NPL data files and returns the UUIDS of the Datasources
 the processed data has been assigned to</p>
 <dl class="field-list simple">
@@ -456,6 +456,17 @@ the processed data has been assigned to</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – Path of file to load</p></li>
 <li><p><strong>site</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Site name</p></li>
+<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>This determines how mismatches between the internal data
+“attributes” and the supplied / derived “metadata” are handled.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”from_source” / “attributes” - update mismatches based on input data (e.g. data attributes)</p></li>
+<li><p>”from_definition” / “metadata” - update mismatches based on associated data (e.g. site_info.json)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -491,7 +502,7 @@ the processed data has been assigned to</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.surface.parse_crds">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_crds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_duplicates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_crds.html#parse_crds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_crds" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_crds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_duplicates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_crds.html#parse_crds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_crds" title="Permalink to this definition">#</a></dt>
 <dd><p>Parses a CRDS data file and creates a dictionary of xarray Datasets
 ready for storage in the object store.</p>
 <dl class="field-list simple">
@@ -504,9 +515,20 @@ ready for storage in the object store.</p>
 <li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
 <li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Sampling period in seconds</p></li>
 <li><p><strong>measurement_type</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Measurement type e.g. insitu, flask</p></li>
+<li><p><strong>drop_duplicates</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Drop measurements at duplicate timestamps, keeping the first.</p></li>
+<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>This determines how mismatches between the internal data
+“attributes” and the supplied / derived “metadata” are handled.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”from_source” / “attributes” - update mismatches based on input data (e.g. data attributes)</p></li>
+<li><p>”from_definition” / “metadata” - update mismatches based on associated data (e.g. site_info.json)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 <li><p><strong>site_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative site info file (see openghg/supplementary_data repository for format).
 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</p></li>
-<li><p><strong>drop_duplicates</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Drop measurements at duplicate timestamps, keeping the first.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -520,7 +542,7 @@ Otherwise will use the data stored within openghg_defs/data/site_info JSON file 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.surface.parse_eurocom">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_eurocom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_eurocom.html#parse_eurocom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_eurocom" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_eurocom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_eurocom.html#parse_eurocom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_eurocom" title="Permalink to this definition">#</a></dt>
 <dd><p>Parses EUROCOM data files into a format expected by OpenGHG</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -531,6 +553,17 @@ Otherwise will use the data stored within openghg_defs/data/site_info JSON file 
 <li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Network name</p></li>
 <li><p><strong>Inlet</strong> – Inlet height in metres</p></li>
 <li><p><strong>Instrument</strong> – Instrument name</p></li>
+<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>This determines how mismatches between the internal data
+“attributes” and the supplied / derived “metadata” are handled.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”from_source” / “attributes” - update mismatches based on input data (e.g. data attributes)</p></li>
+<li><p>”from_definition” / “metadata” - update mismatches based on associated data (e.g. site_info.json)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -544,7 +577,7 @@ Otherwise will use the data stored within openghg_defs/data/site_info JSON file 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.surface.parse_gcwerks">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_gcwerks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_gcwerks.html#parse_gcwerks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_gcwerks" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_gcwerks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_gcwerks.html#parse_gcwerks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_gcwerks" title="Permalink to this definition">#</a></dt>
 <dd><p>Reads a GC data file by creating a GC object and associated datasources</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -554,6 +587,17 @@ Otherwise will use the data stored within openghg_defs/data/site_info JSON file 
 <li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Three letter code or name for site</p></li>
 <li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
 <li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network name</p></li>
+<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>This determines how mismatches between the internal data
+“attributes” and the supplied / derived “metadata” are handled.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”from_source” / “attributes” - update mismatches based on input data (e.g. data attributes)</p></li>
+<li><p>”from_definition” / “metadata” - update mismatches based on associated data (e.g. site_info.json)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 <li><p><strong>site_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative site info file (see openghg/supplementary_data repository for format).
 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</p></li>
 </ul>
@@ -569,7 +613,7 @@ Otherwise will use the data stored within openghg_defs/data/site_info JSON file 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.surface.parse_noaa">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_noaa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NOAA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_noaa.html#parse_noaa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_noaa" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_noaa</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NOAA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_noaa.html#parse_noaa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_noaa" title="Permalink to this definition">#</a></dt>
 <dd><p>Read NOAA data from raw text file or ObsPack NetCDF</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -581,6 +625,17 @@ Otherwise will use the data stored within openghg_defs/data/site_info JSON file 
 <li><p><strong>network</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Network, defaults to NOAA</p></li>
 <li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
 <li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Sampling period</p></li>
+<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>This determines how mismatches between the internal data
+attributes and the supplied / derived metadata are handled.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”attributes” - update mismatches based on input attributes</p></li>
+<li><p>”metadata” - update mismatches based on input metadata</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 <li><p><strong>site_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative site info file (see openghg/supplementary_data repository for format).
 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</p></li>
 </ul>
@@ -596,7 +651,7 @@ Otherwise will use the data stored within openghg_defs/data/site_info JSON file 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.surface.parse_npl">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_npl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NPL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LGHG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_npl.html#parse_npl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_npl" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_npl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NPL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LGHG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_npl.html#parse_npl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_npl" title="Permalink to this definition">#</a></dt>
 <dd><p>Reads NPL data files and returns the UUIDS of the Datasources
 the processed data has been assigned to</p>
 <dl class="field-list simple">
@@ -609,6 +664,17 @@ the processed data has been assigned to</p>
 <li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
 <li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Sampling period</p></li>
 <li><p><strong>measurement_type</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Type of measurement taken e.g.”flask”, “insitu”</p></li>
+<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>This determines how mismatches between the internal data
+“attributes” and the supplied / derived “metadata” are handled.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”from_source” / “attributes” - update mismatches based on input data (e.g. data attributes)</p></li>
+<li><p>”from_definition” / “metadata” - update mismatches based on associated data (e.g. site_info.json)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -622,7 +688,7 @@ the processed data has been assigned to</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.surface.parse_tmb">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_tmb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TMB'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LGHG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_thamesbarrier.html#parse_tmb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_tmb" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.surface.</span></span><span class="sig-name descname"><span class="pre">parse_tmb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'TMB'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LGHG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/surface/_thamesbarrier.html#parse_tmb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.surface.parse_tmb" title="Permalink to this definition">#</a></dt>
 <dd><p>Reads THAMESBARRIER data files and returns the UUIDS of the Datasources
 the processed data has been assigned to</p>
 <dl class="field-list simple">
@@ -635,6 +701,17 @@ the processed data has been assigned to</p>
 <li><p><strong>instrument</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Instrument name</p></li>
 <li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Sampling period</p></li>
 <li><p><strong>measurement_type</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Type of measurement taken e.g.”flask”, “insitu”</p></li>
+<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>This determines how mismatches between the internal data
+“attributes” and the supplied / derived “metadata” are handled.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”from_source” / “attributes” - update mismatches based on input data (e.g. data attributes)</p></li>
+<li><p>”from_definition” / “metadata” - update mismatches based on associated data (e.g. site_info.json)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 <li><p><strong>site_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative site info file (see openghg/supplementary_data repository for format).
 Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.</p></li>
 </ul>
@@ -748,7 +825,7 @@ Note: this will be superceded if site or satellite keywords are specified.</p></
 <p>These ensure the metadata and attributes stored with data are correct.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.meta.assign_attributes">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">assign_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_metadata_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_attributes.html#assign_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.assign_attributes" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">assign_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_attributes.html#assign_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.assign_attributes" title="Permalink to this definition">#</a></dt>
 <dd><p>Assign attributes to each site and species dataset. This ensures that the xarray Datasets produced
 are CF 1.7 compliant. Some of the attributes written to the Dataset are saved as metadata
 to the Datasource allowing more detailed searching of data.</p>
@@ -762,8 +839,17 @@ be accessed from the openghg/supplementary_data repository by default.</p>
 <li><p><strong>sampling_period</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Number of seconds for which air
 sample is taken. Only for time variable attribute</p></li>
 <li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Network name</p></li>
-<li><p><strong>update_metadata_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If current metadata does not match to attributes
-update metadata.</p></li>
+<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>This determines how mismatches between the internal data
+“attributes” and the supplied / derived “metadata” are handled.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”from_source” / “attributes” - update mismatches based on input data (e.g. data attributes)</p></li>
+<li><p>”from_definition” / “metadata” - update mismatches based on associated data (e.g. site_info.json)</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 <li><p><strong>site_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative site info file</p></li>
 <li><p><strong>species_filepath</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Alternative species info file</p></li>
 </ul>
@@ -906,17 +992,14 @@ attributes file.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.meta.metadata_default_keys">
 <span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">metadata_default_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_metadata.html#metadata_default_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.metadata_default_keys" title="Permalink to this definition">#</a></dt>
-<dd><p>Define default values expected within ObsSurface metadata</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></p>
-</dd>
-</dl>
+<dd><p>Defines default values expected within ObsSurface metadata.
+:returns: keys required in metadata
+:rtype: list</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.standardise.meta.sync_surface_metadata">
-<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">sync_surface_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_to_add</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_metadata.html#sync_surface_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.sync_surface_metadata" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.standardise.meta.</span></span><span class="sig-name descname"><span class="pre">sync_surface_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys_to_add</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'never'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/standardise/meta/_metadata.html#sync_surface_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.standardise.meta.sync_surface_metadata" title="Permalink to this definition">#</a></dt>
 <dd><p>Makes sure any duplicated keys between the metadata and attributes
 dictionaries match and that certain keys are present in the metadata.</p>
 <dl class="field-list simple">
@@ -927,16 +1010,24 @@ dictionaries match and that certain keys are present in the metadata.</p>
 <li><p><strong>keys_to_add</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>]) – Add these keys to the metadata, if not present, based on</p></li>
 <li><p><strong>Note</strong> (<em>the attribute values.</em>) – this skips any keys which can’t be</p></li>
 <li><p><strong>values.</strong> (<em>copied from the attribute</em>) – </p></li>
-<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If case insensitive mismatch is found between an
-attribute and a metadata value, update the metadata to contain
-the attribute value. By default this will raise an AttrMismatchError.</p></li>
+<li><p><strong>update_mismatch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>If case insensitive mismatch is found between an
+attribute and a metadata value, this determines the function behaviour.
+This includes the options:</p>
+<blockquote>
+<div><ul>
+<li><p>”never” - don’t update mismatches and raise an AttrMismatchError</p></li>
+<li><p>”from_source” / “attributes” - update mismatches based on input attributes</p></li>
+<li><p>”from_definition” / “metadata” - update mismatches based on input metadata</p></li>
+</ul>
+</div></blockquote>
+</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Copy of metadata updated with attributes</p>
+<dd class="field-even"><p>Aligned metadata, attributes</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p>dict, dict</p>
 </dd>
 </dl>
 </dd></dl>

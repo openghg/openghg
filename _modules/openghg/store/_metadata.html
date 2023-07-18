@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._metadata &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.store._metadata &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -353,18 +353,54 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for openghg.store._metadata</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">exists</span><span class="p">,</span> <span class="n">get_bucket</span><span class="p">,</span> <span class="n">get_object</span><span class="p">,</span> <span class="n">set_object_from_json</span>
-
-<span class="c1"># from openghg.dataobjects import DataHandler</span>
-<span class="c1"># DHType = TypeVar(&#39;U&#39;, bound=DataHandler)</span>
-
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">exists</span><span class="p">,</span> <span class="n">get_object</span><span class="p">,</span> <span class="n">set_object_from_json</span><span class="p">,</span> <span class="n">get_writable_buckets</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">ObjectStoreError</span>
 <span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">Storage</span><span class="p">,</span> <span class="n">TinyDB</span>
 <span class="kn">from</span> <span class="nn">tinydb.middlewares</span> <span class="kn">import</span> <span class="n">CachingMiddleware</span>
 
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">DataManager</span>
 
-<span class="k">def</span> <span class="nf">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TinyDB</span><span class="p">:</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.store&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
+
+<span class="n">DataDictType</span> <span class="o">=</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">]]]</span>
+
+
+<span class="k">class</span> <span class="nc">ObjectStorage</span><span class="p">(</span><span class="n">Storage</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span> <span class="o">=</span> <span class="n">bucket</span>
+
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">get_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">json_data</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">json_data</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
+
+        <span class="n">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+
+<span class="k">def</span> <span class="nf">load_metastore</span><span class="p">(</span><span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TinyDB</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the metastore. This can be used as a context manager</span>
 <span class="sd">    otherwise the database must be closed using the close method</span>
 <span class="sd">    otherwise records are not written to file.</span>
@@ -374,91 +410,97 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        TinyDB: instance of metadata database</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">TinyDB</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="n">CachingMiddleware</span><span class="p">(</span><span class="n">ObjectStorage</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">TinyDB</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="n">CachingMiddleware</span><span class="p">(</span><span class="n">ObjectStorage</span><span class="p">))</span>
 
 
-<span class="k">class</span> <span class="nc">ObjectStorage</span><span class="p">(</span><span class="n">Storage</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_key</span> <span class="o">=</span> <span class="n">key</span>
-
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="n">data</span> <span class="o">=</span> <span class="n">get_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">json_data</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">json_data</span>
-        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">()</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span>
-
-        <span class="n">set_object_from_json</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span>
-
-
-<span class="k">def</span> <span class="nf">datasource_lookup</span><span class="p">(</span>
-    <span class="n">metastore</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">required_keys</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">min_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys</span>
-<span class="sd">    to be present and will require at leas min_keys of these to be present when searching.</span>
-
-<span class="sd">    As some metadata value might change (such as data owners etc) we don&#39;t want to do an exact</span>
-<span class="sd">    search on *all* the metadata so we extract a subset (the required keys) and search for these.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        metastore: Metadata database</span>
-<span class="sd">        data: Combined data dictionary of form {key: {data: Dataset, metadata: Dict}}</span>
-<span class="sd">        required_keys: Iterable of keys to extract from metadata</span>
-<span class="sd">        min_keys: The minimum number of required keys, if not given it will be set</span>
-<span class="sd">        to the length of required_keys</span>
-<span class="sd">    Return:</span>
-<span class="sd">        dict: Dictionary of datasource information</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">metadata_lookup</span>
-
-    <span class="k">if</span> <span class="n">min_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">min_keys</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_keys</span><span class="p">)</span>
-
-    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_data</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="n">_data</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
-        <span class="n">required_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_keys</span><span class="p">}</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_metadata</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">min_keys</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The given metadata doesn&#39;t contain enough information, we need: </span><span class="si">{</span><span class="n">required_keys</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-
-        <span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">metadata_lookup</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">required_metadata</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">results</span>
-
-
-<div class="viewcode-block" id="data_handler_lookup"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.data_handler_lookup">[docs]</a><span class="k">def</span> <span class="nf">data_handler_lookup</span><span class="p">(</span><span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+<div class="viewcode-block" id="data_manager"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.data_manager">[docs]</a><span class="k">def</span> <span class="nf">data_manager</span><span class="p">(</span><span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataManager</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lookup the data / metadata you&#39;d like to modify.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        data_type: Type of data, for example surface, flux, footprint</span>
+<span class="sd">        store: Name of store</span>
 <span class="sd">        kwargs: Any pair of keyword arguments for searching</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        DataHandler: A handler object to help modify the metadata</span>
+<span class="sd">        DataManager: A handler object to help modify the metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">DataManager</span>
     <span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
-    <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">DataHandler</span>
+
+    <span class="n">writable_stores</span> <span class="o">=</span> <span class="n">get_writable_buckets</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">store</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">writable_stores</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ObjectStoreError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;You do not have permission to write to the </span><span class="si">{</span><span class="n">store</span><span class="si">}</span><span class="s2"> store.&quot;</span><span class="p">)</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">metadata</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">metadata</span>
-    <span class="k">return</span> <span class="n">DataHandler</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">DataManager</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span></div>
+
+
+<span class="c1"># def _update_meta_from_datasource(metadata: Dict,</span>
+<span class="c1">#                                  datasource: Datasource,</span>
+<span class="c1">#                                  update_keys: Optional[List] = None) -&gt; Dict:</span>
+<span class="c1">#     &quot;&quot;&quot;Update the metadata entries based on internal metadata from the Datasource.</span>
+
+<span class="c1">#     Args:</span>
+<span class="c1">#         metadata : Dictionary of metadata</span>
+<span class="c1">#         datasource: Datasource object</span>
+<span class="c1">#         update_keys: List of keys to update within metadata using Datasource object.</span>
+<span class="c1">#     Returns:</span>
+<span class="c1">#         dict: Updated metadata dictionary</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+<span class="c1">#     meta_copy = metadata.copy()</span>
+<span class="c1">#     d_meta = datasource._metadata</span>
+
+<span class="c1">#     if update_keys is not None:</span>
+<span class="c1">#         for key in update_keys:</span>
+<span class="c1">#             if key in d_meta:</span>
+<span class="c1">#                 try:</span>
+<span class="c1">#                     meta_value = metadata[key]</span>
+<span class="c1">#                 except KeyError:</span>
+<span class="c1">#                     meta_copy[key] = d_meta[key]</span>
+<span class="c1">#                 else:</span>
+<span class="c1">#                     d_value = d_meta[key]</span>
+<span class="c1">#                     if d_value != meta_value:</span>
+<span class="c1">#                         meta_copy[key] = d_meta[key]</span>
+<span class="c1">#             else:</span>
+<span class="c1">#                 logger.warning(f&quot;Unable to update &#39;{key}&#39; key in metastore.&quot;</span>
+<span class="c1">#                                &quot; Not present on Datasource.&quot;)</span>
+
+<span class="c1">#     return meta_copy</span>
+
+
+<span class="c1"># def update_metadata(data_dict: DataDictType,</span>
+<span class="c1">#                     uuid_dict: Dict,</span>
+<span class="c1">#                     update_keys: Optional[List] = None) -&gt; DataDictType:</span>
+<span class="c1">#     &quot;&quot;&quot;Update metadata (to be saved to metastore) for each source using</span>
+<span class="c1">#     details from the Datasource. See openghg.store.base.Datasource object</span>
+<span class="c1">#     for details of metadata stored on this object.</span>
+
+<span class="c1">#     For example this could include:</span>
+<span class="c1">#      - [&quot;start_date&quot;, &quot;end_date&quot;, &quot;latest_version&quot;]</span>
+
+<span class="c1">#     Args:</span>
+<span class="c1">#         data_dict : Dictionary containing data and metadata for species</span>
+<span class="c1">#         uuid_dict : Dictionary of UUIDs of Datasources data has been assigned to keyed by species name</span>
+<span class="c1">#         update_keys : List of keys to update within metadata using Datasource object.</span>
+<span class="c1">#     Returns:</span>
+<span class="c1">#         dict: data_dict with metadata updated where appropriate.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     for key in data_dict:</span>
+<span class="c1">#         uuid = uuid_dict[key][&quot;uuid&quot;]</span>
+<span class="c1">#         datasource = Datasource.load(uuid=uuid, shallow=True)</span>
+
+<span class="c1">#         if isinstance(data_dict[key][&quot;metadata&quot;], Dict):</span>
+<span class="c1">#             metadata = cast(Dict, data_dict[key][&quot;metadata&quot;])</span>
+<span class="c1">#             metadata = _update_meta_from_datasource(metadata,</span>
+<span class="c1">#                                                     datasource,</span>
+<span class="c1">#                                                     update_keys=update_keys)</span>
+<span class="c1">#             data_dict[key][&quot;metadata&quot;] = metadata</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             logger.warning(f&quot;Unable to update keys: {update_keys} within metadata&quot;)</span>
+
+<span class="c1">#     return data_dict</span>
 </pre></div>
 
                 </article>

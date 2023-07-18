@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Adding observation data &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Adding observation data &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -335,9 +335,6 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
-</ul>
 </div>
 </nav></div>
     </div>
@@ -395,7 +392,7 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="adding-observation-data">
-<h1>Adding observation data<a class="headerlink" href="#adding-observation-data" title="Permalink to this heading">#</a></h1>
+<span id="adding-obs-data"></span><h1>Adding observation data<a class="headerlink" href="#adding-observation-data" title="Permalink to this heading">#</a></h1>
 <p>This tutorial demonstrates how OpenGHG can be used to process new
 measurement data, search the data present and to retrieve this for
 analysis and visualisation.</p>
@@ -415,6 +412,12 @@ affect your use of OpenGHG outside of this tutorial.</p>
 </section>
 <section id="adding-and-standardising-data">
 <h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Permalink to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Outside of this tutorial, if you have write access to multiple object stores you
+will need to pass the name of the object store you wish to write to to
+the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the standardise functions.</p>
+</div>
 <section id="source-formats">
 <h3>Source formats<a class="headerlink" href="#source-formats" title="Permalink to this heading">#</a></h3>
 <p>Within OpenGHG there are several source formats which can be processed and
@@ -481,6 +484,20 @@ a <em>Datasource</em> (see below for a note on Datasources). The
 us that the data has been stored correctly. This will also tell us if
 any errors have been encountered when trying to access and standardise
 this data.</p>
+</section>
+<section id="multiple-stores">
+<h3>Multiple stores<a class="headerlink" href="#multiple-stores" title="Permalink to this heading">#</a></h3>
+<p>If you have write access to more than one object store you’ll need to pass in the name of that store
+to the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument.
+So instead of the standardise_surface call above, we’ll tell it to write to our default <code class="docutils literal notranslate"><span class="pre">user</span></code> object store. This is our default local object store
+created when we run <code class="docutils literal notranslate"><span class="pre">openghg</span> <span class="pre">--quickstart</span></code>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+
+<span class="n">decc_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">store</span></code> argument can be passed to any of the <code class="docutils literal notranslate"><span class="pre">standardise</span></code> functions in OpenGHG and is required if you have write access
+to more than one store.</p>
 </section>
 <section id="agage-data">
 <h3>AGAGE data<a class="headerlink" href="#agage-data" title="Permalink to this heading">#</a></h3>
@@ -695,6 +712,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-and-standardising-data">1. Adding and standardising data</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source-formats">Source formats</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#decc-network">DECC network</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#multiple-stores">Multiple stores</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agage-data">AGAGE data</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#a-note-on-datasources">A note on Datasources</a></li>
 </ul>

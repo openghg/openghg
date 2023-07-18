@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Explore NOAA ObsPack &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Explore NOAA ObsPack &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -335,9 +335,6 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
-</ul>
 </div>
 </nav></div>
     </div>
@@ -437,6 +434,12 @@ a short time to download depending on your internet connection.</p>
 </section>
 <section id="process-and-store-the-data">
 <h3>Process and store the data<a class="headerlink" href="#process-and-store-the-data" title="Permalink to this heading">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Outside of this tutorial, if you have write access to multiple object stores you
+will need to pass the name of the object store you wish to write to to
+the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">add_noaa_obspack</span></code> function.</p>
+</div>
 <p>We pass the directory containing the ObsPack data to <code class="docutils literal notranslate"><span class="pre">add_noaa_obspack</span></code> which processes each of the files it finds in the directory.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">add_noaa_obspack</span><span class="p">(</span><span class="n">data_directory</span><span class="o">=</span><span class="n">noaa_obspack_directory</span><span class="p">)</span>
 </pre></div>

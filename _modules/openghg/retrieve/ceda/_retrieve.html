@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve.ceda._retrieve &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.retrieve.ceda._retrieve &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -356,6 +356,7 @@ document.write(`
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">ObsData</span>
+<span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_writable_bucket</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">running_on_hub</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
@@ -370,6 +371,7 @@ document.write(`
     <span class="n">url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">force_retrieval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">additional_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="n">ObsData</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve surface measurements from the CEDA archive. This function will route the call</span>
 <span class="sd">    to either local or cloud functions based on the environment.</span>
@@ -385,6 +387,7 @@ document.write(`
 <span class="sd">        keys if they aren&#39;t found in the dataset&#39;s attributes.</span>
 <span class="sd">        For example:</span>
 <span class="sd">            {&quot;site&quot;: &quot;AAA&quot;, &quot;inlet&quot;: &quot;10m&quot;}</span>
+<span class="sd">        store: Name of object store to use</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsData or None: ObsData if data found / retrieved successfully.</span>
 
@@ -402,6 +405,7 @@ document.write(`
         <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
         <span class="n">force_retrieval</span><span class="o">=</span><span class="n">force_retrieval</span><span class="p">,</span>
         <span class="n">additional_metadata</span><span class="o">=</span><span class="n">additional_metadata</span><span class="p">,</span>
+        <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -471,6 +475,7 @@ document.write(`
     <span class="n">url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">force_retrieval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">additional_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">],</span> <span class="n">ObsData</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve surface observations data from the CEDA archive. You can pass</span>
@@ -489,6 +494,7 @@ document.write(`
 <span class="sd">        keys if they aren&#39;t found in the dataset&#39;s attributes.</span>
 <span class="sd">        For example:</span>
 <span class="sd">            {&quot;site&quot;: &quot;AAA&quot;, &quot;inlet&quot;: &quot;10m&quot;}</span>
+<span class="sd">        store: Name of object store</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        ObsData or None: ObsData if data found / retrieved successfully.</span>
 
@@ -508,7 +514,7 @@ document.write(`
     <span class="k">if</span> <span class="n">additional_metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">additional_metadata</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">data_source</span><span class="o">=</span><span class="s2">&quot;ceda_archive&quot;</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="n">inlet</span><span class="p">,</span> <span class="n">data_source</span><span class="o">=</span><span class="s2">&quot;ceda_archive&quot;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">results</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_retrieval</span> <span class="ow">or</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">results</span><span class="o">.</span><span class="n">retrieve_all</span><span class="p">()</span>
@@ -577,7 +583,9 @@ document.write(`
 
     <span class="n">to_store</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">}}</span>
 
-    <span class="n">ObsSurface</span><span class="o">.</span><span class="n">store_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">to_store</span><span class="p">)</span>
+    <span class="n">bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">ObsSurface</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">obs</span><span class="p">:</span>
+        <span class="n">obs</span><span class="o">.</span><span class="n">store_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">to_store</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ObsData</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
 </pre></div>

@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._emissions &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.store._emissions &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -353,21 +353,23 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <h1>Source code for openghg.store._emissions</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span> <span class="nn">xarray</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">TracebackType</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Emissions&quot;</span><span class="p">]</span>
-
-
 <span class="n">ArrayType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]]</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.store&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
 <div class="viewcode-block" id="Emissions"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Emissions">[docs]</a><span class="k">class</span> <span class="nc">Emissions</span><span class="p">(</span><span class="n">BaseStore</span><span class="p">):</span>
@@ -377,8 +379,21 @@ document.write(`
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;c5c88168-0498-40ac-9ad3-949e91a30872&quot;</span>
     <span class="n">_metakey</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">/metastore&quot;</span>
 
-<div class="viewcode-block" id="Emissions.read_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Emissions.read_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Emissions</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">exc_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">],</span>
+        <span class="n">exc_val</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">],</span>
+        <span class="n">exc_tb</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TracebackType</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exc_type</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">exc_tb</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Emissions.read_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Emissions.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binary_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">file_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ready a footprint from binary data</span>
 
 <span class="sd">        Args:</span>
@@ -399,10 +414,10 @@ document.write(`
             <span class="n">filepath</span> <span class="o">=</span> <span class="n">tmpdir_path</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
             <span class="n">filepath</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">binary_data</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">Emissions</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Emissions.read_file"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Emissions.read_file">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+<div class="viewcode-block" id="Emissions.read_file"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Emissions.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
         <span class="n">filepath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
         <span class="n">species</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -439,7 +454,6 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary of datasource UUIDs data assigned to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">datasource_lookup</span><span class="p">,</span> <span class="n">load_metastore</span>
         <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">EmissionsTypes</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">hash_file</span><span class="p">,</span> <span class="n">load_emissions_parser</span>
 
@@ -457,15 +471,10 @@ document.write(`
         <span class="c1"># Load the data retrieve object</span>
         <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_emissions_parser</span><span class="p">(</span><span class="n">source_format</span><span class="o">=</span><span class="n">source_format</span><span class="p">)</span>
 
-        <span class="n">em_store</span> <span class="o">=</span> <span class="n">Emissions</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-
-        <span class="c1"># Load in the metadata store</span>
-        <span class="n">metastore</span> <span class="o">=</span> <span class="n">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">em_store</span><span class="o">.</span><span class="n">_metakey</span><span class="p">)</span>
-
         <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="n">em_store</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="n">em_store</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;This file has been uploaded previously with the filename : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
@@ -483,9 +492,7 @@ document.write(`
             <span class="s2">&quot;chunks&quot;</span><span class="p">:</span> <span class="n">chunks</span><span class="p">,</span>
         <span class="p">}</span>
 
-        <span class="n">optional_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="n">database</span><span class="p">,</span>
-                             <span class="s2">&quot;database_version&quot;</span><span class="p">:</span> <span class="n">database_version</span><span class="p">,</span>
-                             <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
+        <span class="n">optional_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="n">database</span><span class="p">,</span> <span class="s2">&quot;database_version&quot;</span><span class="p">:</span> <span class="n">database_version</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">}</span>
 
         <span class="n">param</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optional_keywords</span><span class="p">)</span>
 
@@ -502,28 +509,18 @@ document.write(`
                 <span class="n">min_required</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
         <span class="n">required</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">min_required</span><span class="p">)</span>
-        <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
 
         <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;emissions&quot;</span>
-        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
-            <span class="n">data_dict</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span>
-            <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-            <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span>
         <span class="p">)</span>
-
-        <span class="n">em_store</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
-
         <span class="c1"># Record the file hash in case we see this file again</span>
-        <span class="n">em_store</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
-
-        <span class="n">em_store</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 
-<div class="viewcode-block" id="Emissions.transform_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Emissions.transform_data">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">transform_data</span><span class="p">(</span>
+<div class="viewcode-block" id="Emissions.transform_data"><a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.Emissions.transform_data">[docs]</a>    <span class="k">def</span> <span class="nf">transform_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
         <span class="n">datapath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -549,8 +546,6 @@ document.write(`
 <span class="sd">        TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">inspect</span>
-
-        <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">assign_data</span><span class="p">,</span> <span class="n">datasource_lookup</span><span class="p">,</span> <span class="n">load_metastore</span>
         <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">EmissionsDatabases</span>
         <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">load_emissions_database_parser</span>
 
@@ -563,11 +558,6 @@ document.write(`
 
         <span class="c1"># Load the data retrieve object</span>
         <span class="n">parser_fn</span> <span class="o">=</span> <span class="n">load_emissions_database_parser</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">)</span>
-
-        <span class="n">em_store</span> <span class="o">=</span> <span class="n">Emissions</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-
-        <span class="c1"># Load in the metadata store</span>
-        <span class="n">metastore</span> <span class="o">=</span> <span class="n">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">em_store</span><span class="o">.</span><span class="n">_metakey</span><span class="p">)</span>
 
         <span class="c1"># Find all parameters that can be accepted by parse function</span>
         <span class="n">all_param</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">parser_fn</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -583,22 +573,13 @@ document.write(`
             <span class="n">em_data</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
             <span class="n">Emissions</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">em_data</span><span class="p">)</span>
 
-        <span class="n">required</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">)</span>
-        <span class="n">lookup_results</span> <span class="o">=</span> <span class="n">datasource_lookup</span><span class="p">(</span><span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required</span><span class="p">)</span>
+        <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">)</span>
 
         <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;emissions&quot;</span>
         <span class="n">overwrite</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="n">assign_data</span><span class="p">(</span>
-            <span class="n">data_dict</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span>
-            <span class="n">lookup_results</span><span class="o">=</span><span class="n">lookup_results</span><span class="p">,</span>
-            <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-            <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+        <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span> <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span>
         <span class="p">)</span>
-
-        <span class="n">em_store</span><span class="o">.</span><span class="n">add_datasources</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">datasource_uuids</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">emissions_data</span><span class="p">,</span> <span class="n">metastore</span><span class="o">=</span><span class="n">metastore</span><span class="p">)</span>
-
-        <span class="n">em_store</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="n">metastore</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">datasource_uuids</span></div>
 

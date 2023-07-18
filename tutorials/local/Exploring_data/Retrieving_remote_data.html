@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Retrieving data from remote archives &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Retrieving data from remote archives &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -335,9 +335,6 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
-</ul>
 </div>
 </nav></div>
     </div>
@@ -429,6 +426,13 @@ to find available data at a given site.</p>
 </section>
 <section id="using-retrieve-atmospheric">
 <h3>Using <code class="docutils literal notranslate"><span class="pre">retrieve_atmospheric</span></code><a class="headerlink" href="#using-retrieve-atmospheric" title="Permalink to this heading">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Outside of this tutorial, if you have write access to multiple object stores you
+will need to pass the name of the object store you wish to write to to
+the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">retrieve_atmospheric</span></code> function as the function
+caches the data retrieved from ICOS.</p>
+</div>
 <p>First we’ll import <code class="docutils literal notranslate"><span class="pre">retrieve_atmospheric</span></code> from the <code class="docutils literal notranslate"><span class="pre">retrieve</span></code> submodule, then
 we’ll retrieve some data from Saclay (<strong>SAC</strong>). The function will
 first check for any data from <strong>SAC</strong> already stored in the object
@@ -533,6 +537,13 @@ process, this will depend on the rate at which datasets are updated on the ICOS 
 </section>
 <section id="ceda">
 <h2>2. CEDA<a class="headerlink" href="#ceda" title="Permalink to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Outside of this tutorial, if you have write access to multiple object stores you
+will need to pass the name of the object store you wish to write to to
+the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">retrieve_surface</span></code> function as the function
+caches the data retrieved from CEDA.</p>
+</div>
 <p>To retrieve data from CEDA you can use the <code class="docutils literal notranslate"><span class="pre">retrieve_surface</span></code> function
 from <code class="docutils literal notranslate"><span class="pre">openghg.retrieve.ceda</span></code>. This lets you pull down data from CEDA, process
 it and store it in the object store. Once the data has been stored

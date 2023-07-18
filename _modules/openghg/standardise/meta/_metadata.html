@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.standardise.meta._metadata &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -356,7 +356,7 @@ document.write(`
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">AttrMismatchError</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">is_number</span>
 
@@ -366,7 +366,9 @@ document.write(`
 
 <div class="viewcode-block" id="metadata_default_keys"><a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.meta.metadata_default_keys">[docs]</a><span class="k">def</span> <span class="nf">metadata_default_keys</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Define default values expected within ObsSurface metadata</span>
+<span class="sd">    Defines default values expected within ObsSurface metadata.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: keys required in metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">default_keys</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;site&quot;</span><span class="p">,</span>
@@ -388,13 +390,32 @@ document.write(`
     <span class="k">return</span> <span class="n">default_keys</span></div>
 
 
+<span class="k">def</span> <span class="nf">metadata_keys_as_floats</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines which keys should be consistently stored as numbers in the metadata</span>
+<span class="sd">    (even if they are not numbers within the attributes).</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        list: keys required to be floats in metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">values_as_floats</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># &quot;inlet_height_magl&quot;,</span>
+        <span class="s2">&quot;station_longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;station_latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;station_height_masl&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">values_as_floats</span>
+
+
 <div class="viewcode-block" id="sync_surface_metadata"><a class="viewcode-back" href="../../../../api/devapi_standardise.html#openghg.standardise.meta.sync_surface_metadata">[docs]</a><span class="k">def</span> <span class="nf">sync_surface_metadata</span><span class="p">(</span>
     <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">keys_to_add</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Makes sure any duplicated keys between the metadata and attributes</span>
+    <span class="n">update_mismatch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes sure any duplicated keys between the metadata and attributes</span>
 <span class="sd">    dictionaries match and that certain keys are present in the metadata.</span>
 
 <span class="sd">    Args:</span>
@@ -404,58 +425,90 @@ document.write(`
 <span class="sd">        the attribute values. Note: this skips any keys which can&#39;t be</span>
 <span class="sd">        copied from the attribute values.</span>
 <span class="sd">        update_mismatch: If case insensitive mismatch is found between an</span>
-<span class="sd">            attribute and a metadata value, update the metadata to contain</span>
-<span class="sd">            the attribute value. By default this will raise an AttrMismatchError.</span>
+<span class="sd">          attribute and a metadata value, this determines the function behaviour.</span>
+<span class="sd">          This includes the options:</span>
+<span class="sd">            - &quot;never&quot; - don&#39;t update mismatches and raise an AttrMismatchError</span>
+<span class="sd">            - &quot;from_source&quot; / &quot;attributes&quot; - update mismatches based on input attributes</span>
+<span class="sd">            - &quot;from_definition&quot; / &quot;metadata&quot; - update mismatches based on input metadata</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: Copy of metadata updated with attributes</span>
+<span class="sd">        dict, dict: Aligned metadata, attributes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">meta_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+    <span class="n">attrs_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
+
+    <span class="n">mismatch_keys</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;never&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;never&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;attributes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">,</span> <span class="s2">&quot;from_source&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="s2">&quot;from_definition&quot;</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">options</span> <span class="ow">in</span> <span class="n">mismatch_keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">update_mismatch</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">update_mismatch</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input for &#39;update_mismatch&#39; should be one of </span><span class="si">{</span><span class="n">mismatch_keys</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">attr_mismatches</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Check if we have differences</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">meta_value</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">attr_value</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
             <span class="c1"># This should mainly be used for lat/long</span>
             <span class="n">relative_tolerance</span> <span class="o">=</span> <span class="mf">1e-3</span>
 
-            <span class="k">if</span> <span class="n">is_number</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_number</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">attr_value</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="n">relative_tolerance</span><span class="p">):</span>
-                    <span class="n">err_warn_str</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Value of </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not within tolerance, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">update_mismatch</span><span class="p">:</span>
-                        <span class="n">attr_mismatches</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_number</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_number</span><span class="p">(</span><span class="n">meta_value</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">attr_value</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">meta_value</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="n">relative_tolerance</span><span class="p">):</span>
+                    <span class="n">err_warn_num</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Value of </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not within tolerance, metadata: </span><span class="si">{</span><span class="n">meta_value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="k">if</span> <span class="n">update_mismatch</span> <span class="o">==</span> <span class="s2">&quot;never&quot;</span><span class="p">:</span>
+                        <span class="n">attr_mismatches</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">meta_value</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">update_mismatch</span> <span class="o">==</span> <span class="s2">&quot;attributes&quot;</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">err_warn_num</span><span class="si">}</span><span class="se">\n</span><span class="s2">Updating metadata to use attribute value of </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">meta_copy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">update_mismatch</span> <span class="o">==</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">err_warn_num</span><span class="si">}</span><span class="se">\n</span><span class="s2">Updating attributes to use metadata value of </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">meta_value</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">attrs_copy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">meta_value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Here we don&#39;t care about case. Within the Datasource we&#39;ll store the</span>
+                <span class="c1"># metadata as all lowercase, within the attributes we&#39;ll keep the case.                err_warn_str = f&quot;Metadata mismatch for &#39;{key}&#39;, metadata: {meta_value} - attributes: {attr_value}&quot;</span>
+                <span class="n">err_warn_str</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Metadata mismatch for &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;, metadata: </span><span class="si">{</span><span class="n">meta_value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">meta_value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">update_mismatch</span> <span class="o">==</span> <span class="s2">&quot;never&quot;</span><span class="p">:</span>
+                        <span class="n">attr_mismatches</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">meta_value</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">update_mismatch</span> <span class="o">==</span> <span class="s2">&quot;attributes&quot;</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">err_warn_str</span><span class="si">}</span><span class="se">\n</span><span class="s2">Updating metadata to use attribute value of </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span>
                         <span class="p">)</span>
-
-                    <span class="n">meta_copy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Here we don&#39;t care about case. Within the Datasource we&#39;ll store the</span>
-                <span class="c1"># metadata as all lowercase, within the attributes we&#39;ll keep the case.</span>
-                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">update_mismatch</span><span class="p">:</span>
-                        <span class="n">attr_mismatches</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Metadata mismatch for &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;, metadata: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> - attributes: </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Updating metadata to use attribute value of </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">attr_value</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="p">)</span>
                         <span class="n">meta_copy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_value</span>
+                    <span class="k">elif</span> <span class="n">update_mismatch</span> <span class="o">==</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">err_warn_str</span><span class="si">}</span><span class="se">\n</span><span class="s2">Updating attributes to use metadata value: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">meta_value</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">attrs_copy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta_value</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="c1"># Key wasn&#39;t in attributes for comparison</span>
             <span class="k">pass</span>
 
     <span class="k">if</span> <span class="n">attr_mismatches</span><span class="p">:</span>
-        <span class="n">mismatch_details</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot; - &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;, metadata: </span><span class="si">{</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, attributes: </span><span class="si">{</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">attr_mismatches</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">mismatch_details</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot; - &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;, metadata: </span><span class="si">{</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, attributes: </span><span class="si">{</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">attr_mismatches</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">]</span>
         <span class="n">mismatch_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mismatch_details</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="n">AttrMismatchError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata mismatch / value not within tolerance for the following keys:</span><span class="se">\n</span><span class="si">{</span><span class="n">mismatch_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">AttrMismatchError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Metadata mismatch / value not within tolerance for the following keys:</span><span class="se">\n</span><span class="si">{</span><span class="n">mismatch_str</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
     <span class="n">default_keys_to_add</span> <span class="o">=</span> <span class="n">metadata_default_keys</span><span class="p">()</span>
+    <span class="n">keys_as_floats</span> <span class="o">=</span> <span class="n">metadata_keys_as_floats</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">keys_to_add</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">keys_to_add</span> <span class="o">=</span> <span class="n">default_keys_to_add</span>
@@ -467,8 +520,11 @@ document.write(`
                 <span class="n">meta_copy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> key not in attributes or metadata&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys_as_floats</span><span class="p">:</span>
+                    <span class="n">meta_copy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">meta_copy</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
 
-    <span class="k">return</span> <span class="n">meta_copy</span></div>
+    <span class="k">return</span> <span class="n">meta_copy</span><span class="p">,</span> <span class="n">attrs_copy</span></div>
 </pre></div>
 
                 </article>

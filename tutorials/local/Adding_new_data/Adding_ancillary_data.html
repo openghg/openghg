@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Adding ancillary spatial data &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -335,9 +335,6 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
-</ul>
 </div>
 </nav></div>
     </div>
@@ -428,6 +425,12 @@ affect your use of OpenGHG outside of this tutorial.</p>
 </section>
 <section id="adding-and-standardising-data">
 <h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Permalink to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Outside of this tutorial, if you have write access to multiple object stores you
+will need to pass the name of the object store you wish to write to to
+the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the standardise functions.</p>
+</div>
 <p>Data can be added to the object store using appropriate functions from
 the <code class="docutils literal notranslate"><span class="pre">openghg.standardise</span></code> sub module. This includes:</p>
 <ul class="simple">
@@ -565,7 +568,7 @@ climatology product [++REFINE AND ADD LINK++]</em>.</p>
 </section>
 </section>
 <section id="defining-source-and-bc-input">
-<h3>Defining ‘source’ and ‘bc_input’<a class="headerlink" href="#defining-source-and-bc-input" title="Permalink to this heading">#</a></h3>
+<h3>Defining <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code><a class="headerlink" href="#defining-source-and-bc-input" title="Permalink to this heading">#</a></h3>
 <p>Unlike the <code class="docutils literal notranslate"><span class="pre">domain</span></code> and <code class="docutils literal notranslate"><span class="pre">species</span></code> inputs which have some pre-defined
 values, the <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code> keywords can be chosen by the
 user as a way to describe the flux and boundary condition inputs,
@@ -962,7 +965,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#boundary-conditions">Boundary conditions</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-source-and-bc-input">Defining ‘source’ and ‘bc_input’</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-source-and-bc-input">Defining <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-format">2. Input format</a><ul class="nav section-nav flex-column">

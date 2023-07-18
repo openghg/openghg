@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0.5.1 documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0.6.0 documentation</title>
   
   
   
@@ -359,9 +359,10 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">load_metastore</span>
 <span class="kn">from</span> <span class="nn">openghg.store.spec</span> <span class="kn">import</span> <span class="n">define_data_type_classes</span><span class="p">,</span> <span class="n">define_data_types</span>
+<span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">get_readable_buckets</span>
 <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">decompress</span><span class="p">,</span> <span class="n">running_on_hub</span>
+<span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">ObjectStoreError</span>
 <span class="kn">from</span> <span class="nn">tinydb.database</span> <span class="kn">import</span> <span class="n">TinyDB</span>
 <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
 
@@ -422,39 +423,6 @@ document.write(`
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]:</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">result</span><span class="p">}</span>
-
-
-<span class="k">def</span> <span class="nf">metadata_lookup</span><span class="p">(</span>
-    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="n">TinyDB</span><span class="p">,</span> <span class="n">additional_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Searches the passed database for the given metadata</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        metadata: Keys we are required to find</span>
-<span class="sd">        database: The tinydb database for the storage object</span>
-<span class="sd">        additional: Keys we&#39;d like to find (currently unused)</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        str or bool: UUID string if matching Datasource found, otherwise False</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
-
-    <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">DatasourceLookupError</span>
-    <span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">Query</span>
-
-    <span class="n">q</span> <span class="o">=</span> <span class="n">Query</span><span class="p">()</span>
-
-    <span class="n">search_attrs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
-    <span class="n">required_result</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">reduce</span><span class="p">(</span><span class="n">_find_and</span><span class="p">,</span> <span class="n">search_attrs</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">required_result</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">required_result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">DatasourceLookupError</span><span class="p">(</span><span class="s2">&quot;More than once Datasource found for metadata, refine lookup.&quot;</span><span class="p">)</span>
-
-    <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">required_result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">uuid</span>
 
 
 <div class="viewcode-block" id="search_bc"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_bc">[docs]</a><span class="k">def</span> <span class="nf">search_bc</span><span class="p">(</span>
@@ -838,20 +806,12 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sr</span> <span class="o">=</span> <span class="n">SearchResults</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">sr</span> <span class="o">=</span> <span class="n">local_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">sr</span> <span class="o">=</span> <span class="n">_base_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">sr</span></div>
 
 
-<span class="c1"># TODO</span>
-<span class="c1"># GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user</span>
-<span class="c1"># facing interfaces to a more general search function, this would also make it easier to enforce types</span>
-<span class="c1"># TODO - rename this function!</span>
-<span class="c1"># 2.</span>
-<span class="c1"># _base_search()</span>
-<span class="c1"># 1.</span>
-<span class="c1"># _store_search()</span>
-<span class="k">def</span> <span class="nf">local_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_base_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Search for observations data. Any keyword arguments may be passed to the</span>
 <span class="sd">    the function and these keywords will be used to search metadata.</span>
 
@@ -875,7 +835,6 @@ document.write(`
 <span class="sd">        SearchResults or None: SearchResults object is results found, otherwise None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">itertools</span>
-
     <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
     <span class="kn">from</span> <span class="nn">openghg.dataobjects</span> <span class="kn">import</span> <span class="n">SearchResults</span>
     <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
@@ -926,6 +885,23 @@ document.write(`
     <span class="k">else</span><span class="p">:</span>
         <span class="n">types_to_search</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">data_type_classes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
+    <span class="c1"># Get a dictionary of all the readable buckets available</span>
+    <span class="c1"># We&#39;ll iterate over each of them</span>
+    <span class="n">readable_buckets</span> <span class="o">=</span> <span class="n">get_readable_buckets</span><span class="p">()</span>
+
+    <span class="c1"># If we&#39;re given a store then we&#39;ll just read from that one</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="n">search_kwargs</span><span class="p">[</span><span class="s2">&quot;store&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">search_kwargs</span><span class="p">[</span><span class="s2">&quot;store&quot;</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">readable_buckets</span> <span class="o">=</span> <span class="p">{</span><span class="n">store</span><span class="p">:</span> <span class="n">readable_buckets</span><span class="p">[</span><span class="n">store</span><span class="p">]}</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ObjectStoreError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid store: </span><span class="si">{</span><span class="n">store</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">start_date</span> <span class="o">=</span> <span class="n">search_kwargs</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -962,63 +938,76 @@ document.write(`
     <span class="k">else</span><span class="p">:</span>
         <span class="n">expanded_search</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">not_a_list</span><span class="p">)</span>
 
-    <span class="n">general_results</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">data_type_class</span> <span class="ow">in</span> <span class="n">types_to_search</span><span class="p">:</span>
-        <span class="n">meta_key</span> <span class="o">=</span> <span class="n">data_type_class</span><span class="o">.</span><span class="n">_metakey</span>
-
-        <span class="k">with</span> <span class="n">load_metastore</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">meta_key</span><span class="p">)</span> <span class="k">as</span> <span class="n">metastore</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">expanded_search</span><span class="p">:</span>
-                <span class="n">res</span> <span class="o">=</span> <span class="n">metastore</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">Query</span><span class="p">()</span><span class="o">.</span><span class="n">fragment</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-                <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
-                    <span class="n">general_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-
-    <span class="c1"># Add in a quick check to make sure we don&#39;t have dupes</span>
-    <span class="n">uuids</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">general_results</span><span class="p">]</span>
-    <span class="c1"># TODO - remove this once a more thorough tests are added</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uuids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">uuids</span><span class="p">)):</span>
-        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Multiple results found with same UUID!&quot;</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">error_msg</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
-
-    <span class="c1"># Here we create a dictionary of the metadata keyed by the Datasource UUID</span>
-    <span class="c1"># we&#39;ll create a pandas DataFrame out of this in the SearchResult object</span>
-    <span class="c1"># for better printing / searching within a notebook</span>
-    <span class="n">keyed_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">general_results</span><span class="p">}</span>
-
     <span class="n">data_keys</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c1"># Narrow the search to a daterange if dates passed</span>
-    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="p">()</span>
+    <span class="n">general_metadata</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">bucket</span> <span class="ow">in</span> <span class="n">readable_buckets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">metastore_records</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">data_type_class</span> <span class="ow">in</span> <span class="n">types_to_search</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">data_type_class</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">)</span> <span class="k">as</span> <span class="n">dclass</span><span class="p">:</span>
+                <span class="n">metastore</span> <span class="o">=</span> <span class="n">dclass</span><span class="o">.</span><span class="n">_metastore</span>
+
+                <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">expanded_search</span><span class="p">:</span>
+                    <span class="n">res</span> <span class="o">=</span> <span class="n">metastore</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">Query</span><span class="p">()</span><span class="o">.</span><span class="n">fragment</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
+                        <span class="n">metastore_records</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+        <span class="c1"># Add in a quick check to make sure we don&#39;t have dupes</span>
+        <span class="c1"># TODO - remove this once a more thorough tests are added</span>
+        <span class="n">uuids</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">metastore_records</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uuids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">uuids</span><span class="p">)):</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Multiple results found with same UUID!&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">error_msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+        <span class="c1"># Here we create a dictionary of the metadata keyed by the Datasource UUID</span>
+        <span class="c1"># we&#39;ll create a pandas DataFrame out of this in the SearchResult object</span>
+        <span class="c1"># for better printing / searching within a notebook</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">metastore_records</span><span class="p">}</span>
+
+        <span class="c1"># Narrow the search to a daterange if dates passed</span>
+        <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_epoch</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span> <span class="o">+</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="s2">&quot;1s&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_now</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span> <span class="o">-</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="s2">&quot;1s&quot;</span><span class="p">)</span>
+
+            <span class="n">metadata_in_daterange</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># TODO - we can remove this now the metastore contains the start and end dates of the Datasources</span>
+            <span class="k">for</span> <span class="n">uid</span><span class="p">,</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">_keys</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">keys_in_daterange</span><span class="p">(</span>
+                    <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">_keys</span><span class="p">:</span>
+                    <span class="n">metadata_in_daterange</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span>
+                    <span class="n">data_keys</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">_keys</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">data_keys</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;No data found for the dates given in the </span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2"> store, please try a wider search.&quot;</span>
+                <span class="p">)</span>
+            <span class="c1"># Update the metadata we&#39;ll use to create the SearchResults object</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata_in_daterange</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">start_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span> <span class="o">+</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="s2">&quot;1s&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+                <span class="n">data_keys</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">data_keys</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_now</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">end_date</span> <span class="o">=</span> <span class="n">timestamp_tzaware</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span> <span class="o">-</span> <span class="n">pd_Timedelta</span><span class="p">(</span><span class="s2">&quot;1s&quot;</span><span class="p">)</span>
+        <span class="c1"># TODO - adding this to make sure everything is working correctly</span>
+        <span class="c1"># Remove once more comprehensive tests are done</span>
+        <span class="n">dupe_uuids</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">metadata</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">general_metadata</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">dupe_uuids</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ObjectStoreError</span><span class="p">(</span><span class="s2">&quot;Duplicate UUIDs found between buckets.&quot;</span><span class="p">)</span>
 
-        <span class="n">metadata_in_daterange</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">general_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">uid</span><span class="p">,</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">keyed_metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">_keys</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">keys_in_daterange</span><span class="p">(</span>
-                <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">_keys</span><span class="p">:</span>
-                <span class="n">metadata_in_daterange</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span>
-                <span class="n">data_keys</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">_keys</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">data_keys</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No data found for the dates given, please try a wider search.&quot;</span><span class="p">)</span>
-        <span class="c1"># Update the metadata we&#39;ll use to create the SearchResults object</span>
-        <span class="n">keyed_metadata</span> <span class="o">=</span> <span class="n">metadata_in_daterange</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Here we only need to retrieve the keys</span>
-        <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="n">keyed_metadata</span><span class="p">:</span>
-            <span class="n">data_keys</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">data_keys</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="n">SearchResults</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">data_keys</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">keyed_metadata</span><span class="p">),</span> <span class="n">start_result</span><span class="o">=</span><span class="s2">&quot;data_type&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SearchResults</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">data_keys</span><span class="p">),</span> <span class="n">metadata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">general_metadata</span><span class="p">),</span> <span class="n">start_result</span><span class="o">=</span><span class="s2">&quot;data_type&quot;</span><span class="p">)</span>
 </pre></div>
 
                 </article>
