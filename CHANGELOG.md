@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Configuration file format has been updated to support multiple object stores, note directing users to upgrade has been added
 - The `openghg --quickstart` functionality has been updated to allow multiple objects stores to be added and migrate users from the previous version of the configuration file
+- The name of the `DataHandler` class has been changed to `DataManager` to better reflect its function.
 
 ### Removed
 
