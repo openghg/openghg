@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed use of environment variable for test store, moved to mock - [PR # 580](https://github.com/openghg/openghg/pull/580)
 - Temporary pinning of pandas < 2.0 due to changes that introduced errors - [PR #619](https://github.com/openghg/openghg/pull/619)
 - `ObsData.plot_timeseries` now uses `openghg.plotting.plot_timeseries` to avoid duplication in efforts/code - [PR #624](https://github.com/openghg/openghg/pull/624)
-- `openghg.util._user.get_user_config_path` now creates `openghg.conf` in ~/.openghg - [PR #690](https://github.com/openghg/openghg/pull/690)
+- `openghg.util._user.get_user_config_path` now creates `openghg.conf` in `~/.openghg` - [PR #690](https://github.com/openghg/openghg/pull/690)
 
 ## [0.5.0] - 2023-03-14
 
@@ -77,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- A new :ref:`DataHandler<DataHandler>` class for modification and deletion of metadata and added a matching tutorial.
+- A new `DataHandler<DataHandler>` class for modification and deletion of metadata and added a matching tutorial.
 - Move to a new user configuration file.
 - A new `ObsColumn` class for handing satellite data
 
