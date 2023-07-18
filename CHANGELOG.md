@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Configuration file format has been updated to support multiple object stores, note directing users to upgrade has been added
 - The `openghg --quickstart` functionality has been updated to allow multiple objects stores to be added and migrate users from the previous version of the configuration file
+- Synchronise metadata within metastore to align with data sources when updating (including latest version, start and end dates of the data) - [PR #652](https://github.com/openghg/openghg/pull/652) and [PR #664](https://github.com/openghg/openghg/pull/664)
 
 ### Removed
 
