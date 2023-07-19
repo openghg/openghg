@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
+from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
 import logging
 
@@ -15,6 +16,7 @@ def retrieve_surface(
     url: Optional[str] = None,
     force_retrieval: bool = False,
     additional_metadata: Optional[Dict] = None,
+    store: Optional[str] = None,
 ) -> Union[List[ObsData], ObsData, None]:
     """Retrieve surface measurements from the CEDA archive. This function will route the call
     to either local or cloud functions based on the environment.
@@ -30,6 +32,7 @@ def retrieve_surface(
         keys if they aren't found in the dataset's attributes.
         For example:
             {"site": "AAA", "inlet": "10m"}
+        store: Name of object store to use
     Returns:
         ObsData or None: ObsData if data found / retrieved successfully.
 
@@ -47,6 +50,7 @@ def retrieve_surface(
         url=url,
         force_retrieval=force_retrieval,
         additional_metadata=additional_metadata,
+        store=store,
     )
 
 
@@ -116,6 +120,7 @@ def local_retrieve_surface(
     url: Optional[str] = None,
     force_retrieval: bool = False,
     additional_metadata: Optional[Dict] = None,
+    store: Optional[str] = None,
     **kwargs: Any,
 ) -> Union[List[ObsData], ObsData, None]:
     """Retrieve surface observations data from the CEDA archive. You can pass
@@ -134,6 +139,7 @@ def local_retrieve_surface(
         keys if they aren't found in the dataset's attributes.
         For example:
             {"site": "AAA", "inlet": "10m"}
+        store: Name of object store
     Returns:
         ObsData or None: ObsData if data found / retrieved successfully.
 
@@ -153,7 +159,7 @@ def local_retrieve_surface(
     if additional_metadata is None:
         additional_metadata = {}
 
-    results = search_surface(site=site, species=species, inlet=inlet, data_source="ceda_archive")
+    results = search_surface(site=site, species=species, inlet=inlet, data_source="ceda_archive", store=store)
 
     if results and not force_retrieval or url is None:
         return results.retrieve_all()
@@ -222,6 +228,8 @@ def local_retrieve_surface(
 
     to_store = {key: {"data": dataset, "metadata": metadata}}
 
-    ObsSurface.store_data(data=to_store)
+    bucket = get_writable_bucket(name=store)
+    with ObsSurface(bucket=bucket) as obs:
+        obs.store_data(data=to_store)
 
     return ObsData(data=dataset, metadata=metadata)

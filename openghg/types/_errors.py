@@ -1,4 +1,3 @@
-
 from typing import Optional
 
 
@@ -48,6 +47,10 @@ class SearchError(OpenGHGError):
 
 class AttrMismatchError(OpenGHGError):
     """Mismatch between attributes of input file and derived metadata"""
+
+
+class ConfigFileError(OpenGHGError):
+    """Raised for errors with configuraion file"""
 
 
 def construct_xesmf_import_error(exception: Optional[ImportError] = None) -> str:

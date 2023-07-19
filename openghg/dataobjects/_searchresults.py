@@ -20,11 +20,12 @@ class SearchResults:
     Args:
         keys: Dictionary of keys keyed by Datasource UUID
         metadata: Dictionary of metadata keyed by Datasource UUID
+        start_result: ?
     """
 
-    def __init__(self, keys: Optional[Dict] = None,
-                 metadata: Optional[Dict] = None,
-                 start_result: Optional[str] = None):
+    def __init__(
+        self, keys: Optional[Dict] = None, metadata: Optional[Dict] = None, start_result: Optional[str] = None
+    ):
         if metadata is not None:
             self.metadata = metadata
         else:
@@ -103,7 +104,7 @@ class SearchResults:
     def retrieve(
         self,
         dataframe: Optional[DataFrame] = None,
-        sort: bool = False,
+        sort: bool = True,
         elevate_inlet: bool = False,
         **kwargs: Any,
     ) -> Union[ObsData, List[ObsData]]:
@@ -130,7 +131,6 @@ class SearchResults:
             sort: Sort by time. Note that this may be very memory hungry for large Datasets.
             elevate_inlet: Elevate inlet to a variable within the Dataset, useful
             for ranked data.
-
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
@@ -202,10 +202,10 @@ class SearchResults:
             ObsData / List[ObsData]: ObsData object(s)
         """
         results = []
-        # For uid in uuids
         for uid in uuids:
             keys = self.key_data[uid]
-            dataset = self._retrieve_dataset(keys, sort=sort, elevate_inlet=elevate_inlet)
+            bucket = self.metadata[uid]["object_store"]
+            dataset = self._retrieve_dataset(bucket=bucket, keys=keys, sort=sort, elevate_inlet=elevate_inlet)
             metadata = self.metadata[uid]
 
             results.append(ObsData(data=dataset, metadata=metadata))
@@ -216,7 +216,12 @@ class SearchResults:
             return results
 
     def _retrieve_dataset(
-        self, keys: List, sort: bool, elevate_inlet: bool = True, attrs_to_check: Optional[Dict] = None
+        self,
+        bucket: str,
+        keys: List,
+        sort: bool,
+        elevate_inlet: bool = True,
+        attrs_to_check: Optional[Dict] = None,
     ) -> Dataset:
         """Retrieves datasets from either cloud or local object store
 
@@ -247,5 +252,9 @@ class SearchResults:
             return ds
         else:
             return recombine_datasets(
-                keys=keys, sort=sort, elevate_inlet=elevate_inlet, attrs_to_check=attrs_to_check
+                bucket=bucket,
+                keys=keys,
+                sort=sort,
+                elevate_inlet=elevate_inlet,
+                attrs_to_check=attrs_to_check,
             )

@@ -285,7 +285,6 @@ def get_obs_surface_local(
         retrieved_data.metadata["inlet"] = "multiple"
 
     if start_date is not None and end_date is not None:
-
         # Check if underlying data is timezone aware.
         data_time_index = data.indexes["time"]
         tzinfo = data_time_index.tzinfo
@@ -608,6 +607,7 @@ def get_footprint(
         domain : Domain name for the footprints
         inlet: Height above ground level in metres
         height: Alias for inlet
+        model: Model used to create footprint (e.g. NAME or FLEXPART)
         start_date: Output start date in a format that Pandas can interpret
         end_date: Output end date in a format that Pandas can interpret
         species: Species identifier e.g. "co2" for carbon dioxide. Only needed
@@ -735,15 +735,21 @@ def _metadata_difference(
         logger.exception(err_msg)
         raise ValueError(err_msg)
 
+    # Creating multiple metadata dictionaries to be compared
+    # - Check if only selected parameters be included
     if params is not None:
         metadata = [{param: m[param] for param in params} for m in metadata]
 
+    # - Check if some parameters should be explicitly ignored and not compared
     ignore_params = ["uuid", "data_owner", "data_owner_email"]
     if ignore_params is not None:
         metadata = [{key: value for key, value in m.items() if key not in ignore_params} for m in metadata]
 
+    # - Extract string values  only from the underlying metadata dictionaries
     metadata = [{key: value for key, value in m.items() if isinstance(value, str)} for m in metadata]
-
+    
+    # Select first metadata dictionary from list and use this to compare to others
+    # - Look at difference between first metadata dict and other metadata dicts
     metadata0 = metadata[0]
     difference = []
     for metadata_compare in metadata[1:]:
@@ -754,6 +760,7 @@ def _metadata_difference(
             return {}
         else:
             difference.extend(list(metadata_diff))
+    # - Select parameter names for values which are different between metadata dictionaries
     param_difference = list(set([d[0] for d in difference]))
 
     # ignore_params = ["data_owner", "data_owner_email"]
@@ -763,15 +770,20 @@ def _metadata_difference(
     #     except ValueError:
     #         continue
 
+    # - Collate summary of differences as a dictionary which maps as param: list of values
     summary_difference: Dict[str, list] = {}
     for param in param_difference:
         summary_difference[param] = []
         if print_output:
             logger.info(f" {param}: ")
         for m in metadata:
-            summary_difference[param].append(m[param])
+            if param in m:
+                value = m[param]
+            else:
+                value = "NOT PRESENT"
+            summary_difference[param].append(value)
             if print_output:
-                logger.info(f" '{m[param]}', ")
+                logger.info(f" '{value}', ")
         if print_output:
             logger.info("\n")  # print new line
 

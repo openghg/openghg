@@ -20,16 +20,18 @@ def recombine_multisite(keys: Dict, sort: Optional[bool] = True) -> Dict:
     Returns:
         dict: Dictionary of xarray.Datasets
     """
-    result = {}
-    for key, key_list in keys.items():
-        result[key] = recombine_datasets(keys=key_list, sort=sort)
+    raise NotImplementedError
+    # result = {}
+    # for key, key_list in keys.items():
+    #     result[key] = recombine_datasets(keys=key_list, sort=sort)
 
-    return result
+    # return result
 
 
 def recombine_datasets(
+    bucket: str,
     keys: List[str],
-    sort: Optional[bool] = False,
+    sort: Optional[bool] = True,
     attrs_to_check: Optional[Dict[str, str]] = None,
     elevate_inlet: bool = False,
 ) -> xr.Dataset:
@@ -37,8 +39,9 @@ def recombine_datasets(
     into a single dataset
 
     Args:
+        bucket: Object store bucket to retrieve data from
         keys: List of object store keys
-        sort: Sort the resulting Dataset by the time dimension. Default = True
+        sort: Sort the resulting Dataset by the time dimension, defaults to False
         attrs_to_check: Attributes to check for duplicates. If duplicates are present
             a new data variable will be created containing the values from each dataset
             If a dictionary is passed, the attribute(s) will be retained and the new value assigned.
@@ -47,14 +50,11 @@ def recombine_datasets(
     Returns:
         xarray.Dataset: Combined Dataset
     """
-    from openghg.objectstore import get_bucket
     from openghg.store.base import Datasource
     from xarray import concat as xr_concat
 
     if not keys:
         raise ValueError("No data keys passed.")
-
-    bucket = get_bucket()
 
     data = [Datasource.load_dataset(bucket=bucket, key=k) for k in keys]
 
@@ -99,8 +99,8 @@ def recombine_datasets(
                 else:
                     combined.attrs.pop(attr)
 
-    # if sort:
-    #     combined = combined.sortby("time")
+    if sort:
+        combined = combined.sortby("time")
 
     # This is modified from https://stackoverflow.com/a/51077784/1303032
     unique, index, count = np.unique(combined.time, return_counts=True, return_index=True)
@@ -118,6 +118,8 @@ def recombine_datasets(
     # Only keep the unique values if we have dupes
     # if index.size != combined.time.size:
     #    combined = combined.isel(time=index)
+    if sort:
+        combined = combined.sortby("time")
 
     return combined
 
