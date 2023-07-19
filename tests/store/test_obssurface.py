@@ -1,13 +1,39 @@
 import json
-
 import pytest
 import xarray as xr
 from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_stores
-from openghg.objectstore import exists, get_bucket
+from openghg.objectstore import exists, get_bucket, get_writable_bucket
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
 from openghg.util import create_daterange_str
 from pandas import Timestamp
+
+
+def test_raising_error_doesnt_save_to_store(mocker):
+    clear_test_stores()
+    bucket = get_writable_bucket(name="user")
+
+    key = ""
+    with pytest.raises(ValueError):
+        with ObsSurface(bucket=bucket) as obs:
+            key = obs.key()
+            assert not exists(bucket=bucket, key=key)
+            # Here we're testing to see what happens if a user does something
+            # with obs that results in an exception being raised that isn't internal
+            # to our processing functions
+            raise ValueError("Oops")
+
+    assert not exists(bucket=bucket, key=key)
+
+    mocker.patch("openghg.store.base._base.BaseStore.assign_data", side_effect=ValueError("Read error."))
+
+    one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
+
+    with pytest.raises(ValueError):
+        with ObsSurface(bucket=bucket) as obs:
+            obs.read_file(filepath=one_min, site="tac", network="decc", source_format="CRDS")
+
+    assert not exists(bucket=bucket, key=key)
 
 
 def test_different_sampling_periods_diff_datasources():

@@ -84,6 +84,7 @@ class Datasource:
         metadata: Dict,
         data: Dataset,
         data_type: str,
+        skip_keys: Optional[List] = None,
         overwrite: Optional[bool] = False,
     ) -> None:
         """Add data to this Datasource and segment the data by size.
@@ -103,7 +104,7 @@ class Datasource:
         if data_type not in expected_data_types:
             raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
 
-        self.add_metadata(metadata=metadata)
+        self.add_metadata(metadata=metadata, skip_keys=skip_keys)
 
         if "time" in data.coords:
             return self.add_timed_data(data=data, data_type=data_type, overwrite=overwrite)
@@ -259,7 +260,7 @@ class Datasource:
         for key in set(keys):
             delete_object(bucket=bucket, key=key)
 
-    def add_metadata(self, metadata: Dict) -> None:
+    def add_metadata(self, metadata: Dict, skip_keys: Optional[List] = None) -> None:
         """Add all metadata in the dictionary to this Datasource
 
         Args:
@@ -269,7 +270,7 @@ class Datasource:
         """
         from openghg.util import to_lowercase
 
-        lowercased: Dict = to_lowercase(metadata)
+        lowercased: Dict = to_lowercase(metadata, skip_keys=skip_keys)
         self._metadata.update(lowercased)
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
