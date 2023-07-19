@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Literal, Optional, Tuple, Union
-
+import logging
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
@@ -20,6 +20,9 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 ArrayType = Optional[Union[ndarray, DataArray]]
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class Emissions(BaseStore):
@@ -38,7 +41,10 @@ class Emissions(BaseStore):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
-        self.save()
+        if exc_type is not None:
+            logger.error(msg=f"{exc_type}, {exc_tb}")
+        else:
+            self.save()
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data

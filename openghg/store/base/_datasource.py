@@ -89,6 +89,7 @@ class Datasource:
         metadata: Dict,
         data: Dataset,
         data_type: str,
+        skip_keys: Optional[List] = None,
         if_exists: Optional[str] = None,
     ) -> None:
         """Add data to this Datasource and segment the data by size.
@@ -98,6 +99,7 @@ class Datasource:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
             data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
+            skip_keys: Keys to not standardise as lowercase
             if_exists: What to do if existing data is present.
                 - None - checks new and current data for timeseries overlap
                    - adds data if no overlap
@@ -113,7 +115,7 @@ class Datasource:
         if data_type not in expected_data_types:
             raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
 
-        self.add_metadata(metadata=metadata)
+        self.add_metadata(metadata=metadata, skip_keys=skip_keys)
 
         if "time" in data.coords:
             return self.add_timed_data(data=data, data_type=data_type, if_exists=if_exists)
@@ -316,17 +318,18 @@ class Datasource:
 
         # Or could just try and delete the whole version folder?
 
-    def add_metadata(self, metadata: Dict) -> None:
+    def add_metadata(self, metadata: Dict, skip_keys: Optional[List] = None) -> None:
         """Add all metadata in the dictionary to this Datasource
 
         Args:
             metadata: Dictionary of metadata
+            skip_keys: Keys to not standardise as lowercase
         Returns:
             None
         """
         from openghg.util import to_lowercase
 
-        lowercased: Dict = to_lowercase(metadata)
+        lowercased: Dict = to_lowercase(metadata, skip_keys=skip_keys)
         self._metadata.update(lowercased)
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
