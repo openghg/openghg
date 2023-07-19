@@ -49,7 +49,7 @@ class EulerianModel(BaseStore):
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
-        if_exists: Optional[str] = None,
+        if_exists: str = "default",
         save_current: Optional[bool] = None,
         overwrite: bool = False,
         force: bool = False,
@@ -64,13 +64,13 @@ class EulerianModel(BaseStore):
             end_date: End date (exclusive) associated with model run
             setup: Additional setup details for run
             if_exists: What to do if existing data is present.
-                - None - checks new and current data for timeseries overlap
+                - "default" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
                 - "replace" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                If None, this will depend on if_exists input (None -> True), (other -> False)
+                If None, this will depend on if_exists input ("default" -> True), (other -> False)
             overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
             force: Force adding of data even if this is identical to data stored.
         """
@@ -94,11 +94,15 @@ class EulerianModel(BaseStore):
         end_date = clean_string(end_date)
         setup = clean_string(setup)
 
-        if overwrite and if_exists is None:
+        if overwrite and if_exists == "default":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
             )
+            if_exists = "new"
+
+        # Making sure data can be force overwritten if force keyword is included.
+        if force and if_exists == "default":
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)

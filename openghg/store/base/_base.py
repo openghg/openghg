@@ -71,7 +71,7 @@ class BaseStore:
         required_keys: Sequence[str],
         min_keys: Optional[int] = None,
         update_keys: Optional[List] = None,
-        if_exists: Optional[str] = None,
+        if_exists: str = "default",
         new_version: bool = True,
     ) -> Dict[str, Dict]:
         """Assign data to a Datasource. This will either create a new Datasource
@@ -84,9 +84,9 @@ class BaseStore:
                 required_keys: Required minimum keys to lookup unique Datasource
                 min_keys: Minimum number of metadata keys needed to uniquely match a Datasource
                 if_exists: What to do if existing data is present.
-                    - None - checks new and current data for timeseries overlap
-                    - adds data if no overlap
-                    - raises DataOverlapError if there is an overlap
+                    - "default" - checks new and current data for timeseries overlap
+                        - adds data if no overlap
+                        - raises DataOverlapError if there is an overlap
                     - "new" - just include new data and ignore previous
                     - "replace" - replace and insert new data into current timeseries
                 new_version: Create a new version for the data and save current

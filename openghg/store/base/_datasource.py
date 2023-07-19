@@ -90,7 +90,7 @@ class Datasource:
         data: Dataset,
         data_type: str,
         skip_keys: Optional[List] = None,
-        if_exists: Optional[str] = None,
+        if_exists: str = "default",
     ) -> None:
         """Add data to this Datasource and segment the data by size.
         The data is stored as a tuple of the data and the daterange it covers.
@@ -101,7 +101,7 @@ class Datasource:
             data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
             skip_keys: Keys to not standardise as lowercase
             if_exists: What to do if existing data is present.
-                - None - checks new and current data for timeseries overlap
+                - "default" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
@@ -122,7 +122,7 @@ class Datasource:
         else:
             raise NotImplementedError()
 
-    def add_timed_data(self, data: Dataset, data_type: str, if_exists: Optional[str] = None) -> None:
+    def add_timed_data(self, data: Dataset, data_type: str, if_exists: str = "default") -> None:
         """Add data to this Datasource, splitting along the time axis
 
         Args:
@@ -130,7 +130,7 @@ class Datasource:
             data_type: Name of data_type defined by
                 openghg.store.spec.define_data_types()
             if_exists: What to do if existing data is present.
-                - None - checks new and current data for timeseries overlap
+                - "default" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
@@ -660,7 +660,7 @@ class Datasource:
                 if_exists = self._status["if_exists"]
                 overlapping = self._status["overlapping"]
             else:
-                if_exists = None
+                if_exists = "default"
                 overlapping = False
 
             # Store the keys for the new data
