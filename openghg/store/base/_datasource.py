@@ -129,6 +129,8 @@ class Datasource:
 
         # Ensure data is in time order
         time_coord = "time"
+
+        # TODO - what about sorting large Datasets here? Can we do this in a different way?
         data = data.sortby(time_coord)
 
         # Use a dictionary keyed with the daterange covered by each segment of data

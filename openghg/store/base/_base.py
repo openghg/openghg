@@ -122,6 +122,9 @@ class BaseStore:
                 uid = datasource.uuid()
                 meta_copy["uuid"] = uid
                 # For retrieval later we'll need to know which bucket this is stored in
+                # TODO - can we just add this to Datasource.save and do a add_metadata_key
+                # we'll need to remove the .lowers() from that function though as part of our
+                # removal of the all the lowercasing of the metadata.
                 meta_copy["object_store"] = self._bucket
 
                 # Make sure all the metadata is lowercase for easier searching later
