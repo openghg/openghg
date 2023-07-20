@@ -1,12 +1,7 @@
 import numpy as np
-import xarray as xr
 import pytest
-from openghg.util import (
-    convert_longitude,
-    convert_internal_longitude,
-    find_domain,
-    cut_data_extent,
-)
+import xarray as xr
+from openghg.util import convert_internal_longitude, convert_longitude, cut_data_extent, find_domain
 from openghg.util._domain import _get_coord_data
 
 

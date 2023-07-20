@@ -1,5 +1,5 @@
 import numpy as np
-from openghg.standardise import summary_source_formats, summary_site_codes
+from openghg.standardise import summary_site_codes, summary_source_formats
 
 
 def test_summarise_format():
@@ -42,4 +42,3 @@ def test_summarise_site():
     selection_all = summary_df.loc[site_code]
     selection = selection_all[selection_all["Network"] == network]
     assert selection["Long name"].values == expected_long_name
-

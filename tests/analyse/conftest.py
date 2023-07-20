@@ -1,5 +1,6 @@
 import pytest
 from helpers import (
+    clear_test_stores,
     get_bc_datapath,
     get_emissions_datapath,
     get_footprint_datapath,
@@ -7,7 +8,7 @@ from helpers import (
 )
 from openghg.objectstore import get_bucket
 from openghg.store import BoundaryConditions, Emissions, Footprints, ObsSurface
-from helpers import clear_test_stores
+
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():

@@ -1,6 +1,6 @@
 from helpers import get_eulerian_datapath
-from openghg.retrieve import search
 from openghg.objectstore import get_bucket
+from openghg.retrieve import search
 from openghg.store import EulerianModel
 from xarray import open_dataset
 

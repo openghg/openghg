@@ -4,11 +4,12 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from helpers import clear_test_stores
 from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
 from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
 from pandas import Timedelta, Timestamp
 from xarray import Dataset
-from helpers import clear_test_stores
+
 
 def test_scenario_direct_objects():
     """

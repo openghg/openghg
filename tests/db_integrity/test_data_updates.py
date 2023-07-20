@@ -1,15 +1,11 @@
-import pytest
-import pandas as pd
 import numpy as np
-from helpers import get_surface_datapath, get_emissions_datapath
-from openghg.store import ObsSurface, Emissions
-from openghg.store.base import Datasource
-from openghg.retrieve import get_flux
-from openghg.retrieve import search
+import pandas as pd
+import pytest
+from helpers import clear_test_stores, get_emissions_datapath, get_surface_datapath
 from openghg.objectstore import get_bucket
-
-
-from helpers import clear_test_stores
+from openghg.retrieve import get_flux, search
+from openghg.store import Emissions, ObsSurface
+from openghg.store.base import Datasource
 
 
 def flux_data_read():

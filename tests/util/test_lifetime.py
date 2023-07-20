@@ -1,5 +1,6 @@
-import pytest
 from pathlib import Path
+
+import pytest
 from openghg.util import check_lifetime_monthly, species_lifetime
 
 
@@ -48,7 +49,7 @@ def test_species_info_file_mock():
     """
     Test species_info_file from openghg_defs is being successfully mocked.
 
-    Because species_info_file is an external file (which can be updated), we have 
+    Because species_info_file is an external file (which can be updated), we have
     added a mock for an internal version when species_info_file is imported
     which is static.
 

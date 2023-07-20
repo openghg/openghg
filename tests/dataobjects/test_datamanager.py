@@ -1,17 +1,16 @@
-from openghg.store import data_manager, ObsSurface, Footprints
-from openghg.store.base import Datasource
-from openghg.retrieve import search_surface
-from openghg.standardise import standardise_surface, standardise_footprint
-from openghg.objectstore import get_writable_bucket
-
 import pytest
 from helpers import (
-    get_surface_datapath,
-    clear_test_stores,
-    key_to_local_filepath,
     all_datasource_keys,
+    clear_test_stores,
     get_footprint_datapath,
+    get_surface_datapath,
+    key_to_local_filepath,
 )
+from openghg.objectstore import get_writable_bucket
+from openghg.retrieve import search_surface
+from openghg.standardise import standardise_footprint, standardise_surface
+from openghg.store import Footprints, ObsSurface, data_manager
+from openghg.store.base import Datasource
 
 
 @pytest.fixture(autouse=True)

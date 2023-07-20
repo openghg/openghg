@@ -1,6 +1,6 @@
 import numpy as np
-import xarray as xr
 import pytest
+import xarray as xr
 from openghg.store import infer_date_range, update_zero_dim
 from openghg.util import timestamp_tzaware
 from pandas import Timedelta

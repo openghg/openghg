@@ -3,8 +3,8 @@ from openghg.retrieve import (
     search,
     search_bc,
     search_column,
-    search_flux,
     search_eulerian,
+    search_flux,
     search_footprints,
     search_surface,
 )
@@ -61,7 +61,7 @@ def test_search_surface_range():
                          start_date='2013-02-01',
                          end_date='2013-03-01'
                          )
-    
+
     assert res is not None
 
     key = next(iter(res.metadata))

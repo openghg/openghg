@@ -1,14 +1,14 @@
 import pytest
 from helpers import (
+    clear_test_stores,
     get_bc_datapath,
     get_column_datapath,
     get_emissions_datapath,
     get_eulerian_datapath,
     get_footprint_datapath,
     get_surface_datapath,
-    clear_test_stores,
 )
-
+from openghg.objectstore import get_bucket
 from openghg.store import (
     BoundaryConditions,
     Emissions,
@@ -17,8 +17,6 @@ from openghg.store import (
     ObsColumn,
     ObsSurface,
 )
-
-from openghg.objectstore import get_bucket
 
 
 @pytest.fixture(scope="module", autouse=True)

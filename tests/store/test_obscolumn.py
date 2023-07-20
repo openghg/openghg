@@ -1,7 +1,7 @@
 import numpy as np
 from helpers import get_column_datapath
-from openghg.store import ObsColumn
 from openghg.objectstore import get_bucket
+from openghg.store import ObsColumn
 from openghg.store.base import Datasource
 from pandas import Timestamp
 

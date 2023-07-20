@@ -1,8 +1,9 @@
-from openghg.util import create_config, check_config, read_local_config
-import toml
 from pathlib import Path
+
 import pytest
+import toml
 from openghg.types import ConfigFileError
+from openghg.util import check_config, create_config, read_local_config
 
 
 @pytest.fixture

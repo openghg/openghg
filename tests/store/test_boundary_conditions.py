@@ -1,11 +1,11 @@
-from helpers import get_bc_datapath
-from openghg.retrieve import search
-from openghg.store import BoundaryConditions, load_metastore
-from openghg.objectstore import get_bucket
-from openghg.util import hash_bytes
-from xarray import open_dataset
 import numpy as np
 import pytest
+from helpers import get_bc_datapath
+from openghg.objectstore import get_bucket
+from openghg.retrieve import search
+from openghg.store import BoundaryConditions, load_metastore
+from openghg.util import hash_bytes
+from xarray import open_dataset
 
 
 def test_read_data_monthly(mocker):

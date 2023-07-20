@@ -1,7 +1,8 @@
 import json
+
 import pytest
 import xarray as xr
-from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_stores
+from helpers import attributes_checker_obssurface, clear_test_stores, get_surface_datapath
 from openghg.objectstore import exists, get_bucket, get_writable_bucket
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource

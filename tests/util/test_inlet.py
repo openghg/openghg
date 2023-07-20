@@ -1,5 +1,5 @@
 import pytest
-from openghg.util import format_inlet, extract_height_name
+from openghg.util import extract_height_name, format_inlet
 
 
 @pytest.mark.parametrize(
@@ -45,7 +45,7 @@ def test_format_inlet(test_input, expected):
 def test_format_inlet_keyname(test_input, expected, key_name):
     """
     Test format_inlet formats inlet names in the right way when a key_name
-    is specified. The function will derive whether a unit needs to be 
+    is specified. The function will derive whether a unit needs to be
     included or not.
     """
     output = format_inlet(test_input, key_name=key_name)

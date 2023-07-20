@@ -1,7 +1,7 @@
 import pytest
 from helpers import get_footprint_datapath
-from openghg.retrieve import search
 from openghg.objectstore import get_bucket
+from openghg.retrieve import search
 from openghg.store import Footprints, load_metastore
 from openghg.util import hash_bytes
 
