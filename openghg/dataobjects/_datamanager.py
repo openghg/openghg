@@ -163,6 +163,9 @@ class DataManager:
 
                 # Do a quick check to make sure we're not being asked to delete all the metadata
                 if to_delete is not None:
+                    if not isinstance(to_delete, list):
+                        to_delete = [to_delete]
+
                     if "uuid" in to_delete:
                         raise ValueError("Cannot delete the UUID key.")
 
