@@ -4,6 +4,7 @@ from openghg.retrieve import search
 from openghg.objectstore import get_bucket
 from openghg.store import Footprints, load_metastore
 from openghg.util import hash_bytes
+from openghg.standardise import standardise_footprint
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -499,3 +500,46 @@ def test_footprint_schema_lifetime():
     assert "mean_age_particles_e" in data_vars
     assert "mean_age_particles_s" in data_vars
     assert "mean_age_particles_w" in data_vars
+
+
+def test_adding_high_time_res_footprint():
+    """
+    Expected behavior: adding a high time resolution
+    footprint whose other metadata is the same as
+    an existing footprint will create a new uuid
+    for the high resolution footprint.
+    """
+    lo_res_datapath = get_footprint_datapath("TAC-185magl_UKV_EUROPE_TEST_201405.nc")
+    hi_res_datapath = get_footprint_datapath("TAC-185magl_UKV_co2_EUROPE_TEST_201405.nc")
+
+    site = "TAC"
+    domain = "EUROPE"
+    model = "NAME"
+    metmodel = "UKV"
+    inlet = "185m"
+
+    # standardise lo res
+    lo_res_standardised = standardise_footprint(lo_res_datapath,
+                                                site=site,
+                                                domain=domain,
+                                                model=model,
+                                                inlet=inlet,
+                                                metmodel=metmodel,
+                                                store="user",
+                                                )
+
+    hi_res_standardised = standardise_footprint(hi_res_datapath,
+                                                site=site,
+                                                domain=domain,
+                                                model=model,
+                                                inlet=inlet,
+                                                metmodel=metmodel,
+                                                species="co2",
+                                                store="user",
+                                                )
+
+    lo_res_dict = lo_res_standardised[next(iter(lo_res_standardised))]
+    hi_res_dict = hi_res_standardised[next(iter(hi_res_standardised))]
+
+    assert hi_res_dict["new"] == True
+    assert hi_res_dict["uuid"] != lo_res_dict["uuid"]  # redundant?
