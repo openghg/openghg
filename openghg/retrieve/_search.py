@@ -606,7 +606,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
             raise ValueError(error_msg)
 
         # Due to versions of OpenGHG < 0.6.0 not storing the object store
-        # in the metadata we nede to pass that information in here for backwards
+        # in the metadata we need to pass that information in here for backwards
         # compatibility.
         metadata = {r["uuid"]: r for r in metastore_records}
 
