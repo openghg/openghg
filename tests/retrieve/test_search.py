@@ -438,7 +438,7 @@ def test_search_v5_obj_store():
     """
     # We'll delete some of the object store keys for Tacolneston
     tac_100m_res = search_surface(store="user", site="tac", inlet="100m", species="ch4", instrument="picarro")
-    
+
     assert tac_100m_res
 
     uid = next(iter(tac_100m_res.metadata))
