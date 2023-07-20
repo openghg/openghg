@@ -9,8 +9,11 @@ from openghg.retrieve import (
     search_surface,
 )
 from pandas import Timestamp
-from openghg.store import data_manager
-
+from openghg.store.base import Datasource
+from openghg.store import ObsSurface
+from openghg.objectstore import get_writable_bucket
+import tinydb
+from tinydb.operations import delete as tinydb_delete
 
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
@@ -434,18 +437,28 @@ def test_search_v5_obj_store():
     metastore and then retrieving the data.
     """
     # We'll delete some of the object store keys for Tacolneston
-    tac_100m_dm = data_manager(
-        data_type="surface", store="user", site="tac", inlet="100m", species="ch4", instrument="picarro"
-    )
-    uuid = next(iter(tac_100m_dm.metadata))
-    tac_100m_dm.update_metadata(uuid, to_delete="object_store")
+    tac_100m_res = search_surface(store="user", site="tac", inlet="100m", species="ch4", instrument="picarro")
+    
+    assert tac_100m_res
 
-    tac_100m_dm.refresh()
+    uid = next(iter(tac_100m_res.metadata))
+    bucket = get_writable_bucket(name="user")
 
-    assert "object_store" not in tac_100m_dm.metadata[uuid]
+    ds = Datasource.load(bucket=bucket, uuid=uid, shallow=True)
+    del ds._metadata["object_store"]
+    ds.save(bucket=bucket)
 
-    tac_100m_res = search_surface(species="ch4", inlet="100m", site="tacolneston", instrument="picarro")
+    with ObsSurface(bucket=bucket) as obs:
+        obs._metastore.update(tinydb_delete("object_store"), tinydb.where("uuid") == uid)
+
+    ds = Datasource.load(bucket=bucket, uuid=uid, shallow=True)
+
+    assert "object_store" not in ds._metadata
+
+    tac_100m_res = search_surface(species="ch4", inlet="100m", site="tac", instrument="picarro")
+
+    assert tac_100m_res
 
     data = tac_100m_res.retrieve_all()
 
-    print(data)
+    assert "openghg_testing-STORE_123" in data.metadata["object_store"]
