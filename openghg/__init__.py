@@ -2,7 +2,7 @@ import logging
 import os as _os
 import sys as _sys
 from pathlib import Path as _Path
-from rich.logging import RichHandler
+from rich.logging import RichHandler as _RichHandler
 from . import (
     analyse,
     cloud,
