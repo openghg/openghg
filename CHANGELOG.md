@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix for `KeyError` being raised during data retrieval by `SearchResults` due to `object_store` not being present in metadata in object stores in OpenGHG version < 0.6.0 - [PR #711](https://github.com/openghg/openghg/pull/711)
+- Bug in `DataManager` where a string was interpreted as a list when processing metadata keys to be deleted - [PR #713](https://github.com/openghg/openghg/pull/713)
 
 ## [0.6.0] - 2023-07-18
 
