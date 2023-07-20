@@ -214,7 +214,8 @@ def test_delete_metadata_keys():
 
     assert res.metadata["test-uuid-100"].items() >= expected.items()
 
-    res.update_metadata(uuid="test-uuid-100", to_delete=["species"])
+    # Delete a key giving it a string
+    res.update_metadata(uuid="test-uuid-100", to_delete="species")
 
     res = data_manager(data_type="surface", site="tac", inlet="100m", store="user")
 
@@ -223,6 +224,16 @@ def test_delete_metadata_keys():
     res = data_manager(data_type="surface", site="tac", species="ch4", inlet="100m", store="user")
 
     assert not res
+
+    res = data_manager(data_type="surface", site="tac", inlet="100m", store="user")
+
+    # Delete keys passing in a list
+    res.update_metadata(uuid="test-uuid-100", to_delete=["site", "inlet"])
+
+    res.refresh()
+
+    assert "site" not in res.metadata["test-uuid-100"]
+    assert "inlet" not in res.metadata["test-uuid-100"]
 
 
 def test_delete_and_modify_keys():
