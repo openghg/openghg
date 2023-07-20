@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import logging
 from pathlib import Path
+from types import TracebackType
 from typing import Dict, Optional, Union
 
 from numpy import ndarray
@@ -8,7 +10,6 @@ from numpy import ndarray
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray
-from types import TracebackType
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 

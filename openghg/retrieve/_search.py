@@ -4,12 +4,13 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
-from openghg.store.spec import define_data_type_classes, define_data_types
-from openghg.objectstore import get_readable_buckets
-from openghg.util import decompress, running_on_hub
-from openghg.types import ObjectStoreError
-from tinydb.database import TinyDB
+
 from openghg.dataobjects import SearchResults
+from openghg.objectstore import get_readable_buckets
+from openghg.store.spec import define_data_type_classes, define_data_types
+from openghg.types import ObjectStoreError
+from openghg.util import decompress, running_on_hub
+from tinydb.database import TinyDB
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -480,8 +481,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
     import itertools
-    from openghg.store.base import Datasource
+
     from openghg.dataobjects import SearchResults
+    from openghg.store.base import Datasource
     from openghg.util import (
         clean_string,
         synonyms,

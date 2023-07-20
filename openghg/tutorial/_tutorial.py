@@ -2,14 +2,15 @@
 
 """
 import contextlib
+import logging
 import os
 import shutil
 import tarfile
 import warnings
 from pathlib import Path
 from typing import List, Union
-import logging
-from openghg.standardise import standardise_footprint, standardise_flux, standardise_bc
+
+from openghg.standardise import standardise_bc, standardise_flux, standardise_footprint
 
 logger = logging.getLogger("openghg.tutorial")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler

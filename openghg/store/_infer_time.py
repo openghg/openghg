@@ -1,7 +1,8 @@
+import logging
 import re
 from pathlib import Path
 from typing import Optional, Tuple, Union
-import logging
+
 import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import DataArray, Dataset
@@ -41,7 +42,12 @@ def infer_date_range(
     Returns:
         Timestamp, Timestamp, str: Derived start date, end date and period (containing the value and unit).
     """
-    from openghg.util import create_frequency_str, parse_period, relative_time_offset, timestamp_tzaware
+    from openghg.util import (
+        create_frequency_str,
+        parse_period,
+        relative_time_offset,
+        timestamp_tzaware,
+    )
 
     if filepath is not None:
         filepath = Path(filepath)

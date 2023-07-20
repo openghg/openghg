@@ -8,12 +8,12 @@ from . import (
     cloud,
     dataobjects,
     objectstore,
-    retrieve,
     plotting,
+    retrieve,
     standardise,
     store,
-    types,
     tutorial,
+    types,
     util,
 )
 from ._version import get_versions  # type: ignore

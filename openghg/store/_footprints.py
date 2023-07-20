@@ -1,13 +1,15 @@
 from __future__ import annotations
+
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
+from types import TracebackType
+from typing import DefaultDict, Dict, List, Literal, Optional, Tuple, Union, cast
+
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import Dataset
-from types import TracebackType
 
 __all__ = ["Footprints"]
 
@@ -243,11 +245,14 @@ class Footprints(BaseStore):
             dict: UUIDs of Datasources data has been assigned to
         """
         import xarray as xr
-        from openghg.store import (
-            infer_date_range,
-            update_zero_dim,
+        from openghg.store import infer_date_range, update_zero_dim
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            hash_file,
+            species_lifetime,
+            timestamp_now,
         )
-        from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
 
         filepath = Path(filepath)
 

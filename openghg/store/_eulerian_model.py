@@ -1,10 +1,12 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+
 import logging
+from pathlib import Path
+from types import TracebackType
+from typing import DefaultDict, Dict, Optional, Union
+
 from openghg.store.base import BaseStore
 from xarray import Dataset
-from types import TracebackType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -66,6 +68,7 @@ class EulerianModel(BaseStore):
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
         from collections import defaultdict
+
         from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
         from pandas import Timestamp as pd_Timestamp
         from xarray import open_dataset

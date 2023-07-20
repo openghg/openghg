@@ -1,9 +1,9 @@
+import logging
 from typing import Any, Dict, List, Optional, Union
 
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
-import logging
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler

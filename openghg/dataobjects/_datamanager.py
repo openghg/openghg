@@ -1,12 +1,13 @@
-from collections import defaultdict
 import copy
+import logging
+from collections import defaultdict
+from typing import DefaultDict, Dict, List, Optional, Set, Union
+
+import tinydb
+from openghg.objectstore import delete_object, get_writable_bucket
+from openghg.store import load_metastore
 from openghg.store.base import Datasource
 from openghg.store.spec import define_data_type_classes
-from openghg.store import load_metastore
-from openghg.objectstore import delete_object, get_writable_bucket
-import logging
-import tinydb
-from typing import DefaultDict, Dict, List, Set, Optional, Union
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler

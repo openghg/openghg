@@ -1,12 +1,14 @@
 from __future__ import annotations
+
 import json
-from openghg.objectstore import exists, get_object, set_object_from_json, get_writable_buckets
-from typing import DefaultDict, Dict, Optional, Union, TYPE_CHECKING
-from xarray import Dataset
 import logging
+from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Union
+
+from openghg.objectstore import exists, get_object, get_writable_buckets, set_object_from_json
 from openghg.types import ObjectStoreError
 from tinydb import Storage, TinyDB
 from tinydb.middlewares import CachingMiddleware
+from xarray import Dataset
 
 if TYPE_CHECKING:
     from openghg.dataobjects import DataManager

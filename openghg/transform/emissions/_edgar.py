@@ -1,9 +1,10 @@
+import logging
 import re
 import zipfile
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
-import logging
+
 import numpy as np
 import xarray as xr
 from numpy import ndarray
@@ -69,10 +70,10 @@ def parse_edgar(
     from openghg.store import infer_date_range
     from openghg.util import (
         clean_string,
+        convert_internal_longitude,
+        find_coord_name,
         molar_mass,
         synonyms,
-        find_coord_name,
-        convert_internal_longitude,
         timestamp_now,
     )
 
@@ -164,9 +165,14 @@ def parse_edgar(
 
     if edgar_version not in known_versions:
         if edgar_version is None:
-            raise ValueError(f"Unable to infer EDGAR version ({edgar_version})." f" Please pass as an argument (one of {known_versions})")
+            raise ValueError(
+                f"Unable to infer EDGAR version ({edgar_version})."
+                f" Please pass as an argument (one of {known_versions})"
+            )
         else:
-            raise ValueError(f"Unable to infer EDGAR version." f" Please pass as an argument (one of {known_versions})")
+            raise ValueError(
+                f"Unable to infer EDGAR version." f" Please pass as an argument (one of {known_versions})"
+            )
 
     # TODO: May want to split out into a separate function, so we can use this for
     # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"

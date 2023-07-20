@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict, Optional
 
-from openghg.types import pathType, optionalPathType
+from openghg.types import optionalPathType, pathType
 
 
 def parse_tmb(
@@ -39,13 +39,7 @@ def parse_tmb(
         list: UUIDs of Datasources data has been assigned to
     """
     from openghg.standardise.meta import assign_attributes
-    from openghg.util import (
-        clean_string,
-        get_site_info,
-        format_inlet,
-        synonyms,
-        load_internal_json,
-    )
+    from openghg.util import clean_string, format_inlet, get_site_info, load_internal_json, synonyms
     from pandas import read_csv as pd_read_csv
 
     if sampling_period is None:

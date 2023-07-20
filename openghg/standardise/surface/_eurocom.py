@@ -30,7 +30,7 @@ def parse_eurocom(
         dict: Dictionary of measurement data
     """
     from openghg.standardise.meta import assign_attributes, get_attributes
-    from openghg.util import load_internal_json, read_header, format_inlet
+    from openghg.util import format_inlet, load_internal_json, read_header
     from pandas import Timestamp, read_csv
 
     data_filepath = Path(data_filepath)

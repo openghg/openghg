@@ -50,17 +50,17 @@ from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, c
 import numpy as np
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
 from openghg.retrieve import (
-    get_obs_surface,
     get_bc,
     get_flux,
     get_footprint,
-    search_surface,
+    get_obs_surface,
     search_bc,
     search_flux,
     search_footprints,
+    search_surface,
 )
-from openghg.util import synonyms
 from openghg.types import SearchError
+from openghg.util import synonyms
 from pandas import Timestamp
 from xarray import DataArray, Dataset
 
@@ -336,12 +336,7 @@ class ModelScenario:
         """
         Add footprint data based on keywords or direct FootprintData object.
         """
-        from openghg.util import (
-            clean_string,
-            format_inlet,
-            species_lifetime,
-            extract_height_name,
-        )
+        from openghg.util import clean_string, extract_height_name, format_inlet, species_lifetime
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs / height_name), model, metmodel
@@ -556,7 +551,7 @@ class ModelScenario:
         """
         Find the platform for a site, if present.
 
-        This will access the "site_info.json" file from openghg_defs dependency to 
+        This will access the "site_info.json" file from openghg_defs dependency to
         find this information.
         """
         from openghg.util import get_site_info

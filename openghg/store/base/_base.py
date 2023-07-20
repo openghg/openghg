@@ -1,15 +1,15 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
-from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
-from pandas import Timestamp
-import tinydb
 import logging
 from functools import reduce
-from openghg.types import DatasourceLookupError
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
-from openghg.util import timestamp_now
+from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 
+import tinydb
+from openghg.objectstore import exists, get_object_from_json, set_object_from_json
+from openghg.types import DatasourceLookupError
+from openghg.util import timestamp_now
+from pandas import Timestamp
 
 T = TypeVar("T", bound="BaseStore")
 
@@ -235,6 +235,7 @@ class BaseStore:
         """
         raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from collections import defaultdict
+
         from openghg.util import create_daterange_str, daterange_overlap
 
         if uuid not in self._rank_data:

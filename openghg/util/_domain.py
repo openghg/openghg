@@ -1,9 +1,8 @@
-from typing import Any, Dict, Tuple, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
-
-from openghg.types import optionalPathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
+from openghg.types import ArrayLike, ArrayLikeMatch, XrDataLike, XrDataLikeMatch, optionalPathType
 
 __all__ = ["get_domain_info", "find_domain", "convert_longitude"]
 
@@ -18,8 +17,8 @@ def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
     Returns:
         dict: Data from domain JSON file
     """
-    from openghg_defs import domain_info_file
     from openghg.util import load_json
+    from openghg_defs import domain_info_file
 
     if domain_filepath is None:
         domain_info_json = load_json(path=domain_info_file)
@@ -156,9 +155,9 @@ def convert_longitude(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
     return longitude
 
 
-def convert_internal_longitude(data: XrDataLikeMatch,
-                               lon_name: Optional[str] = None,
-                               reorder: bool = True) -> XrDataLikeMatch:
+def convert_internal_longitude(
+    data: XrDataLikeMatch, lon_name: Optional[str] = None, reorder: bool = True
+) -> XrDataLikeMatch:
     """
     Convert longitude coordinate within an xarray data structure (DataArray or Dataset).
 
@@ -187,12 +186,14 @@ def convert_internal_longitude(data: XrDataLikeMatch,
     return data
 
 
-def cut_data_extent(data: XrDataLikeMatch,
-                    lat_out: ArrayLike,
-                    lon_out: ArrayLike,
-                    lat_name: Optional[str] = None,
-                    lon_name: Optional[str] = None,
-                    copy: bool = False) -> XrDataLikeMatch:
+def cut_data_extent(
+    data: XrDataLikeMatch,
+    lat_out: ArrayLike,
+    lon_out: ArrayLike,
+    lat_name: Optional[str] = None,
+    lon_name: Optional[str] = None,
+    copy: bool = False,
+) -> XrDataLikeMatch:
     """
     Cut down extent of data within an xarray data structure (DataArray or Dataset)
     against an output latitude and longitude range.
@@ -209,7 +210,7 @@ def cut_data_extent(data: XrDataLikeMatch,
         copy: Whether to explicitly copy the data.
 
     Returns:
-        xarray.DataArray / xarray.Dataset: data with reduced lat, lon ranges.        
+        xarray.DataArray / xarray.Dataset: data with reduced lat, lon ranges.
     """
     if lat_name is None:
         lat_options = ["lat", "latitude"]

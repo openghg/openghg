@@ -1,11 +1,12 @@
 import logging
 import os
 import platform
+import shutil
+import uuid
 from pathlib import Path
 from typing import Dict, Optional
-import uuid
+
 import toml
-import shutil
 from openghg.types import ConfigFileError
 
 logger = logging.getLogger("openghg.util")

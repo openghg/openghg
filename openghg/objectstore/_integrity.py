@@ -1,5 +1,5 @@
-from openghg.store.spec import define_data_type_classes
 from openghg.objectstore import get_readable_buckets
+from openghg.store.spec import define_data_type_classes
 from openghg.types import ObjectStoreError
 
 

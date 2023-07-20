@@ -1,6 +1,7 @@
+import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union
-import logging
+
 from openghg.objectstore import get_writable_bucket
 from openghg.store import ObsSurface
 

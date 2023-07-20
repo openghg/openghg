@@ -1,12 +1,12 @@
-from pandas import DataFrame, Timestamp, Timedelta
-from xarray import Dataset
+import logging
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
-import logging
+
 import numpy as np
 from openghg.store.spec import define_data_types
 from openghg.types import ObjectStoreError
-
+from pandas import DataFrame, Timedelta, Timestamp
+from xarray import Dataset
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -27,8 +27,9 @@ class Datasource:
     _data_root = "data"
 
     def __init__(self) -> None:
-        from openghg.util import timestamp_now
         from uuid import uuid4
+
+        from openghg.util import timestamp_now
 
         self._uuid: str = str(uuid4())
 
@@ -493,6 +494,7 @@ class Datasource:
             xarray.Dataset: Dataset from NetCDF file
         """
         import io
+
         from openghg.objectstore import get_object
         from xarray import load_dataset
 
@@ -545,6 +547,7 @@ class Datasource:
         """
         from copy import deepcopy
         from pathlib import Path
+
         from openghg.objectstore import set_object_from_json
         from openghg.util import timestamp_now
 

@@ -3,8 +3,9 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
 from types import TracebackType
+from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
+
 import numpy as np
 from xarray import Dataset
 
@@ -94,10 +95,7 @@ class BoundaryConditions(BaseStore):
         """
         from collections import defaultdict
 
-        from openghg.store import (
-            infer_date_range,
-            update_zero_dim,
-        )
+        from openghg.store import infer_date_range, update_zero_dim
         from openghg.util import clean_string, hash_file, timestamp_now
         from xarray import open_dataset
 

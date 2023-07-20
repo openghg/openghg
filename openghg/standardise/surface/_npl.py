@@ -38,7 +38,7 @@ def parse_npl(
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.util import get_site_info, format_inlet, synonyms
+    from openghg.util import format_inlet, get_site_info, synonyms
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
