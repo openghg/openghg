@@ -77,8 +77,8 @@ def data_read():
     #     obs.set_rank(uuid=uid_42, rank=1, date_range="2019-01-01_2021-01-01")
 
     with ObsSurface(bucket=bucket) as obs:
-    # Obs Surface - openghg pre-formatted data
-    # - This shouldn't conflict with TAC data above as this is for 185m rather than 100m
+        # Obs Surface - openghg pre-formatted data
+        # - This shouldn't conflict with TAC data above as this is for 185m rather than 100m
         openghg_path = get_surface_datapath(
             filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
         )

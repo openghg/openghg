@@ -16,7 +16,7 @@ from openghg.util import extract_height_name, format_inlet
         (None, None),
         (10, "10m"),
         (10.0, "10m"),
-        (20.23456, "20.2m")
+        (20.23456, "20.2m"),
     ],
 )
 def test_format_inlet(test_input, expected):
@@ -66,10 +66,10 @@ def test_format_inlet_special():
     "site,network,inlet,expected",
     [
         ("POCN25", None, None, None),  # height_name not present
-        ("BAO", None, None, "300magl"), # 1 network, 1 height_name value
-        ("MHD", "AGAGE", None, "10magl"), # 1 height_name value
-        ("cgo", "AGAGE", "10m", "10magl"), # Multiple height_name values
-        ("WAO", "ICOS", "10m", ["10magl", "20magl"]) # height_name is dictionary
+        ("BAO", None, None, "300magl"),  # 1 network, 1 height_name value
+        ("MHD", "AGAGE", None, "10magl"),  # 1 height_name value
+        ("cgo", "AGAGE", "10m", "10magl"),  # Multiple height_name values
+        ("WAO", "ICOS", "10m", ["10magl", "20magl"]),  # height_name is dictionary
     ],
 )
 def test_extract_height_name(site, network, inlet, expected):

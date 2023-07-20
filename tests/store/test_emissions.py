@@ -34,8 +34,7 @@ def test_read_binary_data(mocker):
     with Emissions(bucket=bucket) as ems:
         results = ems.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
 
-    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2",
-                                                    "new": True}}
+    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2", "new": True}}
 
     assert results == expected_results
 

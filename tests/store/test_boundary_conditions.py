@@ -30,9 +30,7 @@ def test_read_data_monthly(mocker):
 
     bucket = get_bucket()
     with BoundaryConditions(bucket=bucket) as bcs:
-        proc_results = bcs.read_data(
-            binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
-        )
+        proc_results = bcs.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
 
     # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
     assert proc_results["ch4_mozart_europe"]["new"] is True

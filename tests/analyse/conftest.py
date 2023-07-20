@@ -42,12 +42,12 @@ def data_read():
         network2 = "ICOS"
         source_format2 = "OPENGHG"
 
-        wao_path = get_surface_datapath(filename="wao_rn_icos_standardised_2021-12-04.nc", source_format="OPENGHG")
-        obs.read_file(filepath=wao_path,
-                            source_format=source_format2,
-                            site=site2,
-                            network=network2,
-                            inlet="10m")
+        wao_path = get_surface_datapath(
+            filename="wao_rn_icos_standardised_2021-12-04.nc", source_format="OPENGHG"
+        )
+        obs.read_file(
+            filepath=wao_path, source_format=source_format2, site=site2, network=network2, inlet="10m"
+        )
 
     # Emissions data
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE
@@ -148,16 +148,21 @@ def data_read():
 
     with Footprints(bucket=bucket) as fps:
         fps.read_file(
-            filepath=fp_datapath1, site=site1, model=model1, network=network1,
-            height=height1, domain=domain
+            filepath=fp_datapath1, site=site1, model=model1, network=network1, height=height1, domain=domain
         )
 
         # TAC footprint from 2014-07 - 2014-09 at 100m for CO2 (high time resolution)
         fp_datapath2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
 
         fps.read_file(
-            filepath=fp_datapath2, site=site1, model=model1, network=network1, metmodel="UKV",
-            height=height1, domain="TEST", species="co2"
+            filepath=fp_datapath2,
+            site=site1,
+            model=model1,
+            network=network1,
+            metmodel="UKV",
+            height=height1,
+            domain="TEST",
+            species="co2",
         )
 
         # WAO radon footprint from 2021-12-04
@@ -171,6 +176,11 @@ def data_read():
         fp_datapath2 = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_202112.nc")
 
         fps.read_file(
-            filepath=fp_datapath2, site=site2, model=model2, network=network2,
-            height=fp_height2, domain=domain2, species=species2,
+            filepath=fp_datapath2,
+            site=site2,
+            model=model2,
+            network=network2,
+            height=fp_height2,
+            domain=domain2,
+            species=species2,
         )

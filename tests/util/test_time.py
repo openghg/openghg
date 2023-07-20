@@ -86,7 +86,6 @@ def test_daterange_overlap():
 
 
 def test_closest_daterange():
-
     dateranges = [
         "2012-01-01-00:00:00+00:00_2014-01-01-00:00:00+00:00",
         "2014-01-02-00:00:00+00:00_2015-01-01-00:00:00+00:00",
@@ -220,7 +219,6 @@ def test_combining_big_daterange():
 
 
 def test_split_daterange_str():
-
     start_true = Timestamp("2001-01-01-00:00:00", tz="UTC")
     end_true = Timestamp("2001-03-01-00:00:00", tz="UTC")
 

@@ -491,6 +491,7 @@ def test_key_date_compare():
     with pytest.raises(ValueError):
         in_date = d.key_date_compare(keys=error_key, start_date=start, end_date=end)
 
+
 def test_integrity_check(data, bucket):
     d = Datasource()
 
