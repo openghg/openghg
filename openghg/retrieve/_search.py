@@ -605,10 +605,19 @@ def _base_search(**kwargs: Any) -> SearchResults:
             logger.exception(msg=error_msg)
             raise ValueError(error_msg)
 
-        # Here we create a dictionary of the metadata keyed by the Datasource UUID
-        # we'll create a pandas DataFrame out of this in the SearchResult object
-        # for better printing / searching within a notebook
+        # Due to versions of OpenGHG < 0.6.0 not storing the object store
+        # in the metadata we nede to pass that information in here for backwards
+        # compatibility.
         metadata = {r["uuid"]: r for r in metastore_records}
+
+        updated_metadata = {}
+        store_data = {"object_store": bucket}
+
+        for uid, data in metadata.items():
+            data.update(store_data)
+            updated_metadata[uid] = data
+
+        metadata = updated_metadata
 
         # Narrow the search to a daterange if dates passed
         if start_date is not None or end_date is not None:

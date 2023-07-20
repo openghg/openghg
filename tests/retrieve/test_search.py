@@ -9,6 +9,7 @@ from openghg.retrieve import (
     search_surface,
 )
 from pandas import Timestamp
+from openghg.store import data_manager
 
 
 @pytest.mark.parametrize(
@@ -18,7 +19,7 @@ from pandas import Timestamp
         ("height", "50m"),
         ("inlet", "50magl"),
         ("inlet", "50"),
-        ("inlet", 50),   # May remove this later as really we expect a string here
+        ("inlet", 50),  # May remove this later as really we expect a string here
     ],
 )
 def test_search_surface(inlet_keyword, inlet_value):
@@ -54,14 +55,10 @@ def test_search_surface(inlet_keyword, inlet_value):
 
 
 def test_search_surface_range():
+    res = search_surface(
+        site="TAC", species="co2", inlet="185", start_date="2013-02-01", end_date="2013-03-01"
+    )
 
-    res = search_surface(site='TAC',
-                         species='co2',
-                         inlet='185',
-                         start_date='2013-02-01',
-                         end_date='2013-03-01'
-                         )
-    
     assert res is not None
 
     key = next(iter(res.metadata))
@@ -156,7 +153,7 @@ def test_multi_type_search():
 
     data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    assert data_types == {'surface', 'eulerian_model', 'column'}
+    assert data_types == {"surface", "eulerian_model", "column"}
 
     res = search(species="co2")
     data_types = set([m["data_type"] for m in res.metadata.values()])
@@ -204,6 +201,7 @@ def test_nonsense_terms():
 
     assert not res
 
+
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
     [
@@ -213,16 +211,20 @@ def test_nonsense_terms():
         ("inlet", "10"),
     ],
 )
-def test_search_footprints(inlet_keyword,inlet_value):
+def test_search_footprints(inlet_keyword, inlet_value):
     """
     Test search for footprint data which has been added to the object store.
     This has been stored using one footprint file which represents a year of data.
     """
 
     if inlet_keyword == "inlet":
-        res = search_footprints(site="TMB", network="LGHG", inlet=inlet_value, domain="EUROPE", model="test_model")
+        res = search_footprints(
+            site="TMB", network="LGHG", inlet=inlet_value, domain="EUROPE", model="test_model"
+        )
     elif inlet_keyword == "height":
-        res = search_footprints(site="TMB", network="LGHG", height=inlet_value, domain="EUROPE", model="test_model")
+        res = search_footprints(
+            site="TMB", network="LGHG", height=inlet_value, domain="EUROPE", model="test_model"
+        )
 
     key = next(iter(res.metadata))
     partial_metadata = {
@@ -338,11 +340,7 @@ def test_search_flux_select():
     (Same data as previous test)
     """
     res = search_flux(
-        species="co2",
-        source="gpp-cardamom",
-        domain="europe",
-        start_date="2012-01-01",
-        end_date="2013-01-01"
+        species="co2", source="gpp-cardamom", domain="europe", start_date="2012-01-01", end_date="2013-01-01"
     )
 
     key = next(iter(res.metadata))
@@ -429,3 +427,25 @@ def test_search_eulerian_model():
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
+
+
+def test_search_v5_obj_store():
+    """This mocks an old object store by deleting the "object_store" key from the Datasource and the
+    metastore and then retrieving the data.
+    """
+    # We'll delete some of the object store keys for Tacolneston
+    tac_100m_dm = data_manager(
+        data_type="surface", store="user", site="tac", inlet="100m", species="ch4", instrument="picarro"
+    )
+    uuid = next(iter(tac_100m_dm.metadata))
+    tac_100m_dm.update_metadata(uuid, to_delete="object_store")
+
+    tac_100m_dm.refresh()
+
+    assert "object_store" not in tac_100m_dm.metadata[uuid]
+
+    tac_100m_res = search_surface(species="ch4", inlet="100m", site="tacolneston", instrument="picarro")
+
+    data = tac_100m_res.retrieve_all()
+
+    print(data)
