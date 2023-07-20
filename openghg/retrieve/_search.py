@@ -613,9 +613,18 @@ def _base_search(**kwargs: Any) -> SearchResults:
         updated_metadata = {}
         store_data = {"object_store": bucket}
 
-        for uid, data in metadata.items():
-            data.update(store_data)
-            updated_metadata[uid] = data
+        for uid, _metadata in metadata.items():
+            if "object_store" in _metadata:
+                ds_bucket = _metadata["object_store"]
+                if ds_bucket != bucket:
+                    raise ObjectStoreError(
+                        f"Mismatch between Datasource object_store: {ds_bucket} and "
+                        + f" expected value: {bucket}."
+                    )
+            else:
+                _metadata.update(store_data)
+
+            updated_metadata[uid] = _metadata
 
         metadata = updated_metadata
 
