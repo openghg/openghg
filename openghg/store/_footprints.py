@@ -365,6 +365,7 @@ class Footprints(BaseStore):
         metadata["heights"] = [float(h) for h in fp_data.height.values]
         # Do we also need to save all the variables we have available in this footprints?
         metadata["variables"] = list(fp_data.data_vars)
+        metadata["short_lifetime"] = str(short_lifetime)
 
         # if model_params is not None:
         #     metadata["model_parameters"] = model_params
@@ -384,7 +385,7 @@ class Footprints(BaseStore):
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
-        required = ("site", "model", "inlet", "domain")
+        required = ("site", "model", "inlet", "domain", "time_resolution", "spatial_resolution")
 
         data_type = "footprints"
         datasource_uuids = self.assign_data(

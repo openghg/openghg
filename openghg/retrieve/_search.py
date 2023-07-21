@@ -224,9 +224,9 @@ def search_footprints(
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
-    high_spatial_res: Optional[bool] = None,
-    high_time_res: Optional[bool] = None,
-    short_lifetime: Optional[bool] = None,
+    high_spatial_res: bool = False,
+    high_time_res: bool = False,
+    short_lifetime: bool = False,
     **kwargs: Any,
 ) -> SearchResults:
     """Search for footprints data
@@ -264,6 +264,9 @@ def search_footprints(
     inlet = format_inlet(inlet)
     height = format_inlet(height)
 
+    time_resolution = "high_time_resolution" if high_time_res else "standard_time_resolution"
+    spatial_resolution = "high_spatial_resolution" if high_spatial_res else "standard_spatial_resolution"
+
     return search(
         site=site,
         inlet=inlet,
@@ -277,8 +280,8 @@ def search_footprints(
         end_date=end_date,
         period=period,
         continuous=continuous,
-        high_spatial_res=high_spatial_res,
-        high_time_res=high_time_res,
+        spatial_resolution=spatial_resolution,
+        time_resolution=time_resolution,
         short_lifetime=short_lifetime,
         data_type="footprints",
         **kwargs,
