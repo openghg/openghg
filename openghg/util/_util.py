@@ -203,7 +203,7 @@ def verify_site(site: str) -> Optional[str]:
     else:
         site_code = site_code_finder(site_name=site)
         if site_code is None:
-            logger.info(f"Unable to find site code for {site}, please provide additional metadata.")
+            logger.warning(f"Unable to find site code for {site}, please provide additional metadata.")
         return site_code
 
 
