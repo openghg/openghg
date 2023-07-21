@@ -36,7 +36,6 @@ def download_data(
     import functools
     import io
     import shutil
-    from time import sleep
     from urllib.parse import urlparse
 
     import requests
@@ -95,4 +94,3 @@ def download_data(
             else:
                 Path(filepath).write_bytes(buf.getvalue())
                 return None
-        sleep(0.1)
