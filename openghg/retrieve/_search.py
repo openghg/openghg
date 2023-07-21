@@ -282,7 +282,7 @@ def search_footprints(
         continuous=continuous,
         spatial_resolution=spatial_resolution,
         time_resolution=time_resolution,
-        short_lifetime=short_lifetime,
+        short_lifetime=str(short_lifetime),
         data_type="footprints",
         **kwargs,
     )
