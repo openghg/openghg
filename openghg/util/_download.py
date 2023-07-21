@@ -85,7 +85,7 @@ def download_data(
     desc = f"Downloading {filename}"
     r.raw.read = functools.partial(r.raw.read, decode_content=True)
 
-    with wrap_file(r.raw, "read", total=file_size, description=desc) as r_raw:
+    with wrap_file(r.raw, total=file_size, description=desc) as r_raw:
         with io.BytesIO() as buf:
             shutil.copyfileobj(r_raw, buf)
 
