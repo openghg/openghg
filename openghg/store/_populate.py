@@ -1,4 +1,5 @@
 from pathlib import Path
+from rich.progress import track
 from typing import Dict, List, Optional, Union
 import logging
 from openghg.objectstore import get_writable_bucket
@@ -88,7 +89,7 @@ def add_noaa_obspack(
     files_with_errors = []
     # Find relevant details for each file and call parse_noaa() function
     processed_summary: Dict[str, Dict] = {}
-    for filepath in files:
+    for filepath in track(files, description="Standardising "):
         param = _param_from_filename(filepath)
         site = param["site"]
         _project = param["project"]

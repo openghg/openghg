@@ -25,7 +25,8 @@ dependencies:
   - scipy
   - tinydb
   - toml
-  - tqdm
+  - rich
+  - ipywidgets
   - xarray
   - urllib3>=1.26.3
   - xesmf>=0.7
