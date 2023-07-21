@@ -296,6 +296,41 @@ def test_search_footprints_select():
     assert time[-1] == Timestamp("2016-07-01T02:00:00")
 
 
+def test_search_footprints_high_time_resolution():
+    """Test search for high time resolution footprints
+
+    Expected behaviour: searching for footprints with
+    keyword argument `time_resolution = "high_time_resolution"`
+    or `high_time_res = True` should return results for
+    high time resolution footprints.
+    """
+    res1 = search_footprints(
+        site="TAC",
+        network="DECC",
+        height="100m",
+        domain="EUROPE",
+        model="NAME",
+        start_date="2014-07-01",
+        end_date="2014-08-01",
+        time_resolution="high_time_resolution",
+    )
+
+    res2 = search_footprints(
+        site="TAC",
+        network="DECC",
+        height="100m",
+        domain="EUROPE",
+        model="NAME",
+        start_date="2014-07-01",
+        end_date="2014-08-01",
+        high_time_res=True,
+    )
+
+    # results dataframes should have at least one row
+    assert res1.results.shape[0] > 0
+    assert res2.results.shape[0] > 0
+
+
 def test_search_flux():
     """
     Test search for flux which is comprised of multiple uploaded files.

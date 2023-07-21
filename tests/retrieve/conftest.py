@@ -184,6 +184,20 @@ def data_read():
             metmodel=metmodel,
         )
 
+    # High time resolution footprints
+    hitres_fp_datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=hitres_fp_datapath,
+            site="TAC",
+            model="NAME",
+            network="DECC",
+            height="100m",
+            domain="EUROPE",
+            metmodel="UKV",
+        )
+
+    # Boundary conditions
     test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
 
     species = "n2o"
