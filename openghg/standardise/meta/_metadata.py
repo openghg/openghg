@@ -78,7 +78,6 @@ def sync_surface_metadata(
     Returns:
         dict, dict: Aligned metadata, attributes
     """
-
     meta_copy = deepcopy(metadata)
     attrs_copy = deepcopy(attributes)
 
