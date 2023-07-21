@@ -65,7 +65,7 @@ fileHandler.setLevel(logging.DEBUG)
 logger.addHandler(fileHandler)
 
 # Create console handler - set to WARNING (lower level)
-consoleHandler = RichHandler()
+consoleHandler = _RichHandler()
 consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
 consoleHandler.setFormatter(consoleFormatter)
 consoleHandler.setLevel(logging.INFO)

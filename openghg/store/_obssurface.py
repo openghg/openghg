@@ -4,6 +4,7 @@ from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from pandas import Timedelta
+from rich.progress import track
 from xarray import Dataset
 import inspect
 from openghg.store import DataSchema
@@ -408,7 +409,6 @@ class ObsSurface(BaseStore):
         from openghg.standardise.surface import parse_aqmesh
         from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.util import hash_file
-        from rich.progress import track
 
         data_filepath = Path(data_filepath)
         metadata_filepath = Path(metadata_filepath)

@@ -1,4 +1,5 @@
 from pathlib import Path
+from rich.progress import track
 from typing import Dict, List, Optional, Union
 import logging
 from openghg.store import ObsSurface
@@ -39,8 +40,6 @@ def add_noaa_obspack(
     yet e.g. aircraft, shipboard, aircorenoaa. These should be updated once
     this functionality has been added.
     """
-    from rich.progress import Progress
-
     # Options which we can process at the moment (ObsSurface)
     project_options = {"surface": ["flask", "insitu", "pfp"], "tower": ["insitu"]}
 
@@ -85,14 +84,7 @@ def add_noaa_obspack(
     # Find relevant details for each file and call parse_noaa() function
     processed_summary: Dict[str, Dict] = {}
 
-    # Object to generate progress bar
-    progress = Progress()
-    progress.start()
-    task1 = progress.add_task("Downloading...", total=len(files))
-
-    for filepath in files:
-        progress.update(task_id=task1, advance=1, refresh=True)
-        progress.refresh()
+    for filepath in track(files, description="Standardising "):
         param = _param_from_filename(filepath)
         site = param["site"]
         _project = param["project"]
@@ -128,7 +120,6 @@ def add_noaa_obspack(
     if files_with_errors:
         err_string = "\n".join(files_with_errors)
         logger.info(f"We were unable to process {len(files_with_errors)} files - these were:\n {err_string}.")
-    progress.stop()
     return processed_summary
 
 
