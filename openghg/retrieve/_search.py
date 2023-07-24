@@ -225,7 +225,7 @@ def search_footprints(
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
     high_spatial_res: Optional[bool] = None,
-    high_time_res: Optional[bool] = None,
+    high_time_res: bool = False,
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
@@ -264,6 +264,26 @@ def search_footprints(
     inlet = format_inlet(inlet)
     height = format_inlet(height)
 
+    #Convert boolean kwargs for time resolution to strings
+    time_resolution = "high_time_resolution" if high_time_res else "standard_time_resolution"
+    if "time_resolution" in kwargs and high_time_res:
+        raise TypeError('You cannot pass "time_resolution" as a keyword argument if "high_time_res" is True.')
+    elif "time_resolution" in kwargs:
+        time_resolution = kwargs["time_resolution"]
+        kwargs.pop("time_resolution")
+
+    #Convert boolean kwargs for spatial resolution to strings
+    # if "spatial_resolution" in kwargs and high_spatial_res:
+    #     raise TypeError('Values passed for both "high_spatial_res" and "spatial_resolution". Only pass one of these keywords.')
+    # elif "spatial_resolution" in kwargs:
+    #     spatial_resolution = kwargs["spatial_resolution"]
+    #     kwargs.pop("spatial_resolution")
+    # elif high_spatial_res:
+    #     spatial_resolution = "high_spatial_resolution"
+    # else:
+    #     spatial_resolution = "standard_spatial_resolution"
+
+
     return search(
         site=site,
         inlet=inlet,
@@ -277,8 +297,8 @@ def search_footprints(
         end_date=end_date,
         period=period,
         continuous=continuous,
-        high_spatial_res=high_spatial_res,
-        high_time_res=high_time_res,
+        time_resolution=time_resolution,
+        #spatial_resolution=spatial_resolution,
         short_lifetime=short_lifetime,
         data_type="footprints",
         **kwargs,
@@ -510,6 +530,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
         updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
 
+    # translate data type strings to data type classes
     data_type = search_kwargs.get("data_type")
     data_type_classes = define_data_type_classes()
 

@@ -247,7 +247,7 @@ def test_search_footprints_multiple():
         - 2016-07-01 (3 time points)
         - 2016-08-01 (3 time points)
     """
-    res = search_footprints(site="TAC", network="DECC", height="100m", domain="TEST", model="NAME", time_resolution="standard_time_resolution")
+    res = search_footprints(site="TAC", network="DECC", height="100m", domain="TEST", model="NAME")
 
     key = next(iter(res.metadata))
     partial_metadata = {
@@ -329,6 +329,29 @@ def test_search_footprints_high_time_resolution():
     # results dataframes should have at least one row
     assert res1.results.shape[0] > 0
     assert res2.results.shape[0] > 0
+
+
+def test_search_footprints_high_time_res_kwarg_conflict():
+    """Test search for high time resolution footprints
+
+    Expected behaviour: searching for footprints with
+    keyword argument `time_resolution = "high_time_resolution"`
+    or `high_time_res = True` should return results for
+    high time resolution footprints.
+    """
+    with pytest.raises(TypeError):
+        res = search_footprints(
+            site="TAC",
+            network="DECC",
+            height="100m",
+            domain="TEST",
+            model="NAME",
+            start_date="2014-07-01",
+            end_date="2014-08-01",
+            high_time_res=True,
+            time_resolution="high_time_resolution",
+        )
+
 
 
 def test_search_flux():
