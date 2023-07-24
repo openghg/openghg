@@ -193,8 +193,9 @@ def data_read():
             model="NAME",
             network="DECC",
             height="100m",
-            domain="EUROPE",
+            domain="TEST",
             metmodel="UKV",
+            high_time_res=True,
         )
 
     # Boundary conditions
