@@ -243,6 +243,7 @@ def test_read_footprint_high_spatial_res():
         "min_latitude_high": 50.87064,
         "min_longitude_high": -1.26,
         "time_resolution": "standard_time_resolution",
+        "short_lifetime": "false",
     }
 
     assert footprint_data.attrs == expected_attrs

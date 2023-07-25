@@ -362,6 +362,11 @@ class Footprints(BaseStore):
         else:
             metadata["time_resolution"] = "standard_time_resolution"
 
+        if short_lifetime:
+            metadata["short_lifetime"] = "true"
+        else:
+            metadata["short_lifetime"] = "false"
+
         metadata["heights"] = [float(h) for h in fp_data.height.values]
         # Do we also need to save all the variables we have available in this footprints?
         metadata["variables"] = list(fp_data.data_vars)
@@ -384,7 +389,7 @@ class Footprints(BaseStore):
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
-        required = ("site", "model", "inlet", "domain", "time_resolution")#, "spatial_resolution")
+        required = ("site", "model", "inlet", "domain", "time_resolution", "spatial_resolution", "short_lifetime")
 
         data_type = "footprints"
         datasource_uuids = self.assign_data(
