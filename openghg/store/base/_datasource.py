@@ -8,6 +8,7 @@ import numpy as np
 from pandas import DataFrame, Timestamp, Timedelta
 from xarray import Dataset
 from pathlib import Path
+from openghg.objectstore import exists, move_objects, delete_objects
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -270,7 +271,7 @@ class Datasource:
         """Delete the data associated with this Datasource
 
         Returns:
-            bool: True is all deleted, False otherwise
+            None
         """
         from openghg.objectstore import delete_object
 
@@ -292,7 +293,7 @@ class Datasource:
             bucket: Bucket containing data
             keys: List of keys to delete
         Returns:
-            bool: True is all deleted, False otherwise
+            None
         """
         from openghg.objectstore import delete_object
 
@@ -306,7 +307,7 @@ class Datasource:
             bucket: Bucket containing data
             version: Version string
         Returns:
-            bool: True is all deleted, False otherwise
+            None
         """
         if version not in self._data_keys:
             raise KeyError("Invalid version.")
@@ -667,28 +668,30 @@ class Datasource:
             new_keys = {}
 
             version_key = self.define_version_key(version_str)
-            version_folder = Path(bucket) / version_key
+            # version_folder = Path(bucket) / version_key
 
             # If version is already present, and we are not creating a new version
             # we may need to delete the previous data.
-            if version_folder.exists() and not new_version:
+            delete_version = False
+            if exists(bucket=bucket, key=version_key) and not new_version:
                 # Check update mode and whether data was overlapping.
                 if (if_exists == "replace" and overlapping) or if_exists == "new":
                     logger.info("Previous version of the data will be deleted.")
                     delete_version = True
-                else:
-                    delete_version = False
-            else:
-                delete_version = False
+            #     else:
+            #         delete_version = False
+            # else:
+            #     delete_version = False
 
             # Create back up of original data in case writing new data is unsuccessful
             if delete_version:
                 version_str_backup = self.define_backup_version(version_str)
                 version_key_backup = self.define_version_key(version_str_backup)
 
+                move_objects(bucket=bucket, src_prefix=version_key, dst_prefix=version_key_backup)
                 # Create full path to back up folder and move current version folder
-                version_folder_backup = Path(bucket) / version_key_backup
-                version_folder.rename(version_folder_backup)
+                # version_folder_backup = Path(bucket) / version_key_backup
+                # version_folder.rename(version_folder_backup)
 
                 version_keys = self._data_keys[version_str]["keys"]
                 labels = version_keys.keys()
@@ -701,41 +704,35 @@ class Datasource:
                 self._data_keys[version_str_backup]["timestamp"] = str(timestamp_now())  # type: ignore
 
             # if not version_folder.exists():
-            version_folder.mkdir(parents=True, exist_ok=True)
+            # version_folder.mkdir(parents=True, exist_ok=True)
 
             # Iterate over the keys (daterange string) of the data dictionary
-            for daterange in self._data:
+            for daterange, data in self._data.items():
                 # data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
                 data_key = self.define_data_key(label=daterange, version=version_str)
 
                 new_keys[daterange] = data_key
-                data = self._data[daterange]
-
-                filepath = version_folder / f"{daterange}._data"
+                # filepath = version_folder / f"{daterange}._data"
+                # TODO - we really just want to use set_object here but we need some bytes for that
+                # until the zarr changes are implemented let's stick to writing directly to NetCDF
+                # instead of writing to a temporary space and reading the bytes
+                filepath = Path(bucket, data_key)
 
                 try:
                     data.to_netcdf(filepath, engine="netcdf4")
                 except IOError:
                     # If unable to write, return original data from back up.
-                    os.removedirs(version_folder)
                     if delete_version:
-                        version_folder_backup.rename(version_folder)
+                        move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
                         self._data_keys.pop(version_str_backup)
+
                     raise Exception("Unable to write new data. Restored previous data.")
                     # break
 
-                # Can we just take the bytes from the data here and then write then straight?
-                # TODO - for now just create a temporary directory - will have to update Acquire
-                # or work on a PR for xarray to allow returning a NetCDF as bytes
-                # with tempfile.TemporaryDirectory() as tmpdir:
-                #     filepath = f"{tmpdir}/temp.nc"
-                #     data.to_netcdf(filepath)
-                #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
-                # path = f"{bucket_path}/data"
-
             # If write has been successful, remove any back up data.
             if delete_version:
-                if version_folder_backup.exists():
+                if exists(bucket=bucket, key=version_key_backup):
+                    # if version_folder_backup.exists():
                     logger.warning(f"Deleting previous stored data for this version: {version_str}")
                     self.delete_version(bucket=bucket, version=version_str_backup)
                     os.rmdir(version_folder_backup)
