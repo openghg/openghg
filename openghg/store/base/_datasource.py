@@ -716,14 +716,15 @@ class Datasource:
                 # TODO - we really just want to use set_object here but we need some bytes for that
                 # until the zarr changes are implemented let's stick to writing directly to NetCDF
                 # instead of writing to a temporary space and reading the bytes
-                filepath = Path(bucket, data_key)
+                filepath = Path(f"{bucket}/{data_key}._data")
 
                 try:
                     data.to_netcdf(filepath, engine="netcdf4")
                 except IOError:
                     # If unable to write, return original data from back up.
+                    # NOTE - I wasn't sure how the os.removedir() was restoring the backup here?
+                    move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
                     if delete_version:
-                        move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
                         self._data_keys.pop(version_str_backup)
 
                     raise Exception("Unable to write new data. Restored previous data.")
@@ -735,7 +736,6 @@ class Datasource:
                     # if version_folder_backup.exists():
                     logger.warning(f"Deleting previous stored data for this version: {version_str}")
                     self.delete_version(bucket=bucket, version=version_str_backup)
-                    os.rmdir(version_folder_backup)
 
             # Make sure status is reset now this has been saved
             self._status = None
