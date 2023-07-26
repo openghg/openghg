@@ -8,7 +8,8 @@ from openghg.util import hash_bytes
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
 def test_read_footprint_co2_from_data(mocker):
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    # fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    fake_uuids = [f"test-uuid-{n}" for n in range(100, 150)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")

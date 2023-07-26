@@ -1,14 +1,10 @@
-import os
-from pandas import DataFrame, Timestamp, Timedelta
-from xarray import Dataset
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
 from pandas import DataFrame, Timestamp, Timedelta
 from xarray import Dataset
-from pathlib import Path
-from openghg.objectstore import exists, move_objects, delete_objects
+from openghg.objectstore import exists, move_objects
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -721,13 +717,16 @@ class Datasource:
                 try:
                     data.to_netcdf(filepath, engine="netcdf4")
                 except IOError:
-                    # If unable to write, return original data from back up.
-                    # NOTE - I wasn't sure how the os.removedir() was restoring the backup here?
-                    move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
-                    if delete_version:
-                        self._data_keys.pop(version_str_backup)
-
-                    raise Exception("Unable to write new data. Restored previous data.")
+                    try:
+                        filepath.parent.mkdir(parents=True)
+                        data.to_netcdf(filepath, engine="netcdf4")
+                    except IOError:
+                        # If unable to write, return original data from back up.
+                        # NOTE - I wasn't sure how the os.removedir() was restoring the backup here?
+                        if delete_version:
+                            move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
+                            self._data_keys.pop(version_str_backup)
+                        raise ObjectStoreError("Unable to write new data. Restored previous data.")
                     # break
 
             # If write has been successful, remove any back up data.
