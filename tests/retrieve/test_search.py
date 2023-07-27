@@ -18,7 +18,7 @@ from pandas import Timestamp
         ("height", "50m"),
         ("inlet", "50magl"),
         ("inlet", "50"),
-        ("inlet", 50),   # May remove this later as really we expect a string here
+        ("inlet", 50),  # May remove this later as really we expect a string here
     ],
 )
 def test_search_surface(inlet_keyword, inlet_value):
@@ -54,14 +54,14 @@ def test_search_surface(inlet_keyword, inlet_value):
 
 
 def test_search_surface_range():
+    res = search_surface(
+        site="TAC",
+        species="co2",
+        inlet="185",
+        start_date="2013-02-01",
+        end_date="2013-03-01",
+    )
 
-    res = search_surface(site='TAC',
-                         species='co2',
-                         inlet='185',
-                         start_date='2013-02-01',
-                         end_date='2013-03-01'
-                         )
-    
     assert res is not None
 
     key = next(iter(res.metadata))
@@ -108,7 +108,13 @@ def test_search_site():
 
     assert expected.items() <= metadata.items()
 
-    res = search(site="bsd", species="co2", inlet="108m", instrument="picarro", calibration_scale="wmo-x2019")
+    res = search(
+        site="bsd",
+        species="co2",
+        inlet="108m",
+        instrument="picarro",
+        calibration_scale="wmo-x2019",
+    )
 
     expected = {
         "site": "bsd",
@@ -156,7 +162,7 @@ def test_multi_type_search():
 
     data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    assert data_types == {'surface', 'eulerian_model', 'column'}
+    assert data_types == {"surface", "eulerian_model", "column"}
 
     res = search(species="co2")
     data_types = set([m["data_type"] for m in res.metadata.values()])
@@ -204,6 +210,7 @@ def test_nonsense_terms():
 
     assert not res
 
+
 @pytest.mark.parametrize(
     "inlet_keyword,inlet_value",
     [
@@ -213,16 +220,28 @@ def test_nonsense_terms():
         ("inlet", "10"),
     ],
 )
-def test_search_footprints(inlet_keyword,inlet_value):
+def test_search_footprints(inlet_keyword, inlet_value):
     """
     Test search for footprint data which has been added to the object store.
     This has been stored using one footprint file which represents a year of data.
     """
 
     if inlet_keyword == "inlet":
-        res = search_footprints(site="TMB", network="LGHG", inlet=inlet_value, domain="EUROPE", model="test_model")
+        res = search_footprints(
+            site="TMB",
+            network="LGHG",
+            inlet=inlet_value,
+            domain="EUROPE",
+            model="test_model",
+        )
     elif inlet_keyword == "height":
-        res = search_footprints(site="TMB", network="LGHG", height=inlet_value, domain="EUROPE", model="test_model")
+        res = search_footprints(
+            site="TMB",
+            network="LGHG",
+            height=inlet_value,
+            domain="EUROPE",
+            model="test_model",
+        )
 
     key = next(iter(res.metadata))
     partial_metadata = {
@@ -247,7 +266,14 @@ def test_search_footprints_multiple():
         - 2016-07-01 (3 time points)
         - 2016-08-01 (3 time points)
     """
-    res = search_footprints(site="TAC", network="DECC", height="100m", domain="TEST", model="NAME")
+    res = search_footprints(
+        site="TAC",
+        network="DECC",
+        height="100m",
+        domain="TEST",
+        model="NAME",
+        high_time_res=False,
+    )
 
     key = next(iter(res.metadata))
     partial_metadata = {
@@ -300,22 +326,10 @@ def test_search_footprints_high_time_resolution():
     """Test search for high time resolution footprints
 
     Expected behaviour: searching for footprints with
-    keyword argument `time_resolution = "high_time_resolution"`
-    or `high_time_res = True` should return results for
-    high time resolution footprints.
+    keyword argument `high_time_res = True` should only
+    return results for high time resolution footprints.
     """
-    res1 = search_footprints(
-        site="TAC",
-        network="DECC",
-        height="100m",
-        domain="TEST",
-        model="NAME",
-        start_date="2014-07-01",
-        end_date="2014-08-01",
-        time_resolution="high_time_resolution",
-    )
-
-    res2 = search_footprints(
+    res = search_footprints(
         site="TAC",
         network="DECC",
         height="100m",
@@ -326,32 +340,8 @@ def test_search_footprints_high_time_resolution():
         high_time_res=True,
     )
 
-    # results dataframes should have at least one row
-    assert res1.results.shape[0] > 0
-    assert res2.results.shape[0] > 0
-
-
-def test_search_footprints_high_time_res_kwarg_conflict():
-    """Test search for high time resolution footprints
-
-    Expected behaviour: searching for footprints with
-    keyword argument `time_resolution = "high_time_resolution"`
-    or `high_time_res = True` should return results for
-    high time resolution footprints.
-    """
-    with pytest.raises(TypeError):
-        res = search_footprints(
-            site="TAC",
-            network="DECC",
-            height="100m",
-            domain="TEST",
-            model="NAME",
-            start_date="2014-07-01",
-            end_date="2014-08-01",
-            high_time_res=True,
-            time_resolution="high_time_resolution",
-        )
-
+    # results dataframes should have exactly one row
+    assert res.results.shape[0] == 1
 
 
 def test_search_flux():
@@ -400,7 +390,7 @@ def test_search_flux_select():
         source="gpp-cardamom",
         domain="europe",
         start_date="2012-01-01",
-        end_date="2013-01-01"
+        end_date="2013-01-01",
     )
 
     key = next(iter(res.metadata))

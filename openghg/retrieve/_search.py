@@ -225,7 +225,7 @@ def search_footprints(
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
     high_spatial_res: Optional[bool] = None,
-    high_time_res: bool = False,
+    high_time_res: Optional[bool] = None,
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
@@ -252,57 +252,43 @@ def search_footprints(
     Returns:
         SearchResults: SearchResults object
     """
+    # NOTE: the following two lines are a shorter way to get args...
+    # args = locals().copy()  # get dict of arguments to process and pass to `search`
+    # args.pop("kwargs")  # the value of kwargs is a dictionary, so we remove it
+
+    args = {
+        "site": site,
+        "inlet": inlet,
+        "height": height,
+        "domain": domain,
+        "model": model,
+        "metmodel": metmodel,
+        "species": species,
+        "network": network,
+        "start_date": start_date,
+        "end_date": end_date,
+        "period": period,
+        "continuous": continuous,
+        "high_time_res": high_time_res,
+        "high_spatial_res": high_spatial_res,
+        "short_lifetime": short_lifetime,
+    }
+
+    # Keys in metastore are stored as strings; convert non-string arguments to strings.
+    for k, v in args.items():
+        if v is not None:
+            args[k] = str(v)
+
+    # Either (or both) of 'inlet' and 'height' may be in the metastore, so
+    # both are allowed for search.
     from openghg.util import format_inlet
+    args["inlet"] = format_inlet(inlet)
+    args["height"] = format_inlet(height)
 
-    if start_date is not None:
-        start_date = str(start_date)
-    if end_date is not None:
-        end_date = str(end_date)
+    args["data_type"] = "footprints"  # generic `search` needs the data type
+    args = kwargs | args  # on conflict, keep entries from `args`
 
-    # Allow inlet or height to be specified, both or either may be included
-    # within the metadata so could use either to search
-    inlet = format_inlet(inlet)
-    height = format_inlet(height)
-
-    #Convert boolean kwargs for time resolution to strings
-    time_resolution = "high_time_resolution" if high_time_res else "standard_time_resolution"
-    if "time_resolution" in kwargs and high_time_res:
-        raise TypeError('You cannot pass "time_resolution" as a keyword argument if "high_time_res" is True.')
-    elif "time_resolution" in kwargs:
-        time_resolution = kwargs["time_resolution"]
-        kwargs.pop("time_resolution")
-
-    #Convert boolean kwargs for spatial resolution to strings
-    # if "spatial_resolution" in kwargs and high_spatial_res:
-    #     raise TypeError('Values passed for both "high_spatial_res" and "spatial_resolution". Only pass one of these keywords.')
-    # elif "spatial_resolution" in kwargs:
-    #     spatial_resolution = kwargs["spatial_resolution"]
-    #     kwargs.pop("spatial_resolution")
-    # elif high_spatial_res:
-    #     spatial_resolution = "high_spatial_resolution"
-    # else:
-    #     spatial_resolution = "standard_spatial_resolution"
-
-
-    return search(
-        site=site,
-        inlet=inlet,
-        height=height,
-        domain=domain,
-        model=model,
-        metmodel=metmodel,
-        species=species,
-        network=network,
-        start_date=start_date,
-        end_date=end_date,
-        period=period,
-        continuous=continuous,
-        time_resolution=time_resolution,
-        #spatial_resolution=spatial_resolution,
-        short_lifetime=short_lifetime,
-        data_type="footprints",
-        **kwargs,
-    )
+    return search(**args)
 
 
 def search_surface(
