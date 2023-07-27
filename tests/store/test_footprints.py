@@ -112,8 +112,8 @@ def test_read_footprint_standard(keyword, value):
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "spatial_resolution": "standard_spatial_resolution",
-        "time_resolution": "standard_time_resolution",
+        "high_spatial_res": "False",
+        "high_time_res": "False",
         "time_period": "2 hours",
     }
 
@@ -237,13 +237,13 @@ def test_read_footprint_high_spatial_res():
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "spatial_resolution": "high_spatial_resolution",
+        "high_spatial_res": "True",
         "max_latitude_high": 52.01937,
         "max_longitude_high": 0.468,
         "min_latitude_high": 50.87064,
         "min_longitude_high": -1.26,
-        "time_resolution": "standard_time_resolution",
-        "short_lifetime": "false",
+        "high_time_res": "False",
+        "short_lifetime": "False",
     }
 
     assert footprint_data.attrs == expected_attrs
@@ -342,8 +342,9 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "spatial_resolution": "standard_spatial_resolution",
-        "time_resolution": "high_time_resolution",
+        "high_spatial_res": "False",
+        "high_time_res": "True",
+        "short_lifetime": "False",
         "time_period": "1 hour",
     }
 
@@ -411,8 +412,9 @@ def test_read_footprint_short_lived():
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "spatial_resolution": "standard_spatial_resolution",
-        "time_resolution": "standard_time_resolution",
+        "high_spatial_res": "False",
+        "high_time_res": "False",
+        "short_lifetime": "True",
         "time_period": "1 hour",
     }
 
@@ -503,7 +505,7 @@ def test_footprint_schema_lifetime():
     assert "mean_age_particles_w" in data_vars
 
 
-def test_adding_high_time_res_footprint():
+def test_standardising_high_time_res_footprint():
     """
     Expected behavior: adding a high time resolution
     footprint whose other metadata is the same as
@@ -544,3 +546,45 @@ def test_adding_high_time_res_footprint():
 
     assert hi_res_dict["new"] == True
     assert hi_res_dict["uuid"] != lo_res_dict["uuid"]  # redundant?
+
+
+def test_standardising_short_lifetime_footprint():
+    """
+    Expected behavior: adding a short lifetime
+    footprint whose other metadata is the same as
+    an existing footprint will create a new uuid
+    for the short lifetime footprint.
+    """
+    inert_datapath = get_footprint_datapath("HFD-100magl_UKV_EUROPE_202001_TRUNCATED.nc")
+    short_lifetime_datapath = get_footprint_datapath("HFD-100magl_UKV_rn_EUROPE_202001_TRUNCATED.nc")
+
+    site = "HFD"
+    domain = "EUROPE"
+    model = "NAME"
+    metmodel = "UKV"
+    inlet = "100m"
+
+    inert_standardised = standardise_footprint(inert_datapath,
+                                                site=site,
+                                                domain=domain,
+                                                model=model,
+                                                inlet=inlet,
+                                                metmodel=metmodel,
+                                                store="user",
+                                                )
+
+    short_lifetime_standardised = standardise_footprint(short_lifetime_datapath,
+                                                site=site,
+                                                domain=domain,
+                                                model=model,
+                                                inlet=inlet,
+                                                metmodel=metmodel,
+                                                species="rn",
+                                                store="user",
+                                                )
+
+    inert_dict = inert_standardised[next(iter(inert_standardised))]
+    short_lifetime_dict = short_lifetime_standardised[next(iter(short_lifetime_standardised))]
+
+    assert short_lifetime_dict["new"] == True
+    assert short_lifetime_dict["uuid"] != inert_dict["uuid"]  # redundant?

@@ -351,21 +351,13 @@ class Footprints(BaseStore):
                 metadata["max_latitude_high"] = round(float(fp_data["lat_high"].max()), 5)
                 metadata["min_latitude_high"] = round(float(fp_data["lat_high"].min()), 5)
 
-                metadata["spatial_resolution"] = "high_spatial_resolution"
             except KeyError:
                 raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
-        else:
-            metadata["spatial_resolution"] = "standard_spatial_resolution"
 
-        if high_time_res:
-            metadata["time_resolution"] = "high_time_resolution"
-        else:
-            metadata["time_resolution"] = "standard_time_resolution"
-
-        if short_lifetime:
-            metadata["short_lifetime"] = "true"
-        else:
-            metadata["short_lifetime"] = "false"
+        # NetCDF attributes need to be strings, so we convert Boolean metadata to strings.
+        metadata["high_time_res"] = str(high_time_res)
+        metadata["high_spatial_res"] = str(high_spatial_res)
+        metadata["short_lifetime"] = str(short_lifetime)
 
         metadata["heights"] = [float(h) for h in fp_data.height.values]
         # Do we also need to save all the variables we have available in this footprints?
@@ -389,7 +381,7 @@ class Footprints(BaseStore):
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
-        required = ("site", "model", "inlet", "domain", "time_resolution", "spatial_resolution", "short_lifetime")
+        required = ("site", "model", "inlet", "domain", "high_time_res", "high_spatial_res", "short_lifetime")
 
         data_type = "footprints"
         datasource_uuids = self.assign_data(
