@@ -277,7 +277,10 @@ def search_footprints(
     # Keys in metastore are stored as strings; convert non-string arguments to strings.
     for k, v in args.items():
         if v is not None:
-            args[k] = str(v)
+            if isinstance(v, bool):
+                args[k] = str(v).lower()
+            else:
+                args[k] = str(v)
 
     # Either (or both) of 'inlet' and 'height' may be in the metastore, so
     # both are allowed for search.
