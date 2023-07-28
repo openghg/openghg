@@ -16,13 +16,7 @@ class DataManager:
     def __init__(self, metadata: Dict[str, Dict], store: str):
         # We don't want the object store in this metadata as we want it to be the
         # unadulterated metadata to properly reflect what's stored.
-        for m in metadata.values():
-            try:
-                del m["object_store"]
-            except KeyError:
-                pass
-
-        self.metadata = metadata
+        self.metadata = self._clean_metadata(metadata=metadata)
         self._store = store
         self._bucket = get_writable_bucket(name=store)
         self._backup: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict)
@@ -33,6 +27,25 @@ class DataManager:
 
     def __bool__(self) -> bool:
         return bool(self.metadata)
+
+    def _clean_metadata(self, metadata: Dict) -> Dict:
+        """Ensures the metadata we give to the user is the metadata
+        stored in the metastore and the Datasource and hasn't been modified by the
+        search function. Currently this just removes the object_store key
+
+        Args:
+            metadata: Dictionary of metadata, we expect
+        Returns:
+            dict: Metadata without specific keys
+        """
+        metadata = copy.deepcopy(metadata)
+        for m in metadata.values():
+            try:
+                del m["object_store"]
+            except KeyError:
+                pass
+
+        return metadata
 
     def _check_datatypes(self, uuid: Union[str, List]) -> str:
         """Check the UUIDs are correct and ensure they all
@@ -77,9 +90,12 @@ class DataManager:
         # We don't want the object store in this metadata as we want it to be the
         # unadulterated metadata to properly reflect what's stored.
         for m in res.metadata.values():
-            del m["object_store"]
+            try:
+                del m["object_store"]
+            except KeyError:
+                pass
 
-        self.metadata = res.metadata
+        self.metadata = self._clean_metadata(metadata=res.metadata)
 
     def restore(self, uuid: str, version: Union[str, int] = "latest") -> None:
         """Restore a backed-up version of a Datasource's metadata.
