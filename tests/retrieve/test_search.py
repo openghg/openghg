@@ -292,6 +292,7 @@ def test_search_footprints_multiple():
     # Test retrieved footprint data found from the search contains data spanning
     # the whole range.
     footprint_data = res.retrieve()
+
     data = footprint_data.data
     time = data["time"]
     assert time[0] == Timestamp("2016-07-01T00:00:00")
@@ -345,7 +346,7 @@ def test_search_footprints_high_time_resolution():
 
     # check attributes
     metadata = res.retrieve().metadata
-    assert metadata["high_time_res"] == "True"
+    assert metadata["high_time_res"] == True
 
 
 def test_search_flux():

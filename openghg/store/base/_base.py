@@ -104,7 +104,19 @@ class BaseStore:
 
             # Add the read metadata to the Dataset attributes being careful
             # not to overwrite any attributes that are already there
-            to_add = {k: v for k, v in metadata.items() if k not in _data.attrs}
+            def convert_to_netcdf4_types(value: Any):
+                """Attributes in a netCDF file can be strings, numbers, or sequences:
+                http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
+
+                This function converts any non-numeric or non-list data to strings.
+                Booleans are converted to strings, even though they are a subtype of int.
+                """
+                if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
+                    return value
+                else:
+                    return str(value)
+
+            to_add = {k: convert_to_netcdf4_types(v) for k, v in metadata.items() if k not in _data.attrs}
             _data.attrs.update(to_add)
 
             # If we have a UUID for this Datasource load the existing object
@@ -126,7 +138,7 @@ class BaseStore:
 
                 # Make sure all the metadata is lowercase for easier searching later
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
-                meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
+                #meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
                 # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
                 # so we can have rapid
                 self._datasource_uuids[uid] = key
@@ -156,7 +168,7 @@ class BaseStore:
         self, data: Dict, required_keys: Sequence[str], min_keys: Optional[int] = None
     ) -> Dict:
         """Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys
-        to be present and will require at leas min_keys of these to be present when searching.
+        to be present and will require at least min_keys of these to be present when searching.
 
         As some metadata value might change (such as data owners etc) we don't want to do an exact
         search on *all* the metadata so we extract a subset (the required keys) and search for these.
@@ -176,16 +188,22 @@ class BaseStore:
         results = {}
         for key, _data in data.items():
             metadata = _data["metadata"]
-            required_metadata = {k.lower(): str(v).lower() for k, v in metadata.items() if k in required_keys}
+
+            def lower_if_string(val):
+                "Convert strings to lower case, leave types alone."
+                if isinstance(val, str):
+                    return val.lower()
+                else:
+                    return val
+
+            required_metadata = {k.lower(): lower_if_string(v) for k, v in metadata.items() if k in required_keys}
 
             if len(required_metadata) < min_keys:
                 raise ValueError(
                     f"The given metadata doesn't contain enough information, we need: {required_keys}"
                 )
 
-            q = tinydb.Query()
-            search_attrs = [getattr(q, k) == v for k, v in required_metadata.items()]
-            required_result = self._metastore.search(reduce(_find_and, search_attrs))
+            required_result = self._metastore.search(tinydb.Query().fragment(required_metadata))
 
             if not required_result:
                 results[key] = False

@@ -355,9 +355,9 @@ class Footprints(BaseStore):
                 raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
         # NetCDF attributes need to be strings, so we convert Boolean metadata to strings.
-        metadata["high_time_res"] = str(high_time_res).lower()
-        metadata["high_spatial_res"] = str(high_spatial_res).lower()
-        metadata["short_lifetime"] = str(short_lifetime).lower()
+        metadata["high_time_res"] = high_time_res
+        metadata["high_spatial_res"] = high_spatial_res
+        metadata["short_lifetime"] = short_lifetime
 
         metadata["heights"] = [float(h) for h in fp_data.height.values]
         # Do we also need to save all the variables we have available in this footprints?

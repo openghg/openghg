@@ -224,7 +224,7 @@ def search_footprints(
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
-    high_spatial_res: Optional[bool] = None,
+    high_spatial_res: Optional[bool] = None,  # TODO need to give False to get only low spatial res
     high_time_res: Optional[bool] = None,
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
@@ -275,12 +275,9 @@ def search_footprints(
     }
 
     # Keys in metastore are stored as strings; convert non-string arguments to strings.
-    for k, v in args.items():
-        if v is not None:
-            if isinstance(v, bool):
-                args[k] = str(v).lower()
-            else:
-                args[k] = str(v)
+    for k in ["start_date", "end_date"]:
+        if args[k] is not None:
+            args[k] = str(args[k])
 
     # Either (or both) of 'inlet' and 'height' may be in the metastore, so
     # both are allowed for search.
