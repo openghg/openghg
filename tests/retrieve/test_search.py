@@ -343,6 +343,10 @@ def test_search_footprints_high_time_resolution():
     # results dataframes should have exactly one row
     assert res.results.shape[0] == 1
 
+    # check attributes
+    metadata = res.retrieve().metadata
+    assert metadata["high_time_res"] == "True"
+
 
 def test_search_flux():
     """
