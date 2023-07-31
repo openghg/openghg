@@ -211,8 +211,8 @@ class Footprints(BaseStore):
         chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         retrieve_met: bool = False,
-        high_spatial_res: bool = False,
-        high_time_res: bool = False,
+        high_spatial_resolution: bool = False,
+        high_time_resolution: bool = False,
         short_lifetime: bool = False,
         overwrite: bool = False,
         # model_params: Optional[Dict] = None,
@@ -233,8 +233,8 @@ class Footprints(BaseStore):
             period: Period of measurements. Only needed if this can not be inferred from the time coords
             continuous: Whether time stamps have to be continuous.
             retrieve_met: Whether to also download meterological data for this footprints area
-            high_spatial_res : Indicate footprints include both a low and high spatial resolution.
-            high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+            high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
+            high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
                            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
@@ -279,9 +279,9 @@ class Footprints(BaseStore):
 
         if species == "co2":
             # Expect co2 data to have high time resolution
-            if not high_time_res:
-                logger.info("Updating high_time_res to True for co2 data")
-                high_time_res = True
+            if not high_time_resolution:
+                logger.info("Updating high_time_resolution to True for co2 data")
+                high_time_resolution = True
 
         if short_lifetime and not species:
             raise ValueError(
@@ -298,8 +298,8 @@ class Footprints(BaseStore):
         # Based on configuration (some user defined, some inferred)
         Footprints.validate_data(
             fp_data,
-            high_spatial_res=high_spatial_res,
-            high_time_res=high_time_res,
+            high_spatial_resolution=high_spatial_resolution,
+            high_time_resolution=high_time_resolution,
             short_lifetime=short_lifetime,
         )
 
@@ -344,7 +344,7 @@ class Footprints(BaseStore):
         metadata["max_latitude"] = round(float(fp_data["lat"].max()), 5)
         metadata["min_latitude"] = round(float(fp_data["lat"].min()), 5)
 
-        if high_spatial_res:
+        if high_spatial_resolution:
             try:
                 metadata["max_longitude_high"] = round(float(fp_data["lon_high"].max()), 5)
                 metadata["min_longitude_high"] = round(float(fp_data["lon_high"].min()), 5)
@@ -354,8 +354,8 @@ class Footprints(BaseStore):
             except KeyError:
                 raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
-        metadata["high_time_res"] = high_time_res
-        metadata["high_spatial_res"] = high_spatial_res
+        metadata["high_time_resolution"] = high_time_resolution
+        metadata["high_spatial_resolution"] = high_spatial_resolution
         metadata["short_lifetime"] = short_lifetime
 
         metadata["heights"] = [float(h) for h in fp_data.height.values]
@@ -380,7 +380,7 @@ class Footprints(BaseStore):
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
-        required = ("site", "model", "inlet", "domain", "high_time_res", "high_spatial_res", "short_lifetime")
+        required = ("site", "model", "inlet", "domain", "high_time_resolution", "high_spatial_resolution", "short_lifetime")
 
         data_type = "footprints"
         datasource_uuids = self.assign_data(
@@ -395,8 +395,8 @@ class Footprints(BaseStore):
     @staticmethod
     def schema(
         particle_locations: bool = True,
-        high_spatial_res: bool = False,
-        high_time_res: bool = False,
+        high_spatial_resolution: bool = False,
+        high_time_resolution: bool = False,
         short_lifetime: bool = False,
     ) -> DataSchema:
         """
@@ -405,17 +405,17 @@ class Footprints(BaseStore):
         The returned schema depends on what the footprint represents,
         indicated using the keywords.
         By default, this will include "fp" variable but this will be superceded
-        if high_spatial_res or high_time_res are specified.
+        if high_spatial_resolution or high_time_resolution are specified.
 
         Args:
             particle_locations: Include 4-directional particle location variables:
                 - "particle_location_[nesw]"
                 and include associated additional dimensions ("height")
-            high_spatial_res : Set footprint variables include high and low resolution options:
+            high_spatial_resolution : Set footprint variables include high and low resolution options:
                 - "fp_low"
                 - "fp_high"
                 and include associated additional dimensions ("lat_high", "lon_high").
-            high_time_res : Set footprint variable to be high time resolution
+            high_time_resolution : Set footprint variable to be high time resolution
                 - "fp_HiTRes"
                 and include associated dimensions ("H_back").
             short_lifetime: Include additional particle age parameters for short lived species:
@@ -431,12 +431,12 @@ class Footprints(BaseStore):
             "time": np.datetime64,
         }
 
-        if not high_time_res and not high_spatial_res:
+        if not high_time_resolution and not high_spatial_resolution:
             # Includes standard footprint variable
             data_vars["fp"] = ("time", "lat", "lon")
             dtypes["fp"] = np.floating
 
-        if high_spatial_res:
+        if high_spatial_resolution:
             # Include options for high spatial resolution footprint
             # This includes footprint data on multiple resolutions
 
@@ -446,7 +446,7 @@ class Footprints(BaseStore):
             dtypes["fp_low"] = np.floating
             dtypes["fp_high"] = np.floating
 
-        if high_time_res:
+        if high_time_resolution:
             # Include options for high time resolution footprint (usually co2)
             # This includes a footprint data with an additional hourly back dimension
             data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
@@ -491,8 +491,8 @@ class Footprints(BaseStore):
     def validate_data(
         data: Dataset,
         particle_locations: bool = True,
-        high_spatial_res: bool = False,
-        high_time_res: bool = False,
+        high_spatial_resolution: bool = False,
+        high_time_resolution: bool = False,
         short_lifetime: bool = False,
     ) -> None:
         """
@@ -512,8 +512,8 @@ class Footprints(BaseStore):
         """
         data_schema = Footprints.schema(
             particle_locations=particle_locations,
-            high_spatial_res=high_spatial_res,
-            high_time_res=high_time_res,
+            high_spatial_resolution=high_spatial_resolution,
+            high_time_resolution=high_time_resolution,
             short_lifetime=short_lifetime,
         )
         data_schema.validate_data(data)

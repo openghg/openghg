@@ -148,7 +148,7 @@ def data_read():
             network=network,
             height=height,
             domain=domain,
-            high_spatial_res=True,
+            high_spatial_resolution=True,
         )
 
     # Add two footprints with the same inputs but covering different time periods
@@ -195,7 +195,7 @@ def data_read():
             height="100m",
             domain="TEST",
             metmodel="UKV",
-            high_time_res=True,
+            high_time_resolution=True,
         )
 
     # Boundary conditions

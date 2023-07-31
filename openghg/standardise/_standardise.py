@@ -332,8 +332,8 @@ def standardise_footprint(
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
     retrieve_met: bool = False,
-    high_spatial_res: bool = False,
-    high_time_res: bool = False,
+    high_spatial_resolution: bool = False,
+    high_time_resolution: bool = False,
     overwrite: bool = False,
     store: Optional[str] = None,
 ) -> Optional[Dict]:
@@ -354,8 +354,8 @@ def standardise_footprint(
         chunks: Chunk size to use when opening the NetCDF. Set to "auto" for automated chunk sizing
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
-        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
-        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
+        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically for Carbon Dioxide data.
         overwrite: Overwrite any currently stored data
         store: Name of store to write to
@@ -379,8 +379,8 @@ def standardise_footprint(
             "height": height,
             "continuous": continuous,
             "retrieve_met": retrieve_met,
-            "high_spatial_res": high_spatial_res,
-            "high_time_res": high_time_res,
+            "high_spatial_resolution": high_spatial_resolution,
+            "high_time_resolution": high_time_resolution,
             "overwrite": overwrite,
             "metmodel": metmodel,
             "species": species,
@@ -395,8 +395,8 @@ def standardise_footprint(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
         )
 
-        fn_response = call_function(data=to_post)
-        response_content: Dict = fn_response["content"]
+        fn_resolutionponse = call_function(data=to_post)
+        response_content: Dict = fn_resolutionponse["content"]
         return response_content
     else:
         bucket = get_writable_bucket(name=store)
@@ -415,8 +415,8 @@ def standardise_footprint(
                 chunks=chunks,
                 continuous=continuous,
                 retrieve_met=retrieve_met,
-                high_spatial_res=high_spatial_res,
-                high_time_res=high_time_res,
+                high_spatial_resolution=high_spatial_resolution,
+                high_time_resolution=high_time_resolution,
                 overwrite=overwrite,
             )
 

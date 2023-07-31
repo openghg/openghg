@@ -15,11 +15,6 @@ T = TypeVar("T", bound="BaseStore")
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
-
-def _find_and(x: Any, y: Any) -> Any:
-    return x & y
-
-
 class BaseStore:
     _root = "root"
     _uuid = "root_uuid"
@@ -138,7 +133,7 @@ class BaseStore:
 
                 # Make sure all the metadata is lowercase for easier searching later
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
-                #meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
+                # meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
                 # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
                 # so we can have rapid
                 self._datasource_uuids[uid] = key

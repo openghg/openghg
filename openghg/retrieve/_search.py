@@ -224,8 +224,8 @@ def search_footprints(
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
-    high_spatial_res: Optional[bool] = None,  # TODO need to give False to get only low spatial res
-    high_time_res: Optional[bool] = None,
+    high_spatial_resolution: Optional[bool] = None,  # TODO need to give False to get only low spatial res
+    high_time_resolution: Optional[bool] = None,
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
@@ -243,8 +243,8 @@ def search_footprints(
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
-        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
-        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
+        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically if species="co2" (Carbon Dioxide).
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                         Note this will be set to True if species has an associated lifetime.
@@ -269,8 +269,8 @@ def search_footprints(
         "end_date": end_date,
         "period": period,
         "continuous": continuous,
-        "high_time_res": high_time_res,
-        "high_spatial_res": high_spatial_res,
+        "high_time_resolution": high_time_resolution,
+        "high_spatial_resolution": high_spatial_resolution,
         "short_lifetime": short_lifetime,
     }
 

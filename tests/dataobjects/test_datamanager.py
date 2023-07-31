@@ -47,7 +47,7 @@ def footprint_read(mocker):
         height=height,
         domain=domain,
         period="monthly",
-        high_spatial_res=True,
+        high_spatial_resolution=True,
         store="user",
     )
 

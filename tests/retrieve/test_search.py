@@ -272,7 +272,7 @@ def test_search_footprints_multiple():
         height="100m",
         domain="TEST",
         model="NAME",
-        high_time_res=False,
+        high_time_resolution=False,
     )
 
     key = next(iter(res.metadata))
@@ -338,7 +338,7 @@ def test_search_footprints_high_time_resolution():
         model="NAME",
         start_date="2014-07-01",
         end_date="2014-08-01",
-        high_time_res=True,
+        high_time_resolution=True,
     )
 
     # results dataframes should have exactly one row
@@ -346,7 +346,7 @@ def test_search_footprints_high_time_resolution():
 
     # check attributes
     metadata = res.retrieve().metadata
-    assert metadata["high_time_res"] == True
+    assert metadata["high_time_resolution"] == True
 
 
 def test_search_flux():

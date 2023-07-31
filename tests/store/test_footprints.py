@@ -22,7 +22,7 @@ def test_read_footprint_co2_from_data(mocker):
         "model": "NAME",
         "metmodel": "UKV",
         "species": "co2",
-        "high_time_res": True,
+        "high_time_resolution": True,
     }
 
     binary_data = datapath.read_bytes()
@@ -32,7 +32,7 @@ def test_read_footprint_co2_from_data(mocker):
     file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": True}
 
     # Expect co2 data to be high time resolution
-    # - could include high_time_res=True but don't need to as this will be set automatically
+    # - could include high_time_resolutionolution=True but don't need to as this will be set automatically
     bucket = get_bucket()
     with Footprints(bucket=bucket) as fps:
         result = fps.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
@@ -112,8 +112,8 @@ def test_read_footprint_standard(keyword, value):
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "high_spatial_res": "False",
-        "high_time_res": "False",
+        "high_spatial_resolution": "False",
+        "high_time_resolution": "False",
         "time_period": "2 hours",
     }
 
@@ -121,13 +121,13 @@ def test_read_footprint_standard(keyword, value):
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_read_footprint_high_spatial_res():
+def test_read_footprint_high_spatial_resolution():
     """
     Test high spatial resolution footprint
      - expects additional parameters for `fp_low` and `fp_high`
      - expects additional coordinates for `lat_high`, `lon_high`
      - expects keyword attributes to be set
-       - "spatial_resolution": "high_spatial_resolution"
+       - "spatial_resolution": "high_spatial_resolutionolution"
     """
     datapath = get_footprint_datapath("footprint_test.nc")
     # model_params = {"simulation_params": "123"}
@@ -148,7 +148,7 @@ def test_read_footprint_high_spatial_res():
             inlet=inlet,
             domain=domain,
             period="monthly",
-            high_spatial_res=True,
+            high_spatial_resolution=True,
         )
 
     # Get the footprints data
@@ -237,12 +237,12 @@ def test_read_footprint_high_spatial_res():
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "high_spatial_res": "True",
+        "high_spatial_resolution": "True",
         "max_latitude_high": 52.01937,
         "max_longitude_high": 0.468,
         "min_latitude_high": 50.87064,
         "min_longitude_high": -1.26,
-        "high_time_res": "False",
+        "high_time_resolution": "False",
         "short_lifetime": "False",
     }
 
@@ -283,7 +283,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
      - expects additional parameter for `fp_HiTRes`
      - expects additional coordinate for `H_back`
      - expects keyword attributes to be set
-       - "spatial_resolution": "high_time_resolution"
+       - "spatial_resolution": "high_time_resolutionolution"
 
     Two tests included on same domain for CO2:
     - TAC data - includes H_back as an integer (older style footprint)
@@ -296,7 +296,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
     species = "co2"
 
     # Expect co2 data to be high time resolution
-    # - could include high_time_res=True but don't need to as this will be set automatically
+    # - could include high_time_resolution=True but don't need to as this will be set automatically
 
     bucket = get_bucket()
     with Footprints(bucket=bucket) as fps:
@@ -342,8 +342,8 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "high_spatial_res": "False",
-        "high_time_res": "True",
+        "high_spatial_resolution": "False",
+        "high_time_resolution": "True",
         "short_lifetime": "False",
         "time_period": "1 hour",
     }
@@ -412,8 +412,8 @@ def test_read_footprint_short_lived():
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "high_spatial_res": "False",
-        "high_time_res": "False",
+        "high_spatial_resolution": "False",
+        "high_time_resolution": "False",
         "short_lifetime": "True",
         "time_period": "1 hour",
     }
@@ -439,10 +439,10 @@ def test_footprint_schema():
 def test_footprint_schema_spatial():
     """
     Check expected data variables and extra dimensions
-    are being included for high_spatial_res Footprint schema
+    are being included for high_spatial_resolution Footprint schema
     """
 
-    data_schema = Footprints.schema(high_spatial_res=True)
+    data_schema = Footprints.schema(high_spatial_resolution=True)
 
     data_vars = data_schema.data_vars
     assert "fp" not in data_vars  # "fp" not required (but can be present in file)
@@ -466,10 +466,10 @@ def test_footprint_schema_spatial():
 def test_footprint_schema_temporal():
     """
     Check expected data variables and extra dimensions
-    are being included for high_time_res Footprint schema
+    are being included for high_time_resolution Footprint schema
     """
 
-    data_schema = Footprints.schema(high_time_res=True)
+    data_schema = Footprints.schema(high_time_resolution=True)
 
     data_vars = data_schema.data_vars
     assert "fp" not in data_vars  # "fp" not required (but can be present in file)
