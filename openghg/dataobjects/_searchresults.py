@@ -16,6 +16,7 @@ T = TypeVar("T", bound="SearchResults")
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+
 class SearchResults:
     """This class is used to return data from the search function. It
     has member functions to retrieve data from the object store.
