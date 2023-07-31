@@ -185,7 +185,7 @@ class BaseStore:
         for key, _data in data.items():
             metadata = _data["metadata"]
 
-            def lower_if_string(val):
+            def lower_if_string(val: Any) -> Any:
                 "Convert strings to lower case, leave types alone."
                 if isinstance(val, str):
                     return val.lower()
