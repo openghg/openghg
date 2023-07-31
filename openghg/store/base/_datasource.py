@@ -1,9 +1,12 @@
+from pandas import DataFrame, Timestamp, Timedelta
+from xarray import Dataset
+from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
 from openghg.store.spec import define_data_types
-from pandas import DataFrame, Timestamp, Timedelta
-from xarray import Dataset
+from openghg.types import ObjectStoreError
+
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -23,16 +26,11 @@ class Datasource:
     _datasource_root = "datasource"
     _data_root = "data"
 
-    def __init__(self, uuid: Optional[str] = None) -> None:
-        from collections import defaultdict
+    def __init__(self) -> None:
+        from openghg.util import timestamp_now
         from uuid import uuid4
 
-        from openghg.util import timestamp_now
-
-        if uuid is None:
-            self._uuid: str = str(uuid4())
-        else:
-            self._uuid = uuid
+        self._uuid: str = str(uuid4())
 
         self._creation_datetime = timestamp_now()
         self._metadata: Dict[str, str] = {}
@@ -42,9 +40,9 @@ class Datasource:
         self._start_date = None
         self._end_date = None
 
+        self._bucket = ""
+
         self._stored = False
-        # This dictionary stored the keys for each version of data uploaded
-        # data_key = d._data_keys["latest"]["keys"][date_key]
         self._data_keys: dataKeyType = defaultdict(dict)
         self._data_type: str = ""
         # Hold information regarding the versions of the data
@@ -86,6 +84,7 @@ class Datasource:
         metadata: Dict,
         data: Dataset,
         data_type: str,
+        skip_keys: Optional[List] = None,
         overwrite: Optional[bool] = False,
     ) -> None:
         """Add data to this Datasource and segment the data by size.
@@ -105,7 +104,7 @@ class Datasource:
         if data_type not in expected_data_types:
             raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
 
-        self.add_metadata(metadata=metadata)
+        self.add_metadata(metadata=metadata, skip_keys=skip_keys)
 
         if "time" in data.coords:
             return self.add_timed_data(data=data, data_type=data_type)
@@ -226,9 +225,10 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.objectstore import delete_object, get_bucket
+        from openghg.objectstore import delete_object
 
-        bucket = get_bucket()
+        if not self._bucket:
+            raise ObjectStoreError("No bucket set, has this Datasource been previously saved?")
 
         to_delete = []
         for key_data in self._data_keys.values():
@@ -236,35 +236,20 @@ class Datasource:
             to_delete.extend(keys)
 
         for key in set(to_delete):
-            delete_object(bucket=bucket, key=key)
+            delete_object(bucket=self._bucket, key=key)
 
-    def delete_data(self, keys: List) -> None:
+    def delete_data(self, bucket: str, keys: List) -> None:
         """Delete specific keys
 
         Args:
             keys: List of keys to delete
         """
-        from openghg.objectstore import delete_object, get_bucket
-
-        bucket = get_bucket()
+        from openghg.objectstore import delete_object
 
         for key in set(keys):
             delete_object(bucket=bucket, key=key)
 
-    # def delete_version(self, version: str) -> None:
-    #     """Delete a specific version of data.
-
-    #     Args:
-    #         version: Version string
-    #     Returns:
-    #         None
-    #     """
-    #     if version not in self._data_keys:
-    #         raise KeyError("Invalid version.")
-
-    #     # keys =
-
-    def add_metadata(self, metadata: Dict) -> None:
+    def add_metadata(self, metadata: Dict, skip_keys: Optional[List] = None) -> None:
         """Add all metadata in the dictionary to this Datasource
 
         Args:
@@ -274,7 +259,7 @@ class Datasource:
         """
         from openghg.util import to_lowercase
 
-        lowercased: Dict = to_lowercase(metadata)
+        lowercased: Dict = to_lowercase(metadata, skip_keys=skip_keys)
         self._metadata.update(lowercased)
 
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
@@ -368,9 +353,7 @@ class Datasource:
 
         return daterange_str
 
-    def clip_daterange(self,
-                       end_date: Timestamp,
-                       start_date_next: Timestamp) -> Timestamp:
+    def clip_daterange(self, end_date: Timestamp, start_date_next: Timestamp) -> Timestamp:
         """
         Clip any end_date greater than the next start date (start_date_next) to be
         1 second less.
@@ -472,24 +455,6 @@ class Datasource:
 
         return period
 
-    @staticmethod
-    def exists(datasource_id: str, bucket: Optional[str] = None) -> bool:
-        """Check if a datasource with this ID is already stored in the object store
-
-        Args:
-            datasource_id (str): ID of datasource created from data
-        Returns:
-            bool: True if Datasource exists
-        """
-        from openghg.objectstore import exists, get_bucket
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        key = f"{Datasource._datasource_root}/uuid/{datasource_id}"
-
-        return exists(bucket=bucket, key=key)
-
     def to_data(self) -> Dict:
         """Return a JSON-serialisable dictionary of object
         for storage in object store
@@ -533,17 +498,6 @@ class Datasource:
 
         return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
 
-        # # TODO - is there a cleaner way of doing this?
-        # with tempfile.TemporaryDirectory() as tmpdir:
-        #     tmp_path = Path(tmpdir).joinpath("tmp.nc")
-
-        #     with open(tmp_path, "wb") as f:
-        #         f.write(data)
-
-        #     ds: Dataset = xr_load_dataset(tmp_path)
-
-        #     return ds
-
     @classmethod
     def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:
         """Construct a Datasource from JSON
@@ -557,12 +511,10 @@ class Datasource:
         """
         from openghg.util import timestamp_tzaware
 
-        uuid = data["UUID"]
-        d = cls(uuid=uuid)
-
+        d = cls()
         # TODO: May want to merge these steps within the @classmethod
         # into __init__() so this is not added twice.
-
+        d._uuid = data["UUID"]
         d._creation_datetime = timestamp_tzaware(data["creation_datetime"])
         d._metadata = data["metadata"]
         d._stored = data["stored"]
@@ -570,6 +522,7 @@ class Datasource:
         d._data = {}
         d._data_type = data["data_type"]
         d._latest_version = data["latest_version"]
+        d._bucket = bucket
 
         if d._stored and not shallow:
             for date_key in d._data_keys["latest"]["keys"]:
@@ -582,7 +535,7 @@ class Datasource:
 
         return d
 
-    def save(self, bucket: Optional[str] = None) -> None:
+    def save(self, bucket: str) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
@@ -592,12 +545,8 @@ class Datasource:
         """
         from copy import deepcopy
         from pathlib import Path
-
-        from openghg.objectstore import get_bucket, set_object_from_json
+        from openghg.objectstore import set_object_from_json
         from openghg.util import timestamp_now
-
-        if bucket is None:
-            bucket = get_bucket()
 
         if self._data:
             # Ensure we have the latest key
@@ -661,9 +610,8 @@ class Datasource:
     @classmethod
     def load(
         cls: Type[T],
-        bucket: Optional[str] = None,
-        uuid: Optional[str] = None,
-        key: Optional[str] = None,
+        bucket: str,
+        uuid: str,
         shallow: bool = False,
     ) -> T:
         """Load a Datasource from the object store either by name or UUID
@@ -677,22 +625,12 @@ class Datasource:
         Returns:
             Datasource: Datasource object created from JSON
         """
-        from openghg.objectstore import get_bucket, get_object_from_json
+        from openghg.objectstore import get_object_from_json
 
-        if uuid is None and key is None:
-            raise ValueError("Both uuid and key cannot be None")
-
-        if bucket is None:
-            bucket = get_bucket()
-
-        if key is None:
-            key = f"{Datasource._datasource_root}/uuid/{uuid}"
-
+        key = f"{Datasource._datasource_root}/uuid/{uuid}"
         data = get_object_from_json(bucket=bucket, key=key)
 
-        datasource = cls.from_data(bucket=bucket, data=data, shallow=shallow)
-
-        return datasource
+        return cls.from_data(bucket=bucket, data=data, shallow=shallow)
 
     def data(self) -> Dict:
         """Get the data stored in this Datasource
@@ -700,14 +638,10 @@ class Datasource:
         Returns:
             dict: Dictionary of data keyed by daterange
         """
-        from openghg.objectstore import get_bucket
-
         if not self._data:
-            bucket = get_bucket()
-
             for date_key in self._data_keys["latest"]["keys"]:
                 data_key = self._data_keys["latest"]["keys"][date_key]
-                self._data[date_key] = Datasource.load_dataset(bucket=bucket, key=data_key)
+                self._data[date_key] = Datasource.load_dataset(bucket=self._bucket, key=data_key)
 
         return self._data
 
@@ -1040,3 +974,18 @@ class Datasource:
             str: Latest version
         """
         return self._latest_version
+
+    def integrity_check(self) -> None:
+        """Checks to ensure all data stored by this Datasource exists in the object store.
+
+        Returns:
+            None
+        """
+        from openghg.objectstore import exists
+
+        for version, key_data in self._data_keys.items():
+            for key in key_data["keys"].values():
+                if not exists(bucket=self._bucket, key=key):
+                    raise ObjectStoreError(
+                        f"The key {key} for version {version} of this Datasource does not exist in the object store {self._bucket}"
+                    )

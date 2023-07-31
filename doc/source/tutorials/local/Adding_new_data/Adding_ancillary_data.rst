@@ -38,6 +38,11 @@ affect your use of OpenGHG outside of this tutorial.
 1. Adding and standardising data
 --------------------------------
 
+.. note::
+    Outside of this tutorial, if you have write access to multiple object stores you
+    will need to pass the name of the object store you wish to write to to
+    the ``store`` argument of the standardise functions.
+
 Data can be added to the object store using appropriate functions from
 the ``openghg.standardise`` sub module. This includes:
 
@@ -57,13 +62,13 @@ added to the object store.
 .. code:: ipython3
 
     from openghg.tutorial import retrieve_example_data
-    
+
     fp_url = "https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_inert_201607.tar.gz"
     data_file_fp = retrieve_example_data(url=fp_url)[0]
-    
+
     flux_url = "https://github.com/openghg/example_data/raw/main/flux/ch4-ukghg-all_EUROPE_2016.tar.gz"
     data_file_flux = retrieve_example_data(url=flux_url)[0]
-    
+
     bc_url = "https://github.com/openghg/example_data/raw/main/boundary_conditions/ch4_EUROPE_201607.tar.gz"
     data_file_bc = retrieve_example_data(url=bc_url)[0]
 
@@ -112,7 +117,7 @@ species.
 .. code:: ipython3
 
     from openghg.standardise import standardise_footprint
-    
+
     standardise_footprint(data_file_fp, site="TAC", domain="EUROPE", inlet="100m", model="NAME")
 
 
@@ -128,7 +133,7 @@ object store using the ``get_footprint`` function available from the
 .. code:: ipython3
 
     from openghg.retrieve import get_footprint
-    
+
     footprint_data = get_footprint(site="TAC", domain="EUROPE", inlet="100m")
 
 For the standards associated the footprint files, there are also flags
@@ -170,13 +175,13 @@ described above.
 .. code:: ipython3
 
     from openghg.standardise import standardise_flux
-    
+
     standardise_flux(data_file_flux, species="ch4", domain="EUROPE", source="anthro", model="ukghg")
 
 .. code:: ipython3
 
     from openghg.retrieve import get_flux
-    
+
     flux_data = get_flux(species="ch4", domain="EUROPE", source="anthro")
 
 Boundary conditions
@@ -196,7 +201,7 @@ climatology product [++REFINE AND ADD LINK++]*.
 .. code:: ipython3
 
     from openghg.standardise import standardise_bc
-    
+
     standardise_bc(data_file_bc, species="ch4", domain="EUROPE", bc_input="CAMS")
 
 
@@ -205,8 +210,8 @@ climatology product [++REFINE AND ADD LINK++]*.
     WARNING:openghg.store:This file has been uploaded previously with the filename : ch4_EUROPE_201607.nc - skipping.
 
 
-Defining ‘source’ and ‘bc_input’
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Defining ``source`` and ``bc_input``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Unlike the ``domain`` and ``species`` inputs which have some pre-defined
 values, the ``source`` and ``bc_input`` keywords can be chosen by the
@@ -228,11 +233,9 @@ can be used
 .. code:: ipython3
 
     from openghg.retrieve import search
-    
+
     search_results = search()
     search_results.results
-
-
 
 
 .. raw:: html
@@ -242,11 +245,11 @@ can be used
         .dataframe tbody tr th:only-of-type {
             vertical-align: middle;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
-    
+
         .dataframe thead th {
             text-align: right;
         }
@@ -366,7 +369,7 @@ example, for flux data:
 .. code:: ipython3
 
     from openghg.retrieve import search_flux
-    
+
     search_results_flux = search_flux()
     search_results_flux.results
 
@@ -380,11 +383,11 @@ example, for flux data:
         .dataframe tbody tr th:only-of-type {
             vertical-align: middle;
         }
-    
+
         .dataframe tbody tr th {
             vertical-align: top;
         }
-    
+
         .dataframe thead th {
             text-align: right;
         }
@@ -466,7 +469,7 @@ format using the ``.schema()`` method:
 .. code:: ipython3
 
     from openghg.store import Emissions
-    
+
     Emissions.schema()
 
 
@@ -481,7 +484,7 @@ format using the ``.schema()`` method:
 This tells us that the netcdf input for “emissions” should contain:
 
 - Data variables:
- 
+
   - “flux” data variable with dimensions of (“time”, “lat”, “lon”)
 
 - Data types:
@@ -526,13 +529,13 @@ This tells us that the default netcdf input for “footprints” should
 contain:
 
 - Data variables:
- 
+
   - “fp” data variable with dimensions of (“time”, “lat”, “lon”)
   - “particle_locations_n”, “particle_locations_s” with dimensions of (“time”, “lon”, “height”)
   - “particle_locations_e”, “particle_locations_w” with dimensions of (“time”, “lat”, “height”)
 
 - Data types:
- 
+
   - “fp”, “lat”, “lon”, “height” variables / coordinates should be float type
   - “particle_locations_n”, “particle_locations_e”, “particle_locations_s”, “particle_locations_w” variables should also be float type
   - “time” coordinate should be datetime64
@@ -568,12 +571,12 @@ This tells us that, in addition to the “default” variables, for
 short-lived species there also must be:
 
 - Additional data variables:
- 
+
   - “mean_age_particles_n”, “mean_age_particles_s” with dimensions of (“time”, “lon”, “height”)
   - “mean_age_particles_e”, “mean_age_particles_w” with dimensions of (“time”, “lat”, “height”)
- 
+
 - Data types:
- 
+
   - all new variables should be float type
 
 Similiarly for the ``high_time_res`` and ``high_spatial_res`` flags to

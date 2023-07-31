@@ -4,7 +4,7 @@ channels:
   - defaults
   - anaconda
 dependencies:
-  - python >= 3.8
+  - python>=3.8
   - addict
   - dask
   - h5netcdf
@@ -15,20 +15,20 @@ dependencies:
   - numexpr
   - numpy
   - nc-time-axis
-  - pandas < 2.0
+  - openghg_defs
+  - pandas<2.0
+  - pip
   - plotly
   - pyvis
   - rapidfuzz
-  - requests >= 2.25
+  - requests>=2.25
   - scipy
   - tinydb
   - toml
   - tqdm
   - xarray
-  - urllib3 >= 1.26.3
-  - pip
-  - xesmf >= 0.7
   - rich
+  - urllib3>=1.26.3
+  - xesmf>=0.7
   - pip:
     - icoscp
-    - openghg_defs @ git+https://github.com/openghg/supplementary_data
