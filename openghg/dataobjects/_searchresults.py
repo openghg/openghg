@@ -1,4 +1,5 @@
 import json
+import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
@@ -12,6 +13,8 @@ __all__ = ["SearchResults"]
 
 T = TypeVar("T", bound="SearchResults")
 
+logger = logging.getLogger("openghg.dataobjects")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 class SearchResults:
     """This class is used to return data from the search function. It
@@ -267,8 +270,7 @@ class SearchResults:
             from rich import print
             from rich.table import Table, box
         except ModuleNotFoundError:
-            # Should likely add a logger line here but would also need to set up the logging
-            print("Unable to use rich package to display search results. Please install rich")
+            logger.warning("Unable to use rich package to display search results. Please install rich")
             return None
 
         # Split columns into sets
