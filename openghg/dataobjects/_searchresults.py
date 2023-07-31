@@ -263,8 +263,13 @@ class SearchResults:
         Returns:
             None
         """
-        from rich import print
-        from rich.table import Table, box
+        try:
+            from rich import print
+            from rich.table import Table, box
+        except ModuleNotFoundError:
+            # Should likely add a logger line here but would also need to set up the logging
+            print("Unable to use rich package to display search results. Please install rich")
+            return None
 
         # Split columns into sets
         column_sets = [df.columns[i : i + 4] for i in range(0, len(df.columns), 4)]

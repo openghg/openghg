@@ -28,6 +28,7 @@ dependencies:
   - urllib3 >= 1.26.3
   - pip
   - xesmf >= 0.7
+  - rich
   - pip:
     - icoscp
     - openghg_defs @ git+https://github.com/openghg/supplementary_data
