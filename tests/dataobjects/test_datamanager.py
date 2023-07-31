@@ -334,7 +334,7 @@ def test_delete_data():
         assert uid not in obs._datasource_uuids
 
 
-@pytest.mark.xfail(reason="Failing due to the Datasource save bug - issue 724")
+@pytest.mark.xfail(reason="Failing due to the Datasource save bug - issue 724", raises=AssertionError)
 def test_metadata_backup_restore():
     res_one = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
 
