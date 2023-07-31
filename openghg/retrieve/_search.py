@@ -282,6 +282,7 @@ def search_footprints(
     # Either (or both) of 'inlet' and 'height' may be in the metastore, so
     # both are allowed for search.
     from openghg.util import format_inlet
+
     args["inlet"] = format_inlet(inlet)
     args["height"] = format_inlet(height)
 

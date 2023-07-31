@@ -15,6 +15,7 @@ T = TypeVar("T", bound="BaseStore")
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+
 class BaseStore:
     _root = "root"
     _uuid = "root_uuid"
@@ -191,7 +192,9 @@ class BaseStore:
                 else:
                     return val
 
-            required_metadata = {k.lower(): lower_if_string(v) for k, v in metadata.items() if k in required_keys}
+            required_metadata = {
+                k.lower(): lower_if_string(v) for k, v in metadata.items() if k in required_keys
+            }
 
             if len(required_metadata) < min_keys:
                 raise ValueError(

@@ -380,7 +380,15 @@ class Footprints(BaseStore):
         # These are the keys we will take from the metadata to search the
         # metadata store for a Datasource, they should provide as much detail as possible
         # to uniquely identify a Datasource
-        required = ("site", "model", "inlet", "domain", "high_time_resolution", "high_spatial_resolution", "short_lifetime")
+        required = (
+            "site",
+            "model",
+            "inlet",
+            "domain",
+            "high_time_resolution",
+            "high_spatial_resolution",
+            "short_lifetime",
+        )
 
         data_type = "footprints"
         datasource_uuids = self.assign_data(
