@@ -81,7 +81,7 @@ class BaseStore:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
         from openghg.store.base import Datasource
-        from openghg.util import to_lowercase
+        #from openghg.util import to_lowercase
 
         uuids = {}
 
