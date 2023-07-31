@@ -286,9 +286,11 @@ def search_footprints(
     args["height"] = format_inlet(height)
 
     args["data_type"] = "footprints"  # generic `search` needs the data type
-    args = kwargs | args  # on conflict, keep entries from `args`
 
-    return search(**args)
+    # merge kwargs and args, keeping values from args on key conflict
+    kwargs.update(args)
+
+    return search(**kwargs)
 
 
 def search_surface(

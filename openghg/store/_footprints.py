@@ -354,7 +354,6 @@ class Footprints(BaseStore):
             except KeyError:
                 raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
-        # NetCDF attributes need to be strings, so we convert Boolean metadata to strings.
         metadata["high_time_res"] = high_time_res
         metadata["high_spatial_res"] = high_spatial_res
         metadata["short_lifetime"] = short_lifetime

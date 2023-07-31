@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 from pandas import Timestamp
 import tinydb
 import logging
-from functools import reduce
 from openghg.types import DatasourceLookupError
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.util import timestamp_now
@@ -104,11 +103,12 @@ class BaseStore:
 
             # Add the read metadata to the Dataset attributes being careful
             # not to overwrite any attributes that are already there
-            def convert_to_netcdf4_types(value: Any):
+            def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
                 """Attributes in a netCDF file can be strings, numbers, or sequences:
                 http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
 
-                This function converts any non-numeric or non-list data to strings.
+                This function converts any data whose type is not int, float, str, or list
+                to strings.
                 Booleans are converted to strings, even though they are a subtype of int.
                 """
                 if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
