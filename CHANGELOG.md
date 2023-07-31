@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `rich` package to printing out SearchResults object in a table format. Requires to re-run requirements.txt  - [PR #696](https://github.com/openghg/openghg/pull/696)
+- Added `rich` package to printing out SearchResults object in a table format. Re-run requirements.txt /environment.yml to apply this change. - [PR #696](https://github.com/openghg/openghg/pull/696)
 
 ### Fixed
 
