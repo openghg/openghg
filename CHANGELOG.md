@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Bug where high time resolution footprints were being clobbered into low
-resolution footprints - [PR #720](https://github.com/openghg/openghg/pull/720)
+- Bug when adding high time resolution footprints to object store: they were not
+being distinguished from low resolution footprints - [PR #720](https://github.com/openghg/openghg/pull/720)
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.6.1...HEAD)
 
