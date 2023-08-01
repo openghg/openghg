@@ -81,7 +81,6 @@ class BaseStore:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
         from openghg.store.base import Datasource
-        # from openghg.util import to_lowercase
 
         uuids = {}
 
@@ -132,9 +131,6 @@ class BaseStore:
                 # For retrieval later we'll need to know which bucket this is stored in
                 meta_copy["object_store"] = self._bucket
 
-                # Make sure all the metadata is lowercase for easier searching later
-                # TODO - do we want to do this or should be just perform lowercase comparisons?
-                # meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
                 # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
                 # so we can have rapid
                 self._datasource_uuids[uid] = key
