@@ -395,8 +395,8 @@ def standardise_footprint(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
         )
 
-        fn_resolutionponse = call_function(data=to_post)
-        response_content: Dict = fn_resolutionponse["content"]
+        fn_response = call_function(data=to_post)
+        response_content: Dict = fn_response["content"]
         return response_content
     else:
         bucket = get_writable_bucket(name=store)

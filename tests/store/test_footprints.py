@@ -32,7 +32,7 @@ def test_read_footprint_co2_from_data(mocker):
     file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": True}
 
     # Expect co2 data to be high time resolution
-    # - could include high_time_resolutionolution=True but don't need to as this will be set automatically
+    # - could include high_time_resolution=True but don't need to as this will be set automatically
     bucket = get_bucket()
     with Footprints(bucket=bucket) as fps:
         result = fps.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
@@ -127,7 +127,7 @@ def test_read_footprint_high_spatial_resolution():
      - expects additional parameters for `fp_low` and `fp_high`
      - expects additional coordinates for `lat_high`, `lon_high`
      - expects keyword attributes to be set
-       - "spatial_resolution": "high_spatial_resolutionolution"
+       - "spatial_resolution": "high_spatial_resolution"
     """
     datapath = get_footprint_datapath("footprint_test.nc")
     # model_params = {"simulation_params": "123"}
@@ -283,7 +283,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
      - expects additional parameter for `fp_HiTRes`
      - expects additional coordinate for `H_back`
      - expects keyword attributes to be set
-       - "spatial_resolution": "high_time_resolutionolution"
+       - "spatial_resolution": "high_time_resolution"
 
     Two tests included on same domain for CO2:
     - TAC data - includes H_back as an integer (older style footprint)
