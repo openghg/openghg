@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.6.1] - 2023-07-xx
 
+### Added
+
+- Added `rich` package to printing out SearchResults object in a table format. Re-run requirements.txt /environment.yml to apply this change. - [PR #696](https://github.com/openghg/openghg/pull/696)
+
 ### Fixed
 
 - Bug in `DataManager` where a string was interpreted as a list when processing metadata keys to be deleted - [PR #713](https://github.com/openghg/openghg/pull/713)
