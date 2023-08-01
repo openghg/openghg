@@ -252,9 +252,7 @@ def search_footprints(
     Returns:
         SearchResults: SearchResults object
     """
-    # NOTE: the following two lines are a shorter way to get args...
-    # args = locals().copy()  # get dict of arguments to process and pass to `search`
-    # args.pop("kwargs")  # the value of kwargs is a dictionary, so we remove it
+    from openghg.util import format_inlet
 
     args = {
         "site": site,
@@ -281,8 +279,6 @@ def search_footprints(
 
     # Either (or both) of 'inlet' and 'height' may be in the metastore, so
     # both are allowed for search.
-    from openghg.util import format_inlet
-
     args["inlet"] = format_inlet(inlet)
     args["height"] = format_inlet(height)
 
