@@ -178,6 +178,8 @@ class BaseStore:
         Return:
             dict: Dictionary of datasource information
         """
+        from openghg.util import to_lowercase
+
         if min_keys is None:
             min_keys = len(required_keys)
 
@@ -185,15 +187,8 @@ class BaseStore:
         for key, _data in data.items():
             metadata = _data["metadata"]
 
-            def lower_if_string(val: Any) -> Any:
-                "Convert strings to lower case, leave types alone."
-                if isinstance(val, str):
-                    return val.lower()
-                else:
-                    return val
-
             required_metadata = {
-                k.lower(): lower_if_string(v) for k, v in metadata.items() if k in required_keys
+                k.lower(): to_lowercase(v) for k, v in metadata.items() if k in required_keys
             }
 
             if len(required_metadata) < min_keys:
