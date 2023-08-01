@@ -327,7 +327,7 @@ def test_search_footprints_high_time_resolution():
     """Test search for high time resolution footprints
 
     Expected behaviour: searching for footprints with
-    keyword argument `high_time_res = True` should only
+    keyword argument `high_time_resolution = True` should only
     return results for high time resolution footprints.
     """
     res = search_footprints(
