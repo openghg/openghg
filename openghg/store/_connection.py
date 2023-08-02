@@ -172,10 +172,14 @@ class ObjectStoreConnection:
         If no existing Datasource is found for the given metadata, then a new Datasource is created,
         and the new Datasource uuid is stored in the internal metadata.
 
+        Args:
+            metadata: metadata for data to be stored
+            data: data to be stored
+            overwrite:
         """
         from openghg.store.base import Datasource
-
-        # TODO add overwrite and skip_keys (which are currently only used for ICOS retrieval)
+        # TODO add skip_keys? (currently only used for ICOS retrieval)
+        # TODO add overwrite? (currently not used in Datasource.add_data)
 
         metadata = {k.lower(): v for k, v in metadata.items()}  # metastore keys are lower case
 
@@ -198,8 +202,12 @@ class ObjectStoreConnection:
         datasource.add_data(metadata=metadata, data=data, data_type=self._data_type)
         datasource.save(bucket=self._bucket)
         if new_datasource:
-            self._metastore.insert(datasource.metadata())
+            self._metastore.insert(metadata)
         else:
+            # Since the new data we're adding might have more metadata than was
+            # in the existing Datasource, we update to datasource.metadata(),
+            # which combines the existing metadata in the Datasource with
+            # any newly added metadata.
             self._metastore.update(datasource.metadata())
         return {"uuid": datasource.uuid(), "new_datasource": new_datasource}
 
