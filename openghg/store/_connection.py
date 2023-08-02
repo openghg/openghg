@@ -41,9 +41,9 @@ class ObjectStoreConnection:
     # variables that should be redefined in subclasses
     _root = "root"
     _uuid = "root_uuid"
-    _required_keys: tuple = ()
-    _optional_keys: tuple = ()
-    _data_type: str = ""
+    required_keys: tuple = ()
+    optional_keys: tuple = ()
+    data_type: str = ""
 
     def __init__(self, bucket: str) -> None:
         """Create object store connection object.
@@ -69,14 +69,14 @@ class ObjectStoreConnection:
 
     @classmethod
     def __init_subclass__(cls) -> None:
-        """Register subclasses by _data_type."""
-        ObjectStoreConnection._registry[cls._data_type] = cls
+        """Register subclasses by data_type."""
+        ObjectStoreConnection._registry[cls.data_type] = cls
 
     def __repr__(self) -> str:
         return f"""ObjectStoreConnection to {self._bucket}/{self._metakey}
-        Data type: {self._data_type}
-        Required keys: {self._required_keys!r}
-        Optional keys: {self._optional_keys!r}
+        Data type: {self.data_type}
+        Required keys: {self.required_keys!r}
+        Optional keys: {self.optional_keys!r}
         """
 
     # context manager
@@ -147,14 +147,14 @@ class ObjectStoreConnection:
         # a possible fix is to allow the user to specify "defining keywords", which we would add to required keys
         """
         required_metadata = {
-            k.lower(): v for k, v in metadata.items() if k in self._required_keys
+            k.lower(): v for k, v in metadata.items() if k in self.required_keys
         }  # NOTE: keys stored as lowercase
-        if len(required_metadata) < len(self._required_keys):
+        if len(required_metadata) < len(self.required_keys):
             raise ValueError(
-                f"The given metadata does not contain enough information. The required keys are: {self._required_keys}"
+                f"The given metadata does not contain enough information. The required keys are: {self.required_keys}"
             )
 
-        for key in self._optional_keys:
+        for key in self.optional_keys:
             if (val := metadata.get(key, None)) is not None:
                 required_metadata[key] = val
 
@@ -175,7 +175,10 @@ class ObjectStoreConnection:
         Args:
             metadata: metadata for data to be stored
             data: data to be stored
-            overwrite:
+
+        Returns:
+           Dictionary with uuid of Datasource and a Boolean that is true if the
+        Datasource is new.
         """
         from openghg.store.base import Datasource
         # TODO add skip_keys? (currently only used for ICOS retrieval)
@@ -193,13 +196,13 @@ class ObjectStoreConnection:
             metadata["object_store"] = self._bucket  # TODO is Gareth removing this?
 
             # record datasource in internal metadata
-            key = "_".join(str(metadata[k]) for k in self._required_keys)
+            key = "_".join(str(metadata[k]) for k in self.required_keys)
             self._datasource_uuids[uuid] = key
         else:
             uuid = str(lookup_results)  # we know lookup_results is not none
             datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
-        datasource.add_data(metadata=metadata, data=data, data_type=self._data_type)
+        datasource.add_data(metadata=metadata, data=data, data_type=self.data_type)
         datasource.save(bucket=self._bucket)
         if new_datasource:
             self._metastore.insert(metadata)
@@ -257,7 +260,7 @@ def get_object_store_connection(data_type: str, bucket: str) -> ObjectStoreConne
 class SurfaceConnection(ObjectStoreConnection):
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
-    _required_keys = (
+    required_keys = (
         "species",
         "site",
         "sampling_period",
@@ -270,45 +273,45 @@ class SurfaceConnection(ObjectStoreConnection):
         "icos_data_level",
         "data_type",
     )
-    _data_type = "surface"
+    data_type = "surface"
 
 
 class ColumnConnection(ObjectStoreConnection):
     _root = "ObsColumn"
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
-    _required_keys = ("satellite", "selection", "domain", "site", "species", "network")
-    _data_type = "column"
+    required_keys = ("satellite", "selection", "domain", "site", "species", "network")
+    data_type = "column"
 
 
 class EmissionsConnection(ObjectStoreConnection):
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
-    _required_keys = ("species", "source", "domain")
-    _optional_keys = ("database", "database_version", "model")
-    _data_type = "emissions"
+    required_keys = ("species", "source", "domain")
+    optional_keys = ("database", "database_version", "model")
+    data_type = "emissions"
 
 
 class FootprintsConnection(ObjectStoreConnection):
     _root = "Footprints"
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
-    _required_keys = (
+    required_keys = (
         "site",
         "model",
         "inlet",
         "domain",
     )  # TODO add high_time_resolution, etc. when 0.6.1 is out
-    _data_type = "footprints"
+    data_type = "footprints"
 
 
 class BoundaryConditionsConnection(ObjectStoreConnection):
     _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
-    _required_keys = ("species", "bc_input", "domain")
-    _data_type = "boundary_conditions"
+    required_keys = ("species", "bc_input", "domain")
+    data_type = "boundary_conditions"
 
 
 class EulerianModelConnection(ObjectStoreConnection):
     _root = "EulerianModel"
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
-    _required_keys = ("model", "species", "date")
-    _data_type = "eulerian_model"
+    required_keys = ("model", "species", "date")
+    data_type = "eulerian_model"
