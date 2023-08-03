@@ -15,6 +15,7 @@ Functions:
 - `get_object_store_connection` returns an object store connection
    for a given data type to a given bucket.
 """
+from __future__ import annotations
 import logging
 from pathlib import Path
 from types import TracebackType
@@ -45,7 +46,7 @@ class ObjectStoreConnection:
         data_type: used to register subclasses
     """
 
-    _registry = {}  # subclass registry
+    _registry: dict[str, Any] = {}  # subclass registry  # TODO replace Any with proper typing
 
     # variables that should be redefined in subclasses
     _root = "root"
@@ -89,7 +90,7 @@ class ObjectStoreConnection:
         """
 
     # context manager
-    def __enter__(self):
+    def __enter__(self) -> ObjectStoreConnection:
         return self
 
     def __exit__(
@@ -104,7 +105,7 @@ class ObjectStoreConnection:
         else:
             self.close()
 
-    def close(self):
+    def close(self) -> None:
         """Close object store connection.
 
         This closes the metastore and writes internal metadata.
@@ -174,7 +175,7 @@ class ObjectStoreConnection:
         elif len(results) > 1:
             raise DatasourceLookupError("More than one Datasource found for metadata.")
         else:
-            return results[0]["uuid"]
+            return str(results[0]["uuid"])  # str to appease mypy
 
     def add_to_store(self, metadata: dict[str, Any], data: xarray.Dataset, skip_keys: Optional[list[str]] = ["object_store"]) -> dict[str, Union[str, bool]]:
         """Add (metadata, data) pair to a Datasource in the object store.
@@ -234,7 +235,7 @@ class ObjectStoreConnection:
 
         Returns:
             True if file hash is found in internal metadata for this data type,
-        False if file hash is not found.
+            False if file hash is not found.
         """
         return file_hash in self._file_hashes.keys()
 
@@ -249,7 +250,7 @@ class ObjectStoreConnection:
     # it works
 
 
-def get_object_store_connection(data_type: str, bucket: str) -> ObjectStoreConnection:
+def get_object_store_connection(data_type: str, bucket: str) -> Any:  # TODO: fix typing
     """Get an object store connection for a given data type.
 
     Args:
