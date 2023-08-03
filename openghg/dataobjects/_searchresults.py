@@ -1,4 +1,5 @@
 import json
+import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
@@ -12,6 +13,9 @@ __all__ = ["SearchResults"]
 
 T = TypeVar("T", bound="SearchResults")
 
+logger = logging.getLogger("openghg.dataobjects")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
 
 class SearchResults:
     """This class is used to return data from the search function. It
@@ -20,11 +24,12 @@ class SearchResults:
     Args:
         keys: Dictionary of keys keyed by Datasource UUID
         metadata: Dictionary of metadata keyed by Datasource UUID
+        start_result: ?
     """
 
-    def __init__(self, keys: Optional[Dict] = None,
-                 metadata: Optional[Dict] = None,
-                 start_result: Optional[str] = None):
+    def __init__(
+        self, keys: Optional[Dict] = None, metadata: Optional[Dict] = None, start_result: Optional[str] = None
+    ):
         if metadata is not None:
             self.metadata = metadata
         else:
@@ -43,7 +48,7 @@ class SearchResults:
                 DataFrame.from_dict(data=metadata, orient="index").reset_index().drop(columns="index")
             )
         else:
-            self.results = {}
+            self.results = {}  # type: ignore
 
         if keys is not None:
             self.key_data = keys
@@ -53,6 +58,8 @@ class SearchResults:
         self.hub = running_on_hub()
 
     def __str__(self) -> str:
+        SearchResults.df_to_table_console_output(df=DataFrame.from_dict(data=self.metadata))
+
         return f"Found {len(self.results)} results.\nView the results DataFrame using the results property."
 
     def __repr__(self) -> str:
@@ -130,7 +137,6 @@ class SearchResults:
             sort: Sort by time. Note that this may be very memory hungry for large Datasets.
             elevate_inlet: Elevate inlet to a variable within the Dataset, useful
             for ranked data.
-
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
@@ -202,10 +208,10 @@ class SearchResults:
             ObsData / List[ObsData]: ObsData object(s)
         """
         results = []
-        # For uid in uuids
         for uid in uuids:
             keys = self.key_data[uid]
-            dataset = self._retrieve_dataset(keys, sort=sort, elevate_inlet=elevate_inlet)
+            bucket = self.metadata[uid]["object_store"]
+            dataset = self._retrieve_dataset(bucket=bucket, keys=keys, sort=sort, elevate_inlet=elevate_inlet)
             metadata = self.metadata[uid]
 
             results.append(ObsData(data=dataset, metadata=metadata))
@@ -216,7 +222,12 @@ class SearchResults:
             return results
 
     def _retrieve_dataset(
-        self, keys: List, sort: bool, elevate_inlet: bool = True, attrs_to_check: Optional[Dict] = None
+        self,
+        bucket: str,
+        keys: List,
+        sort: bool,
+        elevate_inlet: bool = True,
+        attrs_to_check: Optional[Dict] = None,
     ) -> Dataset:
         """Retrieves datasets from either cloud or local object store
 
@@ -247,5 +258,51 @@ class SearchResults:
             return ds
         else:
             return recombine_datasets(
-                keys=keys, sort=sort, elevate_inlet=elevate_inlet, attrs_to_check=attrs_to_check
+                bucket=bucket,
+                keys=keys,
+                sort=sort,
+                elevate_inlet=elevate_inlet,
+                attrs_to_check=attrs_to_check,
             )
+
+    @staticmethod
+    def df_to_table_console_output(df: DataFrame) -> None:
+        """
+        Process the DataFrame and display it as a formatted table in the console.
+
+        Args:
+            df (DataFrame): The DataFrame to be processed and displayed.
+
+        Returns:
+            None
+        """
+        try:
+            from rich import print
+            from rich.table import Table, box
+        except ModuleNotFoundError:
+            logger.warning("Unable to use rich package to display search results. Please install rich")
+            return None
+
+        # Split columns into sets
+        column_sets = [df.columns[i : i + 4] for i in range(0, len(df.columns), 4)]
+
+        # Iterate over the column sets
+        for columns in column_sets:
+            # Create a table instance
+            table = Table(show_header=False, header_style="bold", box=box.HORIZONTALS)
+
+            # Add table headers
+            for i, column in enumerate(columns, start=1):
+                if i == 1:
+                    table.add_column(column, style="bold")
+                else:
+                    table.add_column(column)
+
+            # Add table data
+            for index, row in df.iterrows():
+                row_data = [str(index)] + [str(row[column]) for column in columns]
+                table.add_row(*row_data)
+
+            # Print the table
+            print(table)
+            print()

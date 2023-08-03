@@ -1,7 +1,7 @@
 from .cfchecking import check_cf_compliance
 from .helpers import (
     call_function_packager,
-    clear_test_store,
+    clear_test_stores,
     get_bc_datapath,
     get_column_datapath,
     get_emissions_datapath,
@@ -14,7 +14,7 @@ from .helpers import (
     glob_files,
     key_to_local_filepath,
     all_datasource_keys,
-    temporary_store_path,
+    temporary_store_paths,
 )
 from .meta import (
     attributes_checker_get_obs,

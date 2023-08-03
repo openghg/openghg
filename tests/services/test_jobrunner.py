@@ -23,7 +23,7 @@
 
 # @pytest.fixture(autouse=True)
 # def run_before_tests():
-#     _ = clear_test_store()
+#     _ = clear_test_stores()
 
 
 # @pytest.yield_fixture()
