@@ -143,8 +143,6 @@ class ObjectStoreConnection:
 
         Raises:
             DatasourceLookupError if multiple Datasources are found for the given metadata.
-        #TODO if this error occurs, it is not possible with the current set up to add more "required" metadata...
-        # a possible fix is to allow the user to specify "defining keywords", which we would add to required keys
         """
         required_metadata = {
             k.lower(): v for k, v in metadata.items() if k in self.required_keys
@@ -158,15 +156,18 @@ class ObjectStoreConnection:
             if (val := metadata.get(key, None)) is not None:
                 required_metadata[key] = val
 
+        required_metadata = util.to_lowercase(required_metadata, skip_keys=["object_store"])
+        print(required_metadata)
+
         results = self.search(required_metadata)
         if not results:
             return None
         elif len(results) > 1:
-            raise DatasourceLookupError("More than one Datasource found for given metadata.")
+            raise DatasourceLookupError("More than one Datasource found for metadata.")
         else:
             return results[0]["uuid"]
 
-    def add_to_store(self, metadata: dict[str, Any], data: xarray.Dataset) -> dict[str, Union[str, bool]]:
+    def add_to_store(self, metadata: dict[str, Any], data: xarray.Dataset, skip_keys: Optional[list[str]] = ["object_store"]) -> dict[str, Union[str, bool]]:
         """Add (metadata, data) pair to a Datasource in the object store.
 
         If no existing Datasource is found for the given metadata, then a new Datasource is created,
@@ -181,10 +182,10 @@ class ObjectStoreConnection:
         Datasource is new.
         """
         from openghg.store.base import Datasource
-        # TODO add skip_keys? (currently only used for ICOS retrieval)
         # TODO add overwrite? (currently not used in Datasource.add_data)
 
         metadata = {k.lower(): v for k, v in metadata.items()}  # metastore keys are lower case
+        metadata = util.to_lowercase(metadata, skip_keys=skip_keys)
 
         lookup_results = self.datasource_lookup(metadata)
         new_datasource = True if lookup_results is None else False
@@ -202,7 +203,7 @@ class ObjectStoreConnection:
             uuid = str(lookup_results)  # we know lookup_results is not none
             datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
-        datasource.add_data(metadata=metadata, data=data, data_type=self.data_type)
+        datasource.add_data(metadata=metadata, data=data, data_type=self.data_type, skip_keys=skip_keys)
         datasource.save(bucket=self._bucket)
         if new_datasource:
             self._metastore.insert(metadata)
@@ -211,8 +212,8 @@ class ObjectStoreConnection:
             # in the existing Datasource, we update to datasource.metadata(),
             # which combines the existing metadata in the Datasource with
             # any newly added metadata.
-            self._metastore.update(datasource.metadata())
-        return {"uuid": datasource.uuid(), "new_datasource": new_datasource}
+            self._metastore.update(datasource.metadata(), tinydb.where("uuid") == datasource.uuid())
+        return {"uuid": datasource.uuid(), "new": new_datasource}  # TODO change new back to new_datasource
 
     def file_hash_already_seen(self, file_hash: str) -> bool:
         """Return true if file hash has been saved.

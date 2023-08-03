@@ -10,6 +10,8 @@ from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
 from types import TracebackType
 import warnings
+from openghg.store._connection import get_object_store_connection
+from openghg.util import to_lowercase
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -25,6 +27,7 @@ class Emissions(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     def __enter__(self) -> Emissions:
+        self._metastore.close()  # For now, close metastore before connection opened...
         return self
 
     def __exit__(
@@ -36,7 +39,8 @@ class Emissions(BaseStore):
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
-            self.save()
+            #self.save()
+            pass
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
@@ -102,6 +106,13 @@ class Emissions(BaseStore):
         from openghg.types import EmissionsTypes
         from openghg.util import clean_string, hash_file, load_emissions_parser
 
+        optional_args = {"database": database,
+                         "database_version": database_version,
+                         "model": model,
+                         "high_time_resolution": high_time_resolution,
+                         "period": period,
+                         }
+        print("optional_args: ", optional_args)
         species = clean_string(species)
         source = clean_string(source)
         domain = clean_string(domain)
@@ -116,51 +127,44 @@ class Emissions(BaseStore):
         # Load the data retrieve object
         parser_fn = load_emissions_parser(source_format=source_format)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
-            warnings.warn(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
-            )
-            return None
+        datasource_uuids = {}
+        with get_object_store_connection("emissions", self._bucket) as conn:
+            file_hash = hash_file(filepath=filepath)
+            if conn.file_hash_already_seen(file_hash) and not overwrite:
+                warnings.warn(
+                    f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
+                )
+                return None
 
-        # Define parameters to pass to the parser function
-        # TODO: Update this to match against inputs for parser function.
-        param = {
-            "filepath": filepath,
-            "species": species,
-            "domain": domain,
-            "source": source,
-            "high_time_resolution": high_time_resolution,
-            "period": period,
-            "continuous": continuous,
-            "data_type": "emissions",
-            "chunks": chunks,
-        }
+            # Define parameters to pass to the parser function
+            # TODO: Update this to match against inputs for parser function.
+            param = {
+                "filepath": filepath,
+                "species": species,
+                "domain": domain,
+                "source": source,
+                "high_time_resolution": high_time_resolution,
+                "period": period,
+                "continuous": continuous,
+                "data_type": "emissions",
+                "chunks": chunks,
+            }
+            optional_keywords = {k: to_lowercase(optional_args.get(k, None)) for k in conn.optional_keys}
+            param.update(optional_keywords)
+            emissions_data = parser_fn(**param)
 
-        optional_keywords = {"database": database, "database_version": database_version, "model": model}
+            # Checking against expected format for Emissions
+            for split_data in emissions_data.values():
+                em_data = split_data["data"]
+                Emissions.validate_data(em_data)
 
-        param.update(optional_keywords)
+            for key, split_data in emissions_data.items():
+                print("Passed to datasource_lookup:", split_data["metadata"].get("database_version", "database_version not found"))
+                ds_uuid = conn.add_to_store(split_data["metadata"], split_data["data"])
+                datasource_uuids[key] = ds_uuid
 
-        emissions_data = parser_fn(**param)
-
-        # Checking against expected format for Emissions
-        for split_data in emissions_data.values():
-            em_data = split_data["data"]
-            Emissions.validate_data(em_data)
-
-        min_required = ["species", "source", "domain"]
-        for key, value in optional_keywords.items():
-            if value is not None:
-                min_required.append(key)
-
-        required = tuple(min_required)
-
-        data_type = "emissions"
-        datasource_uuids = self.assign_data(
-            data=emissions_data, overwrite=overwrite, data_type=data_type, required_keys=required
-        )
-        # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+            # Record the file hash in case we see this file again
+            conn.save_file_hash(file_hash, filepath)
 
         return datasource_uuids
 

@@ -44,7 +44,7 @@ def parse_openghg(
 
     author_name = "OpenGHG Cloud"
     em_data.attrs["author"] = author_name
-
+    print("parse_openghg attrs database_version:", attrs.get("database_version", None))
     metadata = {}
     metadata.update(attrs)
 
@@ -55,6 +55,7 @@ def parse_openghg(
     optional_keywords = {"database": database,
                          "database_version": database_version,
                          "model": model}
+    print("Optional keywords in parse_openghg:", optional_keywords)
     for key, value in optional_keywords.items():
         if value is not None:
             metadata[key] = value
@@ -97,7 +98,5 @@ def parse_openghg(
     emissions_data[key] = {}
     emissions_data[key]["data"] = em_data
     emissions_data[key]["metadata"] = metadata
-
     emissions_data = assign_flux_attributes(emissions_data)
-
     return emissions_data
