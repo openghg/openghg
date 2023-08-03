@@ -13,7 +13,7 @@ formatting.
 
 Functions:
 - `get_object_store_connection` returns an object store connection
-   to a given bucket for a given data type.
+   for a given data type to a given bucket.
 """
 import logging
 from pathlib import Path
@@ -34,7 +34,16 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 class ObjectStoreConnection:
-    """Represents a connection to an object store."""
+    """Represents a connection to an object store.
+
+    Public attributes:
+        required_keys: keys that must be present for Datasource lookup
+                       and creation
+        optional_keys: keys that will be used for Datasource lookup and
+                       creation if they are present in the metadata passed
+                       to `datasource_lookup`
+        data_type: used to register subclasses
+    """
 
     _registry = {}  # subclass registry
 

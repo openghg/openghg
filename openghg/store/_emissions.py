@@ -39,7 +39,7 @@ class Emissions(BaseStore):
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
-            #self.save()
+            # self.save()
             pass
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
