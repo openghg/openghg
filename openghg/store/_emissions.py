@@ -172,7 +172,7 @@ class Emissions(BaseStore):
         self,
         datapath: Union[str, Path],
         database: str,
-        overwrite: bool = False,
+        # overwrite: bool = False,  # TODO: allow overwrite?
         **kwargs: Dict,
     ) -> Dict:
         """
@@ -222,13 +222,11 @@ class Emissions(BaseStore):
             em_data = split_data["data"]
             Emissions.validate_data(em_data)
 
-        required_keys = ("species", "source", "domain")
-
-        data_type = "emissions"
-        overwrite = False
-        datasource_uuids = self.assign_data(
-            data=emissions_data, overwrite=overwrite, data_type=data_type, required_keys=required_keys
-        )
+        datasource_uuids = {}
+        with get_object_store_connection("emissions", self._bucket) as conn:
+            for key, split_data in emissions_data.items():
+                ds_uuid = conn.add_to_store(split_data["metadata"], split_data["data"])
+                datasource_uuids[key] = ds_uuid
 
         return datasource_uuids
 
