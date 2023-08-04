@@ -148,7 +148,7 @@ def data_read():
             network=network,
             height=height,
             domain=domain,
-            high_spatial_res=True,
+            high_spatial_resolution=True,
         )
 
     # Add two footprints with the same inputs but covering different time periods
@@ -184,6 +184,21 @@ def data_read():
             metmodel=metmodel,
         )
 
+    # High time resolution footprints
+    hitres_fp_datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    with Footprints(bucket=bucket) as fps:
+        fps.read_file(
+            filepath=hitres_fp_datapath,
+            site="TAC",
+            model="NAME",
+            network="DECC",
+            height="100m",
+            domain="TEST",
+            metmodel="UKV",
+            high_time_resolution=True,
+        )
+
+    # Boundary conditions
     test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
 
     species = "n2o"

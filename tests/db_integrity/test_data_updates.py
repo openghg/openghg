@@ -1,11 +1,12 @@
 import pytest
 import pandas as pd
 import numpy as np
-from helpers import get_surface_datapath, get_emissions_datapath
+from helpers import get_surface_datapath, get_emissions_datapath, get_footprint_datapath
 from openghg.store import ObsSurface, Emissions
 from openghg.store.base import Datasource
 from openghg.retrieve import get_flux
 from openghg.retrieve import search
+from openghg.standardise import standardise_footprint
 from openghg.objectstore import get_bucket
 
 
@@ -676,3 +677,68 @@ def bsd_data_read_crds_overwrite():
 #     # np.testing.assert_allclose(sf6, expected_sf6)
 
 #     # TODO: Can we check if this has been saved as a new version?
+
+
+# Test
+@pytest.mark.parametrize(
+    "standard_filename,special_filename,site,domain,model,metmodel,inlet,species",
+    [
+        (
+            "TAC-185magl_UKV_EUROPE_TEST_201405.nc",
+            "TAC-185magl_UKV_co2_EUROPE_TEST_201405.nc",
+            "TAC",
+            "EUROPE",
+            "NAME",
+            "UKV",
+            "185m",
+            "co2",
+        ),
+        (
+            "HFD-100magl_UKV_EUROPE_202001_TRUNCATED.nc",
+            "HFD-100magl_UKV_rn_EUROPE_202001_TRUNCATED.nc",
+            "HFD",
+            "EUROPE",
+            "NAME",
+            "UKV",
+            "100m",
+            "rn",
+        )
+    ],
+)
+def test_standardising_footprint_with_additional_keys(standard_filename, special_filename, site, domain, model, metmodel, inlet, species):
+    """
+    Expected behavior: adding a high time resolution
+    (or short_lifetime) footprint whose other metadata
+    is the same as an existing footprint will create a
+    new uuid for the high resolution (or short_lifetime)
+    footprint.
+    """
+    standard_datapath = get_footprint_datapath(standard_filename)
+    special_datapath = get_footprint_datapath(special_filename)
+
+    clear_test_stores()
+
+    standard_standardised = standardise_footprint(standard_datapath,
+                                                site=site,
+                                                domain=domain,
+                                                model=model,
+                                                inlet=inlet,
+                                                metmodel=metmodel,
+                                                store="user",
+                                                )
+
+    special_standardised = standardise_footprint(special_datapath,
+                                                site=site,
+                                                domain=domain,
+                                                model=model,
+                                                inlet=inlet,
+                                                metmodel=metmodel,
+                                                species=species,
+                                                store="user",
+                                                )
+
+    standard_dict = standard_standardised[next(iter(standard_standardised))]
+    special_dict = special_standardised[next(iter(special_standardised))]
+
+    assert special_dict["new"] == True
+    assert special_dict["uuid"] != standard_dict["uuid"]  # redundant?

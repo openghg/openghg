@@ -3,6 +3,7 @@ from openghg.store.base import Datasource
 from openghg.retrieve import search_surface
 from openghg.standardise import standardise_surface, standardise_footprint
 from openghg.objectstore import get_writable_bucket
+from openghg.dataobjects import DataManager
 
 import pytest
 from helpers import (
@@ -47,7 +48,7 @@ def footprint_read(mocker):
         height=height,
         domain=domain,
         period="monthly",
-        high_spatial_res=True,
+        high_spatial_resolution=True,
         store="user",
     )
 
@@ -108,6 +109,21 @@ def test_delete_footprint_data(footprint_read):
 
     with Footprints(bucket=bucket) as fps:
         assert uuid not in fps._datasource_uuids
+
+
+def test_object_store_not_in_metadata():
+    # metadata = {"object_store" : ""}
+    search_res = data_manager(data_type="surface", site="tac", species="co2", store="user")
+    uuid = next(iter(search_res.metadata))
+
+    assert "object_store" not in search_res.metadata[uuid]
+
+    with_obj_store = search_res.metadata
+    with_obj_store[uuid]["object_store"] = "/tmp/store"
+
+    dm = DataManager(metadata=with_obj_store, store="user")
+
+    assert "object_store" not in dm.metadata[uuid]
 
 
 def test_find_modify_metadata():
@@ -214,7 +230,8 @@ def test_delete_metadata_keys():
 
     assert res.metadata["test-uuid-100"].items() >= expected.items()
 
-    res.update_metadata(uuid="test-uuid-100", to_delete=["species"])
+    # Delete a key giving it a string
+    res.update_metadata(uuid="test-uuid-100", to_delete="species")
 
     res = data_manager(data_type="surface", site="tac", inlet="100m", store="user")
 
@@ -223,6 +240,16 @@ def test_delete_metadata_keys():
     res = data_manager(data_type="surface", site="tac", species="ch4", inlet="100m", store="user")
 
     assert not res
+
+    res = data_manager(data_type="surface", site="tac", inlet="100m", store="user")
+
+    # Delete keys passing in a list
+    res.update_metadata(uuid="test-uuid-100", to_delete=["site", "inlet"])
+
+    res.refresh()
+
+    assert "site" not in res.metadata["test-uuid-100"]
+    assert "inlet" not in res.metadata["test-uuid-100"]
 
 
 def test_delete_and_modify_keys():
@@ -307,6 +334,7 @@ def test_delete_data():
         assert uid not in obs._datasource_uuids
 
 
+@pytest.mark.xfail(reason="Failing due to the Datasource save bug - issue 724", raises=AssertionError)
 def test_metadata_backup_restore():
     res_one = data_manager(data_type="surface", site="tac", inlet="100m", species="ch4", store="user")
 

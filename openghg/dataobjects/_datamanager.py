@@ -14,7 +14,9 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 class DataManager:
     def __init__(self, metadata: Dict[str, Dict], store: str):
-        self.metadata = metadata
+        # We don't want the object store in this metadata as we want it to be the
+        # unadulterated metadata to properly reflect what's stored.
+        self.metadata = self._clean_metadata(metadata=metadata)
         self._store = store
         self._bucket = get_writable_bucket(name=store)
         self._backup: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict)
@@ -25,6 +27,25 @@ class DataManager:
 
     def __bool__(self) -> bool:
         return bool(self.metadata)
+
+    def _clean_metadata(self, metadata: Dict) -> Dict:
+        """Ensures the metadata we give to the user is the metadata
+        stored in the metastore and the Datasource and hasn't been modified by the
+        search function. Currently this just removes the object_store key
+
+        Args:
+            metadata: Dictionary of metadata, we expect
+        Returns:
+            dict: Metadata without specific keys
+        """
+        metadata = copy.deepcopy(metadata)
+        for m in metadata.values():
+            try:
+                del m["object_store"]
+            except KeyError:
+                pass
+
+        return metadata
 
     def _check_datatypes(self, uuid: Union[str, List]) -> str:
         """Check the UUIDs are correct and ensure they all
@@ -66,7 +87,15 @@ class DataManager:
 
         uuids = list(self.metadata.keys())
         res = search(uuid=uuids)
-        self.metadata = res.metadata
+        # We don't want the object store in this metadata as we want it to be the
+        # unadulterated metadata to properly reflect what's stored.
+        for m in res.metadata.values():
+            try:
+                del m["object_store"]
+            except KeyError:
+                pass
+
+        self.metadata = self._clean_metadata(metadata=res.metadata)
 
     def restore(self, uuid: str, version: Union[str, int] = "latest") -> None:
         """Restore a backed-up version of a Datasource's metadata.
@@ -97,6 +126,7 @@ class DataManager:
 
             d = Datasource.load(bucket=self._bucket, uuid=uuid)
             d._metadata = backup
+            d.save(bucket=self._bucket)
 
     def view_backup(self, uuid: Optional[str] = None, version: Optional[str] = None) -> Dict:
         """View backed-up metadata for all Datasources
@@ -138,7 +168,6 @@ class DataManager:
         if to_update is None and to_delete is None:
             return None
 
-        # Add in ability to delete metadata keys
         if not isinstance(uuid, list):
             uuid = [uuid]
 
@@ -149,6 +178,7 @@ class DataManager:
 
         with load_metastore(bucket=self._bucket, key=metakey) as store:
             for u in uuid:
+                updated = False
                 d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
                 # Save a backup of the metadata for now
                 found_record = store.search(tinydb.where("uuid") == u)
@@ -162,7 +192,10 @@ class DataManager:
                 n_records = len(self._backup[u][version])
 
                 # Do a quick check to make sure we're not being asked to delete all the metadata
-                if to_delete is not None:
+                if to_delete is not None and to_delete:
+                    if not isinstance(to_delete, list):
+                        to_delete = [to_delete]
+
                     if "uuid" in to_delete:
                         raise ValueError("Cannot delete the UUID key.")
 
@@ -181,7 +214,9 @@ class DataManager:
                             "Unable to remove keys from metadata store, please ensure they exist."
                         )
 
-                if to_update is not None:
+                    updated = True
+
+                if to_update is not None and to_update:
                     if "uuid" in to_update:
                         raise ValueError("Cannot update the UUID.")
 
@@ -192,12 +227,13 @@ class DataManager:
                     if not response:
                         raise ValueError("Unable to update metadata, possible metadata sync error.")
 
-                d.save(bucket=self._bucket)
+                    updated = True
 
-                # Update the metadata stored internally so we're up to date
-                self.metadata[u] = internal_copy
-
-                logger.info(f"Modified metadata for {u}.")
+                if updated:
+                    d.save(bucket=self._bucket)
+                    # Update the metadata stored internally so we're up to date
+                    self.metadata[u] = internal_copy
+                    logger.info(f"Modified metadata for {u}.")
 
     def delete_datasource(self, uuid: Union[List, str]) -> None:
         """Delete a Datasource in the object store.

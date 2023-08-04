@@ -259,6 +259,13 @@ class Datasource:
         """
         from openghg.util import to_lowercase
 
+        try:
+            del metadata["object_store"]
+        except KeyError:
+            pass
+        else:
+            logger.warning("object_store should not be added to the metadata, removing.")
+
         lowercased: Dict = to_lowercase(metadata, skip_keys=skip_keys)
         self._metadata.update(lowercased)
 
