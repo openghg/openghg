@@ -5,20 +5,13 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.6.1...HEAD)
 
-## [0.6.2] - 2023-08-xx
+## [0.6.1] - 2023-08-04
 
 ### Fixed
 
 - Bug in `get_readable_buckets`: missing check for tutorial store - [PR #729](https://github.com/openghg/openghg/pull/729)
-
-## [Unreleased](https://github.com/openghg/openghg/compare/0.6.1...HEAD)
-
-## [0.6.1] - 2023-07-xx
-
-### Fixed
-
 - Bug in `DataManager` where a string was interpreted as a list when processing metadata keys to be deleted - [PR #713](https://github.com/openghg/openghg/pull/713)
 
 ## [0.6.0] - 2023-07-18
