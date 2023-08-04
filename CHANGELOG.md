@@ -7,19 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
 
-## [0.6.2] - 2023-08-xx
+## [0.6.1] - 2023-07-xx
 
 ### Fixed
 
 - Bug when adding high time resolution footprints to object store: they were not
 being distinguished from low resolution footprints - [PR #720](https://github.com/openghg/openghg/pull/720)
-
-## [Unreleased](https://github.com/openghg/openghg/compare/0.6.1...HEAD)
-
-## [0.6.1] - 2023-07-xx
-
-### Fixed
-
 - Bug in `DataManager` where a string was interpreted as a list when processing metadata keys to be deleted - [PR #713](https://github.com/openghg/openghg/pull/713)
 
 ## [0.6.0] - 2023-07-18
