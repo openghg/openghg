@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.6.1...HEAD)
 
-## [0.6.1] - 2023-07-xx
+## [0.6.1] - 2023-07-04
 
 ### Added
 
-- Added `rich` package to printing out SearchResults object in a table format. Re-run requirements.txt /environment.yml to apply this change. - [PR #696](https://github.com/openghg/openghg/pull/696)
+- Added `rich` package to printing out SearchResults object in a table format. If using an editable install please update your environment to match requirements.txt / environment.yml. - [PR #696](https://github.com/openghg/openghg/pull/696)
 
 ### Fixed
 
