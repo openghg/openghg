@@ -138,9 +138,9 @@ object store using the ``get_footprint`` function available from the
 
 For the standards associated the footprint files, there are also flags
 which can be passed to sub-categorise the footprint inputs: -
-``high_spatial_res`` - footprints containing multiple spatial
+``high_spatial_resolution`` - footprints containing multiple spatial
 resolutions. This is usually an embedded high resolution region within a
-larger lower resolution domain. - ``high_time_res`` - footprints which
+larger lower resolution domain. - ``high_time_resolution`` - footprints which
 include an additional dimension for resolving on the time axis. This is
 associated with shorter term flux changes (e.g. natural sources of
 carbon dioxide). A species will normally be associated with this
@@ -270,7 +270,7 @@ can be used
           <th>source_format</th>
           <th>...</th>
           <th>height</th>
-          <th>spatial_resolution</th>
+          <th>high_spatial_resolution</th>
           <th>heights</th>
           <th>variables</th>
           <th>title</th>
@@ -320,7 +320,7 @@ can be used
           <td>NaN</td>
           <td>...</td>
           <td>100m</td>
-          <td>standard_spatial_resolution</td>
+          <td>False</td>
           <td>[500.0, 1500.0, 2500.0, 3500.0, 4500.0, 5500.0...</td>
           <td>[fp, temperature, pressure, wind_speed, wind_d...</td>
           <td>NaN</td>
@@ -412,7 +412,7 @@ example, for flux data:
           <th>min_longitude</th>
           <th>max_latitude</th>
           <th>min_latitude</th>
-          <th>time_resolution</th>
+          <th>high_time_resolution</th>
           <th>time_period</th>
           <th>uuid</th>
         </tr>
