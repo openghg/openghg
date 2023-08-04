@@ -39,7 +39,7 @@ def populate_store():
         network=network,
         height=height,
         domain=domain,
-        high_spatial_res=True,
+        high_spatial_resolution=True,
         store="user",
     )
 
