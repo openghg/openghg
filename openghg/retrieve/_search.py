@@ -603,6 +603,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
                     if res:
                         metastore_records.extend(res)
 
+        if not metastore_records:
+            continue
+
         # Add in a quick check to make sure we don't have dupes
         # TODO - remove this once a more thorough tests are added
         uuids = [s["uuid"] for s in metastore_records]
@@ -615,6 +618,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
         # we'll create a pandas DataFrame out of this in the SearchResult object
         # for better printing / searching within a notebook
         metadata = {r["uuid"]: r for r in metastore_records}
+        # Add in the object store to the metadata the user sees
+        for m in metadata.values():
+            m.update({"object_store": bucket})
 
         # Narrow the search to a daterange if dates passed
         if start_date is not None or end_date is not None:

@@ -21,3 +21,4 @@ tqdm
 xarray
 urllib3 >= 1.26.3
 openghg_defs
+rich

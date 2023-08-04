@@ -7,7 +7,7 @@ import tinydb
 import logging
 from openghg.types import DatasourceLookupError
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
-from openghg.util import timestamp_now
+from openghg.util import timestamp_now, to_lowercase
 
 
 T = TypeVar("T", bound="BaseStore")
@@ -128,9 +128,9 @@ class BaseStore:
                 datasource = Datasource()
                 uid = datasource.uuid()
                 meta_copy["uuid"] = uid
-                # For retrieval later we'll need to know which bucket this is stored in
-                meta_copy["object_store"] = self._bucket
-
+                # Make sure all the metadata is lowercase for easier searching later
+                # TODO - do we want to do this or should be just perform lowercase comparisons?
+                meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
                 # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
                 # so we can have rapid
                 self._datasource_uuids[uid] = key
