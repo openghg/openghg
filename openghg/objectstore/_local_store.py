@@ -5,7 +5,6 @@ import threading
 from pathlib import Path
 import shutil
 from typing import Dict, List, Optional, Union
-from uuid import uuid4
 import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
