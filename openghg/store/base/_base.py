@@ -121,9 +121,6 @@ class BaseStore:
                 datasource = Datasource()
                 uid = datasource.uuid()
                 meta_copy["uuid"] = uid
-                # For retrieval later we'll need to know which bucket this is stored in
-                meta_copy["object_store"] = self._bucket
-
                 # Make sure all the metadata is lowercase for easier searching later
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
                 meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
