@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._datamanager &#8212; OpenGHG 0.6.0 documentation</title>
+    <title>openghg.dataobjects._datamanager &#8212; OpenGHG 0.6.1 documentation</title>
   
   
   
@@ -369,7 +369,9 @@ document.write(`
 
 <div class="viewcode-block" id="DataManager"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager">[docs]</a><span class="k">class</span> <span class="nc">DataManager</span><span class="p">:</span>
 <div class="viewcode-block" id="DataManager.__init__"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">store</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="c1"># We don&#39;t want the object store in this metadata as we want it to be the</span>
+        <span class="c1"># unadulterated metadata to properly reflect what&#39;s stored.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_store</span> <span class="o">=</span> <span class="n">store</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span> <span class="o">=</span> <span class="n">get_writable_bucket</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">:</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
@@ -380,6 +382,25 @@ document.write(`
 
     <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_clean_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensures the metadata we give to the user is the metadata</span>
+<span class="sd">        stored in the metastore and the Datasource and hasn&#39;t been modified by the</span>
+<span class="sd">        search function. Currently this just removes the object_store key</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metadata: Dictionary of metadata, we expect</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Metadata without specific keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metadata</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">metadata</span>
 
     <span class="k">def</span> <span class="nf">_check_datatypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the UUIDs are correct and ensure they all</span>
@@ -421,7 +442,15 @@ document.write(`
 
         <span class="n">uuids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuids</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">metadata</span></div>
+        <span class="c1"># We don&#39;t want the object store in this metadata as we want it to be the</span>
+        <span class="c1"># unadulterated metadata to properly reflect what&#39;s stored.</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataManager.restore"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.restore">[docs]</a>    <span class="k">def</span> <span class="nf">restore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore a backed-up version of a Datasource&#39;s metadata.</span>
@@ -451,7 +480,8 @@ document.write(`
             <span class="n">metastore</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">backup</span><span class="p">)</span>
 
             <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
-            <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">backup</span></div>
+            <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">backup</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataManager.view_backup"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.view_backup">[docs]</a>    <span class="k">def</span> <span class="nf">view_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;View backed-up metadata for all Datasources</span>
@@ -493,7 +523,6 @@ document.write(`
         <span class="k">if</span> <span class="n">to_update</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">to_delete</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># Add in ability to delete metadata keys</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">uuid</span> <span class="o">=</span> <span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
 
@@ -504,6 +533,7 @@ document.write(`
 
         <span class="k">with</span> <span class="n">load_metastore</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">metakey</span><span class="p">)</span> <span class="k">as</span> <span class="n">store</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">uuid</span><span class="p">:</span>
+                <span class="n">updated</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">d</span> <span class="o">=</span> <span class="n">Datasource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">u</span><span class="p">,</span> <span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="c1"># Save a backup of the metadata for now</span>
                 <span class="n">found_record</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">tinydb</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;uuid&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">u</span><span class="p">)</span>
@@ -517,7 +547,10 @@ document.write(`
                 <span class="n">n_records</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">[</span><span class="n">u</span><span class="p">][</span><span class="n">version</span><span class="p">])</span>
 
                 <span class="c1"># Do a quick check to make sure we&#39;re not being asked to delete all the metadata</span>
-                <span class="k">if</span> <span class="n">to_delete</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">to_delete</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">to_delete</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_delete</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                        <span class="n">to_delete</span> <span class="o">=</span> <span class="p">[</span><span class="n">to_delete</span><span class="p">]</span>
+
                     <span class="k">if</span> <span class="s2">&quot;uuid&quot;</span> <span class="ow">in</span> <span class="n">to_delete</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot delete the UUID key.&quot;</span><span class="p">)</span>
 
@@ -536,7 +569,9 @@ document.write(`
                             <span class="s2">&quot;Unable to remove keys from metadata store, please ensure they exist.&quot;</span>
                         <span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">to_update</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">to_update</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">to_update</span><span class="p">:</span>
                     <span class="k">if</span> <span class="s2">&quot;uuid&quot;</span> <span class="ow">in</span> <span class="n">to_update</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot update the UUID.&quot;</span><span class="p">)</span>
 
@@ -547,12 +582,13 @@ document.write(`
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to update metadata, possible metadata sync error.&quot;</span><span class="p">)</span>
 
-                <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">)</span>
+                    <span class="n">updated</span> <span class="o">=</span> <span class="kc">True</span>
 
-                <span class="c1"># Update the metadata stored internally so we&#39;re up to date</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="n">internal_copy</span>
-
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified metadata for </span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+                <span class="k">if</span> <span class="n">updated</span><span class="p">:</span>
+                    <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">)</span>
+                    <span class="c1"># Update the metadata stored internally so we&#39;re up to date</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="n">internal_copy</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified metadata for </span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataManager.delete_datasource"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.delete_datasource">[docs]</a>    <span class="k">def</span> <span class="nf">delete_datasource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete a Datasource in the object store.</span>

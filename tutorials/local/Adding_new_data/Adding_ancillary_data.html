@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Adding ancillary spatial data &#8212; OpenGHG 0.6.0 documentation</title>
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0.6.1 documentation</title>
   
   
   
@@ -506,9 +506,9 @@ object store using the <code class="docutils literal notranslate"><span class="p
 </div>
 <p>For the standards associated the footprint files, there are also flags
 which can be passed to sub-categorise the footprint inputs: -
-<code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code> - footprints containing multiple spatial
+<code class="docutils literal notranslate"><span class="pre">high_spatial_resolution</span></code> - footprints containing multiple spatial
 resolutions. This is usually an embedded high resolution region within a
-larger lower resolution domain. - <code class="docutils literal notranslate"><span class="pre">high_time_res</span></code> - footprints which
+larger lower resolution domain. - <code class="docutils literal notranslate"><span class="pre">high_time_resolution</span></code> - footprints which
 include an additional dimension for resolving on the time axis. This is
 associated with shorter term flux changes (e.g. natural sources of
 carbon dioxide). A species will normally be associated with this
@@ -619,7 +619,7 @@ can be used</p>
       <th>source_format</th>
       <th>...</th>
       <th>height</th>
-      <th>spatial_resolution</th>
+      <th>high_spatial_resolution</th>
       <th>heights</th>
       <th>variables</th>
       <th>title</th>
@@ -669,7 +669,7 @@ can be used</p>
       <td>NaN</td>
       <td>...</td>
       <td>100m</td>
-      <td>standard_spatial_resolution</td>
+      <td>False</td>
       <td>[500.0, 1500.0, 2500.0, 3500.0, 4500.0, 5500.0...</td>
       <td>[fp, temperature, pressure, wind_speed, wind_d...</td>
       <td>NaN</td>
@@ -750,7 +750,7 @@ example, for flux data:</p>
       <th>min_longitude</th>
       <th>max_latitude</th>
       <th>min_latitude</th>
-      <th>time_resolution</th>
+      <th>high_time_resolution</th>
       <th>time_period</th>
       <th>uuid</th>
     </tr>

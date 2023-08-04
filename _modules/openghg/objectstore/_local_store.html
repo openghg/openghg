@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.objectstore._local_store &#8212; OpenGHG 0.6.0 documentation</title>
+    <title>openghg.objectstore._local_store &#8212; OpenGHG 0.6.1 documentation</title>
   
   
   
@@ -393,6 +393,9 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: List of readable buckets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENGHG_TUT_STORE&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;tutorial_store&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_tutorial_store_path</span><span class="p">())}</span>
+
     <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
     <span class="n">object_stores</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;object_store&quot;</span><span class="p">]</span>
 

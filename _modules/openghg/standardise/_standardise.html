@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.standardise._standardise &#8212; OpenGHG 0.6.0 documentation</title>
+    <title>openghg.standardise._standardise &#8212; OpenGHG 0.6.1 documentation</title>
   
   
   
@@ -687,8 +687,8 @@ document.write(`
     <span class="n">chunks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">continuous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">retrieve_met</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">high_spatial_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">high_time_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">high_spatial_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">high_time_resolution</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -709,8 +709,8 @@ document.write(`
 <span class="sd">        chunks: Chunk size to use when opening the NetCDF. Set to &quot;auto&quot; for automated chunk sizing</span>
 <span class="sd">        continuous: Whether time stamps have to be continuous.</span>
 <span class="sd">        retrieve_met: Whether to also download meterological data for this footprints area</span>
-<span class="sd">        high_spatial_res : Indicate footprints include both a low and high spatial resolution.</span>
-<span class="sd">        high_time_res: Indicate footprints are high time resolution (include H_back dimension)</span>
+<span class="sd">        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.</span>
+<span class="sd">        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)</span>
 <span class="sd">                        Note this will be set to True automatically for Carbon Dioxide data.</span>
 <span class="sd">        overwrite: Overwrite any currently stored data</span>
 <span class="sd">        store: Name of store to write to</span>
@@ -734,8 +734,8 @@ document.write(`
             <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
             <span class="s2">&quot;continuous&quot;</span><span class="p">:</span> <span class="n">continuous</span><span class="p">,</span>
             <span class="s2">&quot;retrieve_met&quot;</span><span class="p">:</span> <span class="n">retrieve_met</span><span class="p">,</span>
-            <span class="s2">&quot;high_spatial_res&quot;</span><span class="p">:</span> <span class="n">high_spatial_res</span><span class="p">,</span>
-            <span class="s2">&quot;high_time_res&quot;</span><span class="p">:</span> <span class="n">high_time_res</span><span class="p">,</span>
+            <span class="s2">&quot;high_spatial_resolution&quot;</span><span class="p">:</span> <span class="n">high_spatial_resolution</span><span class="p">,</span>
+            <span class="s2">&quot;high_time_resolution&quot;</span><span class="p">:</span> <span class="n">high_time_resolution</span><span class="p">,</span>
             <span class="s2">&quot;overwrite&quot;</span><span class="p">:</span> <span class="n">overwrite</span><span class="p">,</span>
             <span class="s2">&quot;metmodel&quot;</span><span class="p">:</span> <span class="n">metmodel</span><span class="p">,</span>
             <span class="s2">&quot;species&quot;</span><span class="p">:</span> <span class="n">species</span><span class="p">,</span>
@@ -770,8 +770,8 @@ document.write(`
                 <span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
                 <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span>
                 <span class="n">retrieve_met</span><span class="o">=</span><span class="n">retrieve_met</span><span class="p">,</span>
-                <span class="n">high_spatial_res</span><span class="o">=</span><span class="n">high_spatial_res</span><span class="p">,</span>
-                <span class="n">high_time_res</span><span class="o">=</span><span class="n">high_time_res</span><span class="p">,</span>
+                <span class="n">high_spatial_resolution</span><span class="o">=</span><span class="n">high_spatial_resolution</span><span class="p">,</span>
+                <span class="n">high_time_resolution</span><span class="o">=</span><span class="n">high_time_resolution</span><span class="p">,</span>
                 <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
             <span class="p">)</span>
 
