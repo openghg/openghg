@@ -123,13 +123,13 @@ def _create_full_uri(uri: str, region: str):
     return f"{server}/{uri}"
 
 
-def get_bucket() -> str:
+def get_bucket(name: Optional[str] = None) -> str:
     """Get the default bucket to use for OpenGHG storage.
     If an OPENGHG_BUCKET environment variable isn't set
     it defaults to openghg_storage.
 
     Args:
-        bucket: Name of bucket
+        name: Name of bucket
     Returns:
         str: Bucket name
     """

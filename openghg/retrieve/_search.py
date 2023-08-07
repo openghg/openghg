@@ -4,9 +4,10 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
-from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
+from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
+from openghg.types import ObjectStoreError
 from tinydb.database import TinyDB
 from openghg.dataobjects import SearchResults
 
@@ -67,39 +68,6 @@ def meta_search(search_terms: Dict, database: TinyDB) -> Dict:
         raise ValueError(error_msg)
 
     return {s["uuid"]: s for s in result}
-
-
-def metadata_lookup(
-    metadata: Dict, database: TinyDB, additional_metadata: Optional[Dict] = None
-) -> Union[bool, str]:
-    """Searches the passed database for the given metadata
-
-    Args:
-        metadata: Keys we are required to find
-        database: The tinydb database for the storage object
-        additional: Keys we'd like to find (currently unused)
-    Returns:
-        str or bool: UUID string if matching Datasource found, otherwise False
-    """
-    from functools import reduce
-
-    from openghg.types import DatasourceLookupError
-    from tinydb import Query
-
-    q = Query()
-
-    search_attrs = [getattr(q, k) == v for k, v in metadata.items()]
-    required_result = database.search(reduce(_find_and, search_attrs))
-
-    if not required_result:
-        return False
-
-    if len(required_result) > 1:
-        raise DatasourceLookupError("More than once Datasource found for metadata, refine lookup.")
-
-    uuid: str = required_result[0]["uuid"]
-
-    return uuid
 
 
 def search_bc(
@@ -256,8 +224,8 @@ def search_footprints(
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
-    high_spatial_res: Optional[bool] = None,
-    high_time_res: Optional[bool] = None,
+    high_spatial_resolution: Optional[bool] = None,  # TODO need to give False to get only low spatial res
+    high_time_resolution: Optional[bool] = None,
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
@@ -275,8 +243,8 @@ def search_footprints(
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
-        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
-        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
+        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically if species="co2" (Carbon Dioxide).
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                         Note this will be set to True if species has an associated lifetime.
@@ -286,35 +254,40 @@ def search_footprints(
     """
     from openghg.util import format_inlet
 
-    if start_date is not None:
-        start_date = str(start_date)
-    if end_date is not None:
-        end_date = str(end_date)
+    args = {
+        "site": site,
+        "inlet": inlet,
+        "height": height,
+        "domain": domain,
+        "model": model,
+        "metmodel": metmodel,
+        "species": species,
+        "network": network,
+        "start_date": start_date,
+        "end_date": end_date,
+        "period": period,
+        "continuous": continuous,
+        "high_time_resolution": high_time_resolution,
+        "high_spatial_resolution": high_spatial_resolution,
+        "short_lifetime": short_lifetime,
+    }
 
-    # Allow inlet or height to be specified, both or either may be included
-    # within the metadata so could use either to search
-    inlet = format_inlet(inlet)
-    height = format_inlet(height)
+    # Keys in metastore are stored as strings; convert non-string arguments to strings.
+    for k in ["start_date", "end_date"]:
+        if args[k] is not None:
+            args[k] = str(args[k])
 
-    return search(
-        site=site,
-        inlet=inlet,
-        height=height,
-        domain=domain,
-        model=model,
-        metmodel=metmodel,
-        species=species,
-        network=network,
-        start_date=start_date,
-        end_date=end_date,
-        period=period,
-        continuous=continuous,
-        high_spatial_res=high_spatial_res,
-        high_time_res=high_time_res,
-        short_lifetime=short_lifetime,
-        data_type="footprints",
-        **kwargs,
-    )
+    # Either (or both) of 'inlet' and 'height' may be in the metastore, so
+    # both are allowed for search.
+    args["inlet"] = format_inlet(inlet)
+    args["height"] = format_inlet(height)
+
+    args["data_type"] = "footprints"  # generic `search` needs the data type
+
+    # merge kwargs and args, keeping values from args on key conflict
+    kwargs.update(args)
+
+    return search(**kwargs)
 
 
 def search_surface(
@@ -483,20 +456,12 @@ def search(**kwargs: Any) -> SearchResults:
         else:
             sr = SearchResults()
     else:
-        sr = local_search(**kwargs)
+        sr = _base_search(**kwargs)
 
     return sr
 
 
-# TODO
-# GJ - 20210721 - I think using kwargs here could lead to errors so we could have different user
-# facing interfaces to a more general search function, this would also make it easier to enforce types
-# TODO - rename this function!
-# 2.
-# _base_search()
-# 1.
-# _store_search()
-def local_search(**kwargs: Any) -> SearchResults:
+def _base_search(**kwargs: Any) -> SearchResults:
     """Search for observations data. Any keyword arguments may be passed to the
     the function and these keywords will be used to search metadata.
 
@@ -520,7 +485,6 @@ def local_search(**kwargs: Any) -> SearchResults:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
     import itertools
-
     from openghg.store.base import Datasource
     from openghg.dataobjects import SearchResults
     from openghg.util import (
@@ -551,6 +515,7 @@ def local_search(**kwargs: Any) -> SearchResults:
         updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
 
+    # translate data type strings to data type classes
     data_type = search_kwargs.get("data_type")
     data_type_classes = define_data_type_classes()
 
@@ -570,6 +535,23 @@ def local_search(**kwargs: Any) -> SearchResults:
             types_to_search.append(type_class)
     else:
         types_to_search.extend(data_type_classes.values())
+
+    # Get a dictionary of all the readable buckets available
+    # We'll iterate over each of them
+    readable_buckets = get_readable_buckets()
+
+    # If we're given a store then we'll just read from that one
+    try:
+        store = search_kwargs["store"]
+    except KeyError:
+        pass
+    else:
+        del search_kwargs["store"]
+
+        try:
+            readable_buckets = {store: readable_buckets[store]}
+        except KeyError:
+            raise ObjectStoreError(f"Invalid store: {store}")
 
     try:
         start_date = search_kwargs["start_date"]
@@ -607,60 +589,79 @@ def local_search(**kwargs: Any) -> SearchResults:
     else:
         expanded_search.append(not_a_list)
 
-    general_results = []
-    for data_type_class in types_to_search:
-        meta_key = data_type_class._metakey
-
-        with load_metastore(key=meta_key) as metastore:
-            for v in expanded_search:
-                res = metastore.search(Query().fragment(v))
-                if res:
-                    general_results.extend(res)
-
-    # Add in a quick check to make sure we don't have dupes
-    uuids = [s["uuid"] for s in general_results]
-    # TODO - remove this once a more thorough tests are added
-    if len(uuids) != len(set(uuids)):
-        error_msg = "Multiple results found with same UUID!"
-        logger.exception(msg=error_msg)
-        raise ValueError(error_msg)
-
-    # Here we create a dictionary of the metadata keyed by the Datasource UUID
-    # we'll create a pandas DataFrame out of this in the SearchResult object
-    # for better printing / searching within a notebook
-    keyed_metadata = {r["uuid"]: r for r in general_results}
-
     data_keys = {}
-    # Narrow the search to a daterange if dates passed
-    if start_date is not None or end_date is not None:
-        if start_date is None:
-            start_date = timestamp_epoch()
+    general_metadata = {}
+
+    for bucket_name, bucket in readable_buckets.items():
+        metastore_records = []
+        for data_type_class in types_to_search:
+            with data_type_class(bucket=bucket) as dclass:
+                metastore = dclass._metastore
+
+                for v in expanded_search:
+                    res = metastore.search(Query().fragment(v))
+                    if res:
+                        metastore_records.extend(res)
+
+        if not metastore_records:
+            continue
+
+        # Add in a quick check to make sure we don't have dupes
+        # TODO - remove this once a more thorough tests are added
+        uuids = [s["uuid"] for s in metastore_records]
+        if len(uuids) != len(set(uuids)):
+            error_msg = "Multiple results found with same UUID!"
+            logger.exception(msg=error_msg)
+            raise ValueError(error_msg)
+
+        # Here we create a dictionary of the metadata keyed by the Datasource UUID
+        # we'll create a pandas DataFrame out of this in the SearchResult object
+        # for better printing / searching within a notebook
+        metadata = {r["uuid"]: r for r in metastore_records}
+        # Add in the object store to the metadata the user sees
+        for m in metadata.values():
+            m.update({"object_store": bucket})
+
+        # Narrow the search to a daterange if dates passed
+        if start_date is not None or end_date is not None:
+            if start_date is None:
+                start_date = timestamp_epoch()
+            else:
+                start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
+
+            if end_date is None:
+                end_date = timestamp_now()
+            else:
+                end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
+
+            metadata_in_daterange = {}
+
+            # TODO - we can remove this now the metastore contains the start and end dates of the Datasources
+            for uid, record in metadata.items():
+                _keys = Datasource.load(bucket=bucket, uuid=uid, shallow=True).keys_in_daterange(
+                    start_date=start_date, end_date=end_date
+                )
+
+                if _keys:
+                    metadata_in_daterange[uid] = record
+                    data_keys[uid] = _keys
+
+            if not data_keys:
+                logger.warning(
+                    f"No data found for the dates given in the {bucket_name} store, please try a wider search."
+                )
+            # Update the metadata we'll use to create the SearchResults object
+            metadata = metadata_in_daterange
         else:
-            start_date = timestamp_tzaware(start_date) + pd_Timedelta("1s")
+            for uid in metadata:
+                data_keys[uid] = Datasource.load(bucket=bucket, uuid=uid, shallow=True).data_keys()
 
-        if end_date is None:
-            end_date = timestamp_now()
-        else:
-            end_date = timestamp_tzaware(end_date) - pd_Timedelta("1s")
+        # TODO - adding this to make sure everything is working correctly
+        # Remove once more comprehensive tests are done
+        dupe_uuids = [k for k in metadata if k in general_metadata]
+        if dupe_uuids:
+            raise ObjectStoreError("Duplicate UUIDs found between buckets.")
 
-        metadata_in_daterange = {}
+        general_metadata.update(metadata)
 
-        for uid, record in keyed_metadata.items():
-            _keys = Datasource.load(uuid=uid, shallow=True).keys_in_daterange(
-                start_date=start_date, end_date=end_date
-            )
-
-            if _keys:
-                metadata_in_daterange[uid] = record
-                data_keys[uid] = _keys
-
-        if not data_keys:
-            logger.warning("No data found for the dates given, please try a wider search.")
-        # Update the metadata we'll use to create the SearchResults object
-        keyed_metadata = metadata_in_daterange
-    else:
-        # Here we only need to retrieve the keys
-        for uid in keyed_metadata:
-            data_keys[uid] = Datasource.load(uuid=uid, shallow=True).data_keys()
-
-    return SearchResults(keys=data_keys, metadata=dict(keyed_metadata), start_result="data_type")
+    return SearchResults(keys=dict(data_keys), metadata=dict(general_metadata), start_result="data_type")

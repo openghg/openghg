@@ -5,13 +5,41 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.5.1...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.6.1...HEAD)
+
+## [0.6.1] - 2023-08-04
 
 ### Added
 
+- Added `rich` package to printing out SearchResults object in a table format. If using an editable install please update your environment to match requirements.txt / environment.yml - [PR #696](https://github.com/openghg/openghg/pull/696)
+
+### Fixed
+
+- Bug in `get_readable_buckets`: missing check for tutorial store - [PR #729](https://github.com/openghg/openghg/pull/729)
+- Bug when adding high time resolution footprints to object store: they were not being distinguished from low resolution footprints - [PR #720](https://github.com/openghg/openghg/pull/720)
+- Bug due to `object_store` key not being present in `Datasource` metadata - [PR #725](https://github.com/openghg/openghg/pull/725)
+- Bug in `DataManager` where a string was interpreted as a list when processing metadata keys to be deleted - [PR #713](https://github.com/openghg/openghg/pull/713)
+
+## [0.6.0] - 2023-07-18
+
+### Added
+
+- Multiple object stores are now supported. Any number of stores may be accessed and read from and written to - [PR #664](https://github.com/openghg/openghg/pull/664)
 - Added `standardise_column()` wrapper function - [PR #569](https://github.com/openghg/openghg/pull/643)
 - The 'height_name' definition from the [openghg/supplementary_data repository](https://github.com/openghg/supplementary_data) for each site can now be accessed, used and interpreted - [PR #648](https://github.com/openghg/openghg/pull/648)
 - Allow metadata within metastore to be updated for existing data sources for the latest version, start and end dates of the data - [PR #652](https://github.com/openghg/openghg/pull/652)
+- Allow mismatches between values in metadata and data attributes to be updated to either match to the metadata or attribute collated details - [PR #682](https://github.com/openghg/openghg/pull/682)
+
+### Changed
+
+- Configuration file format has been updated to support multiple object stores, note directing users to upgrade has been added
+- The `openghg --quickstart` functionality has been updated to allow multiple objects stores to be added and migrate users from the previous version of the configuration file
+- Synchronise metadata within metastore to align with data sources when updating (including latest version, start and end dates of the data) - [PR #652](https://github.com/openghg/openghg/pull/652) and [PR #664](https://github.com/openghg/openghg/pull/664)
+- The name of the `DataHandler` class has been changed to `DataManager` to better reflect its function.
+
+### Removed
+
+- Reading multi-site AQMesh data is no longer possible. This may be reintroduced if required.
 
 ## [0.5.1] - 2023-05-10
 
@@ -30,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed use of environment variable for test store, moved to mock - [PR # 580](https://github.com/openghg/openghg/pull/580)
 - Temporary pinning of pandas < 2.0 due to changes that introduced errors - [PR #619](https://github.com/openghg/openghg/pull/619)
 - `ObsData.plot_timeseries` now uses `openghg.plotting.plot_timeseries` to avoid duplication in efforts/code - [PR #624](https://github.com/openghg/openghg/pull/624)
-
+- `openghg.util._user.get_user_config_path` now creates `openghg.conf` in `~/.openghg` - [PR #690](https://github.com/openghg/openghg/pull/690)
 
 ## [0.5.0] - 2023-03-14
 
@@ -64,7 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- A new :ref:`DataHandler<DataHandler>` class for modification and deletion of metadata and added a matching tutorial.
+- A new `DataHandler` class for modification and deletion of metadata and added a matching tutorial.
 - Move to a new user configuration file.
 - A new `ObsColumn` class for handing satellite data
 
@@ -84,25 +112,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Removed old ``footprints_data_merge`` workflow which is superceded by ``ModelScenario``.
+- Removed old `footprints_data_merge` workflow which is superceded by `ModelScenario`.
 - Tidied and updated tutorial notebooks
 - Updated the conda build recipe
 
 ### Removed
 
-- Removed unused ``jobs`` submodule
+- Removed unused `jobs` submodule
 
 ## [0.3.0] - 2022-08-31
 
 ### Added
 
 - Full ICOS and CEDA archive pulling capabilities in the cloud and locally.
-- Adds logging to logfile, stored at ``~/openghg_log`` when run locally.
+- Adds logging to logfile, stored at `~/openghg_log` when run locally.
 - Improved schema checking for different file formats, including footprint files.
 
 ### Fixed
 
-- Fixes the ``clean_string`` function of ``openghg.util`` to allow dashes as these are commonly used in species names.
+- Fixes the `clean_string` function of `openghg.util` to allow dashes as these are commonly used in species names.
 - Improves local routing functionality within cloud functions
 
 ### Changed
@@ -113,28 +141,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Adds improved ``get_obs_surface`` behaviour for cloud usage.
-- Added shortcut routing for serverless functions, see ``openghg.cloud.call_function``. This differentiates between running on the hub or the cloud, where cloud is classed as running within a serverless function environment.
-- Added new ``running_locally`` function in addition to the ``running_in_cloud`` or ``running_on_hub`` to allower easier checks with the ``openghg.client`` functions.
+- Adds improved `get_obs_surface` behaviour for cloud usage.
+- Added shortcut routing for serverless functions, see `openghg.cloud.call_function`. This differentiates between running on the hub or the cloud, where cloud is classed as running within a serverless function environment.
+- Added new `running_locally` function in addition to the `running_in_cloud` or `running_on_hub` to allower easier checks with the `openghg.client` functions.
 
 ### Fixed
 
 - Fix to metadata storage for different sampling period formats
-- Fix to ``SearchResults`` where environment checks were resulting in attemping to access a local object store even though we were in a Hub environment.
+- Fix to `SearchResults` where environment checks were resulting in attemping to access a local object store even though we were in a Hub environment.
 
 ## [0.2.0] - 2022-07-19
 
 ### Added
 
-- New ``openghg.client`` functions for our cloud platform. Standardisation, searching and retrieval of data is passed to either the local or cloud function call depending on platform setup.
+- New `openghg.client` functions for our cloud platform. Standardisation, searching and retrieval of data is passed to either the local or cloud function call depending on platform setup.
 
 ### Fixed
 
-- Extra checks added to reading of emissions NetCDF datasets that have a single time value. Previously an error occurred due to performing a ``len`` on an unsized object.
+- Extra checks added to reading of emissions NetCDF datasets that have a single time value. Previously an error occurred due to performing a `len` on an unsized object.
 
 ### Removed
 
-- The ``openghg.client.process`` functions have been removed. These have been replaced with ``openghg.client.standardise`` functions.
+- The `openghg.client.process` functions have been removed. These have been replaced with `openghg.client.standardise` functions.
 
 ### Changed
 

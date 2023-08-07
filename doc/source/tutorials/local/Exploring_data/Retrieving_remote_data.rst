@@ -43,6 +43,12 @@ You can also use the `search page`_ to find available data at a given site.
 Using ``retrieve_atmospheric``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. note::
+    Outside of this tutorial, if you have write access to multiple object stores you
+    will need to pass the name of the object store you wish to write to to
+    the ``store`` argument of the ``retrieve_atmospheric`` function as the function
+    caches the data retrieved from ICOS.
+
 First we'll import ``retrieve_atmospheric`` from the ``retrieve`` submodule, then
 we'll retrieve some data from Saclay (**SAC**). The function will
 first check for any data from **SAC** already stored in the object
@@ -202,6 +208,12 @@ process, this will depend on the rate at which datasets are updated on the ICOS 
 
 2. CEDA
 -------
+
+.. note::
+    Outside of this tutorial, if you have write access to multiple object stores you
+    will need to pass the name of the object store you wish to write to to
+    the ``store`` argument of the ``retrieve_surface`` function as the function
+    caches the data retrieved from CEDA.
 
 To retrieve data from CEDA you can use the ``retrieve_surface`` function
 from ``openghg.retrieve.ceda``. This lets you pull down data from CEDA, process

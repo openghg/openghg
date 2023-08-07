@@ -1,7 +1,7 @@
 Searching and plotting
 ======================
 
-In this short tutorial we’ll show how to retrieve some data and create a
+In this short tutorial we'll show how to retrieve some data and create a
 simple plot using one of our plotting functions.
 
 Using the tutorial object store
@@ -27,7 +27,7 @@ Now we'll add some data to the tutorial store.
 1. Searching
 -------------
 
-Let’s search for all the methane data from Tacolneston.
+Let's search for all the methane data from Tacolneston.
 To do this we need to know the site code ("TAC").
 
 If we didn't know the site code, we could find it using
@@ -117,7 +117,7 @@ this is displayed:
     plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
 
 Plotting multiple timeseries
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If there are multiple results for a given search, we can also retrieve
 all the data and receive a ``list`` of |ObsData|_ objects.
@@ -142,7 +142,7 @@ and and responsive, even with relatively large amounts of data.
 -----------------------------
 
 We can easily compare data for the same species from different sites by
-doing a quick search to see what’s available
+doing a quick search to see what's available
 
 .. code:: ipython3
 

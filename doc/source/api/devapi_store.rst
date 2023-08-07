@@ -105,10 +105,10 @@ These handle the segmentation of data ready for storage in the object store.
 Metadata Handling
 =================
 
-The ``data_handler_lookup`` function is used in the same way as the search functions. It takes any number of
-keyword arguments for searching of metadata and a ``data_type`` argument. It returns a :ref:`DataHandler<DataHandler>` object.
+The ``data_manager`` function is used in the same way as the search functions. It takes any number of
+keyword arguments for searching of metadata and a ``data_type`` argument. It returns a :ref:`DataManager<DataManager>` object.
 
-.. autofunction:: openghg.store.data_handler_lookup
+.. autofunction:: openghg.store.data_manager
 
 
 Data types

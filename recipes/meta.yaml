@@ -1,3 +1,9 @@
+
+{% set conda_env = load_file_data('../environment.yaml', from_recipe_dir=True) %}
+# We trim the pip dictionary from the end of the list
+# This is a bit fragile but pip should be at the end
+{% set deps = conda_env["dependencies"][:-1] %}
+
 package:
   name: "openghg"
   version: {{ GIT_DESCRIBE_TAG }}
@@ -17,30 +23,12 @@ requirements:
     - pip
     - python
     - setuptools
+  # These differ slightly from requirements as some
+  # packages such as icoscp aren't available on conda
   run:
-    - addict
-    - cdsapi
-    - dask
-    - h5py
-    - h5netcdf
-    - lazy_import
-    - matplotlib
-    - msgpack-python
-    - netcdf4
-    - numexpr
-    - numpy
-    - nc-time-axis
-    - pandas
-    - plotly
-    - pyvis
-    - rapidfuzz
-    - requests >=2.25
-    - scipy
-    - tinydb
-    - tqdm
-    - xarray >=0.18.2
-    - urllib3 >=1.26.3
-
+    {% for package in deps %}
+    - {{ package }}
+    {% endfor %}
 
 test:
   imports:
