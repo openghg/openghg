@@ -11,6 +11,7 @@ from xarray import DataArray, Dataset
 from types import TracebackType
 import warnings
 from openghg.store._connection import get_object_store_connection
+from openghg.store.base._base import add_attr_to_data_REFACTOR  # TODO refactor this...
 from openghg.util import to_lowercase
 
 ArrayType = Optional[Union[ndarray, DataArray]]
@@ -27,7 +28,7 @@ class Emissions(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     def __enter__(self) -> Emissions:
-        self._metastore.close()  # For now, close metastore before connection opened...
+        self._metastore.close()  # TODO For now, close metastore before connection opened...
         return self
 
     def __exit__(
@@ -160,7 +161,9 @@ class Emissions(BaseStore):
 
             for key, split_data in emissions_data.items():
                 print("Passed to datasource_lookup:", split_data["metadata"].get("database_version", "database_version not found"))
-                ds_uuid = conn.add_to_store(split_data["metadata"], split_data["data"])
+                metadata_data_pair = (split_data["metadata"], split_data["data"])
+                add_attr_to_data_REFACTOR(*metadata_data_pair)
+                ds_uuid = conn.add_to_store(*metadata_data_pair)
                 datasource_uuids[key] = ds_uuid
 
             # Record the file hash in case we see this file again
@@ -225,7 +228,9 @@ class Emissions(BaseStore):
         datasource_uuids = {}
         with get_object_store_connection("emissions", self._bucket) as conn:
             for key, split_data in emissions_data.items():
-                ds_uuid = conn.add_to_store(split_data["metadata"], split_data["data"])
+                metadata_data_pair = (split_data["metadata"], split_data["data"])
+                add_attr_to_data_REFACTOR(*metadata_data_pair)
+                ds_uuid = conn.add_to_store(*metadata_data_pair)
                 datasource_uuids[key] = ds_uuid
 
         return datasource_uuids

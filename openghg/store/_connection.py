@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, cast
 
 import tinydb
 import xarray
@@ -216,7 +216,7 @@ class ObjectStoreConnection:
             key = "_".join(str(metadata[k]) for k in self.required_keys)
             self._datasource_uuids[uuid] = key
         else:
-            uuid = str(lookup_results)  # we know lookup_results is not none
+            uuid = cast(str, lookup_results)  # we know lookup_results is not none
             datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
         datasource.add_data(metadata=metadata, data=data, data_type=self.data_type, skip_keys=skip_keys)
@@ -249,7 +249,7 @@ class ObjectStoreConnection:
         """Add {file_hash: file_name} to internal metadata."""
         self._file_hashes[file_hash] = file_path.name
 
-    def store_retrieved_hashes(self, hashes: dict) -> None:
+    def save_retrieved_hashes(self, hashes: dict) -> None:
         """Store hashes of data retrieved from a remote data source such as
         ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
         seen before and adds the new.

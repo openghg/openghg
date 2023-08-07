@@ -16,6 +16,26 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
+def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
+    """Attributes in a netCDF file can be strings, numbers, or sequences:
+       http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
+
+       This function converts any data whose type is not int, float, str, or list
+       to strings.
+       Booleans are converted to strings, even though they are a subtype of int.
+    """
+    if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
+        return value
+    else:
+        return str(value)
+
+
+def add_attr_to_data_REFACTOR(metadata, data):
+    """Add non-conflicting metadata to data.attrs"""
+    to_add = {k: convert_to_netcdf4_types(v) for k, v in metadata.items() if k not in data.attrs}
+    data.attrs.update(to_add)
+
+
 class BaseStore:
     _root = "root"
     _uuid = "root_uuid"
