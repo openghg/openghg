@@ -32,14 +32,15 @@ class BaseStore:
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: Dict[str, Dict] = {}
         # Where we'll store this object
-        self._bucket = bucket
         self._metakey = ""
-        self._metastore = load_metastore(bucket=bucket, key=self.metakey())
 
         if exists(bucket=bucket, key=self.key()):
             data = get_object_from_json(bucket=bucket, key=self.key())
             # Update myself
             self.__dict__.update(data)
+
+        self._metastore = load_metastore(bucket=bucket, key=self.metakey())
+        self._bucket = bucket
 
     @classmethod
     def metakey(cls) -> str:
@@ -56,7 +57,7 @@ class BaseStore:
     def to_data(self) -> Dict:
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
-        DO_NOT_STORE = ["_metastore"]
+        DO_NOT_STORE = ["_metastore", "_bucket"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
     def assign_data(
