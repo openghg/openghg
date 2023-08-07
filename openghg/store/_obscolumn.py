@@ -1,14 +1,16 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
+from types import TracebackType
 from typing import Dict, Optional, Union
 
 from numpy import ndarray
-
-# from openghg.store import DataSchema
-from openghg.store.base import BaseStore
 from xarray import DataArray
-from types import TracebackType
+
+from openghg.store.base import BaseStore
+from openghg.store._connection import get_object_store_connection
+from openghg.store.base._base import add_attr_to_data_REFACTOR  # TODO refactor this...
+
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -24,6 +26,7 @@ class ObsColumn(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     def __enter__(self) -> ObsColumn:
+        self._metastore.close()
         return self
 
     def __exit__(
@@ -35,7 +38,8 @@ class ObsColumn(BaseStore):
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
-            self.save()
+            # self.save()
+            pass
 
     def read_file(
         self,
@@ -98,49 +102,48 @@ class ObsColumn(BaseStore):
         parser_fn = load_column_parser(source_format=source_format)
 
         # Load in the metadata store
+        datasource_uuids = {}
+        with get_object_store_connection("column", self._bucket) as conn:
+            file_hash = hash_file(filepath=filepath)
+            if conn.file_hash_already_seen(file_hash) and not overwrite:
+                logger.warning(
+                    f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
+                )
+                return None
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
-            logger.warning(
-                "This file has been uploaded previously with the filename : "
-                f"{self._file_hashes[file_hash]} - skipping."
-            )
-            return None
+            # Define parameters to pass to the parser function
+            param = {
+                "data_filepath": filepath,
+                "satellite": satellite,
+                "domain": domain,
+                "selection": selection,
+                "site": site,
+                "species": species,
+                "network": network,
+                "instrument": instrument,
+                "platform": platform,
+            }
 
-        # Define parameters to pass to the parser function
-        param = {
-            "data_filepath": filepath,
-            "satellite": satellite,
-            "domain": domain,
-            "selection": selection,
-            "site": site,
-            "species": species,
-            "network": network,
-            "instrument": instrument,
-            "platform": platform,
-        }
+            obs_data = parser_fn(**param)
 
-        obs_data = parser_fn(**param)
+            # TODO: Add in schema and checks for ObsColumn
+            # # Checking against expected format for ObsColumn
+            # for split_data in obs_data.values():
+            #     col_data = split_data["data"]
+            #     ObsColumn.validate_data(col_data)
 
-        # TODO: Add in schema and checks for ObsColumn
-        # # Checking against expected format for ObsColumn
-        # for split_data in obs_data.values():
-        #     col_data = split_data["data"]
-        #     ObsColumn.validate_data(col_data)
+            # TODO: Do we need to do include a split here of some kind, since
+            # this could be "site" or "satellite" keys.
+            # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
-        # TODO: Do we need to do include a split here of some kind, since
-        # this could be "site" or "satellite" keys.
-        # platform = list(obs_data.keys())[0]["metadata"]["platform"]
+            for key, parsed_data in obs_data.items():
+                metadata_data_pair = (parsed_data["metadata"], parsed_data["data"])
+                add_attr_to_data_REFACTOR(*metadata_data_pair)
+                ds_uuid = conn.add_to_store(*metadata_data_pair)
+                datasource_uuids[key] = ds_uuid
 
-        required = ("satellite", "selection", "domain", "site", "species", "network")
-
-        data_type = "column"
-        datasource_uuids = self.assign_data(
-            data=obs_data, overwrite=overwrite, data_type=data_type, required_keys=required, min_keys=3
-        )
-
-        # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+            # Record the file hash in case we see this file again
+            conn.save_file_hash(file_hash, filepath)  # TODO: do we want filepath.name? this caused an error...
 
         return datasource_uuids
 

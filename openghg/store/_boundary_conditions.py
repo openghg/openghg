@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from openghg.store import DataSchema
 
 from openghg.store.base import BaseStore
+from openghg.store.base._base import add_attr_to_data_REFACTOR  # TODO refactor this...
+from openghg.store._connection import get_object_store_connection
 
 __all__ = ["BoundaryConditions"]
 
@@ -27,6 +29,7 @@ class BoundaryConditions(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     def __enter__(self) -> BoundaryConditions:
+        self._metastore.close()  # TODO remove this when refactoring
         return self
 
     def __exit__(
@@ -38,7 +41,8 @@ class BoundaryConditions(BaseStore):
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
-            self.save()
+            # self.save()
+            pass
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
@@ -108,85 +112,83 @@ class BoundaryConditions(BaseStore):
         filepath = Path(filepath)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
-            logger.warning(
-                "This file has been uploaded previously with the filename : "
-                f"{self._file_hashes[file_hash]} - skipping."
+
+        datasource_uuids = {}
+        with get_object_store_connection("boundary_conditions", bucket=self._bucket) as conn:
+            if conn.file_hash_already_seen(file_hash) and not overwrite:
+                logger.warning(
+                    "This file has been uploaded previously with the filename : "
+                    f"{self._file_hashes[file_hash]} - skipping."
+                )
+                return None
+
+            bc_data = open_dataset(filepath)
+
+            # Some attributes are numpy types we can't serialise to JSON so convert them
+            # to their native types here
+            attrs = {}
+            for key, value in bc_data.attrs.items():
+                try:
+                    attrs[key] = value.item()
+                except AttributeError:
+                    attrs[key] = value
+
+            author_name = "OpenGHG Cloud"
+            bc_data.attrs["author"] = author_name
+
+            metadata = {}
+            metadata.update(attrs)
+
+            metadata["species"] = species
+            metadata["domain"] = domain
+            metadata["bc_input"] = bc_input
+            metadata["author"] = author_name
+            metadata["processed"] = str(timestamp_now())
+
+            # Check if time has 0-dimensions and, if so, expand this so time is 1D
+            if "time" in bc_data.coords:
+                bc_data = update_zero_dim(bc_data, dim="time")
+
+            # Currently ACRG boundary conditions are split by month or year
+            bc_time = bc_data["time"]
+
+            start_date, end_date, period_str = infer_date_range(
+                bc_time, filepath=filepath, period=period, continuous=continuous
             )
-            return None
 
-        bc_data = open_dataset(filepath)
+            # Checking against expected format for boundary conditions
+            BoundaryConditions.validate_data(bc_data)
+            data_type = "boundary_conditions"
 
-        # Some attributes are numpy types we can't serialise to JSON so convert them
-        # to their native types here
-        attrs = {}
-        for key, value in bc_data.attrs.items():
-            try:
-                attrs[key] = value.item()
-            except AttributeError:
-                attrs[key] = value
+            metadata["start_date"] = str(start_date)
+            metadata["end_date"] = str(end_date)
+            metadata["data_type"] = data_type
 
-        author_name = "OpenGHG Cloud"
-        bc_data.attrs["author"] = author_name
+            metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
+            metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
+            metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
+            metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
+            metadata["min_height"] = round(float(bc_data["height"].min()), 5)
+            metadata["max_height"] = round(float(bc_data["height"].max()), 5)
 
-        metadata = {}
-        metadata.update(attrs)
+            metadata["input_filename"] = filepath.name
 
-        metadata["species"] = species
-        metadata["domain"] = domain
-        metadata["bc_input"] = bc_input
-        metadata["author"] = author_name
-        metadata["processed"] = str(timestamp_now())
+            metadata["time_period"] = period_str
 
-        # Check if time has 0-dimensions and, if so, expand this so time is 1D
-        if "time" in bc_data.coords:
-            bc_data = update_zero_dim(bc_data, dim="time")
+            key = "_".join((species, bc_input, domain))
 
-        # Currently ACRG boundary conditions are split by month or year
-        bc_time = bc_data["time"]
+            boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+            boundary_conditions_data[key]["data"] = bc_data
+            boundary_conditions_data[key]["metadata"] = metadata
 
-        start_date, end_date, period_str = infer_date_range(
-            bc_time, filepath=filepath, period=period, continuous=continuous
-        )
+            for key, parsed_data in boundary_conditions_data.items():
+                metadata_data_pair = (parsed_data["metadata"], parsed_data["data"])
+                add_attr_to_data_REFACTOR(*metadata_data_pair)
+                ds_uuid = conn.add_to_store(*metadata_data_pair)
+                datasource_uuids[key] = ds_uuid
 
-        # Checking against expected format for boundary conditions
-        BoundaryConditions.validate_data(bc_data)
-        data_type = "boundary_conditions"
-
-        metadata["start_date"] = str(start_date)
-        metadata["end_date"] = str(end_date)
-        metadata["data_type"] = data_type
-
-        metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
-        metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
-        metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
-        metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
-        metadata["min_height"] = round(float(bc_data["height"].min()), 5)
-        metadata["max_height"] = round(float(bc_data["height"].max()), 5)
-
-        metadata["input_filename"] = filepath.name
-
-        metadata["time_period"] = period_str
-
-        key = "_".join((species, bc_input, domain))
-
-        boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-        boundary_conditions_data[key]["data"] = bc_data
-        boundary_conditions_data[key]["metadata"] = metadata
-
-        required_keys = ("species", "bc_input", "domain")
-
-        # This performs the lookup and assignment of data to new or
-        # exisiting Datasources
-        datasource_uuids = self.assign_data(
-            data=boundary_conditions_data,
-            overwrite=overwrite,
-            data_type=data_type,
-            required_keys=required_keys,
-        )
-
-        # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+            # Record the file hash in case we see this file again
+            conn.save_file_hash(file_hash, filepath)  # TODO: do we want filepath.name? this caused an error...
 
         return datasource_uuids
 
