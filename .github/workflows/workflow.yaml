@@ -118,7 +118,7 @@ jobs:
     name: Build and publish conda package
     runs-on: ubuntu-latest
     needs: ["test", "docs"]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     defaults:
       run:
         shell: bash -el {0}
@@ -132,9 +132,9 @@ jobs:
           micromamba create -n openghg_build anaconda-client boa -c conda-forge
           micromamba activate openghg_build
           mkdir ${{ github.workspace }}/build
-          conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge
-          BUILD_DIR=${GITHUB_WORKSPACE}/build
-          BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
-          anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
+          conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge -c openghg
+          # BUILD_DIR=${GITHUB_WORKSPACE}/build
+          # BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
+          # anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
         env:
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
