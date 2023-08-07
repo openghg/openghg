@@ -8,6 +8,8 @@ import logging
 import tinydb
 from typing import DefaultDict, Dict, List, Set, Optional, Union
 
+from openghg.store._connection import get_object_store_connection
+
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
@@ -251,20 +253,8 @@ class DataManager:
             uuid = [uuid]
 
         dtype = self._check_datatypes(uuid=uuid)
-        data_objs = define_data_type_classes()
-        dclass = data_objs[dtype]
 
-        with dclass(bucket=self._bucket) as dc:
+        with get_object_store_connection(dtype, bucket=self._bucket) as dc:
             for uid in uuid:
-                # First remove the data from the metadata store
-                dc._metastore.remove(tinydb.where("uuid") == uid)
-                # Delete all the data associated with a Datasource
-                d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)
-                d.delete_all_data()
-                # Then delete the Datasource itself
-                key = d.key()
-                delete_object(bucket=self._bucket, key=key)
-                # Remove from the list of Datasources the object knows about
-                dc.remove_datasource(uuid=uid)
-
+                dc.delete(uid)
                 logger.info(f"Deleted Datasource with UUID {uid}.")
