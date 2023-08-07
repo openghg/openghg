@@ -227,7 +227,7 @@ class ObjectStoreConnection:
         datasource.add_data(metadata=metadata, data=data, data_type=self.data_type, skip_keys=skip_keys)
         datasource.save(bucket=self._bucket)
         if new_datasource:
-            self._metastore.insert(metadata)
+            self._metastore.insert(datasource.metadata())  # NOTE: cannot use `metadata` here because datasource.add_data updates time info
         else:
             # Since the new data we're adding might have more metadata than was
             # in the existing Datasource, we update to datasource.metadata(),

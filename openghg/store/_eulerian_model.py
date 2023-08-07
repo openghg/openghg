@@ -6,6 +6,10 @@ from openghg.store.base import BaseStore
 from xarray import Dataset
 from types import TracebackType
 
+from openghg.store.base._base import add_attr_to_data_REFACTOR  # TODO refactor this...
+from openghg.store._connection import get_object_store_connection
+
+
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
@@ -28,6 +32,7 @@ class EulerianModel(BaseStore):
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
     def __enter__(self) -> EulerianModel:
+        self._metastore.close()  # TODO remove when refactoring
         return self
 
     def __exit__(
@@ -39,7 +44,8 @@ class EulerianModel(BaseStore):
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
-            self.save()
+            # self.save()
+            pass
 
     def read_file(
         self,
@@ -78,98 +84,103 @@ class EulerianModel(BaseStore):
 
         filepath = Path(filepath)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
-            raise ValueError(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}."
-            )
+        datasource_uuids = {}
+        with get_object_store_connection("eulerian_model", self._bucket) as conn:
+            file_hash = hash_file(filepath=filepath)
+            if conn.file_hash_already_seen(file_hash) and not overwrite:
+                raise ValueError(  # TODO file hash seen for Eulerian model not the same as other data classes
+                    f"This file has been uploaded previously with the filename : {conn._file_hashes[file_hash]}."
+                )
 
-        em_data = open_dataset(filepath)
+            em_data = open_dataset(filepath)
 
-        # Check necessary 4D coordinates are present and rename if necessary (for consistency)
-        check_coords = {
-            "time": ["time"],
-            "lat": ["lat", "latitude"],
-            "lon": ["lon", "longitude"],
-            "lev": ["lev", "level", "layer", "sigma_level"],
-        }
-        for name, coord_options in check_coords.items():
-            for coord in coord_options:
-                if coord in em_data.coords:
-                    break
-            else:
-                raise ValueError(f"Input data must contain one of '{coord_options}' co-ordinate")
-            if name != coord:
-                logger.info(f"Renaming co-ordinate '{coord}' to '{name}'")
-                em_data = em_data.rename({coord: name})
-
-        attrs = em_data.attrs
-
-        # author_name = "OpenGHG Cloud"
-        # em_data.attrs["author"] = author_name
-
-        metadata = {}
-        metadata.update(attrs)
-
-        metadata["model"] = model
-        metadata["species"] = species
-        metadata["processed"] = str(timestamp_now())
-        metadata["data_type"] = "eulerian_model"
-
-        if start_date is None:
-            if len(em_data["time"]) > 1:
-                start_date = str(timestamp_tzaware(em_data.time[0].values))
-            else:
-                try:
-                    start_date = attrs["simulation_start_date_and_time"]
-                except KeyError:
-                    raise Exception("Unable to derive start_date from data, please provide as an input.")
+            # Check necessary 4D coordinates are present and rename if necessary (for consistency)
+            check_coords = {
+                "time": ["time"],
+                "lat": ["lat", "latitude"],
+                "lon": ["lon", "longitude"],
+                "lev": ["lev", "level", "layer", "sigma_level"],
+            }
+            for name, coord_options in check_coords.items():
+                for coord in coord_options:
+                    if coord in em_data.coords:
+                        break
                 else:
-                    start_date = timestamp_tzaware(start_date)
-                    start_date = str(start_date)
+                    raise ValueError(f"Input data must contain one of '{coord_options}' co-ordinate")
+                if name != coord:
+                    logger.info(f"Renaming co-ordinate '{coord}' to '{name}'")
+                    em_data = em_data.rename({coord: name})
 
-        if end_date is None:
-            if len(em_data["time"]) > 1:
-                end_date = str(timestamp_tzaware(em_data.time[-1].values))
-            else:
-                try:
-                    end_date = attrs["simulation_end_date_and_time"]
-                except KeyError:
-                    raise Exception("Unable to derive `end_date` from data, please provide as an input.")
+            attrs = em_data.attrs
+
+            # author_name = "OpenGHG Cloud"
+            # em_data.attrs["author"] = author_name
+
+            metadata = {}
+            metadata.update(attrs)
+
+            metadata["model"] = model
+            metadata["species"] = species
+            metadata["processed"] = str(timestamp_now())
+            metadata["data_type"] = "eulerian_model"
+
+            if start_date is None:
+                if len(em_data["time"]) > 1:
+                    start_date = str(timestamp_tzaware(em_data.time[0].values))
                 else:
-                    end_date = timestamp_tzaware(end_date)
-                    end_date = str(end_date)
+                    try:
+                        start_date = attrs["simulation_start_date_and_time"]
+                        print(start_date)
+                    except KeyError:
+                        raise Exception("Unable to derive start_date from data, please provide as an input.")
+                    else:
+                        start_date = timestamp_tzaware(start_date)
+                        print(start_date)
+                        start_date = str(start_date)
 
-        date = str(pd_Timestamp(start_date).date())
+            print(start_date)
 
-        metadata["date"] = date
-        metadata["start_date"] = start_date
-        metadata["end_date"] = end_date
+            if end_date is None:
+                if len(em_data["time"]) > 1:
+                    end_date = str(timestamp_tzaware(em_data.time[-1].values))
+                else:
+                    try:
+                        end_date = attrs["simulation_end_date_and_time"]
+                    except KeyError:
+                        raise Exception("Unable to derive `end_date` from data, please provide as an input.")
+                    else:
+                        end_date = timestamp_tzaware(end_date)
+                        end_date = str(end_date)
 
-        metadata["max_longitude"] = round(float(em_data["lon"].max()), 5)
-        metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
-        metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
-        metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
+            date = str(pd_Timestamp(start_date).date())
 
-        history = metadata.get("history")
-        if history is None:
-            history = ""
-        metadata["history"] = history + f" {str(timestamp_now())} Processed onto OpenGHG cloud"
+            metadata["date"] = date
+            metadata["start_date"] = start_date
+            metadata["end_date"] = end_date
 
-        key = "_".join((model, species, date))
+            metadata["max_longitude"] = round(float(em_data["lon"].max()), 5)
+            metadata["min_longitude"] = round(float(em_data["lon"].min()), 5)
+            metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
+            metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
 
-        model_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-        model_data[key]["data"] = em_data
-        model_data[key]["metadata"] = metadata
+            history = metadata.get("history")
+            if history is None:
+                history = ""
+            metadata["history"] = history + f" {str(timestamp_now())} Processed onto OpenGHG cloud"
 
-        required = ("model", "species", "date")
+            key = "_".join((model, species, date))
 
-        data_type = "eulerian_model"
-        datasource_uuids = self.assign_data(
-            data=model_data, overwrite=overwrite, data_type=data_type, required_keys=required
-        )
+            model_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+            model_data[key]["data"] = em_data
+            model_data[key]["metadata"] = metadata
 
-        # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+            for key, parsed_data in model_data.items():
+                metadata_data_pair = (parsed_data["metadata"], parsed_data["data"])
+                add_attr_to_data_REFACTOR(*metadata_data_pair)
+                ds_uuid = conn.add_to_store(*metadata_data_pair)
+                datasource_uuids[key] = ds_uuid
+
+            # Record the file hash in case we see this file again
+            conn.save_file_hash(file_hash, filepath)  # TODO: do we want filepath.name? this caused an error...
 
         return datasource_uuids
