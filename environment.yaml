@@ -27,6 +27,7 @@ dependencies:
   - toml
   - tqdm
   - xarray
+  - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
   - pip:
