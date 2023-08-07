@@ -1,16 +1,19 @@
+import os
 import json
 import pytest
 import xarray as xr
 from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_stores
+from pathlib import Path
 from openghg.objectstore import (
     exists,
     get_bucket,
     get_writable_bucket,
-    get_object_from_json,
     set_object_from_json,
+    get_object_from_json,
 )
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
+from openghg.retrieve import search_surface
 from openghg.util import create_daterange_str
 from pandas import Timestamp
 
@@ -910,23 +913,23 @@ def test_gcwerks_fp_not_a_tuple_raises():
             obs.read_file(filepath=filepath, source_format="gc", site="cgo", network="agage")
 
 
-def test_get_store_path():
-    bucket = get_bucket()
-    print(bucket)
-
-
-def test_object_loads_if_invalid_objectstore_path_in_json():
+def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):
     bucket = get_writable_bucket(name="group")
-
-    with ObsSurface(bucket=bucket) as obs:
-        key = obs.key()
-
-    stored_obj = get_object_from_json(bucket=bucket, key=key)
-    stored_obj.update({"_bucket": "/tmp/nonexistent/path/123"})
-
-    set_object_from_json(bucket=bucket, key=key, data=stored_obj)
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
     with ObsSurface(bucket=bucket) as obs:
         obs.read_file(filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+        key = obs.key()
+
+    no_permissions = Path(tmpdir).joinpath("invalid_path")
+    no_permissions.mkdir()
+    os.chmod(no_permissions, 0o444)
+
+    # Someone else comes along and changes the value
+    stored_obj = get_object_from_json(bucket=bucket, key=key)
+    stored_obj.update({"_bucket": str(no_permissions)})
+    set_object_from_json(bucket=bucket, key=key, data=stored_obj)
+
+    # Now we search for the object, in versions before 0.6.2 this would cause a PermissionError
+    search_surface(site="bsd", species="ch4")
