@@ -914,6 +914,12 @@ def test_gcwerks_fp_not_a_tuple_raises():
 
 
 def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):
+    """This was added due to an issue found where in versions of OpenGHG < 0.6.2
+    the _bucket variable was written to JSON. If this _bucket variable was updated to
+    a path that another user couldn't access (such a symlink in a user's home directory
+    the group object store) then subsequent instances of the class would fail due to that bucket
+    path being invalid. See https://github.com/openghg/openghg/issues/740
+    """
     bucket = get_writable_bucket(name="group")
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
