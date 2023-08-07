@@ -58,6 +58,7 @@ class ObjectStoreConnection:
     _uuid = "root_uuid"
     required_keys: tuple = ()
     optional_keys: tuple = ()
+    min_required_keys: Optional[int] = None
     data_type: str = ""
 
     def __init__(self, bucket: str) -> None:
@@ -70,6 +71,9 @@ class ObjectStoreConnection:
         self._key = f"{self._root}/uuid/{self._uuid}"
         self._metakey = f"{self._root}/uuid/{self._uuid}/metastore"
         self._metastore = store.load_metastore(self._bucket, self._metakey)
+        if self.min_required_keys is None:
+            self.min_required_keys = len(self.required_keys)
+        self.min_required_keys = cast(int, self.min_required_keys)  # TODO: is this necessary?
 
         # internal metadata stored at bucket/key._data
         self._creation_datatime = str(util.timestamp_now())
@@ -162,7 +166,8 @@ class ObjectStoreConnection:
         required_metadata = {
             k.lower(): v for k, v in metadata.items() if k in self.required_keys
         }  # NOTE: keys stored as lowercase
-        if len(required_metadata) < len(self.required_keys):
+
+        if len(required_metadata) < cast(int, self.min_required_keys):
             raise ValueError(
                 f"The given metadata does not contain enough information. The required keys are: {self.required_keys}"
             )
@@ -213,7 +218,7 @@ class ObjectStoreConnection:
             metadata["object_store"] = self._bucket  # TODO is Gareth removing this?
 
             # record datasource in internal metadata
-            key = "_".join(str(metadata[k]) for k in self.required_keys)
+            key = "_".join(str(metadata.get(k, k)) for k in self.required_keys)  # TODO find better way to store internal metadata
             self._datasource_uuids[uuid] = key
         else:
             uuid = cast(str, lookup_results)  # we know lookup_results is not none
@@ -296,6 +301,7 @@ class ObjectStoreConnection:
         del self._datasource_uuids[uuid]
 
         # TODO: Add logging?
+        # TODO: remove file hashes associated with this uuid?
 
 
 
@@ -340,6 +346,7 @@ class ColumnConnection(ObjectStoreConnection):
     _root = "ObsColumn"
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     required_keys = ("satellite", "selection", "domain", "site", "species", "network")
+    min_required_keys = 3
     data_type = "column"
 
 
