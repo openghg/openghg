@@ -37,6 +37,11 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class ObjectStoreConnection:
     """Represents a connection to an object store.
 
+    This class hides the inner workings of the object store from the
+    the parts of OpenGHG that deal with processing and analysing data.
+
+
+
     Public attributes:
         required_keys: keys that must be present for Datasource lookup
                        and creation
@@ -138,7 +143,7 @@ class ObjectStoreConnection:
         else:
             return []
 
-    def datasource_lookup(self, metadata: dict[str, Any]) -> Optional[str]:
+    def _datasource_lookup(self, metadata: dict[str, Any]) -> Optional[str]:
         """Search metastore for a Datasource uuid using the given metadata.
 
         To add data the the object store, we must determine if a Datasource already
@@ -189,15 +194,16 @@ class ObjectStoreConnection:
 
         Returns:
            Dictionary with uuid of Datasource and a Boolean that is true if the
-        Datasource is new.
+           Datasource is new.
         """
         from openghg.store.base import Datasource
         # TODO add overwrite? (currently not used in Datasource.add_data)
+        # TODO: check for overwrites... make alternate update_store method for conflicts
 
         metadata = {k.lower(): v for k, v in metadata.items()}  # metastore keys are lower case
         metadata = util.to_lowercase(metadata, skip_keys=skip_keys)
 
-        lookup_results = self.datasource_lookup(metadata)
+        lookup_results = self._datasource_lookup(metadata)
         new_datasource = True if lookup_results is None else False
 
         if new_datasource:
@@ -243,11 +249,54 @@ class ObjectStoreConnection:
         """Add {file_hash: file_name} to internal metadata."""
         self._file_hashes[file_hash] = file_path.name
 
-    # TODO should we have functions for deleting items from the object store?
-    # BaseStore will let you clear datasources from the internal metadata,
-    # but not the data itself.
-    # Datasource has a delete_data method, although it's not obvious (to me) how
-    # it works
+    def store_retrieved_hashes(self, hashes: dict) -> None:
+        """Store hashes of data retrieved from a remote data source such as
+        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
+        seen before and adds the new.
+
+        Args:
+            hashes: Dictionary of hashes provided by the hash_retrieved_data function,
+                    of the form {hash: species_key}
+
+        Returns:
+            None
+        """
+        # TODO: should this deal with one item at a time and move loop to `store_data`
+        # in _obssurface.py? (This is the only place this function is used.)
+        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
+        self._retrieved_hashes.update(new)
+
+    def delete(self, uuid: str) -> None:
+        """Delete a Datasource with the given UUID.
+
+        This deletes both the data and the record in
+        the metastore.
+
+        Args:
+            uuid: UUID of the Datasource to delete.
+
+        Returns:
+            None
+        """
+        from openghg.objectstore import delete_object
+        from openghg.store.base import Datasource
+        from tinydb import where
+
+        # Delete Datasource data
+        Datasource.load(bucket=self._bucket, uuid=uuid).delete_all_data()
+
+        # Delete the Datasource itself
+        key = f"{Datasource._datasource_root}/uuid/{uuid}"
+        delete_object(bucket=self._bucket, key=key)
+
+        # Delete the UUID from the metastore
+        self._metastore.remove(where("uuid") == uuid)
+
+        # Remove Datasource from internal metadata
+        del self._datasource_uuids[uuid]
+
+        # TODO: Add logging?
+
 
 
 def get_object_store_connection(data_type: str, bucket: str) -> Any:  # TODO: fix typing
@@ -310,7 +359,10 @@ class FootprintsConnection(ObjectStoreConnection):
         "model",
         "inlet",
         "domain",
-    )  # TODO add high_time_resolution, etc. when 0.6.1 is out
+        "high_time_resolution",
+        "high_spatial_resolution",
+        "short_lifetime",
+    )
     data_type = "footprints"
 
 
