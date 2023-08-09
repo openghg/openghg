@@ -1,12 +1,14 @@
 import json
 import pytest
 import xarray as xr
+from pandas import Timestamp
+
 from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_stores
 from openghg.objectstore import exists, get_bucket, get_writable_bucket
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
+from openghg.store._connection import get_object_store_connection
 from openghg.util import create_daterange_str
-from pandas import Timestamp
 
 
 @pytest.mark.skip(reason="Usage of ObsSurface is changing. Possibly refactor this test.")
@@ -566,8 +568,8 @@ def test_delete_Datasource():
             sampling_period="1m",
         )
 
-    with ObsSurface(bucket=bucket) as obs:
-        datasources = obs.datasources()
+    with get_object_store_connection("surface", bucket=bucket) as conn:
+        datasources = list(conn._datasource_uuids.keys())
 
         uuid = datasources[0]
 
@@ -579,9 +581,9 @@ def test_delete_Datasource():
 
         assert exists(bucket=bucket, key=key)
 
-        obs.delete(uuid=uuid)
+        conn.delete(uuid=uuid)
 
-        assert uuid not in obs.datasources()
+        assert uuid not in conn._datasource_uuids
 
         assert not exists(bucket=bucket, key=key)
 
