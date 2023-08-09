@@ -4,6 +4,7 @@ import numpy as np
 from helpers import get_surface_datapath, get_emissions_datapath, get_footprint_datapath
 from openghg.store import ObsSurface, Emissions
 from openghg.store.base import Datasource
+from openghg.store._connection import get_object_store_connection
 from openghg.retrieve import get_flux
 from openghg.retrieve import search
 from openghg.standardise import standardise_footprint
@@ -517,8 +518,8 @@ def test_obs_data_representative_date_overlap():
     bsd_data_read_crds_internal_overlap(overwrite=True)
 
     bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        uuids = obs.datasources()
+    with get_object_store_connection(data_type="surface", bucket=bucket) as obs:
+        uuids = obs._datasources()
 
     datasources = []
     for uuid in uuids:

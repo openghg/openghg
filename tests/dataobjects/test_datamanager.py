@@ -5,6 +5,8 @@ from openghg.standardise import standardise_surface, standardise_footprint
 from openghg.objectstore import get_writable_bucket
 from openghg.dataobjects import DataManager
 
+from openghg.store._connection import get_object_store_connection
+
 import pytest
 from helpers import (
     get_surface_datapath,
@@ -84,8 +86,8 @@ def test_delete_footprint_data(footprint_read):
     res = data_manager(data_type="footprints", site="tmb", store="user")
 
     bucket = get_writable_bucket(name="user")
-    with Footprints(bucket=bucket) as fps:
-        uuid = fps.datasources()[0]
+    with get_object_store_connection(data_type="footprints", bucket=bucket) as fps:
+        uuid = fps._datasources()[0]
 
     ds = Datasource.load(bucket=bucket, uuid=uuid, shallow=True)
     key = ds.key()
@@ -107,8 +109,8 @@ def test_delete_footprint_data(footprint_read):
     for k in filepaths:
         assert not k.exists()
 
-    with Footprints(bucket=bucket) as fps:
-        assert uuid not in fps._datasource_uuids
+    with get_object_store_connection(data_type="footprints", bucket=bucket) as fps:
+        assert uuid not in fps._datasources()
 
 
 def test_object_store_not_in_metadata():

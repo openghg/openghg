@@ -77,7 +77,7 @@ class ObjectStoreConnection:
 
         # internal metadata stored at bucket/key._data
         self._creation_datatime = str(util.timestamp_now())
-        self._datasource_uuids: dict[str, str] = {}  # file names keyed by datasource uuid
+        self._datasource_uuids: dict[str, str] = {}  # file names keyed by datasource uuid # TODO "keys" keyed by uuid?
         self._file_hashes: dict[str, str] = {}  # hashes of previously uploaded files
         self._retrieved_hashes: dict[str, dict] = {}  # hashes of prev. uploaded files from other platforms
         self._stored = False  # TODO what is this?
@@ -130,6 +130,17 @@ class ObjectStoreConnection:
         do_not_store = ["_metastore"]
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in do_not_store}
         objectstore.set_object_from_json(bucket=self._bucket, key=self._key, data=internal_metadata)
+
+    def _datasources(self) -> list[str]:
+        """Return the list of Datasources UUIDs associated with this object.
+
+        Used for testing.
+
+        Returns:
+            list: List of Datasource UUIDs
+        """
+        return list(self._datasource_uuids.keys())
+
 
     #  methods for interacting with object store
     def search(self, search_terms: dict[str, Any]) -> list[dict[str, Any]]:
@@ -226,6 +237,7 @@ class ObjectStoreConnection:
 
         datasource.add_data(metadata=metadata, data=data, data_type=self.data_type, skip_keys=skip_keys)
         datasource.save(bucket=self._bucket)
+        # TODO remove call back from datasource, so that search metadata isn't influenced by datasource?
         if new_datasource:
             self._metastore.insert(datasource.metadata())  # NOTE: cannot use `metadata` here because datasource.add_data updates time info
         else:

@@ -184,11 +184,11 @@ def test_read_CRDS():
     assert ch4_data["ch4_variability"][-1] == 1.034
     assert ch4_data["ch4_number_of_observations"][-1] == 26.0
 
-    with ObsSurface(bucket=bucket) as obs:
-        uuid_one = obs.datasources()[0]
+    with get_object_store_connection(data_type="surface", bucket=bucket) as obs:
+        uuid_one = obs._datasources()[0]
         datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
 
-        first_set_datasources = obs.datasources()
+        first_set_datasources = obs._datasources()
 
     data_keys = list(datasource.data().keys())
 
@@ -207,14 +207,16 @@ def test_read_CRDS():
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.future.dat", source_format="CRDS")
 
     with ObsSurface(bucket=bucket) as obs:
-        results = obs.read_file(filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
-        assert len(obs.datasources()) == 3
+        results = obs.read_file(filepath, source_format="CRDS", site="bsd", network="DECC")
 
-        uuid_one = obs.datasources()[0]
+    with get_object_store_connection(data_type="surface", bucket=bucket) as obs:
+        assert len(obs._datasources()) == 3
+
+        uuid_one = obs._datasources()[0]
         datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
         data_keys = sorted(list(datasource.data().keys()))
 
-        assert first_set_datasources == obs.datasources()
+        assert first_set_datasources == obs._datasources()
 
     new_expected_keys = [
         "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
@@ -328,7 +330,6 @@ def test_read_GC():
     assert hfc152a_data["hfc152a_integration_flag"][-1] == 0
 
     # Check we have the Datasource info saved
-    from openghg.store._connection import get_object_store_connection
     with get_object_store_connection("surface", bucket=bucket) as obs:
         assert sorted(obs._datasource_uuids.values()) == expected_keys
 
@@ -337,7 +338,7 @@ def test_read_GC():
         assert attributes_checker_obssurface(attrs=attrs, species="hfc152a")
 
         # # Now test that if we add more data it adds it to the same Datasource
-        uuid_one = obs.datasources()[0]
+        uuid_one = obs._datasources()[0]
 
     datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
 

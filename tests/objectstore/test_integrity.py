@@ -17,6 +17,7 @@ from helpers import (
 )
 from openghg.store import Footprints, Emissions
 from openghg.store.base import Datasource
+from openghg.store._connection import get_object_store_connection
 import tinydb
 
 
@@ -59,8 +60,8 @@ def test_integrity_check_delete_Datasource_keys():
 
     # Now delete some of the Datasources
     bucket = get_writable_bucket(name="user")
-    with Emissions(bucket=bucket) as em:
-        uid = em.datasources()[0]
+    with get_object_store_connection(data_type="emissions", bucket=bucket) as em:
+        uid = em._datasources()[0]
         ds = Datasource.load(bucket=bucket, uuid=uid)
         keys = ds.data_keys()
         for key in keys:
