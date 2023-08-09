@@ -339,6 +339,7 @@ class SurfaceConnection(ObjectStoreConnection):
         "icos_data_level",
         "data_type",
     )
+    min_required_keys = 5
     data_type = "surface"
 
 
