@@ -38,6 +38,9 @@ def get_readable_buckets() -> Dict[str, str]:
     Returns:
         dict: List of readable buckets
     """
+    if os.getenv("OPENGHG_TUT_STORE") is not None:
+        return {"tutorial_store": str(get_tutorial_store_path())}
+
     config = read_local_config()
     object_stores = config["object_store"]
 

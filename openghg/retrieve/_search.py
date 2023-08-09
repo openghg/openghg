@@ -224,8 +224,8 @@ def search_footprints(
     network: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
-    high_spatial_res: Optional[bool] = None,
-    high_time_res: Optional[bool] = None,
+    high_spatial_resolution: Optional[bool] = None,  # TODO need to give False to get only low spatial res
+    high_time_resolution: Optional[bool] = None,
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
@@ -243,8 +243,8 @@ def search_footprints(
         period: Period of measurements. Only needed if this can not be inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
-        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
-        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
+        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically if species="co2" (Carbon Dioxide).
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                         Note this will be set to True if species has an associated lifetime.
@@ -254,35 +254,40 @@ def search_footprints(
     """
     from openghg.util import format_inlet
 
-    if start_date is not None:
-        start_date = str(start_date)
-    if end_date is not None:
-        end_date = str(end_date)
+    args = {
+        "site": site,
+        "inlet": inlet,
+        "height": height,
+        "domain": domain,
+        "model": model,
+        "metmodel": metmodel,
+        "species": species,
+        "network": network,
+        "start_date": start_date,
+        "end_date": end_date,
+        "period": period,
+        "continuous": continuous,
+        "high_time_resolution": high_time_resolution,
+        "high_spatial_resolution": high_spatial_resolution,
+        "short_lifetime": short_lifetime,
+    }
 
-    # Allow inlet or height to be specified, both or either may be included
-    # within the metadata so could use either to search
-    inlet = format_inlet(inlet)
-    height = format_inlet(height)
+    # Keys in metastore are stored as strings; convert non-string arguments to strings.
+    for k in ["start_date", "end_date"]:
+        if args[k] is not None:
+            args[k] = str(args[k])
 
-    return search(
-        site=site,
-        inlet=inlet,
-        height=height,
-        domain=domain,
-        model=model,
-        metmodel=metmodel,
-        species=species,
-        network=network,
-        start_date=start_date,
-        end_date=end_date,
-        period=period,
-        continuous=continuous,
-        high_spatial_res=high_spatial_res,
-        high_time_res=high_time_res,
-        short_lifetime=short_lifetime,
-        data_type="footprints",
-        **kwargs,
-    )
+    # Either (or both) of 'inlet' and 'height' may be in the metastore, so
+    # both are allowed for search.
+    args["inlet"] = format_inlet(inlet)
+    args["height"] = format_inlet(height)
+
+    args["data_type"] = "footprints"  # generic `search` needs the data type
+
+    # merge kwargs and args, keeping values from args on key conflict
+    kwargs.update(args)
+
+    return search(**kwargs)
 
 
 def search_surface(
@@ -510,6 +515,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
         updated_species = [synonyms(sp) for sp in species]
         search_kwargs["species"] = updated_species
 
+    # translate data type strings to data type classes
     data_type = search_kwargs.get("data_type")
     data_type_classes = define_data_type_classes()
 
@@ -597,6 +603,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
                     if res:
                         metastore_records.extend(res)
 
+        if not metastore_records:
+            continue
+
         # Add in a quick check to make sure we don't have dupes
         # TODO - remove this once a more thorough tests are added
         uuids = [s["uuid"] for s in metastore_records]
@@ -609,6 +618,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
         # we'll create a pandas DataFrame out of this in the SearchResult object
         # for better printing / searching within a notebook
         metadata = {r["uuid"]: r for r in metastore_records}
+        # Add in the object store to the metadata the user sees
+        for m in metadata.values():
+            m.update({"object_store": bucket})
 
         # Narrow the search to a daterange if dates passed
         if start_date is not None or end_date is not None:

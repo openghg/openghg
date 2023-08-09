@@ -5,20 +5,15 @@ from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 from pandas import Timestamp
 import tinydb
 import logging
-from functools import reduce
 from openghg.types import DatasourceLookupError
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
-from openghg.util import timestamp_now
+from openghg.util import timestamp_now, to_lowercase
 
 
 T = TypeVar("T", bound="BaseStore")
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
-
-
-def _find_and(x: Any, y: Any) -> Any:
-    return x & y
 
 
 class BaseStore:
@@ -37,14 +32,15 @@ class BaseStore:
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: Dict[str, Dict] = {}
         # Where we'll store this object
-        self._bucket = bucket
         self._metakey = ""
-        self._metastore = load_metastore(bucket=bucket, key=self.metakey())
 
         if exists(bucket=bucket, key=self.key()):
             data = get_object_from_json(bucket=bucket, key=self.key())
             # Update myself
             self.__dict__.update(data)
+
+        self._metastore = load_metastore(bucket=bucket, key=self.metakey())
+        self._bucket = bucket
 
     @classmethod
     def metakey(cls) -> str:
@@ -61,7 +57,7 @@ class BaseStore:
     def to_data(self) -> Dict:
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
-        DO_NOT_STORE = ["_metastore"]
+        DO_NOT_STORE = ["_metastore", "_bucket"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
 
     def assign_data(
@@ -86,7 +82,6 @@ class BaseStore:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
         from openghg.store.base import Datasource
-        from openghg.util import to_lowercase
 
         uuids = {}
 
@@ -104,7 +99,20 @@ class BaseStore:
 
             # Add the read metadata to the Dataset attributes being careful
             # not to overwrite any attributes that are already there
-            to_add = {k: v for k, v in metadata.items() if k not in _data.attrs}
+            def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
+                """Attributes in a netCDF file can be strings, numbers, or sequences:
+                http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
+
+                This function converts any data whose type is not int, float, str, or list
+                to strings.
+                Booleans are converted to strings, even though they are a subtype of int.
+                """
+                if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
+                    return value
+                else:
+                    return str(value)
+
+            to_add = {k: convert_to_netcdf4_types(v) for k, v in metadata.items() if k not in _data.attrs}
             _data.attrs.update(to_add)
 
             # If we have a UUID for this Datasource load the existing object
@@ -121,9 +129,6 @@ class BaseStore:
                 datasource = Datasource()
                 uid = datasource.uuid()
                 meta_copy["uuid"] = uid
-                # For retrieval later we'll need to know which bucket this is stored in
-                meta_copy["object_store"] = self._bucket
-
                 # Make sure all the metadata is lowercase for easier searching later
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
                 meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
@@ -156,7 +161,7 @@ class BaseStore:
         self, data: Dict, required_keys: Sequence[str], min_keys: Optional[int] = None
     ) -> Dict:
         """Search the metadata store for a Datasource UUID using the metadata in data. We expect the required_keys
-        to be present and will require at leas min_keys of these to be present when searching.
+        to be present and will require at least min_keys of these to be present when searching.
 
         As some metadata value might change (such as data owners etc) we don't want to do an exact
         search on *all* the metadata so we extract a subset (the required keys) and search for these.
@@ -170,22 +175,25 @@ class BaseStore:
         Return:
             dict: Dictionary of datasource information
         """
+        from openghg.util import to_lowercase
+
         if min_keys is None:
             min_keys = len(required_keys)
 
         results = {}
         for key, _data in data.items():
             metadata = _data["metadata"]
-            required_metadata = {k.lower(): str(v).lower() for k, v in metadata.items() if k in required_keys}
+
+            required_metadata = {
+                k.lower(): to_lowercase(v) for k, v in metadata.items() if k in required_keys
+            }
 
             if len(required_metadata) < min_keys:
                 raise ValueError(
                     f"The given metadata doesn't contain enough information, we need: {required_keys}"
                 )
 
-            q = tinydb.Query()
-            search_attrs = [getattr(q, k) == v for k, v in required_metadata.items()]
-            required_result = self._metastore.search(reduce(_find_and, search_attrs))
+            required_result = self._metastore.search(tinydb.Query().fragment(required_metadata))
 
             if not required_result:
                 results[key] = False
