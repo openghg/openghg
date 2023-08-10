@@ -100,7 +100,7 @@ def test_delete_footprint_data(footprint_read):
     for k in filepaths:
         assert k.exists()
 
-    assert uuid in fps._datasource_uuids
+    assert uuid in fps._datasources()
 
     res.delete_datasource(uuid=uuid)
 
@@ -310,8 +310,8 @@ def test_delete_data():
     d = Datasource.load(bucket=bucket, uuid=uid)
     key = d.key()
 
-    with ObsSurface(bucket) as obs:
-        assert uid in obs._datasource_uuids
+    with get_object_store_connection(data_type="surface", bucket=bucket) as obs:
+        assert uid in obs._datasources()
 
     datasource_path = key_to_local_filepath(key=key)[0]
 
@@ -332,8 +332,8 @@ def test_delete_data():
     for k in key_paths:
         assert not k.exists()
 
-    with ObsSurface(bucket) as obs:
-        assert uid not in obs._datasource_uuids
+    with get_object_store_connection(data_type="surface", bucket=bucket) as obs:
+        assert uid not in obs._datasources()
 
 
 @pytest.mark.xfail(reason="Failing due to the Datasource save bug - issue 724", raises=AssertionError)

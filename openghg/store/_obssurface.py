@@ -261,12 +261,12 @@ class ObsSurface(BaseStore):
                         data_filepath = Path(fp)
 
                     file_hash = hash_file(filepath=data_filepath)
-                    if conn.file_hash_already_seen(file_hash) and overwrite is False:
-                        logger.warning(
-                            "This file has been uploaded previously with the filename : "
-                            f"{conn._file_hashes[file_hash]} - skipping."  # TODO: create function to get file name from hash
-                        )
-                        break
+                    if not overwrite:
+                        try:
+                            conn.check_file_hash(file_hash)
+                        except ValueError as e:
+                            logger.warning((str(e) + " Skipping."))
+                            continue  # skip this file
 
                     # Define required input parameters for parser function
                     required_parameters = {
@@ -519,7 +519,7 @@ class ObsSurface(BaseStore):
         datasource_uuids = {}
         with get_object_store_connection("surface", bucket=self._bucket) as conn:
             # Find the keys in data we've seen before
-            seen_before = {next(iter(v)) for k, v in hashes.items() if k in conn._retrieved_hashes}
+            seen_before = {next(iter(v)) for k, v in hashes.items() if k in conn.get_retrieved_hashes()}
 
             if len(seen_before) == len(data):
                 logger.warning("Note: There is no new data to process.")

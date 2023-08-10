@@ -276,11 +276,11 @@ class Footprints(BaseStore):
         datasource_uuids = {}
         with get_object_store_connection("footprints", self._bucket) as conn:
             file_hash = hash_file(filepath=filepath)
-            if conn.file_hash_already_seen(file_hash) and not overwrite:
-                logger.warning(
-                    f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
-                )
-                return None
+            if not overwrite:
+                try:
+                    conn.check_file_hash(file_hash)
+                except ValueError as e:
+                    logger.warning((str(e) + " Skipping."))
 
             # Load this into memory
             fp_data = xr.open_dataset(filepath, chunks=chunks)

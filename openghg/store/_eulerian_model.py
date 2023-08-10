@@ -87,10 +87,11 @@ class EulerianModel(BaseStore):
         datasource_uuids = {}
         with get_object_store_connection("eulerian_model", self._bucket) as conn:
             file_hash = hash_file(filepath=filepath)
-            if conn.file_hash_already_seen(file_hash) and not overwrite:
-                raise ValueError(  # TODO file hash seen for Eulerian model not the same as other data classes
-                    f"This file has been uploaded previously with the filename : {conn._file_hashes[file_hash]}."
-                )
+            if not overwrite:
+                try:
+                    conn.check_file_hash(file_hash)
+                except ValueError as e:
+                    logger.warning((str(e) + " Skipping."))
 
             em_data = open_dataset(filepath)
 

@@ -570,7 +570,7 @@ def test_delete_Datasource():
         )
 
     with get_object_store_connection("surface", bucket=bucket) as conn:
-        datasources = list(conn._datasource_uuids.keys())
+        datasources = conn._datasources()
 
         uuid = datasources[0]
 
@@ -584,7 +584,7 @@ def test_delete_Datasource():
 
         conn.delete(uuid=uuid)
 
-        assert uuid not in conn._datasource_uuids
+        assert uuid not in conn._datasources()
 
         assert not exists(bucket=bucket, key=key)
 

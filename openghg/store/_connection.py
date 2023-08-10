@@ -34,6 +34,55 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
+class InternalMetadata:
+    """Manages metadata about the object store itself,
+    and stores transaction data.
+
+    It tracks:
+        - UUIDs of datasources created
+        - hashes of files stored, together with the filename of the hashed file
+        - hashes of data retrieved from remove sources
+        - the creation time of the associated bucket
+
+    """
+    def __init__(self, bucket: str, key: str) -> None:
+        """Create InternalMetadata object.
+
+        Args:
+            bucket: bucket (i.e. object store) where internal metadata stored.
+            key: location of internal metadata within the bucket.
+        """
+        self._bucket = bucket
+        self._key = key
+
+        self._creation_datatime = str(util.timestamp_now())
+        self.datasource_uuids: dict[str, str] = {}  # file names keyed by datasource uuid # TODO "keys" keyed by uuid?
+        self.file_hashes: dict[str, str] = {}  # hashes of previously uploaded files
+        self.retrieved_hashes: dict[str, dict] = {}  # hashes of prev. uploaded files from other platforms
+
+        # check for existing internal metadata, and update if found
+        if objectstore.exists(bucket=self._bucket, key=self._key):
+            result = objectstore.get_object_from_json(self._bucket, key=self._key)
+            self.__dict__.update(result)
+
+    def write(self) -> None:
+        """Write internal metadata to <bucket>/<key>._data
+
+        Returns:
+            None
+        """
+        internal_metadata = {k: v for k, v in self.__dict__.items() if k not in ["_bucket", "_key"]}
+        objectstore.set_object_from_json(bucket=self._bucket, key=self._key, data=internal_metadata)
+
+    def datasources(self) -> list[str]:
+        """Return list of stored Datasources UUIDs.
+
+        Returns:
+            list: List of Datasource UUIDs
+        """
+        return list(self.datasource_uuids.keys())
+
+
 class ObjectStoreConnection:
     """Represents a connection to an object store.
 
@@ -75,16 +124,7 @@ class ObjectStoreConnection:
             self.min_required_keys = len(self.required_keys)
         self.min_required_keys = cast(int, self.min_required_keys)  # TODO: is this necessary?
 
-        # internal metadata stored at bucket/key._data
-        self._creation_datatime = str(util.timestamp_now())
-        self._datasource_uuids: dict[str, str] = {}  # file names keyed by datasource uuid # TODO "keys" keyed by uuid?
-        self._file_hashes: dict[str, str] = {}  # hashes of previously uploaded files
-        self._retrieved_hashes: dict[str, dict] = {}  # hashes of prev. uploaded files from other platforms
-        self._stored = False  # TODO what is this?
-        # check for existing internal metadata, and update if found
-        if objectstore.exists(bucket=self._bucket, key=self._key):
-            result = objectstore.get_object_from_json(self._bucket, key=self._key)
-            self.__dict__.update(result)  # TODO do we want to overwrite bucket, key, metakey?
+        self._internal_metadata = InternalMetadata(bucket, self._key)
 
     @classmethod
     def __init_subclass__(cls) -> None:
@@ -123,24 +163,7 @@ class ObjectStoreConnection:
         ("with" statement), then it must be closed manually.
         """
         self._metastore.close()
-        self._write_internal_metadata()
-
-    def _write_internal_metadata(self) -> None:
-        """Write internal metadata to bucket/key._data"""
-        do_not_store = ["_metastore"]
-        internal_metadata = {k: v for k, v in self.__dict__.items() if k not in do_not_store}
-        objectstore.set_object_from_json(bucket=self._bucket, key=self._key, data=internal_metadata)
-
-    def _datasources(self) -> list[str]:
-        """Return the list of Datasources UUIDs associated with this object.
-
-        Used for testing.
-
-        Returns:
-            list: List of Datasource UUIDs
-        """
-        return list(self._datasource_uuids.keys())
-
+        self._internal_metadata.write()
 
     #  methods for interacting with object store
     def search(self, search_terms: dict[str, Any]) -> list[dict[str, Any]]:
@@ -188,7 +211,6 @@ class ObjectStoreConnection:
                 required_metadata[key] = val
 
         required_metadata = util.to_lowercase(required_metadata, skip_keys=["object_store"])
-        print(required_metadata)
 
         results = self.search(required_metadata)
         if not results:
@@ -230,7 +252,7 @@ class ObjectStoreConnection:
 
             # record datasource in internal metadata
             key = "_".join(str(metadata.get(k, k)) for k in self.required_keys)  # TODO find better way to store internal metadata
-            self._datasource_uuids[uuid] = key
+            self._internal_metadata.datasource_uuids[uuid] = key
         else:
             uuid = cast(str, lookup_results)  # we know lookup_results is not none
             datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
@@ -247,41 +269,6 @@ class ObjectStoreConnection:
             # any newly added metadata.
             self._metastore.update(datasource.metadata(), tinydb.where("uuid") == datasource.uuid())
         return {"uuid": datasource.uuid(), "new": new_datasource}  # TODO change new back to new_datasource
-
-    def file_hash_already_seen(self, file_hash: str) -> bool:
-        """Return true if file hash has been saved.
-
-        If the file hash was saved, then this file was already uploaded.
-
-        Args:
-           file_hash: hash of file. For instance, from openghg.util.hash_file.
-
-        Returns:
-            True if file hash is found in internal metadata for this data type,
-            False if file hash is not found.
-        """
-        return file_hash in self._file_hashes.keys()
-
-    def save_file_hash(self, file_hash: str, file_path: Path) -> None:
-        """Add {file_hash: file_name} to internal metadata."""
-        self._file_hashes[file_hash] = file_path.name
-
-    def save_retrieved_hashes(self, hashes: dict) -> None:
-        """Store hashes of data retrieved from a remote data source such as
-        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
-        seen before and adds the new.
-
-        Args:
-            hashes: Dictionary of hashes provided by the hash_retrieved_data function,
-                    of the form {hash: species_key}
-
-        Returns:
-            None
-        """
-        # TODO: should this deal with one item at a time and move loop to `store_data`
-        # in _obssurface.py? (This is the only place this function is used.)
-        new = {k: v for k, v in hashes.items() if k not in self._retrieved_hashes}
-        self._retrieved_hashes.update(new)
 
     def delete(self, uuid: str) -> None:
         """Delete a Datasource with the given UUID.
@@ -310,11 +297,50 @@ class ObjectStoreConnection:
         self._metastore.remove(where("uuid") == uuid)
 
         # Remove Datasource from internal metadata
-        del self._datasource_uuids[uuid]
+        del self._internal_metadata.datasource_uuids[uuid]
 
         # TODO: Add logging?
         # TODO: remove file hashes associated with this uuid?
 
+    # Methods related to internal metadata
+    def _datasources(self) -> list[str]:
+        return self._internal_metadata.datasources()
+
+    def check_file_hash(self, file_hash: str) -> None:
+        if file_hash in self._internal_metadata.file_hashes.keys():
+            e = f"This file has been uploaded previously with the filename: {self._internal_metadata.file_hashes[file_hash]}."
+            raise ValueError(e)
+
+    def save_file_hash(self, file_hash: str, file_path: Union[Path, str]) -> None:
+        """Add {file_hash: file_name} to internal metadata."""
+        if isinstance(file_path, Path):
+            file_path = file_path.name
+        self._internal_metadata.file_hashes[file_hash] = file_path
+
+    def get_retrieved_hashes(self) -> list[str]:
+        """Return list of previously retrieved hashes for remote data sources.
+
+        Returns:
+            List of previously retrieved hashes.
+        """
+        return list(self._internal_metadata.retrieved_hashes.keys())
+
+    def save_retrieved_hashes(self, hashes: dict) -> None:
+        """Store hashes of data retrieved from a remote data source such as
+        ICOS or CEDA. This takes the full dictionary of hashes, removes the ones we've
+        seen before and adds the new.
+
+        Args:
+            hashes: Dictionary of hashes provided by the hash_retrieved_data function,
+                    of the form {hash: species_key}
+
+        Returns:
+            None
+        """
+        # TODO: should this deal with one item at a time and move loop to `store_data`
+        # in _obssurface.py? (This is the only place this function is used.)
+        new = {k: v for k, v in hashes.items() if k not in self._internal_metadata.retrieved_hashes}
+        self._internal_metadata.retrieved_hashes.update(new)
 
 
 def get_object_store_connection(data_type: str, bucket: str) -> Any:  # TODO: fix typing

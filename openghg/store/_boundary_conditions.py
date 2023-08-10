@@ -115,12 +115,11 @@ class BoundaryConditions(BaseStore):
 
         datasource_uuids = {}
         with get_object_store_connection("boundary_conditions", bucket=self._bucket) as conn:
-            if conn.file_hash_already_seen(file_hash) and not overwrite:
-                logger.warning(
-                    "This file has been uploaded previously with the filename : "
-                    f"{self._file_hashes[file_hash]} - skipping."
-                )
-                return None
+            if not overwrite:
+                try:
+                    conn.check_file_hash(file_hash)
+                except ValueError as e:
+                    logger.warning((str(e) + " Skipping."))
 
             bc_data = open_dataset(filepath)
 

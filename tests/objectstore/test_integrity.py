@@ -78,7 +78,7 @@ def test_integrity_delete_uuids_metastore():
 
     bucket = get_writable_bucket(name="user")
     with get_object_store_connection("footprints", bucket=bucket) as fp:
-        uids = list(fp._datasource_uuids.keys())[:4]  # TODO should there be a property to expose this attribute?
+        uids = list(fp._datasources())[:4]  # TODO should there be a property to expose this attribute?
         for u in uids:
             fp._metastore.remove(tinydb.where("uuid") == u)
 
