@@ -604,7 +604,7 @@ def obs_ch4_dummy2():
     """
     from openghg.dataobjects import ObsData
 
-    time = pd.date_range("2012-02-01T00:00:00", "2012-02-02T23:00:00", freq="H")
+    time = pd.date_range("2012-03-01T00:00:00", "2012-03-02T23:00:00", freq="H")
 
     ntime = len(time)
     values = np.arange(0, ntime, 1)
@@ -783,7 +783,7 @@ def flux_ch4_monthly_dummy():
     """
     from openghg.dataobjects import FluxData
 
-    time = pd.date_range("2012-01-01", "2012-03-31", freq="MS")
+    time = pd.date_range("2016-01-01", "2016-03-31", freq="MS")
     lat = [1.0, 2.0]
     lon = [10.0, 20.0]
 
@@ -948,20 +948,23 @@ def test_calc_modelled_obs_ch4_monthly(model_scenario_ch4_monthly_dummy,model_sc
     # At this point, both models should contain the same whole flux file
     assert model1.fluxes == model2.fluxes
     
-    time_slice1 = slice(Timestamp("2012-01-01T00:00:00"),Timestamp("2012-02-01T00:00:00"))#model1.obs.data.time
-    time_slice2 = slice(Timestamp("2012-02-01T00:00:00"),Timestamp("2012-03-01T00:00:00"))#model2.obs.data.time
+    flux_time_slice1 = slice(Timestamp("2016-01-01T00:00:00"),Timestamp("2016-01-02T23:00:00"))
+    flux_time_slice2 = slice(Timestamp("2016-03-01T00:00:00"),Timestamp("2016-03-02T23:00:00"))
+
+    fp_time_slice1 = slice(Timestamp("2012-01-01T00:00:00"),Timestamp("2012-01-02T23:00:00"))
+    fp_time_slice2 = slice(Timestamp("2012-03-01T00:00:00"),Timestamp("2012-03-02T23:00:00"))
+        
+    footprint1 = footprint_monthly_dummy.data.sel(time=fp_time_slice1)
+    footprint2 = footprint_monthly_dummy.data.sel(time=fp_time_slice2)
     
-    footprint1 = footprint_monthly_dummy.data.sel(time=time_slice1)
-    footprint2 = footprint_monthly_dummy.data.sel(time=time_slice2)
-    
-    flux1 = flux_ch4_monthly_dummy.data.sel(time=time_slice1)
-    flux2 = flux_ch4_monthly_dummy.data.sel(time=time_slice2)
+    flux1 = flux_ch4_monthly_dummy.data.sel(time=flux_time_slice1)
+    flux2 = flux_ch4_monthly_dummy.data.sel(time=flux_time_slice2)
     
     # Time sliced fluxes should now be different
-    assert flux1 != flux2
+    np.not_equal(flux1['flux'].values, flux2['flux'].values).all() == True
     
-    expected_modelled_mf1 = (flux1['flux'] * footprint1['fp']).sum(dim=("lat", "lon")).values
-    expected_modelled_mf2 = (flux2['flux'] * footprint2['fp']).sum(dim=("lat", "lon")).values
+    expected_modelled_mf1 = np.sum(np.sum(flux1['flux'].values * footprint1['fp'].values,axis=1),axis=1)
+    expected_modelled_mf2 = np.sum(np.sum(flux2['flux'].values * footprint2['fp'].values,axis=1),axis=1)
     
     modelled_mf1 = model1.calc_modelled_obs().values
     modelled_mf2 = model2.calc_modelled_obs().values

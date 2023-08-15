@@ -1071,7 +1071,7 @@ class ModelScenario:
         flux = flux.sel(time=new_month_slice, method = 'ffill')
         flux = flux.expand_dims('time',axis=-1)        
         
-        flux = flux.reindex_like(scenario, "ffill")
+        flux = flux.reindex_like(scenario, "nearest")
         flux_modelled: DataArray = scenario["fp"] * flux["flux"]
         timeseries: DataArray = flux_modelled.sum(["lat", "lon"])
 
