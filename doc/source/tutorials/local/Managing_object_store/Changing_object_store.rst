@@ -7,7 +7,7 @@ Modifying the configuration file directly
 -----------------------------------------
 
 Your local configuration file can be found in the ``.openghg`` directory in your home folder. On Linux and MacOS the file can be accessed at ``~/.openghg/openghg.conf``.
-(This location is new for OpenGHG v.6; your config file will be moved automatically the next time it is accessed.)
+(This location is new for OpenGHG version 0.6.0; your config file will be moved automatically the next time it is accessed.)
 We don't currently support Windows.
 
 If you created the file using the ``openghg --quickstart`` command the file should look something like this (note that the path will be different)
