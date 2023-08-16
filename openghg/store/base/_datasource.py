@@ -543,7 +543,7 @@ class Datasource:
 
         return d
 
-    def save(self, bucket: str, compression: bool=True) -> None:
+    def save(self, bucket: str, compression: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
