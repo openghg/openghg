@@ -20,6 +20,7 @@ __all__ = [
     "get_all_object_names",
     "get_object_names",
     "get_object",
+    "get_object_data_path",
     "set_object",
     "set_object_from_json",
     "set_object_from_file",
@@ -221,6 +222,23 @@ def get_object(bucket: str, key: str) -> bytes:
             return filepath.read_bytes()
         else:
             raise ObjectStoreError(f"No object at key '{key}'")
+
+
+def get_object_data_path(bucket: str, key: str) -> Path:
+    """Get path to object data at key in passed bucket.
+
+    Args:
+        bucket: Bucket containing data
+        key: Key for data in bucket
+    Returns:
+        Path to data
+    """
+    filepath = Path(f"{bucket}/{key}._data")
+
+    if filepath.exists():
+        return filepath
+    else:
+        raise ObjectStoreError(f"No object at key '{key}'")
 
 
 def set_object(bucket: str, key: str, data: bytes) -> None:
