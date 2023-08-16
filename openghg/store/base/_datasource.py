@@ -607,7 +607,7 @@ class Datasource:
                             enc = {k: v for k, v in data[var].encoding.items() if k in valid_encoding_keys}
                             enc.update(comp)
                             encoding[var] = enc
-                    print("encoding:", encoding)
+
                     try:
                         data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
                     except RuntimeError:
