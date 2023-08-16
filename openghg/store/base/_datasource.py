@@ -495,9 +495,6 @@ class Datasource:
         This improves performance, since we often only update one or two chunks of the dataset
         at a time.
 
-        This may cause problems with thread safety if another thread tries to write to the
-        datasource at the same time.
-
         Args:
             bucket: Bucket containing data
             key: Key for data
@@ -546,7 +543,7 @@ class Datasource:
 
         return d
 
-    def save(self, bucket: str, compression=True) -> None:
+    def save(self, bucket: str, compression: bool=True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
