@@ -28,6 +28,11 @@ def integrity_check() -> None:
                 metastore_uuids = [r["uuid"] for r in sc._metastore]
 
                 if datasource_uuids != metastore_uuids:
+                    only_in_class = list(set(datasource_uuids) - set(metastore_uuids))
+                    only_in_metastore = list(set(metastore_uuids) - set(datasource_uuids))
+                    class_name = storage_class.__class__.__name__
                     raise ObjectStoreError(
-                        f"{storage_class} - Mismatch between metastore Datasource UUIDs and {storage_class} Datasource UUIDs."
+                        f"{class_name} - mismatch between metastore Datasource UUIDs and class Datasource UUIDs."
+                        + f"\nOnly in class: {only_in_class}"
+                        + f"\nOnly in metastore: {only_in_metastore}\n"
                     )
