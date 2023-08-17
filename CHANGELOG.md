@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
 
+## Added
+
+- Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of
+  lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
+
 ## [0.6.2] - 2023-08-07
 
 ### Fixed
