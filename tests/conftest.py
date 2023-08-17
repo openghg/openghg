@@ -20,7 +20,7 @@ def default_session_fixture() -> Iterator[None]:
         "object_store": {
             "user": {"path": str(tmp_store_paths["user"]), "permissions": "rw"},
             "group": {"path": str(tmp_store_paths["group"]), "permissions": "rw"},
-            "shared": {"path": str(tmp_store_paths["group"]), "permissions": "r"},
+            "shared": {"path": str(tmp_store_paths["shared"]), "permissions": "r"},
         },
         "user_id": "test-id-123",
         "config_version": "2",

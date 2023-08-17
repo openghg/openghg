@@ -1,10 +1,19 @@
+import os
 import json
 import pytest
 import xarray as xr
 from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_stores
-from openghg.objectstore import exists, get_bucket, get_writable_bucket
+from pathlib import Path
+from openghg.objectstore import (
+    exists,
+    get_bucket,
+    get_writable_bucket,
+    set_object_from_json,
+    get_object_from_json,
+)
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
+from openghg.retrieve import search_surface
 from openghg.util import create_daterange_str
 from pandas import Timestamp
 
@@ -904,6 +913,29 @@ def test_gcwerks_fp_not_a_tuple_raises():
             obs.read_file(filepath=filepath, source_format="gc", site="cgo", network="agage")
 
 
-def test_get_store_path():
-    bucket = get_bucket()
-    print(bucket)
+def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):
+    """This was added due to an issue found where in versions of OpenGHG < 0.6.2
+    the _bucket variable was written to JSON. If this _bucket variable was updated to
+    a path that another user couldn't access (such a symlink in a user's home directory
+    the group object store) then subsequent instances of the class would fail due to that bucket
+    path being invalid. See https://github.com/openghg/openghg/issues/740
+    """
+    bucket = get_writable_bucket(name="group")
+
+    filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
+
+    with ObsSurface(bucket=bucket) as obs:
+        obs.read_file(filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+        key = obs.key()
+
+    no_permissions = Path(tmpdir).joinpath("invalid_path")
+    no_permissions.mkdir()
+    os.chmod(no_permissions, 0o444)
+
+    # Someone else comes along and changes the value
+    stored_obj = get_object_from_json(bucket=bucket, key=key)
+    stored_obj.update({"_bucket": str(no_permissions)})
+    set_object_from_json(bucket=bucket, key=key, data=stored_obj)
+
+    # Now we search for the object, in versions before 0.6.2 this would cause a PermissionError
+    search_surface(site="bsd", species="ch4")

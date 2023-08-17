@@ -36,7 +36,6 @@ else:
         set_object,
         set_object_from_file,
         set_object_from_json,
-        visualise_store,
         get_writable_bucket,
         get_writable_buckets,
         get_readable_buckets,
