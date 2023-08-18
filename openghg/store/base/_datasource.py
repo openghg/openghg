@@ -615,10 +615,12 @@ class Datasource:
                             encoding[var] = enc
 
                     try:
+#                        breakpoint()
                         data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
                     except RuntimeError:
+                        raise
                         logger.warning(
-                            "Storing footprint for date range {daterange} without compression due to netCDF4 RuntimeError."
+                            f"Storing footprint for date range {daterange} without compression due to netCDF4 RuntimeError."
                         )
                         data.to_netcdf(filepath, engine="netcdf4")
                     except ValueError as e:
