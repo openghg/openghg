@@ -84,67 +84,147 @@ class InternalMetadata:
 
 
 class DatasourcePolicy:
+    """This class holds the set of keys used to define datasources.
+
+    To define a datasource, we need a minimum number of keys from a set of required keys.
+
+    By default, the minimum number of required keys is the number of required keys,
+    but it may be less.
+
+    Optional keys are used to determine a datasource, if those keys are available.
     """
+    def __init__(self, required_keys: list[str], optional_keys: Optional[list[str]] = None, min_required_keys: Optional[int] = None) -> None:
+        """Create DatasourcePolicy object.
+
+        Args:
+            required_keys: keys necessary to define a datasource.
+            optional_keys: keys used to define a datasource, if they are available.
+            min_required_keys: the minimum number of required keys that must be present to define a datasource.
+        """
+        self.required_keys = required_keys
+        if optional_keys is None:
+            self.optional_keys = []
+        else:
+            self.optional_keys = optional_keys
+        if min_required_keys is None:
+            self.min_required_keys = len(required_keys)
+        else:
+            self.min_required_keys = min_required_keys
+
+    def get_required_metadata(self, metadata: dict[str, Any]) -> dict[str, Any]:
+        """Return subset of given metadata used for determining a datasource.
+
+        Given a set of metadata, only some of the metadata is used to determine what
+        datasource the data belongs to. Given a collection of metadata, this function
+        extracts this "defining metadata".
+
+        Args:
+            metadata: dictionary of metadata associated to data that will be added to the
+        object store.
+
+        Returns:
+           required metadata: subset of given metadata that is required for determining the
+        associated datasource.
+
+        Raises:
+           ValueError if the number of required keys is less than the minimum number of required
+        keys.
+        """
+        required_metadata = {
+            k.lower(): v for k, v in metadata.items() if k in self.required_keys
+        }  # NOTE: keys stored as lowercase
+
+        if len(required_metadata) < self.min_required_keys:
+            raise ValueError(
+                f"""The given metadata does not contain enough information.
+                The required keys are: {self.required_keys}.
+                You provided: {required_metadata.keys()}.
+                """
+            )
+
+        for key in self.optional_keys:
+            if (val := metadata.get(key, None)) is not None:
+                required_metadata[key] = val
+
+        required_metadata = util.to_lowercase(required_metadata)
+
+        return required_metadata
+
+
+# TODO: read this in from a config file?
+datasource_policy_json = {
+    "surface": {
+        "required_keys": [
+            "species",
+            "site",
+            "sampling_period",
+            "station_long_name",
+            "inlet",
+            "instrument",
+            "network",
+            "source_format",
+            "data_source",
+            "icos_data_level",
+            "data_type"
+        ],
+        "min_required_keys": 5,
+    },
+    "column": {
+        "required_keys": ["satellite", "selection", "domain", "site", "species", "network"],
+        "min_required_keys": 3,
+    },
+    "emissions": {
+        "required_keys": ["species", "source", "domain"],
+        "optional_keys": ["database", "database_version", "model"],
+    },
+    "footprints": {
+        "required_keys": [
+            "site",
+            "model",
+            "inlet",
+            "domain",
+            "high_time_resolution",
+            "high_spatial_resolution",
+            "short_lifetime",
+        ],
+    },
+    "boundary_conditions": {
+        "required_keys": ["species", "bc_input", "domain"],
+    },
+    "eulerian_model": {
+        "required_keys": ["model", "species", "date"],
+    }
+}
+
+datasource_policies = {}
+for k, v in datasource_policy_json.items():
+    datasource_policies[k] = DatasourcePolicy(**v)
+
+def get_required_metadata(data_type: str, metadata: dict[str, Any]) -> dict[str, Any]:
+    """Return subset of given metadata used for determining a datasource.
+
+        Given a set of metadata, only some of the metadata is used to determine what
+    datasource the data belongs to. Given a collection of metadata, this function
+    extracts this "defining metadata".
+
+    Args:
+        metadata: dictionary of metadata associated to data that will be added to the
+    object store.
+
+    Returns:
+       required metadata: subset of given metadata that is required for determining the
+    associated datasource.
+
+    Raises:
+       ValueError: if the number of required keys is less than the minimum number of required
+    keys, or if there isn't a policy registered for the given data type.
     """
-    data_type: str = ""
-    _registry: dict[str, Any] = {}
-
-    @classmethod
-    def __init_subclass__(cls) -> None:
-        """Register subclasses by data_type."""
-        DatasourcePolicy._registry[cls.data_type] = cls
-
-class SurfacePolicy(DatasourcePolicy):
-    required_keys = (
-        "species",
-        "site",
-        "sampling_period",
-        "station_long_name",
-        "inlet",
-        "instrument",
-        "network",
-        "source_format",
-        "data_source",
-        "icos_data_level",
-        "data_type",
-    )
-    min_required_keys = 5
-    data_type = "surface"
-
-
-class ColumnPolicy(DatasourcePolicy):
-    required_keys = ("satellite", "selection", "domain", "site", "species", "network")
-    min_required_keys = 3
-    data_type = "column"
-
-
-class EmissionsPolicy(DatasourcePolicy):
-    required_keys = ("species", "source", "domain")
-    optional_keys = ("database", "database_version", "model")
-    data_type = "emissions"
-
-
-class FootprintsPolicy(DatasourcePolicy):
-    required_keys = (
-        "site",
-        "model",
-        "inlet",
-        "domain",
-        "high_time_resolution",
-        "high_spatial_resolution",
-        "short_lifetime",
-    )
-    data_type = "footprints"
-
-
-class BoundaryConditionsPolicy(DatasourcePolicy):
-    required_keys = ("species", "bc_input", "domain")
-    data_type = "boundary_conditions"
-
-
-class EulerianModelPolicy(DatasourcePolicy):
-    required_keys = ("model", "species", "date")
-    data_type = "eulerian_model"
+    try:
+        policy = datasource_policies[data_type]
+    except KeyError:
+        raise ValueError("No Datasource policy for data type f{data_type}.")
+    else:
+        return policy.get_required_metadata(metadata)
 
 
 class ObjectStoreConnection:
@@ -245,45 +325,6 @@ class ObjectStoreConnection:
         else:
             return []
 
-    def _datasource_lookup(self, metadata: dict[str, Any]) -> Optional[str]:
-        """Search metastore for a Datasource uuid using the given metadata.
-
-        To add data the the object store, we must determine if a Datasource already
-        exists for this data.
-
-        Args:
-            metadata: dictionary of metadata from data to be added to object store.
-
-        Returns:
-            uuid of the Datasource corresponding to the metadata, or None if a
-        datasource is not found.
-
-        Raises:
-            DatasourceLookupError if multiple Datasources are found for the given metadata.
-        """
-        required_metadata = {
-            k.lower(): v for k, v in metadata.items() if k in self.required_keys
-        }  # NOTE: keys stored as lowercase
-
-        if len(required_metadata) < cast(int, self.min_required_keys):
-            raise ValueError(
-                f"The given metadata does not contain enough information. The required keys are: {self.required_keys}"
-            )
-
-        for key in self.optional_keys:
-            if (val := metadata.get(key, None)) is not None:
-                required_metadata[key] = val
-
-        required_metadata = util.to_lowercase(required_metadata, skip_keys=["object_store"])
-
-        results = self.search(required_metadata)
-        if not results:
-            return None
-        elif len(results) > 1:
-            raise DatasourceLookupError("More than one Datasource found for metadata.")
-        else:
-            return str(results[0]["uuid"])  # str to appease mypy
-
     def add(self, metadata: dict[str, Any], data: xarray.Dataset, skip_keys: Optional[list[str]] = ["object_store"]) -> dict[str, Union[str, bool]]:
         """Add (metadata, data) pair to a Datasource in the object store.
 
@@ -305,9 +346,16 @@ class ObjectStoreConnection:
         metadata = {k.lower(): v for k, v in metadata.items()}  # metastore keys are lower case
         metadata = util.to_lowercase(metadata, skip_keys=skip_keys)
 
-        lookup_results = self._datasource_lookup(metadata)
+
+        # get datasource uuid
+        required_metadata = get_required_metadata(self.data_type, metadata)
+        results = self.search(required_metadata)
+        if len(results) > 1:
+            raise DatasourceLookupError("More than one Datasource found for metadata.")
+        lookup_results = None if not results else str(results[0]["uuid"])
         new_datasource = True if lookup_results is None else False
 
+        # get datasource
         if new_datasource:
             datasource = Datasource()
             uuid = datasource.uuid()
@@ -428,63 +476,34 @@ def get_object_store_connection(data_type: str, bucket: str) -> Any:  # TODO: fi
 class SurfaceConnection(ObjectStoreConnection):
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
-    required_keys = (
-        "species",
-        "site",
-        "sampling_period",
-        "station_long_name",
-        "inlet",
-        "instrument",
-        "network",
-        "source_format",
-        "data_source",
-        "icos_data_level",
-        "data_type",
-    )
-    min_required_keys = 5
     data_type = "surface"
 
 
 class ColumnConnection(ObjectStoreConnection):
     _root = "ObsColumn"
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
-    required_keys = ("satellite", "selection", "domain", "site", "species", "network")
-    min_required_keys = 3
     data_type = "column"
 
 
 class EmissionsConnection(ObjectStoreConnection):
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
-    required_keys = ("species", "source", "domain")
-    optional_keys = ("database", "database_version", "model")
     data_type = "emissions"
 
 
 class FootprintsConnection(ObjectStoreConnection):
     _root = "Footprints"
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
-    required_keys = (
-        "site",
-        "model",
-        "inlet",
-        "domain",
-        "high_time_resolution",
-        "high_spatial_resolution",
-        "short_lifetime",
-    )
     data_type = "footprints"
 
 
 class BoundaryConditionsConnection(ObjectStoreConnection):
     _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
-    required_keys = ("species", "bc_input", "domain")
     data_type = "boundary_conditions"
 
 
 class EulerianModelConnection(ObjectStoreConnection):
     _root = "EulerianModel"
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
-    required_keys = ("model", "species", "date")
     data_type = "eulerian_model"
