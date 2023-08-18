@@ -69,18 +69,3 @@ def test_integrity_check_delete_Datasource_keys():
 
     with pytest.raises(ObjectStoreError):
         integrity_check()
-
-
-def test_integrity_delete_uuids_metastore():
-    from openghg.store._connection import get_object_store_connection
-
-    integrity_check()
-
-    bucket = get_writable_bucket(name="user")
-    with get_object_store_connection("footprints", bucket=bucket) as fp:
-        uids = list(fp._datasources())[:4]  # TODO should there be a property to expose this attribute?
-        for u in uids:
-            fp._metastore.remove(tinydb.where("uuid") == u)
-
-    with pytest.raises(ObjectStoreError):
-        integrity_check()

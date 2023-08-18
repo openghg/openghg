@@ -16,6 +16,7 @@ Functions:
    for a given data type to a given bucket.
 """
 from __future__ import annotations
+from functools import cache
 import logging
 from pathlib import Path
 from types import TracebackType
@@ -196,9 +197,20 @@ datasource_policy_json = {
     }
 }
 
-datasource_policies = {}
-for k, v in datasource_policy_json.items():
-    datasource_policies[k] = DatasourcePolicy(**v)
+
+@cache
+def get_datasource_policies() -> dict[str, DatasourcePolicy]:
+    """Return dictonary of DatasourcePolicy objects keyed by data type.
+
+    TODO: find somewhere to store polices as a JSON, and use this function to read them
+    in.
+    """
+    datasource_policies = {}
+    for k, v in datasource_policy_json.items():
+        datasource_policies[k] = DatasourcePolicy(**v)
+
+    return datasource_policies
+
 
 def get_required_metadata(data_type: str, metadata: dict[str, Any]) -> dict[str, Any]:
     """Return subset of given metadata used for determining a datasource.
@@ -220,7 +232,7 @@ def get_required_metadata(data_type: str, metadata: dict[str, Any]) -> dict[str,
     keys, or if there isn't a policy registered for the given data type.
     """
     try:
-        policy = datasource_policies[data_type]
+        policy = get_datasource_policies()[data_type]
     except KeyError:
         raise ValueError("No Datasource policy for data type f{data_type}.")
     else:
@@ -416,7 +428,16 @@ class ObjectStoreConnection:
 
     # Methods related to internal metadata
     def _datasources(self) -> list[str]:
-        return self._internal_metadata.datasources()
+        """For testing purposes, expose convenient list
+        of datasource uuids.
+
+        Note: do not use @cache with this function, since it
+        will give incorrect results if a datasource is deleted.
+
+        Returns:
+            list of datasource uuids stored in metastore.
+        """
+        return [doc["uuid"] for doc in self._metastore]
 
     def check_file_hash(self, file_hash: str) -> None:
         if file_hash in self._internal_metadata.file_hashes.keys():
