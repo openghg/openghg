@@ -163,7 +163,7 @@ class Emissions(BaseStore):
                 print("Passed to datasource_lookup:", split_data["metadata"].get("database_version", "database_version not found"))
                 metadata_data_pair = (split_data["metadata"], split_data["data"])
                 add_attr_to_data_REFACTOR(*metadata_data_pair)
-                ds_uuid = conn.add_to_store(*metadata_data_pair)
+                ds_uuid = conn.add(*metadata_data_pair)
                 datasource_uuids[key] = ds_uuid
 
             # Record the file hash in case we see this file again
@@ -230,7 +230,7 @@ class Emissions(BaseStore):
             for key, split_data in emissions_data.items():
                 metadata_data_pair = (split_data["metadata"], split_data["data"])
                 add_attr_to_data_REFACTOR(*metadata_data_pair)
-                ds_uuid = conn.add_to_store(*metadata_data_pair)
+                ds_uuid = conn.add(*metadata_data_pair)
                 datasource_uuids[key] = ds_uuid
 
         return datasource_uuids

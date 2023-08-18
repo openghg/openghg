@@ -83,6 +83,70 @@ class InternalMetadata:
         return list(self.datasource_uuids.keys())
 
 
+class DatasourcePolicy:
+    """
+    """
+    data_type: str = ""
+    _registry: dict[str, Any] = {}
+
+    @classmethod
+    def __init_subclass__(cls) -> None:
+        """Register subclasses by data_type."""
+        DatasourcePolicy._registry[cls.data_type] = cls
+
+class SurfacePolicy(DatasourcePolicy):
+    required_keys = (
+        "species",
+        "site",
+        "sampling_period",
+        "station_long_name",
+        "inlet",
+        "instrument",
+        "network",
+        "source_format",
+        "data_source",
+        "icos_data_level",
+        "data_type",
+    )
+    min_required_keys = 5
+    data_type = "surface"
+
+
+class ColumnPolicy(DatasourcePolicy):
+    required_keys = ("satellite", "selection", "domain", "site", "species", "network")
+    min_required_keys = 3
+    data_type = "column"
+
+
+class EmissionsPolicy(DatasourcePolicy):
+    required_keys = ("species", "source", "domain")
+    optional_keys = ("database", "database_version", "model")
+    data_type = "emissions"
+
+
+class FootprintsPolicy(DatasourcePolicy):
+    required_keys = (
+        "site",
+        "model",
+        "inlet",
+        "domain",
+        "high_time_resolution",
+        "high_spatial_resolution",
+        "short_lifetime",
+    )
+    data_type = "footprints"
+
+
+class BoundaryConditionsPolicy(DatasourcePolicy):
+    required_keys = ("species", "bc_input", "domain")
+    data_type = "boundary_conditions"
+
+
+class EulerianModelPolicy(DatasourcePolicy):
+    required_keys = ("model", "species", "date")
+    data_type = "eulerian_model"
+
+
 class ObjectStoreConnection:
     """Represents a connection to an object store.
 
@@ -220,7 +284,7 @@ class ObjectStoreConnection:
         else:
             return str(results[0]["uuid"])  # str to appease mypy
 
-    def add_to_store(self, metadata: dict[str, Any], data: xarray.Dataset, skip_keys: Optional[list[str]] = ["object_store"]) -> dict[str, Union[str, bool]]:
+    def add(self, metadata: dict[str, Any], data: xarray.Dataset, skip_keys: Optional[list[str]] = ["object_store"]) -> dict[str, Union[str, bool]]:
         """Add (metadata, data) pair to a Datasource in the object store.
 
         If no existing Datasource is found for the given metadata, then a new Datasource is created,

@@ -388,7 +388,7 @@ class Footprints(BaseStore):
             for key, parsed_data in footprint_data.items():
                 metadata_data_pair = (parsed_data["metadata"], parsed_data["data"])
                 add_attr_to_data_REFACTOR(*metadata_data_pair)
-                ds_uuid = conn.add_to_store(*metadata_data_pair)
+                ds_uuid = conn.add(*metadata_data_pair)
                 datasource_uuids[key] = ds_uuid
 
             # Record the file hash in case we see this file again
