@@ -615,7 +615,6 @@ class Datasource:
                             encoding[var] = enc
 
                     try:
-#                        breakpoint()
                         data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
                     except RuntimeError:
                         logger.warning(
