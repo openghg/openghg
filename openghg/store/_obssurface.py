@@ -12,7 +12,7 @@ from xarray import Dataset
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
-from openghg.store._connection import get_object_store_connection
+from openghg.store._connection import get_object_store_connection, get_file_hash_tracker
 from openghg.store.base._base import add_attr_to_data_REFACTOR  # TODO refactor this...
 
 
@@ -243,6 +243,10 @@ class ObsSurface(BaseStore):
         results: resultsType = defaultdict(dict)
 
         with get_object_store_connection("surface", bucket=self._bucket) as conn:
+            print("testing if load_metastore has to happen first...")
+
+        file_tracker = get_file_hash_tracker("surface", self._bucket)
+        with get_object_store_connection("surface", bucket=self._bucket) as conn:
             # Create a progress bar object using the filepaths, iterate over this below
             with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
                 for fp in filepath:
@@ -263,7 +267,7 @@ class ObsSurface(BaseStore):
                     file_hash = hash_file(filepath=data_filepath)
                     if not overwrite:
                         try:
-                            conn.check_file_hash(file_hash)
+                            file_tracker.check_file_hash(file_hash)
                         except ValueError as e:
                             logger.warning((str(e) + " Skipping."))
                             continue  # skip this file
@@ -356,7 +360,7 @@ class ObsSurface(BaseStore):
                     # Store the hash as the key for easy searching, store the filename as well for
                     # ease of checking by user
                     # TODO - maybe add a timestamp to this string?
-                    conn.save_file_hash(file_hash, data_filepath)  # TODO: filepath name extracted by save_file_hash... this always confuses me
+                    file_tracker.save_file_hash(file_hash, data_filepath)  # TODO: filepath name extracted by save_file_hash... this always confuses me
 
                     progress_bar.update(1)
 
@@ -517,9 +521,10 @@ class ObsSurface(BaseStore):
         hashes = hash_retrieved_data(to_hash=data)
 
         datasource_uuids = {}
+        file_tracker = get_file_hash_tracker("surface", self._bucket)
         with get_object_store_connection("surface", bucket=self._bucket) as conn:
             # Find the keys in data we've seen before
-            seen_before = {next(iter(v)) for k, v in hashes.items() if k in conn.get_retrieved_hashes()}
+            seen_before = {next(iter(v)) for k, v in hashes.items() if k in file_tracker.get_retrieved_hashes()}
 
             if len(seen_before) == len(data):
                 logger.warning("Note: There is no new data to process.")
@@ -543,6 +548,6 @@ class ObsSurface(BaseStore):
                 ds_uuid = conn.add(*metadata_data_pair)
                 datasource_uuids[key] = ds_uuid
 
-            conn.save_retrieved_hashes(hashes=hashes)
+            file_tracker.save_retrieved_hashes(hashes=hashes)
 
         return datasource_uuids

@@ -56,10 +56,10 @@ class BaseStore:
         self._metakey = ""
         self._metastore = load_metastore(bucket=bucket, key=self.metakey())
 
-        if exists(bucket=bucket, key=self.key()):
-            data = get_object_from_json(bucket=bucket, key=self.key())
-            # Update myself
-            self.__dict__.update(data)
+        # if exists(bucket=bucket, key=self.key()):
+        #     data = get_object_from_json(bucket=bucket, key=self.key())
+        #     # Update myself
+        #     self.__dict__.update(data)
 
     @classmethod
     def metakey(cls) -> str:

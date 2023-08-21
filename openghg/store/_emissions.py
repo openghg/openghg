@@ -10,7 +10,7 @@ from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
 from types import TracebackType
 import warnings
-from openghg.store._connection import get_object_store_connection
+from openghg.store._connection import get_object_store_connection, datasource_policy, get_file_hash_tracker
 from openghg.store.base._base import add_attr_to_data_REFACTOR  # TODO refactor this...
 from openghg.util import to_lowercase
 
@@ -129,14 +129,16 @@ class Emissions(BaseStore):
         parser_fn = load_emissions_parser(source_format=source_format)
 
         datasource_uuids = {}
-        with get_object_store_connection("emissions", self._bucket) as conn:
-            file_hash = hash_file(filepath=filepath)
-            if not overwrite:
-                try:
-                    conn.check_file_hash(file_hash)
-                except ValueError as e:
-                    logger.warning((str(e) + " Skipping."))
+        file_tracker = get_file_hash_tracker("emissions", self._bucket)
+        file_hash = hash_file(filepath=filepath)
+        if not overwrite:
+            try:
+                file_tracker.check_file_hash(file_hash)
+            except ValueError as e:
+                logger.warning((str(e) + " Skipping."))
+                return datasource_uuids
 
+        with get_object_store_connection("emissions", self._bucket) as conn:
             # Define parameters to pass to the parser function
             # TODO: Update this to match against inputs for parser function.
             param = {
@@ -150,7 +152,7 @@ class Emissions(BaseStore):
                 "data_type": "emissions",
                 "chunks": chunks,
             }
-            optional_keywords = {k: to_lowercase(optional_args.get(k, None)) for k in conn.optional_keys}
+            optional_keywords = {k: to_lowercase(optional_args.get(k, None)) for k in datasource_policy("emissions").optional_keys}
             param.update(optional_keywords)
             emissions_data = parser_fn(**param)
 
@@ -167,7 +169,7 @@ class Emissions(BaseStore):
                 datasource_uuids[key] = ds_uuid
 
             # Record the file hash in case we see this file again
-            conn.save_file_hash(file_hash, filepath)
+            file_tracker.save_file_hash(file_hash, filepath)
 
         return datasource_uuids
 

@@ -10,6 +10,7 @@ from openghg.util import decompress, running_on_hub
 from openghg.types import ObjectStoreError
 from tinydb.database import TinyDB
 from openghg.dataobjects import SearchResults
+from openghg.store._connection import get_object_store_connection
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -519,6 +520,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
     data_type = search_kwargs.get("data_type")
     data_type_classes = define_data_type_classes()
 
+    data_types_to_search = []
     types_to_search = []
     if data_type is not None:
         if not isinstance(data_type, list):
@@ -531,10 +533,12 @@ def _base_search(**kwargs: Any) -> SearchResults:
                     f"{data_type} is not a valid data type, please select one of {valid_data_types}"
                 )
             # Get the object we want to load in from the object store
+            data_types_to_search.append(d)
             type_class = data_type_classes[d]
             types_to_search.append(type_class)
     else:
         types_to_search.extend(data_type_classes.values())
+        data_types_to_search.extend(data_type_classes.keys())  # TODO need better way to get default here...
 
     # Get a dictionary of all the readable buckets available
     # We'll iterate over each of them
@@ -594,14 +598,19 @@ def _base_search(**kwargs: Any) -> SearchResults:
 
     for bucket_name, bucket in readable_buckets.items():
         metastore_records = []
-        for data_type_class in types_to_search:
-            with data_type_class(bucket=bucket) as dclass:
-                metastore = dclass._metastore
-
+        for data_type in data_types_to_search:
+            with get_object_store_connection(data_type, bucket) as conn:
                 for v in expanded_search:
-                    res = metastore.search(Query().fragment(v))
-                    if res:
-                        metastore_records.extend(res)
+                    if (result := conn.search(v)):
+                        metastore_records.extend(result)
+        # for data_type_class in types_to_search:
+        #     with data_type_class(bucket=bucket) as dclass:
+        #         metastore = dclass._metastore
+
+        #         for v in expanded_search:
+        #             res = metastore.search(Query().fragment(v))
+        #             if res:
+        #                 metastore_records.extend(res)
 
         if not metastore_records:
             continue

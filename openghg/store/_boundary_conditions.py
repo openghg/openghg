@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 from openghg.store.base import BaseStore
 from openghg.store.base._base import add_attr_to_data_REFACTOR  # TODO refactor this...
-from openghg.store._connection import get_object_store_connection
+from openghg.store._connection import get_object_store_connection, get_file_hash_tracker
 
 __all__ = ["BoundaryConditions"]
 
@@ -111,15 +111,18 @@ class BoundaryConditions(BaseStore):
 
         filepath = Path(filepath)
 
-        file_hash = hash_file(filepath=filepath)
-
         datasource_uuids = {}
+
+        file_hash = hash_file(filepath=filepath)
+        file_tracker = get_file_hash_tracker("boundary_conditions", self._bucket)
+        if not overwrite:
+            try:
+                file_tracker.check_file_hash(file_hash)
+            except ValueError as e:
+                logger.warning((str(e) + " Skipping."))
+                return datasource_uuids
+
         with get_object_store_connection("boundary_conditions", bucket=self._bucket) as conn:
-            if not overwrite:
-                try:
-                    conn.check_file_hash(file_hash)
-                except ValueError as e:
-                    logger.warning((str(e) + " Skipping."))
 
             bc_data = open_dataset(filepath)
 
@@ -187,7 +190,7 @@ class BoundaryConditions(BaseStore):
                 datasource_uuids[key] = ds_uuid
 
             # Record the file hash in case we see this file again
-            conn.save_file_hash(file_hash, filepath)  # TODO: do we want filepath.name? this caused an error...
+            file_tracker.save_file_hash(file_hash, filepath)
 
         return datasource_uuids
 
