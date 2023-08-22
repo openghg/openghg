@@ -1,4 +1,6 @@
 import logging
+import os
+from pathlib import Path
 from collections import defaultdict
 from openghg.store.spec import define_data_type_classes
 from openghg.objectstore import get_readable_buckets
@@ -9,7 +11,7 @@ logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(level=logging.DEBUG)
 
 
-def integrity_check(raise_error: bool = True) -> Optional[List]:
+def integrity_check(raise_error: bool = True, check_datasource_integrity=False) -> Optional[List]:
     """Check the integrity of object stores.
 
     Args:
@@ -26,19 +28,25 @@ def integrity_check(raise_error: bool = True) -> Optional[List]:
 
     failed_datasources = defaultdict(dict)
     for bucket in readable_buckets.values():
+        datasource_path = Path(bucket) / "datasource/uuid"
+        datasource_uuids = [uuid[:-6] for uuid in os.listdir(datasource_path)]
         for storage_class in datastore_classes:
             # Now load the object
             with storage_class(bucket=bucket) as sc:
                 # Get all the Datasources
-                datasource_uuids = sc.datasources()
+                metastore_datasource_uuids = sc.datasources()
                 # Check they all exist
                 failures = []
-                for uid in datasource_uuids:
-                    try:
-                        Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
-                    except ObjectStoreError:
-                        failures.append(uid)
+                for uuid in metastore_datasource_uuids:
+                    if uuid not in datasource_uuids:
+                        failures.append(uuid)
+                    if check_datasource_integrity:
+                        try:
+                            Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
+                        except ObjectStoreError:
+                            failures.append(uid)
 
+                
                 if failures:
                     sc_name = sc.__class__.__name__
                     failed_datasources[bucket][sc_name] = failures
@@ -46,7 +54,7 @@ def integrity_check(raise_error: bool = True) -> Optional[List]:
     if failed_datasources:
         if raise_error:
             raise ObjectStoreError(
-                "The following Datasources failed their integriy checks:"
+                "The following Datasources failed their integrity checks:"
                 + f"\n{failed_datasources}"
                 + "\nYour object store is corrupt. Please remove these Datasources."
             )
