@@ -1,14 +1,37 @@
+from functools import partial
 from helpers import get_bc_datapath
 from openghg.retrieve import search
 from openghg.store import BoundaryConditions, load_metastore
 from openghg.objectstore import get_bucket
+from openghg.standardise._standardise import Standardiser
 from openghg.util import hash_bytes
 from xarray import open_dataset
 import numpy as np
 import pytest
 
 
-def test_read_data_monthly(mocker):
+# SET UP
+@pytest.fixture
+def bucket():
+    return get_bucket()
+
+
+@pytest.fixture
+def standardise(bucket):
+    standardiser = Standardiser(bucket=bucket)
+    return partial(standardiser.standardise, data_type="boundary_conditions")
+
+
+def read_data_refactor(bucket, binary_data, metadata, file_metadata):
+    """To make refactoring easier... put all dependency on BoundaryConditions
+    in helper function.
+    """
+    bcs = BoundaryConditions(bucket=bucket)
+    return bcs.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+
+
+# TESTS
+def test_read_data_monthly(mocker, bucket):
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     # mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
@@ -28,29 +51,28 @@ def test_read_data_monthly(mocker):
 
     file_metadata = {"sha1_hash": sha1_hash, "filename": filename, "compressed": False}
 
-    bucket = get_bucket()
-    with BoundaryConditions(bucket=bucket) as bcs:
-        proc_results = bcs.read_data(
-            binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
-        )
+    proc_results = read_data_refactor(
+        bucket=bucket,
+        binary_data=binary_data,
+        metadata=metadata,
+        file_metadata=file_metadata
+    )
 
     # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
     assert proc_results["ch4_mozart_europe"]["new"] is True
 
 
-def test_read_file_monthly():
+def test_read_file_monthly(standardise):
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
-    bucket = get_bucket()
-    with BoundaryConditions(bucket=bucket) as bcs:
-        proc_results = bcs.read_file(
-            filepath=test_datapath,
-            species="ch4",
-            bc_input="MOZART",
-            domain="EUROPE",
-            period="monthly",
-            overwrite=True,
-        )
+    proc_results = standardise(
+        filepath=test_datapath,
+        species="ch4",
+        bc_input="MOZART",
+        domain="EUROPE",
+        period="monthly",
+        overwrite=True,
+    )
 
     assert "ch4_mozart_europe" in proc_results
 
@@ -90,21 +112,19 @@ def test_read_file_monthly():
     assert expected_metadata.items() <= bc_data.metadata.items()
 
 
-def test_read_file_yearly():
+def test_read_file_yearly(standardise):
     test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
 
     species = "n2o"
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    bucket = get_bucket()
-    with BoundaryConditions(bucket=bucket) as bcs:
-        proc_results = bcs.read_file(
-            filepath=test_datapath,
-            species=species,
-            bc_input=bc_input,
-            domain=domain,
-        )
+    proc_results = standardise(
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+    )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
@@ -146,7 +166,7 @@ def test_read_file_yearly():
     assert expected_metadata.items() <= metadata.items()
 
 
-def test_read_file_co2_no_time_dim():
+def test_read_file_co2_no_time_dim(standardise):
     """
     Test monthly co2 file with with no time dimension can be read and intepreted
     correctly.
@@ -160,14 +180,12 @@ def test_read_file_co2_no_time_dim():
     bc_input = "CAMS"
     domain = "EUROPE"
 
-    bucket = get_bucket()
-    with BoundaryConditions(bucket=bucket) as bcs:
-        proc_results = bcs.read_file(
-            filepath=test_datapath,
-            species=species,
-            bc_input=bc_input,
-            domain=domain,
-        )
+    proc_results = standardise(
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+    )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"

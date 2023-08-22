@@ -31,21 +31,6 @@ class EulerianModel(BaseStore):
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def __enter__(self) -> EulerianModel:
-        self._metastore.close()  # TODO remove when refactoring
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            # self.save()
-            pass
 
     def read_file(
         self,

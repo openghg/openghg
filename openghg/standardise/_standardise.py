@@ -7,7 +7,7 @@ from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
 from openghg.types import optionalPathType, multiPathType
-
+from openghg.cloud import call_function
 
 class Standardiser:
     """Helper class to class `read_file` from children of `BaseStore`.
@@ -78,7 +78,6 @@ def standardise_surface(
         dict: Dictionary of result data
     """
     from openghg.cloud import call_function
-    from openghg.store import ObsSurface
 
     if not isinstance(filepaths, list):
         filepaths = [filepaths]
@@ -160,23 +159,23 @@ def standardise_surface(
     else:
         bucket = get_writable_bucket(name=store)
 
-        with ObsSurface(bucket=bucket) as obs:
-            results = obs.read_file(
-                filepath=filepaths,
-                source_format=source_format,
-                network=network,
-                site=site,
-                inlet=inlet,
-                height=height,
-                instrument=instrument,
-                sampling_period=sampling_period,
-                calibration_scale=calibration_scale,
-                measurement_type=measurement_type,
-                overwrite=overwrite,
-                verify_site_code=verify_site_code,
-                site_filepath=site_filepath,
-                update_mismatch=update_mismatch,
-            )
+        results = Standardiser(bucket=bucket).standardise(
+            data_type="surface",
+            filepath=filepaths,
+            source_format=source_format,
+            network=network,
+            site=site,
+            inlet=inlet,
+            height=height,
+            instrument=instrument,
+            sampling_period=sampling_period,
+            calibration_scale=calibration_scale,
+            measurement_type=measurement_type,
+            overwrite=overwrite,
+            verify_site_code=verify_site_code,
+            site_filepath=site_filepath,
+            update_mismatch=update_mismatch,
+        )
 
         return results
 
@@ -221,7 +220,6 @@ def standardise_column(
         dict: Dictionary containing confirmation of standardisation process.
     """
     from openghg.cloud import call_function
-    from openghg.store import ObsColumn
 
     filepath = Path(filepath)
 
@@ -254,20 +252,20 @@ def standardise_column(
     else:
         bucket = get_writable_bucket(name=store)
 
-        with ObsColumn(bucket=bucket) as obs_col:
-            result = obs_col.read_file(
-                filepath=filepath,
-                satellite=satellite,
-                domain=domain,
-                selection=selection,
-                site=site,
-                species=species,
-                network=network,
-                instrument=instrument,
-                platform=platform,
-                source_format=source_format,
-                overwrite=overwrite,
-            )
+        result = Standardiser(bucket=bucket).standardise(
+            data_type="column",
+            filepath=filepath,
+            satellite=satellite,
+            domain=domain,
+            selection=selection,
+            site=site,
+            species=species,
+            network=network,
+            instrument=instrument,
+            platform=platform,
+            source_format=source_format,
+            overwrite=overwrite,
+        )
 
         return result
 
@@ -299,7 +297,6 @@ def standardise_bc(
         dict: Dictionary containing confirmation of standardisation process.
     """
     from openghg.cloud import call_function
-    from openghg.store import BoundaryConditions
 
     filepath = Path(filepath)
 
@@ -326,17 +323,17 @@ def standardise_bc(
         return response_content
     else:
         bucket = get_writable_bucket(name=store)
-        with BoundaryConditions(bucket=bucket) as bcs:
-            result = bcs.read_file(
-                filepath=filepath,
-                species=species,
-                bc_input=bc_input,
-                domain=domain,
-                period=period,
-                continuous=continuous,
-                overwrite=overwrite,
-            )
 
+        result = Standardiser(bucket=bucket).standardise(
+            data_type="boundary_conditions",
+            filepath=filepath,
+            species=species,
+            bc_input=bc_input,
+            domain=domain,
+            period=period,
+            continuous=continuous,
+            overwrite=overwrite,
+        )
         return result
 
 
@@ -386,7 +383,6 @@ def standardise_footprint(
         if file already processed.
     """
     from openghg.cloud import call_function
-    from openghg.store import Footprints
 
     filepath = Path(filepath)
 
@@ -422,26 +418,26 @@ def standardise_footprint(
         return response_content
     else:
         bucket = get_writable_bucket(name=store)
-        with Footprints(bucket=bucket) as fps:
-            result = fps.read_file(
-                filepath=filepath,
-                site=site,
-                domain=domain,
-                model=model,
-                inlet=inlet,
-                height=height,
-                metmodel=metmodel,
-                species=species,
-                network=network,
-                period=period,
-                chunks=chunks,
-                continuous=continuous,
-                retrieve_met=retrieve_met,
-                high_spatial_resolution=high_spatial_resolution,
-                high_time_resolution=high_time_resolution,
-                overwrite=overwrite,
-            )
 
+        result = Standardiser(bucket=bucket).standardise(
+            data_type="footprints",
+            filepath=filepath,
+            site=site,
+            domain=domain,
+            model=model,
+            inlet=inlet,
+            height=height,
+            metmodel=metmodel,
+            species=species,
+            network=network,
+            period=period,
+            chunks=chunks,
+            continuous=continuous,
+            retrieve_met=retrieve_met,
+            high_spatial_resolution=high_spatial_resolution,
+            high_time_resolution=high_time_resolution,
+            overwrite=overwrite,
+        )
         return result
 
 
@@ -478,7 +474,6 @@ def standardise_flux(
         dict: Dictionary of Datasource UUIDs data assigned to
     """
     from openghg.cloud import call_function
-    from openghg.store import Emissions
 
     filepath = Path(filepath)
 
@@ -512,21 +507,22 @@ def standardise_flux(
         return response_content
     else:
         bucket = get_writable_bucket(name=store)
-        with Emissions(bucket=bucket) as ems:
-            return ems.read_file(
-                filepath=filepath,
-                species=species,
-                source=source,
-                domain=domain,
-                database=database,
-                database_version=database_version,
-                model=model,
-                high_time_resolution=high_time_resolution,
-                period=period,
-                continuous=continuous,
-                chunks=chunks,
-                overwrite=overwrite,
-            )
+
+        return Standardiser(bucket=bucket).standardise(
+            data_type="emissions",
+            filepath=filepath,
+            species=species,
+            source=source,
+            domain=domain,
+            database=database,
+            database_version=database_version,
+            model=model,
+            high_time_resolution=high_time_resolution,
+            period=period,
+            continuous=continuous,
+            chunks=chunks,
+            overwrite=overwrite,
+        )
 
 
 # def upload_to_par(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:
