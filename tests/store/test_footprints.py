@@ -1,10 +1,30 @@
 import pytest
+from functools import partial
 from helpers import get_footprint_datapath
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
-from openghg.store import Footprints, load_metastore
+from openghg.store import Footprints
 from openghg.util import hash_bytes
-from openghg.standardise import standardise_footprint
+from openghg.standardise._standardise import Standardiser
+
+@pytest.fixture(autouse=True)
+def bucket():
+    return get_bucket()
+
+
+@pytest.fixture(autouse=True)
+def standardise(bucket):
+    """Use `standardise(**kwargs)` to standardise footprints data.
+
+    We only deal with footprints data in this test module, and most
+    tests just use `bucket = get_bucket()`, so this works for
+    most tests in this module.
+
+    This was added to help refactor `BaseStore` and its children
+    by removing uses of the context manager for using `read_file`.`
+    """
+    standardiser = Standardiser(bucket)
+    return partial(standardiser.standardise, data_type="footprints")
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -34,8 +54,8 @@ def test_read_footprint_co2_from_data(mocker):
     # Expect co2 data to be high time resolution
     # - could include high_time_resolution=True but don't need to as this will be set automatically
     bucket = get_bucket()
-    with Footprints(bucket=bucket) as fps:
-        result = fps.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+    fps = Footprints(bucket=bucket)
+    result = fps.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
 
     assert result == {"tac_test_NAME_100m": {"uuid": "test-uuid-1", "new": True}}
 
@@ -50,38 +70,23 @@ def test_read_footprint_co2_from_data(mocker):
         ("inlet", "100"),
     ],
 )
-def test_read_footprint_standard(keyword, value):
+def test_read_footprint_standard(keyword, value, standardise):
     """
     Test standard footprint which should contain (at least)
      - data variables: "fp"
      - coordinates: "height", "lat", "lev", "lon", "time"
     Check this for different variants of inlet and height inputs.
     """
-    datapath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
-
     site = "TAC"
     domain = "EUROPE"
     model = "NAME"
-
-    bucket = get_bucket()
-    if keyword == "inlet":
-        with Footprints(bucket=bucket) as fps:
-            fps.read_file(
-                filepath=datapath,
-                site=site,
-                model=model,
-                inlet=value,
-                domain=domain,
-            )
-    elif keyword == "height":
-        with Footprints(bucket=bucket) as fps:
-            fps.read_file(
-                filepath=datapath,
-                site=site,
-                model=model,
-                height=value,
-                domain=domain,
-            )
+    args = dict(filepath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc"),
+                site = site,
+                domain = domain,
+                model = model,
+                )
+    args[keyword] = value
+    standardise(**args)
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
@@ -121,7 +126,7 @@ def test_read_footprint_standard(keyword, value):
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_read_footprint_high_spatial_resolution():
+def test_read_footprint_high_spatial_resolution(standardise):
     """
     Test high spatial resolution footprint
      - expects additional parameters for `fp_low` and `fp_high`
@@ -129,26 +134,17 @@ def test_read_footprint_high_spatial_resolution():
      - expects keyword attributes to be set
        - "spatial_resolution": "high_spatial_resolution"
     """
-    datapath = get_footprint_datapath("footprint_test.nc")
-    # model_params = {"simulation_params": "123"}
-
     site = "TMB"
-    network = "LGHG"
-    inlet = "10m"
     domain = "EUROPE"
-    model = "test_model"
-
-    bucket = get_bucket()
-    with Footprints(bucket=bucket) as fps:
-        fps.read_file(
-            filepath=datapath,
-            site=site,
-            model=model,
-            network=network,
-            inlet=inlet,
-            domain=domain,
-            period="monthly",
-            high_spatial_resolution=True,
+    standardise(
+        filepath = get_footprint_datapath("footprint_test.nc"),
+        site = site,
+        network = "LGHG",
+        inlet = "10m",
+        domain = domain,
+        model = "test_model",
+        period="monthly",
+        high_spatial_resolution=True,
         )
 
     # Get the footprints data
@@ -277,7 +273,7 @@ def test_read_footprint_high_spatial_resolution():
         ),
     ],
 )
-def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
+def test_read_footprint_co2(site, inlet, metmodel, start, end, filename, standardise):
     """
     Test high spatial resolution footprint
      - expects additional parameter for `fp_HiTRes`
@@ -297,18 +293,15 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
 
     # Expect co2 data to be high time resolution
     # - could include high_time_resolution=True but don't need to as this will be set automatically
-
-    bucket = get_bucket()
-    with Footprints(bucket=bucket) as fps:
-        fps.read_file(
-            filepath=datapath,
-            site=site,
-            model=model,
-            metmodel=metmodel,
-            inlet=inlet,
-            species=species,
-            domain=domain,
-        )
+    standardise(
+        filepath=datapath,
+        site=site,
+        model=model,
+        metmodel=metmodel,
+        inlet=inlet,
+        species=species,
+        domain=domain,
+    )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
@@ -352,7 +345,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_read_footprint_short_lived():
+def test_read_footprint_short_lived(standardise):
     datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
 
     site = "WAO"
@@ -364,18 +357,15 @@ def test_read_footprint_short_lived():
 
     # Expect rn data to be short lived
     # - could include short_lifetime=True but shouldn't need to as this will be set automatically
-
-    bucket = get_bucket()
-    with Footprints(bucket=bucket) as fps:
-        fps.read_file(
-            filepath=datapath,
-            site=site,
-            model=model,
-            metmodel=metmodel,
-            inlet=inlet,
-            species=species,
-            domain=domain,
-        )
+    standardise(
+        filepath=datapath,
+        site=site,
+        model=model,
+        metmodel=metmodel,
+        inlet=inlet,
+        species=species,
+        domain=domain,
+    )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")

@@ -115,10 +115,7 @@ class DataManager:
 
         dtype = self._check_datatypes(uuid=uuid)
 
-        data_objs = define_data_type_classes()
-        data_class = data_objs[dtype]
-
-        with data_class(bucket=self._bucket) as dclass:
+        with get_object_store_connection(bucket=self._bucket, data_type=dtype) as dclass:
             metastore = dclass._metastore
             backup = self._backup[uuid][version]
             self.metadata[uuid] = backup

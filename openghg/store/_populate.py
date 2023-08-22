@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 import logging
 from openghg.objectstore import get_writable_bucket
-from openghg.store import ObsSurface
+from openghg.standardise._standardise import Standardiser
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -97,15 +97,16 @@ def add_noaa_obspack(
         if _project in projects_to_read:
             try:
                 # TODO - can we streamline this a bit to save repeated loads?
-                with ObsSurface(bucket=bucket) as obs:
-                    processed = obs.read_file(
-                        filepath,
-                        site=site,
-                        measurement_type=measurement_type,
-                        network="NOAA",
-                        source_format="NOAA",
-                        overwrite=overwrite,
-                    )
+                standardiser = Standardiser(bucket=bucket)
+                processed = standardiser.standardise(
+                    data_type="surface",
+                    filepath=filepath,
+                    site=site,
+                    measurement_type=measurement_type,
+                    network="NOAA",
+                    source_format="NOAA",
+                    overwrite=overwrite,
+                )
             except Exception:
                 files_with_errors.append(filepath.name)
 

@@ -1,11 +1,33 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, Literal, Optional, Union, Callable
 from pandas import Timedelta
 
+from openghg.store.spec import define_data_type_classes
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
 from openghg.types import optionalPathType, multiPathType
+
+
+class Standardiser:
+    """Helper class to class `read_file` from children of `BaseStore`.
+
+    This was added to help refactor BaseStore and its children.
+    """
+    def __init__(self, bucket: str, data_type_map: Optional[dict] = None) -> None:
+        self.bucket = bucket
+        if data_type_map is None:
+            self.data_type_map = define_data_type_classes()
+        else:
+            self.data_type_map = data_type_map
+
+    def standardise(self, data_type: str, filepath: Union[str, Path, multiPathType], **kwargs) -> Optional[dict]:
+        try:
+            dclass = self.data_type_map[data_type]
+        except KeyError:
+            raise ValueError(f"No standarising function found for data type {data_type}.")
+        return dclass(self.bucket).read_file(filepath=filepath, **kwargs)
+
 
 
 def standardise_surface(

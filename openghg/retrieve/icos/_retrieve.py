@@ -224,8 +224,8 @@ def local_retrieve(
             return None
 
         bucket = get_writable_bucket(name=store)
-        with ObsSurface(bucket=bucket) as obs:
-            obs.store_data(data=standardised_data)
+        obs = ObsSurface(bucket=bucket)
+        obs.store_data(data=standardised_data)
 
         # Create the expected ObsData type
         obs_data = []

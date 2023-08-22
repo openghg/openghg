@@ -229,7 +229,7 @@ def local_retrieve_surface(
     to_store = {key: {"data": dataset, "metadata": metadata}}
 
     bucket = get_writable_bucket(name=store)
-    with ObsSurface(bucket=bucket) as obs:
-        obs.store_data(data=to_store)
+    obs = ObsSurface(bucket=bucket)
+    obs.store_data(data=to_store)
 
     return ObsData(data=dataset, metadata=metadata)
