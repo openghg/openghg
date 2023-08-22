@@ -33,7 +33,6 @@ def to_dashboard(
     """
     to_export = aDict()
 
-
     if not isinstance(data, list):
         data = [data]
 
