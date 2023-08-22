@@ -71,7 +71,7 @@ class FileHashTracker:
 
     def update(self) -> None:
         """Check for existing file hashes, and update if found"""
-        # TODO: make this smarter... it should the dicts stored at self.file_hashes, etc..
+        # TODO: make this smarter... it should update the dicts stored at self.file_hashes, etc..
         # not replace them
         if objectstore.exists(bucket=self._bucket, key=self._key):
             result = objectstore.get_object_from_json(self._bucket, key=self._key)
@@ -313,35 +313,32 @@ class ObjectStoreConnection:
                        to `datasource_lookup`
         data_type: used to register subclasses
     """
-
-    _registry: dict[str, Any] = {}  # subclass registry  # TODO replace Any with proper typing
-
-    # variables that should be redefined in subclasses
-    _root = "root"
-    _uuid = "root_uuid"
-    data_type: str = ""
-
-    def __init__(self, bucket: str) -> None:
+    def __init__(self, bucket: str, root: str = "root", root_uuid: str = "root_uuid", data_type: str = "") -> None:
         """Create object store connection object.
 
         Args:
             bucket: (path to?) the object store to connect to.
         """
+        self.data_type = data_type
+        self._root = root
+        self._uuid = root_uuid
         self._bucket = bucket
         self._metakey = f"{self._root}/uuid/{self._uuid}/metastore"
         self._metastore = store.load_metastore(self._bucket, self._metakey)
 
+    def __repr__(self) -> str:
+        return f"ObjectStoreConnection(bucket={self._bucket!r}, root={self._root!r}, root_uuid={self._uuid!r}, data_type={self.data_type!r})"
 
     @classmethod
-    def __init_subclass__(cls) -> None:
-        """Register subclasses by data_type."""
-        ObjectStoreConnection._registry[cls.data_type] = cls
+    def from_data_type(cls, bucket: str, data_type: str) -> ObjectStoreConnection:
+        try:
+            dtype_info = object_store_data_classes[data_type]
+        except KeyError:
+            raise ValueError(f"No data class found for data type {data_type}.")
+        else:
+            return cls(bucket=bucket, root=dtype_info["_root"], root_uuid=dtype_info["_uuid"], data_type=data_type)
 
-    def __repr__(self) -> str:
-        return f"""ObjectStoreConnection to {self._bucket}/{self._metakey}
-        Data type: {self.data_type}
-        """
-
+    
     # context manager
     def __enter__(self) -> ObjectStoreConnection:
         return self
@@ -480,7 +477,7 @@ class ObjectStoreConnection:
         return [doc["uuid"] for doc in self._metastore]
 
 
-def get_object_store_connection(data_type: str, bucket: str) -> Any:  # TODO: fix typing
+def get_object_store_connection(data_type: str, bucket: str) -> ObjectStoreConnection:
     """Get an object store connection for a given data type.
 
     Args:
@@ -490,48 +487,4 @@ def get_object_store_connection(data_type: str, bucket: str) -> Any:  # TODO: fi
     Returns:
         Connection to object store of given data type.
     """
-    try:
-        conn = ObjectStoreConnection._registry[data_type](bucket)
-    except KeyError:
-        raise ValueError(f"No ObjectStoreConnection subclass found for data type {data_type}.")
-    else:
-        return conn
-
-
-
-
-
-class SurfaceConnection(ObjectStoreConnection):
-    _root = "ObsSurface"
-    _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
-    data_type = "surface"
-
-
-class ColumnConnection(ObjectStoreConnection):
-    _root = "ObsColumn"
-    _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
-    data_type = "column"
-
-
-class EmissionsConnection(ObjectStoreConnection):
-    _root = "Emissions"
-    _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
-    data_type = "emissions"
-
-
-class FootprintsConnection(ObjectStoreConnection):
-    _root = "Footprints"
-    _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
-    data_type = "footprints"
-
-
-class BoundaryConditionsConnection(ObjectStoreConnection):
-    _root = "BoundaryConditions"
-    _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
-    data_type = "boundary_conditions"
-
-
-class EulerianModelConnection(ObjectStoreConnection):
-    _root = "EulerianModel"
-    _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
-    data_type = "eulerian_model"
+    return ObjectStoreConnection.from_data_type(bucket=bucket, data_type=data_type)
