@@ -27,7 +27,7 @@ def to_dashboard(
     Args:
         data: Dictionary of retrieved data
         downsample_n: Take every nth value from the data
-        filename: filename to write output to
+        filename: filename to write output to specify the file extension to json
     Returns:
         None
     """
