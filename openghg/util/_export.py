@@ -37,6 +37,8 @@ def to_dashboard(
     if not isinstance(data, list):
         data = [data]
 
+    filtered_species = list(set([species.metadata['species'] for species in data]))
+
     for obs in data:
         measurement_data = obs.data
         attributes = measurement_data.attrs
@@ -46,8 +48,7 @@ def to_dashboard(
 
         rename_lower = {c: str(c).lower() for c in df.columns}
         df = df.rename(columns=rename_lower)
-        filtered_species = metadata['species']
-        df = df[filtered_species]
+        df = df.filter(items=filtered_species)
 
         # Downsample the data
         if downsample_n > 1:
