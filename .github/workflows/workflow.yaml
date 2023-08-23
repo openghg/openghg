@@ -103,11 +103,11 @@ jobs:
         run: |
           pip install --upgrade build
       - name: Build a binary wheel and a source tarball
-        id: build
+        id: pypiBuild
         run: |
           python -m build --sdist --wheel --outdir dist/
       - name: Publish distribution 📦 to Test PyPI
-        if: steps.build.outcome == 'success' 
+        if: steps.pypiBuild.outcome == 'success' 
         uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
@@ -130,6 +130,7 @@ jobs:
         with:
           init-shell: bash
       - name: Build and push the conda package
+        id: condaBuild
         run: |
           micromamba create -n openghg_build anaconda-client boa -c conda-forge
           micromamba activate openghg_build
@@ -137,7 +138,7 @@ jobs:
           mkdir ${{ github.workspace }}/build
           conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge
       - name: Upload conda package to Anaconda
-        if: success()
+        if: steps.condaBuild.outcome == 'success'
         run: |
           BUILD_DIR=${GITHUB_WORKSPACE}/build
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
