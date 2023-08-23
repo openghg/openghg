@@ -15,7 +15,7 @@ def test_export_to_dashboard():
     epoch = datetime.datetime(1970, 1, 1, 1, 1)
 
     site_A = DataFrame(
-        data={"A": range(0, n_days)},
+        data={"co2": range(0, n_days)},
         index=date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D"),
     ).to_xarray()
 
@@ -40,7 +40,7 @@ def test_export_to_dashboard():
                     "100m": {
                         "picarro": {
                             "data": {
-                                "a": {
+                                "co2": {
                                     "3660000": 0,
                                     "262860000": 3,
                                     "522060000": 6,
