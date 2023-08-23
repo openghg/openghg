@@ -3,6 +3,7 @@ from json import dump, loads
 from pathlib import Path
 from typing import Dict, List, Union, Optional, TYPE_CHECKING
 from addict import Dict as aDict
+from pandas import DataFrame
 
 if TYPE_CHECKING:
     from openghg.dataobjects import ObsData
@@ -13,7 +14,7 @@ __all__ = ["to_dashboard", "to_dashboard_mobile"]
 def to_dashboard(
     data: Union[ObsData, List[ObsData]],
     downsample_n: int = 3,
-    filename: Optional[str] = None,
+    filepath: Optional[str] = None,
 ) -> Union[Dict, None]:
     """Takes a Dataset produced by OpenGHG and outputs it into a JSON
     format readable by the OpenGHG dashboard or a related project.
@@ -41,10 +42,12 @@ def to_dashboard(
         attributes = measurement_data.attrs
         metadata = obs.metadata
 
-        df = measurement_data.to_dataframe()
+        df: DataFrame = measurement_data.to_dataframe()
 
         rename_lower = {c: str(c).lower() for c in df.columns}
         df = df.rename(columns=rename_lower)
+        filtered_species = metadata['species']
+        df = df[filtered_species]
 
         # Downsample the data
         if downsample_n > 1:
@@ -81,8 +84,8 @@ def to_dashboard(
             "metadata": metadata,
         }
 
-    if filename is not None:
-        with open(filename, "w") as f:
+    if filepath is not None:
+        with open(filepath, "w") as f:
             dump(obj=to_export, fp=f)
         return None
     else:
