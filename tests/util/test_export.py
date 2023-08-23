@@ -97,7 +97,7 @@ def test_export_to_dashboard():
 
     with TemporaryDirectory() as tmpdir:
         tmp_path = Path(tmpdir).joinpath("test_export.json")
-        to_dashboard(data=obs, filename=tmp_path)
+        to_dashboard(data=obs, filepath=tmp_path)
 
         assert tmp_path.exists()
         exported_data = json.loads(tmp_path.read_text())
