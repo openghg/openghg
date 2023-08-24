@@ -6,33 +6,34 @@ from openghg.store import ObsSurface, Emissions
 from openghg.store.base import Datasource
 from openghg.retrieve import get_flux
 from openghg.retrieve import search
-from openghg.standardise import standardise_footprint
+from openghg.standardise import standardise_footprint, standardise_flux, standardise_surface
 from openghg.objectstore import get_bucket
-
-
 from helpers import clear_test_stores
 
 
-def flux_data_read():
-    """
-    Flux data set up.
-    """
-    # Emissions data
-    # Anthropogenic ch4 (methane) data from 2012 for EUROPE
-    source1 = "anthro"
-    domain = "EUROPE"
+@pytest.fixture(autouse=True)
+def clear_stores():
+    """Clear the test store at the start of each test.
 
-    emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
+    This will run before any other fixtures in the same scope (i.e. function scope).
+    In particular, it will run before all of the set-up tests below.
+    """
+    clear_test_stores()
 
+
+@pytest.fixture(autouse=True, scope="module")
+def auto_bucket():
+    """Put `bucket` in namespace.
+
+    Making bucket a module level variable doesn't work, and
+    autouse fixtures don't provide return values unless passed
+    as arguments to the test, so this seems like the best way
+    to do this.
+    """
+    global bucket
     bucket = get_bucket()
-    with Emissions(bucket=bucket) as ems:
-        ems.read_file(
-            filepath=emissions_datapath1,
-            species="ch4",
-            source=source1,
-            domain=domain,
-            high_time_resolution=False,
-        )
+    yield bucket
+    globals().pop('bucket')
 
 
 def test_database_update_repeat():
@@ -40,10 +41,15 @@ def test_database_update_repeat():
     Test object store can handle the same date (flux data) being added twice.
     """
     # Attempt to add same data to the database twice
-    clear_test_stores()
-    flux_data_read()
-    flux_data_read()
+    #bucket = get_bucket()
+    emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
+    args = (emissions_datapath1, "ch4", "anthro", "EUROPE")
+    kwargs = {"bucket": bucket, "high_time_resolution": False}
 
+    standardise_flux(*args, **kwargs)
+    standardise_flux(*args, **kwargs)
+
+    # Search for the data we just added
     em_param = {}
     em_param["start_date"] = "2012-01-01"
     em_param["end_date"] = "2013-01-01"
@@ -51,55 +57,22 @@ def test_database_update_repeat():
     em_param["species"] = "ch4"
     em_param["domain"] = "EUROPE"
     em_param["source"] = "anthro"
-
     flux = get_flux(**em_param)
 
     assert flux is not None
 
-    # bc_param = {}
-    # bc_param["start_date"] = "2012-08-01"
-    # bc_param["end_date"] = "2012-09-01"
-
-    # bc_param["domain"] = "EUROPE"
-    # bc_param["species"] = "ch4"
-    # bc_param["bc_input"] = "MOZART"
-
-    # bc = get_bc(**bc_param)
-
-    # assert bc
-
-    # fp_param = {}
-    # fp_param["start_date"] = "2012-08-01"
-    # fp_param["end_date"] = "2012-09-01"
-
-    # fp_param["site"] = "TAC"
-    # fp_param["height"] = "100m"
-    # fp_param["domain"] = "EUROPE"
-    # fp_param["model"] = "NAME"
-
-    # footprint = get_footprint(**fp_param)
-
-    # assert footprint is not None
-
 
 #  Test variants in data from the same source being added
-
-
 def bsd_data_read_crds():
     """
     Add Bilsdale *minutely* data for CRDS instrument to object store.
      - CRDS: ch4, co2, co
     """
-
     site = "bsd"
     network = "DECC"
     source_format1 = "CRDS"
-
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
-
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network)
+    standardise_surface(bucket=bucket, filepath=bsd_path1, source_format=source_format1, site=site, network=network)
 
 
 def bsd_data_read_gcmd():
@@ -107,7 +80,6 @@ def bsd_data_read_gcmd():
     Add Bilsdale data GCMD instrument to object store.
      - GCMD: sf6, n2o
     """
-
     site = "bsd"
     network = "DECC"
     source_format2 = "GCWERKS"
@@ -116,15 +88,14 @@ def bsd_data_read_gcmd():
     bsd_path2 = get_surface_datapath(filename="bilsdale-md.14.C", source_format="GC")
     bsd_prec_path2 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=(bsd_path2, bsd_prec_path2),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-        )
+    standardise_surface(
+        bucket=bucket,
+        filepath=(bsd_path2, bsd_prec_path2),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+    )
 
 
 def bsd_small_edit_data_read():
@@ -141,18 +112,17 @@ def bsd_small_edit_data_read():
     bsd_path3 = get_surface_datapath(filename="bilsdale-md.small-edit.14.C", source_format="GC")
     bsd_prec_path3 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=(bsd_path3, bsd_prec_path3),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-        )
+    standardise_surface(
+        bucket=bucket,
+        filepath=(bsd_path3, bsd_prec_path3),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+    )
 
 
-def bsd_diff_data_read(overwrite=False):
+def bsd_diff_data_read():
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data values (should create different hash)
@@ -164,20 +134,18 @@ def bsd_diff_data_read(overwrite=False):
 
     bsd_path4 = get_surface_datapath(filename="bilsdale-md.diff-value.14.C", source_format="GC")
     bsd_prec_path4 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
-
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=(bsd_path4, bsd_prec_path4),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-            overwrite=overwrite,
-        )
+    standardise_surface(
+        bucket=bucket,
+        filepath=(bsd_path4, bsd_prec_path4),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+        overwrite=True,
+    )
 
 
-def bsd_diff_date_range_read(overwrite=False):
+def bsd_diff_date_range_read():
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data date range (should create different hash)
@@ -190,16 +158,39 @@ def bsd_diff_date_range_read(overwrite=False):
     bsd_path5 = get_surface_datapath(filename="bilsdale-md.diff-date-range.14.C", source_format="GC")
     bsd_prec_path5 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=(bsd_path5, bsd_prec_path5),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-            overwrite=overwrite,
-        )
+    standardise_surface(
+        bucket=bucket,
+        filepath=(bsd_path5, bsd_prec_path5),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+        overwrite=True,
+    )
+
+
+def bsd_diff_date_range_read_delayed():
+    """
+    Add overlapping Bilsdale GCMD data to the object store:
+     - Small difference in data date range (should create different hash)
+    """
+    site = "bsd"
+    network = "DECC"
+    source_format2 = "GCWERKS"
+    instrument = "GCMD"
+
+    bsd_path5 = get_surface_datapath(filename="bilsdale-md.diff-date-range.14.C", source_format="GC")
+    bsd_prec_path5 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
+
+    standardise_surface(
+        bucket=bucket,
+        filepath=(bsd_path5, bsd_prec_path5),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+        overwrite=True,
+    )
 
 
 def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
@@ -261,14 +252,9 @@ def test_obs_data_read_header_diff():
      - BSD GCMD different data added - header changed so hash will be different but data will be the same
     Expect that GCMD (and CRDS) data can still be accessed.
     """
-    clear_test_stores()
-    # Load BSD data - CRDS data
     bsd_data_read_crds()
-    # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    # Load BSD data - GCMD data (GCWERKS) with small edit in header
     bsd_small_edit_data_read()
-
     # Search for expected species
     # CRDS data
     search_ch4 = search(site="bsd", species="ch4")
@@ -329,13 +315,9 @@ def test_obs_data_read_data_diff():
     Expect that different GCMD will be retrieved from search (as latest version).
     Expect CRDS data can still be accessed.
     """
-    clear_test_stores()
-    # Load BSD data - CRDS
     bsd_data_read_crds()
-    # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    bsd_diff_data_read(overwrite=True)
+    bsd_diff_data_read()
 
     # Search for expected species
     # CRDS data
@@ -381,23 +363,18 @@ def test_obs_data_read_data_diff():
 # TODO: Add test for different time values as well.
 
 #  Look at different data frequencies for the same data
-
-
 def bsd_data_read_crds_diff_frequency():
     """
     Add Bilsdale *hourly* data for CRDS instrument to object store
      - CRDS: ch4, co2, co
     """
-
     site = "bsd"
     network = "DECC"
     source_format1 = "CRDS"
 
     bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.min.dat", source_format="CRDS")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
+    standardise_surface(bucket=bucket, filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
 
 
 def test_obs_data_read_two_frequencies():
@@ -411,14 +388,9 @@ def test_obs_data_read_two_frequencies():
     Expect hourly data to be found as "latest" version to be retrieved (is this what we want?).
     Expect GCMD data to still be available.
     """
-    clear_test_stores()
-    # Load BSD data - CRDS minutely frequency (and GCWERKS data)
     bsd_data_read_crds()
-    # Load BSD data - CRDS hourly frequency
     bsd_data_read_crds_diff_frequency()
-    # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-
     # Search for expected species
     # CRDS data
     search_ch4 = search(site="bsd", species="ch4")
@@ -472,35 +444,23 @@ def test_obs_data_read_two_frequencies():
 
     # TODO: Can we check if this has been saved as a new version?
 
-
-#  Look at replacing data with different / overlapping internal time stamps
-
-
-def bsd_data_read_crds_internal_overlap(overwrite=False):
-    """
-    Add Bilsdale *hourly* data for CRDS instrument to object store
-     - CRDS: ch4, co2, co
-    """
-
+def bsd_crds_overwrite(overwrite: bool):
     site = "bsd"
     network = "DECC"
     source_format1 = "CRDS"
-
     bsd_path_hourly = get_surface_datapath(
         filename="bsd.picarro.hourly.108m.overlap-dates.dat", source_format="CRDS"
     )
-
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=bsd_path_hourly,
-            source_format=source_format1,
-            site=site,
-            network=network,
-            overwrite=overwrite,
-        )
+    standardise_surface(bucket=bucket,
+                        filepath=bsd_path_hourly,
+                        site=site,
+                        network=network,
+                        source_format=source_format1,
+                        overwrite=overwrite
+                        )
 
 
+#  Look at replacing data with different / overlapping internal time stamps
 def test_obs_data_representative_date_overlap():
     """
     Added test based on fix for Issue 506.
@@ -511,10 +471,9 @@ def test_obs_data_representative_date_overlap():
 
     This test checks this will no longer raise a KeyError based on this.
     """
-
-    clear_test_stores()
-    bsd_data_read_crds_internal_overlap()
-    bsd_data_read_crds_internal_overlap(overwrite=True)
+    # Add same data twice, overwriting the second time
+    bsd_crds_overwrite(False)
+    bsd_crds_overwrite(True)
 
     bucket = get_bucket()
     with ObsSurface(bucket=bucket) as obs:
@@ -555,8 +514,6 @@ def test_metadata_update():
     Add data and then update this to check that the version is both added to the original
     metadata and subsequently updated when the datasource is updated.
     """
-    clear_test_stores()
-    # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
 
     # Search for expected species
@@ -582,7 +539,8 @@ def test_metadata_update():
     assert sf6_metadata_1["end_date"] == expected_end_1
 
     # Load BSD data - GCMD data (GCWERKS) with small change in date range
-    bsd_diff_date_range_read(overwrite=True)
+    #bsd_diff_date_range_read(overwrite=True)
+    bsd_diff_date_range_read_delayed()
 
     search_sf6_2 = search(site="bsd", species="sf6")
 
@@ -617,10 +575,9 @@ def bsd_data_read_crds_overwrite():
 
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True
+    standardise_surface(
+        bucket=bucket,
+        filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True
         )
 
 
