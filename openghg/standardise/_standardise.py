@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union, cast
+from typing import Dict, Literal, Optional, Union
 from pandas import Timedelta
 
 from openghg.store.spec import define_data_type_classes
