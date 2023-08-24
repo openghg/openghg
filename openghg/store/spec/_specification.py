@@ -1,9 +1,9 @@
-from typing import Any
+from typing import Any, Tuple
 
 __all__ = ["define_data_types", "define_data_type_classes"]
 
 
-def define_data_types() -> tuple[str, ...]:
+def define_data_types() -> Tuple[str, ...]:
     """
     Define names of data types for objects within OpenGHG
     """
