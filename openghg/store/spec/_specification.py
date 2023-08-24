@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any, Tuple, Dict
 
 __all__ = ["define_data_types", "define_data_type_classes"]
 
@@ -21,7 +21,7 @@ def define_data_types() -> Tuple[str, ...]:
     return data_types
 
 
-def define_data_type_classes() -> dict[str, Any]:
+def define_data_type_classes() -> Dict[str, Any]:
     """
     Define mapping between data types and associated input classes within OpenGHG
     """
