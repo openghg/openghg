@@ -76,7 +76,7 @@ class Emissions(BaseStore):
         chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read emissions file
 
         Args:
@@ -121,7 +121,7 @@ class Emissions(BaseStore):
             warnings.warn(
                 f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.

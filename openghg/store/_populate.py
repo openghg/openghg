@@ -94,6 +94,7 @@ def add_noaa_obspack(
         _project = param["project"]
         measurement_type = param["measurement_type"]
 
+        processed = {}
         if _project in projects_to_read:
             try:
                 # TODO - can we streamline this a bit to save repeated loads?
@@ -114,9 +115,6 @@ def add_noaa_obspack(
             logger.warning(
                 f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
             )
-            processed = {}
-        else:
-            processed = {}
 
         # Expect "processed" dictionary and/or "error" dictionary within `processed`
         for key, value in processed.items():

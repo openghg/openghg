@@ -1,7 +1,10 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
+from types import TracebackType
 from pandas import Timestamp
 import tinydb
 import logging
@@ -42,6 +45,20 @@ class BaseStore:
         self._metastore = load_metastore(bucket=bucket, key=self.metakey())
         self._bucket = bucket
 
+    def __enter__(self) -> BaseStore:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[BaseException],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        if exc_type is not None:
+            logger.error(msg=f"{exc_type}, {exc_tb}")
+        else:
+            self.save()
+
     @classmethod
     def metakey(cls) -> str:
         return str(cls._metakey)
@@ -59,6 +76,18 @@ class BaseStore:
         # QUESTION - Is this cleaner than the previous specifying
         DO_NOT_STORE = ["_metastore", "_bucket"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
+
+    def read_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+        raise NotImplementedError
+
+    def read_file(self, *args: Any, **kwargs: Any) -> dict:
+        raise NotImplementedError
+
+    def store_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+        raise NotImplementedError
+
+    def transform_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+        raise NotImplementedError
 
     def assign_data(
         self,

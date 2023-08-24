@@ -216,7 +216,7 @@ class Footprints(BaseStore):
         short_lifetime: bool = False,
         overwrite: bool = False,
         # model_params: Optional[Dict] = None,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
@@ -272,7 +272,7 @@ class Footprints(BaseStore):
             logger.warning(
                 f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Load this into memory
         fp_data = xr.open_dataset(filepath, chunks=chunks)

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from numpy import ndarray
 
@@ -50,7 +50,7 @@ class ObsColumn(BaseStore):
         platform: str = "satellite",
         source_format: str = "openghg",
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read column observation file
 
         Args:
@@ -105,7 +105,7 @@ class ObsColumn(BaseStore):
                 "This file has been uploaded previously with the filename : "
                 f"{self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Define parameters to pass to the parser function
         param = {
