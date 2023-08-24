@@ -5,13 +5,13 @@ from collections import defaultdict
 from openghg.store.spec import define_data_type_classes
 from openghg.objectstore import get_readable_buckets
 from openghg.types import ObjectStoreError
-from typing import List, Optional
+from typing import Dict, DefaultDict
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(level=logging.DEBUG)
 
 
-def integrity_check(raise_error: bool = True, check_datasource_integrity=False) -> Optional[List]:
+def integrity_check(raise_error: bool = True, check_datasource_integrity=False) -> DefaultDict[str, Dict]:
     """Check the integrity of object stores.
 
     Args:
@@ -42,21 +42,19 @@ def integrity_check(raise_error: bool = True, check_datasource_integrity=False) 
                         failures.append(uuid)
                     if check_datasource_integrity:
                         try:
-                            Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
+                            Datasource.load(bucket=bucket, uuid=uuid, shallow=True).integrity_check()
                         except ObjectStoreError:
-                            failures.append(uid)
+                            failures.append(uuid)
 
-                
                 if failures:
                     sc_name = sc.__class__.__name__
                     failed_datasources[bucket][sc_name] = failures
 
-    if failed_datasources:
-        if raise_error:
-            raise ObjectStoreError(
-                "The following Datasources failed their integrity checks:"
-                + f"\n{failed_datasources}"
-                + "\nYour object store is corrupt. Please remove these Datasources."
-            )
-        else:
-            return failed_datasources
+    if raise_error:
+        raise ObjectStoreError(
+            "The following Datasources failed their integrity checks:"
+            + f"\n{failed_datasources}"
+            + "\nYour object store is corrupt. Please remove these Datasources."
+        )
+    else:
+        return failed_datasources
