@@ -18,6 +18,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class Footprints(BaseStore):
     """This class is used to process footprints model output"""
 
+    _data_type = "footprints"
     _root = "Footprints"
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"

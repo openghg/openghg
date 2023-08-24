@@ -19,6 +19,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class ObsColumn(BaseStore):
     """This class is used to process emissions / flux data"""
 
+    _data_type = "column"
     _root = "ObsColumn"
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"

@@ -7,4 +7,5 @@ pathType = Union[str, Path]
 
 
 class ObsMobile(BaseStore):
+    _data_type = "mobile"
     pass

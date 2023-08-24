@@ -1,5 +1,4 @@
-from __future__ import annotations
-from openghg.store.base import BaseStore
+from typing import Any
 
 __all__ = ["define_data_types", "define_data_type_classes"]
 
@@ -22,7 +21,7 @@ def define_data_types() -> tuple[str, ...]:
     return data_types
 
 
-def define_data_type_classes() -> dict[str, type[BaseStore]]:
+def define_data_type_classes() -> dict[str, Any]:
     """
     Define mapping between data types and associated input classes within OpenGHG
     """

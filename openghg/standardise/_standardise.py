@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, Literal, Optional, Union, Any
 from pandas import Timedelta
 
-from openghg.store.spec import define_data_type_classes
+from openghg.store.base import get_data_class
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
@@ -10,13 +10,9 @@ from openghg.types import optionalPathType, multiPathType
 
 
 def standardise(bucket: str, data_type: str, filepath: multiPathType, **kwargs: Any) -> dict:
-    try:
-        dclass = define_data_type_classes()[data_type]
-    except KeyError:
-        raise ValueError(f"No standarising function found for data type {data_type}.")
-    else:
-        with dclass(bucket) as dc:
-            result = dc.read_file(filepath=filepath, **kwargs)
+    dclass = get_data_class(data_type)
+    with dclass(bucket) as dc:
+        result = dc.read_file(filepath=filepath, **kwargs)
     return result
 
 
@@ -535,41 +531,25 @@ def standardise_flux(
 def standardise_from_binary_data(
     bucket: str, data_type: str, binary_data: bytes, metadata: dict, file_metadata: dict, **kwargs: Any
 ) -> Optional[dict]:
-    try:
-        dclass = define_data_type_classes()[data_type]
-    except KeyError:
-        raise ValueError(f"No data class found for data type {data_type}.")
-    else:
-        with dclass(bucket) as dc:
-            result = dc.read_data(
-                binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs
-            )
+    dclass = get_data_class(data_type)
+    with dclass(bucket) as dc:
+        result = dc.read_data(
+            binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs
+        )
     return result
 
 
 def standardise_from_remote_source(bucket: str, data_type: str, data: dict, **kwargs: Any) -> Optional[dict]:
-    try:
-        dclass = define_data_type_classes()[data_type]
-    except KeyError:
-        raise ValueError(f"No data class found for data type {data_type}.")
-    else:
-        with dclass(bucket) as dc:
-            result = dc.store_data(data=data, **kwargs)
+    dclass = get_data_class(data_type)
+    with dclass(bucket) as dc:
+        result = dc.store_data(data=data, **kwargs)
     return result
 
 
 def standardise_via_transform(
     bucket: str, data_type: str, datapath: Union[str, Path], database: str, **kwargs: Any
 ) -> Optional[dict]:
-    if data_type != "emissions":
-        raise NotImplementedError(
-            f"transform_data only define for emissions/flux, not data type {data_type}."
-        )
-    try:
-        dclass = define_data_type_classes()[data_type]
-    except KeyError:
-        raise ValueError(f"No data class found for data type {data_type}.")
-    else:
-        with dclass(bucket) as dc:
-            result = dc.transform_data(datapath=datapath, database=database, **kwargs)
+    dclass = get_data_class(data_type)
+    with dclass(bucket) as dc:
+        result = dc.transform_data(datapath=datapath, database=database, **kwargs)
     return result

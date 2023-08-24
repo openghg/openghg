@@ -20,6 +20,8 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 class BaseStore:
+    _registry: dict[str, type[BaseStore]] = {}
+    _data_type = ""
     _root = "root"
     _uuid = "root_uuid"
 
@@ -44,6 +46,9 @@ class BaseStore:
 
         self._metastore = load_metastore(bucket=bucket, key=self.metakey())
         self._bucket = bucket
+
+    def __init_subclass__(cls) -> None:
+        BaseStore._registry[cls._data_type] = cls
 
     def __enter__(self) -> BaseStore:
         return self
@@ -467,3 +472,22 @@ class BaseStore:
         """
         self._datasource_uuids.clear()
         self._file_hashes.clear()
+
+
+def get_data_class(data_type: str) -> type[BaseStore]:
+    """Return data class corresponding to given data type.
+
+    args:
+        data_type: one of "surface", "column", "emissions", "footprints",
+    "boundary_conditions", or "eulerian_model"
+
+    returns:
+        Data class, one of `ObsSurface`, `ObsColumn`, `Emissions`, `EulerianModel`,
+    `Footprints`, `BoundaryConditions`.
+    """
+    try:
+        data_class = BaseStore._registry[data_type]
+    except KeyError:
+        raise ValueError(f"No data class for data type {data_type}.")
+    else:
+        return data_class
