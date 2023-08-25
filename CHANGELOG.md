@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
 
+- `open_metastore` function to make access to the metastore more uniform. This was used to refactor places in the code where children of `BaseStore` were used to access the metastore - [PR #767](https://github.com/openghg/openghg/pull/767)
+
 ## [0.6.2] - 2023-08-07
 
 ### Fixed
