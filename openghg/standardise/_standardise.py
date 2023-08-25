@@ -539,6 +539,52 @@ def standardise_flux(
         )
 
 
+def standardise_eulerian(
+        filepath: str,
+        model: str,
+        species: str,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        setup: Optional[str] = None,
+        overwrite: bool = False,
+        store: Optional[str] = None,
+        bucket: Optional[str] = None,
+) -> Optional[Dict]:
+    """Read Eulerian model output
+
+    Args:
+        filepath: Path of Eulerian model species output
+        model: Eulerian model name
+        species: Species name
+        start_date: Start date (inclusive) associated with model run
+        end_date: End date (exclusive) associated with model run
+        setup: Additional setup details for run
+        overwrite: Should this data overwrite currently stored data.
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
+        bucket: object store bucket to use; this takes precendence over 'store'
+    Returns:
+        dict: Dictionary of result data
+    """
+    if running_on_hub():
+        raise NotImplementedError("Serverless not implemented yet for Eulerian model.")
+    else:
+        if bucket is None:
+            bucket = get_writable_bucket(name=store)
+
+        return standardise(
+            bucket=bucket,
+            data_type="eulerian_model",
+            filepath=filepath,
+            model=model,
+            species=species,
+            start_date=start_date,
+            end_date=end_date,
+            setup=setup,
+            overwrite=overwrite,
+        )
+
+
 def standardise_from_binary_data(
     bucket: str, data_type: str, binary_data: bytes, metadata: dict, file_metadata: dict, **kwargs: Any
 ) -> Optional[dict]:
