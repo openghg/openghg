@@ -64,14 +64,15 @@ def test_read_footprint_standard(bucket, keyword, value):
     site = "TAC"
     domain = "EUROPE"
     model = "NAME"
-    kwargs: Any = dict(filepath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc"),
-                site = site,
-                domain = domain,
-                model = model,
-                bucket = bucket,
-                )
-    kwargs[keyword] = value
-    standardise_footprint(**kwargs)
+    kwargs = {keyword: value}  # can't pass `keyword=value` as argument to standardise_footprint
+    standardise_footprint(
+        filepath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc"),
+        site = site,
+        domain = domain,
+        model = model,
+        bucket = bucket,
+        **kwargs,
+    )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
