@@ -4,12 +4,13 @@ from openghg.objectstore import exists, get_object, set_object_from_json, get_wr
 from typing import DefaultDict, Dict, Literal, Optional, Union, TYPE_CHECKING
 from xarray import Dataset
 import logging
-from openghg.types import ObjectStoreError
+from openghg.types import ObjectStoreError, MetastoreError
 from tinydb import Storage, TinyDB
 from tinydb.middlewares import CachingMiddleware
 
 if TYPE_CHECKING:
     from openghg.dataobjects import DataManager
+
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -18,7 +19,11 @@ DataDictType = DefaultDict[str, Dict[str, Union[Dict, Dataset]]]
 
 
 class ObjectStorage(Storage):
-    def __init__(self, bucket: str, key: str, mode: Literal["r", "rw"] = "rw") -> None:
+    def __init__(self, bucket: str, key: str, mode: Literal["r", "rw"]) -> None:
+        valid_modes = ("r", "rw")
+        if mode not in valid_modes:
+            raise ValueError(f"Invalid mode, please choose one of {valid_modes}.")
+
         self._key = key
         self._bucket = bucket
         self._mode = mode
@@ -39,8 +44,7 @@ class ObjectStorage(Storage):
 
     def write(self, data: Dict) -> None:
         if self._mode == "r":
-            print("No writing to object store")
-            return
+            raise MetastoreError("Cannot write to metastore in read-only mode.")
 
         key = self._key
         set_object_from_json(bucket=self._bucket, key=key, data=data)
