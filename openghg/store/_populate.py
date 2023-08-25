@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 import logging
 from openghg.objectstore import get_writable_bucket
-from openghg.standardise import standardise
+from openghg.standardise import standardise_surface
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -94,13 +94,12 @@ def add_noaa_obspack(
         _project = param["project"]
         measurement_type = param["measurement_type"]
 
-        processed = {}
+        processed = dict()
         if _project in projects_to_read:
             try:
                 # TODO - can we streamline this a bit to save repeated loads?
-                processed = standardise(
+                processed = standardise_surface(
                     bucket=bucket,
-                    data_type="surface",
                     filepath=filepath,
                     site=site,
                     measurement_type=measurement_type,

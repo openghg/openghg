@@ -45,7 +45,7 @@ def standardise_surface(
     site_filepath: optionalPathType = None,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Standardise surface measurements and store the data in the object store.
 
     Args:
@@ -199,7 +199,7 @@ def standardise_column(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Read column observation file
 
     Args:
@@ -287,7 +287,7 @@ def standardise_bc(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
@@ -365,7 +365,7 @@ def standardise_footprint(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
@@ -467,7 +467,7 @@ def standardise_flux(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Process flux data
 
     Args:
@@ -540,7 +540,7 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-    filepath: str,
+    filepath: Union[str, Path],
     model: str,
     species: str,
     start_date: Optional[str] = None,
@@ -549,7 +549,7 @@ def standardise_eulerian(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Read Eulerian model output
 
     Args:
