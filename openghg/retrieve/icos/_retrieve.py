@@ -181,7 +181,7 @@ def local_retrieve(
         ObsData, list[ObsData] or None
     """
     from openghg.retrieve import search_surface
-    from openghg.store import ObsSurface
+    from openghg.standardise import standardise_from_remote_source
     from openghg.util import to_lowercase
 
     if not 1 <= data_level <= 2:
@@ -224,8 +224,7 @@ def local_retrieve(
             return None
 
         bucket = get_writable_bucket(name=store)
-        with ObsSurface(bucket=bucket) as obs:
-            obs.store_data(data=standardised_data)
+        standardise_from_remote_source(data_type="surface", bucket=bucket, data=standardised_data)
 
         # Create the expected ObsData type
         obs_data = []

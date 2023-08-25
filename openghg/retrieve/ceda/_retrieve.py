@@ -153,7 +153,7 @@ def local_retrieve_surface(
 
     import xarray as xr
     from openghg.retrieve import search_surface
-    from openghg.store import ObsSurface
+    from openghg.standardise import standardise_from_remote_source
     from openghg.util import download_data, parse_url_filename, site_code_finder, timestamp_now
 
     if additional_metadata is None:
@@ -229,7 +229,6 @@ def local_retrieve_surface(
     to_store = {key: {"data": dataset, "metadata": metadata}}
 
     bucket = get_writable_bucket(name=store)
-    with ObsSurface(bucket=bucket) as obs:
-        obs.store_data(data=to_store)
+    standardise_from_remote_source(data_type="surface", bucket=bucket, data=to_store)
 
     return ObsData(data=dataset, metadata=metadata)
