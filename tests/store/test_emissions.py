@@ -4,7 +4,8 @@ from helpers import get_emissions_datapath
 from openghg.retrieve import search, search_flux
 from openghg.objectstore import get_bucket
 from openghg.store import Emissions, load_metastore
-from openghg.standardise import standardise_flux, standardise_from_binary_data, standardise_via_transform
+from openghg.standardise import standardise_flux, standardise_from_binary_data
+from openghg.transform import transform_emissions_data
 from openghg.util import hash_bytes
 from openghg.types import DatasourceLookupError
 from xarray import open_dataset
@@ -285,7 +286,7 @@ class TestEDGAR:
         database = "EDGAR"
         date = "2015"
 
-        proc_results = standardise_via_transform(bucket=bucket, data_type="emissions", datapath=test_datapath, database=database, date=date)
+        proc_results = transform_emissions_data(bucket=bucket, datapath=test_datapath, database=database, date=date)
 
         default_domain = "globaledgar"
 
@@ -347,7 +348,7 @@ class TestEDGAR:
         domain = "EUROPE"
 
         bucket = get_bucket()
-        proc_results = standardise_via_transform(bucket=bucket, data_type="emissions", datapath=test_datapath, database=database, date=date, domain=domain)
+        proc_results = transform_emissions_data(bucket=bucket, datapath=test_datapath, database=database, date=date, domain=domain)
 
         version = "v6.0"
         species = "ch4"

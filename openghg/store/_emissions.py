@@ -175,7 +175,7 @@ class Emissions(BaseStore):
         """
         Read and transform an emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
-        are determined by which database ie being used.
+        are determined by which database is being used.
 
         The underlying parser functions will be of the form:
             - openghg.transform.emissions.parse_{database.lower()}
