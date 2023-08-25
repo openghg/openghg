@@ -518,7 +518,7 @@ def _base_search(**kwargs: Any) -> SearchResults:
 
     # get data types to search and validate
     data_type = search_kwargs.get("data_type")
-    valid_data_types = define_data_types()
+    valid_data_types = list(define_data_types())
     types_to_search = []
     if data_type is None:
         types_to_search = valid_data_types

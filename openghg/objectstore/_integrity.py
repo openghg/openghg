@@ -13,6 +13,7 @@ def integrity_check() -> None:
     # this maybe suggests that _integrity.py belongs outside of objectstore
     from openghg.store.base import Datasource
     from openghg.store.metastore import open_metastore
+
     # For now loop over each of the object stores, can we somehow lock the object store?
     readable_buckets = get_readable_buckets()
     data_types = define_data_types()
