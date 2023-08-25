@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 from helpers import get_surface_datapath, get_emissions_datapath, get_footprint_datapath
-from openghg.store import ObsSurface, Emissions
+from openghg.store import ObsSurface
 from openghg.store.base import Datasource
 from openghg.retrieve import get_flux
 from openghg.retrieve import search
@@ -21,7 +21,7 @@ def clear_stores():
     clear_test_stores()
 
 
-@pytest.fixture(autouse=True, scope="module")
+@pytest.fixture(autouse=True)
 def auto_bucket():
     """Put `bucket` in namespace.
 
@@ -122,7 +122,7 @@ def bsd_small_edit_data_read():
     )
 
 
-def bsd_diff_data_read():
+def bsd_diff_data_read(overwrite=False):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data values (should create different hash)
@@ -141,11 +141,11 @@ def bsd_diff_data_read():
         site=site,
         network=network,
         instrument=instrument,
-        overwrite=True,
+        overwrite=overwrite,
     )
 
 
-def bsd_diff_date_range_read():
+def bsd_diff_date_range_read(overwrite=False):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data date range (should create different hash)
@@ -165,31 +165,7 @@ def bsd_diff_date_range_read():
         site=site,
         network=network,
         instrument=instrument,
-        overwrite=True,
-    )
-
-
-def bsd_diff_date_range_read_delayed():
-    """
-    Add overlapping Bilsdale GCMD data to the object store:
-     - Small difference in data date range (should create different hash)
-    """
-    site = "bsd"
-    network = "DECC"
-    source_format2 = "GCWERKS"
-    instrument = "GCMD"
-
-    bsd_path5 = get_surface_datapath(filename="bilsdale-md.diff-date-range.14.C", source_format="GC")
-    bsd_prec_path5 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
-
-    standardise_surface(
-        bucket=bucket,
-        filepath=(bsd_path5, bsd_prec_path5),
-        source_format=source_format2,
-        site=site,
-        network=network,
-        instrument=instrument,
-        overwrite=True,
+        overwrite=overwrite,
     )
 
 
@@ -252,9 +228,13 @@ def test_obs_data_read_header_diff():
      - BSD GCMD different data added - header changed so hash will be different but data will be the same
     Expect that GCMD (and CRDS) data can still be accessed.
     """
+    # Load BSD data - CRDS data
     bsd_data_read_crds()
+    # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
+    # Load BSD data - GCMD data (GCWERKS) with small edit in header
     bsd_small_edit_data_read()
+
     # Search for expected species
     # CRDS data
     search_ch4 = search(site="bsd", species="ch4")
@@ -315,9 +295,12 @@ def test_obs_data_read_data_diff():
     Expect that different GCMD will be retrieved from search (as latest version).
     Expect CRDS data can still be accessed.
     """
+    # Load BSD data - CRDS
     bsd_data_read_crds()
+    # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
-    bsd_diff_data_read()
+    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
+    bsd_diff_data_read(overwrite=True)
 
     # Search for expected species
     # CRDS data
@@ -388,9 +371,13 @@ def test_obs_data_read_two_frequencies():
     Expect hourly data to be found as "latest" version to be retrieved (is this what we want?).
     Expect GCMD data to still be available.
     """
+    # Load BSD data - CRDS minutely frequency (and GCWERKS data)
     bsd_data_read_crds()
+    # Load BSD data - CRDS hourly frequency
     bsd_data_read_crds_diff_frequency()
+    # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
+
     # Search for expected species
     # CRDS data
     search_ch4 = search(site="bsd", species="ch4")
@@ -444,7 +431,11 @@ def test_obs_data_read_two_frequencies():
 
     # TODO: Can we check if this has been saved as a new version?
 
-def bsd_crds_overwrite(overwrite: bool):
+def bsd_data_read_crds_internal_overlap(overwrite=False):
+    """
+    Add Bilsdale *hourly* data for CRDS instrument to object store
+     - CRDS: ch4, co2, co
+    """
     site = "bsd"
     network = "DECC"
     source_format1 = "CRDS"
@@ -472,8 +463,8 @@ def test_obs_data_representative_date_overlap():
     This test checks this will no longer raise a KeyError based on this.
     """
     # Add same data twice, overwriting the second time
-    bsd_crds_overwrite(False)
-    bsd_crds_overwrite(True)
+    bsd_data_read_crds_internal_overlap()
+    bsd_data_read_crds_internal_overlap(overwrite=False)
 
     bucket = get_bucket()
     with ObsSurface(bucket=bucket) as obs:
@@ -514,6 +505,7 @@ def test_metadata_update():
     Add data and then update this to check that the version is both added to the original
     metadata and subsequently updated when the datasource is updated.
     """
+    # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
 
     # Search for expected species
@@ -539,8 +531,7 @@ def test_metadata_update():
     assert sf6_metadata_1["end_date"] == expected_end_1
 
     # Load BSD data - GCMD data (GCWERKS) with small change in date range
-    #bsd_diff_date_range_read(overwrite=True)
-    bsd_diff_date_range_read_delayed()
+    bsd_diff_date_range_read(overwrite=True)
 
     search_sf6_2 = search(site="bsd", species="sf6")
 

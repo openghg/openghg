@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
 
-## [0.6.2] - 2023-08-07
-
 ### Added
 
 - Generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
+
+## [0.6.2] - 2023-08-07
 
 ### Fixed
 

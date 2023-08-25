@@ -9,7 +9,7 @@ from helpers import (
     clear_test_stores,
 )
 from openghg.objectstore import get_bucket
-from openghg.standardise import standardise_surface, standardise_footprint, standardise_flux, standardise_bc, standardise_column, standardise
+from openghg.standardise import standardise_surface, standardise_footprint, standardise_flux, standardise_bc, standardise_column, standardise_eulerian
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -198,4 +198,4 @@ def data_read():
 
     test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
-    standardise(bucket=bucket, data_type="eulerian_model", filepath=test_datapath, model="GEOSChem", species="ch4")
+    standardise_eulerian(bucket=bucket, filepath=test_datapath, model="GEOSChem", species="ch4")

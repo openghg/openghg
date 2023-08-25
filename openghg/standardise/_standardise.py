@@ -10,6 +10,17 @@ from openghg.types import optionalPathType, multiPathType
 
 
 def standardise(bucket: str, data_type: str, filepath: multiPathType, **kwargs: Any) -> dict:
+    """Generic standardise function, used by data-type specific versions.
+
+    args:
+        bucket: object store bucket to use
+        data_type: type of data to standardise
+        filepath: path to file(s) to standardise
+        **kwargs: data type specific arguments, see specific implementations below.
+
+    returns:
+        Dictionary of result data.
+    """
     dclass = get_data_class(data_type)
     with dclass(bucket) as dc:
         result = dc.read_file(filepath=filepath, **kwargs)
@@ -34,7 +45,7 @@ def standardise_surface(
     site_filepath: optionalPathType = None,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Standardise surface measurements and store the data in the object store.
 
     Args:
@@ -188,7 +199,7 @@ def standardise_column(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Read column observation file
 
     Args:
@@ -276,7 +287,7 @@ def standardise_bc(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
@@ -354,7 +365,7 @@ def standardise_footprint(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
@@ -456,7 +467,7 @@ def standardise_flux(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
-) -> Optional[Dict]:
+) -> dict:
     """Process flux data
 
     Args:
@@ -528,28 +539,73 @@ def standardise_flux(
         )
 
 
+def standardise_eulerian(
+    filepath: Union[str, Path],
+    model: str,
+    species: str,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    setup: Optional[str] = None,
+    overwrite: bool = False,
+    store: Optional[str] = None,
+    bucket: Optional[str] = None,
+) -> dict:
+    """Read Eulerian model output
+
+    Args:
+        filepath: Path of Eulerian model species output
+        model: Eulerian model name
+        species: Species name
+        start_date: Start date (inclusive) associated with model run
+        end_date: End date (exclusive) associated with model run
+        setup: Additional setup details for run
+        overwrite: Should this data overwrite currently stored data.
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
+        bucket: object store bucket to use; this takes precendence over 'store'
+    Returns:
+        dict: Dictionary of result data
+    """
+    if running_on_hub():
+        raise NotImplementedError("Serverless not implemented yet for Eulerian model.")
+    else:
+        if bucket is None:
+            bucket = get_writable_bucket(name=store)
+
+        return standardise(
+            bucket=bucket,
+            data_type="eulerian_model",
+            filepath=filepath,
+            model=model,
+            species=species,
+            start_date=start_date,
+            end_date=end_date,
+            setup=setup,
+            overwrite=overwrite,
+        )
+
+
 def standardise_from_binary_data(
     bucket: str, data_type: str, binary_data: bytes, metadata: dict, file_metadata: dict, **kwargs: Any
 ) -> Optional[dict]:
+    """Standardise binary data from serverless function.
+        The data dictionary should contain sub-dictionaries that contain
+        data and metadata keys.
+
+    args:
+        bucket: object store bucket to use
+        data_type: type of data to standardise
+        binary_data: Binary measurement data
+        metadata: Metadata
+        file_metadata: File metadata such as original filename
+        **kwargs: data type specific arguments, see specific implementations in data classes.
+
+    returns:
+        Dictionary of result data.
+    """
     dclass = get_data_class(data_type)
     with dclass(bucket) as dc:
         result = dc.read_data(
             binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs
         )
-    return result
-
-
-def standardise_from_remote_source(bucket: str, data_type: str, data: dict, **kwargs: Any) -> Optional[dict]:
-    dclass = get_data_class(data_type)
-    with dclass(bucket) as dc:
-        result = dc.store_data(data=data, **kwargs)
-    return result
-
-
-def standardise_via_transform(
-    bucket: str, data_type: str, datapath: Union[str, Path], database: str, **kwargs: Any
-) -> Optional[dict]:
-    dclass = get_data_class(data_type)
-    with dclass(bucket) as dc:
-        result = dc.transform_data(datapath=datapath, database=database, **kwargs)
     return result

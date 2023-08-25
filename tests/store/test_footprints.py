@@ -1,32 +1,16 @@
 import pytest
-from functools import partial
+from typing import Any
 from helpers import get_footprint_datapath
 from openghg.retrieve import search
 from openghg.objectstore import get_bucket
 from openghg.store import Footprints
 from openghg.util import hash_bytes
-from openghg.standardise._standardise import standardise_footprint, standardise_from_binary_data
-
-@pytest.fixture(autouse=True, scope="module")
-def auto_bucket():
-    global bucket
-    bucket = get_bucket()
-    yield bucket
-    globals().pop('bucket')
+from openghg.standardise import standardise_footprint, standardise_from_binary_data
 
 
-@pytest.fixture(autouse=True)
-def standardise():
-    """Use `standardise(**kwargs)` to standardise footprints data.
-
-    We only deal with footprints data in this test module, and most
-    tests just use `bucket = get_bucket()`, so this works for
-    most tests in this module.
-
-    This was added to help refactor `BaseStore` and its children
-    by removing uses of the context manager for using `read_file`.`
-    """
-    return partial(standardise_footprint, bucket=bucket)
+@pytest.fixture
+def bucket():
+    return get_bucket()
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -70,7 +54,7 @@ def test_read_footprint_co2_from_data(mocker):
         ("inlet", "100"),
     ],
 )
-def test_read_footprint_standard(keyword, value, standardise):
+def test_read_footprint_standard(bucket, keyword, value):
     """
     Test standard footprint which should contain (at least)
      - data variables: "fp"
@@ -80,13 +64,15 @@ def test_read_footprint_standard(keyword, value, standardise):
     site = "TAC"
     domain = "EUROPE"
     model = "NAME"
-    args = dict(filepath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc"),
-                site = site,
-                domain = domain,
-                model = model,
-                )
-    args[keyword] = value
-    standardise(**args)
+    kwargs = {keyword: value}  # can't pass `keyword=value` as argument to standardise_footprint
+    standardise_footprint(
+        filepath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc"),
+        site = site,
+        domain = domain,
+        model = model,
+        bucket = bucket,
+        **kwargs,
+    )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
@@ -126,7 +112,7 @@ def test_read_footprint_standard(keyword, value, standardise):
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_read_footprint_high_spatial_resolution(standardise):
+def test_read_footprint_high_spatial_resolution(bucket):
     """
     Test high spatial resolution footprint
      - expects additional parameters for `fp_low` and `fp_high`
@@ -136,7 +122,7 @@ def test_read_footprint_high_spatial_resolution(standardise):
     """
     site = "TMB"
     domain = "EUROPE"
-    standardise(
+    standardise_footprint(bucket=bucket,
         filepath = get_footprint_datapath("footprint_test.nc"),
         site = site,
         network = "LGHG",
@@ -273,7 +259,7 @@ def test_read_footprint_high_spatial_resolution(standardise):
         ),
     ],
 )
-def test_read_footprint_co2(site, inlet, metmodel, start, end, filename, standardise):
+def test_read_footprint_co2(bucket, site, inlet, metmodel, start, end, filename):
     """
     Test high spatial resolution footprint
      - expects additional parameter for `fp_HiTRes`
@@ -293,7 +279,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename, standar
 
     # Expect co2 data to be high time resolution
     # - could include high_time_resolution=True but don't need to as this will be set automatically
-    standardise(
+    standardise_footprint(bucket=bucket,
         filepath=datapath,
         site=site,
         model=model,
@@ -345,7 +331,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename, standar
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_read_footprint_short_lived(standardise):
+def test_read_footprint_short_lived(bucket):
     datapath = get_footprint_datapath("WAO-20magl_UKV_rn_TEST_201801.nc")
 
     site = "WAO"
@@ -357,7 +343,8 @@ def test_read_footprint_short_lived(standardise):
 
     # Expect rn data to be short lived
     # - could include short_lifetime=True but shouldn't need to as this will be set automatically
-    standardise(
+    standardise_footprint(
+        bucket=bucket,
         filepath=datapath,
         site=site,
         model=model,
