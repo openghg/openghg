@@ -30,7 +30,7 @@ def test_read_data_monthly(mocker):
     file_metadata = {"sha1_hash": sha1_hash, "filename": filename, "compressed": False}
 
     bucket = get_bucket()
-    proc_results = standardise_from_binary_data(data_type="boundary_condtions", bucket=bucket,
+    proc_results = standardise_from_binary_data(data_type="boundary_conditions", bucket=bucket,
                                                 binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
                                                 )
 
