@@ -1,8 +1,7 @@
 from collections import defaultdict
 import copy
 from openghg.store.base import Datasource
-from openghg.store.spec import define_data_type_classes
-from openghg.store import load_metastore
+from openghg.store.metastore import open_metastore
 from openghg.objectstore import delete_object, get_writable_bucket
 import logging
 import tinydb
@@ -112,11 +111,7 @@ class DataManager:
         version = str(version)
 
         dtype = self._check_datatypes(uuid=uuid)
-
-        data_objs = define_data_type_classes()
-        data_class = data_objs[dtype]
-
-        with data_class(bucket=self._bucket) as dclass:
+        with open_metastore(data_type=dtype, bucket=self._bucket) as dclass:
             metastore = dclass._metastore
             backup = self._backup[uuid][version]
             self.metadata[uuid] = backup
@@ -173,10 +168,8 @@ class DataManager:
 
         dtype = self._check_datatypes(uuid=uuid)
 
-        data_objs = define_data_type_classes()
-        metakey = data_objs[dtype]._metakey
-
-        with load_metastore(bucket=self._bucket, key=metakey) as store:
+        with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
+            store = metastore._metastore
             for u in uuid:
                 updated = False
                 d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
@@ -251,13 +244,11 @@ class DataManager:
             uuid = [uuid]
 
         dtype = self._check_datatypes(uuid=uuid)
-        data_objs = define_data_type_classes()
-        dclass = data_objs[dtype]
 
-        with dclass(bucket=self._bucket) as dc:
+        with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for uid in uuid:
                 # First remove the data from the metadata store
-                dc._metastore.remove(tinydb.where("uuid") == uid)
+                metastore._metastore.remove(tinydb.where("uuid") == uid)
                 # Delete all the data associated with a Datasource
                 d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)
                 d.delete_all_data()
@@ -265,6 +256,6 @@ class DataManager:
                 key = d.key()
                 delete_object(bucket=self._bucket, key=key)
                 # Remove from the list of Datasources the object knows about
-                dc.remove_datasource(uuid=uid)
+                metastore.remove_datasource(uuid=uid)
 
                 logger.info(f"Deleted Datasource with UUID {uid}.")
