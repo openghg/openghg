@@ -8,13 +8,14 @@ from typing import Optional, Union, Any
 from openghg.objectstore import get_writable_bucket
 from openghg.store.base import get_data_class
 
+
 def transform_emissions_data(
-        datapath: Union[str, Path],
-        database: str,
-        overwrite: bool = False,
-        bucket: Optional[str] = None,
-        store: Optional[str] = None,
-        **kwargs: Any
+    datapath: Union[str, Path],
+    database: str,
+    overwrite: bool = False,
+    bucket: Optional[str] = None,
+    store: Optional[str] = None,
+    **kwargs: Any
 ) -> Optional[dict]:
     """Read and transform an emissions database. This will find the appropriate
     parser function to use for the database specified. The necessary inputs

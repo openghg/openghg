@@ -540,15 +540,15 @@ def standardise_flux(
 
 
 def standardise_eulerian(
-        filepath: str,
-        model: str,
-        species: str,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-        setup: Optional[str] = None,
-        overwrite: bool = False,
-        store: Optional[str] = None,
-        bucket: Optional[str] = None,
+    filepath: str,
+    model: str,
+    species: str,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    setup: Optional[str] = None,
+    overwrite: bool = False,
+    store: Optional[str] = None,
+    bucket: Optional[str] = None,
 ) -> Optional[Dict]:
     """Read Eulerian model output
 
