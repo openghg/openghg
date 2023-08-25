@@ -16,7 +16,7 @@ from openghg.objectstore import (
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
 from openghg.retrieve import search_surface
-from openghg.standardise import standardise_surface, standardise_from_binary_data, standardise_from_remote_source
+from openghg.standardise import standardise_surface, standardise_from_binary_data
 from openghg.util import create_daterange_str
 from pandas import Timestamp
 
@@ -134,14 +134,15 @@ def test_read_data(mocker):
 
     assert result == expected
 
-    obs = ObsSurface(bucket=bucket)
     with pytest.raises(ValueError):
         metadata = {}
-        obs.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+        standardise_from_binary_data(bucket=bucket, data_type="surface",
+                                     binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
     with pytest.raises(KeyError):
         file_metadata = {}
-        obs.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+        standardise_from_binary_data(bucket=bucket, data_type="surface",
+                                     binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
 
 @pytest.mark.parametrize("sampling_period", ["60", 60, "60000000000", "twelve-thousand"])
@@ -207,9 +208,9 @@ def test_read_CRDS():
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.future.dat", source_format="CRDS")
 
+    results = standardise_surface(bucket=bucket, filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
     with ObsSurface(bucket=bucket) as obs:
-        results = obs.read_file(filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
         assert len(obs.datasources()) == 3
 
         uuid_one = obs.datasources()[0]
@@ -397,8 +398,7 @@ def test_read_beaco2n():
 
     data_filepath = get_surface_datapath(filename="Charlton_Community_Center.csv", source_format="BEACO2N")
 
-    with ObsSurface(bucket=bucket) as obs:
-        results = obs.read_file(
+    results = standardise_surface(bucket=bucket,
             filepath=data_filepath, source_format="BEACO2N", site="CCC", network="BEACO2N", overwrite=True
         )
 
@@ -904,8 +904,8 @@ def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
+    standardise_surface(bucket=bucket, filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
     with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
         key = obs.key()
 
     no_permissions = Path(tmpdir).joinpath("invalid_path")
