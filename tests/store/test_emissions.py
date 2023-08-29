@@ -1,6 +1,7 @@
 import pytest
 from functools import partial
 from helpers import get_emissions_datapath
+from typing import Any, Union
 from openghg.retrieve import search, search_flux
 from openghg.objectstore import get_bucket
 from openghg.store import Emissions, load_metastore
@@ -127,25 +128,29 @@ def test_read_file(bucket):
 
 @pytest.fixture
 def load_edgar(bucket):
-    def _load_edgar(version, year, database_version: bool = True):
-        """Load CH_4 globaledgar data for given version and year.
+    def _load_edgar(species: str, version: str, year: Union[str, int], database_version: bool = True):
+        """Load globaledgar data for given species, version, and year.
+
+        Currently, there is only data available for version v5.0, v6.0, and years 2014, 2015, 2016,
+        all with species CH_4.
 
         Args:
-            version: can be 5 or 6,
-            year: can be 2014, 2015, 2016
+            species: species of gas
+            version: e.g. v5.0, v6.0, v4.3.2
+            year: e.g. 2014, 2015, 2016
             database_version: if True, `database_version` argument passed to `read_file`
         """
-        file_name = f"ch4-anthro_globaledgar_v{str(version)}-0_{str(year)}.nc"
+        file_name = f'ch4-anthro_globaledgar_{version.replace(".", "-")}_{str(year)}.nc'
         datapath = get_emissions_datapath(file_name)
-        kwargs = dict(
+        kwargs: Any = dict(
             filepath=datapath,
-            species="ch4",
+            species=species,
             source="anthro",
             domain="globaledgar",
             database="EDGAR",
         )
         if database_version:
-            kwargs["database_version"] = "v" + str(version) + "0"
+            kwargs["database_version"] = version.replace(".", "")
         return standardise_flux(bucket=bucket, **kwargs)
     return _load_edgar
 
@@ -162,11 +167,11 @@ def test_read_file_additional_keys(clear_stores, load_edgar):
     Should produce 2 search results.
     """
     # load 2014, v5
-    proc_results1 = load_edgar(5, 2014)
+    proc_results1 = load_edgar("ch4", "v5.0", 2014)
     assert "ch4_anthro_globaledgar" in proc_results1
 
     # load 2015, v6
-    proc_results2 = load_edgar(6, 2015)
+    proc_results2 = load_edgar("ch4", "v6.0", 2015)
     assert "ch4_anthro_globaledgar" in proc_results2
 
     search_results_all = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR")
@@ -205,9 +210,9 @@ def test_read_file_align_correct_datasource(clear_stores, load_edgar):
 
     Should produce 2 search results.
     """
-    load_edgar(5, 2014)
-    load_edgar(6, 2015)
-    load_edgar(5, 2015)
+    load_edgar("ch4", "v5.0", 2014)
+    load_edgar("ch4", "v6.0", 2015)
+    load_edgar("ch4", "v5.0", 2015)
 
     search_results_all = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR")
 
@@ -249,11 +254,11 @@ def test_read_file_fails_ambiguous(clear_stores, load_edgar):
      - same as test_read_file_align_correct_datasource() but doesn't pass
      `database_version` keyword at all for final file.
     """
-    load_edgar(5, 2014)
-    load_edgar(6, 2015)
+    load_edgar("ch4", "v5.0", 2014)
+    load_edgar("ch4", "v6.0", 2015)
 
     try:
-        load_edgar(5, 2015, database_version=False)  # do not pass `database_version="v50"`
+        load_edgar("ch4", "v5.0", 2015, database_version=False)  # do not pass `database_version="v50"`
     except Exception as e:
         assert "More than once Datasource found for metadata" in e.args[0]
     else:
