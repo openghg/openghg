@@ -9,20 +9,25 @@ from openghg.util import running_on_hub
 from openghg.types import optionalPathType, multiPathType
 
 
-def standardise(bucket: str, data_type: str, filepath: multiPathType, **kwargs: Any) -> dict:
+def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> dict:
     """Generic standardise function, used by data-type specific versions.
 
-    args:
+    Args:
         bucket: object store bucket to use
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
+
         data_type: type of data to standardise
         filepath: path to file(s) to standardise
         **kwargs: data type specific arguments, see specific implementations below.
 
-    returns:
-        Dictionary of result data.
+    Returns:
+        dict: Dictionary of result data.
     """
     dclass = get_data_class(data_type)
-    with dclass(bucket) as dc:
+    bucket = get_writable_bucket(name=store)
+
+    with dclass(bucket=bucket) as dc:
         result = dc.read_file(filepath=filepath, **kwargs)
     return result
 
@@ -161,10 +166,8 @@ def standardise_surface(
 
         return responses
     else:
-        bucket = get_writable_bucket(name=store)
-
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="surface",
             filepath=filepath,
             source_format=source_format,
@@ -254,10 +257,8 @@ def standardise_column(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_writable_bucket(name=store)
-
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="column",
             filepath=filepath,
             satellite=satellite,
@@ -326,10 +327,8 @@ def standardise_bc(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_writable_bucket(name=store)
-
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="boundary_conditions",
             filepath=filepath,
             species=species,
@@ -423,10 +422,8 @@ def standardise_footprint(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="footprints",
             filepath=filepath,
             site=site,
@@ -513,11 +510,9 @@ def standardise_flux(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_writable_bucket(name=store)
-
         return standardise(
             data_type="emissions",
-            bucket=bucket,
+            store=store,
             filepath=filepath,
             species=species,
             source=source,
@@ -562,10 +557,8 @@ def standardise_eulerian(
     if running_on_hub():
         raise NotImplementedError("Serverless not implemented yet for Eulerian model.")
     else:
-        bucket = get_writable_bucket(name=store)
-
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="eulerian_model",
             filepath=filepath,
             model=model,
