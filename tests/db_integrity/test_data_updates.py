@@ -26,12 +26,11 @@ def bucket():
     return get_bucket()
 
 
-def test_database_update_repeat(clear_stores, bucket):
+def test_database_update_repeat(clear_stores):
     """
     Test object store can handle the same date (flux data) being added twice.
     """
     # Attempt to add same data to the database twice
-    #bucket = get_bucket()
     emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
     args = (emissions_datapath1, "ch4", "anthro", "EUROPE")
     kwargs = {"store": "user", "high_time_resolution": False}
@@ -489,7 +488,7 @@ def test_obs_data_representative_date_overlap(clear_stores, bucket):
 # Check appropriate metadata is updated when data is added to data sources
 
 
-def test_metadata_update(clear_stores, bucket):
+def test_metadata_update(clear_stores):
     """
     Add data and then update this to check that the version is both added to the original
     metadata and subsequently updated when the datasource is updated.
