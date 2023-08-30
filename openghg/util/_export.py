@@ -1,5 +1,5 @@
 from __future__ import annotations
-from json import dump, loads
+import json
 from pathlib import Path
 from typing import Dict, List, Union, Optional, TYPE_CHECKING
 from addict import Dict as aDict
@@ -13,9 +13,10 @@ __all__ = ["to_dashboard", "to_dashboard_mobile"]
 
 def to_dashboard(
     data: Union[ObsData, List[ObsData]],
+    export_folder: Path,
     downsample_n: int = 3,
-    filepath: Optional[str] = None,
-) -> Union[Dict, None]:
+    # filepath: Optional[str] = None,
+) -> None:
     """Takes a Dataset produced by OpenGHG and outputs it into a JSON
     format readable by the OpenGHG dashboard or a related project.
 
@@ -27,17 +28,13 @@ def to_dashboard(
 
     Args:
         data: Dictionary of retrieved data
+        export_folder: Folder path to write files
         downsample_n: Take every nth value from the data
-        filepath: filepath to write out JSON data
     Returns:
         None
     """
-    to_export = aDict()
-
     if not isinstance(data, list):
         data = [data]
-
-    filtered_species = list(set([species.metadata['species'] for species in data]))
 
     for obs in data:
         measurement_data = obs.data
@@ -48,14 +45,15 @@ def to_dashboard(
 
         rename_lower = {c: str(c).lower() for c in df.columns}
         df = df.rename(columns=rename_lower)
-        df = df.filter(items=filtered_species)
+
+        species_name = obs.metadata["species"]
+        df = df[[species_name]]
+
+        # TODO - check precision?
 
         # Downsample the data
         if downsample_n > 1:
             df = df.iloc[::downsample_n]
-
-        network = metadata["network"]
-        instrument = metadata["instrument"]
 
         try:
             station_latitude = attributes["station_latitude"]
@@ -74,25 +72,18 @@ def to_dashboard(
         }
         metadata.update(location)
 
-        json_data = loads(df.to_json())
-
         species = metadata["species"]
         site = metadata["site"]
         inlet = metadata["inlet"]
+        network = metadata["network"]
+        instrument = metadata["instrument"]
 
-        to_export[species][network][site][inlet][instrument] = {
-            "data": json_data,
-            "metadata": metadata,
-        }
+        export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}.json"
+        export_filepath = Path(export_folder).joinpath(export_filename)
 
-    if filepath is not None:
-        with open(filepath, "w") as f:
-            dump(obj=to_export, fp=f)
-        return None
-    else:
-        # TODO - remove this once addict is stubbed
-        export_dict: Dict = to_export.to_dict()
-        return export_dict
+        for_export = {"data": df.to_json(), "metadta": metadata}
+
+        export_filepath.write_text(json_str)
 
 
 def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> Union[Dict, None]:
