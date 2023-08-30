@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, Literal, Optional, Union, Any
 from pandas import Timedelta
+import warnings
 
 from openghg.store.base import get_data_class
 from openghg.cloud import create_file_package, create_post_dict
@@ -87,6 +88,10 @@ def standardise_surface(
         raise ValueError("One of `filepath` and `filepaths` must be specified.")
     elif filepath is None:
         filepath = filepaths
+        warnings.warn(
+            "The argument 'filepaths' will be deprecated in a future release. Please use 'filepath' instead.",
+            FutureWarning,
+        )
 
     if not isinstance(filepath, list):
         filepath = [filepath]
