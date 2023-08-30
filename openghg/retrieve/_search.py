@@ -537,7 +537,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
     else:
         types_to_search.extend(data_type_classes.values())
 
-
     # Get a dictionary of all the readable buckets available
     # We'll iterate over each of them
     readable_buckets = get_readable_buckets()
