@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Tuple, Dict
 
 __all__ = ["define_data_types", "define_data_type_classes"]
 
