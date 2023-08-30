@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bug where the object store path being written to JSON led to an invalid path being given to some users - [PR #741](https://github.com/openghg/openghg/pull/741)
 
+### Changes
+
+- Added read-only opening of the metadata store of each storage class when searching. This is done using a `mode` argument pased to the `load_metastore` function - [PR #763](https://github.com/openghg/openghg/pull/763)
+
 ## [0.6.1] - 2023-08-04
 
 ### Added

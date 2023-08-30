@@ -21,6 +21,7 @@ from ._errors import (
     SearchError,
     AttrMismatchError,
     ConfigFileError,
+    MetastoreError,
     construct_xesmf_import_error,
 )
 from ._types import (
