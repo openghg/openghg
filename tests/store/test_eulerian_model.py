@@ -1,7 +1,5 @@
 from helpers import get_eulerian_datapath
-from openghg import standardise
 from openghg.retrieve import search
-from openghg.objectstore import get_bucket
 from openghg.standardise import standardise_eulerian
 from xarray import open_dataset
 
@@ -9,8 +7,7 @@ from xarray import open_dataset
 def test_read_file():
     test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
-    bucket = get_bucket()
-    proc_results = standardise_eulerian(bucket=bucket, filepath=test_datapath, model="GEOSChem", species="ch4")
+    proc_results = standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4")
 
     assert "geoschem_ch4_2015-01-01" in proc_results
 

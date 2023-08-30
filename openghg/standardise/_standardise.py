@@ -44,7 +44,6 @@ def standardise_surface(
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -73,7 +72,7 @@ def standardise_surface(
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         store: Name of object store to write to, required if user has access to more than one
         writable store
-        bucket: object store bucket to use; this takes precendence over 'store'
+
     Returns:
         dict: Dictionary of result data
     """
@@ -162,8 +161,7 @@ def standardise_surface(
 
         return responses
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
+        bucket = get_writable_bucket(name=store)
 
         return standardise(
             bucket=bucket,
@@ -198,7 +196,6 @@ def standardise_column(
     source_format: str = "openghg",
     overwrite: bool = False,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Read column observation file
 
@@ -222,7 +219,7 @@ def standardise_column(
         source_format : Type of data being input e.g. openghg (internal format)
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
-        bucket: object store bucket to use; this takes precendence over 'store'
+
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -257,8 +254,7 @@ def standardise_column(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
+        bucket = get_writable_bucket(name=store)
 
         return standardise(
             bucket=bucket,
@@ -286,7 +282,6 @@ def standardise_bc(
     continuous: bool = True,
     overwrite: bool = False,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -301,8 +296,8 @@ def standardise_bc(
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
-        bucket: object store bucket to use; this takes precendence over 'store'
-    returns:
+
+    Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
     from openghg.cloud import call_function
@@ -331,8 +326,8 @@ def standardise_bc(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
+        bucket = get_writable_bucket(name=store)
+
         return standardise(
             bucket=bucket,
             data_type="boundary_conditions",
@@ -466,7 +461,6 @@ def standardise_flux(
     continuous: bool = True,
     overwrite: bool = False,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Process flux data
 
@@ -482,8 +476,8 @@ def standardise_flux(
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
-        bucket: object store bucket to use; this takes precendence over 'store'
-    returns:
+
+    Returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
     from openghg.cloud import call_function
@@ -519,8 +513,8 @@ def standardise_flux(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
+        bucket = get_writable_bucket(name=store)
+
         return standardise(
             data_type="emissions",
             bucket=bucket,
@@ -548,7 +542,6 @@ def standardise_eulerian(
     setup: Optional[str] = None,
     overwrite: bool = False,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Read Eulerian model output
 
@@ -562,15 +555,14 @@ def standardise_eulerian(
         overwrite: Should this data overwrite currently stored data.
         store: Name of object store to write to, required if user has access to more than one
         writable store
-        bucket: object store bucket to use; this takes precendence over 'store'
+
     Returns:
         dict: Dictionary of result data
     """
     if running_on_hub():
         raise NotImplementedError("Serverless not implemented yet for Eulerian model.")
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
+        bucket = get_writable_bucket(name=store)
 
         return standardise(
             bucket=bucket,
@@ -586,14 +578,15 @@ def standardise_eulerian(
 
 
 def standardise_from_binary_data(
-    bucket: str, data_type: str, binary_data: bytes, metadata: dict, file_metadata: dict, **kwargs: Any
+    store: str, data_type: str, binary_data: bytes, metadata: dict, file_metadata: dict, **kwargs: Any
 ) -> Optional[dict]:
     """Standardise binary data from serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
 
     args:
-        bucket: object store bucket to use
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
         data_type: type of data to standardise
         binary_data: Binary measurement data
         metadata: Metadata
@@ -604,6 +597,8 @@ def standardise_from_binary_data(
         Dictionary of result data.
     """
     dclass = get_data_class(data_type)
+    bucket = get_writable_bucket(name=store)
+
     with dclass(bucket) as dc:
         result = dc.read_data(
             binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs

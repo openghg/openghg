@@ -3,7 +3,6 @@ import json
 import pytest
 import xarray as xr
 from pandas import Timestamp
-from functools import partial
 from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_stores
 from pathlib import Path
 from openghg.objectstore import (
@@ -47,30 +46,30 @@ def test_raising_error_doesnt_save_to_store(mocker, bucket):
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
 
     with pytest.raises(ValueError):
-        standardise_surface(bucket=bucket, filepath=one_min, site="tac", network="decc", source_format="CRDS")
+        standardise_surface(store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS")
 
     assert not exists(bucket=bucket, key=key)
 
 
-def test_different_sampling_periods_diff_datasources(bucket):
+def test_different_sampling_periods_diff_datasources():
     clear_test_stores()
 
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
-    one_min_res = standardise_surface(bucket=bucket, filepath=one_min, site="tac", network="decc", source_format="CRDS")
+    one_min_res = standardise_surface(store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS")
 
     min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
     for sp, data in min_uuids.items():
         assert data["new"] is True
 
     one_hour = get_surface_datapath("tac.picarro.hourly.100m.test.dat", source_format="CRDS")
-    one_hour_res = standardise_surface(bucket=bucket, filepath=one_hour, site="tac", network="decc", source_format="CRDS")
+    one_hour_res = standardise_surface(store="user", filepath=one_hour, site="tac", network="decc", source_format="CRDS")
 
     hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
     for sp, data in hour_uuids.items():
         assert data["new"] is True
 
 
-def test_same_source_data_same_datasource(bucket):
+def test_same_source_data_same_datasource():
     site = "tac"
     network = "DECC"
     source_format = "CRDS"
@@ -78,13 +77,21 @@ def test_same_source_data_same_datasource(bucket):
     tac_path1 = get_surface_datapath(filename="tac.picarro.1minute.100m.201208.dat", source_format="CRDS")
     tac_path2 = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
 
-    res = standardise_surface(bucket=bucket,
-        filepath=tac_path1, source_format=source_format, site=site, network=network, overwrite=True
-    )
+    res = standardise_surface(store="user",
+                              filepath=tac_path1,
+                              source_format=source_format,
+                              site=site,
+                              network=network,
+                              overwrite=True,
+                              )
 
-    res_2 = standardise_surface(bucket=bucket,
-        filepath=tac_path2, source_format=source_format, site=site, network=network, overwrite=True
-    )
+    res_2 = standardise_surface(store="user",
+                                filepath=tac_path2,
+                                source_format=source_format,
+                                site=site,
+                                network=network,
+                                overwrite=True,
+                                )
 
     proc_data = res["processed"]["tac.picarro.1minute.100m.201208.dat"]
     proc_data_2 = res_2["processed"]["tac.picarro.1minute.100m.201407.dat"]
@@ -101,8 +108,6 @@ def test_read_data(mocker):
     fake_uuids = [f"test-uuid-{i}" for i in range(1, 101)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
-    bucket = get_bucket()
-
     # Get some bytes
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     binary_bsd = filepath.read_bytes()
@@ -115,7 +120,7 @@ def test_read_data(mocker):
 
     file_metadata = {"filename": "bsd.picarro.1minute.248m.min.dat"}
 
-    result = standardise_from_binary_data(bucket=bucket,
+    result = standardise_from_binary_data(store="user",
                                           data_type="surface",
                                           binary_data=binary_bsd,
                                           metadata=metadata,
@@ -135,23 +140,23 @@ def test_read_data(mocker):
 
     with pytest.raises(ValueError):
         metadata = {}
-        standardise_from_binary_data(bucket=bucket, data_type="surface",
+        standardise_from_binary_data(store="user", data_type="surface",
                                      binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
     with pytest.raises(KeyError):
         file_metadata = {}
-        standardise_from_binary_data(bucket=bucket, data_type="surface",
+        standardise_from_binary_data(store="user", data_type="surface",
                                      binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
 
 @pytest.mark.parametrize("sampling_period", ["60", 60, "60000000000", "twelve-thousand"])
-def test_read_CRDS_incorrect_sampling_period_raises(bucket, sampling_period):
+def test_read_CRDS_incorrect_sampling_period_raises(sampling_period):
     clear_test_stores()
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
     with pytest.raises(ValueError) as exec_info:
-        standardise_surface(bucket=bucket,
+        standardise_surface(store="user",
             filepath=filepath,
             source_format="CRDS",
             site="bsd",
@@ -163,7 +168,7 @@ def test_read_CRDS_incorrect_sampling_period_raises(bucket, sampling_period):
 
 def test_read_CRDS(bucket):
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
-    results = standardise_surface(bucket=bucket, filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+    results = standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
     keys = results["processed"]["bsd.picarro.1minute.248m.min.dat"].keys()
 
@@ -205,7 +210,7 @@ def test_read_CRDS(bucket):
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.future.dat", source_format="CRDS")
 
-    results = standardise_surface(bucket=bucket, filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+    results = standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
     with ObsSurface(bucket=bucket) as obs:
         assert len(obs.datasources()) == 3
@@ -232,12 +237,11 @@ def test_read_CRDS(bucket):
 
 def test_read_GC(bucket):
     clear_test_stores()
-    bucket = get_bucket()
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
-    results = standardise_surface(bucket=bucket,
+    results = standardise_surface(store="user",
         filepath=(data_filepath, precision_filepath),
         source_format="GCWERKS",
         site="CGO",
@@ -349,7 +353,7 @@ def test_read_GC(bucket):
         filename="capegrim-medusa.future.precisions.C", source_format="GC"
     )
 
-    results = standardise_surface(bucket=bucket,
+    results = standardise_surface(store="user",
         filepath=(data_filepath, precision_filepath), source_format="GCWERKS", site="CGO", network="AGAGE"
     )
 
@@ -362,11 +366,11 @@ def test_read_GC(bucket):
     ]
 
 
-def test_read_cranfield(bucket):
+def test_read_cranfield():
     clear_test_stores()
 
     data_filepath = get_surface_datapath(filename="THB_hourly_means_test.csv", source_format="Cranfield_CRDS")
-    results = standardise_surface(bucket=bucket,
+    results = standardise_surface(store="user",
         filepath=data_filepath, source_format="CRANFIELD", site="TMB", network="CRANFIELD"
     )
 
@@ -393,7 +397,7 @@ def test_read_cranfield(bucket):
 def test_read_beaco2n(bucket):
     data_filepath = get_surface_datapath(filename="Charlton_Community_Center.csv", source_format="BEACO2N")
 
-    results = standardise_surface(bucket=bucket,
+    results = standardise_surface(store="user",
             filepath=data_filepath, source_format="BEACO2N", site="CCC", network="BEACO2N", overwrite=True
         )
 
@@ -415,11 +419,9 @@ def test_read_openghg_format(bucket):
        - match to site and network supplied
        - additional attributes needed for OpenGHG format
     """
-    bucket = get_bucket()
-
     datafile = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
-    results = standardise_surface(bucket=bucket, filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC")
+    results = standardise_surface(store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC")
 
     uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
 
@@ -433,13 +435,12 @@ def test_read_openghg_format(bucket):
 
 def test_read_noaa_raw(bucket):
     clear_test_stores()
-    bucket = get_bucket()
 
     data_filepath = get_surface_datapath(
         filename="co_pocn25_surface-flask_1_ccgg_event.txt", source_format="NOAA"
     )
 
-    results = standardise_surface(bucket=bucket,
+    results = standardise_surface(store="user",
         filepath=data_filepath, source_format="NOAA", site="POCN25", network="NOAA", inlet="flask"
     )
 
@@ -469,13 +470,11 @@ def test_read_noaa_raw(bucket):
 
 
 def test_read_noaa_obspack(bucket):
-    bucket = get_bucket()
-
     data_filepath = get_surface_datapath(
         filename="ch4_esp_surface-flask_2_representative.nc", source_format="NOAA"
     )
 
-    results = standardise_surface(bucket=bucket,
+    results = standardise_surface(store="user",
         filepath=data_filepath,
         inlet="flask",
         source_format="NOAA",
@@ -514,7 +513,7 @@ def test_read_thames_barrier(bucket):
 
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
 
-    results = standardise_surface(bucket=bucket,
+    results = standardise_surface(store="user",
         filepath=data_filepath,
         source_format="THAMESBARRIER",
         site="TMB",
@@ -545,7 +544,7 @@ def test_read_thames_barrier(bucket):
 def test_delete_Datasource(bucket):
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
 
-    standardise_surface(bucket=bucket,
+    standardise_surface(store="user",
         filepath=data_filepath,
         source_format="THAMESBARRIER",
         site="tmb",
@@ -555,13 +554,9 @@ def test_delete_Datasource(bucket):
 
     with ObsSurface(bucket=bucket) as obs:
         datasources = obs.datasources()
-
         uuid = datasources[0]
-
         datasource = Datasource.load(bucket=bucket, uuid=uuid)
-
         data_keys = datasource.data_keys()
-
         key = data_keys[0]
 
         assert exists(bucket=bucket, key=key)
@@ -569,17 +564,16 @@ def test_delete_Datasource(bucket):
         obs.delete(uuid=uuid)
 
         assert uuid not in obs.datasources()
-
         assert not exists(bucket=bucket, key=key)
 
 
-def test_add_new_data_correct_datasource(bucket):
+def test_add_new_data_correct_datasource():
     clear_test_stores()
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.05.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.05.precisions.C", source_format="GC")
 
-    results = standardise_surface(bucket=bucket,
+    results = standardise_surface(store="user",
         filepath=(data_filepath, precision_filepath), source_format="GCWERKS", site="CGO", network="AGAGE"
     )
 
@@ -594,7 +588,7 @@ def test_add_new_data_correct_datasource(bucket):
     data_filepath = get_surface_datapath(filename="capegrim-medusa.06.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.06.precisions.C", source_format="GC")
 
-    new_results = standardise_surface(bucket=bucket,
+    new_results = standardise_surface(store="user",
         filepath=(data_filepath, precision_filepath), source_format="GCWERKS", site="CGO", network="AGAGE"
     )
 
@@ -861,14 +855,14 @@ def test_obs_schema(species, obs_variable):
     # TODO: Could also add checks for dims and dtypes?
 
 
-def test_check_obssurface_same_file_skips(bucket):
+def test_check_obssurface_same_file_skips():
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
-    results = standardise_surface(bucket=bucket, filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+    results = standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
     assert results
 
-    results = standardise_surface(bucket=bucket, filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+    results = standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
 
     assert not results
 
@@ -877,8 +871,8 @@ def test_gcwerks_fp_not_a_tuple_raises(bucket):
     filepath = "/tmp/test_filepath.txt"
 
     with pytest.raises(TypeError):
-        standardise_surface(bucket=bucket, filepath=filepath, source_format="GCWERKS", site="cgo", network="agage")
-        standardise_surface(bucket=bucket, filepath=filepath, source_format="gc", site="cgo", network="agage")
+        standardise_surface(store="user", filepath=filepath, source_format="GCWERKS", site="cgo", network="agage")
+        standardise_surface(store="user", filepath=filepath, source_format="gc", site="cgo", network="agage")
 
 
 def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):
@@ -892,7 +886,7 @@ def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
-    standardise_surface(bucket=bucket, filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+    standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
     with ObsSurface(bucket=bucket) as obs:
         key = obs.key()
 

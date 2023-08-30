@@ -2,6 +2,8 @@
 This module contains the user interface for adding
 data to the object store via transformations.
 """
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Optional, Union, Any
 
@@ -13,10 +15,9 @@ def transform_emissions_data(
     datapath: Union[str, Path],
     database: str,
     overwrite: bool = False,
-    bucket: Optional[str] = None,
     store: Optional[str] = None,
-    **kwargs: Any
-) -> Optional[dict]:
+    **kwargs: Any,
+) -> dict:
     """Read and transform an emissions database. This will find the appropriate
     parser function to use for the database specified. The necessary inputs
     are determined by which database is being used.
@@ -30,15 +31,15 @@ def transform_emissions_data(
         database: Name of database
         overwrite: Should this data overwrite currently stored data
             which matches.
-        bucket: object store bucket to write data to.
         store: name of object store to write data to.
         **kwargs: Inputs for underlying parser function for the database.
             Necessary inputs will depend on the database being parsed.
-    """
-    if bucket is None:
-        bucket = get_writable_bucket(name=store)
 
+    Returns:
+    """
+    bucket = get_writable_bucket(name=store)
     dclass = get_data_class("emissions")
+
     with dclass(bucket) as dc:
         result = dc.transform_data(datapath=datapath, database=database, overwrite=overwrite, **kwargs)
     return result

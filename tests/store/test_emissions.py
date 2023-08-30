@@ -1,24 +1,15 @@
 import pytest
-from functools import partial
 from helpers import get_emissions_datapath
 from typing import Any, Union
 from openghg.retrieve import search, search_flux
-from openghg.objectstore import get_bucket
-from openghg.store import Emissions, load_metastore
+from openghg.store import Emissions
 from openghg.standardise import standardise_flux, standardise_from_binary_data
 from openghg.transform import transform_emissions_data
 from openghg.util import hash_bytes
-from openghg.types import DatasourceLookupError
 from xarray import open_dataset
 from pandas import Timestamp
 
 from helpers import clear_test_stores
-
-
-# fixtures
-@pytest.fixture
-def bucket():
-    return get_bucket()
 
 
 @pytest.fixture
@@ -26,7 +17,7 @@ def clear_stores():
     clear_test_stores()
 
 
-def test_read_binary_data(mocker, bucket, clear_stores):
+def test_read_binary_data(mocker, clear_stores):
     clear_test_stores()
     fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
@@ -48,7 +39,7 @@ def test_read_binary_data(mocker, bucket, clear_stores):
     file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": False}
 
     results = standardise_from_binary_data(
-        bucket=bucket,
+        store="user",
         data_type="emissions",
         binary_data=binary_data,
         metadata=metadata,
@@ -60,10 +51,10 @@ def test_read_binary_data(mocker, bucket, clear_stores):
     assert results == expected_results
 
 
-def test_read_file(bucket):
+def test_read_file():
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
-    proc_results = standardise_flux(bucket=bucket,
+    proc_results = standardise_flux(store="user",
                                     filepath=test_datapath,
                                     species="co2",
                                     source="gpp-cardamom",
@@ -122,12 +113,11 @@ def test_read_file(bucket):
     del metadata["prior_file_1_version"]
 
     assert metadata.items() >= expected_metadata.items()
-
-
     # TODO: Add test for adding additional years data - 2013 gpp cardomom
 
+
 @pytest.fixture
-def load_edgar(bucket):
+def load_edgar():
     def _load_edgar(species: str, version: str, year: Union[str, int], database_version: bool = True):
         """Load globaledgar data for given species, version, and year.
 
@@ -151,8 +141,9 @@ def load_edgar(bucket):
         )
         if database_version:
             kwargs["database_version"] = version.replace(".", "")
-        return standardise_flux(bucket=bucket, **kwargs)
+        return standardise_flux(store="user", **kwargs)
     return _load_edgar
+
 
 def test_read_file_additional_keys(clear_stores, load_edgar):
     """
@@ -265,7 +256,7 @@ def test_read_file_fails_ambiguous(clear_stores, load_edgar):
         raise AssertionError("This test should throw/catch a DatasourceLookupError with a useful message!")
 
 
-def test_add_edgar_database(clear_stores, bucket):
+def test_add_edgar_database(clear_stores):
     """Test edgar can be added to object store (default domain)"""
     folder = "v6.0_CH4"
     test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
@@ -273,7 +264,7 @@ def test_add_edgar_database(clear_stores, bucket):
     database = "EDGAR"
     date = "2015"
 
-    proc_results = transform_emissions_data(bucket=bucket, datapath=test_datapath, database=database, date=date)
+    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date)
 
     default_domain = "globaledgar"
 
@@ -319,7 +310,7 @@ def test_add_edgar_database(clear_stores, bucket):
     assert metadata.items() >= expected_metadata.items()
 
 
-def test_transform_and_add_edgar_database(clear_stores, bucket):
+def test_transform_and_add_edgar_database(clear_stores):
     """
     Test EDGAR database can be transformed (regridded) and added to the object store.
     """
@@ -334,7 +325,7 @@ def test_transform_and_add_edgar_database(clear_stores, bucket):
     date = "2015"
     domain = "EUROPE"
 
-    proc_results = transform_emissions_data(bucket=bucket, datapath=test_datapath, database=database, date=date, domain=domain)
+    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date, domain=domain)
 
     version = "v6.0"
     species = "ch4"

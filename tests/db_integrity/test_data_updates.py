@@ -34,7 +34,7 @@ def test_database_update_repeat(clear_stores, bucket):
     #bucket = get_bucket()
     emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
     args = (emissions_datapath1, "ch4", "anthro", "EUROPE")
-    kwargs = {"bucket": bucket, "high_time_resolution": False}
+    kwargs = {"store": "user", "high_time_resolution": False}
 
     standardise_flux(*args, **kwargs)
     standardise_flux(*args, **kwargs)
@@ -53,7 +53,7 @@ def test_database_update_repeat(clear_stores, bucket):
 
 
 #  Test variants in data from the same source being added
-def bsd_data_read_crds(bucket: str):
+def bsd_data_read_crds():
     """
     Add Bilsdale *minutely* data for CRDS instrument to object store.
      - CRDS: ch4, co2, co
@@ -62,10 +62,10 @@ def bsd_data_read_crds(bucket: str):
     network = "DECC"
     source_format1 = "CRDS"
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
-    standardise_surface(bucket=bucket, filepath=bsd_path1, source_format=source_format1, site=site, network=network)
+    standardise_surface(store="user", filepath=bsd_path1, source_format=source_format1, site=site, network=network)
 
 
-def bsd_data_read_gcmd(bucket: str):
+def bsd_data_read_gcmd():
     """
     Add Bilsdale data GCMD instrument to object store.
      - GCMD: sf6, n2o
@@ -79,7 +79,7 @@ def bsd_data_read_gcmd(bucket: str):
     bsd_prec_path2 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
     standardise_surface(
-        bucket=bucket,
+        store="user",
         filepath=(bsd_path2, bsd_prec_path2),
         source_format=source_format2,
         site=site,
@@ -88,7 +88,7 @@ def bsd_data_read_gcmd(bucket: str):
     )
 
 
-def bsd_small_edit_data_read(bucket: str):
+def bsd_small_edit_data_read():
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Same data
@@ -103,7 +103,7 @@ def bsd_small_edit_data_read(bucket: str):
     bsd_prec_path3 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
     standardise_surface(
-        bucket=bucket,
+        store="user",
         filepath=(bsd_path3, bsd_prec_path3),
         source_format=source_format2,
         site=site,
@@ -112,7 +112,7 @@ def bsd_small_edit_data_read(bucket: str):
     )
 
 
-def bsd_diff_data_read(bucket: str, overwrite=False):
+def bsd_diff_data_read(overwrite=False):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data values (should create different hash)
@@ -125,7 +125,7 @@ def bsd_diff_data_read(bucket: str, overwrite=False):
     bsd_path4 = get_surface_datapath(filename="bilsdale-md.diff-value.14.C", source_format="GC")
     bsd_prec_path4 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
     standardise_surface(
-        bucket=bucket,
+        store="user",
         filepath=(bsd_path4, bsd_prec_path4),
         source_format=source_format2,
         site=site,
@@ -135,7 +135,7 @@ def bsd_diff_data_read(bucket: str, overwrite=False):
     )
 
 
-def bsd_diff_date_range_read(bucket: str, overwrite=False):
+def bsd_diff_date_range_read(overwrite=False):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data date range (should create different hash)
@@ -149,7 +149,7 @@ def bsd_diff_date_range_read(bucket: str, overwrite=False):
     bsd_prec_path5 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
     standardise_surface(
-        bucket=bucket,
+        store="user",
         filepath=(bsd_path5, bsd_prec_path5),
         source_format=source_format2,
         site=site,
@@ -209,7 +209,7 @@ def read_gcmd_file_pd(filename):
     return gcwerks_file_data
 
 
-def test_obs_data_read_header_diff(clear_stores, bucket):
+def test_obs_data_read_header_diff(clear_stores):
     """
     Test adding new file for GC data (same data as original file but different header).
     Steps:
@@ -219,11 +219,11 @@ def test_obs_data_read_header_diff(clear_stores, bucket):
     Expect that GCMD (and CRDS) data can still be accessed.
     """
     # Load BSD data - CRDS data
-    bsd_data_read_crds(bucket)
+    bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
-    bsd_data_read_gcmd(bucket)
+    bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with small edit in header
-    bsd_small_edit_data_read(bucket)
+    bsd_small_edit_data_read()
 
     # Search for expected species
     # CRDS data
@@ -275,7 +275,7 @@ def test_obs_data_read_header_diff(clear_stores, bucket):
     raises=AssertionError,
     strict=True,
 )
-def test_obs_data_read_data_diff(clear_stores, bucket):
+def test_obs_data_read_data_diff(clear_stores):
     """
     Test adding new file for GC with same time points but some different data values.
     Steps:
@@ -286,11 +286,11 @@ def test_obs_data_read_data_diff(clear_stores, bucket):
     Expect CRDS data can still be accessed.
     """
     # Load BSD data - CRDS
-    bsd_data_read_crds(bucket)
+    bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
-    bsd_data_read_gcmd(bucket)
+    bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    bsd_diff_data_read(bucket, overwrite=True)
+    bsd_diff_data_read(overwrite=True)
 
     # Search for expected species
     # CRDS data
@@ -336,7 +336,7 @@ def test_obs_data_read_data_diff(clear_stores, bucket):
 # TODO: Add test for different time values as well.
 
 #  Look at different data frequencies for the same data
-def bsd_data_read_crds_diff_frequency(bucket: str):
+def bsd_data_read_crds_diff_frequency():
     """
     Add Bilsdale *hourly* data for CRDS instrument to object store
      - CRDS: ch4, co2, co
@@ -347,10 +347,10 @@ def bsd_data_read_crds_diff_frequency(bucket: str):
 
     bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.min.dat", source_format="CRDS")
 
-    standardise_surface(bucket=bucket, filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
+    standardise_surface(store="user", filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
 
 
-def test_obs_data_read_two_frequencies(clear_stores, bucket):
+def test_obs_data_read_two_frequencies(clear_stores):
     """
     Test database when two different frequencies for the same site are added.
     Steps:
@@ -362,11 +362,11 @@ def test_obs_data_read_two_frequencies(clear_stores, bucket):
     Expect GCMD data to still be available.
     """
     # Load BSD data - CRDS minutely frequency (and GCWERKS data)
-    bsd_data_read_crds(bucket)
+    bsd_data_read_crds()
     # Load BSD data - CRDS hourly frequency
-    bsd_data_read_crds_diff_frequency(bucket)
+    bsd_data_read_crds_diff_frequency()
     # Load BSD data - GCMD data (GCWERKS)
-    bsd_data_read_gcmd(bucket)
+    bsd_data_read_gcmd()
 
     # Search for expected species
     # CRDS data
@@ -421,7 +421,7 @@ def test_obs_data_read_two_frequencies(clear_stores, bucket):
 
     # TODO: Can we check if this has been saved as a new version?
 
-def bsd_data_read_crds_internal_overlap(bucket, overwrite=False):
+def bsd_data_read_crds_internal_overlap(overwrite=False):
     """
     Add Bilsdale *hourly* data for CRDS instrument to object store
      - CRDS: ch4, co2, co
@@ -432,7 +432,7 @@ def bsd_data_read_crds_internal_overlap(bucket, overwrite=False):
     bsd_path_hourly = get_surface_datapath(
         filename="bsd.picarro.hourly.108m.overlap-dates.dat", source_format="CRDS"
     )
-    standardise_surface(bucket=bucket,
+    standardise_surface(store="user",
                         filepath=bsd_path_hourly,
                         site=site,
                         network=network,
@@ -453,8 +453,8 @@ def test_obs_data_representative_date_overlap(clear_stores, bucket):
     This test checks this will no longer raise a KeyError based on this.
     """
     # Add same data twice, overwriting the second time
-    bsd_data_read_crds_internal_overlap(bucket,)
-    bsd_data_read_crds_internal_overlap(bucket, overwrite=True)
+    bsd_data_read_crds_internal_overlap()
+    bsd_data_read_crds_internal_overlap(overwrite=True)
 
     with ObsSurface(bucket=bucket) as obs:
         uuids = obs.datasources()
@@ -495,7 +495,7 @@ def test_metadata_update(clear_stores, bucket):
     metadata and subsequently updated when the datasource is updated.
     """
     # Load BSD data - GCMD data (GCWERKS)
-    bsd_data_read_gcmd(bucket)
+    bsd_data_read_gcmd()
 
     # Search for expected species
     # GCMD data
@@ -520,7 +520,7 @@ def test_metadata_update(clear_stores, bucket):
     assert sf6_metadata_1["end_date"] == expected_end_1
 
     # Load BSD data - GCMD data (GCWERKS) with small change in date range
-    bsd_diff_date_range_read(bucket, overwrite=True)
+    bsd_diff_date_range_read(overwrite=True)
 
     search_sf6_2 = search(site="bsd", species="sf6")
 
@@ -543,7 +543,7 @@ def test_metadata_update(clear_stores, bucket):
 # - need to be clear on what we expect to happen here
 
 
-def bsd_data_read_crds_overwrite(bucket: str):
+def bsd_data_read_crds_overwrite():
     """
     Add Bilsdale data for CRDS instrument to object store.
      - CRDS: ch4, co2, co
@@ -556,7 +556,7 @@ def bsd_data_read_crds_overwrite(bucket: str):
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
 
     standardise_surface(
-        bucket=bucket,
+        store="user",
         filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True
         )
 

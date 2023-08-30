@@ -20,7 +20,7 @@ def test_read_openghg_format():
     species = "methane"
 
     bucket = get_bucket()
-    results = standardise_column(bucket=bucket,
+    results = standardise_column(store="user",
                                  filepath=datafile,
                                  source_format="OPENGHG",
                                  satellite=satellite,
