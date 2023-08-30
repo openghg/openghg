@@ -4,6 +4,7 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
+from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
@@ -595,9 +596,9 @@ def _base_search(**kwargs: Any) -> SearchResults:
     for bucket_name, bucket in readable_buckets.items():
         metastore_records = []
         for data_type_class in types_to_search:
-            with data_type_class(bucket=bucket) as dclass:
-                metastore = dclass._metastore
+            metakey = data_type_class._metakey
 
+            with load_metastore(bucket=bucket, key=metakey, mode="r") as metastore:
                 for v in expanded_search:
                     res = metastore.search(Query().fragment(v))
                     if res:

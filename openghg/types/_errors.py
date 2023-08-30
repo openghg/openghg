@@ -53,6 +53,10 @@ class ConfigFileError(OpenGHGError):
     """Raised for errors with configuraion file"""
 
 
+class MetastoreError(OpenGHGError):
+    """Raised for errors with the metadata store"""
+
+
 def construct_xesmf_import_error(exception: Optional[ImportError] = None) -> str:
     xesmf_error_message = (
         "Unable to import xesmf for use with regridding algorithms."

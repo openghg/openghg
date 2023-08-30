@@ -514,3 +514,33 @@ def test_integrity_check(data, bucket):
 
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
+
+def test_datasource_compression(data, bucket):
+    """Saving a Datasource with compression=True should
+    result in a compressed netCDF file.
+    """
+    metadata = data["ch4"]["metadata"]
+    data = data["ch4"]["data"]
+
+    # compressing small files might increase file size
+    data = xr.concat([data.copy() for _ in range(100)], dim="time")
+
+    d1 = Datasource()
+    d1._uuid = "compression-test-id-1"
+    d1.add_data(metadata=metadata, data=data, data_type="surface")
+    d1.save(bucket=bucket, compression=True)
+
+    d2 = Datasource()
+    d2._uuid = "compression-test-id-2"
+    d2.add_data(metadata=metadata, data=data, data_type="surface")
+    d2.save(bucket=bucket, compression=False)
+
+    key1 = next(iter((d1._data_keys['v1']['keys'].values())))
+    key2 = next(iter((d2._data_keys['v1']['keys'].values())))
+    filepath1 = f"{bucket}/{key1}._data"
+    filepath2 = f"{bucket}/{key2}._data"
+
+    size1 = os.path.getsize(filepath1)
+    size2 = os.path.getsize(filepath2)
+
+    assert size1 <= size2
