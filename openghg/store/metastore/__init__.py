@@ -1,1 +1,1 @@
-from ._metastore import open_metastore
+from ._api import open_metastore
