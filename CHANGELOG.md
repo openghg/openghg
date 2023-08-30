@@ -13,11 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `open_metastore` function to make access to the metastore more uniform. This was used to refactor places in the code where children of `BaseStore` were used to access the metastore - [PR #767](https://github.com/openghg/openghg/pull/767)
 
+- Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of
+  lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
+
 ## [0.6.2] - 2023-08-07
 
 ### Fixed
 
 - Bug where the object store path being written to JSON led to an invalid path being given to some users - [PR #741](https://github.com/openghg/openghg/pull/741)
+
+### Changes
+
+- Added read-only opening of the metadata store of each storage class when searching. This is done using a `mode` argument pased to the `load_metastore` function - [PR #763](https://github.com/openghg/openghg/pull/763)
 
 ## [0.6.1] - 2023-08-04
 

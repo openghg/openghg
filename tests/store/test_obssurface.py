@@ -803,7 +803,7 @@ def test_store_icos_carbonportal_data(bucket, mocker):
     # First we need to jump through some hoops to get the correct data dict
     # I feel like there must be a simpler way of doing this but xarray.to_json
     # doesn't convert datetimes correctly
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    fake_uuids = [f"test-uuid-{i}" for i in range(1, 101)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     test_data_nc = get_surface_datapath(filename="test_toh_co2_147m.nc", source_format="ICOS")

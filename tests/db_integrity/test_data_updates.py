@@ -11,25 +11,11 @@ from openghg.objectstore import get_bucket
 from helpers import clear_test_stores
 
 
-@pytest.fixture
-def clear_stores():
-    """Clear the test store at the start of each test.
-
-    This will run before any other fixtures in the same scope (i.e. function scope).
-    In particular, it will run before all of the set-up tests below.
-    """
-    clear_test_stores()
-
-
-@pytest.fixture
-def bucket():
-    return get_bucket()
-
-
-def test_database_update_repeat(clear_stores):
+def test_database_update_repeat():
     """
     Test object store can handle the same date (flux data) being added twice.
     """
+    clear_test_stores()
     # Attempt to add same data to the database twice
     emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
     args = (emissions_datapath1, "ch4", "anthro", "EUROPE")
@@ -208,7 +194,7 @@ def read_gcmd_file_pd(filename):
     return gcwerks_file_data
 
 
-def test_obs_data_read_header_diff(clear_stores):
+def test_obs_data_read_header_diff():
     """
     Test adding new file for GC data (same data as original file but different header).
     Steps:
@@ -217,6 +203,8 @@ def test_obs_data_read_header_diff(clear_stores):
      - BSD GCMD different data added - header changed so hash will be different but data will be the same
     Expect that GCMD (and CRDS) data can still be accessed.
     """
+    clear_test_stores()
+
     # Load BSD data - CRDS data
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
@@ -274,7 +262,7 @@ def test_obs_data_read_header_diff(clear_stores):
     raises=AssertionError,
     strict=True,
 )
-def test_obs_data_read_data_diff(clear_stores):
+def test_obs_data_read_data_diff():
     """
     Test adding new file for GC with same time points but some different data values.
     Steps:
@@ -284,6 +272,8 @@ def test_obs_data_read_data_diff(clear_stores):
     Expect that different GCMD will be retrieved from search (as latest version).
     Expect CRDS data can still be accessed.
     """
+    clear_test_stores()
+
     # Load BSD data - CRDS
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
@@ -349,7 +339,7 @@ def bsd_data_read_crds_diff_frequency():
     standardise_surface(store="user", filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
 
 
-def test_obs_data_read_two_frequencies(clear_stores):
+def test_obs_data_read_two_frequencies():
     """
     Test database when two different frequencies for the same site are added.
     Steps:
@@ -360,6 +350,8 @@ def test_obs_data_read_two_frequencies(clear_stores):
     Expect hourly data to be found as "latest" version to be retrieved (is this what we want?).
     Expect GCMD data to still be available.
     """
+    clear_test_stores()
+
     # Load BSD data - CRDS minutely frequency (and GCWERKS data)
     bsd_data_read_crds()
     # Load BSD data - CRDS hourly frequency
@@ -441,7 +433,7 @@ def bsd_data_read_crds_internal_overlap(overwrite=False):
 
 
 #  Look at replacing data with different / overlapping internal time stamps
-def test_obs_data_representative_date_overlap(clear_stores, bucket):
+def test_obs_data_representative_date_overlap():
     """
     Added test based on fix for Issue 506.
 
@@ -451,6 +443,9 @@ def test_obs_data_representative_date_overlap(clear_stores, bucket):
 
     This test checks this will no longer raise a KeyError based on this.
     """
+    clear_test_stores()
+    bucket = get_bucket()
+
     # Add same data twice, overwriting the second time
     bsd_data_read_crds_internal_overlap()
     bsd_data_read_crds_internal_overlap(overwrite=True)
@@ -486,11 +481,13 @@ def test_obs_data_representative_date_overlap(clear_stores, bucket):
 
 
 # Check appropriate metadata is updated when data is added to data sources
-def test_metadata_update(clear_stores):
+def test_metadata_update():
     """
     Add data and then update this to check that the version is both added to the original
     metadata and subsequently updated when the datasource is updated.
     """
+    clear_test_stores()
+
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
 
@@ -558,11 +555,12 @@ def bsd_data_read_crds_overwrite():
         )
 
 
-# def test_obs_data_read_overwrite(clear_stores, bucket):
+# def test_obs_data_read_overwrite():
 #     """
 #     Test adding new file for GC with same time points but some different data values
 #     """
 #     clear_test_stores()
+#     bucket = get_bucket()
 #     # Load BSD data - CRDS minutely frequency
 #     bsd_data_read_crds()
 #     # Load BSD data - CRDS hourly frequency
