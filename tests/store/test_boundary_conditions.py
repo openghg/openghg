@@ -2,11 +2,9 @@ from helpers import get_bc_datapath
 from openghg.retrieve import search
 from openghg.store import BoundaryConditions
 from openghg.standardise import standardise_bc, standardise_from_binary_data
-from openghg.objectstore import get_bucket
 from openghg.util import hash_bytes
 from xarray import open_dataset
 import numpy as np
-import pytest
 
 
 def test_read_data_monthly(mocker):
@@ -29,8 +27,7 @@ def test_read_data_monthly(mocker):
 
     file_metadata = {"sha1_hash": sha1_hash, "filename": filename, "compressed": False}
 
-    bucket = get_bucket()
-    proc_results = standardise_from_binary_data(data_type="boundary_conditions", bucket=bucket,
+    proc_results = standardise_from_binary_data(data_type="boundary_conditions", store="user",
                                                 binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
                                                 )
 
@@ -41,15 +38,14 @@ def test_read_data_monthly(mocker):
 def test_read_file_monthly():
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
-    bucket = get_bucket()
     proc_results = standardise_bc(
-            bucket=bucket,
-            filepath=test_datapath,
-            species="ch4",
-            bc_input="MOZART",
-            domain="EUROPE",
-            period="monthly",
-            overwrite=True,
+        store="user",
+        filepath=test_datapath,
+        species="ch4",
+        bc_input="MOZART",
+        domain="EUROPE",
+        period="monthly",
+        overwrite=True,
         )
 
     assert "ch4_mozart_europe" in proc_results
@@ -97,13 +93,12 @@ def test_read_file_yearly():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    bucket = get_bucket()
-    proc_results = standardise_bc(bucket=bucket,
-            filepath=test_datapath,
-            species=species,
-            bc_input=bc_input,
-            domain=domain,
-        )
+    standardise_bc(store="user",
+                   filepath=test_datapath,
+                   species=species,
+                   bc_input=bc_input,
+                   domain=domain,
+                   )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
@@ -159,13 +154,12 @@ def test_read_file_co2_no_time_dim():
     bc_input = "CAMS"
     domain = "EUROPE"
 
-    bucket = get_bucket()
-    proc_results = standardise_bc(bucket=bucket,
-            filepath=test_datapath,
-            species=species,
-            bc_input=bc_input,
-            domain=domain,
-        )
+    standardise_bc(store="user",
+                   filepath=test_datapath,
+                   species=species,
+                   bc_input=bc_input,
+                   domain=domain,
+                   )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"

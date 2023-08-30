@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 import logging
-from openghg.objectstore import get_writable_bucket
 from openghg.standardise import standardise_surface
 
 logger = logging.getLogger("openghg.store")
@@ -82,8 +81,6 @@ def add_noaa_obspack(
     if not files:
         files = _find_noaa_files(data_directory=data_directory, ext=".txt")
 
-    bucket = get_writable_bucket(name=store)
-
     # TODO - remove this once we can ensure all files will be processed correctly
     files_with_errors = []
     # Find relevant details for each file and call parse_noaa() function
@@ -99,7 +96,7 @@ def add_noaa_obspack(
             try:
                 # TODO - can we streamline this a bit to save repeated loads?
                 processed = standardise_surface(
-                    bucket=bucket,
+                    store=store,
                     filepath=filepath,
                     site=site,
                     measurement_type=measurement_type,

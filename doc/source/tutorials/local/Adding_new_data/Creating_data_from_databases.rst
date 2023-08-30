@@ -32,15 +32,14 @@ affect your use of OpenGHG outside of this tutorial.
 ---------------------------------------------
 
 To create emissions maps from an underlying database, we can use the
-``transform_data(...)`` method for the ``Emissions`` object (from
-``openghg.store``). The general form for this is as follows (same as
-``Emissions.read_file()``):
+``transform_emissions_data(...)`` function in the ``openghg.transform``
+module.
 
 .. code:: python
 
-   from openghg.store import Emissions
+   from openghg.transform import transform_emissions_data
 
-   Emissions.transform_data(datapath, database, ...)  # Additional keywords
+   transform_emissions_data(datapath, database, ...)  # Additional keywords
 
 This function expects the path, the name of the database as well as
 keyword inputs which will be determined by the underlying function being
@@ -95,11 +94,11 @@ provided is v6.0, annual, global and for methane.
 
 .. code:: python
 
-   from openghg.store import Emissions
+   from openghg.transform import transform_emissions_data
 
    database = "edgar"
 
-   Emissions.transform_data(datapath=edgar_datapath, database=database, date=2014, domain="EUROPE", species="ch4")
+   transform_emissions_data(datapath=edgar_datapath, database=database, date=2014, domain="EUROPE", species="ch4")
 
 *Note: this can take a few minutes to complete.*
 

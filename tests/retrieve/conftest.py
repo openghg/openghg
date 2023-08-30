@@ -25,22 +25,22 @@ def data_read():
 
     bsd_paths = [bsd_248_path, bsd_108_path, bsd_42_path]
 
-    standardise_surface(bucket=bucket, filepath=bsd_paths, source_format="CRDS", site="bsd", network=network)
+    standardise_surface(store="user", filepath=bsd_paths, source_format="CRDS", site="bsd", network=network)
 
     hfd_100_path = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
     hfd_50_path = get_surface_datapath(filename="hfd.picarro.1minute.50m.min.dat", source_format="CRDS")
     hfd_paths = [hfd_100_path, hfd_50_path]
 
-    standardise_surface(bucket=bucket, filepath=hfd_paths, source_format="CRDS", site="hfd", network=network)
+    standardise_surface(store="user", filepath=hfd_paths, source_format="CRDS", site="hfd", network=network)
 
     tac_path = get_surface_datapath(filename="tac.picarro.1minute.100m.test.dat", source_format="CRDS")
-    standardise_surface(bucket=bucket, filepath=tac_path, source_format="CRDS", site="tac", network=network)
+    standardise_surface(store="user", filepath=tac_path, source_format="CRDS", site="tac", network=network)
 
     # GCWERKS data (AGAGE network sites)
     data_filepath = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
     prec_filepath = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
-    standardise_surface(bucket=bucket,
+    standardise_surface(store="user",
                              filepath=(data_filepath, prec_filepath),
                              site="CGO",
                              source_format="GCWERKS",
@@ -50,7 +50,7 @@ def data_read():
     mhd_data_filepath = get_surface_datapath(filename="macehead.12.C", source_format="GC")
     mhd_prec_filepath = get_surface_datapath(filename="macehead.12.precisions.C", source_format="GC")
 
-    standardise_surface(bucket=bucket,
+    standardise_surface(store="user",
                              filepath=(mhd_data_filepath, mhd_prec_filepath),
                              site="MHD",
                              source_format="GCWERKS",
@@ -76,7 +76,7 @@ def data_read():
     openghg_path = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
     )
-    standardise_surface(bucket=bucket,
+    standardise_surface(store="user",
                              filepath=openghg_path,
                              source_format="OPENGHG",
                              site="tac",
@@ -88,7 +88,7 @@ def data_read():
     # Obs Column data
     column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
 
-    standardise_column(bucket=bucket,
+    standardise_column(store="user",
                              filepath=column_datapath,
                              source_format="OPENGHG",
                              satellite="GOSAT",
@@ -104,14 +104,14 @@ def data_read():
     species = "co2"
     source = "gpp-cardamom"
     domain = "europe"
-    standardise_flux(bucket=bucket,
+    standardise_flux(store="user",
                              filepath=test_datapath1,
                              species=species,
                              source=source,
                              domain=domain,
                              high_time_resolution=False,
                              )
-    standardise_flux(bucket=bucket,
+    standardise_flux(store="user",
                              filepath=test_datapath2,
                              species=species,
                              source=source,
@@ -128,7 +128,7 @@ def data_read():
     domain = "EUROPE"
     model = "test_model"
 
-    standardise_footprint(bucket=bucket,
+    standardise_footprint(store="user",
                              filepath=datapath,
                              site=site,
                              model=model,
@@ -149,7 +149,7 @@ def data_read():
     model = "NAME"
     metmodel = "UKV"
 
-    standardise_footprint(bucket=bucket,
+    standardise_footprint(store="user",
                              filepath=fp_datapath2,
                              site=site,
                              model=model,
@@ -159,7 +159,7 @@ def data_read():
                              metmodel=metmodel,
                              )
 
-    standardise_footprint(bucket=bucket,
+    standardise_footprint(store="user",
                              filepath=fp_datapath3,
                              site=site,
                              model=model,
@@ -171,7 +171,7 @@ def data_read():
 
     # High time resolution footprints
     hitres_fp_datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-    standardise_footprint(bucket=bucket,
+    standardise_footprint(store="user",
                              filepath=hitres_fp_datapath,
                              site="TAC",
                              model="NAME",
@@ -189,7 +189,7 @@ def data_read():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    standardise_bc(bucket=bucket,
+    standardise_bc(store="user",
                              filepath=test_datapath,
                              species=species,
                              bc_input=bc_input,
@@ -198,4 +198,4 @@ def data_read():
 
     test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 
-    standardise_eulerian(bucket=bucket, filepath=test_datapath, model="GEOSChem", species="ch4")
+    standardise_eulerian(store="user", filepath=test_datapath, model="GEOSChem", species="ch4")

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, Literal, Optional, Union, Any
 from pandas import Timedelta
+import warnings
 
 from openghg.store.base import get_data_class
 from openghg.cloud import create_file_package, create_post_dict
@@ -9,20 +10,25 @@ from openghg.util import running_on_hub
 from openghg.types import optionalPathType, multiPathType
 
 
-def standardise(bucket: str, data_type: str, filepath: multiPathType, **kwargs: Any) -> dict:
+def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> dict:
     """Generic standardise function, used by data-type specific versions.
 
-    args:
+    Args:
         bucket: object store bucket to use
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
+
         data_type: type of data to standardise
         filepath: path to file(s) to standardise
         **kwargs: data type specific arguments, see specific implementations below.
 
-    returns:
-        Dictionary of result data.
+    Returns:
+        dict: Dictionary of result data.
     """
     dclass = get_data_class(data_type)
-    with dclass(bucket) as dc:
+    bucket = get_writable_bucket(name=store)
+
+    with dclass(bucket=bucket) as dc:
         result = dc.read_file(filepath=filepath, **kwargs)
     return result
 
@@ -44,7 +50,6 @@ def standardise_surface(
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -73,7 +78,7 @@ def standardise_surface(
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         store: Name of object store to write to, required if user has access to more than one
         writable store
-        bucket: object store bucket to use; this takes precendence over 'store'
+
     Returns:
         dict: Dictionary of result data
     """
@@ -83,6 +88,10 @@ def standardise_surface(
         raise ValueError("One of `filepath` and `filepaths` must be specified.")
     elif filepath is None:
         filepath = filepaths
+        warnings.warn(
+            "The argument 'filepaths' will be deprecated in a future release. Please use 'filepath' instead.",
+            FutureWarning,
+        )
 
     if not isinstance(filepath, list):
         filepath = [filepath]
@@ -162,11 +171,8 @@ def standardise_surface(
 
         return responses
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
-
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="surface",
             filepath=filepath,
             source_format=source_format,
@@ -198,7 +204,6 @@ def standardise_column(
     source_format: str = "openghg",
     overwrite: bool = False,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Read column observation file
 
@@ -222,7 +227,7 @@ def standardise_column(
         source_format : Type of data being input e.g. openghg (internal format)
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
-        bucket: object store bucket to use; this takes precendence over 'store'
+
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
@@ -257,11 +262,8 @@ def standardise_column(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
-
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="column",
             filepath=filepath,
             satellite=satellite,
@@ -286,7 +288,6 @@ def standardise_bc(
     continuous: bool = True,
     overwrite: bool = False,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -301,8 +302,8 @@ def standardise_bc(
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
-        bucket: object store bucket to use; this takes precendence over 'store'
-    returns:
+
+    Returns:
         dict: Dictionary containing confirmation of standardisation process.
     """
     from openghg.cloud import call_function
@@ -331,10 +332,8 @@ def standardise_bc(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="boundary_conditions",
             filepath=filepath,
             species=species,
@@ -428,10 +427,8 @@ def standardise_footprint(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="footprints",
             filepath=filepath,
             site=site,
@@ -466,7 +463,6 @@ def standardise_flux(
     continuous: bool = True,
     overwrite: bool = False,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Process flux data
 
@@ -482,8 +478,8 @@ def standardise_flux(
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
-        bucket: object store bucket to use; this takes precendence over 'store'
-    returns:
+
+    Returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
     from openghg.cloud import call_function
@@ -519,11 +515,9 @@ def standardise_flux(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
         return standardise(
             data_type="emissions",
-            bucket=bucket,
+            store=store,
             filepath=filepath,
             species=species,
             source=source,
@@ -548,7 +542,6 @@ def standardise_eulerian(
     setup: Optional[str] = None,
     overwrite: bool = False,
     store: Optional[str] = None,
-    bucket: Optional[str] = None,
 ) -> dict:
     """Read Eulerian model output
 
@@ -562,18 +555,15 @@ def standardise_eulerian(
         overwrite: Should this data overwrite currently stored data.
         store: Name of object store to write to, required if user has access to more than one
         writable store
-        bucket: object store bucket to use; this takes precendence over 'store'
+
     Returns:
         dict: Dictionary of result data
     """
     if running_on_hub():
         raise NotImplementedError("Serverless not implemented yet for Eulerian model.")
     else:
-        if bucket is None:
-            bucket = get_writable_bucket(name=store)
-
         return standardise(
-            bucket=bucket,
+            store=store,
             data_type="eulerian_model",
             filepath=filepath,
             model=model,
@@ -586,14 +576,15 @@ def standardise_eulerian(
 
 
 def standardise_from_binary_data(
-    bucket: str, data_type: str, binary_data: bytes, metadata: dict, file_metadata: dict, **kwargs: Any
+    store: str, data_type: str, binary_data: bytes, metadata: dict, file_metadata: dict, **kwargs: Any
 ) -> Optional[dict]:
     """Standardise binary data from serverless function.
         The data dictionary should contain sub-dictionaries that contain
         data and metadata keys.
 
     args:
-        bucket: object store bucket to use
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
         data_type: type of data to standardise
         binary_data: Binary measurement data
         metadata: Metadata
@@ -604,6 +595,8 @@ def standardise_from_binary_data(
         Dictionary of result data.
     """
     dclass = get_data_class(data_type)
+    bucket = get_writable_bucket(name=store)
+
     with dclass(bucket) as dc:
         result = dc.read_data(
             binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs

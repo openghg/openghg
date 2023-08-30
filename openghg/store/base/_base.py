@@ -91,7 +91,7 @@ class BaseStore:
     def store_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
         raise NotImplementedError
 
-    def transform_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+    def transform_data(self, *args: Any, **kwargs: Any) -> dict:
         raise NotImplementedError
 
     def assign_data(
@@ -477,11 +477,11 @@ class BaseStore:
 def get_data_class(data_type: str) -> type[BaseStore]:
     """Return data class corresponding to given data type.
 
-    args:
+    Args:
         data_type: one of "surface", "column", "emissions", "footprints",
     "boundary_conditions", or "eulerian_model"
 
-    returns:
+    Returns:
         Data class, one of `ObsSurface`, `ObsColumn`, `Emissions`, `EulerianModel`,
     `Footprints`, `BoundaryConditions`.
     """
