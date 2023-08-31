@@ -21,12 +21,12 @@ def get_new_uuid() -> str:
 
 
 class TinyDBMetaStore(MetaStore[T]):
-    def __init__(self, bucket: str, data_type: str) -> None:
-        super().__init__(bucket)
+    def __init__(self, storage_object: type[T], bucket: str, data_type: str) -> None:
+        super().__init__(storage_object=storage_object, bucket=bucket)
         self.data_type = data_type
-        self._metastore = load_metastore(self.bucket, get_metakey(self.data_type))
+        self._metastore = load_metastore(self._bucket, get_metakey(self.data_type))
 
-    def search(self, search_terms: dict[str, Any]) -> list[Any]:
+    def search(self, search_terms: dict[str, Any] = dict()) -> list[Any]:
         search_terms = {k.lower(): v for k, v in search_terms.items()}
         query = tinydb.Query().fragment(search_terms)
         return self._metastore.search(query)
