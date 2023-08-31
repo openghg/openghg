@@ -1,38 +1,59 @@
 from __future__ import annotations
 import json
 from pathlib import Path
-from typing import Dict, List, Union, Optional, TYPE_CHECKING
-from addict import Dict as aDict
+from typing import Dict, List, Literal, Union, TYPE_CHECKING, Optional
+import addict
 from pandas import DataFrame
+import logging
+import gzip
 
 if TYPE_CHECKING:
     from openghg.dataobjects import ObsData
 
 __all__ = ["to_dashboard", "to_dashboard_mobile"]
 
+logger = logging.getLogger("openghg.util")
+logger.setLevel("DEBUG")
+
 
 def to_dashboard(
     data: Union[ObsData, List[ObsData]],
     export_folder: Path,
     downsample_n: int = 3,
-    # filepath: Optional[str] = None,
+    output_format: Literal["json", "parquet"] = "json",
+    compress_json: bool = False,
+    parquet_compression: Literal["brotli", "snappy", "gzip"] = "gzip",
+    default_site: Optional[str] = None,
+    default_species: Optional[str] = None,
 ) -> None:
-    """Takes a Dataset produced by OpenGHG and outputs it into a JSON
-    format readable by the OpenGHG dashboard or a related project.
+    """Takes ObsData objects produced by OpenGHG and outputs them to JSON
+    files. Files are named using the following convention:
 
-    This also exports a separate file with the locations of the sites
-    for use with map selector component.
+    export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}.json"
 
-    Note - this function does not currently support export of data from multiple
-    inlets.
+    A separate metadata file, metadata_complete.json is created in the same
+    export folder containing the metadata for each site and the filename for
+    that specific data set. This chunking allows a larger amount of data to be used
+    by the dashboard due to the separation into separate files.
 
     Args:
-        data: Dictionary of retrieved data
+        data: ObsData object or list of ObsData objects
         export_folder: Folder path to write files
         downsample_n: Take every nth value from the data
+        output_format: json or parquet
+        compress_json: compress JSON using gzip
+        parquet_compression: One of ["brotli", "snappy", "gzip"]
     Returns:
         None
     """
+    allowed_formats = ("json", "parquet")
+    if output_format not in allowed_formats:
+        raise ValueError(f"Invalid output format, please select one of {allowed_formats}")
+    # Here we'll store the metadata that can be used to populate the interface
+    # it'll also hold the filenames for the retrieval of data
+    metadata_complete = addict.Dict()
+    metadata_complete_filepath = Path(export_folder).joinpath("metadata_complete.json")
+
     if not isinstance(data, list):
         data = [data]
 
@@ -70,6 +91,7 @@ def to_dashboard(
             "station_latitude": station_latitude,
             "station_longitude": station_longitude,
         }
+
         metadata.update(location)
 
         species = metadata["species"]
@@ -78,12 +100,38 @@ def to_dashboard(
         network = metadata["network"]
         instrument = metadata["instrument"]
 
-        export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}.json"
+        export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}.{output_format}"
         export_filepath = Path(export_folder).joinpath(export_filename)
 
-        for_export = {"data": df.to_json(), "metadta": metadata}
+        file_data = {
+            "metadata": metadata,
+            "filename": export_filename,
+        }
 
-        export_filepath.write_text(json_str)
+        metadata_complete[species][network][site][inlet][instrument] = file_data
+
+        # TODO - Check if this hoop jumping is required, I can't remember exactly why
+        # I did it
+        if output_format == "json":
+            for_export_str = json.dumps(json.loads(df.to_json()))
+            if compress_json:
+                for_export_bytes = gzip.compress(for_export_str.encode())
+                export_filepath.write_bytes(for_export_bytes)
+            else:
+                export_filepath.write_text(for_export_str)
+        else:
+            df.to_parquet(export_filepath, compression=parquet_compression)
+
+        logger.info(f"Writing dashboard data to: {export_filename}")
+
+        one_MB = 1e6
+        if export_filepath.stat().st_size > one_MB:
+            logger.warn(
+                msg=f"The file {export_filename} is larger than 1 MB, consider ways to reduce its size."
+            )
+
+    metadata_complete_filepath.write_text(json.dumps(metadata_complete))
+    logger.info(f"Complete metadata file written to: {metadata_complete_filepath}")
 
 
 def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> Union[Dict, None]:
