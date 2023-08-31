@@ -55,6 +55,9 @@ def test_get(metastore):
 
 
 def test_search(metastore):
+    """Test searching when there are multiple items
+    in the metastore.
+    """
     uuid1 = metastore.add({"key": "val1"})
     uuid2 = metastore.add({"key": "val2"})
 
@@ -71,3 +74,19 @@ def test_search(metastore):
 
     assert result2[0]['uuid'] == uuid2
     assert result2[0]['key'] == 'val2'
+
+
+def test_lowercase_add_search(metastore):
+    """Check that keys are stored in lower case, and
+    converted to lower case for searches.
+    """
+    metastore.add({"KEY": 1})
+    metastore.add({"key": 2})
+
+    result1 = metastore.search({"key": 1})
+
+    assert len(result1) == 1
+
+    result2 = metastore.search({"KEY": 2})
+
+    assert len(result2) == 1
