@@ -27,10 +27,9 @@ class BucketUUIDLoadable(Protocol):
 
 
 class MetaStore(ABC, Generic[T]):
-    data_object: type[T]
-
-    def __init__(self, bucket: str) -> None:
-        self.bucket = bucket
+    def __init__(self, storage_object: type[T], bucket: str) -> None:
+        self._storage_object = storage_object
+        self._bucket = bucket
 
     @abstractmethod
     def search(self, search_terms: dict[str, Any]) -> list[Any]:
@@ -49,4 +48,4 @@ class MetaStore(ABC, Generic[T]):
 
     def get(self, uuid: str) -> T:
         """Get data stored at given uuid."""
-        return self.data_object.load(self.bucket, uuid)
+        return self._storage_object.load(self._bucket, uuid)
