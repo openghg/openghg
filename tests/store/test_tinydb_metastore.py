@@ -2,7 +2,8 @@ import pytest
 from typing import TypeVar
 
 from openghg.store.metastore._metastore import BucketUUIDLoadable
-from openghg.store.metastore._tinydb_metastore import TinyDBMetaStore
+from openghg.store.metastore._tinydb_metastore import TinyDBMetaStore, tinydb_session
+from openghg.types import MetastoreError
 
 T = TypeVar('T', bound='DumbDatasource')
 
@@ -28,21 +29,24 @@ def metastore(tmp_path):
     Note: `tmp_path` is function scope, so the metastore is
     reset for each test that uses this fixture.
     """
-    metastore = TinyDBMetaStore[DumbDatasource](storage_object=DumbDatasource, bucket=str(tmp_path), data_type="")
-    yield metastore
-    metastore._metastore.close()
+    bucket = str(tmp_path)
+    with tinydb_session(bucket=bucket, data_type="") as session:
+        metastore = TinyDBMetaStore[DumbDatasource](
+            storage_object=DumbDatasource,
+            bucket=bucket,
+            session=session)
+        yield metastore
 
 
 @pytest.fixture
 def surface_metastore(tmp_path):
-    metastore = TinyDBMetaStore[DumbDatasource](storage_object=DumbDatasource, bucket=str(tmp_path), data_type="surface")
-    yield metastore
-    metastore._metastore.close()
-
-
-def test_init(metastore):
-    assert metastore.data_type == ""
-    assert metastore._storage_object == DumbDatasource
+    bucket = str(tmp_path)
+    with tinydb_session(bucket=bucket, data_type="surface") as session:
+        metastore = TinyDBMetaStore[DumbDatasource](
+            storage_object=DumbDatasource,
+            bucket=bucket,
+            session=session)
+        yield metastore
 
 
 def test_search_empty(metastore):
@@ -133,3 +137,18 @@ def test_multiple_metastores(metastore, surface_metastore):
     res2 = surface_metastore.search()
 
     assert len(res2) == 1
+
+
+def test_read_only_metastore(tmp_path):
+    """Check that adding to a metastore opened with
+    a read-only TinyDB raises a MetaStoreError
+    """
+    bucket = str(tmp_path)
+    with pytest.raises(MetastoreError):
+        with tinydb_session(bucket=bucket, data_type='', mode='r') as session:
+            read_only_metastore = TinyDBMetaStore[DumbDatasource](
+                storage_object=DumbDatasource,
+                bucket=bucket,
+                session=session,
+            )
+            read_only_metastore.add({"key": "val"})

@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from typing import Any, TypeVar
 from uuid import uuid4
 
@@ -30,16 +31,24 @@ def get_metakey(data_type: str) -> str:
         return f"{result['_root']}/uuid/{result['_uuid']}/metastore"
 
 
+@contextmanager
+def tinydb_session(bucket: str, data_type: str, **kwargs):
+    metastore = load_metastore(bucket, get_metakey(data_type), **kwargs)
+    try:
+        yield metastore
+    finally:
+        metastore.close()
+
+
 def get_new_uuid() -> str:
     """Return a new uuid as a string."""
     return str(uuid4())
 
 
 class TinyDBMetaStore(MetaStore[T]):
-    def __init__(self, storage_object: type[T], bucket: str, data_type: str) -> None:
+    def __init__(self, storage_object: type[T], bucket: str, session: tinydb.TinyDB) -> None:
         super().__init__(storage_object=storage_object, bucket=bucket)
-        self.data_type = data_type
-        self._metastore = load_metastore(self._bucket, get_metakey(self.data_type))
+        self._metastore = session
 
     def search(self, search_terms: dict[str, Any] = dict()) -> list[Any]:
         search_terms = {k.lower(): v for k, v in search_terms.items()}
