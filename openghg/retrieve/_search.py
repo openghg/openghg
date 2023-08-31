@@ -4,8 +4,8 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
-from openghg.store import load_metastore
-from openghg.store.spec import define_data_type_classes, define_data_types
+from openghg.store.metastore import open_metastore
+from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub
 from openghg.types import ObjectStoreError
@@ -518,24 +518,21 @@ def _base_search(**kwargs: Any) -> SearchResults:
 
     # get data types to search and validate
     data_type = search_kwargs.get("data_type")
-    data_type_classes = define_data_type_classes()
+    valid_data_types = define_data_types()
 
     types_to_search = []
     if data_type is not None:
         if not isinstance(data_type, list):
             data_type = [data_type]
 
-        valid_data_types = define_data_types()
         for d in data_type:
             if d not in valid_data_types:
                 raise ValueError(
                     f"{data_type} is not a valid data type, please select one of {valid_data_types}"
                 )
-            # Get the object we want to load in from the object store
-            type_class = data_type_classes[d]
-            types_to_search.append(type_class)
+            types_to_search.append(d)
     else:
-        types_to_search.extend(data_type_classes.values())
+        types_to_search.extend(valid_data_types)
 
     # Get a dictionary of all the readable buckets available
     # We'll iterate over each of them
@@ -595,12 +592,10 @@ def _base_search(**kwargs: Any) -> SearchResults:
 
     for bucket_name, bucket in readable_buckets.items():
         metastore_records = []
-        for data_type_class in types_to_search:
-            metakey = data_type_class._metakey
-
-            with load_metastore(bucket=bucket, key=metakey, mode="r") as metastore:
+        for data_type in types_to_search:
+            with open_metastore(bucket=bucket, data_type=data_type, mode="r") as metastore:
                 for v in expanded_search:
-                    res = metastore.search(Query().fragment(v))
+                    res = metastore.search(v)
                     if res:
                         metastore_records.extend(res)
 
