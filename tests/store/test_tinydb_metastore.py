@@ -21,9 +21,21 @@ def test_dumb_datasource_is_loadable():
     assert issubclass(DumbDatasource, BucketUUIDLoadable)
 
 
-@pytest.fixture()
+@pytest.fixture
 def metastore(tmp_path):
+    """Open metastore with no data type.
+
+    Note: `tmp_path` is function scope, so the metastore is
+    reset for each test that uses this fixture.
+    """
     metastore = TinyDBMetaStore[DumbDatasource](storage_object=DumbDatasource, bucket=str(tmp_path), data_type="")
+    yield metastore
+    metastore._metastore.close()
+
+
+@pytest.fixture
+def surface_metastore(tmp_path):
+    metastore = TinyDBMetaStore[DumbDatasource](storage_object=DumbDatasource, bucket=str(tmp_path), data_type="surface")
     yield metastore
     metastore._metastore.close()
 
@@ -92,3 +104,32 @@ def test_lowercase_add_search(metastore):
     result2 = metastore.search({"KEY": 2})
 
     assert len(result2) == 1
+
+
+def test_surface_metastore(surface_metastore):
+    """Check if we can use the metastore with a non-empty
+    data type.
+    """
+    uuid = surface_metastore.add({"key1": "val1"})
+    result = surface_metastore.search()
+
+    assert len(result) == 1
+
+    assert result[0]['uuid'] == uuid
+    assert result[0]['key1'] == 'val1'
+
+
+def test_multiple_metastores(metastore, surface_metastore):
+    """Check that metastores with different data types do not
+    interact.
+    """
+    metastore.add({"key": 1})
+    surface_metastore.add({"key": 1})
+
+    res1 = metastore.search()
+
+    assert len(res1) == 1
+
+    res2 = surface_metastore.search()
+
+    assert len(res2) == 1
