@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Literal
 
@@ -41,7 +42,9 @@ def get_metakey(data_type: str) -> str:
 
 
 @contextmanager
-def open_metastore(bucket: str, data_type: str, mode: Literal['r', 'rw'] = 'rw'):
+def open_metastore(
+    bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
+) -> Generator[ClassicMetaStore, None, None]:
     """Context manager for TinyDBMetaStore based on OpenGHG v<=6.2 set-up for keys
     and TinyDB.
 
@@ -67,15 +70,16 @@ class ClassicMetaStore(TinyDBMetaStore[Datasource]):
         self.data_type = data_type
 
     @property
-    def _datasource_uuids(self):
-        return {result['uuid']: "" for result in self.search()}
+    def _datasource_uuids(self) -> dict:
+        return {result["uuid"]: "" for result in self.search()}
 
-    def datasources(self):
-        return [result['uuid'] for result in self.search()]
+    def datasources(self) -> list:
+        return [result["uuid"] for result in self.search()]
 
     def remove_datasource(self, uuid: str) -> None:
         pass
-    def key(self):
+
+    def key(self) -> str:
         return get_key(self.data_type)
 
     def delete(self, uuid: str) -> None:

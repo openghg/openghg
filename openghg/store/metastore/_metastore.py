@@ -14,7 +14,7 @@ from uuid import uuid4
 import tinydb
 
 
-T = TypeVar('T', bound='BucketUUIDLoadable')
+T = TypeVar("T", bound="BucketUUIDLoadable")
 
 
 @runtime_checkable
@@ -22,6 +22,7 @@ class BucketUUIDLoadable(Protocol):
     """Protocol for objects that can be created via a `load` class method
     that takes a bucket and a uuid as arguments.
     """
+
     @classmethod
     @abstractmethod
     def load(cls: type[T], bucket: str, uuid: str) -> T:
@@ -35,7 +36,10 @@ class MetaStore(ABC, Generic[T]):
 
     @abstractmethod
     def search(self, search_terms: dict[str, Any]) -> list[Any]:
-        """Search for data using a dictionary of search terms."""
+        """Search for data using a dictionary of search terms.
+
+        TODO: need to specify output format.
+        """
         pass
 
     @abstractmethod
@@ -65,11 +69,11 @@ class TinyDBMetaStore(MetaStore[T]):
     def search(self, search_terms: dict[str, Any] = dict()) -> list[Any]:
         search_terms = {k.lower(): v for k, v in search_terms.items()}
         query = tinydb.Query().fragment(search_terms)
-        return self._metastore.search(query)
+        return list(self._metastore.search(query))  # TODO: find better way to deal with mypy than casting...
 
     def add(self, metadata: dict[str, Any]) -> str:
         uuid = get_new_uuid()
         metadata = {k.lower(): v for k, v in metadata.items()}
-        metadata['uuid'] = uuid
+        metadata["uuid"] = uuid
         self._metastore.insert(metadata)
         return uuid

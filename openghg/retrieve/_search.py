@@ -496,7 +496,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
         timestamp_tzaware,
     )
     from pandas import Timedelta as pd_Timedelta
-    from tinydb import Query
 
     if running_on_hub():
         raise ValueError(
