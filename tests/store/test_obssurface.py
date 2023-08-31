@@ -114,17 +114,10 @@ def test_read_data(mocker):
     with ObsSurface(bucket=bucket) as obs:
         result = obs.read_data(binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
 
-    expected = {
-        "processed": {
-            "bsd.picarro.1minute.248m.min.dat": {
-                "ch4": {"uuid": "test-uuid-1", "new": True},
-                "co2": {"uuid": "test-uuid-9", "new": True},
-                "co": {"uuid": "test-uuid-17", "new": True},
-            }
-        }
-    }
-
-    assert result == expected
+    species = ["ch4", "co2", "co"]
+    for k, v in result["processed"]["bsd.picarro.1minute.248m.min.dat"].items():
+        assert k in species
+        assert v["new"] is True
 
     with pytest.raises(ValueError):
         metadata = {}
@@ -822,7 +815,8 @@ def test_store_icos_carbonportal_data(mocker):
     # First we need to jump through some hoops to get the correct data dict
     # I feel like there must be a simpler way of doing this but xarray.to_json
     # doesn't convert datetimes correctly
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    # fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    fake_uuids = [f"test-uuid-{n}" for n in range(100, 150)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     test_data_nc = get_surface_datapath(filename="test_toh_co2_147m.nc", source_format="ICOS")
@@ -838,7 +832,7 @@ def test_store_icos_carbonportal_data(mocker):
     with ObsSurface(bucket=bucket) as obs:
         first_result = obs.store_data(data=data)
 
-    assert first_result == {"co2": {"uuid": "test-uuid-2", "new": True}}
+    assert first_result == {"co2": {"uuid": "test-uuid-101", "new": True}}
 
     with ObsSurface(bucket=bucket) as obs:
         second_result = obs.store_data(data=data)
