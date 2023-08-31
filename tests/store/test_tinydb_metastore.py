@@ -1,11 +1,14 @@
 import pytest
 from typing import TypeVar
 
-from openghg.store.metastore._metastore import BucketUUIDLoadable
-from openghg.store.metastore._tinydb_metastore import TinyDBMetaStore, tinydb_session
+from openghg.store import load_metastore
+from openghg.store.metastore._metastore import TinyDBMetaStore, BucketUUIDLoadable
+from openghg.store.metastore._classic_metastore import get_metakey
 from openghg.types import MetastoreError
 
+
 T = TypeVar('T', bound='DumbDatasource')
+
 
 class DumbDatasource:
     """Minimal class satisfying BucketUUIDLoadable protocol."""
@@ -30,7 +33,7 @@ def metastore(tmp_path):
     reset for each test that uses this fixture.
     """
     bucket = str(tmp_path)
-    with tinydb_session(bucket=bucket, data_type="") as session:
+    with load_metastore(bucket=bucket, key='') as session:
         metastore = TinyDBMetaStore[DumbDatasource](
             storage_object=DumbDatasource,
             bucket=bucket,
@@ -41,7 +44,7 @@ def metastore(tmp_path):
 @pytest.fixture
 def surface_metastore(tmp_path):
     bucket = str(tmp_path)
-    with tinydb_session(bucket=bucket, data_type="surface") as session:
+    with load_metastore(bucket=bucket, key=get_metakey("surface")) as session:
         metastore = TinyDBMetaStore[DumbDatasource](
             storage_object=DumbDatasource,
             bucket=bucket,
@@ -145,7 +148,7 @@ def test_read_only_metastore(tmp_path):
     """
     bucket = str(tmp_path)
     with pytest.raises(MetastoreError):
-        with tinydb_session(bucket=bucket, data_type='', mode='r') as session:
+        with load_metastore(bucket=bucket, key='', mode='r') as session:
             read_only_metastore = TinyDBMetaStore[DumbDatasource](
                 storage_object=DumbDatasource,
                 bucket=bucket,
