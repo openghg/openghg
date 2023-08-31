@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
+import shutil
 from pandas import DataFrame, Timestamp, Timedelta
 from xarray import Dataset
 from openghg.objectstore import exists, move_objects
@@ -664,7 +665,6 @@ class Datasource:
             new_keys = {}
 
             version_key = self.define_version_key(version_str)
-            # version_folder = Path(bucket) / version_key
 
             # If version is already present, and we are not creating a new version
             # we may need to delete the previous data.
@@ -674,10 +674,6 @@ class Datasource:
                 if (if_exists == "replace" and overlapping) or if_exists == "new":
                     logger.info("Previous version of the data will be deleted.")
                     delete_version = True
-            #     else:
-            #         delete_version = False
-            # else:
-            #     delete_version = False
 
             # Create back up of original data in case writing new data is unsuccessful
             if delete_version:
@@ -721,8 +717,9 @@ class Datasource:
                         filepath.parent.mkdir(parents=True)
                         data.to_netcdf(filepath, engine="netcdf4")
                     except IOError:
+                        # Remove this version
+                        shutil.rmtree(filepath.parent)
                         # If unable to write, return original data from back up.
-                        # NOTE - I wasn't sure how the os.removedir() was restoring the backup here?
                         if delete_version:
                             move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
                             self._data_keys.pop(version_str_backup)

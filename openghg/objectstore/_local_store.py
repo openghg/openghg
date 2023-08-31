@@ -251,11 +251,12 @@ def move_object(bucket: str, src_key: str, dst_key: str) -> None:
     dst = Path(f"{bucket}/{dst_key}._data")
 
     with rlock:
-        src.rename(dst)
+        shutil.move(src=src, dst=dst)
 
 
 def move_objects(bucket: str, src_prefix: str, dst_prefix: str) -> None:
-    """Move all keys with a certain prefix.
+    """Move all keys with a certain prefix. Any data in the destination folder
+    will be deleted.
 
     Args:
         bucket: Bucket path
@@ -268,7 +269,8 @@ def move_objects(bucket: str, src_prefix: str, dst_prefix: str) -> None:
     dst = Path(bucket, dst_prefix)
 
     with rlock:
-        src.rename(dst)
+        shutil.rmtree(dst)
+        shutil.move(src=src, dst=dst)
 
 
 def set_object(bucket: str, key: str, data: bytes) -> None:
