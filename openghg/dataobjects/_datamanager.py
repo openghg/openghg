@@ -2,7 +2,7 @@ from collections import defaultdict
 import copy
 from openghg.store.base import Datasource
 from openghg.store.metastore import open_metastore
-from openghg.objectstore import delete_object, get_writable_bucket
+from openghg.objectstore import get_writable_bucket
 import logging
 import tinydb
 from typing import DefaultDict, Dict, List, Set, Optional, Union
@@ -174,7 +174,7 @@ class DataManager:
                 updated = False
                 d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
                 # Save a backup of the metadata for now
-                found_record = store.search(tinydb.where("uuid") == u)
+                found_record = metastore.search({'uuid': u})
                 current_metadata = found_record[0]
 
                 version = str(len(self._backup[u].keys()) + 1)
@@ -247,15 +247,5 @@ class DataManager:
 
         with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for uid in uuid:
-                # First remove the data from the metadata store
-                metastore._metastore.remove(tinydb.where("uuid") == uid)
-                # Delete all the data associated with a Datasource
-                d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)
-                d.delete_all_data()
-                # Then delete the Datasource itself
-                key = d.key()
-                delete_object(bucket=self._bucket, key=key)
-                # Remove from the list of Datasources the object knows about
-                metastore.remove_datasource(uuid=uid)
-
+                metastore.delete(uid)
                 logger.info(f"Deleted Datasource with UUID {uid}.")
