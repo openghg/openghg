@@ -7,13 +7,13 @@ from openghg.store.metastore._tinydb_metastore import TinyDBMetaStore
 T = TypeVar('T', bound='DumbDatasource')
 
 class DumbDatasource:
-    def __init__(self, bucket: str, uuid: str) -> None:
-        self.bucket = bucket
+    """Minimal class satisfying BucketUUIDLoadable protocol."""
+    def __init__(self, uuid: str) -> None:
         self.uuid = uuid
 
     @classmethod
     def load(cls: type[T], bucket: str, uuid: str) -> T:
-        return cls(bucket, uuid)
+        return cls(uuid)
 
 
 def test_dumb_datasource_is_loadable():
@@ -49,8 +49,10 @@ def test_add(metastore):
 
 
 def test_get(metastore):
+    """Check if we can retrieve DumbDatasource via uuid."""
     result = metastore.get(uuid="123")
 
+    assert type(result) == DumbDatasource
     assert result.uuid == "123"
 
 
