@@ -10,14 +10,12 @@ from abc import ABC, abstractmethod
 from typing import Protocol, runtime_checkable
 from typing import Any, Generic, TypeVar
 
-from openghg.dataobjects import SearchResults
 
-
-T = TypeVar('T', bound='DataObject')
+T = TypeVar('T', bound='BucketUUIDLoadable')
 
 
 @runtime_checkable
-class DataObject(Protocol):
+class BucketUUIDLoadable(Protocol):
     """Protocol for objects that can be created
     via a `load` class method that takes a bucket and
     a uuid as arguments.
@@ -28,14 +26,14 @@ class DataObject(Protocol):
         pass
 
 
-class MetaStore(Generic[T]):
+class MetaStore(ABC, Generic[T]):
     data_object: type[T]
 
     def __init__(self, bucket: str) -> None:
         self.bucket = bucket
 
     @abstractmethod
-    def search(self, search_terms: dict[str, Any]) -> SearchResults:
+    def search(self, search_terms: dict[str, Any]) -> list[Any]:
         """Search for data using a dictionary of search terms."""
         pass
 
