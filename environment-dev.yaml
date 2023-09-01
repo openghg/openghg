@@ -6,7 +6,6 @@ channels:
 dependencies:
   - python>=3.8
   - git
-  - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
   - flake8
   - pre-commit
   - pytest
@@ -14,10 +13,12 @@ dependencies:
   - pytest-mock
   - requests-mock
   - pytest-tornasync
-  - msgpack-types
   - mypy==1.4.0
   - types-paramiko
   - types-PyYAML
   - types-requests
   - types-toml
   - types-urllib3
+  - pip:
+    - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
+    - msgpack-types
