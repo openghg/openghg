@@ -64,7 +64,7 @@ def open_metastore(
 
 
 class ClassicMetaStore(TinyDBMetaStore):
-    """Class that provides the methods previously available
+    """Class that provides additional methods previously available
     from `load_metastore`.
     """
     def __init__(self, bucket: str, session: tinydb.TinyDB, data_type: str) -> None:
@@ -79,6 +79,11 @@ class ClassicMetaStore(TinyDBMetaStore):
         return [result["uuid"] for result in self.search()]
 
     def remove_datasource(self, uuid: str) -> None:
+        """List of datasource UUIDs is drawn from metastore, so this
+        function isn't needed. (But remains in the code base because
+        'Make Metastore source of truth for datasource UUIDs' PR is still
+        open, as of writing this doc string.)
+        """
         pass
 
     def key(self) -> str:

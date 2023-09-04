@@ -32,7 +32,11 @@ class MetaStore(ABC):
     def search(self, search_terms: MetaData) -> QueryResults:
         """Search for data using a dictionary of search terms.
 
-        TODO: need to specify output format.
+        Args:
+            search_terms: dictionary of key-value pairs to search by.
+
+        Returns:
+            list of records in the metastore matching the given search terms.
         """
         pass
 
@@ -57,6 +61,17 @@ class MetaStore(ABC):
             None
         """
         pass
+
+    def update(self) -> None:
+        """Method for updating existing records.
+
+        TODO: figure out appropriate signature for this function.
+
+        Can this be implemented in the ABC by combining
+        `delete` and `add`? (Probably yes, if we don't care about preserving
+        document IDs.)
+        """
+        raise NotImplementedError
 
 
 class TinyDBMetaStore(MetaStore):
