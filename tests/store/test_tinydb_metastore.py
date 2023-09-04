@@ -1,3 +1,9 @@
+"""
+Tests for the TinyDB based metastore.
+
+It should be possible to use these tests with any metastore,
+provided the fixtures are changed.
+"""
 import pytest
 
 from openghg.store import load_metastore
@@ -23,6 +29,12 @@ def metastore(tmp_path):
 
 @pytest.fixture
 def surface_metastore(tmp_path):
+    """Open metastore with key for `ObsSurface`.
+
+    NOTE: we should be able to use any 'key' here besides '' to
+    show that this metastore is independent of the metastore provided
+    by the `metastore` fixture.
+    """
     bucket = str(tmp_path)
     with load_metastore(bucket=bucket, key=get_metakey("surface")) as session:
         metastore = TinyDBMetaStore(
