@@ -67,6 +67,7 @@ class ClassicMetaStore(TinyDBMetaStore):
     """Class that provides additional methods previously available
     from `load_metastore`.
     """
+
     def __init__(self, bucket: str, session: tinydb.TinyDB, data_type: str) -> None:
         super().__init__(bucket=bucket, session=session)
         self.data_type = data_type

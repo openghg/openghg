@@ -45,7 +45,6 @@ class MetaStore(ABC):
         """Add new metadata to the metastore."""
         pass
 
-
     @abstractmethod
     def delete(self, metadata: MetaData) -> None:
         """Delete metadata from the metastore.
@@ -136,7 +135,9 @@ class TinyDBMetaStore(MetaStore):
         if delete_one:
             results = self.search(metadata)
             if len(results) > 1:
-                raise MetastoreError("Multiple records found matching metadata. Pass `delete_one=False` to delete multiple records.")
+                raise MetastoreError(
+                    "Multiple records found matching metadata. Pass `delete_one=False` to delete multiple records."
+                )
 
         query = tinydb.Query().fragment(self._format_metadata(metadata))
         self._metastore.remove(query)

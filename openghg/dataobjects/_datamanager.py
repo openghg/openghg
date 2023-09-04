@@ -174,7 +174,7 @@ class DataManager:
                 updated = False
                 d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
                 # Save a backup of the metadata for now
-                found_record = metastore.search({'uuid': u})
+                found_record = metastore.search({"uuid": u})
                 current_metadata = found_record[0]
 
                 version = str(len(self._backup[u].keys()) + 1)
