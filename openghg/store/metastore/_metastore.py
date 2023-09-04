@@ -18,14 +18,14 @@ the MetaStore interface.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Dict, List
 
 import tinydb
 
 from openghg.types import MetastoreError
 
-MetaData = dict[str, Any]
-QueryResults = list[Any]  # ...to avoid clashes with `SearchResults` object
+MetaData = Dict[str, Any]
+QueryResults = List[Any]  # ...to avoid clashes with `SearchResults` object
 
 
 class MetaStore(ABC):
