@@ -168,3 +168,52 @@ def test_delete_multiple(metastore):
     results = metastore.search()
 
     assert len(results) == 0
+
+
+def test_overwrite_update(metastore):
+    """Test updating an entry by overwriting an existing
+    value.
+    """
+    metastore.add({"key": 123})
+    metastore.update(record_to_update={"key": 123}, metadata_to_add={"key": 321})
+
+    result = metastore.search()[0]
+
+    assert result["key"] == 321
+
+
+def test_add_update(metastore):
+    """Test updating an entry by adding a key-value pair an
+    existing record.
+    """
+    metastore.add({"key1": 123})
+    metastore.update(record_to_update={"key1": 123}, metadata_to_add={"key2": 321})
+
+    result = metastore.search()[0]
+
+    assert result["key1"] == 123
+    assert result["key2"] == 321
+
+
+def test_add_and_overwrite_update(metastore):
+    """Test updating an entry by overwriting an existing
+    value and adding a new key-value pair.
+    """
+    metastore.add({"key1": 123})
+    metastore.update(record_to_update={"key1": 123}, metadata_to_add={"key1": 321, "key2": "asdf"})
+
+    result = metastore.search()[0]
+
+    assert result["key1"] == 321
+    assert result["key2"] == "asdf"
+
+
+def test_update_error_if_not_unique(metastore):
+    """Check if an error is raised if we try to update
+    multiple records at once.
+    """
+    metastore.add({"key": 123})
+    metastore.add({"key": 123})
+
+    with pytest.raises(MetastoreError):
+        metastore.update(record_to_update={"key": 123}, metadata_to_add={"key2": 234})

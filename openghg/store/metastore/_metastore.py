@@ -4,6 +4,10 @@ This module defines an interface for metastores.
 Metastores store metadata that is used to search an
 object store for data.
 
+The documentation in this module refers to metadata entries stored
+in the metastore as "records". These correspond to "documents" in
+TinyDB and Mongodb.
+
 A MetaStore managed by an ObjectStore object will store
 UUIDs, which are used to locate data stored in the object store.
 
@@ -65,6 +69,8 @@ class MetaStore(ABC):
         """Method for updating existing records.
 
         TODO: figure out appropriate signature for this function.
+        TODO: there are many possibilities for what "update" means,
+        need to figure out what we need
 
         Can this be implemented in the ABC by combining
         `delete` and `add`? (Probably yes, if we don't care about preserving
@@ -103,6 +109,19 @@ class TinyDBMetaStore(MetaStore):
         query = tinydb.Query().fragment(self._format_metadata(search_terms))
         return list(self._metastore.search(query))  # TODO: find better way to deal with mypy than casting...
 
+    def _uniquely_identifies(self, metadata: MetaData) -> bool:
+        """Return true if the given metadata identifies a single record
+        in the metastore.
+
+        Args:
+            metadata: metadata to test to see if it identifies a single record.
+
+        Returns:
+            True if a search for the given metadata returns a single result; False otherwise.
+        """
+        result = self.search(search_terms=metadata)
+        return len(result) == 1
+
     def add(self, metadata: MetaData) -> None:
         """Add new metadata to the metastore.
 
@@ -114,15 +133,36 @@ class TinyDBMetaStore(MetaStore):
         """
         self._metastore.insert(self._format_metadata(metadata))
 
+    def update(self, record_to_update: MetaData, metadata_to_add: MetaData) -> None:
+        """Update a single record with given metadata.
+
+        Args:
+            record_to_update: metadata identifying the record to update. This must uniquely
+        identify the record.
+            metadata_to_add: metadata to overwrite or add to the record.
+
+        Returns:
+            None
+
+        Raises:
+            MetastoreError if more than one record matches the metadata in `record_to_update`.
+        """
+        if not self._uniquely_identifies(self._format_metadata(record_to_update)):
+            raise MetastoreError(
+                "Multiple records found matching metadata. Pass `delete_one=False` to delete multiple records."
+            )
+        query = tinydb.Query().fragment(self._format_metadata(record_to_update))
+        self._metastore.update(metadata_to_add, query)
+
     def delete(self, metadata: MetaData, delete_one: bool = True) -> None:
         """Delete metadata from the metastore.
 
-        Note: this will delete *all* records matching the given metadata.
-        To see what will be deleted, search the metastore using the same
-        metadata.
-
         By default, an error will be thrown if more than one record will
         be deleted.
+
+        If `delete_one` is False, then this will delete *all* records matching
+        the given metadata. To see what will be deleted, search the metastore using
+        the same metadata.
 
         Args:
             metadata: metadata to search for records to delete.
@@ -133,8 +173,7 @@ class TinyDBMetaStore(MetaStore):
             None
         """
         if delete_one:
-            results = self.search(metadata)
-            if len(results) > 1:
+            if not self._uniquely_identifies(metadata):
                 raise MetastoreError(
                     "Multiple records found matching metadata. Pass `delete_one=False` to delete multiple records."
                 )
