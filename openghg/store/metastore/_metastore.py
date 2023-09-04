@@ -153,7 +153,7 @@ class TinyDBMetaStore(MetaStore):
         """
         if not self._uniquely_identifies(self._format_metadata(record_to_update)):
             raise MetastoreError(
-                "Multiple records found matching metadata. Pass `delete_one=False` to delete multiple records."
+                "Multiple records found matching metadata. `record_to_update` must identify a single record."
             )
         query = tinydb.Query().fragment(self._format_metadata(record_to_update))
         self._metastore.update(metadata_to_add, query)
