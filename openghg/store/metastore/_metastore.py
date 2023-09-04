@@ -65,18 +65,22 @@ class MetaStore(ABC):
         """
         pass
 
-    def update(self) -> None:
-        """Method for updating existing records.
+    @abstractmethod
+    def update(self, record_to_update: MetaData, metadata_to_add: MetaData) -> None:
+        """Update a single record with given metadata.
 
-        TODO: figure out appropriate signature for this function.
-        TODO: there are many possibilities for what "update" means,
-        need to figure out what we need
+        Args:
+            record_to_update: metadata identifying the record to update. This must uniquely
+        identify the record.
+            metadata_to_add: metadata to overwrite or add to the record.
 
-        Can this be implemented in the ABC by combining
-        `delete` and `add`? (Probably yes, if we don't care about preserving
-        document IDs.)
+        Returns:
+            None
+
+        Raises:
+            MetastoreError if more than one record matches the metadata in `record_to_update`.
         """
-        raise NotImplementedError
+        pass
 
 
 class TinyDBMetaStore(MetaStore):
