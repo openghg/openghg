@@ -239,6 +239,8 @@ class DataManager:
         Returns:
             None
         """
+        from openghg.objectstore import delete_object
+
         # Add in ability to delete metadata keys
         if not isinstance(uuid, list):
             uuid = [uuid]
@@ -247,5 +249,15 @@ class DataManager:
 
         with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for uid in uuid:
+                # First remove the data from the metadata store
                 metastore.delete(uid)
+
+                # Delete all the data associated with a Datasource
+                d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)
+                d.delete_all_data()
+
+                # Then delete the Datasource itself
+                key = d.key()
+                delete_object(bucket=self._bucket, key=key)
+
                 logger.info(f"Deleted Datasource with UUID {uid}.")

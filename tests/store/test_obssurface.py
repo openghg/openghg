@@ -542,6 +542,7 @@ def test_read_thames_barrier(bucket):
         assert sorted(obs._datasource_uuids.values()) == expected_keys
 
 
+@pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects")
 def test_delete_Datasource(bucket):
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
 

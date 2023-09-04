@@ -7,7 +7,6 @@ from typing import Literal
 import tinydb
 
 from openghg.store import load_metastore
-from openghg.store.base import Datasource
 from openghg.store.metastore._metastore import TinyDBMetaStore
 
 
@@ -64,9 +63,9 @@ def open_metastore(
         yield metastore
 
 
-class ClassicMetaStore(TinyDBMetaStore[Datasource]):
+class ClassicMetaStore(TinyDBMetaStore):
     def __init__(self, bucket: str, session: tinydb.TinyDB, data_type: str) -> None:
-        super().__init__(storage_object=Datasource, bucket=bucket, session=session)
+        super().__init__(bucket=bucket, session=session)
         self.data_type = data_type
 
     @property
@@ -83,25 +82,15 @@ class ClassicMetaStore(TinyDBMetaStore[Datasource]):
         return get_key(self.data_type)
 
     def delete(self, uuid: str) -> None:
-        """Delete a Datasource with the given UUID.
+        """Delete a record with given UUID from metastore.
 
-        This deletes both the data and the record in
-        the metastore.
+        Note: this only deletes the record in the metastore,
+        not the data itself.
 
         Args:
-            uuid: UUID of the Datasource to delete.
+            uuid: UUID of the record to delete.
 
         Returns:
             None
         """
-        from openghg.objectstore import delete_object
-
-        # Delete Datasource data
-        Datasource.load(bucket=self._bucket, uuid=uuid).delete_all_data()
-
-        # Delete the Datasource itself
-        key = f"{Datasource._datasource_root}/uuid/{uuid}"
-        delete_object(bucket=self._bucket, key=key)
-
-        # Delete the UUID from the metastore
         self._metastore.remove(tinydb.where("uuid") == uuid)

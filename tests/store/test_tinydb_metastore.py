@@ -1,28 +1,9 @@
 import pytest
-from typing import TypeVar
 
 from openghg.store import load_metastore
-from openghg.store.metastore._metastore import TinyDBMetaStore, BucketUUIDLoadable
+from openghg.store.metastore._metastore import TinyDBMetaStore
 from openghg.store.metastore._classic_metastore import get_metakey
 from openghg.types import MetastoreError
-
-
-T = TypeVar('T', bound='DumbDatasource')
-
-
-class DumbDatasource:
-    """Minimal class satisfying BucketUUIDLoadable protocol."""
-    def __init__(self, uuid: str) -> None:
-        self.uuid = uuid
-
-    @classmethod
-    def load(cls: type[T], bucket: str, uuid: str) -> T:
-        return cls(uuid)
-
-
-def test_dumb_datasource_is_loadable():
-    """Check that DumbDatasource satisfies BucketUUIDLoadable protocol."""
-    assert issubclass(DumbDatasource, BucketUUIDLoadable)
 
 
 @pytest.fixture
@@ -34,8 +15,7 @@ def metastore(tmp_path):
     """
     bucket = str(tmp_path)
     with load_metastore(bucket=bucket, key='') as session:
-        metastore = TinyDBMetaStore[DumbDatasource](
-            storage_object=DumbDatasource,
+        metastore = TinyDBMetaStore(
             bucket=bucket,
             session=session)
         yield metastore
@@ -45,8 +25,7 @@ def metastore(tmp_path):
 def surface_metastore(tmp_path):
     bucket = str(tmp_path)
     with load_metastore(bucket=bucket, key=get_metakey("surface")) as session:
-        metastore = TinyDBMetaStore[DumbDatasource](
-            storage_object=DumbDatasource,
+        metastore = TinyDBMetaStore(
             bucket=bucket,
             session=session)
         yield metastore
@@ -58,29 +37,20 @@ def test_search_empty(metastore):
 
 
 def test_add(metastore):
-    uuid = metastore.add({"key1": "val1"})
+    metastore.add({"key1": "val1"})
     result = metastore.search()
 
     assert len(result) == 1
 
-    assert result[0]['uuid'] == uuid
     assert result[0]['key1'] == 'val1'
-
-
-def test_get(metastore):
-    """Check if we can retrieve DumbDatasource via uuid."""
-    result = metastore.get(uuid="123")
-
-    assert type(result) == DumbDatasource
-    assert result.uuid == "123"
 
 
 def test_search(metastore):
     """Test searching when there are multiple items
     in the metastore.
     """
-    uuid1 = metastore.add({"key": "val1"})
-    uuid2 = metastore.add({"key": "val2"})
+    metastore.add({"key": "val1"})
+    metastore.add({"key": "val2"})
 
     result_all = metastore.search()
 
@@ -88,12 +58,10 @@ def test_search(metastore):
 
     result1 = metastore.search({'key': 'val1'})
 
-    assert result1[0]['uuid'] == uuid1
     assert result1[0]['key'] == 'val1'
 
     result2 = metastore.search({'key': 'val2'})
 
-    assert result2[0]['uuid'] == uuid2
     assert result2[0]['key'] == 'val2'
 
 
@@ -117,12 +85,11 @@ def test_surface_metastore(surface_metastore):
     """Check if we can use the metastore with a non-empty
     data type.
     """
-    uuid = surface_metastore.add({"key1": "val1"})
+    surface_metastore.add({"key1": "val1"})
     result = surface_metastore.search()
 
     assert len(result) == 1
 
-    assert result[0]['uuid'] == uuid
     assert result[0]['key1'] == 'val1'
 
 
@@ -149,8 +116,7 @@ def test_read_only_metastore(tmp_path):
     bucket = str(tmp_path)
     with pytest.raises(MetastoreError):
         with load_metastore(bucket=bucket, key='', mode='r') as session:
-            read_only_metastore = TinyDBMetaStore[DumbDatasource](
-                storage_object=DumbDatasource,
+            read_only_metastore = TinyDBMetaStore(
                 bucket=bucket,
                 session=session,
             )
