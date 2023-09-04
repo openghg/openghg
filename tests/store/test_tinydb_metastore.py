@@ -121,3 +121,38 @@ def test_read_only_metastore(tmp_path):
                 session=session,
             )
             read_only_metastore.add({"key": "val"})
+
+
+def test_delete(metastore):
+    """Check if we can delete data."""
+    metastore.add({"key": 123})
+    metastore.delete({"key": 123})
+
+    results = metastore.search()
+
+    assert len(results) == 0
+
+
+def test_delete_multiple_raises_error_by_default(metastore):
+    """By default, the TinyDBMetaStore will throw an error if multiple
+    records will be deleted.
+    """
+    metastore.add({"key": 123})
+    metastore.add({"key": 123})
+
+    with pytest.raises(MetastoreError):
+        metastore.delete({"key": 123})
+
+
+def test_delete_multiple(metastore):
+    """Deleting multiple records is possible if we say we set
+    `delete_one` to `False`.
+    """
+    metastore.add({"key": 123})
+    metastore.add({"key": 123})
+
+    metastore.delete({"key": 123}, delete_one=False)
+
+    results = metastore.search()
+
+    assert len(results) == 0

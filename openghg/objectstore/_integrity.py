@@ -32,5 +32,5 @@ def integrity_check() -> None:
 
                 if datasource_uuids != metastore_uuids:
                     raise ObjectStoreError(
-                        f"Mismatch between metastore Datasource UUIDs and {metastore._root} Datasource UUIDs."
+                        f"Mismatch between metastore Datasource UUIDs and {metastore} Datasource UUIDs."
                     )

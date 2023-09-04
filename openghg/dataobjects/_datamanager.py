@@ -250,7 +250,7 @@ class DataManager:
         with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for uid in uuid:
                 # First remove the data from the metadata store
-                metastore.delete(uid)
+                metastore.delete({"uuid": uid})
 
                 # Delete all the data associated with a Datasource
                 d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)

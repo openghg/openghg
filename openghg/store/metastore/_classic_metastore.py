@@ -56,7 +56,7 @@ def open_metastore(
         mode: specify read or read/write mode
 
     Yields:
-        TinyDBMetaStore instance storing data as Datasource objects.
+        ClassicMetaStore instance.
     """
     with load_metastore(bucket, get_metakey(data_type), mode=mode) as session:
         metastore = ClassicMetaStore(bucket=bucket, session=session, data_type=data_type)
@@ -64,6 +64,9 @@ def open_metastore(
 
 
 class ClassicMetaStore(TinyDBMetaStore):
+    """Class that provides the methods previously available
+    from `load_metastore`.
+    """
     def __init__(self, bucket: str, session: tinydb.TinyDB, data_type: str) -> None:
         super().__init__(bucket=bucket, session=session)
         self.data_type = data_type
@@ -80,17 +83,3 @@ class ClassicMetaStore(TinyDBMetaStore):
 
     def key(self) -> str:
         return get_key(self.data_type)
-
-    def delete(self, uuid: str) -> None:
-        """Delete a record with given UUID from metastore.
-
-        Note: this only deletes the record in the metastore,
-        not the data itself.
-
-        Args:
-            uuid: UUID of the record to delete.
-
-        Returns:
-            None
-        """
-        self._metastore.remove(tinydb.where("uuid") == uuid)
