@@ -7,8 +7,8 @@ provided the fixtures are changed.
 import pytest
 
 from openghg.store import load_metastore
-from openghg.store.metastore._metastore import TinyDBMetaStore
-from openghg.store.metastore._classic_metastore import get_metakey
+from openghg.objectstore.metastore._metastore import TinyDBMetaStore
+from openghg.objectstore.metastore._classic_metastore import get_metakey
 from openghg.types import MetastoreError
 
 
