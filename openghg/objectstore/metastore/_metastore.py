@@ -26,10 +26,11 @@ from openghg.types import MetastoreError
 
 MetaData = Dict[str, Any]
 QueryResults = List[Any]  # ...to avoid clashes with `SearchResults` object
+Bucket = str
 
 
 class MetaStore(ABC):
-    def __init__(self, bucket: str) -> None:
+    def __init__(self, bucket: Bucket) -> None:
         self._bucket = bucket
 
     @abstractmethod
@@ -84,7 +85,7 @@ class MetaStore(ABC):
 
 
 class TinyDBMetaStore(MetaStore):
-    def __init__(self, bucket: str, session: tinydb.TinyDB) -> None:
+    def __init__(self, bucket: Bucket, session: tinydb.TinyDB) -> None:
         super().__init__(bucket=bucket)
         self._metastore = session
 
