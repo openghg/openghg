@@ -4,7 +4,7 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
-from openghg.store.metastore import open_metastore
+from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
 from openghg.objectstore import get_readable_buckets
 from openghg.util import decompress, running_on_hub

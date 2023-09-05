@@ -14,7 +14,7 @@ from openghg.objectstore import (
 )
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
-from openghg.store.metastore import open_metastore
+from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import search_surface
 from openghg.standardise import standardise_surface, standardise_from_binary_data
 from openghg.util import create_daterange_str

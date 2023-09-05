@@ -5,7 +5,7 @@ from openghg.objectstore import get_writable_bucket, delete_object
 from openghg.types import ObjectStoreError
 from helpers import get_footprint_datapath, get_emissions_datapath, clear_test_stores
 from openghg.store.base import Datasource
-from openghg.store.metastore import open_metastore
+from openghg.objectstore.metastore import open_metastore
 import tinydb
 
 

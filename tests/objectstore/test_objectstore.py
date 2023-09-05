@@ -1,11 +1,19 @@
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, Dict, List
 
 import pytest
 
 from openghg.store import load_metastore
 from openghg.objectstore.metastore._metastore import TinyDBMetaStore
-from openghg.objectstore._objectstore import AbstractDatasource, ObjectStore
+from openghg.objectstore._datasource import InMemoryDatasource
+from openghg.objectstore._objectstore import ObjectStore
 from openghg.types import ObjectStoreError
+
+
+MetaData = Dict[str, Any]
+QueryResults = List[Any]
+UUID = str
+Data = Any
+Bucket = str
 
 
 @pytest.fixture
@@ -24,47 +32,6 @@ def metastore(bucket):
             bucket=bucket,
             session=session)
         yield metastore
-
-
-T = TypeVar('T', bound='InMemoryDatasource')
-
-
-MetaData = Dict[str, Any]
-QueryResults = List[Any]
-UUID = str
-Data = Any
-Bucket = str
-
-
-class InMemoryDatasource(AbstractDatasource):
-    """Minimal class implementing the AbstractDatasource interface."""
-    datasources = dict()
-
-    def __init__(self, uuid: UUID, data: Optional[List[Data]] = None) -> None:
-        self.uuid = uuid
-        if data:
-            self.data: List[Data] = data
-        else:
-            self.data: List[Data] = []
-
-    @classmethod
-    def load(cls: type[T], bucket: Bucket, uuid: UUID) -> T:
-        try:
-            data = cls.datasources[uuid]
-        except KeyError:
-            raise ValueError(f'No datasource with UUID {uuid} found in bucket {bucket}.')
-        else:
-            return cls(uuid, data)
-
-    def add(self, data: Data) -> None:
-        self.data.append(data)
-
-    def delete(self) -> None:
-        self.data = []
-        del InMemoryDatasource.datasources[self.uuid]
-
-    def save(self, bucket: Bucket) -> None:
-        InMemoryDatasource.datasources[self.uuid] = self.data
 
 
 @pytest.fixture
