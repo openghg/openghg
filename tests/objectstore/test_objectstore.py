@@ -80,6 +80,16 @@ def test_create_twice_raises_error(objectstore, fake_metadata, fake_data):
         objectstore.create(fake_metadata[0], fake_data[1])
 
 
+def test_create_many(objectstore, fake_metadata, fake_data):
+    """Check that creating different datasources with different metadata works."""
+    objectstore.create(fake_metadata[0], fake_data[0])
+    objectstore.create(fake_metadata[1], fake_data[0])
+    objectstore.create(fake_metadata[2], fake_data[0])
+
+    uuids = objectstore.get_uuids()
+
+    assert len(uuids) == 3
+
 def test_update(objectstore, fake_metadata, fake_data):
     objectstore.create(fake_metadata[0], fake_data[0])
 
@@ -107,3 +117,16 @@ def test_update_metadata(objectstore, fake_metadata, fake_data):
     result = objectstore.search({'uuid': uuid})[0]
 
     assert result['inlet'] == '200m'
+
+
+def test_delete(objectstore, fake_metadata, fake_data):
+    objectstore.create(fake_metadata[0], fake_data[0])
+
+    uuid = objectstore.get_uuids(fake_metadata[0])[0]
+    objectstore.delete(uuid)
+
+    assert len(objectstore.get_uuids()) == 0
+
+    with pytest.raises(LookupError):
+        # LookupError from trying to load data from UUID not found in InMemoryDatasource
+        objectstore.get_data(uuid)

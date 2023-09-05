@@ -72,7 +72,7 @@ class InMemoryDatasource(Datasource):
         try:
             data = cls.datasources[uuid]
         except KeyError:
-            raise ValueError(f'No datasource with UUID {uuid} found in bucket {bucket}.')
+            raise LookupError(f'No datasource with UUID {uuid} found in bucket {bucket}.')
         else:
             return cls(uuid, data)
 
