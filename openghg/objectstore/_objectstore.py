@@ -15,17 +15,16 @@ both metadata and data.
 """
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from openghg.store.metastore._metastore import MetaStore
+from openghg.objectstore._datasource import Datasource
+from openghg.objectstore.metastore import MetaStore
 from openghg.types import ObjectStoreError
 
 
-M = TypeVar("M", bound=MetaStore)
-DS = TypeVar("DS", bound='AbstractDatasource')
+DS = TypeVar("DS", bound='Datasource')
 
 
 MetaData = Dict[str, Any]
@@ -33,46 +32,6 @@ QueryResults = List[Any]
 UUID = str
 Data = Any
 Bucket = str
-
-
-class AbstractDatasource(ABC):
-    """Interface for Datasource-like objects.
-
-    The data stored in a Datasource is assumed to be related in some way.
-
-    For instance, a data source might contain time series data for concentrations
-    of a particular gas, measured from a specific instrument, at a specific
-    inlet height, and at a specific site.
-
-    Datasources are stored by UUID within buckets, and must have a `load` classmethod
-    to support this.
-    """
-    def __init__(self, uuid: UUID) -> None:
-        self.uuid = uuid
-
-    @classmethod
-    @abstractmethod
-    def load(cls: type[DS], bucket: str, uuid: str) -> DS:
-        pass
-
-    @abstractmethod
-    def add(self, data: Data) -> None:
-        """Add data to the datasource.
-
-        TODO: add `overwrite` argument, with expected error type
-        if trying to overwrite data without saying so.
-        """
-        pass
-
-    @abstractmethod
-    def delete(self) -> None:
-        """Delete all of the data stored by this datasource."""
-        pass
-
-    @abstractmethod
-    def save(self, bucket: Bucket) -> None:
-        """Save changes to datasource made by `add` method."""
-        pass
 
 
 class ObjectStore(Generic[DS]):
