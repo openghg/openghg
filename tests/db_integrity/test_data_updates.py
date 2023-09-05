@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from helpers import get_surface_datapath, get_emissions_datapath, get_footprint_datapath
 from openghg.store.base import Datasource
-from openghg.store.metastore import open_metastore
+from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_flux
 from openghg.retrieve import search
 from openghg.standardise import standardise_footprint, standardise_flux, standardise_surface

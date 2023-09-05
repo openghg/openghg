@@ -7,7 +7,7 @@ from typing import Literal
 import tinydb
 
 from openghg.store import load_metastore
-from openghg.store.metastore._metastore import TinyDBMetaStore
+from openghg.objectstore.metastore._metastore import TinyDBMetaStore
 
 
 object_store_data_classes = {

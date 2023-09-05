@@ -1,7 +1,7 @@
 from collections import defaultdict
 import copy
 from openghg.store.base import Datasource
-from openghg.store.metastore import open_metastore
+from openghg.objectstore.metastore import open_metastore
 from openghg.objectstore import get_writable_bucket
 import logging
 import tinydb

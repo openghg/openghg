@@ -1,6 +1,6 @@
 from openghg.store import data_manager
 from openghg.store.base import Datasource
-from openghg.store.metastore import open_metastore
+from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import search_surface
 from openghg.standardise import standardise_surface, standardise_footprint
 from openghg.objectstore import get_writable_bucket
