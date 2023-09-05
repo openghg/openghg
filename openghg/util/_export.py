@@ -49,6 +49,11 @@ def to_dashboard(
     allowed_formats = ("json", "parquet")
     if output_format not in allowed_formats:
         raise ValueError(f"Invalid output format, please select one of {allowed_formats}")
+
+    export_folder = Path(export_folder)
+    if not export_folder.exists():
+        logger.info(f"Creating export folder at {export_folder}")
+        export_folder.mkdir()
     # Here we'll store the metadata that can be used to populate the interface
     # it'll also hold the filenames for the retrieval of data
     metadata_complete = addict.Dict()
@@ -56,6 +61,10 @@ def to_dashboard(
 
     if not isinstance(data, list):
         data = [data]
+
+    # Hold a list of all the files we export so we can check the size of the exported data
+    file_sizes_bytes = 0
+    one_MB = 1024 * 1024
 
     for obs in data:
         measurement_data = obs.data
@@ -124,14 +133,18 @@ def to_dashboard(
 
         logger.info(f"Writing dashboard data to: {export_filename}")
 
-        one_MB = 1e6
-        if export_filepath.stat().st_size > one_MB:
+        file_size = export_filepath.stat().st_size
+        file_sizes_bytes += file_size
+        if file_size > one_MB:
             logger.warn(
                 msg=f"The file {export_filename} is larger than 1 MB, consider ways to reduce its size."
             )
 
     metadata_complete_filepath.write_text(json.dumps(metadata_complete))
-    logger.info(f"Complete metadata file written to: {metadata_complete_filepath}")
+    file_sizes_bytes += metadata_complete_filepath.stat().st_size
+
+    logger.info(f"\n\nComplete metadata file written to: {metadata_complete_filepath}")
+    logger.info(f"Total size of exported data package: {file_sizes_bytes/one_MB:.2f} MB")
 
 
 def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> Union[Dict, None]:
@@ -143,7 +156,7 @@ def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> 
     Returns:
         dict or None: Dictonary if no filename given
     """
-    to_export = aDict()
+    to_export = addict.Dict()
 
     for species, species_data in data.items():
         spec_data = species_data["data"]
@@ -158,7 +171,7 @@ def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> 
 
     if filename is not None:
         with open(filename, "w") as f:
-            dump(to_export, f)
+            json.dump(to_export, f)
         return None
     else:
         to_return: Dict = to_export.to_dict()
