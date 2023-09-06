@@ -25,6 +25,8 @@ def to_dashboard(
     parquet_compression: Literal["brotli", "snappy", "gzip"] = "gzip",
     default_site: Optional[str] = None,
     default_species: Optional[str] = None,
+    default_inlet: Optional[str] = None,
+    default_instrument: Optional[str] = None,
 ) -> None:
     """Takes ObsData objects produced by OpenGHG and outputs them to JSON
     files. Files are named using the following convention:
@@ -57,7 +59,12 @@ def to_dashboard(
     # Here we'll store the metadata that can be used to populate the interface
     # it'll also hold the filenames for the retrieval of data
     metadata_complete = addict.Dict()
-    metadata_complete_filepath = Path(export_folder).joinpath("metadata_complete.json")
+    metadata_complete_filepath = Path(export_folder).joinpath("metadata_complete_compressed.json")
+
+    # Create the data directory
+    data_foldername = "measurements"
+    data_dir = export_folder.joinpath(data_foldername)
+    data_dir.mkdir(exist_ok=True)
 
     if not isinstance(data, list):
         data = [data]
@@ -109,12 +116,19 @@ def to_dashboard(
         network = metadata["network"]
         instrument = metadata["instrument"]
 
-        export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}.{output_format}"
-        export_filepath = Path(export_folder).joinpath(export_filename)
+        if output_format == "json":
+            file_extension = ".json"
+            if compress_json:
+                file_extension += ".gz"
+        elif output_format == "parquet":
+            file_extension = ".parquet"
+
+        export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}{file_extension}"
+        export_filepath = data_dir.joinpath(export_filename)
 
         file_data = {
             "metadata": metadata,
-            "filename": export_filename,
+            "filepath": f"{data_foldername}/{export_filename}",
         }
 
         metadata_complete[species][network][site][inlet][instrument] = file_data
@@ -122,13 +136,20 @@ def to_dashboard(
         # TODO - Check if this hoop jumping is required, I can't remember exactly why
         # I did it
         if output_format == "json":
-            for_export_str = json.dumps(json.loads(df.to_json()))
+            data_dict = json.loads(df.to_json())
+            # Let's trim the species name as we don't need that
+            data_dict = data_dict[species.lower()]
+            for_export_str = json.dumps(data_dict)
             if compress_json:
                 for_export_bytes = gzip.compress(for_export_str.encode())
                 export_filepath.write_bytes(for_export_bytes)
             else:
                 export_filepath.write_text(for_export_str)
         else:
+            logger.warning(
+                "The dashboard doesn't currently support the parquet format. "
+                + "This is for testing purposes only."
+            )
             df.to_parquet(export_filepath, compression=parquet_compression)
 
         logger.info(f"Writing dashboard data to: {export_filename}")
