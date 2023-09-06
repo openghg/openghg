@@ -96,18 +96,21 @@ class TinyDBMetaStore(MetaStore):
         """
         return {k.lower(): v for k, v in metadata.items()}
 
+    def _get_query(self, metadata: MetaData) -> tinydb.queries.QueryInstance:
+        return tinydb.Query().fragment(self._format_metadata(metadata))
+
     def search(self, search_terms: MetaData = dict()) -> QueryResults:
         """Search metastore using a dictionary of search terms.
 
         Args:
             search_terms: dictionary of key-value pairs to search by.
-        For instance search_terms = {'site': 'TAC'} will find all results
-        whose site is 'TAC'.
+                For instance search_terms = {'site': 'TAC'} will find all results
+                whose site is 'TAC'.
 
         Returns:
             list of records in the metastore matching the given search terms.
         """
-        query = tinydb.Query().fragment(self._format_metadata(search_terms))
+        query = self._get_query(search_terms)
         return list(self._metastore.search(query))  # TODO: find better way to deal with mypy than casting...
 
     def _uniquely_identifies(self, metadata: MetaData) -> bool:
@@ -148,11 +151,11 @@ class TinyDBMetaStore(MetaStore):
         Raises:
             MetastoreError if more than one record matches the metadata in `record_to_update`.
         """
-        if not self._uniquely_identifies(self._format_metadata(record_to_update)):
+        if not self._uniquely_identifies(record_to_update):
             raise MetastoreError(
                 "Multiple records found matching metadata. `record_to_update` must identify a single record."
             )
-        query = tinydb.Query().fragment(self._format_metadata(record_to_update))
+        query = self._get_query(record_to_update)
         self._metastore.update(metadata_to_add, query)
 
     def delete(self, metadata: MetaData, delete_one: bool = True) -> None:
@@ -168,7 +171,7 @@ class TinyDBMetaStore(MetaStore):
         Args:
             metadata: metadata to search for records to delete.
             delete_one: if True, throw error if more than one record will
-        be deleted.
+                be deleted.
 
         Returns:
             None
@@ -179,5 +182,5 @@ class TinyDBMetaStore(MetaStore):
                     "Multiple records found matching metadata. Pass `delete_one=False` to delete multiple records."
                 )
 
-        query = tinydb.Query().fragment(self._format_metadata(metadata))
+        query = self._get_query(metadata)
         self._metastore.remove(query)
