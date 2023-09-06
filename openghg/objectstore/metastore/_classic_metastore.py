@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 import json
-from typing import Literal, Optional
+from typing import Literal, Optional, TypeVar
 
 import tinydb
 from tinydb.middlewares import CachingMiddleware
@@ -109,6 +109,9 @@ def open_metastore(
         yield metastore
 
 
+CM = TypeVar('CM', bound='ClassicMetaStore')
+
+
 class ClassicMetaStore(TinyDBMetaStore):
     """Class that provides additional methods previously available
     from `load_metastore`.
@@ -117,6 +120,15 @@ class ClassicMetaStore(TinyDBMetaStore):
     def __init__(self, session: tinydb.TinyDB, data_type: str) -> None:
         super().__init__(session=session)
         self.data_type = data_type
+
+    @classmethod
+    def from_bucket(cls: type[CM], bucket: str, data_type: str) -> CM:
+        key = get_metakey(data_type)
+        session = tinydb.TinyDB(bucket, key, mode='rw', storage=CachingMiddleware(ObjectStorage))
+        return cls(session=session, data_type=data_type)
+
+    def close(self) -> None:
+        self._metastore.close()
 
     @property
     def _datasource_uuids(self) -> dict:

@@ -3,17 +3,19 @@
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
-from types import TracebackType
-from pandas import Timestamp
-import tinydb
 import logging
-from openghg.types import DatasourceLookupError
+from pandas import Timestamp
+from types import TracebackType
+from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
+
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore.metastore import ClassicMetaStore
+from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_now, to_lowercase
 
 
 T = TypeVar("T", bound="BaseStore")
+
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -26,7 +28,6 @@ class BaseStore:
     _uuid = "root_uuid"
 
     def __init__(self, bucket: str) -> None:
-        from openghg.store import load_metastore
 
         self._creation_datetime = str(timestamp_now())
         self._stored = False
@@ -44,7 +45,7 @@ class BaseStore:
             # Update myself
             self.__dict__.update(data)
 
-        self._metastore = load_metastore(bucket=bucket, key=self.metakey())
+        self._metastore = ClassicMetaStore.from_bucket(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
 
     def __init_subclass__(cls) -> None:
@@ -62,6 +63,7 @@ class BaseStore:
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
+            self._metastore.close()
             self.save()
 
     @classmethod
@@ -73,7 +75,6 @@ class BaseStore:
         return f"{cls._root}/uuid/{cls._uuid}"
 
     def save(self) -> None:
-        self._metastore.close()
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
     def to_data(self) -> Dict:
@@ -183,9 +184,9 @@ class BaseStore:
             # in the Datasource
             datasource_metadata = datasource.metadata()
             if new_ds:
-                self._metastore.insert(datasource_metadata)
+                self._metastore.add(datasource_metadata)
             else:
-                self._metastore.update(datasource_metadata, tinydb.where("uuid") == datasource.uuid())
+                self._metastore.update(record_to_update={'uuid': datasource.uuid()}, metadata_to_add=datasource_metadata)
 
             uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
 
@@ -227,7 +228,7 @@ class BaseStore:
                     f"The given metadata doesn't contain enough information, we need: {required_keys}"
                 )
 
-            required_result = self._metastore.search(tinydb.Query().fragment(required_metadata))
+            required_result = self._metastore.search(required_metadata)
 
             if not required_result:
                 results[key] = False
