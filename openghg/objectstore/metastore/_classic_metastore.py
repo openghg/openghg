@@ -23,16 +23,6 @@ object_store_data_classes = {
 }
 
 
-def get_key(data_type: str) -> str:
-    """Return the metakey for a given data type."""
-    try:
-        result = object_store_data_classes[data_type]
-    except KeyError:
-        return "default"
-    else:
-        return f"{result['_root']}/uuid/{result['_uuid']}"
-
-
 def get_metakey(data_type: str) -> str:
     """Return the metakey for a given data type."""
     try:
@@ -69,8 +59,8 @@ class ObjectStorage(tinydb.Storage):
         data = get_object(bucket=self._bucket, key=self._key)
 
         try:
-            json_data: dict = json.loads(data)  # TODO: just use get_object_from_json
-            return json_data  # TODO: this should go in 'else' cause
+            json_data: dict = json.loads(data)
+            return json_data
         except json.JSONDecodeError:
             return None
 
@@ -91,9 +81,6 @@ def open_metastore(
 ) -> Generator[ClassicMetaStore, None, None]:
     """Context manager for TinyDBMetaStore based on OpenGHG v<=6.2 set-up for keys
     and TinyDB.
-
-    NOTE: This is a convenience function to help bring new MetaStore code into the
-    existing code base.
 
     Args:
         bucket: path to object store
@@ -129,27 +116,3 @@ class ClassicMetaStore(TinyDBMetaStore):
 
     def close(self) -> None:
         self._metastore.close()
-
-    @property
-    def _datasource_uuids(self) -> dict:
-        return {result["uuid"]: "" for result in self.search()}
-
-    def datasources(self) -> list:
-        return [result["uuid"] for result in self.search()]
-
-    def remove_datasource(self, uuid: str) -> None:
-        """List of datasource UUIDs is drawn from metastore, so this
-        function isn't needed. (But remains in the code base because
-        'Make Metastore source of truth for datasource UUIDs' PR is still
-        open, as of writing this doc string.)
-        """
-        pass
-
-    def key(self) -> str:
-        """This is the only place where `get_key` is used.
-
-        This method is only used by some tests in test_obssurface.py.
-
-        TODO: remove dependency on this function.
-        """
-        return get_key(self.data_type)
