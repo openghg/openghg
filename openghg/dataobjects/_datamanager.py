@@ -1,11 +1,14 @@
 from collections import defaultdict
 import copy
+import logging
+from typing import DefaultDict, Dict, List, Set, Optional, Union
+
+import tinydb
+
 from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
-from openghg.objectstore import get_writable_bucket
-import logging
-import tinydb
-from typing import DefaultDict, Dict, List, Set, Optional, Union
+from openghg.objectstore import get_writable_bucket, get_writable_buckets
+from openghg.types import ObjectStoreError
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -261,3 +264,26 @@ class DataManager:
                 delete_object(bucket=self._bucket, key=key)
 
                 logger.info(f"Deleted Datasource with UUID {uid}.")
+
+
+def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
+    """Lookup the data / metadata you'd like to modify.
+
+    Args:
+        data_type: Type of data, for example surface, flux, footprint
+        store: Name of store
+        kwargs: Any pair of keyword arguments for searching
+    Returns:
+        DataManager: A handler object to help modify the metadata
+    """
+    from openghg.dataobjects import DataManager
+    from openghg.retrieve import search
+
+    writable_stores = get_writable_buckets()
+
+    if store not in writable_stores:
+        raise ObjectStoreError(f"You do not have permission to write to the {store} store.")
+
+    res = search(data_type=data_type, **kwargs)
+    metadata = res.metadata
+    return DataManager(metadata=metadata, store=store)

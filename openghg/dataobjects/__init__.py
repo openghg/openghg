@@ -6,4 +6,4 @@ from ._metdata import METData
 from ._obsdata import ObsData
 from ._obscolumn_data import ObsColumnData
 from ._searchresults import SearchResults
-from ._datamanager import DataManager
+from ._datamanager import DataManager, data_manager
