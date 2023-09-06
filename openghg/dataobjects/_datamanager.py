@@ -167,7 +167,6 @@ class DataManager:
         dtype = self._check_datatypes(uuid=uuid)
 
         with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
-            store = metastore._metastore
             for u in uuid:
                 updated = False
                 d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
