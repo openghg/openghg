@@ -7,7 +7,6 @@ import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import Dataset
-from types import TracebackType
 
 __all__ = ["Footprints"]
 

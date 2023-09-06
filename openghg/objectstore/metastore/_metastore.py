@@ -30,7 +30,6 @@ Bucket = str
 
 
 class MetaStore(ABC):
-
     @abstractmethod
     def search(self, search_terms: MetaData) -> QueryResults:
         """Search for data using a dictionary of search terms.

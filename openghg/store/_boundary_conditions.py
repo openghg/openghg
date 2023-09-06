@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
-from types import TracebackType
 import numpy as np
 from xarray import Dataset
 

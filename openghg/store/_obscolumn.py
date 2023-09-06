@@ -8,7 +8,6 @@ from numpy import ndarray
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray
-from types import TracebackType
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 

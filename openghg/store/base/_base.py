@@ -28,7 +28,6 @@ class BaseStore:
     _uuid = "root_uuid"
 
     def __init__(self, bucket: str) -> None:
-
         self._creation_datetime = str(timestamp_now())
         self._stored = False
         # Keyed by Datasource UUID
@@ -186,7 +185,9 @@ class BaseStore:
             if new_ds:
                 self._metastore.add(datasource_metadata)
             else:
-                self._metastore.update(record_to_update={'uuid': datasource.uuid()}, metadata_to_add=datasource_metadata)
+                self._metastore.update(
+                    record_to_update={"uuid": datasource.uuid()}, metadata_to_add=datasource_metadata
+                )
 
             uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
 

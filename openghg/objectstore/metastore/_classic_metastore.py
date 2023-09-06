@@ -96,13 +96,11 @@ def open_metastore(
         yield metastore
 
 
-CM = TypeVar('CM', bound='ClassicMetaStore')
+CM = TypeVar("CM", bound="ClassicMetaStore")
 
 
 class ClassicMetaStore(TinyDBMetaStore):
-    """Class that provides additional methods previously available
-    from `load_metastore`.
-    """
+    """TinyDBMetaStore using set-up for keys and TinyDB from OpenGHG <=v6.2"""
 
     def __init__(self, session: tinydb.TinyDB, data_type: str) -> None:
         super().__init__(session=session)
@@ -111,7 +109,7 @@ class ClassicMetaStore(TinyDBMetaStore):
     @classmethod
     def from_bucket(cls: type[CM], bucket: str, data_type: str) -> CM:
         key = get_metakey(data_type)
-        session = tinydb.TinyDB(bucket, key, mode='rw', storage=CachingMiddleware(ObjectStorage))
+        session = tinydb.TinyDB(bucket, key, mode="rw", storage=CachingMiddleware(ObjectStorage))
         return cls(session=session, data_type=data_type)
 
     def close(self) -> None:

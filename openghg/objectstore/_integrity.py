@@ -23,7 +23,7 @@ def integrity_check() -> None:
             # Now load the object
             with open_metastore(bucket=bucket, data_type=data_type) as metastore:
                 # Get all the Datasources
-                datasource_uuids = [result['uuid'] for result in metastore.search()]
+                datasource_uuids = [result["uuid"] for result in metastore.search()]
                 # Check they all exist
                 for uid in datasource_uuids:
                     Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()

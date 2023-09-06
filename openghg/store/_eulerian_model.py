@@ -4,7 +4,6 @@ from typing import DefaultDict, Dict, Optional, Union
 import logging
 from openghg.store.base import BaseStore
 from xarray import Dataset
-from types import TracebackType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler

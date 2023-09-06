@@ -10,7 +10,6 @@ import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
-from types import TracebackType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -580,7 +579,6 @@ class ObsSurface(BaseStore):
         """
         from openghg.objectstore import delete_object
         from openghg.store.base import Datasource
-        from tinydb import where
 
         # Load the Datasource and get all its keys
         # iterate over these keys and delete them
@@ -600,7 +598,7 @@ class ObsSurface(BaseStore):
         delete_object(bucket=self._bucket, key=key)
 
         # Delete the UUID from the metastore
-        self._metastore.remove(where("uuid") == uuid)
+        self._metastore.delete({"uuid": uuid})
 
         del self._datasource_uuids[uuid]
 
