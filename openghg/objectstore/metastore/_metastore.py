@@ -30,8 +30,6 @@ Bucket = str
 
 
 class MetaStore(ABC):
-    def __init__(self, bucket: Bucket) -> None:
-        self._bucket = bucket
 
     @abstractmethod
     def search(self, search_terms: MetaData) -> QueryResults:
@@ -85,8 +83,7 @@ class MetaStore(ABC):
 
 
 class TinyDBMetaStore(MetaStore):
-    def __init__(self, bucket: Bucket, session: tinydb.TinyDB) -> None:
-        super().__init__(bucket=bucket)
+    def __init__(self, session: tinydb.TinyDB) -> None:
         self._metastore = session
 
     def _format_metadata(self, metadata: MetaData) -> MetaData:

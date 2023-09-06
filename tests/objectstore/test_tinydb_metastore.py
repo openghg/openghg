@@ -5,10 +5,9 @@ It should be possible to use these tests with any metastore,
 provided the fixtures are changed.
 """
 import pytest
+import tinydb
 
-from openghg.store import load_metastore
-from openghg.objectstore.metastore._metastore import TinyDBMetaStore
-from openghg.objectstore.metastore._classic_metastore import get_metakey
+from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
 
 
@@ -19,27 +18,22 @@ def metastore(tmp_path):
     Note: `tmp_path` is function scope, so the metastore is
     reset for each test that uses this fixture.
     """
-    bucket = str(tmp_path)
-    with load_metastore(bucket=bucket, key='') as session:
-        metastore = TinyDBMetaStore(
-            bucket=bucket,
-            session=session)
+    filename = str(tmp_path / 'metastore._data')
+    with tinydb.TinyDB(filename) as session:
+        metastore = TinyDBMetaStore(session=session)
         yield metastore
 
 
 @pytest.fixture
-def surface_metastore(tmp_path):
-    """Open metastore with key for `ObsSurface`.
+def alternate_metastore(tmp_path):
+    """Open metastore with a different filepath.
 
-    NOTE: we should be able to use any 'key' here besides '' to
-    show that this metastore is independent of the metastore provided
-    by the `metastore` fixture.
+    This will be used to show that two different
+    metastore will not interact.
     """
-    bucket = str(tmp_path)
-    with load_metastore(bucket=bucket, key=get_metakey("surface")) as session:
-        metastore = TinyDBMetaStore(
-            bucket=bucket,
-            session=session)
+    filename = str(tmp_path / 'alternate_metastore._data')
+    with tinydb.TinyDB(filename) as session:
+        metastore = TinyDBMetaStore(session=session)
         yield metastore
 
 
@@ -93,46 +87,32 @@ def test_lowercase_add_search(metastore):
     assert len(result2) == 1
 
 
-def test_surface_metastore(surface_metastore):
+def test_alternate_metastore(alternate_metastore):
     """Check if we can use the metastore with a non-empty
     data type.
     """
-    surface_metastore.add({"key1": "val1"})
-    result = surface_metastore.search()
+    alternate_metastore.add({"key1": "val1"})
+    result = alternate_metastore.search()
 
     assert len(result) == 1
 
     assert result[0]['key1'] == 'val1'
 
 
-def test_multiple_metastores(metastore, surface_metastore):
+def test_multiple_metastores(metastore, alternate_metastore):
     """Check that metastores with different data types do not
     interact.
     """
     metastore.add({"key": 1})
-    surface_metastore.add({"key": 1})
+    alternate_metastore.add({"key": 1})
 
     res1 = metastore.search()
 
     assert len(res1) == 1
 
-    res2 = surface_metastore.search()
+    res2 = alternate_metastore.search()
 
     assert len(res2) == 1
-
-
-def test_read_only_metastore(tmp_path):
-    """Check that adding to a metastore opened with
-    a read-only TinyDB raises a MetaStoreError
-    """
-    bucket = str(tmp_path)
-    with pytest.raises(MetastoreError):
-        with load_metastore(bucket=bucket, key='', mode='r') as session:
-            read_only_metastore = TinyDBMetaStore(
-                bucket=bucket,
-                session=session,
-            )
-            read_only_metastore.add({"key": "val"})
 
 
 def test_delete(metastore):

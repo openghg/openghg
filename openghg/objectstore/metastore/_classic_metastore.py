@@ -28,7 +28,7 @@ def get_key(data_type: str) -> str:
     try:
         result = object_store_data_classes[data_type]
     except KeyError:
-        return ""
+        return "default"
     else:
         return f"{result['_root']}/uuid/{result['_uuid']}"
 
@@ -38,7 +38,7 @@ def get_metakey(data_type: str) -> str:
     try:
         result = object_store_data_classes[data_type]
     except KeyError:
-        return ""
+        return "default"
     else:
         return f"{result['_root']}/uuid/{result['_uuid']}/metastore"
 
@@ -69,8 +69,8 @@ class ObjectStorage(tinydb.Storage):
         data = get_object(bucket=self._bucket, key=self._key)
 
         try:
-            json_data: dict = json.loads(data)
-            return json_data
+            json_data: dict = json.loads(data)  # TODO: just use get_object_from_json
+            return json_data  # TODO: this should go in 'else' cause
         except json.JSONDecodeError:
             return None
 
@@ -105,7 +105,7 @@ def open_metastore(
     """
     key = get_metakey(data_type)
     with tinydb.TinyDB(bucket, key, mode, storage=CachingMiddleware(ObjectStorage)) as session:
-        metastore = ClassicMetaStore(bucket=bucket, session=session, data_type=data_type)
+        metastore = ClassicMetaStore(session=session, data_type=data_type)
         yield metastore
 
 
@@ -114,8 +114,8 @@ class ClassicMetaStore(TinyDBMetaStore):
     from `load_metastore`.
     """
 
-    def __init__(self, bucket: str, session: tinydb.TinyDB, data_type: str) -> None:
-        super().__init__(bucket=bucket, session=session)
+    def __init__(self, session: tinydb.TinyDB, data_type: str) -> None:
+        super().__init__(session=session)
         self.data_type = data_type
 
     @property
