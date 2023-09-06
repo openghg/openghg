@@ -186,7 +186,7 @@ class BaseStore:
                 self._metastore.add(datasource_metadata)
             else:
                 self._metastore.update(
-                    record_to_update={"uuid": datasource.uuid()}, metadata_to_add=datasource_metadata
+                    where={"uuid": datasource.uuid()}, to_update=datasource_metadata
                 )
 
             uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}

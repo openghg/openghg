@@ -3,8 +3,6 @@ import copy
 import logging
 from typing import DefaultDict, Dict, List, Set, Optional, Union
 
-import tinydb
-
 from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
 from openghg.objectstore import get_writable_bucket, get_writable_buckets
@@ -114,13 +112,12 @@ class DataManager:
         version = str(version)
 
         dtype = self._check_datatypes(uuid=uuid)
-        with open_metastore(data_type=dtype, bucket=self._bucket) as dclass:
-            metastore = dclass._metastore
+        with open_metastore(data_type=dtype, bucket=self._bucket) as metastore:
             backup = self._backup[uuid][version]
             self.metadata[uuid] = backup
 
-            metastore.remove(tinydb.where("uuid") == uuid)
-            metastore.insert(backup)
+            metastore.delete({'uuid': uuid})
+            metastore.add(backup)
 
             d = Datasource.load(bucket=self._bucket, uuid=uuid)
             d._metadata = backup
@@ -161,8 +158,6 @@ class DataManager:
         Returns:
             None
         """
-        from tinydb.operations import delete as tinydb_delete
-
         if to_update is None and to_delete is None:
             return None
 
@@ -202,9 +197,7 @@ class DataManager:
                         internal_copy.pop(k)
 
                     try:
-                        store.update_multiple(
-                            [(tinydb_delete(k), tinydb.where("uuid") == u) for k in to_delete]
-                        )
+                        metastore.update(where={'uuid': u}, to_delete=to_delete)
                     except KeyError:
                         raise ValueError(
                             "Unable to remove keys from metadata store, please ensure they exist."
@@ -218,10 +211,7 @@ class DataManager:
 
                     d._metadata.update(to_update)
                     internal_copy.update(to_update)
-                    response = store.update(to_update, tinydb.where("uuid") == u)
-
-                    if not response:
-                        raise ValueError("Unable to update metadata, possible metadata sync error.")
+                    metastore.update(where={'uuid': u}, to_update=to_update)
 
                     updated = True
 

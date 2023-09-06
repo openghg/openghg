@@ -6,7 +6,6 @@ from openghg.types import ObjectStoreError
 from helpers import get_footprint_datapath, get_emissions_datapath, clear_test_stores
 from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
-import tinydb
 
 
 @pytest.fixture(autouse=True)
@@ -66,7 +65,7 @@ def test_integrity_delete_uuids_metastore():
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
         uids = [result['uuid'] for result in metastore.search()[:4]]
         for u in uids:
-            metastore._metastore.remove(tinydb.where("uuid") == u)
+            metastore.delete({'uuid': u})
 
     with pytest.raises(ObjectStoreError):
         integrity_check()

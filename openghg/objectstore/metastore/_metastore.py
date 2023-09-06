@@ -18,7 +18,7 @@ the MetaStore interface.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Union
 
 import tinydb
 
@@ -137,26 +137,34 @@ class TinyDBMetaStore(MetaStore):
         """
         self._metastore.insert(self._format_metadata(metadata))
 
-    def update(self, record_to_update: MetaData, metadata_to_add: MetaData) -> None:
+    def update(self, where: MetaData, to_update: Optional[MetaData] = None, to_delete: Optional[Union[str, list[str]]] = None) -> None:
         """Update a single record with given metadata.
 
         Args:
-            record_to_update: metadata identifying the record to update. This must uniquely
-        identify the record.
-            metadata_to_add: metadata to overwrite or add to the record.
+            where: metadata identifying the record to update. This must uniquely
+                identify the record.
+            to_update: metadata to overwrite or add to the record.
+            to_delete: key or list of keys to delete from record.
 
         Returns:
             None
 
         Raises:
-            MetastoreError if more than one record matches the metadata in `record_to_update`.
+            MetastoreError if more than one record matches the metadata in `where`.
         """
-        if not self._uniquely_identifies(record_to_update):
+        if not self._uniquely_identifies(where):
             raise MetastoreError(
-                "Multiple records found matching metadata. `record_to_update` must identify a single record."
+                "Multiple records found matching metadata. `where` must identify a single record."
             )
-        query = self._get_query(record_to_update)
-        self._metastore.update(metadata_to_add, query)
+        query = self._get_query(where)
+        if to_update:
+            self._metastore.update(to_update, query)
+        if to_delete:
+            from tinydb.operations import delete
+            if not isinstance(to_delete, list):
+                to_delete = [to_delete]
+            for key in to_delete:
+                self._metastore.update(delete(key), query)
 
     def delete(self, metadata: MetaData, delete_one: bool = True) -> None:
         """Delete metadata from the metastore.
