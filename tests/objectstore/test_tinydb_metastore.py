@@ -155,7 +155,7 @@ def test_overwrite_update(metastore):
     value.
     """
     metastore.add({"key": 123})
-    metastore.update(record_to_update={"key": 123}, metadata_to_add={"key": 321})
+    metastore.update(where={"key": 123}, to_update={"key": 321})
 
     result = metastore.search()[0]
 
@@ -167,7 +167,7 @@ def test_add_update(metastore):
     existing record.
     """
     metastore.add({"key1": 123})
-    metastore.update(record_to_update={"key1": 123}, metadata_to_add={"key2": 321})
+    metastore.update(where={"key1": 123}, to_update={"key2": 321})
 
     result = metastore.search()[0]
 
@@ -180,7 +180,7 @@ def test_add_and_overwrite_update(metastore):
     value and adding a new key-value pair.
     """
     metastore.add({"key1": 123})
-    metastore.update(record_to_update={"key1": 123}, metadata_to_add={"key1": 321, "key2": "asdf"})
+    metastore.update(where={"key1": 123}, to_update={"key1": 321, "key2": "asdf"})
 
     result = metastore.search()[0]
 
@@ -196,4 +196,4 @@ def test_update_error_if_not_unique(metastore):
     metastore.add({"key": 123})
 
     with pytest.raises(MetastoreError):
-        metastore.update(record_to_update={"key": 123}, metadata_to_add={"key2": 234})
+        metastore.update(where={"key": 123}, to_update={"key2": 234})

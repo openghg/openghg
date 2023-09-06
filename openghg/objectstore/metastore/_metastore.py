@@ -83,7 +83,7 @@ class MetaStore(ABC):
 
 class TinyDBMetaStore(MetaStore):
     def __init__(self, session: tinydb.TinyDB) -> None:
-        self._metastore = session
+        self._db = session
 
     def _format_metadata(self, metadata: MetaData) -> MetaData:
         """Convert all keys to lowercase.
@@ -111,7 +111,7 @@ class TinyDBMetaStore(MetaStore):
             list of records in the metastore matching the given search terms.
         """
         query = self._get_query(search_terms)
-        return list(self._metastore.search(query))  # TODO: find better way to deal with mypy than casting...
+        return list(self._db.search(query))  # TODO: find better way to deal with mypy than casting...
 
     def _uniquely_identifies(self, metadata: MetaData) -> bool:
         """Return true if the given metadata identifies a single record
@@ -135,7 +135,7 @@ class TinyDBMetaStore(MetaStore):
         Returns:
             None
         """
-        self._metastore.insert(self._format_metadata(metadata))
+        self._db.insert(self._format_metadata(metadata))
 
     def update(self, where: MetaData, to_update: Optional[MetaData] = None, to_delete: Optional[Union[str, list[str]]] = None) -> None:
         """Update a single record with given metadata.
@@ -158,13 +158,13 @@ class TinyDBMetaStore(MetaStore):
             )
         query = self._get_query(where)
         if to_update:
-            self._metastore.update(to_update, query)
+            self._db.update(to_update, query)
         if to_delete:
             from tinydb.operations import delete
             if not isinstance(to_delete, list):
                 to_delete = [to_delete]
             for key in to_delete:
-                self._metastore.update(delete(key), query)
+                self._db.update(delete(key), query)
 
     def delete(self, metadata: MetaData, delete_one: bool = True) -> None:
         """Delete metadata from the metastore.
@@ -191,4 +191,4 @@ class TinyDBMetaStore(MetaStore):
                 )
 
         query = self._get_query(metadata)
-        self._metastore.remove(query)
+        self._db.remove(query)

@@ -28,7 +28,7 @@ def integrity_check() -> None:
                 for uid in datasource_uuids:
                     Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
 
-                metastore_uuids = [r["uuid"] for r in metastore._metastore]
+                metastore_uuids = [r["uuid"] for r in metastore.search()]
 
                 if datasource_uuids != metastore_uuids:
                     raise ObjectStoreError(

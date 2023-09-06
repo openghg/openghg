@@ -113,4 +113,4 @@ class ClassicMetaStore(TinyDBMetaStore):
         return cls(session=session, data_type=data_type)
 
     def close(self) -> None:
-        self._metastore.close()
+        self._db.close()
