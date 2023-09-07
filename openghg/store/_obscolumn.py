@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from numpy import ndarray
 
@@ -19,6 +19,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class ObsColumn(BaseStore):
     """This class is used to process emissions / flux data"""
 
+    _data_type = "column"
     _root = "ObsColumn"
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
@@ -50,7 +51,7 @@ class ObsColumn(BaseStore):
         platform: str = "satellite",
         source_format: str = "openghg",
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read column observation file
 
         Args:
@@ -105,7 +106,7 @@ class ObsColumn(BaseStore):
                 "This file has been uploaded previously with the filename : "
                 f"{self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Define parameters to pass to the parser function
         param = {

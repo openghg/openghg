@@ -1,15 +1,16 @@
 from __future__ import annotations
 import json
 from openghg.objectstore import exists, get_object, set_object_from_json, get_writable_buckets
-from typing import DefaultDict, Dict, Optional, Union, TYPE_CHECKING
+from typing import DefaultDict, Dict, Literal, Optional, Union, TYPE_CHECKING
 from xarray import Dataset
 import logging
-from openghg.types import ObjectStoreError
+from openghg.types import ObjectStoreError, MetastoreError
 from tinydb import Storage, TinyDB
 from tinydb.middlewares import CachingMiddleware
 
 if TYPE_CHECKING:
     from openghg.dataobjects import DataManager
+
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -18,9 +19,14 @@ DataDictType = DefaultDict[str, Dict[str, Union[Dict, Dataset]]]
 
 
 class ObjectStorage(Storage):
-    def __init__(self, bucket: str, key: str) -> None:
+    def __init__(self, bucket: str, key: str, mode: Literal["r", "rw"]) -> None:
+        valid_modes = ("r", "rw")
+        if mode not in valid_modes:
+            raise ValueError(f"Invalid mode, please choose one of {valid_modes}.")
+
         self._key = key
         self._bucket = bucket
+        self._mode = mode
 
     def read(self) -> Optional[Dict]:
         key = self._key
@@ -37,25 +43,29 @@ class ObjectStorage(Storage):
             return None
 
     def write(self, data: Dict) -> None:
-        key = self._key
+        if self._mode == "r":
+            raise MetastoreError("Cannot write to metastore in read-only mode.")
 
+        key = self._key
         set_object_from_json(bucket=self._bucket, key=key, data=data)
 
     def close(self) -> None:
         pass
 
 
-def load_metastore(bucket: str, key: str) -> TinyDB:
+def load_metastore(bucket: str, key: str, mode: Literal["r", "rw"] = "rw") -> TinyDB:
     """Load the metastore. This can be used as a context manager
     otherwise the database must be closed using the close method
     otherwise records are not written to file.
 
     Args:
+        bucket: Path to object store
         key: Key to metadata store
+        mode: rw for read-write or r for read-only
     Returns:
         TinyDB: instance of metadata database
     """
-    return TinyDB(bucket, key, storage=CachingMiddleware(ObjectStorage))
+    return TinyDB(bucket, key, mode, storage=CachingMiddleware(ObjectStorage))
 
 
 def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:

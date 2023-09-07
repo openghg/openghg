@@ -1,8 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 import logging
-from openghg.objectstore import get_writable_bucket
-from openghg.store import ObsSurface
+from openghg.standardise import standardise_surface
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -82,8 +81,6 @@ def add_noaa_obspack(
     if not files:
         files = _find_noaa_files(data_directory=data_directory, ext=".txt")
 
-    bucket = get_writable_bucket(name=store)
-
     # TODO - remove this once we can ensure all files will be processed correctly
     files_with_errors = []
     # Find relevant details for each file and call parse_noaa() function
@@ -94,18 +91,19 @@ def add_noaa_obspack(
         _project = param["project"]
         measurement_type = param["measurement_type"]
 
+        processed = dict()
         if _project in projects_to_read:
             try:
                 # TODO - can we streamline this a bit to save repeated loads?
-                with ObsSurface(bucket=bucket) as obs:
-                    processed = obs.read_file(
-                        filepath,
-                        site=site,
-                        measurement_type=measurement_type,
-                        network="NOAA",
-                        source_format="NOAA",
-                        overwrite=overwrite,
-                    )
+                processed = standardise_surface(
+                    store=store,
+                    filepath=filepath,
+                    site=site,
+                    measurement_type=measurement_type,
+                    network="NOAA",
+                    source_format="NOAA",
+                    overwrite=overwrite,
+                )
             except Exception:
                 files_with_errors.append(filepath.name)
 
@@ -113,9 +111,6 @@ def add_noaa_obspack(
             logger.warning(
                 f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
             )
-            processed = {}
-        else:
-            processed = {}
 
         # Expect "processed" dictionary and/or "error" dictionary within `processed`
         for key, value in processed.items():

@@ -1,6 +1,8 @@
 from pandas import DataFrame, Timestamp, Timedelta
+import xarray as xr
 from xarray import Dataset
 from collections import defaultdict
+import re
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
@@ -487,11 +489,11 @@ class Datasource:
     def load_dataset(bucket: str, key: str) -> Dataset:
         """Loads a xarray Dataset from the passed key for creation of a Datasource object
 
-        Currently this function gets binary data back from the object store, writes it
-        to a temporary file and then gets xarray to read from this file.
+        Data is lazy-loaded because we use `xarray.open_dataset`. This means that the
+        file handler for the data file remains open until the data is actually required.
 
-        This is done in a long winded way due to xarray not being able to create a Dataset
-        from binary data at the moment.
+        This improves performance, since we often only update one or two chunks of the dataset
+        at a time.
 
         Args:
             bucket: Bucket containing data
@@ -499,11 +501,10 @@ class Datasource:
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
-        import io
-        from openghg.objectstore import get_object
-        from xarray import load_dataset
+        from openghg.objectstore import get_object_data_path
 
-        return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
+        file_path = get_object_data_path(bucket, key)
+        return xr.open_dataset(file_path)
 
     @classmethod
     def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:
@@ -542,11 +543,12 @@ class Datasource:
 
         return d
 
-    def save(self, bucket: str) -> None:
+    def save(self, bucket: str, compression: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
             bucket: Bucket to hold data
+            compression: True if data should be compressed on save
         Returns:
             None
         """
@@ -577,8 +579,60 @@ class Datasource:
                 if not parent_folder.exists():
                     parent_folder.mkdir(parents=True, exist_ok=True)
 
-                data.to_netcdf(filepath, engine="netcdf4")
+                if compression:
+                    # variables with variable length data types shouldn't be compressed
+                    # e.g. object ("O") or unicode ("U") type
+                    do_not_compress = []
 
+                    # regex for Unicode and Object dtypes, with character code U or O
+                    # type strings may start with a byteorder character: <, >, =, or |,
+                    # so we skip these if present.
+                    dtype_pat = re.compile(r"[<>=|]?[UO]")
+                    for dv in data.data_vars:
+                        if dtype_pat.match(data[dv].data.dtype.str):
+                            do_not_compress.append(dv)
+
+                    # setting compression levels for data vars in data
+                    comp = dict(zlib=True, complevel=5)
+
+                    valid_encoding_keys = [
+                        "zlib",
+                        "fletcher32",
+                        "dtype",
+                        "complevel",
+                        "chunksizes",
+                        "compression",
+                        "shuffle",
+                        "contiguous",
+                        "least_significant_digit",
+                        "_FillValue",
+                    ]
+                    encoding = {}
+                    for var in data.data_vars:
+                        if var not in do_not_compress:
+                            enc = {k: v for k, v in data[var].encoding.items() if k in valid_encoding_keys}
+                            enc.update(comp)
+                            encoding[var] = enc
+
+                    try:
+                        data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
+                    except RuntimeError:
+                        logger.warning(
+                            f"Storing footprint for date range {daterange} without compression due to netCDF4 RuntimeError."
+                        )
+                        data.to_netcdf(filepath, engine="netcdf4")
+                    except ValueError as e:
+                        # chunksize might be set if the data was read from a netCDF file
+                        # and sometimes this causes errors.
+                        if "chunksize" in e.args[0].lstrip().split():
+                            for k in encoding:
+                                encoding[k]["chunksizes"] = None
+                            data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
+                        else:
+                            raise e
+
+                else:
+                    data.to_netcdf(filepath, engine="netcdf4")
                 # Can we just take the bytes from the data here and then write then straight?
                 # TODO - for now just create a temporary directory - will have to update Acquire
                 # or work on a PR for xarray to allow returning a NetCDF as bytes
