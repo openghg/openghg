@@ -603,14 +603,9 @@ class Datasource:
 
         return d
 
-    def define_datasource_key(self) -> str:
-        """Define key for Datasource"""
-        datasource_key = f"{Datasource._data_root}/uuid/{self._uuid}"
-        return datasource_key
-
     def define_version_key(self, version: str) -> str:
         """Define key for version on Datasource"""
-        datasource_key = self.define_datasource_key()
+        datasource_key = self.key()
         version_key = f"{datasource_key}/{version}"
         return version_key
 
