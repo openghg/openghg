@@ -269,7 +269,8 @@ def move_objects(bucket: str, src_prefix: str, dst_prefix: str) -> None:
     dst = Path(bucket, dst_prefix)
 
     with rlock:
-        shutil.rmtree(dst)
+        if dst.exists():
+            shutil.rmtree(dst)
         shutil.move(src=src, dst=dst)
 
 
