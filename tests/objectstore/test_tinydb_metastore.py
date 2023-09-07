@@ -87,6 +87,15 @@ def test_lowercase_add_search(metastore):
     assert len(result2) == 1
 
 
+def test_select(metastore):
+    for i in range(10):
+        metastore.add({'uuid': i, 'key': 'val'})
+
+    results = metastore.select('uuid')
+
+    assert results == list(range(10))
+
+
 def test_alternate_metastore(alternate_metastore):
     """Check if we can use the metastore with a non-empty
     data type.

@@ -25,13 +25,13 @@ import tinydb
 from openghg.types import MetastoreError
 
 MetaData = Dict[str, Any]
-QueryResults = List[Any]  # ...to avoid clashes with `SearchResults` object
+QueryResults = List[Dict[str, Any]]  # ...to avoid clashes with `SearchResults` object
 Bucket = str
 
 
 class MetaStore(ABC):
     @abstractmethod
-    def search(self, search_terms: MetaData) -> QueryResults:
+    def search(self, search_terms: Optional[MetaData] = None) -> QueryResults:
         """Search for data using a dictionary of search terms.
 
         Args:
@@ -39,6 +39,7 @@ class MetaStore(ABC):
 
         Returns:
             list of records in the metastore matching the given search terms.
+            If search_terms is None, return all records.
         """
         pass
 
@@ -81,6 +82,18 @@ class MetaStore(ABC):
         """
         pass
 
+    def select(self, key: str) -> List[Any]:
+        """Select the values stored in all records for given key.
+
+        Args:
+            key: key to select.
+
+        Returns:
+            list of values stored at that key, over all records in the metastore.
+
+        """
+        return [result[key] for result in self.search()]
+
 
 class TinyDBMetaStore(MetaStore):
     def __init__(self, session: tinydb.TinyDB) -> None:
@@ -100,7 +113,7 @@ class TinyDBMetaStore(MetaStore):
     def _get_query(self, metadata: MetaData) -> tinydb.queries.QueryInstance:
         return tinydb.Query().fragment(self._format_metadata(metadata))
 
-    def search(self, search_terms: MetaData = dict()) -> QueryResults:
+    def search(self, search_terms: Optional[MetaData] = None) -> QueryResults:
         """Search metastore using a dictionary of search terms.
 
         Args:
@@ -111,6 +124,8 @@ class TinyDBMetaStore(MetaStore):
         Returns:
             list of records in the metastore matching the given search terms.
         """
+        if not search_terms:
+            search_terms = dict()
         query = self._get_query(search_terms)
         return list(self._db.search(query))  # TODO: find better way to deal with mypy than casting...
 
