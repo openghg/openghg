@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
 
-- `open_metastore` function to make access to the metastore more uniform. This was used to refactor places in the code where children of `BaseStore` were used to access the metastore - [PR #767](https://github.com/openghg/openghg/pull/767)
+- `MetaStore` ABC as interface for metastore classes. A `ClassicMetaStore` subclass implements the same bucket/key structure as the previous metastore.
+   All references to TinyDB are now in the `objectstore` module, meaning that there is only one place where code needs to change to use a different 
+   backend with the metastore - [PR #771](https://github.com/openghg/openghg/pull/771)
 
 - Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of
   lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
