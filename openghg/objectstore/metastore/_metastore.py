@@ -64,19 +64,20 @@ class MetaStore(ABC):
         pass
 
     @abstractmethod
-    def update(self, record_to_update: MetaData, metadata_to_add: MetaData) -> None:
+    def update(self, where: MetaData, to_update: Optional[MetaData] = None, to_delete: Optional[Union[str, list[str]]] = None) -> None:
         """Update a single record with given metadata.
 
         Args:
-            record_to_update: metadata identifying the record to update. This must uniquely
-        identify the record.
-            metadata_to_add: metadata to overwrite or add to the record.
+            where: metadata identifying the record to update. This must uniquely
+                identify the record.
+            to_update: metadata to overwrite or add to the record.
+            to_delete: key or list of keys to delete from record.
 
         Returns:
             None
 
         Raises:
-            MetastoreError if more than one record matches the metadata in `record_to_update`.
+            MetastoreError if more than one record matches the metadata in `where`.
         """
         pass
 
