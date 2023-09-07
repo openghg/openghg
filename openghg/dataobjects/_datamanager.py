@@ -116,7 +116,7 @@ class DataManager:
             backup = self._backup[uuid][version]
             self.metadata[uuid] = backup
 
-            metastore.delete({'uuid': uuid})
+            metastore.delete({"uuid": uuid})
             metastore.add(backup)
 
             d = Datasource.load(bucket=self._bucket, uuid=uuid)
@@ -196,7 +196,7 @@ class DataManager:
                         internal_copy.pop(k)
 
                     try:
-                        metastore.update(where={'uuid': u}, to_delete=to_delete)
+                        metastore.update(where={"uuid": u}, to_delete=to_delete)
                     except KeyError:
                         raise ValueError(
                             "Unable to remove keys from metadata store, please ensure they exist."
@@ -210,7 +210,7 @@ class DataManager:
 
                     d._metadata.update(to_update)
                     internal_copy.update(to_update)
-                    metastore.update(where={'uuid': u}, to_update=to_update)
+                    metastore.update(where={"uuid": u}, to_update=to_update)
 
                     updated = True
 

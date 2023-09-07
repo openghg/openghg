@@ -1,3 +1,25 @@
+"""
+This module implements a MetaStore based on TinyDB, with custom
+middleware based on `CachingMiddleware`.
+
+The metastore can be accessed given a bucket and data type.
+ In a context manager, use `open_metastore`. Outside of a context
+ manager, use `ClassicMetaStore.from_bucket`; in this case, the
+metastore must be closed using the `close` method.
+
+Closing the metastore is necessary, since `CachingMiddleware`
+doesn't write to disk unless at least 1000 writes have been made.
+
+The `ClassicMetaStore` is organised in the same way that the
+metastore was organised in OpenGHG <= v 6.2: there are separate
+TinyDB databases for each data type.
+
+Besides taking a data type parameter in the `__init__` method,
+`ClassicMetaStore` only extends `TinyDBMetastore` by adding
+a `from_bucket` class method, and a `close` method.
+These methods are only needed by `store.BaseStore`.
+
+"""
 from __future__ import annotations
 
 from collections.abc import Generator
@@ -9,7 +31,7 @@ import tinydb
 from tinydb.middlewares import CachingMiddleware
 
 from openghg.objectstore import exists, get_object, set_object_from_json
-from openghg.objectstore.metastore import TinyDBMetaStore
+from openghg.objectstore.metastore._metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
 
 
@@ -29,11 +51,15 @@ def get_metakey(data_type: str) -> str:
         result = object_store_data_classes[data_type]
     except KeyError:
         return "default"
-    else:
-        return f"{result['_root']}/uuid/{result['_uuid']}/metastore"
+    return f"{result['_root']}/uuid/{result['_uuid']}/metastore"
 
 
 class ObjectStorage(tinydb.Storage):
+    """Custom TinyDB storage class.
+
+    Uses methods in `_local_store` module to read/write files via bucket and key.
+    """
+
     def __init__(self, bucket: str, key: str, mode: Literal["r", "rw"]) -> None:
         valid_modes = ("r", "rw")
         if mode not in valid_modes:
@@ -65,6 +91,17 @@ class ObjectStorage(tinydb.Storage):
             return None
 
     def write(self, data: dict) -> None:
+        """Write data to metastore.
+
+        Args:
+            data: dictonary of data to add
+
+        Returns:
+            None
+
+        Raises:
+            MetastoreError if metastore opened in read-only mode.
+        """
         if self._mode == "r":
             raise MetastoreError("Cannot write to metastore in read-only mode.")
 
@@ -108,9 +145,15 @@ class ClassicMetaStore(TinyDBMetaStore):
 
     @classmethod
     def from_bucket(cls: type[CM], bucket: str, data_type: str) -> CM:
+        """Initialise a ClassicMetaStore given a bucket and data type.
+
+        A ClassicMetaStore opened with this method must be closed to
+        ensure that writes are saved.
+        """
         key = get_metakey(data_type)
         session = tinydb.TinyDB(bucket, key, mode="rw", storage=CachingMiddleware(ObjectStorage))
         return cls(session=session, data_type=data_type)
 
     def close(self) -> None:
+        """Close the underlying TinyDB database."""
         self._db.close()
