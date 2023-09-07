@@ -48,7 +48,7 @@ def test_integrity_check_delete_Datasource_keys():
     # Now delete some of the Datasources
     bucket = get_writable_bucket(name="user")
     with open_metastore(bucket=bucket, data_type="emissions") as metastore:
-        uid = metastore.search()[0]['uuid']
+        uid = metastore.select("uuid")[0]
         ds = Datasource.load(bucket=bucket, uuid=uid)
         keys = ds.data_keys()
         for key in keys:
@@ -63,9 +63,9 @@ def test_integrity_delete_uuids_metastore():
 
     bucket = get_writable_bucket(name="user")
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        uids = [result['uuid'] for result in metastore.search()[:4]]
+        uids = metastore.select("uuid")[:4]
         for u in uids:
-            metastore.delete({'uuid': u})
+            metastore.delete({"uuid": u})
 
     with pytest.raises(ObjectStoreError):
         integrity_check()

@@ -62,7 +62,6 @@ class BaseStore:
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
-            self._metastore.close()
             self.save()
 
     @classmethod
@@ -74,6 +73,7 @@ class BaseStore:
         return f"{cls._root}/uuid/{cls._uuid}"
 
     def save(self) -> None:
+        self._metastore.close()
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 
     def to_data(self) -> Dict:
