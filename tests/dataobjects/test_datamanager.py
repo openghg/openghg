@@ -86,8 +86,7 @@ def test_delete_footprint_data(footprint_read):
 
     bucket = get_writable_bucket(name="user")
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        results = metastore.search()
-        uuid = results[0]['uuid']
+        uuid = metastore.select('uuid')[0]
 
     ds = Datasource.load(bucket=bucket, uuid=uuid, shallow=True)
     key = ds.key()

@@ -451,7 +451,7 @@ def test_obs_data_representative_date_overlap():
     bsd_data_read_crds_internal_overlap(overwrite=True)
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        uuids = [result['uuid'] for result in metastore.search()]
+        uuids = metastore.select('uuid')
 
     datasources = []
     for uuid in uuids:

@@ -189,10 +189,10 @@ def test_read_CRDS(bucket):
     assert ch4_data["ch4_number_of_observations"][-1] == 26.0
 
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        uuid_one = metastore.search()[0]['uuid']
+        uuid_one = metastore.select('uuid')[0]
         datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
 
-        first_set_datasources = [result['uuid'] for result in metastore.search()]
+        first_set_datasources = metastore.select('uuid')
 
     data_keys = list(datasource.data().keys())
 
@@ -215,11 +215,11 @@ def test_read_CRDS(bucket):
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
         assert len(metastore.search()) == 3
 
-        uuid_one = metastore.search()[0]['uuid']
+        uuid_one = metastore.select('uuid')[0]
         datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
         data_keys = sorted(list(datasource.data().keys()))
 
-        assert first_set_datasources == [result['uuid'] for result in metastore.search()]
+        assert first_set_datasources == metastore.select('uuid')
 
     new_expected_keys = [
         "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
@@ -334,8 +334,7 @@ def test_read_GC(bucket):
 
     # Check we have the Datasource info saved
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        results = metastore.search()
-        uuids = [result['uuid'] for result in results]
+        uuids = metastore.select('uuid')
 
         assert sorted(uuids) == expected_keys
 
@@ -541,8 +540,7 @@ def test_read_thames_barrier(bucket):
     assert data["co2_variability"][-1] == 0
 
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        results = metastore.search()
-        uuids = [result['uuid'] for result in results]
+        uuids = metastore.select('uuid')
         assert sorted(uuids) == expected_keys
 
 
@@ -559,7 +557,7 @@ def test_delete_Datasource(bucket):
     )
 
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        uuid = metastore.search()[0]['uuid']
+        uuid = metastore.select('uuid')[0]
         datasource = Datasource.load(bucket=bucket, uuid=uuid)
         data_keys = datasource.data_keys()
         key = data_keys[0]
@@ -568,7 +566,7 @@ def test_delete_Datasource(bucket):
 
         metastore.delete({'uuid': uuid})
 
-        assert uuid not in [result['uuid'] for result in metastore.search()]
+        assert uuid not in metastore.select('uuid')
         assert not exists(bucket=bucket, key=key)
 
 
