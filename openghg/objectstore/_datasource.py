@@ -58,7 +58,7 @@ T = TypeVar("T", bound="InMemoryDatasource")
 
 
 class InMemoryDatasource(Datasource):
-    """Minimal class implementing the AbstractDatasource interface."""
+    """Minimal class implementing the Datasource interface."""
 
     datasources: dict[UUID, List[Data]] = dict()
 
