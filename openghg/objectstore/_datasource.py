@@ -31,7 +31,7 @@ class Datasource(ABC):
 
     @classmethod
     @abstractmethod
-    def load(cls: type[DS], bucket: Bucket, uuid: UUID) -> DS:
+    def load(cls: type[DS], uuid: UUID, **kwargs) -> DS:
         pass
 
     @abstractmethod
@@ -49,7 +49,7 @@ class Datasource(ABC):
         pass
 
     @abstractmethod
-    def save(self, bucket: Bucket) -> None:
+    def save(self) -> None:
         """Save changes to datasource made by `add` method."""
         pass
 
@@ -70,11 +70,11 @@ class InMemoryDatasource(Datasource):
             self.data: List[Data] = []
 
     @classmethod
-    def load(cls: type[T], bucket: Bucket, uuid: UUID) -> T:
+    def load(cls: type[T], uuid: UUID) -> T:
         try:
             data = cls.datasources[uuid]
         except KeyError:
-            raise LookupError(f"No datasource with UUID {uuid} found in bucket {bucket}.")
+            raise LookupError(f"No datasource with UUID {uuid} found.")
         else:
             return cls(uuid, data)
 
@@ -85,5 +85,5 @@ class InMemoryDatasource(Datasource):
         self.data = []
         del InMemoryDatasource.datasources[self.uuid]
 
-    def save(self, bucket: Bucket) -> None:
+    def save(self) -> None:
         InMemoryDatasource.datasources[self.uuid] = self.data

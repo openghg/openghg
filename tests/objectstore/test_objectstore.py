@@ -13,12 +13,7 @@ MetaData = Dict[str, Any]
 QueryResults = List[Any]
 UUID = str
 Data = Any
-Bucket = str
 
-
-@pytest.fixture
-def bucket(tmp_path):
-    return str(tmp_path)
 
 @pytest.fixture
 def metastore(tmp_path):
@@ -34,11 +29,10 @@ def metastore(tmp_path):
 
 
 @pytest.fixture
-def objectstore(metastore, bucket):
+def objectstore(metastore):
     yield ObjectStore[InMemoryDatasource](
             metastore=metastore,
-            datasource_class=InMemoryDatasource,
-            bucket=bucket
+            datasource_class=InMemoryDatasource
         )
 
     # Clear datasources after test finishes

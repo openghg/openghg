@@ -35,10 +35,15 @@ Bucket = str
 
 
 class ObjectStore(Generic[DS]):
-    def __init__(self, metastore: MetaStore, datasource_class: type[DS], bucket: Bucket) -> None:
+    def __init__(
+        self,
+        metastore: MetaStore,
+        datasource_class: type[DS],
+        datasource_load_kwargs: Optional[dict[str, Any]] = None,
+    ) -> None:
         self.metastore = metastore
         self.datasource_class = datasource_class
-        self.bucket = bucket
+        self.datasource_load_kwargs = datasource_load_kwargs if datasource_load_kwargs else {}
 
     def search(self, metadata: MetaData) -> QueryResults:
         """Search the metastore.
@@ -80,7 +85,7 @@ class ObjectStore(Generic[DS]):
             metadata["uuid"] = uuid
             self.metastore.add(metadata)
             del metadata["uuid"]  # don't mutate the metadata
-            datasource.save(bucket=self.bucket)
+            datasource.save()
 
     def update(self, uuid: UUID, metadata: Optional[MetaData] = None, data: Optional[Data] = None) -> None:
         """Update metadata and/or data associated with a given UUID.
@@ -105,11 +110,11 @@ class ObjectStore(Generic[DS]):
         if data:
             datasource = self.get_data(uuid)
             datasource.add(data)
-            datasource.save(bucket=self.bucket)
+            datasource.save()
 
     def get_data(self, uuid: UUID) -> DS:
         """Get data stored at given uuid."""
-        return self.datasource_class.load(self.bucket, uuid)
+        return self.datasource_class.load(uuid=uuid, **self.datasource_load_kwargs)
 
     def delete(self, uuid: UUID) -> None:
         """Delete data and metadata with given UUID."""
