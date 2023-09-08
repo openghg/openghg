@@ -1,7 +1,10 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
+from types import TracebackType
 from pandas import Timestamp
 import tinydb
 import logging
@@ -17,6 +20,8 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 class BaseStore:
+    _registry: dict[str, type[BaseStore]] = {}
+    _data_type = ""
     _root = "root"
     _uuid = "root_uuid"
 
@@ -41,6 +46,23 @@ class BaseStore:
         self._bucket = bucket
         self._datasource_uuids = [r["uuid"] for r in self._metastore]
 
+    def __init_subclass__(cls) -> None:
+        BaseStore._registry[cls._data_type] = cls
+
+    def __enter__(self) -> BaseStore:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[BaseException],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        if exc_type is not None:
+            logger.error(msg=f"{exc_type}, {exc_tb}")
+        else:
+            self.save()
+
     @classmethod
     def metakey(cls) -> str:
         return str(cls._metakey)
@@ -58,6 +80,18 @@ class BaseStore:
         # QUESTION - Is this cleaner than the previous specifying
         DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
+
+    def read_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+        raise NotImplementedError
+
+    def read_file(self, *args: Any, **kwargs: Any) -> dict:
+        raise NotImplementedError
+
+    def store_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+        raise NotImplementedError
+
+    def transform_data(self, *args: Any, **kwargs: Any) -> dict:
+        raise NotImplementedError
 
     def assign_data(
         self,
@@ -422,3 +456,22 @@ class BaseStore:
         """
         self._datasource_uuids.clear()
         self._file_hashes.clear()
+
+
+def get_data_class(data_type: str) -> type[BaseStore]:
+    """Return data class corresponding to given data type.
+
+    Args:
+        data_type: one of "surface", "column", "emissions", "footprints",
+    "boundary_conditions", or "eulerian_model"
+
+    Returns:
+        Data class, one of `ObsSurface`, `ObsColumn`, `Emissions`, `EulerianModel`,
+    `Footprints`, `BoundaryConditions`.
+    """
+    try:
+        data_class = BaseStore._registry[data_type]
+    except KeyError:
+        raise ValueError(f"No data class for data type {data_type}.")
+    else:
+        return data_class

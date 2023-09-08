@@ -22,6 +22,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class BoundaryConditions(BaseStore):
     """This class is used to process boundary condition data"""
 
+    _data_type = "boundary_conditions"
     _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
@@ -72,7 +73,7 @@ class BoundaryConditions(BaseStore):
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read boundary conditions file
 
         Args:
@@ -113,7 +114,7 @@ class BoundaryConditions(BaseStore):
                 "This file has been uploaded previously with the filename : "
                 f"{self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         bc_data = open_dataset(filepath)
 

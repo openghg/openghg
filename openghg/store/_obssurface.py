@@ -19,6 +19,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class ObsSurface(BaseStore):
     """This class is used to process surface observation data"""
 
+    _data_type = "surface"
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
