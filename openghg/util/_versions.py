@@ -138,7 +138,7 @@ def show_versions(file: IO = sys.stdout) -> None:
     ]
 
     deps_blob: List[Tuple] = []
-    for (modname, ver_f) in deps:
+    for modname, ver_f in deps:
         try:
             if modname in sys.modules:
                 mod = sys.modules[modname]

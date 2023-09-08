@@ -45,8 +45,7 @@ class EmissionsDatabases(Enum):
 
 
 class ObsTypes(Enum):
-    """
-    """
+    """ """
 
     SURFACE = "ObsSurface"
     COLUMN = "ObsColumn"
