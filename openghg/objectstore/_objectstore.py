@@ -24,7 +24,7 @@ from openghg.objectstore.metastore import MetaStore
 from openghg.types import ObjectStoreError
 
 
-DS = TypeVar("DS", bound='Datasource')
+DS = TypeVar("DS", bound="Datasource")
 
 
 MetaData = Dict[str, Any]
@@ -50,7 +50,7 @@ class ObjectStore(Generic[DS]):
 
     def get_uuids(self, metadata: MetaData = dict()) -> list[UUID]:
         results = self.metastore.search(metadata)
-        return [result['uuid'] for result in results]
+        return [result["uuid"] for result in results]
 
     def create(self, metadata: MetaData, data: Data) -> None:
         """Create a new datasource and store its metadata and UUID in the metastore.
@@ -65,8 +65,10 @@ class ObjectStore(Generic[DS]):
         Raises:
             ObjectStoreError if the given metadata is already associated with a UUID.
         """
-        if (uuids := self.get_uuids(metadata)):
-            raise ObjectStoreError(f'Cannot create new Datasource: this metadata is already associated with UUID f{uuids[0]}.')
+        if uuids := self.get_uuids(metadata):
+            raise ObjectStoreError(
+                f"Cannot create new Datasource: this metadata is already associated with UUID f{uuids[0]}."
+            )
 
         uuid: UUID = str(uuid4())
         datasource = self.datasource_class(uuid)
@@ -75,9 +77,9 @@ class ObjectStore(Generic[DS]):
         except Exception as e:
             raise e
         else:
-            metadata['uuid'] = uuid
+            metadata["uuid"] = uuid
             self.metastore.add(metadata)
-            del metadata['uuid']  # don't mutate the metadata
+            del metadata["uuid"]  # don't mutate the metadata
             datasource.save(bucket=self.bucket)
 
     def update(self, uuid: UUID, metadata: Optional[MetaData] = None, data: Optional[Data] = None) -> None:
@@ -94,11 +96,11 @@ class ObjectStore(Generic[DS]):
         Raises:
             ObjectStoreError if the given UUID is not found.
         """
-        if not self.metastore.search({'uuid': uuid}):
-            raise ObjectStoreError(f'Cannot update: UUID {uuid} not found.')
+        if not self.metastore.search({"uuid": uuid}):
+            raise ObjectStoreError(f"Cannot update: UUID {uuid} not found.")
 
         if metadata:
-            self.metastore.update(record_to_update={'uuid': uuid}, metadata_to_add=metadata)
+            self.metastore.update(where={"uuid": uuid}, to_update=metadata)
 
         if data:
             datasource = self.get_data(uuid)

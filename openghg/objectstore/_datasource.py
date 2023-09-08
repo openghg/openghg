@@ -5,7 +5,7 @@ from typing import TypeVar
 from typing import Any, List, Optional
 
 
-DS = TypeVar("DS", bound='Datasource')
+DS = TypeVar("DS", bound="Datasource")
 
 
 UUID = str
@@ -25,6 +25,7 @@ class Datasource(ABC):
     Datasources are stored by UUID within buckets, and must have a `load` classmethod
     to support this.
     """
+
     def __init__(self, uuid: UUID) -> None:
         self.uuid = uuid
 
@@ -53,11 +54,12 @@ class Datasource(ABC):
         pass
 
 
-T = TypeVar('T', bound='InMemoryDatasource')
+T = TypeVar("T", bound="InMemoryDatasource")
 
 
 class InMemoryDatasource(Datasource):
     """Minimal class implementing the AbstractDatasource interface."""
+
     datasources: dict[UUID, List[Data]] = dict()
 
     def __init__(self, uuid: UUID, data: Optional[List[Data]] = None) -> None:
@@ -72,7 +74,7 @@ class InMemoryDatasource(Datasource):
         try:
             data = cls.datasources[uuid]
         except KeyError:
-            raise LookupError(f'No datasource with UUID {uuid} found in bucket {bucket}.')
+            raise LookupError(f"No datasource with UUID {uuid} found in bucket {bucket}.")
         else:
             return cls(uuid, data)
 

@@ -3,7 +3,7 @@ from openghg.store.spec import define_data_types
 from openghg.types import ObjectStoreError
 
 
-def integrity_check() -> None:
+def integrity_check() -> None:  # TODO: update since metastore source UUID truth
     """Check the integrity of object stores.
 
     Returns:
@@ -23,12 +23,12 @@ def integrity_check() -> None:
             # Now load the object
             with open_metastore(bucket=bucket, data_type=data_type) as metastore:
                 # Get all the Datasources
-                datasource_uuids = metastore.datasources()
+                datasource_uuids = metastore.select("uuid")
                 # Check they all exist
                 for uid in datasource_uuids:
                     Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
 
-                metastore_uuids = [r["uuid"] for r in metastore._metastore]
+                metastore_uuids = metastore.select("uuid")
 
                 if datasource_uuids != metastore_uuids:
                     raise ObjectStoreError(

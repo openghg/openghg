@@ -1,8 +1,8 @@
 from typing import Any, Dict, List
 
 import pytest
+import tinydb
 
-from openghg.store import load_metastore
 from openghg.objectstore.metastore._metastore import TinyDBMetaStore
 from openghg.objectstore._datasource import InMemoryDatasource
 from openghg.objectstore._objectstore import ObjectStore
@@ -21,16 +21,15 @@ def bucket(tmp_path):
     return str(tmp_path)
 
 @pytest.fixture
-def metastore(bucket):
+def metastore(tmp_path):
     """Open metastore with no data type.
 
     Note: `tmp_path` is function scope, so the metastore is
     reset for each test that uses this fixture.
     """
-    with load_metastore(bucket=bucket, key='metastore') as session:
-        metastore = TinyDBMetaStore(
-            bucket=bucket,
-            session=session)
+    metastore_path = tmp_path / 'metastore._data'
+    with tinydb.TinyDB(metastore_path) as session:
+        metastore = TinyDBMetaStore(session=session)
         yield metastore
 
 

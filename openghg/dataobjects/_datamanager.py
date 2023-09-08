@@ -1,11 +1,12 @@
 from collections import defaultdict
 import copy
+import logging
+from typing import DefaultDict, Dict, List, Set, Optional, Union
+
 from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
-from openghg.objectstore import get_writable_bucket
-import logging
-import tinydb
-from typing import DefaultDict, Dict, List, Set, Optional, Union
+from openghg.objectstore import get_writable_bucket, get_writable_buckets
+from openghg.types import ObjectStoreError
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -111,13 +112,12 @@ class DataManager:
         version = str(version)
 
         dtype = self._check_datatypes(uuid=uuid)
-        with open_metastore(data_type=dtype, bucket=self._bucket) as dclass:
-            metastore = dclass._metastore
+        with open_metastore(data_type=dtype, bucket=self._bucket) as metastore:
             backup = self._backup[uuid][version]
             self.metadata[uuid] = backup
 
-            metastore.remove(tinydb.where("uuid") == uuid)
-            metastore.insert(backup)
+            metastore.delete({"uuid": uuid})
+            metastore.add(backup)
 
             d = Datasource.load(bucket=self._bucket, uuid=uuid)
             d._metadata = backup
@@ -158,8 +158,6 @@ class DataManager:
         Returns:
             None
         """
-        from tinydb.operations import delete as tinydb_delete
-
         if to_update is None and to_delete is None:
             return None
 
@@ -169,7 +167,6 @@ class DataManager:
         dtype = self._check_datatypes(uuid=uuid)
 
         with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
-            store = metastore._metastore
             for u in uuid:
                 updated = False
                 d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
@@ -199,9 +196,7 @@ class DataManager:
                         internal_copy.pop(k)
 
                     try:
-                        store.update_multiple(
-                            [(tinydb_delete(k), tinydb.where("uuid") == u) for k in to_delete]
-                        )
+                        metastore.update(where={"uuid": u}, to_delete=to_delete)
                     except KeyError:
                         raise ValueError(
                             "Unable to remove keys from metadata store, please ensure they exist."
@@ -215,10 +210,7 @@ class DataManager:
 
                     d._metadata.update(to_update)
                     internal_copy.update(to_update)
-                    response = store.update(to_update, tinydb.where("uuid") == u)
-
-                    if not response:
-                        raise ValueError("Unable to update metadata, possible metadata sync error.")
+                    metastore.update(where={"uuid": u}, to_update=to_update)
 
                     updated = True
 
@@ -261,3 +253,26 @@ class DataManager:
                 delete_object(bucket=self._bucket, key=key)
 
                 logger.info(f"Deleted Datasource with UUID {uid}.")
+
+
+def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
+    """Lookup the data / metadata you'd like to modify.
+
+    Args:
+        data_type: Type of data, for example surface, flux, footprint
+        store: Name of store
+        kwargs: Any pair of keyword arguments for searching
+    Returns:
+        DataManager: A handler object to help modify the metadata
+    """
+    from openghg.dataobjects import DataManager
+    from openghg.retrieve import search
+
+    writable_stores = get_writable_buckets()
+
+    if store not in writable_stores:
+        raise ObjectStoreError(f"You do not have permission to write to the {store} store.")
+
+    res = search(data_type=data_type, **kwargs)
+    metadata = res.metadata
+    return DataManager(metadata=metadata, store=store)
