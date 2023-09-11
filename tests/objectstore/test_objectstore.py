@@ -35,7 +35,7 @@ def objectstore(metastore):
     )
 
     # Clear datasources after test finishes
-    InMemoryDatasource.datasources = dict()
+    InMemoryDatasource.datasources = {}
 
 
 @pytest.fixture
