@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 from typing import Any, List, Optional
 
-
 DS = TypeVar("DS", bound="Datasource")
 
 
@@ -21,6 +20,7 @@ class DatasourceFactory(Generic[DS]):
     object to a function or class allows Datasources to be used without
     knowledge of how they are stored.
     """
+
     def __init__(
         self,
         datasource_class: type[DS],
