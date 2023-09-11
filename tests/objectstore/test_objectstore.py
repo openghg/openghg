@@ -22,7 +22,7 @@ def metastore(tmp_path):
     Note: `tmp_path` is function scope, so the metastore is
     reset for each test that uses this fixture.
     """
-    metastore_path = tmp_path / 'metastore._data'
+    metastore_path = tmp_path / "metastore._data"
     with tinydb.TinyDB(metastore_path) as session:
         metastore = TinyDBMetaStore(session=session)
         yield metastore
@@ -31,9 +31,8 @@ def metastore(tmp_path):
 @pytest.fixture
 def objectstore(metastore):
     yield ObjectStore[InMemoryDatasource](
-            metastore=metastore,
-            datasource_factory=DatasourceFactory[InMemoryDatasource](InMemoryDatasource)
-        )
+        metastore=metastore, datasource_factory=DatasourceFactory[InMemoryDatasource](InMemoryDatasource)
+    )
 
     # Clear datasources after test finishes
     InMemoryDatasource.datasources = dict()
@@ -41,9 +40,9 @@ def objectstore(metastore):
 
 @pytest.fixture
 def fake_metadata():
-    md1 = {'site': 'TAC', 'species': 'CH4', 'inlet': '185m'}
-    md2 = {'site': 'TAC', 'species': 'CH4', 'inlet': '108m'}
-    md3 = {'site': 'MHD', 'species': 'CH4', 'inlet': '10m'}
+    md1 = {"site": "TAC", "species": "CH4", "inlet": "185m"}
+    md2 = {"site": "TAC", "species": "CH4", "inlet": "108m"}
+    md3 = {"site": "MHD", "species": "CH4", "inlet": "10m"}
     return [md1, md2, md3]
 
 
@@ -83,6 +82,7 @@ def test_create_many(objectstore, fake_metadata, fake_data):
 
     assert len(uuids) == 3
 
+
 def test_update(objectstore, fake_metadata, fake_data):
     objectstore.create(fake_metadata[0], fake_data[0])
 
@@ -97,7 +97,7 @@ def test_update(objectstore, fake_metadata, fake_data):
 
 def test_update_raises_error_if_uuid_not_found(objectstore):
     with pytest.raises(ObjectStoreError):
-        objectstore.update(uuid='abc123')
+        objectstore.update(uuid="abc123")
 
 
 def test_update_metadata(objectstore, fake_metadata, fake_data):
@@ -105,11 +105,11 @@ def test_update_metadata(objectstore, fake_metadata, fake_data):
 
     uuid = objectstore.get_uuids(fake_metadata[0])[0]
 
-    objectstore.update(uuid, metadata={'inlet': '200m'})
+    objectstore.update(uuid, metadata={"inlet": "200m"})
 
-    result = objectstore.search({'uuid': uuid})[0]
+    result = objectstore.search({"uuid": uuid})[0]
 
-    assert result['inlet'] == '200m'
+    assert result["inlet"] == "200m"
 
 
 def test_delete(objectstore, fake_metadata, fake_data):
