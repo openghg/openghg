@@ -31,7 +31,7 @@ def metastore(tmp_path):
 @pytest.fixture
 def objectstore(metastore):
     yield ObjectStore[InMemoryDatasource](
-        metastore=metastore, datasource_factory=DatasourceFactory[InMemoryDatasource](InMemoryDatasource)
+        metastore, DatasourceFactory[InMemoryDatasource](InMemoryDatasource)
     )
 
     # Clear datasources after test finishes
