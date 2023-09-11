@@ -19,7 +19,7 @@ from typing import Generic, TypeVar
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from openghg.objectstore._datasource import Datasource
+from openghg.objectstore._datasource import Datasource, DatasourceFactory
 from openghg.objectstore.metastore import MetaStore
 from openghg.types import ObjectStoreError
 
@@ -38,12 +38,10 @@ class ObjectStore(Generic[DS]):
     def __init__(
         self,
         metastore: MetaStore,
-        datasource_class: type[DS],
-        datasource_load_kwargs: Optional[dict[str, Any]] = None,
+        datasource_factory: DatasourceFactory
     ) -> None:
         self.metastore = metastore
-        self.datasource_class = datasource_class
-        self.datasource_load_kwargs = datasource_load_kwargs if datasource_load_kwargs else {}
+        self.datasource_factory = datasource_factory
 
     def search(self, metadata: MetaData) -> QueryResults:
         """Search the metastore.
@@ -76,7 +74,7 @@ class ObjectStore(Generic[DS]):
             )
 
         uuid: UUID = str(uuid4())
-        datasource = self.datasource_class(uuid)
+        datasource = self.datasource_factory.new(uuid)
         try:
             datasource.add(data)
         except Exception as e:
@@ -108,16 +106,16 @@ class ObjectStore(Generic[DS]):
             self.metastore.update(where={"uuid": uuid}, to_update=metadata)
 
         if data:
-            datasource = self.get_data(uuid)
+            datasource = self.get_datasource(uuid)
             datasource.add(data)
             datasource.save()
 
-    def get_data(self, uuid: UUID) -> DS:
+    def get_datasource(self, uuid: UUID) -> DS:
         """Get data stored at given uuid."""
-        return self.datasource_class.load(uuid=uuid, **self.datasource_load_kwargs)
+        return self.datasource_factory.load(uuid)
 
     def delete(self, uuid: UUID) -> None:
         """Delete data and metadata with given UUID."""
-        data = self.get_data(uuid)
+        data = self.get_datasource(uuid)
         data.delete()
         self.metastore.delete({"uuid": uuid})

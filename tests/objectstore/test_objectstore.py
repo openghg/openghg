@@ -4,7 +4,7 @@ import pytest
 import tinydb
 
 from openghg.objectstore.metastore._metastore import TinyDBMetaStore
-from openghg.objectstore._datasource import InMemoryDatasource
+from openghg.objectstore._datasource import InMemoryDatasource, DatasourceFactory
 from openghg.objectstore._objectstore import ObjectStore
 from openghg.types import ObjectStoreError
 
@@ -32,7 +32,7 @@ def metastore(tmp_path):
 def objectstore(metastore):
     yield ObjectStore[InMemoryDatasource](
             metastore=metastore,
-            datasource_class=InMemoryDatasource
+            datasource_factory=DatasourceFactory[InMemoryDatasource](InMemoryDatasource)
         )
 
     # Clear datasources after test finishes
@@ -61,7 +61,7 @@ def test_create(objectstore, fake_metadata, fake_data):
 def test_create_and_retrieve(objectstore, fake_metadata, fake_data):
     objectstore.create(fake_metadata[0], fake_data[0])
     uuid = objectstore.get_uuids()[0]
-    data = objectstore.get_data(uuid).data
+    data = objectstore.get_datasource(uuid).data
 
     assert data == [0]
 
@@ -89,7 +89,7 @@ def test_update(objectstore, fake_metadata, fake_data):
     uuid = objectstore.get_uuids(fake_metadata[0])[0]
     objectstore.update(uuid, data=fake_data[1])
 
-    data = objectstore.get_data(uuid).data
+    data = objectstore.get_datasource(uuid).data
 
     assert len(data) == 2
     assert data == fake_data[:2]
@@ -122,4 +122,4 @@ def test_delete(objectstore, fake_metadata, fake_data):
 
     with pytest.raises(LookupError):
         # LookupError from trying to load data from UUID not found in InMemoryDatasource
-        objectstore.get_data(uuid)
+        objectstore.get_datasource(uuid)
