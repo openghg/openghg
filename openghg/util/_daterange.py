@@ -119,6 +119,6 @@ def clip_dateranges(dateranges: list[DateRange]) -> list[DateRange]:
             clipped_dateranges.append(DateRange(dr1.start, clipped_end))
         else:
             clipped_dateranges.append(dr1)
-    clipped_dateranges.append(dateranges[-1])
+    clipped_dateranges.append(dateranges[-1])  # last daterange isn't clipped
 
     return clipped_dateranges
