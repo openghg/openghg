@@ -56,16 +56,3 @@ def test_integrity_check_delete_Datasource_keys():
 
     with pytest.raises(ObjectStoreError):
         integrity_check()
-
-@pytest.mark.xfail(reason="metastore.datasources() now returns metastore uuids")
-def test_integrity_delete_uuids_metastore():
-    integrity_check()
-
-    bucket = get_writable_bucket(name="user")
-    with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        uids = metastore.select("uuid")[:4]
-        for u in uids:
-            metastore.delete({"uuid": u})
-
-    with pytest.raises(ObjectStoreError):
-        integrity_check()

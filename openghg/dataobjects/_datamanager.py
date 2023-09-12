@@ -221,7 +221,7 @@ class DataManager:
                     logger.info(f"Modified metadata for {u}.")
 
     def delete_datasource(self, uuid: Union[List, str]) -> None:
-        """Delete a Datasource in the object store.
+        """Delete Datasource(s) in the object store.
         At the moment we only support deleting the complete Datasource.
 
         NOTE: Make sure you really want to delete the Datasource(s)
@@ -249,8 +249,7 @@ class DataManager:
                 d.delete_all_data()
 
                 # Then delete the Datasource itself
-                key = d.key()
-                delete_object(bucket=self._bucket, key=key)
+                delete_object(bucket=self._bucket, key=d.key())
 
                 logger.info(f"Deleted Datasource with UUID {uid}.")
 
