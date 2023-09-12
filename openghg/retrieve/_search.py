@@ -261,11 +261,9 @@ def search_footprints(
         SearchResults: SearchResults object
     """
     from openghg.util import format_inlet
-    
     if high_time_resolution is not None:
         warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
         time_resolved = high_time_resolution
-    
     args = {
         "site": site,
         "inlet": inlet,
