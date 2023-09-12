@@ -214,7 +214,7 @@ class Footprints(BaseStore):
         continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
-        time_resolved: Optional[bool] = False,
+        time_resolved: bool = False,
         high_time_resolution: Optional[bool] = None,
         short_lifetime: bool = False,
         overwrite: bool = False,
