@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718) 
 
+### Changed
+
+- Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
+
+
 ## [0.6.2] - 2023-08-07
 
 ### Fixed

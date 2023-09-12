@@ -334,8 +334,6 @@ def test_read_GC(bucket):
 
     # Check we have the Datasource info saved
     with ObsSurface(bucket=bucket) as obs:
-        assert sorted(obs._datasource_uuids.values()) == expected_keys
-
         attrs = hfc152a_data.attrs
 
         assert attributes_checker_obssurface(attrs=attrs, species="hfc152a")
@@ -537,8 +535,6 @@ def test_read_thames_barrier(bucket):
     assert data["co2_variability"][0] == 0
     assert data["co2_variability"][-1] == 0
 
-    with ObsSurface(bucket=bucket) as obs:
-        assert sorted(obs._datasource_uuids.values()) == expected_keys
 
 
 def test_delete_Datasource(bucket):

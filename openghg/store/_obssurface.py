@@ -605,10 +605,10 @@ class ObsSurface(BaseStore):
         key = f"{Datasource._datasource_root}/uuid/{uuid}"
         delete_object(bucket=self._bucket, key=key)
 
-        # Delete the UUID from the metastore
+        # Delete the UUID from the metastore and this instances
+        # list of UUIDs
         self._metastore.remove(where("uuid") == uuid)
-
-        del self._datasource_uuids[uuid]
+        self._datasource_uuids.remove(uuid)
 
     def seen_hash(self, file_hash: str) -> bool:
         return file_hash in self._file_hashes

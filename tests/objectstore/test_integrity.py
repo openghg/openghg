@@ -68,16 +68,3 @@ def test_integrity_check_delete_Datasource_keys():
 
     with pytest.raises(ObjectStoreError):
         integrity_check()
-
-
-def test_integrity_delete_uuids_metastore():
-    integrity_check()
-
-    bucket = get_writable_bucket(name="user")
-    with Footprints(bucket=bucket) as fp:
-        uids = fp.datasources()[:4]
-        for u in uids:
-            fp._metastore.remove(tinydb.where("uuid") == u)
-
-    with pytest.raises(ObjectStoreError):
-        integrity_check()
