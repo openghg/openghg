@@ -9,6 +9,8 @@ on:
       - 'CHANGELOG.md'
   pull_request:
     branches: [master, devel]
+    paths-ignore:
+      - 'CHANGELOG.md'
 
 jobs:
   test:
