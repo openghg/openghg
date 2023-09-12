@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, Literal, Optional, Union
+import warnings
 
 
 def parse_openghg(
@@ -11,6 +12,7 @@ def parse_openghg(
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
+    time_resolved: Optional[bool] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -32,6 +34,10 @@ def parse_openghg(
     from xarray import open_dataset
 
     em_data = open_dataset(filepath, chunks=chunks)
+
+    if high_time_resolution:
+        warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+        time_resolved = high_time_resolution
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -88,7 +94,7 @@ def parse_openghg(
     metadata["max_latitude"] = round(float(em_data["lat"].max()), 5)
     metadata["min_latitude"] = round(float(em_data["lat"].min()), 5)
 
-    metadata["time_resolution"] = "high" if high_time_resolution else "standard"
+    metadata["time_resolution"] = "high" if time_resolved else "standard"
     metadata["time_period"] = period_str
 
     key = "_".join((species, source, domain))

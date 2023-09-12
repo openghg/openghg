@@ -4,6 +4,7 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
+import warnings
 from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.objectstore import get_readable_buckets
@@ -163,6 +164,7 @@ def search_flux(
     model: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
+    time_resolved: Optional[bool] = None,
     high_time_resolution: Optional[bool] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
@@ -189,7 +191,9 @@ def search_flux(
     Returns:
         SearchResults: SearchResults object
     """
-
+    if high_time_resolution is not None:
+        warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+        time_resolved = high_time_resolution
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
@@ -204,7 +208,7 @@ def search_flux(
         model=model,
         start_date=start_date,
         end_date=end_date,
-        high_time_resolution=high_time_resolution,
+        time_resolved=time_resolved,
         period=period,
         continuous=continuous,
         data_type="emissions",
@@ -226,6 +230,7 @@ def search_footprints(
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
     high_spatial_resolution: Optional[bool] = None,  # TODO need to give False to get only low spatial res
+    time_resolved: Optional[bool] = None,
     high_time_resolution: Optional[bool] = None,
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
@@ -254,7 +259,11 @@ def search_footprints(
         SearchResults: SearchResults object
     """
     from openghg.util import format_inlet
-
+    
+    if high_time_resolution is not None:
+        warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+        time_resolved = high_time_resolution
+    
     args = {
         "site": site,
         "inlet": inlet,
@@ -268,7 +277,7 @@ def search_footprints(
         "end_date": end_date,
         "period": period,
         "continuous": continuous,
-        "high_time_resolution": high_time_resolution,
+        "high_time_resolution": time_resolved,
         "high_spatial_resolution": high_spatial_resolution,
         "short_lifetime": short_lifetime,
     }

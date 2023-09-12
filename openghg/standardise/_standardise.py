@@ -360,6 +360,7 @@ def standardise_footprint(
     continuous: bool = True,
     retrieve_met: bool = False,
     high_spatial_resolution: bool = False,
+    time_resolved: Optional[bool] = None,
     high_time_resolution: bool = False,
     overwrite: bool = False,
     store: Optional[str] = None,
@@ -395,6 +396,9 @@ def standardise_footprint(
     from openghg.cloud import call_function
 
     filepath = Path(filepath)
+    if high_time_resolution is not None:
+        warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+        time_resolved = high_time_resolution
 
     if running_on_hub():
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
@@ -408,7 +412,7 @@ def standardise_footprint(
             "continuous": continuous,
             "retrieve_met": retrieve_met,
             "high_spatial_resolution": high_spatial_resolution,
-            "high_time_resolution": high_time_resolution,
+            "high_time_resolution": time_resolved,
             "overwrite": overwrite,
             "metmodel": metmodel,
             "species": species,
@@ -457,6 +461,7 @@ def standardise_flux(
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
+    time_resolved: Optional[bool] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -486,6 +491,10 @@ def standardise_flux(
 
     filepath = Path(filepath)
 
+    if high_time_resolution:
+        warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+        time_resolved = high_time_resolution
+
     if running_on_hub():
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="flux")
 
@@ -493,7 +502,7 @@ def standardise_flux(
             "species": species,
             "source": source,
             "domain": domain,
-            "high_time_resolution": high_time_resolution,
+            "high_time_resolution": time_resolved,
             "continuous": continuous,
             "overwrite": overwrite,
             "chunks": chunks,
