@@ -214,8 +214,8 @@ class Footprints(BaseStore):
         continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
-        time_resolved: Optional[bool] = None,
-        high_time_resolution: Optional[bool] = False,
+        time_resolved: Optional[bool] = False,
+        high_time_resolution: Optional[bool] = None,
         short_lifetime: bool = False,
         overwrite: bool = False,
         # model_params: Optional[Dict] = None,
@@ -237,8 +237,9 @@ class Footprints(BaseStore):
             continuous: Whether time stamps have to be continuous.
             retrieve_met: Whether to also download meterological data for this footprints area
             high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-            high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
+            time_resolved: Indicate footprints are high time resolution (include H_back dimension)
                            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
             overwrite: Overwrite any currently stored data
@@ -304,7 +305,7 @@ class Footprints(BaseStore):
         Footprints.validate_data(
             fp_data,
             high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=time_resolved,
+            time_resolved=time_resolved,
             short_lifetime=short_lifetime,
         )
 
@@ -359,7 +360,7 @@ class Footprints(BaseStore):
             except KeyError:
                 raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
-        metadata["high_time_resolution"] = time_resolved
+        metadata["time_resolved"] = time_resolved
         metadata["high_spatial_resolution"] = high_spatial_resolution
         metadata["short_lifetime"] = short_lifetime
 
@@ -390,7 +391,7 @@ class Footprints(BaseStore):
             "model",
             "inlet",
             "domain",
-            "high_time_resolution",
+            "time_resolved",
             "high_spatial_resolution",
             "short_lifetime",
         )
@@ -409,8 +410,8 @@ class Footprints(BaseStore):
     def schema(
         particle_locations: bool = True,
         high_spatial_resolution: bool = False,
-        time_resolved: bool = None,
-        high_time_resolution: Optional[bool] = False,
+        time_resolved: Optional[bool] = False,
+        high_time_resolution: Optional[bool] = None,
         short_lifetime: bool = False,
     ) -> DataSchema:
         """
@@ -419,7 +420,7 @@ class Footprints(BaseStore):
         The returned schema depends on what the footprint represents,
         indicated using the keywords.
         By default, this will include "fp" variable but this will be superceded
-        if high_spatial_resolution or high_time_resolution are specified.
+        if high_spatial_resolution or time_resolved are specified.
 
         Args:
             particle_locations: Include 4-directional particle location variables:
@@ -429,9 +430,10 @@ class Footprints(BaseStore):
                 - "fp_low"
                 - "fp_high"
                 and include associated additional dimensions ("lat_high", "lon_high").
-            high_time_resolution : Set footprint variable to be high time resolution
+            time_resolved : Set footprint variable to be high time resolution
                 - "fp_HiTRes"
                 and include associated dimensions ("H_back").
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             short_lifetime: Include additional particle age parameters for short lived species:
                 - "mean_age_particles_[nesw]"
         """
@@ -508,8 +510,8 @@ class Footprints(BaseStore):
         data: Dataset,
         particle_locations: bool = True,
         high_spatial_resolution: bool = False,
-        time_resolved: bool = None,
-        high_time_resolution: Optional[bool] = False,
+        time_resolved: Optional[bool] = False,
+        high_time_resolution: Optional[bool] = None,
         short_lifetime: bool = False,
     ) -> None:
         """

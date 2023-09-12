@@ -360,8 +360,8 @@ def standardise_footprint(
     continuous: bool = True,
     retrieve_met: bool = False,
     high_spatial_resolution: bool = False,
-    time_resolved: Optional[bool] = None,
-    high_time_resolution: bool = False,
+    time_resolved: Optional[bool] = False,
+    high_time_resolution: Optional[bool] = None,
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
@@ -384,8 +384,9 @@ def standardise_footprint(
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
+        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically for Carbon Dioxide data.
+        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         overwrite: Overwrite any currently stored data
         store: Name of store to write to
         bucket: object store bucket to use; this takes precendence over 'store'
@@ -412,7 +413,7 @@ def standardise_footprint(
             "continuous": continuous,
             "retrieve_met": retrieve_met,
             "high_spatial_resolution": high_spatial_resolution,
-            "high_time_resolution": time_resolved,
+            "time_resolved": time_resolved,
             "overwrite": overwrite,
             "metmodel": metmodel,
             "species": species,
@@ -448,7 +449,7 @@ def standardise_footprint(
             continuous=continuous,
             retrieve_met=retrieve_met,
             high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=high_time_resolution,
+            high_time_resolution=time_resolved,
             overwrite=overwrite,
         )
 
@@ -461,8 +462,8 @@ def standardise_flux(
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
-    time_resolved: Optional[bool] = None,
-    high_time_resolution: Optional[bool] = False,
+    time_resolved: Optional[bool] = False,
+    high_time_resolution: Optional[bool] = None,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
@@ -478,7 +479,8 @@ def standardise_flux(
         domain: Emissions domain
         date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
                Only needed if this can not be inferred from the time coords
-        high_time_resolution: If this is a high resolution file
+        time_resolved: If this is a high resolution file
+        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         period: Period of measurements, if not passed this is inferred from the time coords
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
@@ -502,7 +504,7 @@ def standardise_flux(
             "species": species,
             "source": source,
             "domain": domain,
-            "high_time_resolution": time_resolved,
+            "time_resolved": time_resolved,
             "continuous": continuous,
             "overwrite": overwrite,
             "chunks": chunks,
@@ -534,7 +536,7 @@ def standardise_flux(
             database=database,
             database_version=database_version,
             model=model,
-            high_time_resolution=high_time_resolution,
+            high_time_resolution=time_resolved,
             period=period,
             continuous=continuous,
             chunks=chunks,
