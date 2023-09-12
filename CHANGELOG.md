@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
+- Added generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
 
 - Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of
   lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
+
+- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718) 
 
 ## [0.6.2] - 2023-08-07
 
