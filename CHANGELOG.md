@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
 
 ### Added
-- Added environment-dev.yaml file for cloud developers environment, especially dependencies like pytest, pytest-mock requested by users. - [PR #769](https://github.com/openghg/openghg/pull/769)
+- Added `environment-dev.yaml` file for developer conda environment - [PR #769](https://github.com/openghg/openghg/pull/769)
 
 - Generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
 
