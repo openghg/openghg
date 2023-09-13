@@ -540,7 +540,7 @@ def test_read_thames_barrier(bucket):
 
 
 
-@pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects")
+@pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects - links to issue #727")
 def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectStore` class created
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
 
