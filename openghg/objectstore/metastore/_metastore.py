@@ -55,25 +55,39 @@ class MetaStore(ABC):
         pass
 
     @abstractmethod
-    def add(self, metadata: MetaData) -> None:
-        """Add new metadata to the metastore."""
+    def insert(self, metadata: MetaData) -> None:
+        """Insert new metadata into the metastore."""
         pass
 
     @abstractmethod
-    def delete(self, metadata: MetaData) -> None:
+    def delete(self, metadata: MetaData, delete_one: bool = True) -> None:
         """Delete metadata from the metastore.
 
-        Note: this will delete *all* records matching the given metadata.
-        To see what will be deleted, search the metastore using the same
-        metadata.
+        By default, an error will be thrown if more than one record will
+        be deleted.
+
+        If `delete_one` is False, then this will delete *all* records matching
+        the given metadata. To see what will be deleted, search the metastore using
+        the same metadata.
 
         Args:
             metadata: metadata to search for records to delete.
+            delete_one: if True, throw error if more than one record will
+                be deleted.
 
         Returns:
             None
+
+        Raises:
+            MetastoreError if delete_one=True and multiple records will
+                be deleted.
         """
-        pass
+        if delete_one:
+            if not self._uniquely_identifies(metadata):
+                raise MetastoreError(
+                    "Multiple records found matching metadata. "
+                    "Pass `delete_one=False` to delete multiple records."
+                )
 
     @abstractmethod
     def update(
@@ -96,7 +110,10 @@ class MetaStore(ABC):
         Raises:
             MetastoreError if more than one record matches the metadata in `where`.
         """
-        pass
+        if not self._uniquely_identifies(where):
+            raise MetastoreError(
+                "Multiple records found matching metadata. `where` must identify a single record."
+            )
 
     def select(self, key: str) -> List[Any]:
         """Select the values stored in all records for given key.
@@ -110,12 +127,33 @@ class MetaStore(ABC):
         """
         return [result[key] for result in self.search()]
 
+    def _uniquely_identifies(self, metadata: MetaData) -> bool:
+        """Return true if the given metadata identifies a single record
+        in the metastore.
+
+        Args:
+            metadata: metadata to test to see if it identifies a single record.
+
+        Returns:
+            True if a search for the given metadata returns a single result; False otherwise.
+        """
+        result = self.search(search_terms=metadata)
+        return len(result) == 1
+
 
 class TinyDBMetaStore(MetaStore):
     """MetaStore using a TinyDB database backend."""
 
-    def __init__(self, session: tinydb.TinyDB) -> None:
-        self._db = session
+    def __init__(self, database: tinydb.TinyDB) -> None:
+        """Create TinyDBMetaStore object.
+
+        Args:
+            database: a TinyDB database.
+
+        Returns:
+            None
+        """
+        self._db = database
 
     def _format_metadata(self, metadata: MetaData) -> MetaData:
         """Convert all keys to lowercase.
@@ -156,20 +194,7 @@ class TinyDBMetaStore(MetaStore):
         query = self._get_query(search_terms)
         return list(self._db.search(query))
 
-    def _uniquely_identifies(self, metadata: MetaData) -> bool:
-        """Return true if the given metadata identifies a single record
-        in the metastore.
-
-        Args:
-            metadata: metadata to test to see if it identifies a single record.
-
-        Returns:
-            True if a search for the given metadata returns a single result; False otherwise.
-        """
-        result = self.search(search_terms=metadata)
-        return len(result) == 1
-
-    def add(self, metadata: MetaData) -> None:
+    def insert(self, metadata: MetaData) -> None:
         """Add new metadata to the metastore.
 
         Args:
@@ -200,10 +225,7 @@ class TinyDBMetaStore(MetaStore):
         Raises:
             MetastoreError if more than one record matches the metadata in `where`.
         """
-        if not self._uniquely_identifies(where):
-            raise MetastoreError(
-                "Multiple records found matching metadata. `where` must identify a single record."
-            )
+        super().update(where, to_update, to_delete)  # Error handling
         query = self._get_query(where)
         if to_update:
             self._db.update(to_update, query)
@@ -230,13 +252,11 @@ class TinyDBMetaStore(MetaStore):
 
         Returns:
             None
-        """
-        if delete_one:
-            if not self._uniquely_identifies(metadata):
-                raise MetastoreError(
-                    "Multiple records found matching metadata. "
-                    "Pass `delete_one=False` to delete multiple records."
-                )
 
+        Raises:
+            MetastoreError if delete_one=True and multiple records will
+                be deleted.
+        """
+        super().delete(metadata, delete_one)  # Error handling
         query = self._get_query(metadata)
         self._db.remove(query)

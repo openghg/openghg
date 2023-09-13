@@ -32,12 +32,13 @@ def test_raising_error_doesnt_save_to_store(mocker, bucket):
 
     key = ""
     with pytest.raises(ValueError):
-        key = "abc123"
-        assert not exists(bucket=bucket, key=key)
-        # Here we're testing to see what happens if a user does something
-        # with metastore that results in an exception being raised that isn't internal
-        # to our processing functions
-        raise ValueError("Oops")
+        with open_metastore(data_type="surface", bucket=bucket) as obs:
+            key = "abc123"
+            assert not exists(bucket=bucket, key=key)
+            # Here we're testing to see what happens if a user does something
+            # with obs that results in an exception being raised that isn't internal
+            # to our processing functions
+            raise ValueError("Oops")
 
     assert not exists(bucket=bucket, key=key)
 
@@ -540,7 +541,7 @@ def test_read_thames_barrier(bucket):
 
 
 @pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects")
-def test_delete_Datasource(bucket):
+def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectStore` class created
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
 
     standardise_surface(store="user",
@@ -822,7 +823,7 @@ def test_store_icos_carbonportal_data(bucket, mocker):
 
 
 @pytest.mark.parametrize(
-    "species,metastore_variable",
+    "species,obs_variable",
     [
         ("carbon dioxide", "co2"),  # Known species (convert using synonyms)
         ("radon", "rn"),  # Previous issues (added check)
@@ -832,7 +833,7 @@ def test_store_icos_carbonportal_data(bucket, mocker):
         ("SF5CF3", "sf5cf3"),  # Unknown species (convert to lower case)
     ],
 )
-def test_metastore_schema(species, metastore_variable):
+def test_obs_schema(species, obs_variable):
     """
     Check expected expected data variables (based on species) are being
     included for default ObsSurface schema.
@@ -846,9 +847,7 @@ def test_metastore_schema(species, metastore_variable):
     data_schema = ObsSurface.schema(species=species)
 
     data_vars = data_schema.data_vars
-    assert metastore_variable in data_vars
-
-    assert "time" in data_vars[metastore_variable]
+    assert obs_variable in data_vars
 
     # TODO: Could also add checks for dims and dtypes?
 

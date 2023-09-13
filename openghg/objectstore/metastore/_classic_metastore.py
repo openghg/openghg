@@ -35,7 +35,7 @@ from openghg.objectstore.metastore._metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
 
 
-object_store_data_classes = {
+object_store_data_classes = {  # TODO: move this to central location after ObjectStore PR
     "surface": {"_root": "ObsSurface", "_uuid": "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"},
     "column": {"_root": "ObsColumn", "_uuid": "5c567168-0287-11ed-9d0f-e77f5194a415"},
     "emissions": {"_root": "Emissions", "_uuid": "c5c88168-0498-40ac-9ad3-949e91a30872"},
@@ -46,7 +46,15 @@ object_store_data_classes = {
 
 
 def get_metakey(data_type: str) -> str:
-    """Return the metakey for a given data type."""
+    """Return the metakey for a given data type.
+
+    Args:
+        data_type: data type to get metakey for.
+
+    Returns:
+        Metakey string for given data type, if found, or "default"
+            if data type not found.
+    """
     try:
         result = object_store_data_classes[data_type]
     except KeyError:
@@ -54,13 +62,23 @@ def get_metakey(data_type: str) -> str:
     return f"{result['_root']}/uuid/{result['_uuid']}/metastore"
 
 
-class ObjectStorage(tinydb.Storage):
+class BucketKeyStorage(tinydb.Storage):
     """Custom TinyDB storage class.
 
     Uses methods in `_local_store` module to read/write files via bucket and key.
     """
 
     def __init__(self, bucket: str, key: str, mode: Literal["r", "rw"]) -> None:
+        """Create BucketKeyStorage object.
+
+        Args:
+            bucket: path to object store bucket (as string)
+            key: metastore key
+            mode: "r" for read-only, "rw" for read/write
+
+        Returns:
+            None
+        """
         valid_modes = ("r", "rw")
         if mode not in valid_modes:
             raise ValueError(f"Invalid mode, please choose one of {valid_modes}.")
@@ -70,7 +88,7 @@ class ObjectStorage(tinydb.Storage):
         self._mode = mode
 
     def read(self) -> Optional[dict]:
-        """Read data from DB.
+        """Read data from database.
 
         Returns:
             Dictionary version of JSON database, or None if database has
@@ -128,8 +146,8 @@ def open_metastore(
         ClassicMetaStore instance.
     """
     key = get_metakey(data_type)
-    with tinydb.TinyDB(bucket, key, mode, storage=CachingMiddleware(ObjectStorage)) as session:
-        metastore = ClassicMetaStore(session=session, data_type=data_type)
+    with tinydb.TinyDB(bucket, key, mode, storage=CachingMiddleware(BucketKeyStorage)) as db:
+        metastore = ClassicMetaStore(database=db, data_type=data_type)
         yield metastore
 
 
@@ -139,8 +157,8 @@ CM = TypeVar("CM", bound="ClassicMetaStore")
 class ClassicMetaStore(TinyDBMetaStore):
     """TinyDBMetaStore using set-up for keys and TinyDB from OpenGHG <=v6.2"""
 
-    def __init__(self, session: tinydb.TinyDB, data_type: str) -> None:
-        super().__init__(session=session)
+    def __init__(self, database: tinydb.TinyDB, data_type: str) -> None:
+        super().__init__(database=database)
         self.data_type = data_type
 
     @classmethod
@@ -149,10 +167,17 @@ class ClassicMetaStore(TinyDBMetaStore):
 
         A ClassicMetaStore opened with this method must be closed to
         ensure that writes are saved.
+
+        Args:
+            bucket: path to object store
+            data_type: data type of metastore to open
+
+        Returns:
+            ClassicMetastore object for given bucket and data type.
         """
         key = get_metakey(data_type)
-        session = tinydb.TinyDB(bucket, key, mode="rw", storage=CachingMiddleware(ObjectStorage))
-        return cls(session=session, data_type=data_type)
+        database = tinydb.TinyDB(bucket, key, mode="rw", storage=CachingMiddleware(BucketKeyStorage))
+        return cls(database=database, data_type=data_type)
 
     def close(self) -> None:
         """Close the underlying TinyDB database."""

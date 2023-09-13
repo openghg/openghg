@@ -117,7 +117,7 @@ class DataManager:
             self.metadata[uuid] = backup
 
             metastore.delete({"uuid": uuid})
-            metastore.add(backup)
+            metastore.insert(backup)
 
             d = Datasource.load(bucket=self._bucket, uuid=uuid)
             d._metadata = backup

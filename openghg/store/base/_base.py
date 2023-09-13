@@ -179,7 +179,7 @@ class BaseStore:
             # in the Datasource
             datasource_metadata = datasource.metadata()
             if new_ds:
-                self._metastore.add(datasource_metadata)
+                self._metastore.insert(datasource_metadata)
             else:
                 self._metastore.update(where={"uuid": datasource.uuid()}, to_update=datasource_metadata)
 
