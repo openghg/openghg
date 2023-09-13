@@ -35,6 +35,7 @@ def parse_openghg(
 
     em_data = open_dataset(filepath, chunks=chunks)
 
+    # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
     if high_time_resolution:
         warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
         time_resolved = high_time_resolution

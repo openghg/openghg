@@ -397,6 +397,8 @@ def standardise_footprint(
     from openghg.cloud import call_function
 
     filepath = Path(filepath)
+
+    # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
     if high_time_resolution is not None:
         warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
         time_resolved = high_time_resolution
@@ -449,7 +451,7 @@ def standardise_footprint(
             continuous=continuous,
             retrieve_met=retrieve_met,
             high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=time_resolved,
+            time_resolved=time_resolved,
             overwrite=overwrite,
         )
 
@@ -493,6 +495,7 @@ def standardise_flux(
 
     filepath = Path(filepath)
 
+    # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
     if high_time_resolution:
         warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
         time_resolved = high_time_resolution
@@ -536,7 +539,7 @@ def standardise_flux(
             database=database,
             database_version=database_version,
             model=model,
-            high_time_resolution=time_resolved,
+            time_resolved=time_resolved,
             period=period,
             continuous=continuous,
             chunks=chunks,

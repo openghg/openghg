@@ -258,11 +258,14 @@ class Footprints(BaseStore):
         network = clean_string(network)
         domain = clean_string(domain)
 
-        # Make sure `inlet` OR the alias `height` is included
-        # Note: from this point only `inlet` variable should be used.
+        # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
         if high_time_resolution is not None:
             warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
             time_resolved = high_time_resolution
+
+        # Make sure `inlet` OR the alias `height` is included
+        # Note: from this point only `inlet` variable should be used.
+
         if inlet is None and height is None:
             raise ValueError("One of inlet (or height) must be specified as an input")
         elif inlet is None:
@@ -437,9 +440,12 @@ class Footprints(BaseStore):
             short_lifetime: Include additional particle age parameters for short lived species:
                 - "mean_age_particles_[nesw]"
         """
+
+        # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
         if high_time_resolution:
             warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
             time_resolved = high_time_resolution
+
         # Names of data variables and associated dimensions (as a tuple)
         data_vars: Dict[str, Tuple[str, ...]] = {}
         # Internal data types of data variables and coordinates
@@ -529,7 +535,8 @@ class Footprints(BaseStore):
             Raises a ValueError with details if the input data does not adhere
             to the Footprints schema.
         """
-
+        
+        # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
         if high_time_resolution:
             warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
             time_resolved = high_time_resolution
@@ -537,7 +544,7 @@ class Footprints(BaseStore):
         data_schema = Footprints.schema(
             particle_locations=particle_locations,
             high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=time_resolved,
+            time_resolved=time_resolved,
             short_lifetime=short_lifetime,
         )
         data_schema.validate_data(data)
