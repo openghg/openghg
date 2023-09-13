@@ -379,7 +379,6 @@ class ModelScenario:
 
             footprint_keyword_options = []
             for fp_inlet_option in fp_inlet_options:
-
                 footprint_keywords = {
                     "site": site,
                     "height": fp_inlet_option,
@@ -505,7 +504,6 @@ class ModelScenario:
         # Search for boundary conditions data based on keywords
         # - domain, species, bc_input
         if domain is not None and bc is None:
-
             bc_keywords = {
                 "species": species,
                 "domain": domain,
@@ -1267,7 +1265,6 @@ class ModelScenario:
         logger.info("Calculating modelled timeseries comparison:")
         iters = track(time_array.values)
         for tt, time in enumerate(iters):
-
             # Get correct index for low resolution data based on start and current date
             current = {dd: getattr(np.datetime64(time, "h").astype(object), dd) for dd in ["month", "year"]}
             tt_low = current["month"] - start["month"] + 12 * (current["year"] - start["year"])
@@ -1453,7 +1450,6 @@ class ModelScenario:
             loss_w: Union[DataArray, float] = np.exp(-1 * scenario["mean_age_particles_w"] / lifetime_hrs).rename("loss_w")  # type: ignore
 
         else:
-
             loss_n = 1.0
             loss_e = 1.0
             loss_s = 1.0
