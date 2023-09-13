@@ -8,6 +8,7 @@ import logging
 import numpy as np
 from openghg.store.spec import define_data_types
 from openghg.types import ObjectStoreError
+from openghg.util import DateRange, clip_daterange_keys
 
 
 logger = logging.getLogger("openghg.store.base")
@@ -136,21 +137,22 @@ class Datasource:
         # Use a dictionary keyed with the daterange covered by each segment of data
         # Group by year
         new_data = {
-            self.get_representative_daterange_str(year_data, period=period): year_data
+            DateRange.from_dataset(year_data, period=period): year_data
             for _, year_data in data.groupby(f"{time_coord}.year")
         }
 
         # Ensure daterange strings are independent and do not overlap each other
         # (this can occur due to representative date strings)
-        new_data = self._clip_daterange_label(new_data)
+        new_data = clip_daterange_keys(new_data)
 
         if self._data:
             # We need to remove them from the current daterange
             overlapping = []
             for existing_daterange in self._data:
                 for new_daterange in new_data:
-                    if daterange_overlap(daterange_a=existing_daterange, daterange_b=new_daterange):
-                        overlapping.append((existing_daterange, new_daterange))
+                    # TODO: change `load` so that date range strings are converted to DateRange
+                    if DateRange.from_string(existing_daterange).overlaps(new_daterange):
+                        overlapping.append((DateRange.from_string(existing_daterange), new_daterange))
 
             # If we have overlapping data, we print a warning and then combine the datasets
             # if we have duplicate timestamps, we first check if the data is just the same
@@ -159,7 +161,7 @@ class Datasource:
             if overlapping:
                 combined_datasets = {}
                 for existing_daterange, new_daterange in overlapping:
-                    ex = self._data.pop(existing_daterange)
+                    ex = self._data.pop(str(existing_daterange))  # TODO: refactor
                     new = new_data.pop(new_daterange)
 
                     logger.info("Combining overlapping data dateranges")
@@ -198,20 +200,20 @@ class Datasource:
 
                     # TODO: May need to find a way to find period for *last point* rather than *current point*
                     # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
-                    combined_daterange = self.get_representative_daterange_str(
-                        dataset=combined, period=period
-                    )
+                    combined_daterange = DateRange.from_dataset(dataset=combined, period=period)
                     combined_datasets[combined_daterange] = combined
 
                 # Checking for overlapping date range strings in combined
                 # data and clipping the labels as necessary.
-                combined_datasets = self._clip_daterange_label(combined_datasets)
+                combined_datasets = clip_daterange_keys(combined_datasets)
+                combined_datasets = {str(k): v for k, v in combined_datasets.items()}
 
                 self._data.update(combined_datasets)
             else:
+                new_data = {str(k): v for k, v in new_data.items()}
                 self._data.update(new_data)
         else:
-            self._data = new_data
+            self._data = {str(k): v for k, v in new_data.items()}
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
@@ -271,6 +273,7 @@ class Datasource:
         lowercased: Dict = to_lowercase(metadata, skip_keys=skip_keys)
         self._metadata.update(lowercased)
 
+    # TODO: remove this method and move test to tests/util/test_daterange.py
     def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
         """Returns the daterange for the passed DataFrame
 
@@ -290,137 +293,6 @@ class Datasource:
         end = timestamp_tzaware(dataframe.last_valid_index())
 
         return start, end
-
-    def get_dataset_daterange(self, dataset: Dataset) -> Tuple[Timestamp, Timestamp]:
-        """Get the daterange for the passed Dataset
-
-        Args:
-            dataset (xarray.DataSet): Dataset to parse
-        Returns:
-            tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
-
-        """
-        from openghg.util import timestamp_tzaware
-
-        try:
-            start = timestamp_tzaware(dataset.time.min().values)
-            end = timestamp_tzaware(dataset.time.max().values)
-
-            return start, end
-        except AttributeError:
-            raise AttributeError("This dataset does not have a time attribute, unable to read date range")
-
-    def get_dataset_daterange_str(self, dataset: Dataset) -> str:
-        start, end = self.get_dataset_daterange(dataset=dataset)
-
-        # Tidy the string and concatenate them
-        start = str(start).replace(" ", "-")
-        end = str(end).replace(" ", "-")
-
-        daterange_str: str = start + "_" + end
-
-        return daterange_str
-
-    def get_representative_daterange_str(self, dataset: Dataset, period: Optional[str] = None) -> str:
-        """
-        Get representative daterange which incorporates any period the data covers.
-
-        A representative daterange covers the start - end time + any additional period that is covered
-        by each time point. The start and end times can be extracted from the input dataset and
-        any supplied period used to extend the end of the date range to cover the representative period.
-
-        If there is only one time point (i.e. start and end datetimes are the same) and no period is
-        supplied 1 additional second will be added to ensure these values are not identical.
-
-        Args:
-            dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.
-            period: Value representing a time period e.g. "12H", "1AS" "3MS". Should be suitable for
-                creation of a pandas Timedelta or DataOffset object.
-
-        Returns:
-            str : Date string covering representative date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
-        """
-        from openghg.util import create_daterange_str, relative_time_offset
-        from pandas import Timedelta
-
-        # Extract start and end dates from grouped data
-        start_date, end_date = self.get_dataset_daterange(dataset)
-
-        # If period is defined add this to the end date
-        # This ensure start-end range includes time period covered by data
-        if period is not None:
-            period_td = relative_time_offset(period=period)
-            end_date = (
-                end_date + period_td - Timedelta(seconds=1)
-            )  # Subtract 1 second to make this exclusive end.
-
-        # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
-        if start_date == end_date:
-            end_date += Timedelta(seconds=1)
-
-        daterange_str = create_daterange_str(start=start_date, end=end_date)
-
-        return daterange_str
-
-    def clip_daterange(self, end_date: Timestamp, start_date_next: Timestamp) -> Timestamp:
-        """
-        Clip any end_date greater than the next start date (start_date_next) to be
-        1 second less.
-        """
-        if end_date >= start_date_next:
-            end_date = start_date_next - Timedelta(seconds=1)
-
-        return end_date
-
-    def clip_daterange_from_str(self, daterange_str1: str, daterange_str2: str) -> str:
-        """
-        Ensure the end date of a daterange string is not greater than the start
-        date of the next daterange string. Update as needed.
-        """
-        from openghg.util import create_daterange_str
-
-        start_date_str, end_date_str = daterange_str1.split("_")
-        start_date_next_str, _ = daterange_str2.split("_")
-
-        start_date = Timestamp(start_date_str)
-        end_date = Timestamp(end_date_str)
-        start_date_next = Timestamp(start_date_next_str)
-
-        end_date = self.clip_daterange(end_date, start_date_next)
-
-        daterange_str1_clipped = create_daterange_str(start_date, end_date)
-
-        return daterange_str1_clipped
-
-    def _clip_daterange_label(self, labelled_datasets: Dict[str, Dataset]) -> Dict[str, Dataset]:
-        """
-        Check the daterange string labels for the datasets and ensure neighbouring
-        date ranges are not overlapping. The daterange string labels will be updated
-        as required.
-
-        Args:
-            labelled_datasets : Dictionary of datasets labelled by date range strings.
-                These are expected to be in time order.
-
-        Returns:
-            Dict : Same format as input with labels updated as necessary.
-        """
-
-        datestr_labels = list(labelled_datasets.keys())
-        num_data_groups = len(datestr_labels)
-
-        labelled_datasets_clipped = {}
-        for i in range(num_data_groups):
-            daterange_str_1 = datestr_labels[i]
-            if i < num_data_groups - 1:
-                daterange_str_2 = datestr_labels[i + 1]
-                daterange_str = self.clip_daterange_from_str(daterange_str_1, daterange_str_2)
-            else:
-                daterange_str = daterange_str_1
-            dataset = labelled_datasets[daterange_str_1]
-            labelled_datasets_clipped[daterange_str] = dataset
-
-        return labelled_datasets_clipped
 
     def get_period(self) -> Optional[str]:
         """
