@@ -2,6 +2,7 @@
     Utility functions for OpenGHG
 """
 from ._cli import cli
+from ._daterange import DateRange, clip_dateranges
 from ._domain import (
     get_domain_info,
     find_domain,

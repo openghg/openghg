@@ -17,12 +17,19 @@ DR = TypeVar("DR", bound="DateRange")
 
 
 class DateRange:
-    def __init__(self, start: pd.Timestamp, end: pd.Timestamp, freq: Optional[pd.DateOffset] = None) -> None:
+    def __init__(self, start: pd.Timestamp, end: pd.Timestamp, period: Optional[str] = None) -> None:
         if start > end:
             raise ValueError(f"Start date {start} after end date {end}.")
         self.start = start
+
+        if period is not None:
+            offset = relative_time_offset(period=period)
+            end += offset  # end of time period covered by data
+            end -= pd.Timedelta(seconds=1)  # exclude endpoint
         self.end = end
-        self.freq = freq
+
+        if self.end == start:
+            self.end += pd.Timedelta(seconds=1)  # make range longer than 0 seconds
 
     def __str__(self) -> str:
         start = str(self.start).replace(" ", "-")
@@ -81,21 +88,6 @@ class DateRange:
         so they overlap is the opposite is true.
         """
         return bool(self.start <= other.end and self.end >= other.start)
-
-    def make_representative(self, period: Optional[str] = None) -> DateRange:
-        """Take period information into account."""
-        start = self.start
-        end = self.end
-
-        if period is not None:
-            offset = relative_time_offset(period=period)
-            end += offset  # end of time period covered by data
-            end -= pd.Timedelta(seconds=1)  # exclude endpoint
-
-        if start == end:
-            end += pd.Timedelta(seconds=1)  # make range longer than 0 seconds
-
-        return DateRange(start, end)
 
 
 def clip_dateranges(dateranges: list[DateRange]) -> list[DateRange]:
