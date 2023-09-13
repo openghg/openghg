@@ -273,27 +273,6 @@ class Datasource:
         lowercased: Dict = to_lowercase(metadata, skip_keys=skip_keys)
         self._metadata.update(lowercased)
 
-    # TODO: remove this method and move test to tests/util/test_daterange.py
-    def get_dataframe_daterange(self, dataframe: DataFrame) -> Tuple[Timestamp, Timestamp]:
-        """Returns the daterange for the passed DataFrame
-
-        Args:
-            dataframe: DataFrame to parse
-        Returns:
-            tuple (Timestamp, Timestamp): Start and end Timestamps for data
-        """
-        from openghg.util import timestamp_tzaware
-        from pandas import DatetimeIndex
-
-        if not isinstance(dataframe.index, DatetimeIndex):
-            raise TypeError("Only DataFrames with a DatetimeIndex must be passed")
-
-        # Here we want to make the pandas Timestamps timezone aware
-        start = timestamp_tzaware(dataframe.first_valid_index())
-        end = timestamp_tzaware(dataframe.last_valid_index())
-
-        return start, end
-
     def get_period(self) -> Optional[str]:
         """
         Extract period value from metadata. This expects keywords of either "sampling_period" (observation data) or

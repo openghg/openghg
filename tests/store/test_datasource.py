@@ -165,23 +165,6 @@ def test_versioning(capfd, bucket):
     assert detailed_keys["v2"]["keys"] == expected_v2
 
 
-def test_get_dataframe_daterange():
-    n_days = 100
-    epoch = datetime.datetime(1970, 1, 1, 1, 1)
-    random_data = pd.DataFrame(
-        data=np.random.randint(0, 100, size=(100, 4)),
-        index=pd.date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D"),
-        columns=list("ABCD"),
-    )
-
-    d = Datasource()
-
-    start, end = d.get_dataframe_daterange(random_data)
-
-    assert start == pd.Timestamp("1970-01-01 01:01:00+0000")
-    assert end == pd.Timestamp("1970-04-10 01:01:00+0000")
-
-
 def test_save(mock_uuid2, bucket):
     bucket = get_bucket()
 
