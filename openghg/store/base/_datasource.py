@@ -147,11 +147,12 @@ class Datasource:
         if self._data:
             # We need to remove them from the current daterange
             overlapping = []
-            for existing_daterange in self._data:
+            existing_dateranges = [DateRange.from_string(daterange_str) for daterange_str in self._data]
+            for existing_daterange in existing_dateranges:
                 for new_daterange in new_data:
                     # TODO: change `load` so that date range strings are converted to DateRange
-                    if DateRange.from_string(existing_daterange).overlaps(new_daterange):
-                        overlapping.append((DateRange.from_string(existing_daterange), new_daterange))
+                    if existing_daterange.overlaps(new_daterange):
+                        overlapping.append((existing_daterange, new_daterange))
 
             # If we have overlapping data, we print a warning and then combine the datasets
             # if we have duplicate timestamps, we first check if the data is just the same
@@ -205,12 +206,9 @@ class Datasource:
                 # Checking for overlapping date range strings in combined
                 # data and clipping the labels as necessary.
                 combined_datasets = clip_daterange_keys(combined_datasets)
-                combined_datasets = {str(k): v for k, v in combined_datasets.items()}
-
-                self._data.update(combined_datasets)
+                self._data.update({str(k): v for k, v in combined_datasets.items()})
             else:
-                new_data = {str(k): v for k, v in new_data.items()}
-                self._data.update(new_data)
+                self._data.update({str(k): v for k, v in new_data.items()})
         else:
             self._data = {str(k): v for k, v in new_data.items()}
 

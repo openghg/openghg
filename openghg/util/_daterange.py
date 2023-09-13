@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import cast, TypeVar, Optional
+from types import NotImplementedType
+from typing import cast, Optional, TypeVar, Union
 
 import pandas as pd
 import xarray as xr
@@ -69,8 +70,12 @@ class DateRange:
         hash_string = str(self) + "_" + period
         return hash(hash_string)
 
-    def __eq__(self, other: DateRange) -> bool:
-        return (self.start == other.start) and (self.end == other.end)
+    def __eq__(self, other: object) -> Union[bool, NotImplementedType]:
+        if not isinstance(other, DateRange):
+            return NotImplemented
+        else:
+            cast(DateRange, other)
+        return bool((self.start == other.start) and (self.end == other.end))
 
     def __lt__(self, other: DateRange) -> bool:
         """Compare (start, end) pairs in lexicographical order.
@@ -87,7 +92,7 @@ class DateRange:
         if self.start < other.start:
             return True
         elif self.start == other.start:
-            return self.end < other.end
+            return bool(self.end < other.end)
         else:
             return False
 
@@ -185,7 +190,7 @@ def _clip_dateranges(dateranges: list[DateRange]) -> list[DateRange]:
     return clipped_dateranges
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def clip_daterange_keys(daterange_dict: dict[DateRange, T]) -> dict[DateRange, T]:
