@@ -4,6 +4,7 @@
 """
 import logging
 from typing import Any, Dict, List, Optional, Union
+import warnings
 from openghg.store import load_metastore
 from openghg.store.spec import define_data_type_classes, define_data_types
 from openghg.objectstore import get_readable_buckets
@@ -163,7 +164,8 @@ def search_flux(
     model: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    high_time_resolution: Optional[bool] = None,
+    time_resolved: Optional[bool] = None,
+    high_time_resolution: Optional[bool] = None,  # DEPRECATED: use time_resolved instead
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
     **kwargs: Any,
@@ -178,7 +180,8 @@ def search_flux(
         database_version: Name of database version (if relevant)
         model: Model name (if relevant)
         source_format : Type of data being input e.g. openghg (internal format)
-        high_time_resolution: If this is a high resolution file
+        time_resolved: If this is a high resolution file
+        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         period: Period of measurements. Only needed if this can not be inferred from the time coords
                 If specified, should be one of:
                     - "yearly", "monthly"
@@ -190,6 +193,10 @@ def search_flux(
         SearchResults: SearchResults object
     """
 
+    # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
+    if high_time_resolution is not None:
+        warnings.warn("This argument is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+        time_resolved = high_time_resolution
     if start_date is not None:
         start_date = str(start_date)
     if end_date is not None:
@@ -204,7 +211,7 @@ def search_flux(
         model=model,
         start_date=start_date,
         end_date=end_date,
-        high_time_resolution=high_time_resolution,
+        time_resolved=time_resolved,
         period=period,
         continuous=continuous,
         data_type="emissions",
@@ -226,6 +233,7 @@ def search_footprints(
     period: Optional[Union[str, tuple]] = None,
     continuous: Optional[bool] = None,
     high_spatial_resolution: Optional[bool] = None,  # TODO need to give False to get only low spatial res
+    time_resolved: Optional[bool] = None,
     high_time_resolution: Optional[bool] = None,
     short_lifetime: Optional[bool] = None,
     **kwargs: Any,
@@ -245,8 +253,9 @@ def search_footprints(
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
         high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
+        time_resolved: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+        high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
         short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                         Note this will be set to True if species has an associated lifetime.
         kwargs: Additional search terms
@@ -254,7 +263,10 @@ def search_footprints(
         SearchResults: SearchResults object
     """
     from openghg.util import format_inlet
-
+    # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
+    if high_time_resolution is not None:
+        warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+        time_resolved = high_time_resolution
     args = {
         "site": site,
         "inlet": inlet,
@@ -268,7 +280,7 @@ def search_footprints(
         "end_date": end_date,
         "period": period,
         "continuous": continuous,
-        "high_time_resolution": high_time_resolution,
+        "time_resolved": time_resolved,
         "high_spatial_resolution": high_spatial_resolution,
         "short_lifetime": short_lifetime,
     }

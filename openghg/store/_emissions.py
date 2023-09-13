@@ -72,7 +72,8 @@ class Emissions(BaseStore):
         database_version: Optional[str] = None,
         model: Optional[str] = None,
         source_format: str = "openghg",
-        high_time_resolution: Optional[bool] = False,
+        time_resolved: Optional[bool] = False,
+        high_time_resolution: Optional[bool] = None,
         period: Optional[Union[str, tuple]] = None,
         chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
@@ -108,7 +109,10 @@ class Emissions(BaseStore):
         domain = clean_string(domain)
 
         filepath = Path(filepath)
-
+        # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
+        if high_time_resolution:
+            warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+            time_resolved = high_time_resolution
         try:
             source_format = EmissionsTypes[source_format.upper()].value
         except KeyError:
@@ -131,7 +135,7 @@ class Emissions(BaseStore):
             "species": species,
             "domain": domain,
             "source": source,
-            "high_time_resolution": high_time_resolution,
+            "time_resolved": time_resolved,
             "period": period,
             "continuous": continuous,
             "data_type": "emissions",

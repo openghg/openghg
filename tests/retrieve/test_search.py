@@ -346,7 +346,7 @@ def test_search_footprints_high_time_resolution():
 
     # check attributes
     metadata = res.retrieve().metadata
-    assert metadata["high_time_resolution"] == True
+    assert metadata["time_resolved"] == True
 
 
 def test_search_flux():

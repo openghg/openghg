@@ -97,7 +97,7 @@ def test_read_footprint_standard(keyword, value):
         "max_latitude": 79.057,
         "min_latitude": 10.729,
         "high_spatial_resolution": "False",
-        "high_time_resolution": "False",
+        "time_resolved": "False",
         "time_period": "2 hours",
     }
 
@@ -217,7 +217,7 @@ def test_read_footprint_high_spatial_resolution():
         "max_longitude_high": 0.468,
         "min_latitude_high": 50.87064,
         "min_longitude_high": -1.26,
-        "high_time_resolution": "False",
+        "time_resolved": "False",
         "short_lifetime": "False",
     }
 
@@ -315,7 +315,7 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         "max_latitude": 53.785,
         "min_latitude": 51.211,
         "high_spatial_resolution": "False",
-        "high_time_resolution": "True",
+        "time_resolved": "True",
         "short_lifetime": "False",
         "time_period": "1 hour",
     }
@@ -383,7 +383,7 @@ def test_read_footprint_short_lived():
         "max_latitude": 53.785,
         "min_latitude": 51.211,
         "high_spatial_resolution": "False",
-        "high_time_resolution": "False",
+        "time_resolved": "False",
         "short_lifetime": "True",
         "time_period": "1 hour",
     }

@@ -3,6 +3,7 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from typing import DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
+import warnings
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -213,7 +214,8 @@ class Footprints(BaseStore):
         continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
-        high_time_resolution: bool = False,
+        time_resolved: bool = False,
+        high_time_resolution: Optional[bool] = None,
         short_lifetime: bool = False,
         overwrite: bool = False,
         # model_params: Optional[Dict] = None,
@@ -235,8 +237,9 @@ class Footprints(BaseStore):
             continuous: Whether time stamps have to be continuous.
             retrieve_met: Whether to also download meterological data for this footprints area
             high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
-            high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
+            time_resolved: Indicate footprints are high time resolution (include H_back dimension)
                            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
             overwrite: Overwrite any currently stored data
@@ -251,13 +254,18 @@ class Footprints(BaseStore):
         from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
 
         filepath = Path(filepath)
-
         site = clean_string(site)
         network = clean_string(network)
         domain = clean_string(domain)
 
+        # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
+        if high_time_resolution is not None:
+            warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+            time_resolved = high_time_resolution
+
         # Make sure `inlet` OR the alias `height` is included
         # Note: from this point only `inlet` variable should be used.
+
         if inlet is None and height is None:
             raise ValueError("One of inlet (or height) must be specified as an input")
         elif inlet is None:
@@ -280,9 +288,9 @@ class Footprints(BaseStore):
 
         if species == "co2":
             # Expect co2 data to have high time resolution
-            if not high_time_resolution:
-                logger.info("Updating high_time_resolution to True for co2 data")
-                high_time_resolution = True
+            if not time_resolved:
+                logger.info("Updating time_resolved to True for co2 data")
+                time_resolved = True
 
         if short_lifetime and not species:
             raise ValueError(
@@ -300,7 +308,7 @@ class Footprints(BaseStore):
         Footprints.validate_data(
             fp_data,
             high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=high_time_resolution,
+            time_resolved=time_resolved,
             short_lifetime=short_lifetime,
         )
 
@@ -355,7 +363,7 @@ class Footprints(BaseStore):
             except KeyError:
                 raise KeyError("Expected high spatial resolution. Unable to find lat_high or lon_high data.")
 
-        metadata["high_time_resolution"] = high_time_resolution
+        metadata["time_resolved"] = time_resolved
         metadata["high_spatial_resolution"] = high_spatial_resolution
         metadata["short_lifetime"] = short_lifetime
 
@@ -386,7 +394,7 @@ class Footprints(BaseStore):
             "model",
             "inlet",
             "domain",
-            "high_time_resolution",
+            "time_resolved",
             "high_spatial_resolution",
             "short_lifetime",
         )
@@ -405,7 +413,8 @@ class Footprints(BaseStore):
     def schema(
         particle_locations: bool = True,
         high_spatial_resolution: bool = False,
-        high_time_resolution: bool = False,
+        time_resolved: Optional[bool] = False,
+        high_time_resolution: Optional[bool] = None,
         short_lifetime: bool = False,
     ) -> DataSchema:
         """
@@ -414,7 +423,7 @@ class Footprints(BaseStore):
         The returned schema depends on what the footprint represents,
         indicated using the keywords.
         By default, this will include "fp" variable but this will be superceded
-        if high_spatial_resolution or high_time_resolution are specified.
+        if high_spatial_resolution or time_resolved are specified.
 
         Args:
             particle_locations: Include 4-directional particle location variables:
@@ -424,12 +433,18 @@ class Footprints(BaseStore):
                 - "fp_low"
                 - "fp_high"
                 and include associated additional dimensions ("lat_high", "lon_high").
-            high_time_resolution : Set footprint variable to be high time resolution
+            time_resolved : Set footprint variable to be high time resolution
                 - "fp_HiTRes"
                 and include associated dimensions ("H_back").
+            high_time_resolution: This argument is deprecated and will be replaced in future versions with time_resolved.
             short_lifetime: Include additional particle age parameters for short lived species:
                 - "mean_age_particles_[nesw]"
         """
+
+        # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
+        if high_time_resolution:
+            warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+            time_resolved = high_time_resolution
 
         # Names of data variables and associated dimensions (as a tuple)
         data_vars: Dict[str, Tuple[str, ...]] = {}
@@ -440,7 +455,7 @@ class Footprints(BaseStore):
             "time": np.datetime64,
         }
 
-        if not high_time_resolution and not high_spatial_resolution:
+        if not time_resolved and not high_spatial_resolution:
             # Includes standard footprint variable
             data_vars["fp"] = ("time", "lat", "lon")
             dtypes["fp"] = np.floating
@@ -455,7 +470,7 @@ class Footprints(BaseStore):
             dtypes["fp_low"] = np.floating
             dtypes["fp_high"] = np.floating
 
-        if high_time_resolution:
+        if time_resolved:
             # Include options for high time resolution footprint (usually co2)
             # This includes a footprint data with an additional hourly back dimension
             data_vars["fp_HiTRes"] = ("time", "lat", "lon", "H_back")
@@ -501,7 +516,8 @@ class Footprints(BaseStore):
         data: Dataset,
         particle_locations: bool = True,
         high_spatial_resolution: bool = False,
-        high_time_resolution: bool = False,
+        time_resolved: Optional[bool] = False,
+        high_time_resolution: Optional[bool] = None,
         short_lifetime: bool = False,
     ) -> None:
         """
@@ -519,10 +535,15 @@ class Footprints(BaseStore):
             Raises a ValueError with details if the input data does not adhere
             to the Footprints schema.
         """
+        # `high_time_resolution` is checked and stored in `time_resolved` with deprecation warning
+        if high_time_resolution:
+            warnings.warn("This feature is deprecated and will be replaced in future versions with time_resolved.", DeprecationWarning)
+            time_resolved = high_time_resolution
+
         data_schema = Footprints.schema(
             particle_locations=particle_locations,
             high_spatial_resolution=high_spatial_resolution,
-            high_time_resolution=high_time_resolution,
+            time_resolved=time_resolved,
             short_lifetime=short_lifetime,
         )
         data_schema.validate_data(data)
