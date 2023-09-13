@@ -1,4 +1,4 @@
-from pandas import DataFrame, Timestamp, Timedelta
+from pandas import Timestamp
 import xarray as xr
 from xarray import Dataset
 from collections import defaultdict
@@ -123,7 +123,6 @@ class Datasource:
             None
         """
         from numpy import unique as np_unique
-        from openghg.util import daterange_overlap
         from xarray import concat as xr_concat
 
         # Extract period associated with data from metadata
