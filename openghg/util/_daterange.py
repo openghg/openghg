@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from types import NotImplementedType
-from typing import cast, Optional, TypeVar, Union
+from typing import cast, Optional, TypeVar
 
 import pandas as pd
 import xarray as xr
@@ -70,9 +69,9 @@ class DateRange:
         hash_string = str(self) + "_" + period
         return hash(hash_string)
 
-    def __eq__(self, other: object) -> Union[bool, NotImplementedType]:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, DateRange):
-            return NotImplemented
+            raise NotImplementedError(f"Cannot compare DateRange to {type(other)} object.")
         else:
             cast(DateRange, other)
         return bool((self.start == other.start) and (self.end == other.end))
