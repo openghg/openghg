@@ -41,7 +41,13 @@ def parse_agage(data_folder: Union[Path, str], drop_duplicate_timestamps: bool =
             if lookup_inlet_height:
                 site_info = load_json(path=site_info_file)
                 site_code = ds.attrs["site_code"].upper()
-                inlet_heights = site_info[site_code]["AGAGE"]["height"]
+
+                try:
+                    inlet_heights = site_info[site_code]["AGAGE"]["height"]
+                except KeyError:
+                    logger.warning(f"Unable to find inlet height for {site_code}, skipping {site_file.name}.")
+                    continue
+
                 if len(inlet_heights) > 1:
                     logger.warning(
                         f"Multiple inlet heights found for {site_code}, skipping {site_file.name}."
