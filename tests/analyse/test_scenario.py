@@ -1445,6 +1445,39 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     np.testing.assert_allclose(output_flux, expected_flux)
 
 
+def test_scenario_infer_flux_source_ch4():
+    """
+    Test ModelScenario can find the source of a flux
+    if only a single flux matches the given metadata
+    and source is in the flux metadata.
+    """
+    start_date = "2012-08-01"
+    end_date = "2012-09-01"
+
+    site = "tac"
+    domain = "EUROPE"
+    inlet = "100m"
+    network = "DECC"
+
+    species = "ch4"
+    source = "anthro"
+
+    bc_input = "MOZART"
+
+    model_scenario = ModelScenario(
+        site=site,
+        species=species,
+        inlet=inlet,
+        network=network,
+        domain=domain,
+        bc_input=bc_input,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    assert source in model_scenario.fluxes
+
+
 def test_modelscenario_doesnt_error_empty_objectstore():
     clear_test_stores()
 
