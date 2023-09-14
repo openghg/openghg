@@ -23,15 +23,15 @@ jobs:
       - name: Build a binary wheel and a source tarball
         run: |
           python -m build --sdist --wheel --outdir dist/
-    #   - name: Publish distribution to Test PyPI
-    #     uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
-    #     with:
-    #       password: 
-    #       repository_url: https://test.pypi.org/legacy/
-    #   - name: Publish distribution to PyPI
-    #     uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
-    #     with:
-    #       password: 
+      - name: Publish distribution to Test PyPI
+        uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
+        with:
+          password:  ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
   release_conda:
     name: Build and publish conda package
@@ -53,6 +53,6 @@ jobs:
           conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge
           BUILD_DIR=${GITHUB_WORKSPACE}/build
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
-        #   anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
+          anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
         env:
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
