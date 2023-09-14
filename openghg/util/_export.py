@@ -1,108 +1,171 @@
 from __future__ import annotations
-from json import dump, loads
+import json
 from pathlib import Path
-from typing import Dict, List, Union, Optional, TYPE_CHECKING
-from addict import Dict as aDict
+from typing import Dict, List, Literal, Union, TYPE_CHECKING, Optional
+import addict
+from pandas import DataFrame
+import logging
+import gzip
 
 if TYPE_CHECKING:
     from openghg.dataobjects import ObsData
 
 __all__ = ["to_dashboard", "to_dashboard_mobile"]
 
+logger = logging.getLogger("openghg.util")
+logger.setLevel("DEBUG")
+
 
 def to_dashboard(
     data: Union[ObsData, List[ObsData]],
-    selected_vars: List,
+    export_folder: Path,
     downsample_n: int = 3,
-    filename: Optional[str] = None,
-) -> Union[Dict, None]:
-    """Takes a Dataset produced by OpenGHG and outputs it into a JSON
-    format readable by the OpenGHG dashboard or a related project.
+    output_format: Literal["json", "parquet"] = "json",
+    compress_json: bool = False,
+    parquet_compression: Literal["brotli", "snappy", "gzip"] = "gzip",
+    default_site: Optional[str] = None,
+    default_species: Optional[str] = None,
+    default_inlet: Optional[str] = None,
+    default_instrument: Optional[str] = None,
+) -> None:
+    """Takes ObsData objects produced by OpenGHG and outputs them to JSON
+    files. Files are named using the following convention:
 
-    This also exports a separate file with the locations of the sites
-    for use with map selector component.
+    export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}.json"
 
-    Note - this function does not currently support export of data from multiple
-    inlets.
+    A separate metadata file, metadata_complete.json is created in the same
+    export folder containing the metadata for each site and the filename for
+    that specific data set. This chunking allows a larger amount of data to be used
+    by the dashboard due to the separation into separate files.
 
     Args:
-        data: Dictionary of retrieved data
-        selected_vars: The variables to want to export
+        data: ObsData object or list of ObsData objects
+        export_folder: Folder path to write files
         downsample_n: Take every nth value from the data
-        filename: filename to write output to
+        output_format: json or parquet
+        compress_json: compress JSON using gzip
+        parquet_compression: One of ["brotli", "snappy", "gzip"]
     Returns:
         None
     """
-    to_export = aDict()
+    allowed_formats = ("json", "parquet")
+    if output_format not in allowed_formats:
+        raise ValueError(f"Invalid output format, please select one of {allowed_formats}")
 
-    if not isinstance(selected_vars, list):
-        selected_vars = [selected_vars]
+    export_folder = Path(export_folder)
+    if not export_folder.exists():
+        logger.info(f"Creating export folder at {export_folder}")
+        export_folder.mkdir()
+    # Here we'll store the metadata that can be used to populate the interface
+    # it'll also hold the filenames for the retrieval of data
+    metadata_complete = addict.Dict()
+    metadata_complete_filepath = Path(export_folder).joinpath("metadata_complete_compressed.json")
 
-    selected_vars = [str(c).lower() for c in selected_vars]
+    # Create the data directory
+    data_foldername = "measurements"
+    data_dir = export_folder.joinpath(data_foldername)
+    data_dir.mkdir(exist_ok=True)
 
     if not isinstance(data, list):
         data = [data]
+
+    # Hold a list of all the files we export so we can check the size of the exported data
+    file_sizes_bytes = 0
+    one_MB = 1024 * 1024
 
     for obs in data:
         measurement_data = obs.data
         attributes = measurement_data.attrs
         metadata = obs.metadata
 
-        df = measurement_data.to_dataframe()
+        df: DataFrame = measurement_data.to_dataframe()
 
         rename_lower = {c: str(c).lower() for c in df.columns}
         df = df.rename(columns=rename_lower)
-        # We just want the selected variables
-        to_extract = [c for c in df.columns if c in selected_vars]
 
-        if not to_extract:
-            continue
+        species_name = obs.metadata["species"]
+        df = df[[species_name]]
 
-        df = df[to_extract]
+        # TODO - check precision?
 
         # Downsample the data
         if downsample_n > 1:
             df = df.iloc[::downsample_n]
 
-        network = metadata["network"]
-        instrument = metadata["instrument"]
+        try:
+            station_latitude = attributes["station_latitude"]
+        except KeyError:
+            station_latitude = metadata["station_latitude"]
 
         try:
-            latitude = attributes["latitude"]
+            station_longitude = attributes["station_longitude"]
         except KeyError:
-            latitude = metadata["latitude"]
-
-        try:
-            longitude = attributes["longitude"]
-        except KeyError:
-            longitude = metadata["longitude"]
+            station_longitude = metadata["station_longitude"]
 
         # TODO - remove this if we add site location to standard metadata
         location = {
-            "latitude": latitude,
-            "longitude": longitude,
+            "station_latitude": station_latitude,
+            "station_longitude": station_longitude,
         }
-        metadata.update(location)
 
-        json_data = loads(df.to_json())
+        metadata.update(location)
 
         species = metadata["species"]
         site = metadata["site"]
         inlet = metadata["inlet"]
+        network = metadata["network"]
+        instrument = metadata["instrument"]
 
-        to_export[species][network][site][inlet][instrument] = {
-            "data": json_data,
+        if output_format == "json":
+            file_extension = ".json"
+            if compress_json:
+                file_extension += ".gz"
+        elif output_format == "parquet":
+            file_extension = ".parquet"
+
+        export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}{file_extension}"
+        export_filepath = data_dir.joinpath(export_filename)
+
+        file_data = {
             "metadata": metadata,
+            "filepath": f"{data_foldername}/{export_filename}",
         }
 
-    if filename is not None:
-        with open(filename, "w") as f:
-            dump(obj=to_export, fp=f)
-        return None
-    else:
-        # TODO - remove this once addict is stubbed
-        export_dict: Dict = to_export.to_dict()
-        return export_dict
+        metadata_complete[species][network][site][inlet][instrument] = file_data
+
+        # TODO - Check if this hoop jumping is required, I can't remember exactly why
+        # I did it
+        if output_format == "json":
+            data_dict = json.loads(df.to_json())
+            # Let's trim the species name as we don't need that
+            data_dict = data_dict[species.lower()]
+            for_export_str = json.dumps(data_dict)
+            if compress_json:
+                for_export_bytes = gzip.compress(for_export_str.encode())
+                export_filepath.write_bytes(for_export_bytes)
+            else:
+                export_filepath.write_text(for_export_str)
+        else:
+            logger.warning(
+                "The dashboard doesn't currently support the parquet format. "
+                + "This is for testing purposes only."
+            )
+            df.to_parquet(export_filepath, compression=parquet_compression)
+
+        logger.info(f"Writing dashboard data to: {export_filename}")
+
+        file_size = export_filepath.stat().st_size
+        file_sizes_bytes += file_size
+        if file_size > one_MB:
+            logger.warn(
+                msg=f"The file {export_filename} is larger than 1 MB, consider ways to reduce its size."
+            )
+
+    metadata_complete_filepath.write_text(json.dumps(metadata_complete))
+    file_sizes_bytes += metadata_complete_filepath.stat().st_size
+
+    logger.info(f"\n\nComplete metadata file written to: {metadata_complete_filepath}")
+    logger.info(f"Total size of exported data package: {file_sizes_bytes/one_MB:.2f} MB")
 
 
 def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> Union[Dict, None]:
@@ -114,7 +177,7 @@ def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> 
     Returns:
         dict or None: Dictonary if no filename given
     """
-    to_export = aDict()
+    to_export = addict.Dict()
 
     for species, species_data in data.items():
         spec_data = species_data["data"]
@@ -129,7 +192,7 @@ def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> 
 
     if filename is not None:
         with open(filename, "w") as f:
-            dump(to_export, f)
+            json.dump(to_export, f)
         return None
     else:
         to_return: Dict = to_export.to_dict()
