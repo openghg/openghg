@@ -45,6 +45,7 @@ on which data types are missing.
 """
 
 import logging
+from rich.progress import track
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
@@ -556,7 +557,7 @@ class ModelScenario:
         """
         Find the platform for a site, if present.
 
-        This will access the "site_info.json" file from openghg_defs dependency to 
+        This will access the "site_info.json" file from openghg_defs dependency to
         find this information.
         """
         from openghg.util import get_site_info
@@ -1130,7 +1131,6 @@ class ModelScenario:
 
         import dask.array as da  # type: ignore
         from pandas import date_range
-        from tqdm import tqdm
 
         # TODO: Need to work out how this fits in with high time resolution method
         # Do we need to flag low resolution to use a different method? natural / anthro for example
@@ -1265,7 +1265,7 @@ class ModelScenario:
         # at each release time we disaggregate the particles backwards over the previous 24hrs
         # The final value then contains the 29-day integrated residual footprints
         logger.info("Calculating modelled timeseries comparison:")
-        iters = tqdm(time_array.values)
+        iters = track(time_array.values)
         for tt, time in enumerate(iters):
 
             # Get correct index for low resolution data based on start and current date

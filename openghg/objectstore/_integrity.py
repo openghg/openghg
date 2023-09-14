@@ -1,11 +1,20 @@
+import logging
+from collections import defaultdict
 from openghg.store.spec import define_data_type_classes
 from openghg.objectstore import get_readable_buckets
 from openghg.types import ObjectStoreError
+from typing import List, Optional
+
+logger = logging.getLogger("openghg.objectstore")
+logger.setLevel(level=logging.DEBUG)
 
 
-def integrity_check() -> None:
+def integrity_check(raise_error: bool = True) -> Optional[List]:
     """Check the integrity of object stores.
 
+    Args:
+        on_failure: On integrity check failure either raise or return
+        If return a list of Datasources that failed the integrity check are returned.
     Returns:
         None
     """
@@ -15,6 +24,7 @@ def integrity_check() -> None:
     readable_buckets = get_readable_buckets()
     datastore_classes = define_data_type_classes().values()
 
+    failed_datasources = defaultdict(dict)
     for bucket in readable_buckets.values():
         for storage_class in datastore_classes:
             # Now load the object
@@ -22,12 +32,23 @@ def integrity_check() -> None:
                 # Get all the Datasources
                 datasource_uuids = sc.datasources()
                 # Check they all exist
+                failures = []
                 for uid in datasource_uuids:
-                    Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
+                    try:
+                        Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
+                    except ObjectStoreError:
+                        failures.append(uid)
 
-                metastore_uuids = [r["uuid"] for r in sc._metastore]
+                if failures:
+                    sc_name = sc.__class__.__name__
+                    failed_datasources[bucket][sc_name] = failures
 
-                if datasource_uuids != metastore_uuids:
-                    raise ObjectStoreError(
-                        f"{storage_class} - Mismatch between metastore Datasource UUIDs and {storage_class} Datasource UUIDs."
-                    )
+    if failed_datasources:
+        if raise_error:
+            raise ObjectStoreError(
+                "The following Datasources failed their integriy checks:"
+                + f"\n{failed_datasources}"
+                + "\nYour object store is corrupt. Please remove these Datasources."
+            )
+        else:
+            return failed_datasources

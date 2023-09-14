@@ -20,6 +20,7 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class Emissions(BaseStore):
     """This class is used to process emissions / flux data"""
 
+    _data_type = "emissions"
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
@@ -76,7 +77,7 @@ class Emissions(BaseStore):
         chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read emissions file
 
         Args:
@@ -121,7 +122,7 @@ class Emissions(BaseStore):
             warnings.warn(
                 f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -174,7 +175,7 @@ class Emissions(BaseStore):
         """
         Read and transform an emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
-        are determined by which database ie being used.
+        are determined by which database is being used.
 
         The underlying parser functions will be of the form:
             - openghg.transform.emissions.parse_{database.lower()}

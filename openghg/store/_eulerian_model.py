@@ -23,6 +23,7 @@ __all__ = ["EulerianModel"]
 class EulerianModel(BaseStore):
     """This class is used to process Eulerian model data"""
 
+    _data_type = "eulerian_model"
     _root = "EulerianModel"
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"

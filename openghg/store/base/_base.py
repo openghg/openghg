@@ -1,7 +1,10 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
+from types import TracebackType
 from pandas import Timestamp
 import tinydb
 import logging
@@ -17,6 +20,8 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 
 class BaseStore:
+    _registry: dict[str, type[BaseStore]] = {}
+    _data_type = ""
     _root = "root"
     _uuid = "root_uuid"
 
@@ -25,13 +30,11 @@ class BaseStore:
 
         self._creation_datetime = str(timestamp_now())
         self._stored = False
-        # Keyed by Datasource UUID
-        self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
         self._file_hashes: Dict[str, str] = {}
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: Dict[str, Dict] = {}
-        # Where we'll store this object
+        # Where we'll store this object's metastore
         self._metakey = ""
 
         if exists(bucket=bucket, key=self.key()):
@@ -41,6 +44,24 @@ class BaseStore:
 
         self._metastore = load_metastore(bucket=bucket, key=self.metakey())
         self._bucket = bucket
+        self._datasource_uuids = [r["uuid"] for r in self._metastore]
+
+    def __init_subclass__(cls) -> None:
+        BaseStore._registry[cls._data_type] = cls
+
+    def __enter__(self) -> BaseStore:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[BaseException],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        if exc_type is not None:
+            logger.error(msg=f"{exc_type}, {exc_tb}")
+        else:
+            self.save()
 
     @classmethod
     def metakey(cls) -> str:
@@ -57,8 +78,20 @@ class BaseStore:
     def to_data(self) -> Dict:
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
-        DO_NOT_STORE = ["_metastore", "_bucket"]
+        DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
+
+    def read_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+        raise NotImplementedError
+
+    def read_file(self, *args: Any, **kwargs: Any) -> dict:
+        raise NotImplementedError
+
+    def store_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+        raise NotImplementedError
+
+    def transform_data(self, *args: Any, **kwargs: Any) -> dict:
+        raise NotImplementedError
 
     def assign_data(
         self,
@@ -122,7 +155,6 @@ class BaseStore:
 
             # Take a copy of the metadata so we can update it
             meta_copy = metadata.copy()
-
             new_ds = uuid is False
 
             if new_ds:
@@ -132,9 +164,6 @@ class BaseStore:
                 # Make sure all the metadata is lowercase for easier searching later
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
                 meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
-                # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
-                # so we can have rapid
-                self._datasource_uuids[uid] = key
             else:
                 datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
@@ -218,18 +247,7 @@ class BaseStore:
         Returns:
             list: List of Datasource UUIDs
         """
-        return list(self._datasource_uuids.keys())
-
-    def remove_datasource(self, uuid: str) -> None:
-        """Remove the Datasource with the given uuid from the list
-        of Datasources
-
-        Args:
-            uuid: UUID of Datasource to be removed
-        Returns:
-            None
-        """
-        del self._datasource_uuids[uuid]
+        return self._datasource_uuids
 
     def get_rank(self, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range
@@ -438,3 +456,22 @@ class BaseStore:
         """
         self._datasource_uuids.clear()
         self._file_hashes.clear()
+
+
+def get_data_class(data_type: str) -> type[BaseStore]:
+    """Return data class corresponding to given data type.
+
+    Args:
+        data_type: one of "surface", "column", "emissions", "footprints",
+    "boundary_conditions", or "eulerian_model"
+
+    Returns:
+        Data class, one of `ObsSurface`, `ObsColumn`, `Emissions`, `EulerianModel`,
+    `Footprints`, `BoundaryConditions`.
+    """
+    try:
+        data_class = BaseStore._registry[data_type]
+    except KeyError:
+        raise ValueError(f"No data class for data type {data_type}.")
+    else:
+        return data_class

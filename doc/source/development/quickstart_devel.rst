@@ -82,14 +82,14 @@ Making sure you're in the ``openghg`` repository folder run
 
 .. code-block:: bash
 
-   conda env create -f environment.yaml
+   conda env create -f environment-dev.yaml
 
 Once ``conda`` finishes its installation process you can activate the enironment
 
 
 .. code-block:: bash
 
-   conda activate openghg_env
+   conda activate openghg_dev_env
 
 Next install ``conda-build`` which allows us to install packages in develop mode
 
