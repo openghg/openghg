@@ -23,6 +23,7 @@ def to_dashboard(
     output_format: Literal["json", "parquet"] = "json",
     compress_json: bool = False,
     parquet_compression: Literal["brotli", "snappy", "gzip"] = "gzip",
+    float_to_int: bool = False,
     default_site: Optional[str] = None,
     default_species: Optional[str] = None,
     default_inlet: Optional[str] = None,
@@ -45,6 +46,7 @@ def to_dashboard(
         output_format: json or parquet
         compress_json: compress JSON using gzip
         parquet_compression: One of ["brotli", "snappy", "gzip"]
+        float_to_int: Convert floats to ints by multiplying by 100
     Returns:
         None
     """
@@ -84,9 +86,22 @@ def to_dashboard(
         df = df.rename(columns=rename_lower)
 
         species_name = obs.metadata["species"]
-        df = df[[species_name]]
 
-        # TODO - check precision?
+        # Some of the AGAGE data variables are named differently from the species in the metadata
+        try:
+            df = df[[species_name]]
+        except KeyError:
+            species_label = obs.metadata["species_label"]
+            df = df[[species_label]]
+
+        # Drop any NaNs
+        df = df.dropna()
+
+        if float_to_int:
+            float_to_int_multiplier = 100
+            key = next(iter(df))
+            df[key] = df[key] * float_to_int_multiplier
+            df = df.astype(int)
 
         # Downsample the data
         if downsample_n > 1:
@@ -95,12 +110,18 @@ def to_dashboard(
         try:
             station_latitude = attributes["station_latitude"]
         except KeyError:
-            station_latitude = metadata["station_latitude"]
+            try:
+                station_latitude = metadata["station_latitude"]
+            except KeyError:
+                station_latitude = metadata["inlet_latitude"]
 
         try:
             station_longitude = attributes["station_longitude"]
         except KeyError:
-            station_longitude = metadata["station_longitude"]
+            try:
+                station_longitude = metadata["station_longitude"]
+            except KeyError:
+                station_longitude = metadata["inlet_longitude"]
 
         # TODO - remove this if we add site location to standard metadata
         location = {
@@ -112,7 +133,7 @@ def to_dashboard(
 
         species = metadata["species"]
         site = metadata["site"]
-        inlet = metadata["inlet"]
+        inlet = str(int(float(metadata["inlet"])))
         network = metadata["network"]
         instrument = metadata["instrument"]
 
@@ -129,7 +150,11 @@ def to_dashboard(
         file_data = {
             "metadata": metadata,
             "filepath": f"{data_foldername}/{export_filename}",
+            "float_to_int": float_to_int,
         }
+
+        if float_to_int:
+            file_data["float_to_int_multiplier"] = float_to_int_multiplier
 
         metadata_complete[species][network][site][inlet][instrument] = file_data
 
@@ -138,7 +163,9 @@ def to_dashboard(
         if output_format == "json":
             data_dict = json.loads(df.to_json())
             # Let's trim the species name as we don't need that
-            data_dict = data_dict[species.lower()]
+            key = next(iter(data_dict))
+            data_dict = data_dict[key]
+
             for_export_str = json.dumps(data_dict)
             if compress_json:
                 for_export_bytes = gzip.compress(for_export_str.encode())

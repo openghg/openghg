@@ -542,8 +542,14 @@ class ObsSurface(BaseStore):
                 "network",
                 "source_format",
                 "data_source",
+                # TODO - do we want to make this a requirement?
+                # We could add a set of required_keys to the ICOS processing
+                # code
                 "icos_data_level",
             )
+            min_keys = len(required_metakeys)
+        else:
+            min_keys = len(required_metakeys)
 
         # Create Datasources, save them to the object store and get their UUIDs
         data_type = "surface"
@@ -554,7 +560,7 @@ class ObsSurface(BaseStore):
             overwrite=overwrite,
             data_type=data_type,
             required_keys=required_metakeys,
-            min_keys=5,
+            min_keys=min_keys,
         )
 
         self.store_hashes(hashes=hashes)
