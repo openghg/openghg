@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._util &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>openghg.util._util &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -28,21 +27,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/util/_util';</script>
     <script src="../../../_static/custom.js"></script>
@@ -364,7 +364,9 @@ document.write(`
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
-<div class="viewcode-block" id="running_in_cloud"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_in_cloud">[docs]</a><span class="k">def</span> <span class="nf">running_in_cloud</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="running_in_cloud">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_in_cloud">[docs]</a>
+<span class="k">def</span> <span class="nf">running_in_cloud</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Are we running in the cloud?</span>
 
 <span class="sd">    Checks for the OPENGHG_CLOUD environment variable being set</span>
@@ -379,7 +381,10 @@ document.write(`
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">cloud_env</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="running_on_hub"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_on_hub">[docs]</a><span class="k">def</span> <span class="nf">running_on_hub</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+<div class="viewcode-block" id="running_on_hub">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_on_hub">[docs]</a>
+<span class="k">def</span> <span class="nf">running_on_hub</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Are we running on the OpenGHG Hub?</span>
 
 <span class="sd">    Checks for the OPENGHG_CLOUD environment variable being set</span>
@@ -394,7 +399,10 @@ document.write(`
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">hub_env</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="running_locally"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_locally">[docs]</a><span class="k">def</span> <span class="nf">running_locally</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+<div class="viewcode-block" id="running_locally">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.running_locally">[docs]</a>
+<span class="k">def</span> <span class="nf">running_locally</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Are we running OpenGHG locally?</span>
 
 <span class="sd">    Returns:</span>
@@ -403,7 +411,10 @@ document.write(`
     <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="n">running_on_hub</span><span class="p">()</span> <span class="ow">or</span> <span class="n">running_in_cloud</span><span class="p">())</span></div>
 
 
-<div class="viewcode-block" id="unanimous"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.unanimous">[docs]</a><span class="k">def</span> <span class="nf">unanimous</span><span class="p">(</span><span class="n">seq</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+<div class="viewcode-block" id="unanimous">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.unanimous">[docs]</a>
+<span class="k">def</span> <span class="nf">unanimous</span><span class="p">(</span><span class="n">seq</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks that all values in an iterable object</span>
 <span class="sd">    are the same</span>
 
@@ -422,7 +433,10 @@ document.write(`
         <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">first</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">it</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="pairwise"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.pairwise">[docs]</a><span class="k">def</span> <span class="nf">pairwise</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+
+<div class="viewcode-block" id="pairwise">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.pairwise">[docs]</a>
+<span class="k">def</span> <span class="nf">pairwise</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a zip of an iterable where a is the iterable</span>
 <span class="sd">    and b is the iterable advanced one step.</span>
 
@@ -439,7 +453,10 @@ document.write(`
     <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="site_code_finder"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.site_code_finder">[docs]</a><span class="k">def</span> <span class="nf">site_code_finder</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="site_code_finder">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.site_code_finder">[docs]</a>
+<span class="k">def</span> <span class="nf">site_code_finder</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the site code for a given site name.</span>
 
 <span class="sd">    Args:</span>
@@ -472,7 +489,10 @@ document.write(`
     <span class="k">return</span> <span class="n">site_code</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="find_matching_site"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_matching_site">[docs]</a><span class="k">def</span> <span class="nf">find_matching_site</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_sites</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+<div class="viewcode-block" id="find_matching_site">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_matching_site">[docs]</a>
+<span class="k">def</span> <span class="nf">find_matching_site</span><span class="p">(</span><span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">possible_sites</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try and find a similar name to site_name in site_list and return a suggestion or</span>
 <span class="sd">    error string.</span>
 
@@ -504,6 +524,7 @@ document.write(`
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Did you mean one of : </span><span class="se">\n</span><span class="s2"> </span><span class="si">{</span><span class="n">nl_char</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">suggestions</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Unknown site: </span><span class="si">{</span><span class="n">site_name</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_create_site_lookup_dict</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
@@ -538,7 +559,9 @@ document.write(`
     <span class="k">return</span> <span class="n">inverted</span>
 
 
-<div class="viewcode-block" id="verify_site"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.verify_site">[docs]</a><span class="k">def</span> <span class="nf">verify_site</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="verify_site">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.verify_site">[docs]</a>
+<span class="k">def</span> <span class="nf">verify_site</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the passed site is a valid one and returns the three</span>
 <span class="sd">    letter site code if found. Otherwise we use fuzzy text matching to suggest</span>
 <span class="sd">    sites with similar names.</span>
@@ -562,7 +585,10 @@ document.write(`
         <span class="k">return</span> <span class="n">site_code</span></div>
 
 
-<div class="viewcode-block" id="multiple_inlets"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.multiple_inlets">[docs]</a><span class="k">def</span> <span class="nf">multiple_inlets</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+<div class="viewcode-block" id="multiple_inlets">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.multiple_inlets">[docs]</a>
+<span class="k">def</span> <span class="nf">multiple_inlets</span><span class="p">(</span><span class="n">site</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the passed site has more than one inlet</span>
 
 <span class="sd">    Args:</span>
@@ -586,6 +612,7 @@ document.write(`
             <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">heights</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span></div>
+
 </pre></div>
 
                 </article>

@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Util &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Util &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/devapi_util';</script>
     <script src="../_static/custom.js"></script>
@@ -396,13 +396,13 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="util">
-<h1>Util<a class="headerlink" href="#util" title="Permalink to this heading">#</a></h1>
+<h1>Util<a class="headerlink" href="#util" title="Link to this heading">#</a></h1>
 <p>Helper functions that are used throughout OpenGHG. From file hashing to timestamp handling.</p>
 <section id="domain">
-<h2>Domain<a class="headerlink" href="#domain" title="Permalink to this heading">#</a></h2>
+<h2>Domain<a class="headerlink" href="#domain" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.convert_longitude">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">convert_longitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#convert_longitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.convert_longitude" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">convert_longitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#convert_longitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.convert_longitude" title="Link to this definition">#</a></dt>
 <dd><p>Convert longitude extent from (0 to 360) to (-180 to 180).
 This does <em>not</em> reorder the values.</p>
 <dl class="field-list simple">
@@ -420,7 +420,7 @@ This does <em>not</em> reorder the values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.find_domain">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_domain.html#find_domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_domain" title="Link to this definition">#</a></dt>
 <dd><p>Finds the latitude and longitude values in degrees associated
 with a given domain name.</p>
 <dl class="field-list simple">
@@ -441,10 +441,10 @@ with a given domain name.</p>
 
 </section>
 <section id="downloading-data">
-<h2>Downloading data<a class="headerlink" href="#downloading-data" title="Permalink to this heading">#</a></h2>
+<h2>Downloading data<a class="headerlink" href="#downloading-data" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.download_data">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">download_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_download.html#download_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.download_data" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">download_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_download.html#download_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.download_data" title="Link to this definition">#</a></dt>
 <dd><p>Download data file, with progress bar.</p>
 <p>Based on <a class="reference external" href="https://stackoverflow.com/a/63831344/1303032">https://stackoverflow.com/a/63831344/1303032</a></p>
 <dl class="field-list simple">
@@ -466,7 +466,7 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.parse_url_filename">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">parse_url_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_download.html#parse_url_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.parse_url_filename" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">parse_url_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_download.html#parse_url_filename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.parse_url_filename" title="Link to this definition">#</a></dt>
 <dd><p>Get the filename from a (messy) URL.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -483,10 +483,10 @@ with a given domain name.</p>
 
 </section>
 <section id="file-handling-compression">
-<h2>File handling, compression<a class="headerlink" href="#file-handling-compression" title="Permalink to this heading">#</a></h2>
+<h2>File handling, compression<a class="headerlink" href="#file-handling-compression" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.compress">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">compress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#compress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.compress" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">compress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#compress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.compress" title="Link to this definition">#</a></dt>
 <dd><p>Compress the given data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -503,7 +503,7 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.compress_json">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">compress_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#compress_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.compress_json" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">compress_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#compress_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.compress_json" title="Link to this definition">#</a></dt>
 <dd><p>Convert object to JSON string and compress</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -520,7 +520,7 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.compress_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">compress_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#compress_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.compress_str" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">compress_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#compress_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.compress_str" title="Link to this definition">#</a></dt>
 <dd><p>Compress a string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -538,7 +538,7 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.decompress">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">decompress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#decompress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.decompress" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">decompress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#decompress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.decompress" title="Link to this definition">#</a></dt>
 <dd><p>Decompress the given data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -555,7 +555,7 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.decompress_json">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">decompress_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#decompress_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.decompress_json" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">decompress_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#decompress_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.decompress_json" title="Link to this definition">#</a></dt>
 <dd><p>Decompress a string and load to JSON</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -572,7 +572,7 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.decompress_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">decompress_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#decompress_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.decompress_str" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">decompress_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#decompress_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.decompress_str" title="Link to this definition">#</a></dt>
 <dd><p>Decompress a string from bytes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -589,7 +589,7 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.get_datapath">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">get_datapath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#get_datapath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.get_datapath" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">get_datapath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#get_datapath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.get_datapath" title="Link to this definition">#</a></dt>
 <dd><p>Returns the correct path to data files used for assigning attributes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -606,7 +606,7 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.get_logfile_path">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">get_logfile_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#get_logfile_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.get_logfile_path" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">get_logfile_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#get_logfile_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.get_logfile_path" title="Link to this definition">#</a></dt>
 <dd><p>Get the logfile path</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -620,7 +620,7 @@ with a given domain name.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.load_column_parser">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_column_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_column_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_column_parser" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_column_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_column_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_column_parser" title="Link to this definition">#</a></dt>
 <dd><p>Load a parsing object for the obscolumn data type.
 Used with <cite>openghg.standardise.column</cite> sub-module</p>
 <dl class="field-list simple">
@@ -638,7 +638,7 @@ Used with <cite>openghg.standardise.column</cite> sub-module</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.load_column_source_parser">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_column_source_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_column_source_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_column_source_parser" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_column_source_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_column_source_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_column_source_parser" title="Link to this definition">#</a></dt>
 <dd><p>Load a parsing object for the source of column data.
 Used with <cite>openghg.transform.column</cite> sub-module</p>
 <dl class="field-list simple">
@@ -656,7 +656,7 @@ Used with <cite>openghg.transform.column</cite> sub-module</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.load_emissions_database_parser">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_emissions_database_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_emissions_database_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_emissions_database_parser" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_emissions_database_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_emissions_database_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_emissions_database_parser" title="Link to this definition">#</a></dt>
 <dd><p>Load a parsing object for the source of column data.
 Used with <cite>openghg.transform.emissions</cite> sub-module</p>
 <dl class="field-list simple">
@@ -674,7 +674,7 @@ Used with <cite>openghg.transform.emissions</cite> sub-module</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.load_emissions_parser">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_emissions_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_emissions_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_emissions_parser" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_emissions_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_emissions_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_emissions_parser" title="Link to this definition">#</a></dt>
 <dd><p>Load a parsing object for the emissions data type.
 Used with <cite>openghg.standardise.emissions</cite> sub-module</p>
 <dl class="field-list simple">
@@ -692,7 +692,7 @@ Used with <cite>openghg.standardise.emissions</cite> sub-module</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.load_json">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_json" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_json" title="Link to this definition">#</a></dt>
 <dd><p>Returns a dictionary deserialised from JSON.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -709,7 +709,7 @@ Used with <cite>openghg.standardise.emissions</cite> sub-module</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.load_surface_parser">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_surface_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_surface_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_surface_parser" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">load_surface_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_format</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#load_surface_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.load_surface_parser" title="Link to this definition">#</a></dt>
 <dd><p>Load parsing object for the obssurface data type.
 Used with <cite>openghg.standardise.surface</cite> sub-module</p>
 <dl class="field-list simple">
@@ -727,7 +727,7 @@ Used with <cite>openghg.standardise.surface</cite> sub-module</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.read_header">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">read_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#read_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.read_header" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">read_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment_char</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_file.html#read_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.read_header" title="Link to this definition">#</a></dt>
 <dd><p>Reads the header lines denoted by the comment_char</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -748,10 +748,10 @@ Used with <cite>openghg.standardise.surface</cite> sub-module</p>
 
 </section>
 <section id="hashing">
-<h2>Hashing<a class="headerlink" href="#hashing" title="Permalink to this heading">#</a></h2>
+<h2>Hashing<a class="headerlink" href="#hashing" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.hash_bytes">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_bytes" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_bytes" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the SHA1 sum of some data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -768,7 +768,7 @@ Used with <cite>openghg.standardise.surface</cite> sub-module</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.hash_file">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_file" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_file" title="Link to this definition">#</a></dt>
 <dd><p>Opens the file at filepath and calculates its SHA1 hash</p>
 <p>Taken from <a class="reference external" href="https://stackoverflow.com/a/22058673">https://stackoverflow.com/a/22058673</a></p>
 <dl class="field-list simple">
@@ -786,7 +786,7 @@ Used with <cite>openghg.standardise.surface</cite> sub-module</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.hash_retrieved_data">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_retrieved_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_hash</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_retrieved_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_retrieved_data" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_retrieved_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_hash</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_retrieved_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_retrieved_data" title="Link to this definition">#</a></dt>
 <dd><p>Hash data retrieved from a data platform. This calculates the SHA1 of the metadata
 and the start date, end date and the number of timestamps in the Dataset.</p>
 <dl class="field-list simple">
@@ -808,7 +808,7 @@ and the start date, end date and the number of timestamps in the Dataset.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.hash_string">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_hash</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_string" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">hash_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_hash</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_hashing.html#hash_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.hash_string" title="Link to this definition">#</a></dt>
 <dd><p>Return the SHA-1 hash of a string</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -825,10 +825,10 @@ and the start date, end date and the number of timestamps in the Dataset.</p>
 
 </section>
 <section id="measurement-helpers">
-<h2>Measurement helpers<a class="headerlink" href="#measurement-helpers" title="Permalink to this heading">#</a></h2>
+<h2>Measurement helpers<a class="headerlink" href="#measurement-helpers" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.check_lifetime_monthly">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_lifetime_monthly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lifetime</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#check_lifetime_monthly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_lifetime_monthly" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_lifetime_monthly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lifetime</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#check_lifetime_monthly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_lifetime_monthly" title="Link to this definition">#</a></dt>
 <dd><p>Check whether retrieved lifetime value represents monthly lifetimes.
 This checks whether lifetime is a list and contains 12 values.</p>
 <dl class="field-list simple">
@@ -850,7 +850,7 @@ This checks whether lifetime is a list and contains 12 values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.format_inlet">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_inlet.html#format_inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.format_inlet" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">format_inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'m'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_inlet.html#format_inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.format_inlet" title="Link to this definition">#</a></dt>
 <dd><p>Make sure inlet / height name conforms to standard. The standard
 imposed can depend on the associated key_name itself (can
 be supplied as an option to check).</p>
@@ -911,7 +911,7 @@ If this is not set a special keyword of “multiple” and “column” will sti
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.find_matching_site">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_matching_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">possible_sites</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#find_matching_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_matching_site" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_matching_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">possible_sites</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#find_matching_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_matching_site" title="Link to this definition">#</a></dt>
 <dd><p>Try and find a similar name to site_name in site_list and return a suggestion or
 error string.</p>
 <dl class="field-list simple">
@@ -932,7 +932,7 @@ error string.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.multiple_inlets">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">multiple_inlets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#multiple_inlets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.multiple_inlets" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">multiple_inlets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#multiple_inlets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.multiple_inlets" title="Link to this definition">#</a></dt>
 <dd><p>Check if the passed site has more than one inlet</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -949,7 +949,7 @@ error string.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.molar_mass">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">molar_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#molar_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.molar_mass" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">molar_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#molar_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.molar_mass" title="Link to this definition">#</a></dt>
 <dd><p>Extracts the molar mass of a species.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -969,7 +969,7 @@ error string.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.species_lifetime">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">species_lifetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#species_lifetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.species_lifetime" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">species_lifetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#species_lifetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.species_lifetime" title="Link to this definition">#</a></dt>
 <dd><p>Find species lifetime.
 This can either be labelled as “lifetime” or “lifetime_monthly”.</p>
 <p>Note: no species synonyms accepted yet</p>
@@ -991,7 +991,7 @@ This can either be labelled as “lifetime” or “lifetime_monthly”.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.synonyms">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_new_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#synonyms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.synonyms" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">synonyms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_new_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_species.html#synonyms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.synonyms" title="Link to this definition">#</a></dt>
 <dd><p>Check to see if there are other names that we should be using for
 a particular input. E.g. If CFC-11 or CFC11 was input, go on to use cfc11.</p>
 <dl class="field-list simple">
@@ -1019,7 +1019,7 @@ and changed if needed.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.site_code_finder">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">site_code_finder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#site_code_finder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.site_code_finder" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">site_code_finder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#site_code_finder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.site_code_finder" title="Link to this definition">#</a></dt>
 <dd><p>Find the site code for a given site name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1036,7 +1036,7 @@ and changed if needed.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.verify_site">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">verify_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#verify_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.verify_site" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">verify_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#verify_site"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.verify_site" title="Link to this definition">#</a></dt>
 <dd><p>Check if the passed site is a valid one and returns the three
 letter site code if found. Otherwise we use fuzzy text matching to suggest
 sites with similar names.</p>
@@ -1055,10 +1055,10 @@ sites with similar names.</p>
 
 </section>
 <section id="string-handling">
-<h2>String handling<a class="headerlink" href="#string-handling" title="Permalink to this heading">#</a></h2>
+<h2>String handling<a class="headerlink" href="#string-handling" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.clean_string">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">clean_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_clean</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#clean_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.clean_string" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">clean_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_clean</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#clean_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.clean_string" title="Link to this definition">#</a></dt>
 <dd><p>Returns a lowercase string with only alphanumeric
 characters and underscores.</p>
 <dl class="field-list simple">
@@ -1076,7 +1076,7 @@ characters and underscores.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.is_number">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">is_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#is_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.is_number" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">is_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#is_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.is_number" title="Link to this definition">#</a></dt>
 <dd><p>Is it a number?</p>
 <p><a class="reference external" href="https://stackoverflow.com/q/354038">https://stackoverflow.com/q/354038</a></p>
 <dl class="field-list simple">
@@ -1094,7 +1094,7 @@ characters and underscores.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.remove_punctuation">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">remove_punctuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#remove_punctuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.remove_punctuation" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">remove_punctuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#remove_punctuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.remove_punctuation" title="Link to this definition">#</a></dt>
 <dd><p>Removes punctuation and converts the passed string
 to lowercase</p>
 <dl class="field-list simple">
@@ -1112,7 +1112,7 @@ to lowercase</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.to_lowercase">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_lowercase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#to_lowercase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.to_lowercase" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">to_lowercase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_strings.html#to_lowercase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.to_lowercase" title="Link to this definition">#</a></dt>
 <dd><p>Convert an object to lowercase. All keys and values in a dictionary will be converted
 to lowercase as will all objects in a list, tuple or set. You can optionally pass in a list of keys to
 skip when lowercasing a dictionary.</p>
@@ -1135,10 +1135,10 @@ skip when lowercasing a dictionary.</p>
 
 </section>
 <section id="dates-and-times">
-<h2>Dates and times<a class="headerlink" href="#dates-and-times" title="Permalink to this heading">#</a></h2>
+<h2>Dates and times<a class="headerlink" href="#dates-and-times" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.check_date">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#check_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_date" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#check_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_date" title="Link to this definition">#</a></dt>
 <dd><p>Check if a date string can be converted to a pd.Timestamp
 and returns NA if not.</p>
 <p>Returns a string that can be JSON serialised.</p>
@@ -1157,7 +1157,7 @@ and returns NA if not.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.check_nan">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_nan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#check_nan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_nan" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_nan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#check_nan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_nan" title="Link to this definition">#</a></dt>
 <dd><p>Check if a number is Nan.</p>
 <p>Returns a string that can be JSON serialised.</p>
 <dl class="field-list simple">
@@ -1175,7 +1175,7 @@ and returns NA if not.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.closest_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">closest_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_compare</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dateranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#closest_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.closest_daterange" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">closest_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_compare</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dateranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#closest_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.closest_daterange" title="Link to this definition">#</a></dt>
 <dd><p>Finds the closest daterange in a list of dateranges</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1195,7 +1195,7 @@ and returns NA if not.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.combine_dateranges">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">combine_dateranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dateranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#combine_dateranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.combine_dateranges" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">combine_dateranges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dateranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#combine_dateranges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.combine_dateranges" title="Link to this definition">#</a></dt>
 <dd><p>Combine dateranges</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1214,7 +1214,7 @@ and returns NA if not.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.create_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'D'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_daterange" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'D'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_daterange" title="Link to this definition">#</a></dt>
 <dd><p>Create a minute aligned daterange</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1234,7 +1234,7 @@ and returns NA if not.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.create_daterange_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_daterange_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_daterange_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_daterange_str" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_daterange_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_daterange_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_daterange_str" title="Link to this definition">#</a></dt>
 <dd><p>Convert the passed datetimes into a daterange string
 for use in searches and Datasource interactions</p>
 <dl class="field-list simple">
@@ -1255,7 +1255,7 @@ for use in searches and Datasource interactions</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.create_frequency_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_frequency_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_frequency_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_frequency_str" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_frequency_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#create_frequency_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_frequency_str" title="Link to this definition">#</a></dt>
 <dd><p>Create a suitable frequency string based either a value and unit pair
 or a period value. The unit will be made singular if the value is 1.</p>
 <p>Check time_offset_definition() for accepted input units.</p>
@@ -1290,7 +1290,7 @@ or a period value. The unit will be made singular if the value is 1.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.daterange_contains">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contained</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_contains" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contained</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_contains" title="Link to this definition">#</a></dt>
 <dd><p>Check if the daterange container contains the daterange contained</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1310,7 +1310,7 @@ or a period value. The unit will be made singular if the value is 1.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.daterange_from_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'D'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_from_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_from_str" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'D'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_from_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_from_str" title="Link to this definition">#</a></dt>
 <dd><p>Get a Pandas DatetimeIndex from a string. The created
 DatetimeIndex has minute frequency.</p>
 <dl class="field-list simple">
@@ -1331,7 +1331,7 @@ DatetimeIndex has minute frequency.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.daterange_overlap">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daterange_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_overlap" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daterange_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_overlap" title="Link to this definition">#</a></dt>
 <dd><p>Check if daterange_a is within daterange_b.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1352,7 +1352,7 @@ DatetimeIndex has minute frequency.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.daterange_to_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_to_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_to_str" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">daterange_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#daterange_to_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.daterange_to_str" title="Link to this definition">#</a></dt>
 <dd><p>Takes a pandas DatetimeIndex created by pandas date_range converts it to a
 string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00</p>
 <dl class="field-list simple">
@@ -1370,7 +1370,7 @@ string of the form 2019-01-01-00:00:00_2019-03-16-00:00:00</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.find_daterange_gaps">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_daterange_gaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_search</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_search</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dateranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#find_daterange_gaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_daterange_gaps" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_daterange_gaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_search</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_search</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dateranges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#find_daterange_gaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_daterange_gaps" title="Link to this definition">#</a></dt>
 <dd><p>Given a start and end date and a list of dateranges find the gaps.</p>
 <p>For example given a list of dateranges</p>
 <p>example = [‘2014-09-02_2014-11-01’, ‘2016-09-02_2018-11-01’]</p>
@@ -1401,7 +1401,7 @@ end = timestamp_tzaware(“2019-09-01”)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.find_duplicate_timestamps">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_duplicate_timestamps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#find_duplicate_timestamps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_duplicate_timestamps" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">find_duplicate_timestamps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#find_duplicate_timestamps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.find_duplicate_timestamps" title="Link to this definition">#</a></dt>
 <dd><p>Check for duplicates</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1418,7 +1418,7 @@ end = timestamp_tzaware(“2019-09-01”)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.first_last_dates">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">first_last_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#first_last_dates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.first_last_dates" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">first_last_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#first_last_dates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.first_last_dates" title="Link to this definition">#</a></dt>
 <dd><p>Find the first and last timestamp from a list of keys</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1435,7 +1435,7 @@ end = timestamp_tzaware(“2019-09-01”)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.in_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">in_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#in_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.in_daterange" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">in_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#in_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.in_daterange" title="Link to this definition">#</a></dt>
 <dd><p>Check if two dateranges overlap.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1455,7 +1455,7 @@ end = timestamp_tzaware(“2019-09-01”)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.parse_period">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">parse_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">period</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#parse_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.parse_period" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">parse_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">period</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#parse_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.parse_period" title="Link to this definition">#</a></dt>
 <dd><p>Parses period input and converts to a value, unit pair.</p>
 <p>Check time_offset_definition() for accepted input units.</p>
 <dl class="field-list simple">
@@ -1496,7 +1496,7 @@ Should be one of:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.relative_time_offset">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">relative_time_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#relative_time_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.relative_time_offset" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">relative_time_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#relative_time_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.relative_time_offset" title="Link to this definition">#</a></dt>
 <dd><p>Create relative time offset based on inputs. This is based on the pandas
 DateOffset and Timedelta functions.</p>
 <p>Check time_offset_definition() for accepted input units.</p>
@@ -1528,7 +1528,7 @@ be created since these are variable units. For example:</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.sanitise_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">sanitise_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#sanitise_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.sanitise_daterange" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">sanitise_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#sanitise_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.sanitise_daterange" title="Link to this definition">#</a></dt>
 <dd><p>Make sure the daterange is correct and return
 tzaware daterange.</p>
 <dl class="field-list simple">
@@ -1546,7 +1546,7 @@ tzaware daterange.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.split_daterange_str">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">split_daterange_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#split_daterange_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.split_daterange_str" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">split_daterange_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#split_daterange_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.split_daterange_str" title="Link to this definition">#</a></dt>
 <dd><p>Split a daterange string to the component start and end
 Timestamps</p>
 <dl class="field-list simple">
@@ -1569,7 +1569,7 @@ Timestamps</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.split_encompassed_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">split_encompassed_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contained</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#split_encompassed_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.split_encompassed_daterange" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">split_encompassed_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contained</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#split_encompassed_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.split_encompassed_daterange" title="Link to this definition">#</a></dt>
 <dd><p>Checks if one of the passed dateranges contains the other, if so, then
 split the larger daterange into three sections.</p>
 <blockquote>
@@ -1596,7 +1596,7 @@ split the larger daterange into three sections.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.time_offset">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">time_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#time_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.time_offset" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">time_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#time_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.time_offset" title="Link to this definition">#</a></dt>
 <dd><p>Create time offset based on inputs. This will return a Timedelta object
 and cannot create relative offsets (this includes “weeks”, “months”, “years”).</p>
 <dl class="field-list simple">
@@ -1618,7 +1618,7 @@ and cannot create relative offsets (this includes “weeks”, “months”, “
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.time_offset_definition">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">time_offset_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#time_offset_definition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.time_offset_definition" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">time_offset_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#time_offset_definition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.time_offset_definition" title="Link to this definition">#</a></dt>
 <dd><p>Returns synonym definition for time offset inputs.</p>
 <dl class="simple">
 <dt>Accepted inputs are as follows:</dt><dd><ul class="simple">
@@ -1646,7 +1646,7 @@ functions can be supplied (want this to be “years”, “months” etc.)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.timestamp_epoch">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_epoch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_epoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_epoch" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_epoch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_epoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_epoch" title="Link to this definition">#</a></dt>
 <dd><p>Returns the UNIX epoch time
 1st of January 1970</p>
 <dl class="field-list simple">
@@ -1661,7 +1661,7 @@ functions can be supplied (want this to be “years”, “months” etc.)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.timestamp_now">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_now"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_now" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_now"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_now" title="Link to this definition">#</a></dt>
 <dd><p>Returns a pandas timezone (UTC) aware Timestamp for the current time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1675,7 +1675,7 @@ functions can be supplied (want this to be “years”, “months” etc.)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.timestamp_tzaware">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_tzaware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_tzaware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_tzaware" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">timestamp_tzaware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#timestamp_tzaware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.timestamp_tzaware" title="Link to this definition">#</a></dt>
 <dd><p>Returns the pandas Timestamp passed as a timezone (UTC) aware
 Timestamp.</p>
 <dl class="field-list simple">
@@ -1693,7 +1693,7 @@ Timestamp.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.trim_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">trim_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_trim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#trim_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.trim_daterange" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">trim_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_trim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#trim_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.trim_daterange" title="Link to this definition">#</a></dt>
 <dd><p>Removes overlapping dates from to_trim</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1715,7 +1715,7 @@ Timestamp.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.valid_daterange">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">valid_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#valid_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.valid_daterange" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">valid_daterange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daterange</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_time.html#valid_daterange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.valid_daterange" title="Link to this definition">#</a></dt>
 <dd><p>Check if the passed daterange is valid</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1732,11 +1732,11 @@ Timestamp.</p>
 
 </section>
 <section id="user">
-<h2>User<a class="headerlink" href="#user" title="Permalink to this heading">#</a></h2>
+<h2>User<a class="headerlink" href="#user" title="Link to this heading">#</a></h2>
 <p>Handling user configuration files.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.create_config">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#create_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_config" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">create_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#create_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.create_config" title="Link to this definition">#</a></dt>
 <dd><p>Creates a user config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1756,7 +1756,7 @@ Timestamp.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.get_user_id">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">get_user_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#get_user_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.get_user_id" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">get_user_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#get_user_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.get_user_id" title="Link to this definition">#</a></dt>
 <dd><p>Return the user’s ID</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1770,7 +1770,7 @@ Timestamp.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.get_user_config_path">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">get_user_config_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#get_user_config_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.get_user_config_path" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">get_user_config_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#get_user_config_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.get_user_config_path" title="Link to this definition">#</a></dt>
 <dd><p>Returns path to user config file.</p>
 <p>This file is created in the user’s home directory
 in  ~/.ghgconfig/openghg/user.conf on Linux / macOS or
@@ -1787,7 +1787,7 @@ in LOCALAPPDATA/openghg/openghg.conf on Windows.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.read_local_config">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">read_local_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#read_local_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.read_local_config" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">read_local_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#read_local_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.read_local_config" title="Link to this definition">#</a></dt>
 <dd><p>Reads the local config file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1801,7 +1801,7 @@ in LOCALAPPDATA/openghg/openghg.conf on Windows.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.check_config">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#check_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_config" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">check_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_user.html#check_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.check_config" title="Link to this definition">#</a></dt>
 <dd><p>Check that the user config file is valid and the paths
 given in it exist. Raises ConfigFileError if problems found.</p>
 <dl class="field-list simple">
@@ -1816,10 +1816,10 @@ given in it exist. Raises ConfigFileError if problems found.</p>
 
 </section>
 <section id="environment-detection">
-<h2>Environment detection<a class="headerlink" href="#environment-detection" title="Permalink to this heading">#</a></h2>
+<h2>Environment detection<a class="headerlink" href="#environment-detection" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.running_locally">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">running_locally</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#running_locally"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.running_locally" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">running_locally</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#running_locally"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.running_locally" title="Link to this definition">#</a></dt>
 <dd><p>Are we running OpenGHG locally?</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1833,7 +1833,7 @@ given in it exist. Raises ConfigFileError if problems found.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.running_in_cloud">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">running_in_cloud</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#running_in_cloud"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.running_in_cloud" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">running_in_cloud</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#running_in_cloud"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.running_in_cloud" title="Link to this definition">#</a></dt>
 <dd><p>Are we running in the cloud?</p>
 <p>Checks for the OPENGHG_CLOUD environment variable being set</p>
 <dl class="field-list simple">
@@ -1848,7 +1848,7 @@ given in it exist. Raises ConfigFileError if problems found.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.running_on_hub">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">running_on_hub</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#running_on_hub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.running_on_hub" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">running_on_hub</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#running_on_hub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.running_on_hub" title="Link to this definition">#</a></dt>
 <dd><p>Are we running on the OpenGHG Hub?</p>
 <p>Checks for the OPENGHG_CLOUD environment variable being set</p>
 <dl class="field-list simple">
@@ -1863,11 +1863,11 @@ given in it exist. Raises ConfigFileError if problems found.</p>
 
 </section>
 <section id="miscellaneous">
-<h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this heading">#</a></h2>
+<h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Link to this heading">#</a></h2>
 <p>Some <cite>itertools</cite> like functions.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.pairwise">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">pairwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#pairwise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.pairwise" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">pairwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#pairwise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.pairwise" title="Link to this definition">#</a></dt>
 <dd><p>Return a zip of an iterable where a is the iterable
 and b is the iterable advanced one step.</p>
 <dl class="field-list simple">
@@ -1885,7 +1885,7 @@ and b is the iterable advanced one step.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="openghg.util.unanimous">
-<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">unanimous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#unanimous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.unanimous" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">openghg.util.</span></span><span class="sig-name descname"><span class="pre">unanimous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openghg/util/_util.html#unanimous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openghg.util.unanimous" title="Link to this definition">#</a></dt>
 <dd><p>Checks that all values in an iterable object
 are the same</p>
 <dl class="field-list simple">

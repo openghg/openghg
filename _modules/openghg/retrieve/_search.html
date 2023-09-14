@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.retrieve._search &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>openghg.retrieve._search &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -28,21 +27,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/retrieve/_search';</script>
     <script src="../../../_static/custom.js"></script>
@@ -425,7 +425,9 @@ document.write(`
     <span class="k">return</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;uuid&quot;</span><span class="p">]:</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">result</span><span class="p">}</span>
 
 
-<div class="viewcode-block" id="search_bc"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_bc">[docs]</a><span class="k">def</span> <span class="nf">search_bc</span><span class="p">(</span>
+<div class="viewcode-block" id="search_bc">
+<a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_bc">[docs]</a>
+<span class="k">def</span> <span class="nf">search_bc</span><span class="p">(</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">bc_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -474,7 +476,10 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="search_eulerian"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_eulerian">[docs]</a><span class="k">def</span> <span class="nf">search_eulerian</span><span class="p">(</span>
+
+<div class="viewcode-block" id="search_eulerian">
+<a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_eulerian">[docs]</a>
+<span class="k">def</span> <span class="nf">search_eulerian</span><span class="p">(</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -508,7 +513,10 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="search_flux"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_flux">[docs]</a><span class="k">def</span> <span class="nf">search_flux</span><span class="p">(</span>
+
+<div class="viewcode-block" id="search_flux">
+<a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_flux">[docs]</a>
+<span class="k">def</span> <span class="nf">search_flux</span><span class="p">(</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -566,7 +574,10 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="search_footprints"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_footprints">[docs]</a><span class="k">def</span> <span class="nf">search_footprints</span><span class="p">(</span>
+
+<div class="viewcode-block" id="search_footprints">
+<a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_footprints">[docs]</a>
+<span class="k">def</span> <span class="nf">search_footprints</span><span class="p">(</span>
     <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -645,7 +656,10 @@ document.write(`
     <span class="k">return</span> <span class="n">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="search_surface"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_surface">[docs]</a><span class="k">def</span> <span class="nf">search_surface</span><span class="p">(</span>
+
+<div class="viewcode-block" id="search_surface">
+<a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_surface">[docs]</a>
+<span class="k">def</span> <span class="nf">search_surface</span><span class="p">(</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">site</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">inlet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -721,7 +735,10 @@ document.write(`
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="search_column"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_column">[docs]</a><span class="k">def</span> <span class="nf">search_column</span><span class="p">(</span>
+
+<div class="viewcode-block" id="search_column">
+<a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search_column">[docs]</a>
+<span class="k">def</span> <span class="nf">search_column</span><span class="p">(</span>
     <span class="n">satellite</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">selection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -768,7 +785,10 @@ document.write(`
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="search"><a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
+
+<div class="viewcode-block" id="search">
+<a class="viewcode-back" href="../../../api/devapi_retrieve.html#openghg.retrieve.search">[docs]</a>
+<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Search for observations data. Any keyword arguments may be passed to the</span>
 <span class="sd">    the function and these keywords will be used to search the metadata associated</span>
 <span class="sd">    with each Datasource.</span>
@@ -814,6 +834,7 @@ document.write(`
         <span class="n">sr</span> <span class="o">=</span> <span class="n">_base_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">sr</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_base_search</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResults</span><span class="p">:</span>

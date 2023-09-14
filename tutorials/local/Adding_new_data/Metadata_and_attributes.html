@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Metadata and attributes &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Metadata and attributes &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_new_data/Metadata_and_attributes';</script>
     <script src="../../../_static/custom.js"></script>
@@ -355,10 +355,10 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="metadata-and-attributes">
-<h1>Metadata and attributes<a class="headerlink" href="#metadata-and-attributes" title="Permalink to this heading">#</a></h1>
+<h1>Metadata and attributes<a class="headerlink" href="#metadata-and-attributes" title="Link to this heading">#</a></h1>
 <p><em>Note at the moment this tutorial is only applicable to surface data and not to the other data types.</em></p>
 <section id="using-the-tutorial-object-store">
-<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Permalink to this heading">#</a></h2>
+<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
 <p>To avoid adding the example data we use in this tutorial to your normal
 object store, we need to tell OpenGHG to use a separate sandboxed object
 store that we’ll call the tutorial store. To do this we use the
@@ -372,7 +372,7 @@ affect your use of OpenGHG outside of this tutorial.</p>
 </div>
 </section>
 <section id="add-example-observation-data">
-<h2>1. Add example observation data<a class="headerlink" href="#add-example-observation-data" title="Permalink to this heading">#</a></h2>
+<h2>1. Add example observation data<a class="headerlink" href="#add-example-observation-data" title="Link to this heading">#</a></h2>
 <p>For this tutorial, we can add some example Tacolnestion data to the tutorial object store.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
@@ -398,7 +398,7 @@ mismatching metadata and attributes.</p>
 <p>We will demonstrate how to add this to the object store below.</p>
 </section>
 <section id="id1">
-<h2>2. Metadata and attributes<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
+<h2>2. Metadata and attributes<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
 <p>Within OpenGHG, metadata is used as a way to categorise a data source by
 applying a unique set of keys. This is used to distinguish between stored data
 and allows this to be searchable.</p>
@@ -517,7 +517,7 @@ data in the object store, for example using the <em class="xref py py-obj">to_ne
 <p>Here we would uncomment this and substitue <em class="xref py py-obj"></em> for a filepath.</p>
 </section>
 <section id="resolving-mismatches">
-<h2>3. Resolving mismatches<a class="headerlink" href="#resolving-mismatches" title="Permalink to this heading">#</a></h2>
+<h2>3. Resolving mismatches<a class="headerlink" href="#resolving-mismatches" title="Link to this heading">#</a></h2>
 <p>When the <em>metadata</em> and <em>attributes</em> are created as part of the openghg standardisation
 process (and when using <em class="xref py py-obj">retrieve_atmospheric</em>), these sets of details are often collated
 from different sources.</p>
@@ -629,7 +629,7 @@ by running <em class="xref py py-obj">standardise_surface</em> again but this ti
 <p>to check this is what we expected.</p>
 </section>
 <section id="cleanup">
-<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
+<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>

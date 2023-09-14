@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Fn setup &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Fn setup &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../_static/togglebutton.js"></script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'development/cloud/fn_setup';</script>
     <script src="../../_static/custom.js"></script>
@@ -355,17 +355,17 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="fn-setup">
-<h1>Fn setup<a class="headerlink" href="#fn-setup" title="Permalink to this heading">#</a></h1>
+<h1>Fn setup<a class="headerlink" href="#fn-setup" title="Link to this heading">#</a></h1>
 <p>This guide will help you get a basic Fn server setup and ready to be given functions for invocation. In future tutorials
 we will cover getting Fn setup using Kubernetes.</p>
 <section id="server">
-<h2>Server<a class="headerlink" href="#server" title="Permalink to this heading">#</a></h2>
+<h2>Server<a class="headerlink" href="#server" title="Link to this heading">#</a></h2>
 <p>In this tutorial we’ll be using a virtual machine cloud instance on the Oracle cloud, but any cloud provider
 will work. Although we’ll use a CentOS 8 image on our VM any Docker capable image should work, though setup steps will difference
 from those given here.</p>
 </section>
 <section id="installing-docker">
-<h2>Installing Docker<a class="headerlink" href="#installing-docker" title="Permalink to this heading">#</a></h2>
+<h2>Installing Docker<a class="headerlink" href="#installing-docker" title="Link to this heading">#</a></h2>
 <p>We’ll install Docker from their repos for CentOS. For the complete
 installation instructions please see the <a class="reference external" href="https://docs.docker.com/engine/install/centos/">Docker documentation</a>
 but we will summarise the steps below.</p>
@@ -398,7 +398,7 @@ are <em class="xref py py-obj">outlined here</em>.</p>
 </div>
 </section>
 <section id="install-fn">
-<h2>Install Fn<a class="headerlink" href="#install-fn" title="Permalink to this heading">#</a></h2>
+<h2>Install Fn<a class="headerlink" href="#install-fn" title="Link to this heading">#</a></h2>
 <p>We can now install Fn</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget<span class="w"> </span>-O<span class="w"> </span>install_fn.sh<span class="w"> </span>https://raw.githubusercontent.com/fnproject/cli/master/install
 <span class="nb">echo</span><span class="w"> </span>a02456b8c8aba8b727d35f704cbca9234e40d2731f200b94abeceb9467973a13<span class="w"> </span>install_fn.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sha256sum<span class="w"> </span>-c
@@ -414,7 +414,7 @@ bash<span class="w"> </span>install_fn.sh
 </div>
 </section>
 <section id="setup-nginx-proxy">
-<h2>Setup NGINX proxy<a class="headerlink" href="#setup-nginx-proxy" title="Permalink to this heading">#</a></h2>
+<h2>Setup NGINX proxy<a class="headerlink" href="#setup-nginx-proxy" title="Link to this heading">#</a></h2>
 <p>So that we’re not exposing Fn directly to the internet we’ll use nginx as a reverse-proxy. First install nginx
 using</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>nginx
@@ -482,7 +482,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 </div>
 </section>
 <section id="setup-firewall-rules">
-<h2>Setup Firewall Rules<a class="headerlink" href="#setup-firewall-rules" title="Permalink to this heading">#</a></h2>
+<h2>Setup Firewall Rules<a class="headerlink" href="#setup-firewall-rules" title="Link to this heading">#</a></h2>
 <p>First we enable and then start the <code class="docutils literal notranslate"><span class="pre">firewalld</span></code></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>firewalld
 sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>firewalld
@@ -519,7 +519,7 @@ num<span class="w">  </span>target<span class="w">     </span>prot<span class="w
 </div>
 </section>
 <section id="get-a-letsencrypt-certificate-with-certbot">
-<h2>Get a LetsEncrypt certificate with Certbot<a class="headerlink" href="#get-a-letsencrypt-certificate-with-certbot" title="Permalink to this heading">#</a></h2>
+<h2>Get a LetsEncrypt certificate with Certbot<a class="headerlink" href="#get-a-letsencrypt-certificate-with-certbot" title="Link to this heading">#</a></h2>
 <p>To get a LetsEncrypt certificate for https we’ll use Certbot. First, make sure you’ve setup the subdomain for the
 server and pointed it at the IP address of the server. Then follow the commands below.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>epel-release
@@ -541,7 +541,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <p>This adds a cron job to <code class="docutils literal notranslate"><span class="pre">/etc/crontab</span></code>.</p>
 </section>
 <section id="deploy-fn-functions">
-<h2>Deploy Fn Functions<a class="headerlink" href="#deploy-fn-functions" title="Permalink to this heading">#</a></h2>
+<h2>Deploy Fn Functions<a class="headerlink" href="#deploy-fn-functions" title="Link to this heading">#</a></h2>
 <p>We now want to deploy our functions. We’ll first need to make sure we’ve got <code class="docutils literal notranslate"><span class="pre">git</span></code> and <code class="docutils literal notranslate"><span class="pre">python</span></code> installed.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span>python38<span class="w"> </span>git
 </pre></div>
@@ -562,7 +562,7 @@ step unless our dependencies change.</p>
 </div>
 </section>
 <section id="manually-triggering-functions">
-<h2>Manually Triggering Functions<a class="headerlink" href="#manually-triggering-functions" title="Permalink to this heading">#</a></h2>
+<h2>Manually Triggering Functions<a class="headerlink" href="#manually-triggering-functions" title="Link to this heading">#</a></h2>
 </section>
 </section>
 

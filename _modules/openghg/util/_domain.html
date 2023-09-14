@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._domain &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>openghg.util._domain &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -28,21 +27,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/util/_domain';</script>
     <script src="../../../_static/custom.js"></script>
@@ -384,7 +384,9 @@ document.write(`
     <span class="k">return</span> <span class="n">domain_info_json</span>
 
 
-<div class="viewcode-block" id="find_domain"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_domain">[docs]</a><span class="k">def</span> <span class="nf">find_domain</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">domain_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
+<div class="viewcode-block" id="find_domain">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.find_domain">[docs]</a>
+<span class="k">def</span> <span class="nf">find_domain</span><span class="p">(</span><span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">domain_filepath</span><span class="p">:</span> <span class="n">optionalPathType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the latitude and longitude values in degrees associated</span>
 <span class="sd">    with a given domain name.</span>
 
@@ -411,6 +413,7 @@ document.write(`
     <span class="n">longitude</span> <span class="o">=</span> <span class="n">_get_coord_data</span><span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="n">domain_data</span><span class="p">,</span> <span class="n">domain</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">longitude</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_get_coord_data</span><span class="p">(</span><span class="n">coord</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">domain</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
@@ -495,7 +498,9 @@ document.write(`
     <span class="k">return</span> <span class="n">name</span>
 
 
-<div class="viewcode-block" id="convert_longitude"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.convert_longitude">[docs]</a><span class="k">def</span> <span class="nf">convert_longitude</span><span class="p">(</span><span class="n">longitude</span><span class="p">:</span> <span class="n">ArrayLikeMatch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLikeMatch</span><span class="p">:</span>
+<div class="viewcode-block" id="convert_longitude">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.convert_longitude">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_longitude</span><span class="p">(</span><span class="n">longitude</span><span class="p">:</span> <span class="n">ArrayLikeMatch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLikeMatch</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert longitude extent from (0 to 360) to (-180 to 180).</span>
 <span class="sd">    This does *not* reorder the values.</span>
@@ -509,6 +514,7 @@ document.write(`
     <span class="n">longitude</span> <span class="o">=</span> <span class="p">((</span><span class="n">longitude</span> <span class="o">-</span> <span class="mi">180</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span><span class="p">)</span> <span class="o">-</span> <span class="mi">180</span>
 
     <span class="k">return</span> <span class="n">longitude</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">convert_internal_longitude</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">XrDataLikeMatch</span><span class="p">,</span>

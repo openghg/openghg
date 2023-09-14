@@ -1,33 +1,24 @@
 Comparing observations to emissions
 ===================================
 
-In addition to observation files, ancillary data can also be added to an
-openghg object store which can be used to perform analysis.
+In this tutorial, we will see how to combine observation data and
+acillary data into a ``ModelScenario``, which can compute modelled
+outputs based on ancillary data, and compare these modelled outputs
+to observed measurements.
 
-At the moment, the accepted files include: - Footprints - regional
-outputs from an LPDM model (e.g. NAME) - Emissions/Flux - estimates of
-species emissions within a region - Boundary conditions - vertical
-curtains at the boundary of a regional domain - Global CTM output
-(e.g. GEOSChem)
+This tutorial builds on the tutorials :ref:`Adding observation data`
+and :ref:`Adding ancillary spatial data`.
 
-These inputs must adhere to an expected format and are expected to
-minimally contain a fixed set of inputs.
-
-*At the moment, the expected format for these files is created through
-standard methods from within the ACRG repository.*
-
-   **NOTE:** Plots created within this tutorial may not show up on the
+.. note::
+   Plots created within this tutorial may not show up on the
    online documentation version of this notebook.
 
-0. Using the tutorial object store
-----------------------------------
+Using the tutorial object store
+-------------------------------
 
-To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we'll call the tutorial store. To do this we use the
-``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
-``OPENGHG_TUT_STORE`` environment variable for this session and won't
-affect your use of OpenGHG outside of this tutorial.
+As in the :ref:`previous tutorials <using-the-tutorial-object-store>`,
+we will use the tutorial object store to avoid cluttering your personal
+object store.
 
 .. code:: ipython3
 
@@ -35,23 +26,21 @@ affect your use of OpenGHG outside of this tutorial.
 
     use_tutorial_store()
 
+Omit this step if you want to analyse data in your local object store.
+(This data needs to be added following the instructions in the
+:ref:`previous <Adding observation data>` :ref:`tutorials <Adding ancillary spatial data>`.)
+
+
 1. Loading data sources into the object store
 ---------------------------------------------
 
-This tutorial will create a temporary object store for the duration of
-this tutorial.
+We begin by adding observation, footprint, flux, and (optionally)
+boundary conditions data to the object store.
+This data relates to Tacolneston (TAC) site within the DECC
+network and the area around Europe (EUROPE domain).
 
-See
-`Adding_new_data/Adding_observation_data.ipynb <../Adding_new_data/Adding_observation_data.ipynb>`__
-for more details and advice on how to create a more permanent object
-store. Once a permanent object store is set up, these steps would only
-need to be performed once. Any added data can then be retrieved using
-searches.
-
-For this, we will add observation, footprint and flux data to the object
-store. This data relates to Tacolneston (TAC) site within the DECC
-network and the area around Europe (EUROPE domain). Here we'll use some
-helper functions fro the ``openghg.tutorial`` submodule.
+We'll use some helper functions from the ``openghg.tutorial`` submodule
+to retrieve raw data in the :ref:`expected format <2. Input format>`:
 
 .. code:: ipython3
 
@@ -61,15 +50,9 @@ helper functions fro the ``openghg.tutorial`` submodule.
 
     populate_surface_data()
 
-.. code:: ipython3
-
     populate_footprint_inert()
 
-.. code:: ipython3
-
     populate_flux_ch4()
-
-.. code:: ipython3
 
     populate_bc_ch4()
 
@@ -164,6 +147,8 @@ the ``ModelScenario.plot_timeseries()`` method:
     scenario.plot_timeseries()
 
 You can also set up your own searches and add this data directly.
+One benefit of this interface is to reduce searching the database if the
+same data needs to be used for multiple different scenarios.
 
 .. code:: ipython3
 
@@ -201,15 +186,15 @@ You can also set up your own searches and add this data directly.
 
     scenario_direct = ModelScenario(obs=obs_results, footprint=footprint_results, flux=flux_results, bc=bc_results)
 
-*You can create your own input objects directly and add these in the
-same way. This allows you to bypass the object store for experimental
-examples. At the moment these inputs need to be ``ObsData``,
-``FootprintData``, ``FluxData`` or ``BoundaryConditionsData`` objects
-(can be created using classes from openghg.dataobjects) but simpler
-inputs will be made available*.
+.. note::
 
-One benefit of this interface is to reduce searching the database if the
-same data needs to be used for multiple different scenarios.
+   You can create your own input objects directly and add these in the
+   same way. This allows you to bypass the object store for experimental
+   examples. At the moment these inputs need to be ``ObsData``,
+   ``FootprintData``, ``FluxData`` or ``BoundaryConditionsData`` objects,
+   which can be created using classes from ``openghg.dataobjects``.
+   Simpler inputs will be made available.
+
 
 3. Comparing data sources
 -------------------------

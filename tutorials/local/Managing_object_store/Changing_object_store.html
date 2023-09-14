@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Explore NOAA ObsPack &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
+    <title>Changing the object store path &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -45,12 +45,12 @@
     <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Exploring_data/Explore_NOAA_ObsPack';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Managing_object_store/Changing_object_store';</script>
     <script src="../../../_static/custom.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Retrieving data from remote archives" href="Retrieving_remote_data.html" />
-    <link rel="prev" title="Working with carbon dioxide" href="../Analysing_data/Working_with_co2.html" />
+    <link rel="next" title="User API" href="../../../api/index.html" />
+    <link rel="prev" title="Modifying and deleting data" href="Modifying_and_deleting_data.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -323,20 +323,20 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Analysing_data/Working_with_co2.html">Working with carbon dioxide</a></li>
 </ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Explore_NOAA_ObsPack.html">Explore NOAA ObsPack</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Exploring_data/Searching_and_plotting.html">Searching and plotting</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
+</ul>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Explore NOAA ObsPack</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="Retrieving_remote_data.html">Retrieving data from remote archives</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="Searching_and_plotting.html">Searching and plotting</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
-</ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Changing the object store path</a></li>
 </ul>
 </div>
 </nav></div>
@@ -377,7 +377,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Tutorials</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Explore NOAA ObsPack</li>
+    <li class="breadcrumb-item active" aria-current="page">Changing the object store path</li>
   </ul>
 </nav>
 </div>
@@ -394,109 +394,59 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="explore-noaa-obspack">
-<h1>Explore NOAA ObsPack<a class="headerlink" href="#explore-noaa-obspack" title="Link to this heading">#</a></h1>
-<p>The NOAA ObsPack products are collections of observation data from many
-sites which have been collated and standardised. ObsPack data products
-are prepared by NOAA in consultation with data providers. Available
-ObsPack products can be accessed and downloaded from the <a class="reference external" href="https://gml.noaa.gov/ccgg/obspack/data.php">ObsPack
-download</a> page.</p>
-<p>In this tutorial, we will demonstrate how the NOAA ObsPack can be loaded
-into the object store, explored and plotted.</p>
-<section id="using-the-tutorial-object-store">
-<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
-<p>To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we’ll call the tutorial store. To do this we use the
-<code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
-<code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
-affect your use of OpenGHG outside of this tutorial.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+  <section id="changing-the-object-store-path">
+<h1>Changing the object store path<a class="headerlink" href="#changing-the-object-store-path" title="Link to this heading">#</a></h1>
+<p>To change the object store path you can do it in one of two ways</p>
+<section id="modifying-the-configuration-file-directly">
+<h2>Modifying the configuration file directly<a class="headerlink" href="#modifying-the-configuration-file-directly" title="Link to this heading">#</a></h2>
+<p>Your local configuration file can be found in the <code class="docutils literal notranslate"><span class="pre">.openghg</span></code> directory in your home folder. On Linux and MacOS the file can be accessed at <code class="docutils literal notranslate"><span class="pre">~/.openghg/openghg.conf</span></code>.
+(This location is new for OpenGHG version 0.6.0; your config file will be moved automatically the next time it is accessed.)
+We don’t currently support Windows.</p>
+<p>If you created the file using the <code class="docutils literal notranslate"><span class="pre">openghg</span> <span class="pre">--quickstart</span></code> command the file should look something like this (note that the path will be different)</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;6dea284d-888a-4cd6-974e-f8888c4b7be3&quot;</span>
 
-<span class="n">use_tutorial_store</span><span class="p">()</span>
+<span class="k">[object_store]</span>
+<span class="n">local_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/gareth/openghg_store&quot;</span>
 </pre></div>
 </div>
-</section>
-<section id="loading-the-noaa-obspack-data">
-<h2>1. Loading the NOAA ObsPack data<a class="headerlink" href="#loading-the-noaa-obspack-data" title="Link to this heading">#</a></h2>
-<section id="download-the-data">
-<h3>Download the data<a class="headerlink" href="#download-the-data" title="Link to this heading">#</a></h3>
-<p>For convenience we have included a copy of the
-“obspack_ch4_1_GLOBALVIEWplus_v2.0_2020-04-24” to be retrieved from our
-example database. Once this has been downloaded, this can be processd
-using the <code class="docutils literal notranslate"><span class="pre">add_noaa_obspack()</span></code> function available from
-<code class="docutils literal notranslate"><span class="pre">openghg.store</span></code> subpackage. The file is ~ 128 MB in size so might take
-a short time to download depending on your internet connection.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_obspack</span>
-<span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">add_noaa_obspack</span>
+<p>To update the path to the object store change the path after <a href="#id1"><span class="problematic" id="id2">``</span></a>local_store = <a href="#id3"><span class="problematic" id="id4">``</span></a>. To move the store to another folder in my home directory, I can just update the path like so</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;6dea284d-888a-4cd6-974e-f8888c4b7be3&quot;</span>
 
-<span class="n">noaa_obspack_directory</span> <span class="o">=</span> <span class="n">retrieve_example_obspack</span><span class="p">()</span>
+<span class="k">[object_store]</span>
+<span class="n">local_store</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/gareth/atmos_chem/object_store&quot;</span>
 </pre></div>
 </div>
-<p>Now we have the data retrieved and extracted we can ask OpenGHG to process it and add it to our local object store.</p>
-</section>
-<section id="process-and-store-the-data">
-<h3>Process and store the data<a class="headerlink" href="#process-and-store-the-data" title="Link to this heading">#</a></h3>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Outside of this tutorial, if you have write access to multiple object stores you
-will need to pass the name of the object store you wish to write to to
-the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">add_noaa_obspack</span></code> function.</p>
-</div>
-<p>We pass the directory containing the ObsPack data to <code class="docutils literal notranslate"><span class="pre">add_noaa_obspack</span></code> which processes each of the files it finds in the directory.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">add_noaa_obspack</span><span class="p">(</span><span class="n">data_directory</span><span class="o">=</span><span class="n">noaa_obspack_directory</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="search-retrieve-and-plot">
-<h2>2. Search, retrieve and plot<a class="headerlink" href="#search-retrieve-and-plot" title="Link to this heading">#</a></h2>
-<p>The object store should now contain a large amount of data, we can query the object store and find all the flask CH4 data for
-example</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search_surface</span>
+<p>Now we can use the <code class="docutils literal notranslate"><span class="pre">check_config</span></code> command line tool to make sure the configuration file is valid. This checks to make sure the layout of the config file is correct and that the directory exists. To do this we’ll use an <code class="docutils literal notranslate"><span class="pre">ipython</span></code> session.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">check_config</span>
 
-<span class="n">flask_ch4</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">measurement_type</span><span class="o">=</span><span class="s2">&quot;flask&quot;</span><span class="p">,</span> <span class="n">data_source</span><span class="o">=</span><span class="s2">&quot;noaa_obspack&quot;</span><span class="p">)</span>
+<span class="n">check_config</span><span class="p">()</span>
+<span class="n">Your</span> <span class="n">configuration</span> <span class="n">file</span> <span class="ow">is</span> <span class="n">valid</span><span class="o">.</span>
 </pre></div>
 </div>
-<p>Then we can look at the results print as a Pandas DataFrame by doing</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">flask_ch4</span><span class="o">.</span><span class="n">results</span>
-</pre></div>
-</div>
-<p>Say we want to have a better look at some of the data from Sary Taukum, Kazakhstan</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">kzd_data</span> <span class="o">=</span> <span class="n">flask_ch4</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;kzd&quot;</span><span class="p">)</span>
+<p>If the folder doesn’t exist you’ll be presented with an input field asking if you want the folder to be created.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">check_config</span><span class="p">()</span>
 
-<span class="n">kzd_data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
+<span class="n">The</span> <span class="n">folder</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">gareth</span><span class="o">/</span><span class="n">atmos_chem</span><span class="o">/</span><span class="n">object_store</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">exist</span>
+<span class="n">Should</span> <span class="n">we</span> <span class="n">create</span> <span class="n">it</span><span class="err">?</span> <span class="p">(</span><span class="n">y</span><span class="o">/</span><span class="n">n</span><span class="p">):</span> <span class="n">y</span>
+<span class="n">The</span> <span class="n">folder</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">gareth</span><span class="o">/</span><span class="n">atmos_chem</span><span class="o">/</span><span class="n">object_store</span> <span class="n">has</span> <span class="n">ben</span> <span class="n">created</span><span class="o">.</span>
 </pre></div>
 </div>
+<p>OpenGHG will now use the new path when searching for and storing data.</p>
 </section>
-<section id="using-get-obs-surface">
-<h2>3. Using <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code><a class="headerlink" href="#using-get-obs-surface" title="Link to this heading">#</a></h2>
-<p>Alternatively, we can do an all in one search and retrieve using
-<code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code>. Here we find CH4 data from Estevan Point, British
-Columbia, retrieve it and plot it.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span>
+<section id="command-line">
+<h2>Command line<a class="headerlink" href="#command-line" title="Link to this heading">#</a></h2>
+<p>OpenGHG provides a command line interface accessible from the terminal. To update the path of the object store you can run <code class="docutils literal notranslate"><span class="pre">openghg</span> <span class="pre">--quickstart</span></code>. This will read your current configuration file and ask if you want to update the object store path.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">OpenGHG configuration</span>
+<span class="go">---------------------</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;HPB&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
+<span class="go">User config exists at /home/gareth/.config/openghg/openghg.conf, checking...</span>
+<span class="go">Current object store path: /home/gareth/openghg_store</span>
+<span class="go">Would you like to update the path? (y/n): y</span>
+<span class="go">Enter new path for object store: /home/gareth/atmos_chem/openghg_store</span>
+<span class="go">Updated configuration saved.</span>
 </pre></div>
 </div>
-<p>As there isn’t any ranking data set (see tutorial 2) <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code>
-doesn’t know which inlet to select, we need to tell it.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">get_obs_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;HPB&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;93m&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
-<section id="cleanup">
-<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
-<p>If you’re finished with the data in this tutorial you can cleanup the
-tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
-
-<span class="n">clear_tutorial_store</span><span class="p">()</span>
-</pre></div>
-</div>
+<p>OpenGHG will now use the new path when searching for and storing data.</p>
 </section>
 </section>
 
@@ -512,20 +462,20 @@ tutorial object store using the <code class="docutils literal notranslate"><span
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../Analysing_data/Working_with_co2.html"
+       href="Modifying_and_deleting_data.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Working with carbon dioxide</p>
+        <p class="prev-next-title">Modifying and deleting data</p>
       </div>
     </a>
     <a class="right-next"
-       href="Retrieving_remote_data.html"
+       href="../../../api/index.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Retrieving data from remote archives</p>
+        <p class="prev-next-title">User API</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -547,15 +497,8 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">0. Using the tutorial object store</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loading-the-noaa-obspack-data">1. Loading the NOAA ObsPack data</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#download-the-data">Download the data</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#process-and-store-the-data">Process and store the data</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#search-retrieve-and-plot">2. Search, retrieve and plot</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-get-obs-surface">3. Using <code class="docutils literal notranslate"><span class="pre">get_obs_surface</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup">4. Cleanup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modifying-the-configuration-file-directly">Modifying the configuration file directly</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#command-line">Command line</a></li>
 </ul>
   </nav></div>
 

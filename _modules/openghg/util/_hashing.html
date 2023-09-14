@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._hashing &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>openghg.util._hashing &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -28,21 +27,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/util/_hashing';</script>
     <script src="../../../_static/custom.js"></script>
@@ -361,7 +361,9 @@ document.write(`
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
 
-<div class="viewcode-block" id="hash_string"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_string">[docs]</a><span class="k">def</span> <span class="nf">hash_string</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="hash_string">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_string">[docs]</a>
+<span class="k">def</span> <span class="nf">hash_string</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the SHA-1 hash of a string</span>
 
 <span class="sd">    Args:</span>
@@ -372,7 +374,10 @@ document.write(`
     <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">to_hash</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="hash_file"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_file">[docs]</a><span class="k">def</span> <span class="nf">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+<div class="viewcode-block" id="hash_file">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_file">[docs]</a>
+<span class="k">def</span> <span class="nf">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Opens the file at filepath and calculates its SHA1 hash</span>
 
 <span class="sd">    Taken from https://stackoverflow.com/a/22058673</span>
@@ -398,7 +403,10 @@ document.write(`
     <span class="k">return</span> <span class="n">sha1</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="hash_bytes"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_bytes">[docs]</a><span class="k">def</span> <span class="nf">hash_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+<div class="viewcode-block" id="hash_bytes">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_bytes">[docs]</a>
+<span class="k">def</span> <span class="nf">hash_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the SHA1 sum of some data</span>
 
 <span class="sd">    Args:</span>
@@ -409,7 +417,10 @@ document.write(`
     <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="hash_retrieved_data"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_retrieved_data">[docs]</a><span class="k">def</span> <span class="nf">hash_retrieved_data</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+
+<div class="viewcode-block" id="hash_retrieved_data">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.hash_retrieved_data">[docs]</a>
+<span class="k">def</span> <span class="nf">hash_retrieved_data</span><span class="p">(</span><span class="n">to_hash</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Hash data retrieved from a data platform. This calculates the SHA1 of the metadata</span>
 <span class="sd">    and the start date, end date and the number of timestamps in the Dataset.</span>
 
@@ -452,6 +463,7 @@ document.write(`
         <span class="n">hashes</span><span class="p">[</span><span class="n">combo_hash</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">current_timestamp</span><span class="p">}</span>
 
     <span class="k">return</span> <span class="n">hashes</span></div>
+
 </pre></div>
 
                 </article>

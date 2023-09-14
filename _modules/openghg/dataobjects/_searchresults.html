@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._searchresults &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>openghg.dataobjects._searchresults &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -28,21 +27,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/dataobjects/_searchresults';</script>
     <script src="../../../_static/custom.js"></script>
@@ -372,7 +372,9 @@ document.write(`
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
-<div class="viewcode-block" id="SearchResults"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults">[docs]</a><span class="k">class</span> <span class="nc">SearchResults</span><span class="p">:</span>
+<div class="viewcode-block" id="SearchResults">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults">[docs]</a>
+<span class="k">class</span> <span class="nc">SearchResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class is used to return data from the search function. It</span>
 <span class="sd">    has member functions to retrieve data from the object store.</span>
 
@@ -382,7 +384,9 @@ document.write(`
 <span class="sd">        start_result: ?</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SearchResults.__init__"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="SearchResults.__init__">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">start_result</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -412,13 +416,20 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">hub</span> <span class="o">=</span> <span class="n">running_on_hub</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SearchResults.__str__"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+<div class="viewcode-block" id="SearchResults.__str__">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.__str__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">SearchResults</span><span class="o">.</span><span class="n">df_to_table_console_output</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2"> results.</span><span class="se">\n</span><span class="s2">View the results DataFrame using the results property.&quot;</span></div>
 
-<div class="viewcode-block" id="SearchResults.__repr__"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+<div class="viewcode-block" id="SearchResults.__repr__">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.__repr__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span></div>
+
 
     <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
@@ -429,7 +440,9 @@ document.write(`
     <span class="c1"># def __iter__(self) -&gt; Iterator:</span>
     <span class="c1">#     yield from self.results.iterrows()</span>
 
-<div class="viewcode-block" id="SearchResults.to_data"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="SearchResults.to_data">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.to_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert this object to a dictionary for JSON serialisation</span>
 
 <span class="sd">        Returns:</span>
@@ -441,7 +454,10 @@ document.write(`
             <span class="s2">&quot;hub&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">hub</span><span class="p">,</span>
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="SearchResults.to_json"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+<div class="viewcode-block" id="SearchResults.to_json">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.to_json">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Serialises the object to JSON</span>
 
 <span class="sd">        Returns:</span>
@@ -449,7 +465,10 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_data</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="SearchResults.from_json"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.from_json">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="SearchResults.from_json">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.from_json">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a SearchResults object from a dictionary</span>
 
@@ -462,7 +481,10 @@ document.write(`
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">loaded</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">],</span> <span class="n">metadata</span><span class="o">=</span><span class="n">loaded</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="SearchResults.retrieve"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.retrieve">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span>
+
+<div class="viewcode-block" id="SearchResults.retrieve">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.retrieve">[docs]</a>
+    <span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dataframe</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -485,7 +507,10 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_by_term</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="n">elevate_inlet</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SearchResults.retrieve_all"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.retrieve_all">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]]:</span>
+
+<div class="viewcode-block" id="SearchResults.retrieve_all">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.retrieve_all">[docs]</a>
+    <span class="k">def</span> <span class="nf">retrieve_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">ObsData</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ObsData</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieves all data found during the search</span>
 
 <span class="sd">        Args:</span>
@@ -498,13 +523,17 @@ document.write(`
         <span class="n">uuids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_by_uuid</span><span class="p">(</span><span class="n">uuids</span><span class="o">=</span><span class="n">uuids</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="o">=</span><span class="n">elevate_inlet</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SearchResults.uuids"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.uuids">[docs]</a>    <span class="k">def</span> <span class="nf">uuids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+
+<div class="viewcode-block" id="SearchResults.uuids">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.uuids">[docs]</a>
+    <span class="k">def</span> <span class="nf">uuids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the UUIDs of the found data</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of UUIDs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
 
     <span class="k">def</span> <span class="nf">_retrieve_by_term</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">elevate_inlet</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
@@ -620,7 +649,9 @@ document.write(`
                 <span class="n">attrs_to_check</span><span class="o">=</span><span class="n">attrs_to_check</span><span class="p">,</span>
             <span class="p">)</span>
 
-<div class="viewcode-block" id="SearchResults.df_to_table_console_output"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.df_to_table_console_output">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="SearchResults.df_to_table_console_output">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.SearchResults.df_to_table_console_output">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">df_to_table_console_output</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process the DataFrame and display it as a formatted table in the console.</span>
@@ -660,7 +691,9 @@ document.write(`
 
             <span class="c1"># Print the table</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">()</span></div></div>
+            <span class="nb">print</span><span class="p">()</span></div>
+</div>
+
 </pre></div>
 
                 </article>

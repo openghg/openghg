@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.analyse._scenario &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>openghg.analyse._scenario &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -28,21 +27,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/analyse/_scenario';</script>
     <script src="../../../_static/custom.js"></script>
@@ -437,7 +437,9 @@ document.write(`
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
-<div class="viewcode-block" id="ModelScenario"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario">[docs]</a><span class="k">class</span> <span class="nc">ModelScenario</span><span class="p">:</span>
+<div class="viewcode-block" id="ModelScenario">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario">[docs]</a>
+<span class="k">class</span> <span class="nc">ModelScenario</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class stores together observation data with ancillary data and allows</span>
 <span class="sd">    operations to be performed combining these inputs.</span>
@@ -446,7 +448,9 @@ document.write(`
     <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bc</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ModelScenario.__init__"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="ModelScenario.__init__">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -576,6 +580,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">modelled_baseline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flux_stacked</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
+
         <span class="c1"># TODO: Check species, site etc. values align between inputs?</span>
 
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="n">ParamType</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -628,7 +633,9 @@ document.write(`
 
         <span class="k">return</span> <span class="n">data</span>
 
-<div class="viewcode-block" id="ModelScenario.add_obs"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_obs">[docs]</a>    <span class="k">def</span> <span class="nf">add_obs</span><span class="p">(</span>
+<div class="viewcode-block" id="ModelScenario.add_obs">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_obs">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_obs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -673,7 +680,10 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;inlet&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="ModelScenario.add_footprint"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_footprint">[docs]</a>    <span class="k">def</span> <span class="nf">add_footprint</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ModelScenario.add_footprint">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_footprint">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_footprint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">inlet</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -765,7 +775,10 @@ document.write(`
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">footprint</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;site&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="ModelScenario.add_flux"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_flux">[docs]</a>    <span class="k">def</span> <span class="nf">add_flux</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ModelScenario.add_flux">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_flux">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_flux</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -843,7 +856,10 @@ document.write(`
 
             <span class="bp">self</span><span class="o">.</span><span class="n">flux_sources</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="ModelScenario.add_bc"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_bc">[docs]</a>    <span class="k">def</span> <span class="nf">add_bc</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ModelScenario.add_bc">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.add_bc">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_bc</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">species</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">bc_input</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -872,6 +888,7 @@ document.write(`
             <span class="n">bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="n">bc_keywords</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;boundary_conditions&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">bc</span> <span class="o">=</span> <span class="n">bc</span></div>
+
 
     <span class="k">def</span> <span class="nf">_check_data_is_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">need</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1072,7 +1089,9 @@ document.write(`
 
         <span class="k">return</span> <span class="n">obs_data</span><span class="p">,</span> <span class="n">footprint_data</span>
 
-<div class="viewcode-block" id="ModelScenario.combine_obs_footprint"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.combine_obs_footprint">[docs]</a>    <span class="k">def</span> <span class="nf">combine_obs_footprint</span><span class="p">(</span>
+<div class="viewcode-block" id="ModelScenario.combine_obs_footprint">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.combine_obs_footprint">[docs]</a>
+    <span class="k">def</span> <span class="nf">combine_obs_footprint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
         <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1161,6 +1180,7 @@ document.write(`
 
         <span class="k">return</span> <span class="n">combined_dataset</span></div>
 
+
     <span class="k">def</span> <span class="nf">_clean_sources_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check sources input and make sure this is a list. If None, this will extract</span>
@@ -1176,7 +1196,9 @@ document.write(`
 
         <span class="k">return</span> <span class="n">sources</span>
 
-<div class="viewcode-block" id="ModelScenario.combine_flux_sources"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.combine_flux_sources">[docs]</a>    <span class="k">def</span> <span class="nf">combine_flux_sources</span><span class="p">(</span>
+<div class="viewcode-block" id="ModelScenario.combine_flux_sources">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.combine_flux_sources">[docs]</a>
+    <span class="k">def</span> <span class="nf">combine_flux_sources</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1224,6 +1246,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">flux_stacked</span> <span class="o">=</span> <span class="n">flux_stacked</span>
 
         <span class="k">return</span> <span class="n">flux_stacked</span></div>
+
 
     <span class="k">def</span> <span class="nf">_check_footprint_resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1314,7 +1337,9 @@ document.write(`
 
         <span class="k">return</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="ModelScenario.calc_modelled_obs"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.calc_modelled_obs">[docs]</a>    <span class="k">def</span> <span class="nf">calc_modelled_obs</span><span class="p">(</span>
+<div class="viewcode-block" id="ModelScenario.calc_modelled_obs">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.calc_modelled_obs">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_modelled_obs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
@@ -1382,6 +1407,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Reset this to None after calculation completed</span>
 
         <span class="k">return</span> <span class="n">modelled_obs</span></div>
+
 
     <span class="k">def</span> <span class="nf">_calc_modelled_obs_integrated</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1708,7 +1734,9 @@ document.write(`
 
         <span class="k">return</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="ModelScenario.calc_modelled_baseline"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.calc_modelled_baseline">[docs]</a>    <span class="k">def</span> <span class="nf">calc_modelled_baseline</span><span class="p">(</span>
+<div class="viewcode-block" id="ModelScenario.calc_modelled_baseline">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.calc_modelled_baseline">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_modelled_baseline</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
         <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1851,13 +1879,16 @@ document.write(`
 
         <span class="k">return</span> <span class="n">modelled_baseline</span></div>
 
+
     <span class="c1"># def _calc_modelled_baseline_long_lived():</span>
     <span class="c1">#     pass</span>
 
     <span class="c1"># def _calc_modelled_baseline_short_lived():</span>
     <span class="c1">#     pass</span>
 
-<div class="viewcode-block" id="ModelScenario.footprints_data_merge"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.footprints_data_merge">[docs]</a>    <span class="k">def</span> <span class="nf">footprints_data_merge</span><span class="p">(</span>
+<div class="viewcode-block" id="ModelScenario.footprints_data_merge">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.footprints_data_merge">[docs]</a>
+    <span class="k">def</span> <span class="nf">footprints_data_merge</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">resample_to</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coarsest&quot;</span><span class="p">,</span>
         <span class="n">platform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1923,7 +1954,10 @@ document.write(`
 
         <span class="k">return</span> <span class="n">combined_dataset</span></div>
 
-<div class="viewcode-block" id="ModelScenario.plot_timeseries"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.plot_timeseries">[docs]</a>    <span class="k">def</span> <span class="nf">plot_timeseries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ModelScenario.plot_timeseries">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.plot_timeseries">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_timeseries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the observation timeseries data.</span>
 
@@ -1939,7 +1973,10 @@ document.write(`
 
         <span class="k">return</span> <span class="n">fig</span></div>
 
-<div class="viewcode-block" id="ModelScenario.plot_comparison"><a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.plot_comparison">[docs]</a>    <span class="k">def</span> <span class="nf">plot_comparison</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ModelScenario.plot_comparison">
+<a class="viewcode-back" href="../../../api/api_analyse.html#openghg.analyse.ModelScenario.plot_comparison">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_comparison</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">baseline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;boundary_conditions&quot;</span><span class="p">,</span>
         <span class="n">sources</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2015,7 +2052,9 @@ document.write(`
 
         <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_data</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">))</span>
 
-        <span class="k">return</span> <span class="n">fig</span></div></div>
+        <span class="k">return</span> <span class="n">fig</span></div>
+</div>
+
 
 
 <span class="k">def</span> <span class="nf">_indexes_match</span><span class="p">(</span><span class="n">dataset_A</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">dataset_B</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>

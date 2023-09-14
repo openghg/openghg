@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Searching and plotting &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Searching and plotting &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Exploring_data/Searching_and_plotting';</script>
     <script src="../../../_static/custom.js"></script>
@@ -335,6 +335,9 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+</ul>
 </div>
 </nav></div>
     </div>
@@ -392,46 +395,77 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="searching-and-plotting">
-<h1>Searching and plotting<a class="headerlink" href="#searching-and-plotting" title="Permalink to this heading">#</a></h1>
+<h1>Searching and plotting<a class="headerlink" href="#searching-and-plotting" title="Link to this heading">#</a></h1>
 <p>In this short tutorial we’ll show how to retrieve some data and create a
 simple plot using one of our plotting functions.</p>
-<p>As in the <a class="reference external" href="Adding_observation_data.ipynb">previous tutorial</a>, we will
-start by setting up our temporary object store for our data. If you’ve
-already create your own local object store you can skip the next few
-steps and move onto the <strong>Searching</strong> section.</p>
+<section id="using-the-tutorial-object-store">
+<h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
+<p>As in the <a class="reference internal" href="../Adding_new_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorial</span></a>,
+we will use the tutorial object store to avoid cluttering your personal
+object store.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
+
+<span class="n">use_tutorial_store</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Now we’ll add some data to the tutorial store.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_surface_data</span>
+<span class="n">populate_surface_data</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
-</pre></div>
-</div>
+</section>
 <section id="searching">
-<h2>Searching<a class="headerlink" href="#searching" title="Permalink to this heading">#</a></h2>
-<p>Let’s search for all the methane data from Tacolneston to do this we
-need to know the site code. We can see a summary of known site codes
-using the <code class="docutils literal notranslate"><span class="pre">summary_site_codes()</span></code> function</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_site_codes</span>
+<h2>1. Searching<a class="headerlink" href="#searching" title="Link to this heading">#</a></h2>
+<p>Let’s search for all the methane data from Tacolneston.
+To do this we need to know the site code (“TAC”).</p>
+<p>If we didn’t know the site code, we could find it using
+the <code class="docutils literal notranslate"><span class="pre">summary_site_codes()</span></code> function:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_site_codes</span>
 
-<span class="c1">## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES</span>
-<span class="c1"># import pandas as pd; pd.set_option(&#39;display.max_rows&#39;, None)</span>
+<span class="go">## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES</span>
+<span class="go"># import pandas as pd; pd.set_option(&#39;display.max_rows&#39;, None)</span>
+<span class="gp">In [2]: </span><span class="n">summary</span> <span class="o">=</span> <span class="n">summary_site_codes</span><span class="p">()</span>
 
-<span class="n">summary</span> <span class="o">=</span> <span class="n">summary_site_codes</span><span class="p">()</span>
-<span class="n">summary</span>
+<span class="gp">In [3]: </span><span class="n">summary</span>
+<span class="gh">Out[3]: </span>
+<span class="go">          Network  ... Inlet heights</span>
+<span class="go">Site Code          ...              </span>
+<span class="go">AAO          NOAA  ...              </span>
+<span class="go">ABP          NOAA  ...              </span>
+<span class="go">ABT          NOAA  ...       [&#39;33m&#39;]</span>
+<span class="go">ACG          NOAA  ...              </span>
+<span class="go">ADR           ALE  ...       [&#39;10m&#39;]</span>
+<span class="go">...           ...  ...           ...</span>
+<span class="go">YON          NOAA  ...       [&#39;20m&#39;]</span>
+<span class="go">ZEP         AGAGE  ...       [&#39;12m&#39;]</span>
+<span class="go">ZEP          ICOS  ...       [&#39;15m&#39;]</span>
+<span class="go">ZEP          NOAA  ...              </span>
+<span class="go">ZSF          ICOS  ...        [&#39;3m&#39;]</span>
+
+<span class="go">[390 rows x 6 columns]</span>
 </pre></div>
 </div>
 <p>The output of this function is a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#dataframe">pandas
-DataFrame</a>.
-If we wanted to filter this to include sites containing the name
-“Tacolneston” we could do so as follows:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">site_long_name</span> <span class="o">=</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Long name&quot;</span><span class="p">]</span>
-<span class="n">find_tacolneston</span> <span class="o">=</span> <span class="n">site_long_name</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Tacolneston&quot;</span><span class="p">)</span>
+DataFrame</a>,
+so we can filter to find sites containing the name “Tacolneston”:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="n">site_long_name</span> <span class="o">=</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Long name&quot;</span><span class="p">]</span>
 
-<span class="n">summary</span><span class="p">[</span><span class="n">find_tacolneston</span><span class="p">]</span>
+<span class="gp">In [5]: </span><span class="n">find_tacolneston</span> <span class="o">=</span> <span class="n">site_long_name</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;Tacolneston&quot;</span><span class="p">)</span>
+
+<span class="gp">In [6]: </span><span class="n">summary</span><span class="p">[</span><span class="n">find_tacolneston</span><span class="p">]</span>
+<span class="gh">Out[6]: </span>
+<span class="go">          Network  ...            Inlet heights</span>
+<span class="go">Site Code          ...                         </span>
+<span class="go">TAC          DECC  ...  [&#39;185m&#39;, &#39;54m&#39;, &#39;100m&#39;]</span>
+<span class="go">TAC          NOAA  ...                         </span>
+
+<span class="go">[2 rows x 6 columns]</span>
 </pre></div>
 </div>
-<p>As you can see, there will sometimes be multiple entries for a site if
-this is included under multiple networks.</p>
-<p>If we wanted to see all available data associated with Tacolneston we
+<p>This shows us that the site code for Tacolneston is “TAC”, and also that
+there are two entries for Tacolneston, since it is included under
+multiple networks.</p>
+<p>To see all available data associated with Tacolneston we
 can search for this using the site code of “TAC”.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
 
@@ -454,16 +488,19 @@ to extract, for example, just the methane data:</p>
 </div>
 <p>There are also equivalent search functions for other data types
 including <code class="docutils literal notranslate"><span class="pre">search_footprints</span></code>, <code class="docutils literal notranslate"><span class="pre">search_emissions</span></code> and <code class="docutils literal notranslate"><span class="pre">search_bc</span></code>.</p>
+</section>
+<section id="plotting">
+<h2>2. Plotting<a class="headerlink" href="#plotting" title="Link to this heading">#</a></h2>
 <p>If we want to take a look at the data from the 185m inlet we can first
 retrieve the data from the object store and then create a quick
-timeseries plot. See the
-<code class="docutils literal notranslate"><span class="pre">`SearchResults</span></code> &lt;<a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults">https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults</a>&gt;`__
-object documentation for more information.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span> <span class="n">data_185m</span> <span class="o">=</span> <span class="n">tac_surface_search</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;185m&quot;</span><span class="p">)</span>
-
-<span class="o">**</span><span class="n">NOTE</span><span class="p">:</span><span class="o">**</span> <span class="n">the</span> <span class="n">plots</span> <span class="n">created</span> <span class="n">below</span> <span class="n">may</span> <span class="ow">not</span> <span class="n">show</span> <span class="n">up</span> <span class="n">on</span> <span class="n">the</span> <span class="n">online</span>
-<span class="n">documentation</span> <span class="n">version</span> <span class="n">of</span> <span class="n">this</span> <span class="n">notebook</span><span class="o">.</span>
+timeseries plot. See the <a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult"><code class="docutils literal notranslate"><span class="pre">SearchResults</span></code></a> object documentation for more information.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_185m</span> <span class="o">=</span> <span class="n">tac_surface_search</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;185m&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The plots created below may not show up on the online
+documentation version of this notebook.</p>
 </div>
 <p>We can visualise this data using the in-built plotting commands from the
 <code class="docutils literal notranslate"><span class="pre">plotting</span></code> sub-module. We can also modify the inputs to improve how
@@ -473,22 +510,10 @@ this is displayed:</p>
 <span class="n">plot_timeseries</span><span class="p">(</span><span class="n">data_185m</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Methane at Tacolneston&quot;</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Conc.&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;ppm&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="searching-a-specific-store">
-<h2>Searching a specific store<a class="headerlink" href="#searching-a-specific-store" title="Permalink to this heading">#</a></h2>
-<p>If you only want to search for data from a specific object store you can pass the store name to the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the search functions.
-To search for Tacolneston data from out <code class="docutils literal notranslate"><span class="pre">group</span></code> object store you could do</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tac_data_search</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="s2">&quot;group&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>This will then only search for data in the <code class="docutils literal notranslate"><span class="pre">group</span></code> object store.</p>
-</section>
-<section id="plot-all-the-data">
-<h2>Plot all the data<a class="headerlink" href="#plot-all-the-data" title="Permalink to this heading">#</a></h2>
+<section id="plotting-multiple-timeseries">
+<h3>Plotting multiple timeseries<a class="headerlink" href="#plotting-multiple-timeseries" title="Link to this heading">#</a></h3>
 <p>If there are multiple results for a given search, we can also retrieve
-all the data and receive a <code class="docutils literal notranslate"><span class="pre">list</span></code> of
-<code class="docutils literal notranslate"><span class="pre">`ObsData</span></code> &lt;<a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData">https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData</a>&gt;`__
-objects.</p>
+all the data and receive a <code class="docutils literal notranslate"><span class="pre">list</span></code> of <a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData"><code class="docutils literal notranslate"><span class="pre">ObsData</span></code></a> objects.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">all_ch4_tac</span> <span class="o">=</span> <span class="n">tac_surface_search</span><span class="o">.</span><span class="n">retrieve</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -500,22 +525,18 @@ and and responsive, even with relatively large amounts of data.</p>
 </pre></div>
 </div>
 </section>
-<section id="compare-different-sites">
-<h2>Compare different sites<a class="headerlink" href="#compare-different-sites" title="Permalink to this heading">#</a></h2>
+</section>
+<section id="comparing-different-sites">
+<h2>3. Comparing different sites<a class="headerlink" href="#comparing-different-sites" title="Link to this heading">#</a></h2>
 <p>We can easily compare data for the same species from different sites by
 doing a quick search to see what’s available</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span>
+
+<span class="n">ch4_data</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
 <p>Then we refine our search to only retrieve the sites (and inlets) that
-we want:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ch4_data</span><span class="o">.</span><span class="n">results</span>
-</pre></div>
-</div>
-<p>We can retrieve the data we want to compare and make a plot</p>
+we want to compare and make a plot</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bsd_data</span> <span class="o">=</span> <span class="n">ch4_data</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;BSD&quot;</span><span class="p">)</span>
 <span class="n">tac_data</span> <span class="o">=</span> <span class="n">ch4_data</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;54m&quot;</span><span class="p">)</span>
 </pre></div>
@@ -573,10 +594,13 @@ we want:</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#searching">Searching</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#searching-a-specific-store">Searching a specific store</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-all-the-data">Plot all the data</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compare-different-sites">Compare different sites</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">Using the tutorial object store</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#searching">1. Searching</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting">2. Plotting</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-multiple-timeseries">Plotting multiple timeseries</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparing-different-sites">3. Comparing different sites</a></li>
 </ul>
   </nav></div>
 

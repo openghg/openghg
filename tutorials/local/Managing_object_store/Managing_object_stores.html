@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Managing object stores &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Managing object stores &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Managing_object_store/Managing_object_stores';</script>
     <script src="../../../_static/custom.js"></script>
@@ -355,25 +355,25 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="managing-object-stores">
-<span id="id1"></span><h1>Managing object stores<a class="headerlink" href="#managing-object-stores" title="Permalink to this heading">#</a></h1>
+<span id="id1"></span><h1>Managing object stores<a class="headerlink" href="#managing-object-stores" title="Link to this heading">#</a></h1>
 <p>As of OpenGHG 0.6.0 multiple object stores are supported. This means you can read and write to multiple stores as long
 as you have permission to do so.</p>
 <section id="getting-setup">
-<h2>Getting setup<a class="headerlink" href="#getting-setup" title="Permalink to this heading">#</a></h2>
+<h2>Getting setup<a class="headerlink" href="#getting-setup" title="Link to this heading">#</a></h2>
 <p>To create your configuration file use the <code class="docutils literal notranslate"><span class="pre">openghg</span> <span class="pre">--quickstart</span></code> command line tool.
 You’ll be asked where you want your object store created, by default this is in your home folder
 and you can just press enter if you’re happy with the default. This first one is your personal object store,
 don’t give the path to a shared object store here. By default your local store will have read/write permissions.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ openghg --quickstart
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>openghg<span class="w"> </span>--quickstart
 
-OpenGHG configuration
+OpenGHG<span class="w"> </span>configuration
 ---------------------
 
-INFO:openghg.util:We&#39;ll first create your user object store.
+INFO:openghg.util:We<span class="err">&#39;</span>ll<span class="w"> </span>first<span class="w"> </span>create<span class="w"> </span>your<span class="w"> </span>user<span class="w"> </span>object<span class="w"> </span>store.
 
-Enter path for object store (default /home/gareth/openghg_store):
-Would you like to add another object store? (y/n): n
-INFO:openghg.util:Configuration written to /home/gareth/.config/openghg/openghg.conf
+Enter<span class="w"> </span>path<span class="w"> </span><span class="k">for</span><span class="w"> </span>object<span class="w"> </span>store<span class="w"> </span><span class="o">(</span>default<span class="w"> </span>/home/gareth/openghg_store<span class="o">)</span>:
+Would<span class="w"> </span>you<span class="w"> </span>like<span class="w"> </span>to<span class="w"> </span>add<span class="w"> </span>another<span class="w"> </span>object<span class="w"> </span>store?<span class="w"> </span><span class="o">(</span>y/n<span class="o">)</span>:<span class="w"> </span>n
+INFO:openghg.util:Configuration<span class="w"> </span>written<span class="w"> </span>to<span class="w"> </span>/home/gareth/.config/openghg/openghg.conf
 </pre></div>
 </div>
 <p>Your configuration file should now look something like this. Note that your <code class="docutils literal notranslate"><span class="pre">user_id</span></code> will be different
@@ -388,7 +388,7 @@ as this is a string that’s randomly generated when you first create your confi
 </div>
 </section>
 <section id="multiple-stores">
-<h2>Multiple stores<a class="headerlink" href="#multiple-stores" title="Permalink to this heading">#</a></h2>
+<h2>Multiple stores<a class="headerlink" href="#multiple-stores" title="Link to this heading">#</a></h2>
 <p>New stores can be easily added using the tool, run <code class="docutils literal notranslate"><span class="pre">openghg</span> <span class="pre">--quickstart</span></code> again and select yes when asked if you want
 to add another store. You can add as many stores as you want, giving a path and the permissions you have to that store.
 Note that your write permissions will be checked by OpenGHG.</p>
@@ -430,7 +430,7 @@ store. When you use the search and retrieve functions both object stores will be
 select which store to write data to in <span class="xref std std-ref">addings-obs-data</span>.</p>
 </section>
 <section id="migrating-to-the-new-configuration-file">
-<h2>Migrating to the new configuration file<a class="headerlink" href="#migrating-to-the-new-configuration-file" title="Permalink to this heading">#</a></h2>
+<h2>Migrating to the new configuration file<a class="headerlink" href="#migrating-to-the-new-configuration-file" title="Link to this heading">#</a></h2>
 <p>If you’ve used a version of OpenGHG before 0.6.0 you’ll need to update your local configuration file to support the new
 schema. You can do this easily using the command line tool. It will first ask if you want to update the path
 of your local object store, then if you would like to add any new stores. If you answer no to both of these questions

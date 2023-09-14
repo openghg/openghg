@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Comparing observations to emissions &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Comparing observations to emissions &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Analysing_data/Comparing_with_emissions';</script>
     <script src="../../../_static/custom.js"></script>
@@ -335,6 +335,9 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+</ul>
 </div>
 </nav></div>
     </div>
@@ -392,68 +395,55 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="comparing-observations-to-emissions">
-<h1>Comparing observations to emissions<a class="headerlink" href="#comparing-observations-to-emissions" title="Permalink to this heading">#</a></h1>
-<p>In addition to observation files, ancillary data can also be added to an
-openghg object store which can be used to perform analysis.</p>
-<p>At the moment, the accepted files include: - Footprints - regional
-outputs from an LPDM model (e.g. NAME) - Emissions/Flux - estimates of
-species emissions within a region - Boundary conditions - vertical
-curtains at the boundary of a regional domain - Global CTM output
-(e.g. GEOSChem)</p>
-<p>These inputs must adhere to an expected format and are expected to
-minimally contain a fixed set of inputs.</p>
-<p><em>At the moment, the expected format for these files is created through
-standard methods from within the ACRG repository.</em></p>
-<blockquote>
-<div><p><strong>NOTE:</strong> Plots created within this tutorial may not show up on the
+<h1>Comparing observations to emissions<a class="headerlink" href="#comparing-observations-to-emissions" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we will see how to combine observation data and
+acillary data into a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code>, which can compute modelled
+outputs based on ancillary data, and compare these modelled outputs
+to observed measurements.</p>
+<p>This tutorial builds on the tutorials <a class="reference internal" href="../Adding_new_data/Adding_observation_data.html#adding-observation-data"><span class="std std-ref">Adding observation data</span></a>
+and <a class="reference internal" href="../Adding_new_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">Adding ancillary spatial data</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Plots created within this tutorial may not show up on the
 online documentation version of this notebook.</p>
-</div></blockquote>
+</div>
 <section id="using-the-tutorial-object-store">
-<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Permalink to this heading">#</a></h2>
-<p>To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we’ll call the tutorial store. To do this we use the
-<code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
-<code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
-affect your use of OpenGHG outside of this tutorial.</p>
+<h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
+<p>As in the <a class="reference internal" href="../Adding_new_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorials</span></a>,
+we will use the tutorial object store to avoid cluttering your personal
+object store.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
 <span class="n">use_tutorial_store</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>Omit this step if you want to analyse data in your local object store.
+(This data needs to be added following the instructions in the
+<a class="reference internal" href="../Adding_new_data/Adding_observation_data.html#adding-observation-data"><span class="std std-ref">previous</span></a> <a class="reference internal" href="../Adding_new_data/Adding_ancillary_data.html#adding-ancillary-spatial-data"><span class="std std-ref">tutorials</span></a>.)</p>
 </section>
 <section id="loading-data-sources-into-the-object-store">
-<h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Permalink to this heading">#</a></h2>
-<p>This tutorial will create a temporary object store for the duration of
-this tutorial.</p>
-<p>See
-<a class="reference external" href="../Adding_new_data/Adding_observation_data.ipynb">Adding_new_data/Adding_observation_data.ipynb</a>
-for more details and advice on how to create a more permanent object
-store. Once a permanent object store is set up, these steps would only
-need to be performed once. Any added data can then be retrieved using
-searches.</p>
-<p>For this, we will add observation, footprint and flux data to the object
-store. This data relates to Tacolneston (TAC) site within the DECC
-network and the area around Europe (EUROPE domain). Here we’ll use some
-helper functions fro the <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule.</p>
+<h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Link to this heading">#</a></h2>
+<p>We begin by adding observation, footprint, flux, and (optionally)
+boundary conditions data to the object store.
+This data relates to Tacolneston (TAC) site within the DECC
+network and the area around Europe (EUROPE domain).</p>
+<p>We’ll use some helper functions from the <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule
+to retrieve raw data in the <a class="reference internal" href="../Adding_new_data/Adding_ancillary_data.html#input-format"><span class="std std-ref">expected format</span></a>:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_surface_data</span><span class="p">,</span> <span class="n">populate_footprint_inert</span><span class="p">,</span> <span class="n">populate_flux_ch4</span><span class="p">,</span> <span class="n">populate_bc_ch4</span>
 </pre></div>
 </div>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_footprint_inert</span><span class="p">()</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_flux_ch4</span><span class="p">()</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_bc_ch4</span><span class="p">()</span>
+
+<span class="n">populate_footprint_inert</span><span class="p">()</span>
+
+<span class="n">populate_flux_ch4</span><span class="p">()</span>
+
+<span class="n">populate_bc_ch4</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="creating-a-model-scenario">
-<h2>2. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Permalink to this heading">#</a></h2>
+<h2>2. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Link to this heading">#</a></h2>
 <p>With this ancillary data, we can start to make comparisons between model
 data, such as bottom-up inventories, and our observations. This analysis
 is based around a <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object which can be created to link
@@ -524,7 +514,9 @@ the <code class="docutils literal notranslate"><span class="pre">ModelScenario.p
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span><span class="o">.</span><span class="n">plot_timeseries</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>You can also set up your own searches and add this data directly.</p>
+<p>You can also set up your own searches and add this data directly.
+One benefit of this interface is to reduce searching the database if the
+same data needs to be used for multiple different scenarios.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_obs_surface</span><span class="p">,</span> <span class="n">get_footprint</span><span class="p">,</span> <span class="n">get_flux</span><span class="p">,</span> <span class="n">get_bc</span>
 
 <span class="c1"># Extract obs results from object store</span>
@@ -559,17 +551,18 @@ the <code class="docutils literal notranslate"><span class="pre">ModelScenario.p
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario_direct</span> <span class="o">=</span> <span class="n">ModelScenario</span><span class="p">(</span><span class="n">obs</span><span class="o">=</span><span class="n">obs_results</span><span class="p">,</span> <span class="n">footprint</span><span class="o">=</span><span class="n">footprint_results</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux_results</span><span class="p">,</span> <span class="n">bc</span><span class="o">=</span><span class="n">bc_results</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><em>You can create your own input objects directly and add these in the
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can create your own input objects directly and add these in the
 same way. This allows you to bypass the object store for experimental
-examples. At the moment these inputs need to be ``ObsData``,
-``FootprintData``, ``FluxData`` or ``BoundaryConditionsData`` objects
-(can be created using classes from openghg.dataobjects) but simpler
-inputs will be made available</em>.</p>
-<p>One benefit of this interface is to reduce searching the database if the
-same data needs to be used for multiple different scenarios.</p>
+examples. At the moment these inputs need to be <code class="docutils literal notranslate"><span class="pre">ObsData</span></code>,
+<code class="docutils literal notranslate"><span class="pre">FootprintData</span></code>, <code class="docutils literal notranslate"><span class="pre">FluxData</span></code> or <code class="docutils literal notranslate"><span class="pre">BoundaryConditionsData</span></code> objects,
+which can be created using classes from <code class="docutils literal notranslate"><span class="pre">openghg.dataobjects</span></code>.
+Simpler inputs will be made available.</p>
+</div>
 </section>
 <section id="comparing-data-sources">
-<h2>3. Comparing data sources<a class="headerlink" href="#comparing-data-sources" title="Permalink to this heading">#</a></h2>
+<h2>3. Comparing data sources<a class="headerlink" href="#comparing-data-sources" title="Link to this heading">#</a></h2>
 <p>Once your <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> has been created you can then start to use
 the linked data to compare outputs. For example we may want to calculate
 modelled observations at our site based on our linked footprint and
@@ -635,7 +628,7 @@ time and stacked to create a total output:</p>
 <p><em>Plotting functions to be added for 2D / 3D data</em></p>
 </section>
 <section id="cleanup">
-<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
+<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
@@ -694,7 +687,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">0. Using the tutorial object store</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">Using the tutorial object store</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loading-data-sources-into-the-object-store">1. Loading data sources into the object store</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-model-scenario">2. Creating a model scenario</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparing-data-sources">3. Comparing data sources</a></li>

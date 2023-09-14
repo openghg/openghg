@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Developer API &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Developer API &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/index_devapi';</script>
     <script src="../_static/custom.js"></script>
@@ -394,7 +394,7 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="developer-api">
-<h1>Developer API<a class="headerlink" href="#developer-api" title="Permalink to this heading">#</a></h1>
+<h1>Developer API<a class="headerlink" href="#developer-api" title="Link to this heading">#</a></h1>
 <p>The functions and methods documented in this section are the internal workings of the OpenGHG library. They are subject to change, we’ll add
 deprecation warnings to functions if we’re going to phase them out in the next few releases.</p>
 <div class="admonition warning">
@@ -402,7 +402,7 @@ deprecation warnings to functions if we’re going to phase them out in the next
 <p>Normal users should not use any of the functions shown here directly as they may be removed or their functionality may change.</p>
 </div>
 <section id="cloud">
-<h2>Cloud<a class="headerlink" href="#cloud" title="Permalink to this heading">#</a></h2>
+<h2>Cloud<a class="headerlink" href="#cloud" title="Link to this heading">#</a></h2>
 <p>Handles the packaging of data and the calling of serverless functions for the cloud platform.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -418,7 +418,7 @@ deprecation warnings to functions if we’re going to phase them out in the next
 </div>
 </section>
 <section id="dataclasses">
-<h2>Dataclasses<a class="headerlink" href="#dataclasses" title="Permalink to this heading">#</a></h2>
+<h2>Dataclasses<a class="headerlink" href="#dataclasses" title="Link to this heading">#</a></h2>
 <p>These dataclasses are used to return data and metadata from the object store. Some of them also contain helper functions to quickly plot data,
 modify metadata and delete data in the object store.</p>
 <div class="toctree-wrapper compound">
@@ -437,7 +437,7 @@ modify metadata and delete data in the object store.</p>
 </div>
 </section>
 <section id="object-store">
-<h2>Object Store<a class="headerlink" href="#object-store" title="Permalink to this heading">#</a></h2>
+<h2>Object Store<a class="headerlink" href="#object-store" title="Link to this heading">#</a></h2>
 <p>These functions handle the storage of data in the object store, in JSON or binary format. Each object and piece of data in the
 object store is stored at a specific <code class="docutils literal notranslate"><span class="pre">key</span></code>, which can be thought of as the address of the data. The data is stored
 in a <code class="docutils literal notranslate"><span class="pre">bucket</span></code> which in the cloud is a section of the OpenGHG object store. Locally a <code class="docutils literal notranslate"><span class="pre">bucket</span></code> is just a normal
@@ -452,7 +452,7 @@ directory in the user’s filesystem specified by the path given in the configur
 </div>
 </section>
 <section id="retrieval-functions">
-<h2>Retrieval functions<a class="headerlink" href="#retrieval-functions" title="Permalink to this heading">#</a></h2>
+<h2>Retrieval functions<a class="headerlink" href="#retrieval-functions" title="Link to this heading">#</a></h2>
 <p>These handle the retrieval of data from the object store.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -466,9 +466,9 @@ directory in the user’s filesystem specified by the path given in the configur
 </div>
 </section>
 <section id="standardisation">
-<h2>Standardisation<a class="headerlink" href="#standardisation" title="Permalink to this heading">#</a></h2>
+<h2>Standardisation<a class="headerlink" href="#standardisation" title="Link to this heading">#</a></h2>
 <section id="surface-measurements">
-<h3>Surface measurements<a class="headerlink" href="#surface-measurements" title="Permalink to this heading">#</a></h3>
+<h3>Surface measurements<a class="headerlink" href="#surface-measurements" title="Link to this heading">#</a></h3>
 <p>These functions take surface measurement data and standardise it for storage in the object store. They ensure the correct metadata and attributes
 are recorded with the data, and that the data is <a class="reference external" href="https://cfconventions.org/">CF compliant</a>. They are called by the <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class.</p>
 <div class="toctree-wrapper compound">
@@ -484,7 +484,7 @@ are recorded with the data, and that the data is <a class="reference external" h
 </div>
 </section>
 <section id="metadata">
-<h3>Metadata<a class="headerlink" href="#metadata" title="Permalink to this heading">#</a></h3>
+<h3>Metadata<a class="headerlink" href="#metadata" title="Link to this heading">#</a></h3>
 <p>These handle the assignment and checking of metadata.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -499,7 +499,7 @@ are recorded with the data, and that the data is <a class="reference external" h
 </section>
 </section>
 <section id="storage">
-<h2>Storage<a class="headerlink" href="#storage" title="Permalink to this heading">#</a></h2>
+<h2>Storage<a class="headerlink" href="#storage" title="Link to this heading">#</a></h2>
 <p>These functions and classes handle the lower level storage and retrieval of data from the object store.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -515,7 +515,7 @@ are recorded with the data, and that the data is <a class="reference external" h
 </div>
 </section>
 <section id="types">
-<h2>Types<a class="headerlink" href="#types" title="Permalink to this heading">#</a></h2>
+<h2>Types<a class="headerlink" href="#types" title="Link to this heading">#</a></h2>
 <p>Some customised errors and types for type hinting and keeping <code class="docutils literal notranslate"><span class="pre">mypy</span></code> happy.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -528,7 +528,7 @@ are recorded with the data, and that the data is <a class="reference external" h
 </div>
 </section>
 <section id="utility-functions">
-<h2>Utility functions<a class="headerlink" href="#utility-functions" title="Permalink to this heading">#</a></h2>
+<h2>Utility functions<a class="headerlink" href="#utility-functions" title="Link to this heading">#</a></h2>
 <p>This module contains all the helper functions used throughout OpenGHG.</p>
 <div class="toctree-wrapper compound">
 <ul>

@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Installation &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/documentation_options.js?v=55f4e601"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="_static/togglebutton.js"></script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'install';</script>
     <script src="_static/custom.js"></script>
@@ -357,11 +357,11 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h1>
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
 <p>The easiest way to install OpenGHG is using pip, first ensure you have a recent version of
 Python installed.</p>
 <section id="checking-your-python-installation">
-<h2>Checking your Python installation<a class="headerlink" href="#checking-your-python-installation" title="Permalink to this heading">#</a></h2>
+<h2>Checking your Python installation<a class="headerlink" href="#checking-your-python-installation" title="Link to this heading">#</a></h2>
 <p>OpenGHG is developed and <a class="reference external" href="https://github.com/openghg/openghg/actions">tested on Linux and MacOS</a>,
 support for Windows is planned.</p>
 <p>To install OpenGHG, you first need to install Python &gt;= 3.8. To check
@@ -379,11 +379,11 @@ If the version number is <code class="docutils literal notranslate"><span class=
 <a class="reference external" href="https://docs.brew.sh/Homebrew-and-Python">Homebrew on MacOS</a>. An alternative for both platforms is <a class="reference external" href="https://anaconda.org">anaconda</a>.</p>
 </section>
 <section id="id1">
-<h2>Installation<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
+<h2>Installation<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
 <p>We highly recommend creating a separate virtual environment for <code class="docutils literal notranslate"><span class="pre">openghg</span></code>. This ensures the correct versions
 of libraries can be installed without making changes to versions of libraries needed for other projects / programs.</p>
 <section id="pip">
-<h3>pip<a class="headerlink" href="#pip" title="Permalink to this heading">#</a></h3>
+<h3>pip<a class="headerlink" href="#pip" title="Link to this heading">#</a></h3>
 <p>First create a virtual environment</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>/path/to/env/openghg_env
 <span class="c1"># Activate the environment</span>
@@ -397,7 +397,7 @@ of libraries can be installed without making changes to versions of libraries ne
 </div>
 </section>
 <section id="conda">
-<h3>conda<a class="headerlink" href="#conda" title="Permalink to this heading">#</a></h3>
+<h3>conda<a class="headerlink" href="#conda" title="Link to this heading">#</a></h3>
 <p>First create and activate a conda environment</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>openghg_env
 conda<span class="w"> </span>activate<span class="w"> </span>openghg_env
@@ -410,12 +410,12 @@ conda<span class="w"> </span>activate<span class="w"> </span>openghg_env
 </section>
 </section>
 <section id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">#</a></h2>
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">#</a></h2>
 <p>OpenGHG needs to know where to create the object store it uses to store data, it does this by reading a configuration file in your home
 directory. As part of the setup process we need to create this configuration file using either the <a class="reference internal" href="api/devapi_util.html#openghg.util.create_config" title="openghg.util.create_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openghg.util.create_config</span></code></a> function
 or the command line interface.</p>
 <section id="python">
-<h3>Python<a class="headerlink" href="#python" title="Permalink to this heading">#</a></h3>
+<h3>Python<a class="headerlink" href="#python" title="Link to this heading">#</a></h3>
 <p>You can use the <em class="xref py py-obj">create_config</em> function to help you make a config file. First import</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">create_config</span>
 
@@ -433,7 +433,7 @@ or the command line interface.</p>
 <p>Here I left the path to the object store blank to use the default path in my home directory.</p>
 </section>
 <section id="command-line">
-<h3>Command line<a class="headerlink" href="#command-line" title="Permalink to this heading">#</a></h3>
+<h3>Command line<a class="headerlink" href="#command-line" title="Link to this heading">#</a></h3>
 <p>You can also use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">openghg</span></code> command line tool to get the configuration file setup.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>openghg<span class="w"> </span>--quickstart
 
@@ -456,7 +456,7 @@ you can find it at <code class="docutils literal notranslate"><span class="pre">
 </div>
 </section>
 <section id="deprecation-of-openghg-path">
-<h3>Deprecation of <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code><a class="headerlink" href="#deprecation-of-openghg-path" title="Permalink to this heading">#</a></h3>
+<h3>Deprecation of <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code><a class="headerlink" href="#deprecation-of-openghg-path" title="Link to this heading">#</a></h3>
 <p>If you’ve previously used OpenGHG and worked through our tutorials you might have encountered
 the need to set the <code class="docutils literal notranslate"><span class="pre">OPENGHG_PATH</span></code> environment variable. Now that we’ve moved to a configuration
 file this is not longer used. If you previously set a custom path using the variable please update
@@ -464,7 +464,7 @@ the configuration file as below.</p>
 </section>
 </section>
 <section id="developers">
-<h2>Developers<a class="headerlink" href="#developers" title="Permalink to this heading">#</a></h2>
+<h2>Developers<a class="headerlink" href="#developers" title="Link to this heading">#</a></h2>
 <p>For developers please see the <a class="reference internal" href="development/python_devel.html"><span class="doc">Getting setup</span></a> documentation.</p>
 </section>
 </section>

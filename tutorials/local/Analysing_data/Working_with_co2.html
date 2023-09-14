@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Working with carbon dioxide &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Working with carbon dioxide &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Analysing_data/Working_with_co2';</script>
@@ -336,6 +336,9 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+</ul>
 </div>
 </nav></div>
     </div>
@@ -393,30 +396,33 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="working-with-carbon-dioxide">
-<h1>Working with carbon dioxide<a class="headerlink" href="#working-with-carbon-dioxide" title="Permalink to this heading">#</a></h1>
-<p>For carbon dioxide data, the natural diurnal cycle must be taken into
+<h1>Working with carbon dioxide<a class="headerlink" href="#working-with-carbon-dioxide" title="Link to this heading">#</a></h1>
+<p>In this tutorial, we will compare carbon dioxide (<span class="math notranslate nohighlight">\(\mathrm{CO_2}\)</span>)
+emissions with flux data.
+For carbon dioxide data, the natural diurnal cycle must be taken into
 account when comparing any expected measurements against our
 observations.</p>
-<p>In order to compare our measurements to modelled data for carbon dioxide
-(<span class="math notranslate nohighlight">\(\mathrm{CO_2}\)</span>), we need high frequency inputs for both the
+<p>In order to compare our measurements to modelled data for carbon dioxide,
+we need high frequency inputs for both the
 footprint and flux files. For NAME footprints these should contain an
 additional “H_back” dimension to store hourly footprints overall an
 initial time period for each release time. For any natural flux data to
 compare against, this should have a frequency of less than 24 hours.</p>
-<p><em>Operations around :math:`CO_2` and high resolution data may run slow at
-the moment, the plan is to profile this so we can optimise performance.</em></p>
-<blockquote>
-<div><p><strong>NOTE:</strong> Plots created within this tutorial may not show up on the
-online documentation version of this notebook.</p>
-</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Operations involving <span class="math notranslate nohighlight">\(\mathrm{CO}_2\)</span> and high resolution data may
+run slowly at the moment.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Plots created within this tutorial may not show up on the
+online documentation.</p>
+</div>
 <section id="using-the-tutorial-object-store">
-<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Permalink to this heading">#</a></h2>
-<p>To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we’ll call the tutorial store. To do this we use the
-<code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
-<code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
-affect your use of OpenGHG outside of this tutorial.</p>
+<h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
+<p>As in the <a class="reference internal" href="../Adding_new_data/Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorial</span></a>,
+we will use the tutorial object store to avoid cluttering your personal
+object store.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
 <span class="n">use_tutorial_store</span><span class="p">()</span>
@@ -424,35 +430,26 @@ affect your use of OpenGHG outside of this tutorial.</p>
 </div>
 </section>
 <section id="loading-data-sources-into-the-object-store">
-<h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Permalink to this heading">#</a></h2>
-<p>For this tutorial we will again use a helper function from the
-<code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule to add some data to your local object
-store. As we’re going to be comparing CO2 emissions with flux data here,
-we’ll add surface, flux and footprint data to the object store. Don’t
-worry if you get a message telling you the file has already been added,
-this might happen if you’ve been through one of the other tutorials
-previously.</p>
+<h2>1. Loading data sources into the object store<a class="headerlink" href="#loading-data-sources-into-the-object-store" title="Link to this heading">#</a></h2>
+<p>We will use a helper function from the <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code> submodule
+to add surface, flux, and footprint data to the object store.</p>
+<p>You might get a message telling you that a file has already been added
+if you’ve been through one of the other tutorials previously.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">populate_flux_data</span><span class="p">,</span> <span class="n">populate_surface_data</span><span class="p">,</span> <span class="n">populate_footprint_data</span>
 </pre></div>
 </div>
-<p>First we’ll add some surface measurment data</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_surface_data</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>Next we’ll add some flux data.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_flux_data</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>And finally some footprint data</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">populate_footprint_data</span><span class="p">()</span>
+
+<span class="n">populate_flux_data</span><span class="p">()</span>
+
+<span class="n">populate_footprint_data</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="creating-a-model-scenario">
-<h2>2. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Permalink to this heading">#</a></h2>
-<p>To link together our observations to our ancillary data we can create a
-<code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object, as shown in the previous tutorial
-<a class="reference external" href="3_Comparing_with_emissions.ipynb">3_Comparing_with_emissions.ipynb</a>,
+<h2>2. Creating a model scenario<a class="headerlink" href="#creating-a-model-scenario" title="Link to this heading">#</a></h2>
+<p>To link our observations to our ancillary data we can create a
+<code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object, as shown in the <a class="reference internal" href="Comparing_with_emissions.html#comparing-observations-to-emissions"><span class="std std-ref">previous tutorial</span></a>,
 using suitable keywords to grab the data from the object store.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.analyse</span> <span class="kn">import</span> <span class="n">ModelScenario</span>
 
@@ -488,7 +485,7 @@ this to have an associated species and for this to be labelled as “co2”:</p>
 </div>
 </section>
 <section id="comparing-data-sources">
-<h2>3. Comparing data sources<a class="headerlink" href="#comparing-data-sources" title="Permalink to this heading">#</a></h2>
+<h2>3. Comparing data sources<a class="headerlink" href="#comparing-data-sources" title="Link to this heading">#</a></h2>
 <p>Once the correct high frequency emissions and footprints have been
 linked for our carbon dioxide data, we can start to plot comparisons
 between the sources and our measurement data.</p>
@@ -497,7 +494,7 @@ between the sources and our measurement data.</p>
 </div>
 <p>As in the previous tutorial, multiple fluxes can be linked to your
 <code class="docutils literal notranslate"><span class="pre">ModelScenario</span></code> object if required. This can include additional high
-frequency (&lt;24 hourly) or low frequency flux data. In this case we have
+frequency (less than 24 hourly) or low frequency flux data. In this case we have
 added monthly “fossil fuel” emissions:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">source_fossil</span> <span class="o">=</span> <span class="s2">&quot;ff-edgar-bp&quot;</span>
 
@@ -518,7 +515,7 @@ in an appropriate way:</p>
 </div>
 </section>
 <section id="cleanup">
-<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
+<h2>4. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
@@ -577,7 +574,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">0. Using the tutorial object store</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">Using the tutorial object store</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loading-data-sources-into-the-object-store">1. Loading data sources into the object store</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-model-scenario">2. Creating a model scenario</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparing-data-sources">3. Comparing data sources</a></li>

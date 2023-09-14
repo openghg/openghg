@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Getting setup &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Getting setup &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'development/python_devel';</script>
     <script src="../_static/custom.js"></script>
@@ -377,15 +377,15 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="getting-setup">
-<h1>Getting setup<a class="headerlink" href="#getting-setup" title="Permalink to this heading">#</a></h1>
+<h1>Getting setup<a class="headerlink" href="#getting-setup" title="Link to this heading">#</a></h1>
 <p>Here we’ll cover getting your development environment setup for contributing to OpenGHG.
 The source code for OpenGHG is available on <a class="reference external" href="https://github.com/openghg/openghg">GitHub</a>.</p>
 <section id="setting-up-your-computer">
-<h2>Setting up your computer<a class="headerlink" href="#setting-up-your-computer" title="Permalink to this heading">#</a></h2>
+<h2>Setting up your computer<a class="headerlink" href="#setting-up-your-computer" title="Link to this heading">#</a></h2>
 <p>You’ll need <a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">git</a> and Python &gt;= 3.8, so please make sure you have both installed before continuing
 further.</p>
 <section id="clone-openghg">
-<h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Permalink to this heading">#</a></h3>
+<h3>Clone OpenGHG<a class="headerlink" href="#clone-openghg" title="Link to this heading">#</a></h3>
 <p>First we’ll clone the repository and make sure we’re on the <code class="docutils literal notranslate"><span class="pre">devel</span></code> branch. This makes sure we’re on the most up to date version of OpenGHG.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/openghg/openghg.git
 <span class="nb">cd</span><span class="w"> </span>openghg
@@ -395,13 +395,13 @@ git<span class="w"> </span>checkout<span class="w"> </span>devel
 <p>Next we’ll get a virtual environment setup using either <code class="docutils literal notranslate"><span class="pre">pip</span></code> or <code class="docutils literal notranslate"><span class="pre">conda</span></code>.</p>
 </section>
 <section id="environments">
-<h3>Environments<a class="headerlink" href="#environments" title="Permalink to this heading">#</a></h3>
+<h3>Environments<a class="headerlink" href="#environments" title="Link to this heading">#</a></h3>
 <p>Here we cover the creation of an environment and the installation of OpenGHG into it. Installation here means adding OpenGHG to the environment.
 We’ll install it in developer mode so that any changes you make to the code will automatically be available when you run commands. Similarly, if you
 run a <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code> on the <code class="docutils literal notranslate"><span class="pre">devel</span></code> branch all changes made will be available to you straight away, without having to reinstall or update OpenGHG within
 the environment.</p>
 <section id="pip">
-<h4><code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#pip" title="Permalink to this heading">#</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#pip" title="Link to this heading">#</a></h4>
 <p>It is recommended that you develop OpenGHG in a Python
 <a class="reference external" href="https://docs.python.org/3/tutorial/venv.html">virtual environment</a>.
 Here we’ll create a new folder called <code class="docutils literal notranslate"><span class="pre">envs</span></code> in our home directory and create
@@ -435,7 +435,7 @@ interfering with other Python installations.</p>
 </div>
 </section>
 <section id="conda">
-<h4><code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#conda" title="Permalink to this heading">#</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#conda" title="Link to this heading">#</a></h4>
 <p>Making sure you’re in the <code class="docutils literal notranslate"><span class="pre">openghg</span></code> repository folder run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yaml
 </pre></div>
@@ -459,7 +459,7 @@ interfering with other Python installations.</p>
 </section>
 </section>
 <section id="run-tests">
-<h3>Run tests<a class="headerlink" href="#run-tests" title="Permalink to this heading">#</a></h3>
+<h3>Run tests<a class="headerlink" href="#run-tests" title="Link to this heading">#</a></h3>
 <p>To ensure everything is working on your system running the tests is a good idea. To do this run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>-v<span class="w"> </span>tests
 </pre></div>
@@ -467,7 +467,7 @@ interfering with other Python installations.</p>
 </section>
 </section>
 <section id="coding-style">
-<h2>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this heading">#</a></h2>
+<h2>Coding Style<a class="headerlink" href="#coding-style" title="Link to this heading">#</a></h2>
 <p>OpenGHG is written in Python 3 (&gt;= 3.8). We aim as much as possible to follow a
 <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8</a> python coding style and
 recommend that use a linter such as <a class="reference external" href="https://flake8.pycqa.org/en/latest/">flake8</a>.</p>
@@ -476,7 +476,7 @@ systems and machines - some of which don’t have any graphic libraries,
 so please be careful when adding a dependency.</p>
 <p>With this in mind, we use the following coding conventions:</p>
 <section id="naming">
-<h3>Naming<a class="headerlink" href="#naming" title="Permalink to this heading">#</a></h3>
+<h3>Naming<a class="headerlink" href="#naming" title="Link to this heading">#</a></h3>
 <p>We follow a Python style naming convention.</p>
 <ul class="simple">
 <li><p>Packages: lowercase, singleword</p></li>
@@ -491,7 +491,7 @@ underscore. This prevents them from being prominantly visible in Python’s
 help and tab completion.</p>
 </section>
 <section id="modules">
-<h3>Modules<a class="headerlink" href="#modules" title="Permalink to this heading">#</a></h3>
+<h3>Modules<a class="headerlink" href="#modules" title="Link to this heading">#</a></h3>
 <p>OpenGHG consists of the main module, e.g. <code class="docutils literal notranslate"><span class="pre">openghg</span></code>, plus
 a <code class="docutils literal notranslate"><span class="pre">openghg.submodule</span></code> module.</p>
 <p>To make OpenGHG easy for new developers
@@ -522,7 +522,7 @@ expose further implementation detail can, of course, type an underscore to
 show the hidden names when searching.</p>
 </section>
 <section id="type-hinting">
-<h3>Type hinting<a class="headerlink" href="#type-hinting" title="Permalink to this heading">#</a></h3>
+<h3>Type hinting<a class="headerlink" href="#type-hinting" title="Link to this heading">#</a></h3>
 <p>Throughout the OpenGHG project we use type hinting which allows us to declare the type of the objects
 that are going to be passed to and returned from functions. This helps improve user understanding of the code
 and when used in conjunction with tools like <a class="reference external" href="https://mypy.readthedocs.io/en/stable/">mypy</a> can help
@@ -554,9 +554,9 @@ catch bugs.</p>
 </section>
 </section>
 <section id="workflow">
-<h2>Workflow<a class="headerlink" href="#workflow" title="Permalink to this heading">#</a></h2>
+<h2>Workflow<a class="headerlink" href="#workflow" title="Link to this heading">#</a></h2>
 <section id="feature-branches">
-<h3>Feature branches<a class="headerlink" href="#feature-branches" title="Permalink to this heading">#</a></h3>
+<h3>Feature branches<a class="headerlink" href="#feature-branches" title="Link to this heading">#</a></h3>
 <p>First make sure that you are on the development branch of OpenGHG:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>devel
 </pre></div>
@@ -568,7 +568,7 @@ catch bugs.</p>
 </div>
 </section>
 <section id="pre-commit">
-<h3>Pre-commit<a class="headerlink" href="#pre-commit" title="Permalink to this heading">#</a></h3>
+<h3>Pre-commit<a class="headerlink" href="#pre-commit" title="Link to this heading">#</a></h3>
 <p>This project uses <a class="reference external" href="https://pre-commit.com/">pre-commit</a> to ensure code is linted and formatted using tools such as flake8,
 black and others. This ensures errors are caught before the code is checked in the CI pipeline.</p>
 <p>To install the hook</p>
@@ -579,7 +579,7 @@ black and others. This ensures errors are caught before the code is checked in t
 </section>
 </section>
 <section id="testing">
-<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this heading">#</a></h2>
+<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading">#</a></h2>
 <p>When working on your feature it is important to write tests to ensure that it
 does what is expected and doesn’t break any existing functionality. All code added to the
 project must be covered by tests and tests should be placed inside the <code class="docutils literal notranslate"><span class="pre">tests</span></code> directory, creating an appropriately
@@ -604,7 +604,7 @@ or end with <em>test</em>, e.g.:</p>
 </div>
 <p>We use the convention of <code class="docutils literal notranslate"><span class="pre">test_*</span></code> when naming files and functions.</p>
 <section id="running-tests">
-<h3>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this heading">#</a></h3>
+<h3>Running tests<a class="headerlink" href="#running-tests" title="Link to this heading">#</a></h3>
 <p>To run the full test suite, simply type:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>tests/
 </pre></div>
@@ -618,7 +618,7 @@ or end with <em>test</em>, e.g.:</p>
 <a class="reference external" href="https://docs.pytest.org/en/stable/contents.html">pytest documentation</a>.</p>
 </section>
 <section id="continuous-integration-and-delivery">
-<h3>Continuous integration and delivery<a class="headerlink" href="#continuous-integration-and-delivery" title="Permalink to this heading">#</a></h3>
+<h3>Continuous integration and delivery<a class="headerlink" href="#continuous-integration-and-delivery" title="Link to this heading">#</a></h3>
 <p>We use GitHub Actions to run a full continuous integration (CI)
 on all pull requests to devel and
 master, and all pushes to devel and master. We will not merge a pull
@@ -626,7 +626,7 @@ request until all tests pass. We only accept pull requests to devel.</p>
 </section>
 </section>
 <section id="documentation">
-<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">#</a></h2>
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">#</a></h2>
 <p>OpenGHG is fully documented using a combination of hand-written files
 (in the <code class="docutils literal notranslate"><span class="pre">doc</span></code> folder) and auto-generated api documentation created from
 Google <a class="reference external" href="https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html">style docstrings</a>.
@@ -646,7 +646,7 @@ can be <a class="reference external" href="https://pandoc.org/installing.html">f
 <p>When finished, point your browser to <code class="docutils literal notranslate"><span class="pre">build/html/index.html</span></code>.</p>
 </section>
 <section id="committing">
-<h2>Committing<a class="headerlink" href="#committing" title="Permalink to this heading">#</a></h2>
+<h2>Committing<a class="headerlink" href="#committing" title="Link to this heading">#</a></h2>
 <p>If you create new tests, please make sure that they pass locally before
 commiting. When happy, commit your changes, e.g.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>commit<span class="w"> </span>openghg/_new_feature.py<span class="w"> </span>tests/test_feature<span class="w"> </span><span class="se">\</span>
@@ -676,7 +676,7 @@ For information, see the documentation
 <a class="reference external" href="https://help.github.com/articles/about-pull-requests">here</a>.</p>
 </section>
 <section id="creating-a-release">
-<h2>Creating a release<a class="headerlink" href="#creating-a-release" title="Permalink to this heading">#</a></h2>
+<h2>Creating a release<a class="headerlink" href="#creating-a-release" title="Link to this heading">#</a></h2>
 <p>The creation of the packages required by PyPI and conda is handled in the GitHub actions workflow files
 under <code class="docutils literal notranslate"><span class="pre">.github/workflows/workflow.yaml</span></code>. The package build and release workflow will only be triggered by a
 tagged commit. Before we get to this step we need to make sure everything is setup to do a release.</p>

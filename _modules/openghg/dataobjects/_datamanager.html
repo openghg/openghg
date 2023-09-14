@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.dataobjects._datamanager &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>openghg.dataobjects._datamanager &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -28,21 +27,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/dataobjects/_datamanager';</script>
     <script src="../../../_static/custom.js"></script>
@@ -367,8 +367,12 @@ document.write(`
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
 
 
-<div class="viewcode-block" id="DataManager"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager">[docs]</a><span class="k">class</span> <span class="nc">DataManager</span><span class="p">:</span>
-<div class="viewcode-block" id="DataManager.__init__"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">store</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="DataManager">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager">[docs]</a>
+<span class="k">class</span> <span class="nc">DataManager</span><span class="p">:</span>
+<div class="viewcode-block" id="DataManager.__init__">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">store</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="c1"># We don&#39;t want the object store in this metadata as we want it to be the</span>
         <span class="c1"># unadulterated metadata to properly reflect what&#39;s stored.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
@@ -377,8 +381,12 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_backup</span><span class="p">:</span> <span class="n">DefaultDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_latest</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span></div>
 
-<div class="viewcode-block" id="DataManager.__str__"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataManager.__str__">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.__str__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
@@ -432,7 +440,9 @@ document.write(`
 
         <span class="k">return</span> <span class="n">data_types</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
-<div class="viewcode-block" id="DataManager.refresh"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="DataManager.refresh">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.refresh">[docs]</a>
+    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Force refresh the internal metadata store with data from the object store.</span>
 
 <span class="sd">        Returns:</span>
@@ -452,7 +462,10 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataManager.restore"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.restore">[docs]</a>    <span class="k">def</span> <span class="nf">restore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataManager.restore">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.restore">[docs]</a>
+    <span class="k">def</span> <span class="nf">restore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore a backed-up version of a Datasource&#39;s metadata.</span>
 
 <span class="sd">        Args:</span>
@@ -483,7 +496,10 @@ document.write(`
             <span class="n">d</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">backup</span>
             <span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataManager.view_backup"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.view_backup">[docs]</a>    <span class="k">def</span> <span class="nf">view_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataManager.view_backup">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.view_backup">[docs]</a>
+    <span class="k">def</span> <span class="nf">view_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;View backed-up metadata for all Datasources</span>
 <span class="sd">        or a single Datasource if a UUID is passed in.</span>
 
@@ -501,7 +517,10 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backup</span></div>
 
-<div class="viewcode-block" id="DataManager.update_metadata"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.update_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">update_metadata</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DataManager.update_metadata">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.update_metadata">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_metadata</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">uuid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
         <span class="n">to_update</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -590,7 +609,10 @@ document.write(`
                     <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="n">internal_copy</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modified metadata for </span><span class="si">{</span><span class="n">u</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataManager.delete_datasource"><a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.delete_datasource">[docs]</a>    <span class="k">def</span> <span class="nf">delete_datasource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataManager.delete_datasource">
+<a class="viewcode-back" href="../../../api/devapi_dataobjects.html#openghg.dataobjects.DataManager.delete_datasource">[docs]</a>
+    <span class="k">def</span> <span class="nf">delete_datasource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete a Datasource in the object store.</span>
 <span class="sd">        At the moment we only support deleting the complete Datasource.</span>
 
@@ -622,7 +644,9 @@ document.write(`
                 <span class="c1"># Remove from the list of Datasources the object knows about</span>
                 <span class="n">dc</span><span class="o">.</span><span class="n">remove_datasource</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uid</span><span class="p">)</span>
 
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted Datasource with UUID </span><span class="si">{</span><span class="n">uid</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div></div>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted Datasource with UUID </span><span class="si">{</span><span class="n">uid</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
                 </article>

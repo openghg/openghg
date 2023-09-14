@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.util._user &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>openghg.util._user &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -28,21 +27,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/openghg/util/_user';</script>
     <script src="../../../_static/custom.js"></script>
@@ -370,7 +370,9 @@ document.write(`
 
 
 <span class="c1"># @lru_cache</span>
-<div class="viewcode-block" id="get_user_id"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.get_user_id">[docs]</a><span class="k">def</span> <span class="nf">get_user_id</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="get_user_id">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.get_user_id">[docs]</a>
+<span class="k">def</span> <span class="nf">get_user_id</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the user&#39;s ID</span>
 
 <span class="sd">    Returns:</span>
@@ -379,6 +381,7 @@ document.write(`
     <span class="n">config</span> <span class="o">=</span> <span class="n">read_local_config</span><span class="p">()</span>
     <span class="n">uid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_id&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">uid</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">get_default_objectstore_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
@@ -391,7 +394,9 @@ document.write(`
 
 
 <span class="c1"># @lru_cache</span>
-<div class="viewcode-block" id="get_user_config_path"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.get_user_config_path">[docs]</a><span class="k">def</span> <span class="nf">get_user_config_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<div class="viewcode-block" id="get_user_config_path">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.get_user_config_path">[docs]</a>
+<span class="k">def</span> <span class="nf">get_user_config_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns path to user config file.</span>
 
 <span class="sd">    This file is created in the user&#39;s home directory</span>
@@ -417,7 +422,10 @@ document.write(`
     <span class="k">return</span> <span class="n">config_path</span></div>
 
 
-<div class="viewcode-block" id="create_config"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.create_config">[docs]</a><span class="k">def</span> <span class="nf">create_config</span><span class="p">(</span><span class="n">silent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+<div class="viewcode-block" id="create_config">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.create_config">[docs]</a>
+<span class="k">def</span> <span class="nf">create_config</span><span class="p">(</span><span class="n">silent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a user config.</span>
 
 <span class="sd">    Args:</span>
@@ -536,6 +544,7 @@ document.write(`
     <span class="n">user_config_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">toml</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config</span><span class="p">))</span></div>
 
 
+
 <span class="k">def</span> <span class="nf">_user_multstore_input</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ask the user to input data about shared object stores</span>
 
@@ -587,7 +596,9 @@ document.write(`
 
 
 <span class="c1"># @lru_cache</span>
-<div class="viewcode-block" id="read_local_config"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.read_local_config">[docs]</a><span class="k">def</span> <span class="nf">read_local_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="read_local_config">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.read_local_config">[docs]</a>
+<span class="k">def</span> <span class="nf">read_local_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads the local config file.</span>
 
 <span class="sd">    Returns:</span>
@@ -617,7 +628,10 @@ document.write(`
     <span class="k">return</span> <span class="n">config</span></div>
 
 
-<div class="viewcode-block" id="check_config"><a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.check_config">[docs]</a><span class="k">def</span> <span class="nf">check_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+<div class="viewcode-block" id="check_config">
+<a class="viewcode-back" href="../../../api/devapi_util.html#openghg.util.check_config">[docs]</a>
+<span class="k">def</span> <span class="nf">check_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check that the user config file is valid and the paths</span>
 <span class="sd">    given in it exist. Raises ConfigFileError if problems found.</span>
 
@@ -657,6 +671,7 @@ document.write(`
         <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The path for object store </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2"> does not exist but will be created.&quot;</span><span class="p">)</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_migrate_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Adding observation data &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Adding observation data &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_new_data/Adding_observation_data';</script>
     <script src="../../../_static/custom.js"></script>
@@ -335,6 +335,9 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+</ul>
 </div>
 </nav></div>
     </div>
@@ -392,12 +395,12 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="adding-observation-data">
-<span id="adding-obs-data"></span><h1>Adding observation data<a class="headerlink" href="#adding-observation-data" title="Permalink to this heading">#</a></h1>
+<span id="adding-obs-data"></span><h1>Adding observation data<a class="headerlink" href="#adding-observation-data" title="Link to this heading">#</a></h1>
 <p>This tutorial demonstrates how OpenGHG can be used to process new
 measurement data, search the data present and to retrieve this for
 analysis and visualisation.</p>
 <section id="using-the-tutorial-object-store">
-<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Permalink to this heading">#</a></h2>
+<span id="id1"></span><h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
 <p>To avoid adding the example data we use in this tutorial to your normal
 object store, we need to tell OpenGHG to use a separate sandboxed object
 store that we’ll call the tutorial store. To do this we use the
@@ -411,7 +414,7 @@ affect your use of OpenGHG outside of this tutorial.</p>
 </div>
 </section>
 <section id="adding-and-standardising-data">
-<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Permalink to this heading">#</a></h2>
+<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Link to this heading">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Outside of this tutorial, if you have write access to multiple object stores you
@@ -419,39 +422,57 @@ will need to pass the name of the object store you wish to write to to
 the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument of the standardise functions.</p>
 </div>
 <section id="source-formats">
-<h3>Source formats<a class="headerlink" href="#source-formats" title="Permalink to this heading">#</a></h3>
-<p>Within OpenGHG there are several source formats which can be processed and
-stored within the object store. This includes data from the AGAGE, DECC,
-NOAA, LondonGHG, BEAC2ON networks.</p>
-<p>When uploading a new data file, the data type must be specified
-alongside some additional details so OpenGHG can recognise the format
-and the correct standardisation can occur. The details needed will vary
-by the type of data being uploaded but will often include the
-measurement reference (e.g. a site code) and the name of any network.</p>
-<p>For the full list of accepted observation inputs and source formats, there
-is a summary function which can be called:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_source_formats</span>
+<h3>Source formats<a class="headerlink" href="#source-formats" title="Link to this heading">#</a></h3>
+<p>OpenGHG can process and store several source formats in the object store,
+including data from the AGAGE, DECC, NOAA, LondonGHG, BEAC2ON networks.
+The process of adding data to the object store is called <em>standardisation</em>.</p>
+<p>To standardise a new data file, you must specify the <em>source format</em> and
+other details about the data.
+For the full list of accepted observation inputs and source formats, call
+the function <code class="docutils literal notranslate"><span class="pre">summary_source_formats</span></code>:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">summary_source_formats</span>
 
-<span class="n">summary</span> <span class="o">=</span> <span class="n">summary_source_formats</span><span class="p">()</span>
+<span class="gp">In [2]: </span><span class="n">summary</span> <span class="o">=</span> <span class="n">summary_source_formats</span><span class="p">()</span>
 
-<span class="c1">## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES</span>
-<span class="c1"># import pandas as pd; pd.set_option(&#39;display.max_rows&#39;, None)</span>
+<span class="go">## UNCOMMENT THIS CODE TO SHOW ALL ENTRIES</span>
+<span class="go"># import pandas as pd; pd.set_option(&#39;display.max_rows&#39;, None)</span>
+<span class="gp">In [3]: </span><span class="n">summary</span>
+<span class="gh">Out[3]: </span>
+<span class="go">     Source format Site code  ...                     Long name      Platform</span>
+<span class="go">0              BTT       BTT  ...                  BT Tower, UK  surface site</span>
+<span class="go">1             CRDS       RPB  ...        Ragged Point, Barbados  surface site</span>
+<span class="go">2             CRDS       HFD  ...                Heathfield, UK  surface site</span>
+<span class="go">3             CRDS       BSD  ...                  Bilsdale, UK  surface site</span>
+<span class="go">4             CRDS       TTA  ...               Angus Tower, UK  surface site</span>
+<span class="go">..             ...       ...  ...                           ...           ...</span>
+<span class="go">317           NOAA       YON  ...           Yonagunijima, Japan  surface site</span>
+<span class="go">318           NOAA       ZEP  ...  Zeppelin, Ny Alesund, Norway  surface site</span>
+<span class="go">319  THAMESBARRIER       TMB  ...            Thames Barrier, UK  surface site</span>
+<span class="go">320      CRANFIELD       TMB  ...            Thames Barrier, UK  surface site</span>
+<span class="go">321            NPL       NPL  ...  National Physical Laboratory  surface site</span>
 
-<span class="n">summary</span>
+<span class="go">[322 rows x 7 columns]</span>
 </pre></div>
 </div>
-<p>Note: there may be multiple source formats applicable for a give site. This
-is can be dependent on various factors including the instrument type
-used to measure the data e.g. for Tacolneston (“TAC”):</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">summary</span><span class="p">[</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Site code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;TAC&quot;</span><span class="p">]</span>
+<p>There may be multiple source formats for a given site.
+For instance, the Tacolneston site in the UK (site code “TAC”) has four entries:</p>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="n">summary</span><span class="p">[</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Site code&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;TAC&quot;</span><span class="p">]</span>
+<span class="gh">Out[4]: </span>
+<span class="go">    Source format Site code  ...              Long name      Platform</span>
+<span class="go">6            CRDS       TAC  ...  Tacolneston Tower, UK  surface site</span>
+<span class="go">33        GCWERKS       TAC  ...  Tacolneston Tower, UK  surface site</span>
+<span class="go">35        GCWERKS       TAC  ...  Tacolneston Tower, UK  surface site</span>
+<span class="go">279          NOAA       TAC  ...  Tacolneston Tower, UK  surface site</span>
+
+<span class="go">[4 rows x 7 columns]</span>
 </pre></div>
 </div>
 </section>
 <section id="decc-network">
-<h3>DECC network<a class="headerlink" href="#decc-network" title="Permalink to this heading">#</a></h3>
-<p>We will start by adding data to the object store from a surface site
-within the DECC network. Here we have accessed a subset of data from the
-Tacolneston site (site code “TAC”) in the UK.</p>
+<h3>DECC network<a class="headerlink" href="#decc-network" title="Link to this heading">#</a></h3>
+<p>We will start by adding data to the object store from Tacolneston, which is a <em>surface site</em>
+in the DECC network. (Data at surface sites is measured in-situ.)</p>
+<p>First we retrieve the raw data.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">data_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/tac_example.tar.gz&quot;</span>
@@ -459,34 +480,36 @@ Tacolneston site (site code “TAC”) in the UK.</p>
 <span class="n">tac_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">data_url</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>As this data is measured in-situ, this is classed as a surface site and
-we need to use the <code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class to interpret this data. We can
-pass our list of files to the <code class="docutils literal notranslate"><span class="pre">read_file</span></code> method associated within the
-<code class="docutils literal notranslate"><span class="pre">ObsSurface</span></code> class, also providing details on: - site code - <code class="docutils literal notranslate"><span class="pre">&quot;TAC&quot;</span></code>
-for Tacolneston - type of data we want to process, known as the data
-type - <code class="docutils literal notranslate"><span class="pre">&quot;CRDS&quot;</span></code> - network - <code class="docutils literal notranslate"><span class="pre">&quot;DECC&quot;</span></code></p>
-<p>This is shown below:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
+<p>Now we add this data to the object store using <code class="docutils literal notranslate"><span class="pre">standardise_surface</span></code>, passing the
+following arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">filepaths</span></code>: list of paths to <code class="docutils literal notranslate"><span class="pre">.dat</span></code> files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">site</span></code>:  <code class="docutils literal notranslate"><span class="pre">&quot;TAC&quot;</span></code>, the site code for Tacolneston</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source_format</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;CRDS&quot;</span></code>, the type of data we want to process</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">network</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;DECC&quot;</span></code></p></li>
+</ul>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [5]: </span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_surface</span>
 
-<span class="n">decc_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+<span class="gp">In [6]: </span><span class="n">decc_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">tac_data</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;CRDS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;TAC&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s2">&quot;DECC&quot;</span><span class="p">)</span>
+
+<span class="gp">In [7]: </span><span class="n">decc_results</span>
+<span class="gh">Out[7]: </span><span class="go">{&#39;processed&#39;: {&#39;tac.picarro.hourly.54m.dat&#39;: {&#39;ch4&#39;: {&#39;uuid&#39;: &#39;e2339fdf-c0d5-46b8-b5b9-3d682610e9fe&#39;, &#39;new&#39;: True}, &#39;co2&#39;: {&#39;uuid&#39;: &#39;1b4603e6-cac2-458c-b47e-e441864b29eb&#39;, &#39;new&#39;: True}},</span>
+<span class="go">&#39;tac.picarro.hourly.100m.dat&#39;: {&#39;ch4&#39;: {&#39;uuid&#39;: &#39;2e5935cc-07e3-4c0f-bd7c-8c6e4e2b13b7&#39;, &#39;new&#39;: True}, &#39;co2&#39;: {&#39;uuid&#39;: &#39;64c020b8-35dd-483f-b38c-99de83ea412d&#39;, &#39;new&#39;: True}},</span>
+<span class="go">&#39;tac.picarro.hourly.185m.dat&#39;: {&#39;ch4&#39;: {&#39;uuid&#39;: &#39;13172db7-7859-4f38-90cf-219c1fbe3b99&#39;, &#39;new&#39;: True}, &#39;co2&#39;: {&#39;uuid&#39;: &#39;c79a3473-9f50-47d8-83d8-66a62fd085f7&#39;, &#39;new&#39;: True}}}}</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">decc_results</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Here this extracts the data (and metadata) from the supplied files,
-standardises them and adds these to our created object store.</p>
-<p>The returned <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> will give us a dictionary of how the data
-has been stored. The data itself may have been split into different
-entries, each one stored with a unique ID (UUID). Each entry is known as
-a <em>Datasource</em> (see below for a note on Datasources). The
-<code class="docutils literal notranslate"><span class="pre">decc_results</span></code> output includes details of the processed data and tells
+<p>This extracts the data and metadata from the files,
+standardises them, and adds them to our object store.</p>
+<p>The returned <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> dictionary shows how the data
+has been stored: each file has been split into several entries, each with a unique ID (UUID).
+Each entry is known as a <em>Datasource</em> (see <a class="reference internal" href="#note-on-datasources"><span class="std std-ref">Note on Datasources</span></a>).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">decc_results</span></code> output includes details of the processed data and tells
 us that the data has been stored correctly. This will also tell us if
 any errors have been encountered when trying to access and standardise
 this data.</p>
 </section>
 <section id="multiple-stores">
-<h3>Multiple stores<a class="headerlink" href="#multiple-stores" title="Permalink to this heading">#</a></h3>
+<h3>Multiple stores<a class="headerlink" href="#multiple-stores" title="Link to this heading">#</a></h3>
 <p>If you have write access to more than one object store you’ll need to pass in the name of that store
 to the <code class="docutils literal notranslate"><span class="pre">store</span></code> argument.
 So instead of the standardise_surface call above, we’ll tell it to write to our default <code class="docutils literal notranslate"><span class="pre">user</span></code> object store. This is our default local object store
@@ -500,36 +523,35 @@ created when we run <code class="docutils literal notranslate"><span class="pre"
 to more than one store.</p>
 </section>
 <section id="agage-data">
-<h3>AGAGE data<a class="headerlink" href="#agage-data" title="Permalink to this heading">#</a></h3>
-<p>Another data type which can be added is data from the AGAGE network. The
-functions that process the AGAGE data expect data to have an
-accompanying precisions file. For each data file we create a tuple with
-the data filename and the precisions filename. <em>Note: A simpler method
-of uploading these file types is planned.</em></p>
-<p>We can now retrieve the example data for Capegrim as we did above</p>
+<h3>AGAGE data<a class="headerlink" href="#agage-data" title="Link to this heading">#</a></h3>
+<p>OpenGHG can also process data from the <a class="reference external" href="https://agage.mit.edu/">AGAGE network</a>.</p>
+<p>The functions that process the AGAGE data expect data to have an
+accompanying <em>precisions file</em>. For each data file we create a tuple with
+the data filename and the precisions filename.</p>
+<p>First we retrieve example data from the  Cape Grim station in Australia (site code “CGO””).</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cgo_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz&quot;</span>
+
+<span class="n">capegrim_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">cgo_url</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_data</span> <span class="o">=</span> <span class="n">retrieve_example_data</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">cgo_url</span><span class="p">)</span>
+<p><code class="docutils literal notranslate"><span class="pre">capegrim_data</span></code> is a list of two file paths, one for the data file and one for the precisions file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/Users/bm13805/openghg_store/tutorial_store/extracted_files/capegrim.18.C&#39;</span><span class="p">),</span>
+<span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/Users/bm13805/openghg_store/tutorial_store/extracted_files/capegrim.18.precisions.C&#39;</span><span class="p">)]</span>
 </pre></div>
 </div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_data</span>
+<p>We put the data file and precisions file into a tuple:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">capegrim_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">capegrim_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>We must create a <code class="docutils literal notranslate"><span class="pre">tuple</span></code> associated with each data file to link this
-to a precision file:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">list_of_tuples</span> <span class="o">=</span> <span class="p">[(</span><span class="n">data1_filepath</span><span class="p">,</span> <span class="n">precision1_filepath</span><span class="p">),</span> <span class="p">(</span><span class="n">data2_filepath</span><span class="p">,</span> <span class="n">precision2_filepath</span><span class="p">),</span> <span class="o">...</span><span class="p">]</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">capegrim_data</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-<span class="n">capegrim_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">capegrim_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">capegrim_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-</pre></div>
-</div>
-<p>The data being uploaded here is from the Cape Grim station in Australia,
-site code “CGO”.</p>
 <p>We can add these files to the object store in the same way as the DECC
-data by including the right keywords: - site code - <code class="docutils literal notranslate"><span class="pre">&quot;CGO&quot;</span></code> for Cape
-Grim - data type - <code class="docutils literal notranslate"><span class="pre">&quot;GCWERKS&quot;</span></code> - network - <code class="docutils literal notranslate"><span class="pre">&quot;AGAGE&quot;</span></code></p>
+data by including the right arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">filepaths</span></code>: tuple (or list of tuples) with paths to data and precision files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">site</span></code> (site code): <code class="docutils literal notranslate"><span class="pre">&quot;CGO&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source_format</span></code> (data type): <code class="docutils literal notranslate"><span class="pre">&quot;GCWERKS&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">network</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;AGAGE&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">instrument</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;medusa&quot;</span></code></p></li>
+</ul>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">agage_results</span> <span class="o">=</span> <span class="n">standardise_surface</span><span class="p">(</span><span class="n">filepaths</span><span class="o">=</span><span class="n">capegrim_tuple</span><span class="p">,</span> <span class="n">source_format</span><span class="o">=</span><span class="s2">&quot;GCWERKS&quot;</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="s2">&quot;CGO&quot;</span><span class="p">,</span>
                               <span class="n">network</span><span class="o">=</span><span class="s2">&quot;AGAGE&quot;</span><span class="p">,</span> <span class="n">instrument</span><span class="o">=</span><span class="s2">&quot;medusa&quot;</span><span class="p">)</span>
 </pre></div>
@@ -537,11 +559,25 @@ Grim - data type - <code class="docutils literal notranslate"><span class="pre">
 <p>When viewing <code class="docutils literal notranslate"><span class="pre">agage_results</span></code> there will be a large number of
 Datasource UUIDs shown due to the large number of gases in each data
 file</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">agage_results</span>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [8]: </span><span class="n">agage_results</span>
+<span class="gh">Out[8]: </span>
+<span class="go">{&#39;processed&#39;: {&#39;capegrim.18.C&#39;: {&#39;ch4_70m&#39;: {&#39;uuid&#39;: &#39;200d8a1b-bc41-4f9f-86c4-448c2427d780&#39;,</span>
+<span class="go">&#39;new&#39;: True},</span>
+<span class="go">&#39;cfc12_70m&#39;: {&#39;uuid&#39;: &#39;e507358e-ade3-4c83-914e-e486628640ce&#39;, &#39;new&#39;: True},</span>
+<span class="go">&#39;n2o_70m&#39;: {&#39;uuid&#39;: &#39;ad381148-76af-4d8c-aaec-f7cc2a0088b7&#39;, &#39;new&#39;: True},</span>
+<span class="go">&#39;cfc11_70m&#39;: {&#39;uuid&#39;: &#39;2563a11b-2a54-4287-8705-670f34330e33&#39;, &#39;new&#39;: True},</span>
+<span class="go">&#39;cfc113_70m&#39;: {&#39;uuid&#39;: &#39;6a6e28d9-4242-4c6f-a71a-0d56915a485b&#39;, &#39;new&#39;: True},</span>
+<span class="go">&#39;chcl3_70m&#39;: {&#39;uuid&#39;: &#39;36af68d9-f421-4feb-9bfd-c719ec603f05&#39;, &#39;new&#39;: True},</span>
+<span class="go">&#39;ch3ccl3_70m&#39;: {&#39;uuid&#39;: &#39;f096f4c3-e86f-4d99-8a92-e35dd193cfbc&#39;,</span>
+<span class="go">&#39;new&#39;: True},</span>
+<span class="go">&#39;ccl4_70m&#39;: {&#39;uuid&#39;: &#39;396be43c-f29a-408e-9a88-c16ffd79da3b&#39;, &#39;new&#39;: True},</span>
+<span class="go">&#39;h2_70m&#39;: {&#39;uuid&#39;: &#39;62045a91-bac9-4b7d-84b8-696ec8484002&#39;, &#39;new&#39;: True},</span>
+<span class="go">&#39;co_70m&#39;: {&#39;uuid&#39;: &#39;a1bd7ab9-4ae0-46aa-8570-ec961f929431&#39;, &#39;new&#39;: True},</span>
+<span class="go">&#39;ne_70m&#39;: {&#39;uuid&#39;: &#39;950e94fe-6cf9-48e3-b920-275935761885&#39;, &#39;new&#39;: True}}}}</span>
 </pre></div>
 </div>
-<section id="a-note-on-datasources">
-<h4>A note on Datasources<a class="headerlink" href="#a-note-on-datasources" title="Permalink to this heading">#</a></h4>
+<section id="note-on-datasources">
+<span id="id2"></span><h4>Note on Datasources<a class="headerlink" href="#note-on-datasources" title="Link to this heading">#</a></h4>
 <p>Datasources are objects that are stored in the object store (++add link
 to object store notes++) that hold the data and metadata associated with
 each measurement we upload to the platform.</p>
@@ -557,9 +593,9 @@ stored for easy future comparison.</p>
 </section>
 </section>
 <section id="searching-for-data">
-<h2>3. Searching for data<a class="headerlink" href="#searching-for-data" title="Permalink to this heading">#</a></h2>
+<h2>3. Searching for data<a class="headerlink" href="#searching-for-data" title="Link to this heading">#</a></h2>
 <section id="searching-the-object-store">
-<h3>Searching the object store<a class="headerlink" href="#searching-the-object-store" title="Permalink to this heading">#</a></h3>
+<h3>Searching the object store<a class="headerlink" href="#searching-the-object-store" title="Link to this heading">#</a></h3>
 <p>We can search the object store by property using the
 <code class="docutils literal notranslate"><span class="pre">search_surface(...)</span></code> function.</p>
 <p>For example we can find all sites which have measurements for carbon
@@ -570,8 +606,8 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
 <span class="n">cfc_results</span>
 </pre></div>
 </div>
-<p>We could also look for details of all the data measured at the Billsdale
-(“BSD”) site using the <code class="docutils literal notranslate"><span class="pre">site</span></code> keyword:</p>
+<p>We could also look for details of all the data measured at the Tacolneston
+(“TAC”) site using the <code class="docutils literal notranslate"><span class="pre">site</span></code> keyword:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tac_results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">)</span>
 <span class="n">tac_results</span>
 </pre></div>
@@ -583,10 +619,9 @@ tetrafluoride (“cf4”) using the <code class="docutils literal notranslate"><
 as well as the inlet heights these were measured at.</p>
 </section>
 <section id="quickly-retrieve-data">
-<h3>Quickly retrieve data<a class="headerlink" href="#quickly-retrieve-data" title="Permalink to this heading">#</a></h3>
+<h3>Quickly retrieve data<a class="headerlink" href="#quickly-retrieve-data" title="Link to this heading">#</a></h3>
 <p>Say we want to retrieve all the <code class="docutils literal notranslate"><span class="pre">co2</span></code> data from Tacolneston, we can
-perform perform a search and expect a
-<code class="docutils literal notranslate"><span class="pre">`SearchResults</span></code> &lt;<a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult">https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult</a>&gt;`__
+perform perform a search and expect a <a class="reference external" href="https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult"><code class="docutils literal notranslate"><span class="pre">SearchResults</span></code></a>
 object to be returned. If no results are found <code class="docutils literal notranslate"><span class="pre">None</span></code> is returned.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">search_surface</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="s2">&quot;tac&quot;</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;co2&quot;</span><span class="p">)</span>
 </pre></div>
@@ -594,7 +629,7 @@ object to be returned. If no results are found <code class="docutils literal not
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span><span class="o">.</span><span class="n">results</span>
 </pre></div>
 </div>
-<p>We can retrive either some or all of the data easily using the
+<p>We can retrieve either some or all of the data easily using the
 <code class="docutils literal notranslate"><span class="pre">retrieve</span></code> function.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inlet_54m_data</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">inlet</span><span class="o">=</span><span class="s2">&quot;54m&quot;</span><span class="p">)</span>
 <span class="n">inlet_54m_data</span>
@@ -611,7 +646,7 @@ objects.</p>
 </section>
 </section>
 <section id="retrieving-data">
-<h2>4. Retrieving data<a class="headerlink" href="#retrieving-data" title="Permalink to this heading">#</a></h2>
+<h2>4. Retrieving data<a class="headerlink" href="#retrieving-data" title="Link to this heading">#</a></h2>
 <p>To retrieve the standardised data from the object store there are
 several functions we can use which depend on the type of data we want to
 access.</p>
@@ -649,7 +684,7 @@ documentation version of this notebook.</p>
 to the <code class="docutils literal notranslate"><span class="pre">plot_timeseries</span></code> function to modify the labels.</p>
 </section>
 <section id="cleanup">
-<h2>5. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
+<h2>5. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
 <p>If you’re finished with the data in this tutorial you can cleanup the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
@@ -708,13 +743,13 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">0. Using the tutorial object store</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">Using the tutorial object store</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-and-standardising-data">1. Adding and standardising data</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#source-formats">Source formats</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#decc-network">DECC network</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#multiple-stores">Multiple stores</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#agage-data">AGAGE data</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#a-note-on-datasources">A note on Datasources</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#note-on-datasources">Note on Datasources</a></li>
 </ul>
 </li>
 </ul>

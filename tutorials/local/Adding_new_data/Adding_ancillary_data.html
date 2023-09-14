@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Adding ancillary spatial data &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>Adding ancillary spatial data &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,21 +28,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../../../_static/togglebutton.js"></script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/local/Adding_new_data/Adding_ancillary_data';</script>
     <script src="../../../_static/custom.js"></script>
@@ -335,6 +335,9 @@ document.write(`
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html">Modifying and deleting data</a></li>
 </ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Managing_object_store/Changing_object_store.html">Changing the object store path</a></li>
+</ul>
 </div>
 </nav></div>
     </div>
@@ -392,31 +395,30 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="adding-ancillary-spatial-data">
-<h1>Adding ancillary spatial data<a class="headerlink" href="#adding-ancillary-spatial-data" title="Permalink to this heading">#</a></h1>
+<h1>Adding ancillary spatial data<a class="headerlink" href="#adding-ancillary-spatial-data" title="Link to this heading">#</a></h1>
 <p>This tutorial demonstrates how to add ancillary spatial data to the
 OpenGHG store. These are split into several data types which currently
 include:</p>
 <ul class="simple">
-<li><p>“footprints” - regional outputs from an LPDM model (e.g. NAME)</p></li>
-<li><p>“emissions” - estimates of species emissions/flux within a region</p></li>
-<li><p>“boundary_conditions” - vertical curtains at the boundary of a
+<li><p>“footprints”: regional outputs from an LPDM model <a class="footnote-reference brackets" href="#f3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> (e.g. NAME)</p></li>
+<li><p>“emissions”: estimates of species emissions/flux <a class="footnote-reference brackets" href="#f2" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> within a region</p></li>
+<li><p>“boundary_conditions”: vertical curtains at the boundary of a
 regional domain</p></li>
-<li><p><em>“eulerian_model” - Global CTM output (e.g. GEOSChem)</em></p></li>
+<li><p>“eulerian_model”: Global CTM output (e.g. GEOSChem) <a class="footnote-reference brackets" href="#f1" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></li>
 </ul>
-<p>These inputs must adhere to an expected netcdf format and are expected
-to minimally contain a fixed set of inputs.</p>
-<p><em>For some often used databases and inputs, there will be limited
+<p>These inputs must adhere to an expected <a class="reference external" href="https://www.unidata.ucar.edu/software/netcdf/">netCDF</a>
+format with a minimum fixed set of inputs (see <a class="reference internal" href="#input-format"><span class="std std-ref">below</span></a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For some often used databases and inputs, there will be limited
 transformation functions available to create and store data in this
-format directly. See the ``openghg.transform`` sub-module for options.
-To be expanded upon.</em></p>
+format directly. See the <a class="reference external" href="https://docs.openghg.org/api/api_transform.html"><code class="docutils literal notranslate"><span class="pre">openghg.transform</span></code></a> sub-module for options.</p>
+</div>
 <section id="using-the-tutorial-object-store">
-<h2>0. Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Permalink to this heading">#</a></h2>
-<p>To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we’ll call the tutorial store. To do this we use the
-<code class="docutils literal notranslate"><span class="pre">use_tutorial_store</span></code> function from <code class="docutils literal notranslate"><span class="pre">openghg.tutorial</span></code>. This sets the
-<code class="docutils literal notranslate"><span class="pre">OPENGHG_TUT_STORE</span></code> environment variable for this session and won’t
-affect your use of OpenGHG outside of this tutorial.</p>
+<h2>Using the tutorial object store<a class="headerlink" href="#using-the-tutorial-object-store" title="Link to this heading">#</a></h2>
+<p>As in the <a class="reference internal" href="Adding_observation_data.html#using-the-tutorial-object-store"><span class="std std-ref">previous tutorial</span></a>,
+we will use the tutorial object store to avoid cluttering your personal
+object store.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">use_tutorial_store</span>
 
 <span class="n">use_tutorial_store</span><span class="p">()</span>
@@ -424,7 +426,7 @@ affect your use of OpenGHG outside of this tutorial.</p>
 </div>
 </section>
 <section id="adding-and-standardising-data">
-<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Permalink to this heading">#</a></h2>
+<h2>1. Adding and standardising data<a class="headerlink" href="#adding-and-standardising-data" title="Link to this heading">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Outside of this tutorial, if you have write access to multiple object stores you
@@ -437,14 +439,14 @@ the <code class="docutils literal notranslate"><span class="pre">openghg.standar
 <li><p><code class="docutils literal notranslate"><span class="pre">standardise_footprints</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">standardise_flux</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">standardise_bc</span></code></p></li>
-<li><p><em>``standardise_eulerian`` - not implemented yet</em></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">standardise_eulerian</span></code> <a class="footnote-reference brackets" href="#f1" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></li>
 </ul>
-<p>For all data types, as well as the path to the data file, a set of
-keywords should be supplied. The applicable keywords depends upon the
-data type itself but are used to categorise the data.</p>
-<p>We can grab some data which is in the expected format (see below for
-more details on the format) for our different types so these can be
-added to the object store.</p>
+<p>For all data types, a set of keywords should be supplied in addition
+to the path to the data file.
+These keywords depend on the data type; they are
+used to categorise the data.</p>
+<p>We can grab some data which is in the <a class="reference internal" href="#input-format"><span class="std std-ref">expected format</span></a>
+for our different types so these can be added to the object store.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">retrieve_example_data</span>
 
 <span class="n">fp_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/openghg/example_data/raw/main/footprint/tac_footprint_inert_201607.tar.gz&quot;</span>
@@ -463,24 +465,28 @@ Downloading ch4_EUROPE_201607.tar.gz: 100%|██████████| 77.4k
 </pre></div>
 </div>
 <section id="data-domains">
-<h3>Data domains<a class="headerlink" href="#data-domains" title="Permalink to this heading">#</a></h3>
-<p>For spatial data, we can indicate consistent areas and resolution using
-a <em>domain</em> as a label for this. For multiple pieces of data, a single
-domain name should refer to the exact same set of latitude and longitude
-bounds.</p>
-<p>There are some pre-defined domain names already defined but it is also
-possible to add new domain labels and definitions as needed. (<em>make sure
-this has been consistently applied</em>)</p>
-<p><em>Add details for how to check known domains</em></p>
+<h3>Data domains<a class="headerlink" href="#data-domains" title="Link to this heading">#</a></h3>
+<p>For spatial data, a <em>domain</em> label indicates consistent areas and resolution.
+For multiple pieces of data, a single domain name should refer to the exact
+same set of latitude and longitude bounds.</p>
+<p>Pre-defined domains can be listed as follows:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">get_domain_info</span>
+
+<span class="n">get_domain_info</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can also add new domain labels and definitions as needed.</p>
 <section id="footprints">
-<h4>Footprints<a class="headerlink" href="#footprints" title="Permalink to this heading">#</a></h4>
-<p>To standardise and store footprint data, in addition to the data file to
-standardise, we also need to pass a set of keywords to label this. As a
-minumum this needs to include: - <code class="docutils literal notranslate"><span class="pre">site</span></code> - site identifier (use
-<code class="docutils literal notranslate"><span class="pre">openghg.standardise.summary_site_codes()</span></code> function to check this) -
-<code class="docutils literal notranslate"><span class="pre">inlet</span></code> (/ height) associated with the site - <code class="docutils literal notranslate"><span class="pre">domain</span></code> - regional
-domain covered by the footprint - <code class="docutils literal notranslate"><span class="pre">model</span></code> - name of model used to
-create the footprint</p>
+<h4>Footprints<a class="headerlink" href="#footprints" title="Link to this heading">#</a></h4>
+<p>To standardise <a class="footnote-reference brackets" href="#f4" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a> footprint data, we pass the following arguments to
+<code class="docutils literal notranslate"><span class="pre">standardise_footprint</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">filepath</span></code>: path to footprint file (this is the first positional argument)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">site</span></code>: site identifier (use <code class="docutils literal notranslate"><span class="pre">openghg.standardise.summary_site_codes()</span></code> function to check this)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inlet</span></code>: inlet height associated with the site</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">domain</span></code>: regional domain covered by the footprint</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: name of model used to create the footprint</p></li>
+</ul>
 <p>Additional details can also be specified, in particular, for the
 meteorological model used (metmodel) and the species name (if relevant).</p>
 <p>For the example below, the footprint data generated from the NAME model
@@ -510,36 +516,55 @@ which can be passed to sub-categorise the footprint inputs: -
 resolutions. This is usually an embedded high resolution region within a
 larger lower resolution domain. - <code class="docutils literal notranslate"><span class="pre">high_time_resolution</span></code> - footprints which
 include an additional dimension for resolving on the time axis. This is
-associated with shorter term flux changes (e.g. natural sources of
+associated with shorter term flux changes (e.g. natural sources of
 carbon dioxide). A species will normally be associated with this
-footprint (e.g. “co2”). - <code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code> - footprints for species
+footprint (e.g. “co2”). - <code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code> - footprints for species
 with a shorter lifetime (&lt;30 days). An explicit species input should be
 associated with this footprint as well.</p>
-<p>If possible, the standardise functionality will attempt to infer these
-details but they should be supplied to ensure the footprint data is
-labelled correctly. See schema details below for how these inputs are
-defined.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">high_spatial_res</span></code>: footprints containing multiple spatial resolutions.
+This is usually an embedded high resolution region within a larger lower
+resolution domain.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">high_time_res</span></code>: footprints which include an additional dimension for
+resolving on the time axis. This is associated with shorter term flux
+changes (e.g. natural sources of carbon dioxide). A species will normally
+be associated with this footprint (e.g. “co2”).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code>: footprints for species with a shorter lifetime (less
+than 30 days). An explicit species input should be associated with this
+footprint as well.</p></li>
+</ul>
+<p>If possible, <code class="docutils literal notranslate"><span class="pre">standardise_footprint</span></code> will attempt to infer these
+details, but they should be supplied to ensure the footprint data is
+labelled correctly.
+See schema details below for how these inputs are defined.</p>
 </section>
 <section id="flux-emissions">
-<h4>Flux / Emissions<a class="headerlink" href="#flux-emissions" title="Permalink to this heading">#</a></h4>
-<p>To store and standardise flux / emissions data, as well as the input
-file, as a minimum we need to supply the following keywords: -
-<code class="docutils literal notranslate"><span class="pre">species</span></code> - a name for the associated species - <code class="docutils literal notranslate"><span class="pre">domain</span></code> - the
-regional domain covered by the flux data - <code class="docutils literal notranslate"><span class="pre">source</span></code> - a name for the
-source of that data.</p>
-<p>Optionally, additional identifiers can be use including: - <code class="docutils literal notranslate"><span class="pre">database</span></code>
-- inventory/database name associated with the flux data -
-<code class="docutils literal notranslate"><span class="pre">database_version</span></code> - if a database is specified, a version should be
-included as well - <code class="docutils literal notranslate"><span class="pre">model</span></code> - the name of the model used to generate
-the flux data</p>
-<p>For the example below, the flux data is for methane (“ch4”) and which,
-again, is covered by the same “EUROPE” domain as the footprint data
-described above.</p>
+<h4>Flux / Emissions<a class="headerlink" href="#flux-emissions" title="Link to this heading">#</a></h4>
+<p>Flux/emissions data typically describes “prior guesses” for emissions
+of substances, often broken down by region and source of emission.</p>
+<p>To  standardise flux/emissions data <a class="footnote-reference brackets" href="#f2" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> we pass the following arguments
+to <code class="docutils literal notranslate"><span class="pre">standardise_flux</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">filepath</span></code>: path to footprint file (this is the first positional argument)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">species</span></code>: a name for the associated species</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">domain</span></code>: the regional domain covered by the flux data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source</span></code>: a name for the source of that data.</p></li>
+</ul>
+<p>Additional optional identifiers include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">database</span></code>: inventory/database name associated with the flux data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">database_version</span></code>: if a database is specified, a version should
+be included as well</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: the name of the model used to generate the flux data</p></li>
+</ul>
+<p>For the example below, the flux data is for methane (“ch4”) and is covered
+by the same “EUROPE” domain as the footprint data described above.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_flux</span>
 
 <span class="n">standardise_flux</span><span class="p">(</span><span class="n">data_file_flux</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;anthro&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;ukghg&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Once the raw flux data is standardised, we can retrieve it from the object store:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">get_flux</span>
 
 <span class="n">flux_data</span> <span class="o">=</span> <span class="n">get_flux</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;anthro&quot;</span><span class="p">)</span>
@@ -547,16 +572,19 @@ described above.</p>
 </div>
 </section>
 <section id="boundary-conditions">
-<h4>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading">#</a></h4>
-<p>The boundary conditions data type describe the vertical curtains of a
-regional domain. To store and standardise boundary conditions data, as
-well as the input file, as a minimum we need to supply the following
-keywords: - <code class="docutils literal notranslate"><span class="pre">species</span></code> - a name for the associated species - <code class="docutils literal notranslate"><span class="pre">domain</span></code>
-- the name of the domain the vertical curtains surround - <code class="docutils literal notranslate"><span class="pre">bc_input</span></code> -
-a keyword descriptor for the boundary conditions inputs used</p>
+<h4>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Link to this heading">#</a></h4>
+<p>Boundary conditions describe the vertical curtains of a
+regional domain.</p>
+<p>To  standardise boundary conditions data we pass the following arguments
+to <code class="docutils literal notranslate"><span class="pre">standardise_bc</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">filepath</span></code>: path to footprint file (this is the first positional argument)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">species</span></code>: a name for the associated species</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">domain</span></code>: the name of the domain the vertical curtains surround</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bc_input</span></code>: a keyword descriptor for the boundary conditions inputs used</p></li>
+</ul>
 <p>For the example below, the boundary conditions are for methane (“ch4”)
-at the edges of the “EUROPE” domain. They were created using the <em>CAMS
-climatology product [++REFINE AND ADD LINK++]</em>.</p>
+at the edges of the “EUROPE” domain. They were created using the <a class="reference external" href="https://www.ecmwf.int/en/newsletter/163/news/ecmwf-helps-users-drive-regional-chemistry-model-cams-data">CAMS climatology product</a> <a class="footnote-reference brackets" href="#f5" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.standardise</span> <span class="kn">import</span> <span class="n">standardise_bc</span>
 
 <span class="n">standardise_bc</span><span class="p">(</span><span class="n">data_file_bc</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="s2">&quot;ch4&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="s2">&quot;EUROPE&quot;</span><span class="p">,</span> <span class="n">bc_input</span><span class="o">=</span><span class="s2">&quot;CAMS&quot;</span><span class="p">)</span>
@@ -567,22 +595,24 @@ climatology product [++REFINE AND ADD LINK++]</em>.</p>
 </div>
 </section>
 </section>
-<section id="defining-source-and-bc-input">
-<h3>Defining <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code><a class="headerlink" href="#defining-source-and-bc-input" title="Permalink to this heading">#</a></h3>
+<section id="user-defined-keywords-source-and-bc-input">
+<h3>User defined keywords: <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code><a class="headerlink" href="#user-defined-keywords-source-and-bc-input" title="Link to this heading">#</a></h3>
 <p>Unlike the <code class="docutils literal notranslate"><span class="pre">domain</span></code> and <code class="docutils literal notranslate"><span class="pre">species</span></code> inputs which have some pre-defined
 values, the <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code> keywords can be chosen by the
 user as a way to describe the flux and boundary condition inputs,
-alongside the additional optional values. However, once a convention is
-chosen for a given <code class="docutils literal notranslate"><span class="pre">source</span></code> or <code class="docutils literal notranslate"><span class="pre">bc_input</span></code>, consistent keywords
-should be used to describe like data so this can be associated and
-distinguished correctly. Combinations of these keywords with the other
-identifiers (such as species and domain) should allow associated data in
-a timeseries to be identified.</p>
-<p>See “Modifying_and_deleting_data” tutorial <em>[++ADD INTERNAL LINK++]</em> for
-how to update stored metadata if needed.</p>
+alongside the additional optional values.</p>
+<p>However, once a convention is chosen for a given <code class="docutils literal notranslate"><span class="pre">source</span></code> or <code class="docutils literal notranslate"><span class="pre">bc_input</span></code>,
+consistent keywords should be used to describe like data so this can be
+associated and distinguished correctly. Combinations of these keywords with
+the other identifiers (such as species and domain) should allow associated data
+in a timeseries to be identified.</p>
+<p>See the <a class="reference internal" href="../Managing_object_store/Modifying_and_deleting_data.html#modifying-and-deleting-data"><span class="std std-ref">Modifying and deleting data</span></a> tutorial for how to update stored
+metadata if needed.</p>
+</section>
+<section id="reviewing-what-is-in-the-object-store">
+<h3>Reviewing what is in the object store<a class="headerlink" href="#reviewing-what-is-in-the-object-store" title="Link to this heading">#</a></h3>
 <p>To check the data and metadata already stored within an object store,
-the <code class="docutils literal notranslate"><span class="pre">search</span></code> function from within the <code class="docutils literal notranslate"><span class="pre">openghg.retrieve</span></code> sub-module
-can be used</p>
+use the <code class="docutils literal notranslate"><span class="pre">search</span></code> function from within the <code class="docutils literal notranslate"><span class="pre">openghg.retrieve</span></code> sub-module:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.retrieve</span> <span class="kn">import</span> <span class="n">search</span>
 
 <span class="n">search_results</span> <span class="o">=</span> <span class="n">search</span><span class="p">()</span>
@@ -706,7 +736,9 @@ can be used</p>
   </tbody>
 </table>
 <p>3 rows × 32 columns</p>
-</div><p>To search for just one data type a specific <code class="docutils literal notranslate"><span class="pre">search_*</span></code> function can be
+</div><p>Here we see the data types we’ve added, along with the keywords used when
+standarising the data.</p>
+<p>To search for just one data type a specific <code class="docutils literal notranslate"><span class="pre">search_*</span></code> function can be
 used (or the <code class="docutils literal notranslate"><span class="pre">data_type</span></code> input of <code class="docutils literal notranslate"><span class="pre">&quot;emissions&quot;</span></code> or
 <code class="docutils literal notranslate"><span class="pre">&quot;boundary_conditions&quot;</span></code> can be passed to the <code class="docutils literal notranslate"><span class="pre">search</span></code> function). For
 example, for flux data:</p>
@@ -782,22 +814,25 @@ example, for flux data:</p>
 </table>
 </div><p>In this case the <code class="docutils literal notranslate"><span class="pre">source</span></code> value has been set to <code class="docutils literal notranslate"><span class="pre">&quot;anthro&quot;</span></code>.</p>
 <p>Note that the <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code> keywords can also include “-”
-to logically separate the descriptor e.g. “anthro-waste” but should not
+to logically separate the descriptor e.g. “anthro-waste” but should not
 include other separators.</p>
 </section>
 </section>
 <section id="input-format">
-<h2>2. Input format<a class="headerlink" href="#input-format" title="Permalink to this heading">#</a></h2>
-<p>For each of these data types there is an associated object from the
+<h2>2. Input format<a class="headerlink" href="#input-format" title="Link to this heading">#</a></h2>
+<p>For each of the data types seen above, there is an associated object from the
 <code class="docutils literal notranslate"><span class="pre">openghg.store</span></code> sub-module:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Footprints</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Emissions</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">BoundaryConditions</span></code></p></li>
-<li><p><em>``EulerianModel`` - to be completed</em></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EulerianModel</span></code> <a class="footnote-reference brackets" href="#f1" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></li>
 </ul>
-<p>These objects can be used to give us information about the expected data
-format using the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method:</p>
+<p>To get information about the expected format <a class="footnote-reference brackets" href="#f6" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a> for a data type,
+use the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method for the associated object.</p>
+<section id="input-format-for-flux-data">
+<h3>Input format for flux data<a class="headerlink" href="#input-format-for-flux-data" title="Link to this heading">#</a></h3>
+<p>For instance, to see the schema for flux data:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">Emissions</span>
 
 <span class="n">Emissions</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
@@ -806,7 +841,7 @@ format using the <code class="docutils literal notranslate"><span class="pre">.s
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>DataSchema(data_vars={&#39;flux&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;lon&#39;)}, dtypes={&#39;lat&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;lon&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;time&#39;: &lt;class &#39;numpy.datetime64&#39;&gt;, &#39;flux&#39;: &lt;class &#39;numpy.floating&#39;&gt;}, dims=None)
 </pre></div>
 </div>
-<p>This tells us that the netcdf input for “emissions” should contain:</p>
+<p>This tells us that the netCDF input for “emissions” should contain:</p>
 <ul class="simple">
 <li><p>Data variables:</p>
 <ul>
@@ -815,11 +850,14 @@ format using the <code class="docutils literal notranslate"><span class="pre">.s
 </li>
 <li><p>Data types:</p>
 <ul>
-<li><p>“flux”, “lat”, “lon” variables / coordinates should be float type - “time” coordinate should be</p></li>
+<li><p>“flux”, “lat”, “lon” variables/coordinates should be float type</p></li>
+<li><p>“time” coordinate should be <code class="docutils literal notranslate"><span class="pre">datetime64</span></code></p></li>
 </ul>
 </li>
 </ul>
-<p>datetime64</p>
+</section>
+<section id="input-format-for-footprints">
+<h3>Input format for footprints<a class="headerlink" href="#input-format-for-footprints" title="Link to this heading">#</a></h3>
 <p>Similarly for <code class="docutils literal notranslate"><span class="pre">Footprints</span></code>, as described in the standardisations
 section, there are a few different input options available:</p>
 <ul class="simple">
@@ -829,10 +867,10 @@ section, there are a few different input options available:</p>
 <li><p>short-lived species (<code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code> flag)</p></li>
 <li><p>particle locations (<code class="docutils literal notranslate"><span class="pre">particle_locations</span></code> - default is True, expect to be included)</p></li>
 </ul>
+<p>These can be shown by passing keywords to the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method.</p>
 <section id="default-inert-footprint-format">
-<h3>Default (inert) footprint format<a class="headerlink" href="#default-inert-footprint-format" title="Permalink to this heading">#</a></h3>
-<p>These can be shown by passing keywords to the <code class="docutils literal notranslate"><span class="pre">.schema()</span></code> method. For
-example, if nothing is passed this returns the details for an integrated
+<h4>Default (inert) footprint format<a class="headerlink" href="#default-inert-footprint-format" title="Link to this heading">#</a></h4>
+<p>For example, if nothing is passed this returns the details for an integrated
 footprint for an inert species:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">Footprints</span>
 <span class="n">Footprints</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
@@ -841,7 +879,7 @@ footprint for an inert species:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>DataSchema(data_vars={&#39;fp&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;lon&#39;), &#39;particle_locations_n&#39;: (&#39;time&#39;, &#39;lon&#39;, &#39;height&#39;), &#39;particle_locations_e&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;height&#39;), &#39;particle_locations_s&#39;: (&#39;time&#39;, &#39;lon&#39;, &#39;height&#39;), &#39;particle_locations_w&#39;: (&#39;time&#39;, &#39;lat&#39;, &#39;height&#39;)}, dtypes={&#39;lat&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;lon&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;time&#39;: &lt;class &#39;numpy.datetime64&#39;&gt;, &#39;fp&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;height&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_n&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_e&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_s&#39;: &lt;class &#39;numpy.floating&#39;&gt;, &#39;particle_locations_w&#39;: &lt;class &#39;numpy.floating&#39;&gt;}, dims=None)
 </pre></div>
 </div>
-<p>This tells us that the default netcdf input for “footprints” should
+<p>This tells us that the default netCDF input for “footprints” should
 contain:</p>
 <ul class="simple">
 <li><p>Data variables:</p>
@@ -867,7 +905,7 @@ requirement for these particle location boundary sensitivies to be
 included.</p>
 </section>
 <section id="other-footprint-formats">
-<h3>Other footprint formats<a class="headerlink" href="#other-footprint-formats" title="Permalink to this heading">#</a></h3>
+<h4>Other footprint formats<a class="headerlink" href="#other-footprint-formats" title="Link to this heading">#</a></h4>
 <p>For species with a short lifetime the input footprints require
 additional variables. This can be seen by passing the <code class="docutils literal notranslate"><span class="pre">short_lifetime</span></code>
 flag:</p>
@@ -897,9 +935,10 @@ the <code class="docutils literal notranslate"><span class="pre">Footprints.sche
 within the input footprint files.</p>
 </section>
 </section>
+</section>
 <section id="cleanup">
-<h2>3. Cleanup<a class="headerlink" href="#cleanup" title="Permalink to this heading">#</a></h2>
-<p>If you’re finished with the data in this tutorial you can cleanup the
+<h2>3. Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading">#</a></h2>
+<p>If you’re finished with the data in this tutorial you can clean up the
 tutorial object store using the <code class="docutils literal notranslate"><span class="pre">clear_tutorial_store</span></code> function.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openghg.tutorial</span> <span class="kn">import</span> <span class="n">clear_tutorial_store</span>
 </pre></div>
@@ -907,6 +946,37 @@ tutorial object store using the <code class="docutils literal notranslate"><span
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">clear_tutorial_store</span><span class="p">()</span>
 </pre></div>
 </div>
+<p class="rubric">Footnotes</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f3" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>LPDM means <em>Lagrangrian Particle Dispersion Model</em>.</p>
+</aside>
+<aside class="footnote brackets" id="f2" role="note">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id6">2</a>)</span>
+<p>“Flux” includes emissions (and depositions) of substances from (and to) a surface.
+However, we use “flux” and “emissions” interchangeably.</p>
+</aside>
+<aside class="footnote brackets" id="f1" role="note">
+<span class="label"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id3">1</a>,<a role="doc-backlink" href="#id4">2</a>,<a role="doc-backlink" href="#id8">3</a>)</span>
+<p><code class="docutils literal notranslate"><span class="pre">eulerian_model</span></code> isn’t available yet.</p>
+</aside>
+<aside class="footnote brackets" id="f4" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">4</a><span class="fn-bracket">]</span></span>
+<p>Recall, <em>standardising</em> is the process that adds data and metadata from
+raw data files to the object store.</p>
+</aside>
+<aside class="footnote brackets" id="f5" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">5</a><span class="fn-bracket">]</span></span>
+<p>CAMS means <em>Copernicus Atmosphere Monitoring Service</em></p>
+</aside>
+<aside class="footnote brackets" id="f6" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">6</a><span class="fn-bracket">]</span></span>
+<p>“Expected format” and “OpenGHG format” are both used in the docs.</p>
+</aside>
+</aside>
 </section>
 </section>
 
@@ -957,7 +1027,7 @@ tutorial object store using the <code class="docutils literal notranslate"><span
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">0. Using the tutorial object store</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-tutorial-object-store">Using the tutorial object store</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-and-standardising-data">1. Adding and standardising data</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-domains">Data domains</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#footprints">Footprints</a></li>
@@ -965,12 +1035,17 @@ tutorial object store using the <code class="docutils literal notranslate"><span
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#boundary-conditions">Boundary conditions</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-source-and-bc-input">Defining <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#user-defined-keywords-source-and-bc-input">User defined keywords: <code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">bc_input</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reviewing-what-is-in-the-object-store">Reviewing what is in the object store</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#input-format">2. Input format</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#default-inert-footprint-format">Default (inert) footprint format</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#other-footprint-formats">Other footprint formats</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input-format-for-flux-data">Input format for flux data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#input-format-for-footprints">Input format for footprints</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#default-inert-footprint-format">Default (inert) footprint format</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#other-footprint-formats">Other footprint formats</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cleanup">3. Cleanup</a></li>

@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>User API &#8212; OpenGHG 0.6.2 documentation</title>
+    <title>User API &#8212; OpenGHG 0+untagged.1.g8e9d8f5 documentation</title>
   
   
   
@@ -29,28 +28,29 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/documentation_options.js?v=55f4e601"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/index';</script>
     <script src="../_static/custom.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Analyse" href="api_analyse.html" />
-    <link rel="prev" title="Modifying and deleting data" href="../tutorials/local/Managing_object_store/Modifying_and_deleting_data.html" />
+    <link rel="prev" title="Changing the object store path" href="../tutorials/local/Managing_object_store/Changing_object_store.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -386,11 +386,11 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section id="user-api">
-<h1>User API<a class="headerlink" href="#user-api" title="Permalink to this heading">#</a></h1>
+<h1>User API<a class="headerlink" href="#user-api" title="Link to this heading">#</a></h1>
 <p>This section of the documentation gives an overview of the public facing functions used in the Jupyter notebooks available at the
 OpenGHG hub. For developers documentation of the internal workings of the library are available in the developer API section.</p>
 <section id="analyse">
-<h2>Analyse<a class="headerlink" href="#analyse" title="Permalink to this heading">#</a></h2>
+<h2>Analyse<a class="headerlink" href="#analyse" title="Link to this heading">#</a></h2>
 <p>The <em class="xref py py-obj">analyse</em> submodule contains functionality to help you analyse data retrieved from the object store.
 The <em class="xref py py-obj">ModelScenario</em> class allows users to collate related data sources and calculate
 modelled output based on this data.</p>
@@ -404,7 +404,7 @@ modelled output based on this data.</p>
 </div>
 </section>
 <section id="data-objects">
-<h2>Data objects<a class="headerlink" href="#data-objects" title="Permalink to this heading">#</a></h2>
+<h2>Data objects<a class="headerlink" href="#data-objects" title="Link to this heading">#</a></h2>
 <p>Classes used to return data from the object store, help with manipulation and modification.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -422,7 +422,7 @@ modelled output based on this data.</p>
 </div>
 </section>
 <section id="plotting">
-<h2>Plotting<a class="headerlink" href="#plotting" title="Permalink to this heading">#</a></h2>
+<h2>Plotting<a class="headerlink" href="#plotting" title="Link to this heading">#</a></h2>
 <p>These are some helper functions to quickly create plots using ObsData objects.</p>
 <p>Classes within the client module are used to interact with OpenGHG, whether it be a cloud or local instance.</p>
 <div class="toctree-wrapper compound">
@@ -436,7 +436,7 @@ modelled output based on this data.</p>
 </div>
 </section>
 <section id="retrieve">
-<h2>Retrieve<a class="headerlink" href="#retrieve" title="Permalink to this heading">#</a></h2>
+<h2>Retrieve<a class="headerlink" href="#retrieve" title="Link to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">retrieve</span></code> submodule contains the functionality needed to retrieve different data types from the OpenGHG store.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -450,7 +450,7 @@ modelled output based on this data.</p>
 </div>
 </section>
 <section id="standardise">
-<h2>Standardise<a class="headerlink" href="#standardise" title="Permalink to this heading">#</a></h2>
+<h2>Standardise<a class="headerlink" href="#standardise" title="Link to this heading">#</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">standardise</span></code> submodule handles the standardisation of different data types to the OpenGHG specification.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -463,7 +463,7 @@ modelled output based on this data.</p>
 </div>
 </section>
 <section id="transform">
-<h2>Transform<a class="headerlink" href="#transform" title="Permalink to this heading">#</a></h2>
+<h2>Transform<a class="headerlink" href="#transform" title="Link to this heading">#</a></h2>
 <p>The transform submodule handles creation of data types to OpenGHG specification based on an underlying input such as a database or model output. This usually involves some transformation of the data to e.g. select a region or regrid the data.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -476,7 +476,7 @@ modelled output based on this data.</p>
 </div>
 </section>
 <section id="tutorial">
-<h2>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this heading">#</a></h2>
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="Link to this heading">#</a></h2>
 <p>Functions used in our OpenGHG tutorial notebooks and documentation.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -514,12 +514,12 @@ modelled output based on this data.</p>
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../tutorials/local/Managing_object_store/Modifying_and_deleting_data.html"
+       href="../tutorials/local/Managing_object_store/Changing_object_store.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Modifying and deleting data</p>
+        <p class="prev-next-title">Changing the object store path</p>
       </div>
     </a>
     <a class="right-next"
