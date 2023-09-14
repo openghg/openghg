@@ -54,5 +54,5 @@ jobs:
           BUILD_DIR=${GITHUB_WORKSPACE}/build
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
         #   anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
-        # env:
-        #   ANACONDA_TOKEN: 
+        env:
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
