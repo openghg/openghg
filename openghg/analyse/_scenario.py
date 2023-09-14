@@ -464,6 +464,8 @@ class ModelScenario:
                 flux_source = self._get_data(flux_keywords, data_type="flux")
                 # TODO: May need to update this check if flux_source is empty FluxData() object
                 if flux_source is not None:
+                    if name is None and len(sources) == 1:
+                        name = flux_source.metadata.get("source", "no_source_specified")
                     flux[name] = flux_source
 
         elif flux is not None:
