@@ -1451,6 +1451,23 @@ def test_scenario_infer_flux_source_ch4():
     if only a single flux matches the given metadata
     and source is in the flux metadata.
     """
+    import tinydb
+
+    from openghg.store import data_manager
+    from openghg.objectstore import get_readable_buckets
+    from openghg.store import Emissions
+
+    # remove 'waste' flux file
+    bucket = get_readable_buckets()["user"]
+    with Emissions(bucket=bucket) as em:
+        query = tinydb.Query().fragment({'species': 'ch4', 'domain': 'europe', 'source': 'waste'})
+        result = em._metastore.search(query)[0]
+        uuid = result['uuid']
+
+    manager = data_manager(data_type="emissions", store="user")
+    manager.delete_datasource(uuid=uuid)
+
+    # create model scenario without specifying source
     start_date = "2012-08-01"
     end_date = "2012-09-01"
 
@@ -1460,7 +1477,6 @@ def test_scenario_infer_flux_source_ch4():
     network = "DECC"
 
     species = "ch4"
-    source = "anthro"
 
     bc_input = "MOZART"
 
@@ -1475,7 +1491,8 @@ def test_scenario_infer_flux_source_ch4():
         end_date=end_date,
     )
 
-    assert source in model_scenario.fluxes
+    # expect 'anthro' to be found in flux metadata:
+    assert 'anthro' in model_scenario.fluxes
 
 
 def test_modelscenario_doesnt_error_empty_objectstore():
