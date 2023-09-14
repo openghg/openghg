@@ -1,4 +1,4 @@
-name: OpenGHG Build and Release
+name: OpenGHG Build and Publish
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
       - "*"
 
 jobs:
-  release_pypi:
-    name: Build and publish Python distributions to PyPI and TestPyPI
+  build_pypi:
+    name: Build Python distributions to PyPI and TestPyPI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,6 +23,13 @@ jobs:
       - name: Build a binary wheel and a source tarball
         run: |
           python -m build --sdist --wheel --outdir dist/
+
+  publish_pypi:
+    name: Publish Python distributions to PyPI and TestPyPI
+    runs-on: ubuntu-latest
+    needs: build_pypi
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    steps:
       - name: Publish distribution to Test PyPI
         uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
         with:
@@ -33,24 +40,36 @@ jobs:
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
-  release_conda:
-    name: Build and publish conda package
+  env_setup_conda:
+    name: Build Conda environment
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -el {0}
     steps:
       - uses: actions/checkout@v3
       - uses: mamba-org/setup-micromamba@875557da4ee020f18df03b8910a42203fbf02da1
         with:
           init-shell: bash
-      - name: Build and push the conda package
+
+  build_conda:
+    name: Build Conda package
+    runs-on: ubuntu-latest
+    needs: env_setup_conda
+    steps:
+      - name: Build the Conda package
         run: |
           micromamba create -n openghg_build anaconda-client boa -c conda-forge
           micromamba activate openghg_build
           conda config --append channels openghg
           mkdir ${{ github.workspace }}/build
           conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge
+
+  publish_conda:
+    name: Publish Conda package
+    runs-on: ubuntu-latest
+    needs: build_conda
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    steps:
+      - name: Upload the Conda package
+        run: |
           BUILD_DIR=${GITHUB_WORKSPACE}/build
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
           anaconda --token "$ANACONDA_TOKEN" upload --user openghg --label main "$BUILD"
