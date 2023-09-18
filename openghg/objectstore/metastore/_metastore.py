@@ -103,7 +103,6 @@ class MetaStore(ABC):
                 identify the record.
             to_update: metadata to overwrite or add to the record.
             to_delete: key or list of keys to delete from record.
-
         Returns:
             None
 
@@ -120,9 +119,8 @@ class MetaStore(ABC):
 
         Args:
             key: key to select.
-
         Returns:
-            list of values stored at that key, over all records in the metastore.
+            list: list of values stored at that key, over all records in the metastore.
 
         """
         return [result[key] for result in self.search()]
@@ -160,7 +158,6 @@ class TinyDBMetaStore(MetaStore):
 
         Args:
             metadata: metadata to format.
-
         Returns:
             formatted metadata.
         """
@@ -187,7 +184,7 @@ class TinyDBMetaStore(MetaStore):
                 whose site is 'TAC'.
 
         Returns:
-            list of records in the metastore matching the given search terms.
+            list: list of records in the metastore matching the given search terms.
         """
         if not search_terms:
             search_terms = {}
