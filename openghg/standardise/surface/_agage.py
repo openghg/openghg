@@ -7,9 +7,6 @@ from typing import Dict, Union
 import logging
 import numpy as np
 
-from openghg_defs import site_info_file
-from openghg.util import load_json
-
 logger = logging.getLogger("standardise")
 logger.setLevel(logging.DEBUG)
 
@@ -31,32 +28,12 @@ def parse_agage(data_folder: Union[Path, str], drop_duplicate_timestamps: bool =
         for site_file in species_files:
             ds = xr.open_dataset(site_file)
 
-            lookup_inlet_height = False
-            try:
-                _ = str(int(float(ds.attrs["inlet_base_elevation_masl"])))
-            except ValueError:
-                lookup_inlet_height = True
-                logger.warning(f"Can't read inlet height for {site_file.name}, we'll try looking it up.")
-
-            if lookup_inlet_height:
-                site_info = load_json(path=site_info_file)
-                site_code = ds.attrs["site_code"].upper()
-
-                try:
-                    inlet_heights = site_info[site_code]["AGAGE"]["height"]
-                except KeyError:
-                    logger.warning(f"Unable to find inlet height for {site_code}, skipping {site_file.name}.")
-                    continue
-
-                if len(inlet_heights) > 1:
-                    logger.warning(
-                        f"Multiple inlet heights found for {site_code}, skipping {site_file.name}."
-                    )
-                    continue
-
-                inlet_height = inlet_heights[0]
+            # Get the list of inlets
+            inlet_heights = np.unique(ds["inlet_height"].values).tolist()
+            if len(inlet_heights) > 1:
+                inlet_height_str = "multiple"
             else:
-                inlet_height = f"{int(float(ds.attrs['inlet_base_elevation_masl']))}m"
+                inlet_height_str = str(inlet_heights[0])
 
             # Do a very quick check to make sure the species is what we expect it to be
             attrs_species = ds.attrs["species"]
@@ -87,6 +64,11 @@ def parse_agage(data_folder: Union[Path, str], drop_duplicate_timestamps: bool =
 
             metadata = {str(k): str(v) for k, v in ds.attrs.items() if k not in skip_keys}
             # Clean any empty strings
+            for k, v in metadata.items():
+                if not v:
+                    print(f"We have no data for {k} for {site_file.name}, skipping...")
+                    continue
+
             metadata = {k: v for k, v in metadata.items() if v}
 
             metadata["filename_original"] = site_file.name
@@ -94,7 +76,7 @@ def parse_agage(data_folder: Union[Path, str], drop_duplicate_timestamps: bool =
             metadata["network"] = "AGAGE"
             metadata["site"] = metadata["site_code"]
             # We'll store these as integer strings, if that's a term
-            metadata["inlet"] = inlet_height
+            metadata["inlet"] = inlet_height_str
             metadata["species_label"] = species_label_lower
 
             to_store[str(n_key)] = {"data": ds, "metadata": metadata}
