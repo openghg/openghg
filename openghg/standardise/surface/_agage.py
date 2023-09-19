@@ -7,11 +7,19 @@ from typing import Dict, Union
 import logging
 import numpy as np
 
+
 logger = logging.getLogger("standardise")
 logger.setLevel(logging.DEBUG)
 
 
-def parse_agage(data_folder: Union[Path, str], drop_duplicate_timestamps: bool = True) -> Dict:
+def parse_agage(data_folder: Union[Path, str]) -> Dict:
+    """Parse AGAGE NetCDF files
+
+    Args:
+        data_folder: Path to folder containing AGAGE data
+    Returns:
+        dict: Dictionary of data and metadata
+    """
     data_folder = Path(data_folder)
     species_folders = [Path(f) for f in data_folder.iterdir() if f.is_dir()]
     print(
@@ -20,7 +28,18 @@ def parse_agage(data_folder: Union[Path, str], drop_duplicate_timestamps: bool =
     )
 
     skip_keys = ["comment", "file_created", "file_created_by", "github_url"]
+    # TODO - this can be removed once we know the attributes will be populated correctly
+    required_metakeys = [
+        "inlet_latitude",
+        "inlet_longitude",
+        "species",
+        "calibration_scale",
+        "inlet_base_elevation_masl",
+        "units",
+        "site_code",
+    ]
     n_key = 0
+
     to_store = {}
     for species in species_folders:
         species_files = species.glob("*.nc")
@@ -63,11 +82,24 @@ def parse_agage(data_folder: Union[Path, str], drop_duplicate_timestamps: bool =
             ObsSurface.validate_data(data=ds, species=attrs_species)
 
             metadata = {str(k): str(v) for k, v in ds.attrs.items() if k not in skip_keys}
-            # Clean any empty strings
+            missing_keys = [k for k in required_metakeys if k not in metadata]
+
+            if missing_keys:
+                logger.warning(
+                    f"Missing required metadata keys: {missing_keys} for {site_file.name}, skipping..."
+                )
+                continue
+
+            empty_strings = {}
             for k, v in metadata.items():
-                if not v:
-                    print(f"We have no data for {k} for {site_file.name}, skipping...")
-                    continue
+                if not v and k in required_metakeys:
+                    empty_strings[k] = v
+
+            if empty_strings:
+                logger.warning(
+                    f"Empty strings for required metadata in {site_file.name}.\n{empty_strings}.\nSkipping..."
+                )
+                continue
 
             metadata = {k: v for k, v in metadata.items() if v}
 
@@ -75,7 +107,6 @@ def parse_agage(data_folder: Union[Path, str], drop_duplicate_timestamps: bool =
             metadata["file_hash"] = hash_file(site_file)
             metadata["network"] = "AGAGE"
             metadata["site"] = metadata["site_code"]
-            # We'll store these as integer strings, if that's a term
             metadata["inlet"] = inlet_height_str
             metadata["species_label"] = species_label_lower
 

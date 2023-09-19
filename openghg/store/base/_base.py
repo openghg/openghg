@@ -222,9 +222,12 @@ class BaseStore:
                 k.lower(): to_lowercase(v) for k, v in metadata.items() if k in required_keys
             }
 
-            if len(required_metadata) < min_keys:
+            n_metadata_keys = len(required_metadata)
+            if n_metadata_keys < min_keys:
                 raise ValueError(
-                    f"The given metadata doesn't contain enough information, we need: {required_keys}"
+                    "The given metadata doesn't contain enough information, "
+                    f"we have {n_metadata_keys}, need 8 {min_keys} "
+                    f"and these are: {required_keys}\nWe have: {metadata}"
                 )
 
             required_result = self._metastore.search(tinydb.Query().fragment(required_metadata))

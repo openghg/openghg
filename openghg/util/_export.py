@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 from pathlib import Path
-from typing import Dict, List, Literal, Union, TYPE_CHECKING, Optional
+from typing import Any, Dict, List, Literal, Union, TYPE_CHECKING, Optional
 import addict
 from pandas import DataFrame
 import logging
@@ -24,6 +24,7 @@ def to_dashboard(
     compress_json: bool = False,
     parquet_compression: Literal["brotli", "snappy", "gzip"] = "gzip",
     float_to_int: bool = False,
+    selection_level: Literal["site", "inlet"] = "inlet",
     default_site: Optional[str] = None,
     default_species: Optional[str] = None,
     default_inlet: Optional[str] = None,
@@ -47,12 +48,17 @@ def to_dashboard(
         compress_json: compress JSON using gzip
         parquet_compression: One of ["brotli", "snappy", "gzip"]
         float_to_int: Convert floats to ints by multiplying by 100
+        selection_level: Do we want the user to select by site or inlet in the dashboard
     Returns:
         None
     """
     allowed_formats = ("json", "parquet")
     if output_format not in allowed_formats:
         raise ValueError(f"Invalid output format, please select one of {allowed_formats}")
+
+    allowed_selection_levels = ("site", "inlet")
+    if selection_level not in allowed_selection_levels:
+        raise ValueError(f"Invalid selection level, please select one of {allowed_selection_levels}")
 
     export_folder = Path(export_folder)
     if not export_folder.exists():
@@ -61,7 +67,8 @@ def to_dashboard(
     # Here we'll store the metadata that can be used to populate the interface
     # it'll also hold the filenames for the retrieval of data
     metadata_complete = addict.Dict()
-    metadata_complete_filepath = Path(export_folder).joinpath("metadata_complete_compressed.json")
+    metadata_complete_filepath = export_folder.joinpath("metadata_complete_compressed.json")
+    dashboard_config_filepath = export_folder.joinpath("dashboard_config.json")
 
     # Create the data directory
     data_foldername = "measurements"
@@ -74,6 +81,22 @@ def to_dashboard(
     # Hold a list of all the files we export so we can check the size of the exported data
     file_sizes_bytes = 0
     one_MB = 1024 * 1024
+    # We'll use this to convert floats to ints
+    float_to_int_multiplier = 1000
+
+    dashboard_config: Dict[str, Any] = {}
+    dashboard_config["selection_level"] = selection_level
+    dashboard_config["float_to_int"] = float_to_int
+    dashboard_config["compressed_json"] = compress_json
+
+    if float_to_int:
+        dashboard_config["float_to_int_multiplier"] = float_to_int_multiplier
+
+    # Now add in any of the default selections
+    # TODO - is this just lazy?
+    # defaults = ["default_site", "default_species", "default_inlet", "default_instrument"]
+    # defaults = {d: locals()[d] for d in defaults}
+    # dashboard_config.update(defaults)
 
     for obs in data:
         measurement_data = obs.data
@@ -98,7 +121,6 @@ def to_dashboard(
         df = df.dropna()
 
         if float_to_int:
-            float_to_int_multiplier = 100
             key = next(iter(df))
             df[key] = df[key] * float_to_int_multiplier
             df = df.astype(int)
@@ -111,31 +133,36 @@ def to_dashboard(
             station_latitude = attributes["station_latitude"]
         except KeyError:
             try:
-                station_latitude = metadata["station_latitude"]
+                station_latitude = obs.metadata["station_latitude"]
             except KeyError:
-                station_latitude = metadata["inlet_latitude"]
+                station_latitude = obs.metadata["inlet_latitude"]
 
         try:
             station_longitude = attributes["station_longitude"]
         except KeyError:
             try:
-                station_longitude = metadata["station_longitude"]
+                station_longitude = obs.metadata["station_longitude"]
             except KeyError:
-                station_longitude = metadata["inlet_longitude"]
-
-        # TODO - remove this if we add site location to standard metadata
-        location = {
-            "station_latitude": station_latitude,
-            "station_longitude": station_longitude,
-        }
-
-        metadata.update(location)
+                station_longitude = obs.metadata["inlet_longitude"]
 
         species = metadata["species"]
         site = metadata["site"]
-        inlet = str(int(float(metadata["inlet"])))
-        network = metadata["network"]
-        instrument = metadata["instrument"]
+
+        if selection_level != "site":
+            inlet = str(int(float(obs.metadata["inlet"])))
+
+        network = obs.metadata["network"]
+        instrument = obs.metadata["instrument"]
+
+        # This is all the metadata we need for the dashboard itself
+        source_metadata = {
+            "station_latitude": station_latitude,
+            "station_longitude": station_longitude,
+            "species": species,
+            "site": site,
+            "network": network,
+            "instrument": instrument,
+        }
 
         if output_format == "json":
             file_extension = ".json"
@@ -144,19 +171,22 @@ def to_dashboard(
         elif output_format == "parquet":
             file_extension = ".parquet"
 
-        export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}{file_extension}"
+        if selection_level == "site":
+            export_filename = f"{species}_{network}_{site}{file_extension}"
+        else:
+            export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}{file_extension}"
+
         export_filepath = data_dir.joinpath(export_filename)
 
         file_data = {
-            "metadata": metadata,
+            "metadata": source_metadata,
             "filepath": f"{data_foldername}/{export_filename}",
-            "float_to_int": float_to_int,
         }
 
-        if float_to_int:
-            file_data["float_to_int_multiplier"] = float_to_int_multiplier
-
-        metadata_complete[species][network][site][inlet][instrument] = file_data
+        if selection_level == "site":
+            metadata_complete[species][network][site] = file_data
+        else:
+            metadata_complete[species][network][site][inlet] = file_data
 
         # TODO - Check if this hoop jumping is required, I can't remember exactly why
         # I did it
@@ -188,11 +218,15 @@ def to_dashboard(
                 msg=f"The file {export_filename} is larger than 1 MB, consider ways to reduce its size."
             )
 
+    # Add in the config
+    dashboard_config_filepath.write_text(json.dumps(dashboard_config))
     metadata_complete_filepath.write_text(json.dumps(metadata_complete))
     file_sizes_bytes += metadata_complete_filepath.stat().st_size
+    file_sizes_bytes += dashboard_config_filepath.stat().st_size
 
     logger.info(f"\n\nComplete metadata file written to: {metadata_complete_filepath}")
-    logger.info(f"Total size of exported data package: {file_sizes_bytes/one_MB:.2f} MB")
+    logger.info(f"Dashboard configuration file written to: {metadata_complete_filepath}")
+    logger.info(f"\nTotal size of exported data package: {file_sizes_bytes/one_MB:.2f} MB")
 
 
 def to_dashboard_mobile(data: Dict, filename: Union[str, Path, None] = None) -> Union[Dict, None]:
