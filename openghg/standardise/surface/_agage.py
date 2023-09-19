@@ -78,6 +78,11 @@ def parse_agage(data_folder: Union[Path, str]) -> Dict:
                 logger.warning(f"Dropping duplicate timestamps in {site_file.name}")
                 ds = ds.drop_duplicates("time", keep="first")
 
+            # TODO - do we want to just drop NaNs here?
+            # Drop NaNs
+            logger.warning("This function will currently silently drop NaNs")
+            ds = ds.dropna(dim="time", how="any", subset=[species_label_lower])
+
             # Check the file attributes and pull out for use as metadata, maybe just keep a subset of these
             ObsSurface.validate_data(data=ds, species=attrs_species)
 
