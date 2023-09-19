@@ -624,7 +624,7 @@ class Datasource:
                             data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
                         except RuntimeError:
                             logger.warning(
-                                f"Storing footprint for date range {daterange} without compression due to netCDF4 RuntimeError."
+                                f"Storing data for date range {daterange} without compression due to netCDF4 RuntimeError."
                             )
                             data.to_netcdf(filepath, engine="netcdf4")
                     except ValueError as e:
@@ -639,14 +639,6 @@ class Datasource:
 
                 else:
                     data.to_netcdf(filepath, engine="netcdf4")
-                # Can we just take the bytes from the data here and then write then straight?
-                # TODO - for now just create a temporary directory - will have to update Acquire
-                # or work on a PR for xarray to allow returning a NetCDF as bytes
-                # with tempfile.TemporaryDirectory() as tmpdir:
-                #     filepath = f"{tmpdir}/temp.nc"
-                #     data.to_netcdf(filepath)
-                #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
-                # path = f"{bucket_path}/data"
 
             # Copy the last version
             if "latest" in self._data_keys:
