@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
+import warnings
 
 
 def parse_btt(
@@ -28,13 +29,14 @@ def parse_btt(
     from numpy import nan as np_nan
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, load_internal_json, get_site_info, format_inlet
-    from pandas import Timestamp, isnull, read_csv, to_timedelta
+    from pandas import Timestamp, isnull, read_csv, to_timedelta   
 
     # TODO: Decide what to do about inputs which aren't use anywhere
     # at present - inlet, instrument, sampling_period, measurement_type
 
     data_filepath = Path(data_filepath)
 
+    warnings.warn("This function will be removed in a future release", DeprecationWarning)
     site = "BTT"
 
     # Rename these columns
