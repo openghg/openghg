@@ -29,7 +29,7 @@ def parse_btt(
     from numpy import nan as np_nan
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, load_internal_json, get_site_info, format_inlet
-    from pandas import Timestamp, isnull, read_csv, to_timedelta   
+    from pandas import Timestamp, isnull, read_csv, to_timedelta
 
     # TODO: Decide what to do about inputs which aren't use anywhere
     # at present - inlet, instrument, sampling_period, measurement_type
