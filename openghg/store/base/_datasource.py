@@ -617,16 +617,10 @@ class Datasource:
                     try:
                         data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
                     except RuntimeError:
-                        try:
-                            logger.warning("Attempting a simple encoding scheme.")
-                            comp = dict(zlib=True, complevel=5)
-                            encoding = {var: comp for var in data.data_vars}
-                            data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
-                        except RuntimeError:
-                            logger.warning(
-                                f"Storing data for date range {daterange} without compression due to netCDF4 RuntimeError."
-                            )
-                            data.to_netcdf(filepath, engine="netcdf4")
+                        logger.warning(
+                            f"Storing data for date range {daterange} without compression due to netCDF4 RuntimeError."
+                        )
+                        data.to_netcdf(filepath, engine="netcdf4")
                     except ValueError as e:
                         # chunksize might be set if the data was read from a netCDF file
                         # and sometimes this causes errors.
