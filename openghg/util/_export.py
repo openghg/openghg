@@ -18,7 +18,7 @@ logger.setLevel("DEBUG")
 
 def to_dashboard(
     data: Union[ObsData, List[ObsData]],
-    export_folder: Path,
+    export_folder: Union[str, Path],
     downsample_n: int = 3,
     compress_json: bool = False,
     float_to_int: bool = False,
@@ -31,6 +31,8 @@ def to_dashboard(
 ) -> None:
     """Takes ObsData objects produced by OpenGHG and outputs them to JSON
     files. Files are named using the following convention:
+
+    TODO - add compression of metadata file
 
     if selection_level == "site":
         export_filename = f"{species}_{network}_{site}.json"
@@ -64,6 +66,9 @@ def to_dashboard(
 
     if selection_level == "site":
         raise NotImplementedError("Selection by site is not currently supported")
+
+    if mock_inlet:
+        logger.warning("Assuming multiple inlet height data and setting inlet = 'single_inlet'")
 
     export_folder = Path(export_folder)
     if not export_folder.exists():
@@ -164,7 +169,7 @@ def to_dashboard(
         network = obs.metadata["network"]
         # TODO - remove this as we won't want to select by instrument
         # use a mock instrument name for now
-        instrument = "remove_instrument_key"
+        instrument = "instrument_key"
 
         # This is all the metadata we need for the dashboard itself
         source_metadata = {
@@ -180,10 +185,14 @@ def to_dashboard(
 
         # TODO - remove this once we've updated the dashboard to support selection by site or inlet
         if mock_inlet:
-            inlet = "888m"
+            inlet = "single_inlet"
         else:
-            inlet = str(int(float(obs.metadata["inlet"])))
-            source_metadata["inlet"] = inlet
+            try:
+                inlet = obs.metadata["inlet"]
+            except ValueError:
+                inlet = str(int(float(obs.metadata["inlet"])))
+
+        source_metadata["inlet"] = inlet
 
         file_extension = ".json"
         if compress_json:
@@ -198,7 +207,7 @@ def to_dashboard(
 
         file_data = {
             "metadata": source_metadata,
-            "filepath": f"{data_foldername}/{export_filename}",
+            "filepath": f"{data_foldername}/{export_filename.lower()}",
         }
 
         if selection_level == "site":
