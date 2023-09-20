@@ -20,20 +20,22 @@ def to_dashboard(
     data: Union[ObsData, List[ObsData]],
     export_folder: Path,
     downsample_n: int = 3,
-    output_format: Literal["json", "parquet"] = "json",
     compress_json: bool = False,
-    parquet_compression: Literal["brotli", "snappy", "gzip"] = "gzip",
     float_to_int: bool = False,
     selection_level: Literal["site", "inlet"] = "inlet",
+    mock_inlet: bool = False,
+    drop_na: bool = True,
     default_site: Optional[str] = None,
     default_species: Optional[str] = None,
     default_inlet: Optional[str] = None,
-    default_instrument: Optional[str] = None,
 ) -> None:
     """Takes ObsData objects produced by OpenGHG and outputs them to JSON
     files. Files are named using the following convention:
 
-    export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}.json"
+    if selection_level == "site":
+        export_filename = f"{species}_{network}_{site}.json"
+    elif selection_level == "inlet":
+        export_filename = f"{species}_{network}_{site}_{inlet}_{instrument}.json"
 
     A separate metadata file, metadata_complete.json is created in the same
     export folder containing the metadata for each site and the filename for
@@ -43,22 +45,25 @@ def to_dashboard(
     Args:
         data: ObsData object or list of ObsData objects
         export_folder: Folder path to write files
-        downsample_n: Take every nth value from the data
-        output_format: json or parquet
-        compress_json: compress JSON using gzip
-        parquet_compression: One of ["brotli", "snappy", "gzip"]
-        float_to_int: Convert floats to ints by multiplying by 100
         selection_level: Do we want the user to select by site or inlet in the dashboard
+        downsample_n: Take every nth value from the data
+        compress_json: compress JSON using gzip
+        float_to_int: Convert floats to ints by multiplying by 100
+        mock_inlet: Use a mock "888m" inlet for the the dashboard as it doesn't currently support
+        selection only by site.
+        drop_na: Drop any NaNs from the datasets
+        default_site: Set a default site for the dashboard
+        default_species: Set a default species for the dashboard
+        default_inlet: Set a default inlet for the dashboard
     Returns:
         None
     """
-    allowed_formats = ("json", "parquet")
-    if output_format not in allowed_formats:
-        raise ValueError(f"Invalid output format, please select one of {allowed_formats}")
-
     allowed_selection_levels = ("site", "inlet")
     if selection_level not in allowed_selection_levels:
         raise ValueError(f"Invalid selection level, please select one of {allowed_selection_levels}")
+
+    if selection_level == "site":
+        raise NotImplementedError("Selection by site is not currently supported")
 
     export_folder = Path(export_folder)
     if not export_folder.exists():
@@ -66,8 +71,8 @@ def to_dashboard(
         export_folder.mkdir()
     # Here we'll store the metadata that can be used to populate the interface
     # it'll also hold the filenames for the retrieval of data
-    metadata_complete = addict.Dict()
-    metadata_complete_filepath = export_folder.joinpath("metadata_complete_compressed.json")
+
+    metadata_complete_filepath = export_folder.joinpath("metadata_complete.json")
     dashboard_config_filepath = export_folder.joinpath("dashboard_config.json")
 
     # Create the data directory
@@ -89,14 +94,22 @@ def to_dashboard(
     dashboard_config["float_to_int"] = float_to_int
     dashboard_config["compressed_json"] = compress_json
 
+    if default_site is not None:
+        dashboard_config["default_site"] = default_site
+    if default_species is not None:
+        dashboard_config["default_species"] = default_species
+    if default_inlet is not None:
+        dashboard_config["default_inlet"] = default_inlet
+
     if float_to_int:
         dashboard_config["float_to_int_multiplier"] = float_to_int_multiplier
 
-    # Now add in any of the default selections
-    # TODO - is this just lazy?
-    # defaults = ["default_site", "default_species", "default_inlet", "default_instrument"]
-    # defaults = {d: locals()[d] for d in defaults}
-    # dashboard_config.update(defaults)
+    # We'll store the filename information and source metadata here
+    metadata_complete = addict.Dict()
+    # We'll record the inlets for each site
+    # so we can warn the user if they're exporting multiple inlets
+    # for the same site
+    site_inlets = addict.Dict()
 
     for obs in data:
         measurement_data = obs.data
@@ -118,7 +131,8 @@ def to_dashboard(
             df = df[[species_label]]
 
         # Drop any NaNs
-        df = df.dropna()
+        if drop_na:
+            df = df.dropna()
 
         if float_to_int:
             key = next(iter(df))
@@ -147,12 +161,10 @@ def to_dashboard(
 
         species = metadata["species"]
         site = metadata["site"]
-
-        if selection_level != "site":
-            inlet = str(int(float(obs.metadata["inlet"])))
-
         network = obs.metadata["network"]
-        instrument = obs.metadata["instrument"]
+        # TODO - remove this as we won't want to select by instrument
+        # use a mock instrument name for now
+        instrument = "remove_instrument_key"
 
         # This is all the metadata we need for the dashboard itself
         source_metadata = {
@@ -162,14 +174,20 @@ def to_dashboard(
             "site": site,
             "network": network,
             "instrument": instrument,
+            "units": obs.metadata["units"],
+            "station_long_name": obs.metadata["station_long_name"],
         }
 
-        if output_format == "json":
-            file_extension = ".json"
-            if compress_json:
-                file_extension += ".gz"
-        elif output_format == "parquet":
-            file_extension = ".parquet"
+        # TODO - remove this once we've updated the dashboard to support selection by site or inlet
+        if mock_inlet:
+            inlet = "888m"
+        else:
+            inlet = str(int(float(obs.metadata["inlet"])))
+            source_metadata["inlet"] = inlet
+
+        file_extension = ".json"
+        if compress_json:
+            file_extension += ".gz"
 
         if selection_level == "site":
             export_filename = f"{species}_{network}_{site}{file_extension}"
@@ -185,29 +203,25 @@ def to_dashboard(
 
         if selection_level == "site":
             metadata_complete[species][network][site] = file_data
+            site_inlets[species][network][site] = (
+                site_inlets[species][network][site].get(site, []).append(inlet)
+            )
         else:
-            metadata_complete[species][network][site][inlet] = file_data
+            metadata_complete[species][network][site][inlet][instrument] = file_data
 
         # TODO - Check if this hoop jumping is required, I can't remember exactly why
         # I did it
-        if output_format == "json":
-            data_dict = json.loads(df.to_json())
-            # Let's trim the species name as we don't need that
-            key = next(iter(data_dict))
-            data_dict = data_dict[key]
+        data_dict = json.loads(df.to_json())
+        # Let's trim the species name as we don't need that
+        key = next(iter(data_dict))
+        data_dict = data_dict[key]
 
-            for_export_str = json.dumps(data_dict)
-            if compress_json:
-                for_export_bytes = gzip.compress(for_export_str.encode())
-                export_filepath.write_bytes(for_export_bytes)
-            else:
-                export_filepath.write_text(for_export_str)
+        for_export_str = json.dumps(data_dict)
+        if compress_json:
+            for_export_bytes = gzip.compress(for_export_str.encode())
+            export_filepath.write_bytes(for_export_bytes)
         else:
-            logger.warning(
-                "The dashboard doesn't currently support the parquet format. "
-                + "This is for testing purposes only."
-            )
-            df.to_parquet(export_filepath, compression=parquet_compression)
+            export_filepath.write_text(for_export_str)
 
         logger.info(f"Writing dashboard data to: {export_filename}")
 
@@ -217,6 +231,18 @@ def to_dashboard(
             logger.warn(
                 msg=f"The file {export_filename} is larger than 1 MB, consider ways to reduce its size."
             )
+
+    if selection_level == "site":
+        for species, networkData in site_inlets.items():
+            for network, siteData in networkData.items():
+                for site, inlets in siteData.items():
+                    if len(inlets) > 1:
+                        logger.warn(
+                            msg=f"Site {site} has multiple inlets: {inlets}. "
+                            "You've set selection_level == 'site' meaning only data for the last inlet will be kept."
+                            "Please make sure are more specific in your selection of data or select"
+                            "selection_level == 'inlet'"
+                        )
 
     # Add in the config
     dashboard_config_filepath.write_text(json.dumps(dashboard_config))

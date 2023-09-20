@@ -37,6 +37,7 @@ def parse_agage(data_folder: Union[Path, str]) -> Dict:
         "inlet_base_elevation_masl",
         "units",
         "site_code",
+        "instrument",
     ]
     n_key = 0
 
