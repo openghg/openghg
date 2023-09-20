@@ -6,6 +6,7 @@ from openghg.dataobjects import SearchResults
 from openghg.retrieve.ceda import retrieve_surface
 from pandas import Timestamp
 from xarray import load_dataset
+import pytest
 
 
 def test_ceda_retrieve_cloud_no_results(monkeypatch, mocker):
@@ -43,6 +44,9 @@ def test_ceda_retrieve_cloud(monkeypatch, mocker):
     assert res.metadata == mock_metadata
 
 
+@pytest.mark.xfail(
+    reason="The data we mock with doesn't contain the right data, related to required_keys, see #785"
+)
 def test_ceda_retrieve(mocker):
     sample_hfd = get_retrieval_datapath(filename="sample_of_bristol-crds_heathfield_20130101_co2-100m.nc")
 

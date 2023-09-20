@@ -65,3 +65,13 @@ delete or modify already existing data.
    :maxdepth: 1
 
    local/Managing_object_store/Changing_object_store
+
+Exporting data
+--------------
+
+Exporting data for our data dashboards or to use for your own analysis or simulations.
+
+.. toctree::
+   :maxdepth: 1
+
+   local/Exporting_data/Export_to_dashboard

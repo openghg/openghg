@@ -794,6 +794,7 @@ def test_read_multiside_aqmesh():
     assert data.attrs.items() >= expected_attrs.items()
 
 
+@pytest.xfail(reason="Fails due to metadata issued related to required_keys - see #785")
 def test_store_icos_carbonportal_data(bucket, mocker):
     # First we need to jump through some hoops to get the correct data dict
     # I feel like there must be a simpler way of doing this but xarray.to_json

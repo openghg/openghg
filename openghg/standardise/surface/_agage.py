@@ -1,0 +1,124 @@
+from pathlib import Path
+import xarray as xr
+from openghg.standardise.meta import define_species_label
+from openghg.store import ObsSurface
+from openghg.util import remove_punctuation, hash_file
+from typing import Dict, Union
+import logging
+import numpy as np
+
+
+logger = logging.getLogger("standardise")
+logger.setLevel(logging.DEBUG)
+
+
+def parse_agage(data_folder: Union[Path, str]) -> Dict:
+    """Parse AGAGE NetCDF files
+
+    Args:
+        data_folder: Path to folder containing AGAGE data
+    Returns:
+        dict: Dictionary of data and metadata
+    """
+    data_folder = Path(data_folder)
+    species_folders = [Path(f) for f in data_folder.iterdir() if f.is_dir()]
+    logger.warning(
+        "For now this function is not intelligent and will try and process all subfolders of this directory "
+        "and try to read the contained .nc files."
+    )
+
+    logger.warning("This function will currently silently drop NaNs")
+
+    skip_keys = ["comment", "file_created", "file_created_by", "github_url"]
+    # TODO - this can be removed once we know the attributes will be populated correctly
+    required_metakeys = [
+        "inlet_latitude",
+        "inlet_longitude",
+        "species",
+        "calibration_scale",
+        "inlet_base_elevation_masl",
+        "units",
+        "site_code",
+        "instrument",
+    ]
+    n_key = 0
+
+    to_store = {}
+    for species in species_folders:
+        species_files = species.glob("*.nc")
+
+        for site_file in species_files:
+            ds = xr.open_dataset(site_file)
+
+            # Get the list of inlets
+            inlet_heights = np.unique(ds["inlet_height"].values).tolist()
+            if len(inlet_heights) > 1:
+                inlet_height_str = "multiple"
+            else:
+                inlet_height_str = str(inlet_heights[0])
+
+            # Do a very quick check to make sure the species is what we expect it to be
+            attrs_species = ds.attrs["species"]
+            folder_species = species.name
+            if remove_punctuation(folder_species) != remove_punctuation(attrs_species):
+                raise ValueError(
+                    f"Mismatch between species foldername: {folder_species} and species in attributes {attrs_species}"
+                )
+
+            species_label_lower, _ = define_species_label(attrs_species)
+            # Update the variable names to inlcude the species
+            rename_dict = {
+                "mf": species_label_lower,
+                "mf_repeatability": f"{species_label_lower}_repeatability",
+            }
+
+            ds = ds.rename(rename_dict)
+
+            unique, index, count = np.unique(ds.time, return_counts=True, return_index=True)
+            n_dupes = unique[count > 1].size
+
+            if n_dupes > 0:
+                logger.warning(f"Dropping duplicate timestamps in {site_file.name}")
+                ds = ds.drop_duplicates("time", keep="first")
+
+            # TODO - do we want to just drop NaNs here?
+            # Drop NaNs
+
+            ds = ds.dropna(dim="time", how="any", subset=[species_label_lower])
+
+            # Check the file attributes and pull out for use as metadata, maybe just keep a subset of these
+            ObsSurface.validate_data(data=ds, species=attrs_species)
+
+            metadata = {str(k): str(v) for k, v in ds.attrs.items() if k not in skip_keys}
+            missing_keys = [k for k in required_metakeys if k not in metadata]
+
+            if missing_keys:
+                logger.warning(
+                    f"Missing required metadata keys: {missing_keys} for {site_file.name}, skipping..."
+                )
+                continue
+
+            empty_strings = {}
+            for k, v in metadata.items():
+                if not v and k in required_metakeys:
+                    empty_strings[k] = v
+
+            if empty_strings:
+                logger.warning(
+                    f"Empty strings for required metadata in {site_file.name}.\n{empty_strings}.\nSkipping..."
+                )
+                continue
+
+            metadata = {k: v for k, v in metadata.items() if v}
+
+            metadata["filename_original"] = site_file.name
+            metadata["file_hash"] = hash_file(site_file)
+            metadata["network"] = "AGAGE"
+            metadata["site"] = metadata["site_code"]
+            metadata["inlet"] = inlet_height_str
+            metadata["species_label"] = species_label_lower
+
+            to_store[str(n_key)] = {"data": ds, "metadata": metadata}
+            n_key += 1
+
+    return to_store
