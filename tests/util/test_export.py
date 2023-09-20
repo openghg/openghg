@@ -1,7 +1,8 @@
+import pytest
 import datetime
 import json
 from pathlib import Path
-from tempfile import TemporaryDirectory
+import gzip
 
 from helpers import get_mobile_datapath
 from openghg.dataobjects import ObsData
@@ -10,82 +11,62 @@ from openghg.util import to_dashboard, to_dashboard_mobile
 from pandas import DataFrame, date_range
 
 
-def test_export_to_dashboard():
-    n_days = 100
+@pytest.fixture
+def fake_obsdata():
+    n_days = 365
     epoch = datetime.datetime(1970, 1, 1, 1, 1)
 
-    site_A = DataFrame(
+    df_site_a = DataFrame(
         data={"co2": range(0, n_days)},
         index=date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D"),
-    ).to_xarray()
+    )
 
-    site_A.attrs = {"station_longitude": 52.123, "station_latitude": 52.123}
+    ds_site_a = df_site_a.to_xarray()
+
+    ds_site_a.attrs = {"station_longitude": 52.123, "station_latitude": 52.123}
 
     metadata = {
-        "network": "BEACO2N",
+        "network": "AGAGE",
         "site": "test_site",
         "instrument": "picarro",
         "inlet": "100m",
         "species": "co2",
+        "units": "ppm",
+        "station_long_name": "Test site",
     }
 
-    obs = ObsData(data=site_A, metadata=metadata)
+    return ObsData(data=ds_site_a, metadata=metadata)
 
-    for_export = to_dashboard(data=obs)
 
-    expected_export = {
+def test_export_to_dashboard(tmpdir, fake_obsdata):
+    export_folder = Path(tmpdir)
+
+    to_dashboard(data=fake_obsdata, export_folder=export_folder)
+
+    dashboard_config = json.loads(export_folder.joinpath("dashboard_config.json").read_text())
+
+    assert dashboard_config == {"selection_level": "inlet", "float_to_int": False, "compressed_json": False}
+
+    complete_metadata = json.loads(export_folder.joinpath("metadata_complete.json").read_text())
+
+    expected_metadata = {
         "co2": {
-            "BEACO2N": {
+            "AGAGE": {
                 "test_site": {
                     "100m": {
-                        "picarro": {
-                            "data": {
-                                "co2": {
-                                    "3660000": 0,
-                                    "262860000": 3,
-                                    "522060000": 6,
-                                    "781260000": 9,
-                                    "1040460000": 12,
-                                    "1299660000": 15,
-                                    "1558860000": 18,
-                                    "1818060000": 21,
-                                    "2077260000": 24,
-                                    "2336460000": 27,
-                                    "2595660000": 30,
-                                    "2854860000": 33,
-                                    "3114060000": 36,
-                                    "3373260000": 39,
-                                    "3632460000": 42,
-                                    "3891660000": 45,
-                                    "4150860000": 48,
-                                    "4410060000": 51,
-                                    "4669260000": 54,
-                                    "4928460000": 57,
-                                    "5187660000": 60,
-                                    "5446860000": 63,
-                                    "5706060000": 66,
-                                    "5965260000": 69,
-                                    "6224460000": 72,
-                                    "6483660000": 75,
-                                    "6742860000": 78,
-                                    "7002060000": 81,
-                                    "7261260000": 84,
-                                    "7520460000": 87,
-                                    "7779660000": 90,
-                                    "8038860000": 93,
-                                    "8298060000": 96,
-                                    "8557260000": 99,
-                                }
-                            },
+                        "instrument_key": {
                             "metadata": {
-                                "network": "BEACO2N",
-                                "site": "test_site",
-                                "instrument": "picarro",
-                                "inlet": "100m",
                                 "station_latitude": 52.123,
                                 "station_longitude": 52.123,
-                                "species": "co2"
+                                "species": "co2",
+                                "site": "test_site",
+                                "network": "AGAGE",
+                                "instrument": "instrument_key",
+                                "units": "ppm",
+                                "station_long_name": "Test site",
+                                "inlet": "100m",
                             },
+                            "filepath": "measurements/co2_agage_test_site_100m_instrument_key.json",
                         }
                     }
                 }
@@ -93,15 +74,73 @@ def test_export_to_dashboard():
         }
     }
 
-    assert for_export == expected_export
+    assert complete_metadata == expected_metadata
 
-    with TemporaryDirectory() as tmpdir:
-        tmp_path = Path(tmpdir).joinpath("test_export.json")
-        to_dashboard(data=obs, filepath=tmp_path)
+    exported_data = json.loads(
+        export_folder.joinpath("measurements/co2_AGAGE_test_site_100m_instrument_key.json").read_text()
+    )
 
-        assert tmp_path.exists()
-        exported_data = json.loads(tmp_path.read_text())
-        assert exported_data == for_export
+    sliced = list(exported_data.items())[:4]
+
+    assert sliced == [("3660000", 0), ("262860000", 3), ("522060000", 6), ("781260000", 9)]
+
+
+def test_to_dashboard_data_saving(tmpdir, fake_obsdata):
+    output_folder = Path(tmpdir)
+    to_dashboard(data=fake_obsdata, export_folder=output_folder, compress_json=True)
+
+    dashboard_config = json.loads(output_folder.joinpath("dashboard_config.json").read_text())
+
+    assert dashboard_config == {"selection_level": "inlet", "float_to_int": False, "compressed_json": True}
+
+    metadata = json.loads(output_folder.joinpath("metadata_complete.json").read_text())
+    filepath = metadata["co2"]["AGAGE"]["test_site"]["100m"]["instrument_key"]["filepath"]
+
+    exported_datapath = output_folder.joinpath(filepath)
+    decompressed = gzip.decompress(exported_datapath.read_bytes())
+    exported_data = json.loads(decompressed)
+
+    sliced = list(exported_data.items())[:4]
+
+    assert sliced == [("3660000", 0), ("262860000", 3), ("522060000", 6), ("781260000", 9)]
+
+    to_dashboard(data=fake_obsdata, export_folder=output_folder, compress_json=True, float_to_int=True)
+
+    dashboard_config = json.loads(output_folder.joinpath("dashboard_config.json").read_text())
+    metadata = json.loads(output_folder.joinpath("metadata_complete.json").read_text())
+
+    assert dashboard_config == {
+        "selection_level": "inlet",
+        "float_to_int": True,
+        "compressed_json": True,
+        "float_to_int_multiplier": 1000,
+    }
+
+    filepath = metadata["co2"]["AGAGE"]["test_site"]["100m"]["instrument_key"]["filepath"]
+    exported_datapath = output_folder.joinpath(filepath)
+    decompressed = gzip.decompress(exported_datapath.read_bytes())
+    exported_data = json.loads(decompressed)
+
+    sliced = list(exported_data.items())[:4]
+
+    assert sliced == [("3660000", 0), ("262860000", 3000), ("522060000", 6000), ("781260000", 9000)]
+
+
+def test_to_dashboard_check_source_select_site_raises_notimplemented(fake_obsdata, tmpdir):
+    with pytest.raises(NotImplementedError):
+        to_dashboard(data=fake_obsdata, export_folder=tmpdir, selection_level="site")
+
+
+def test_to_dashboard_mock_inlet(fake_obsdata, tmpdir):
+    to_dashboard(data=fake_obsdata, export_folder=tmpdir, mock_inlet=True)
+
+    export_folder = Path(tmpdir)
+    metadata = json.loads(export_folder.joinpath("metadata_complete.json").read_text())
+
+    assert (
+        metadata["co2"]["AGAGE"]["test_site"]["single_inlet"]["instrument_key"]["metadata"]["inlet"]
+        == "single_inlet"
+    )
 
 
 def test_to_dashboard_mobile_return_dict():
