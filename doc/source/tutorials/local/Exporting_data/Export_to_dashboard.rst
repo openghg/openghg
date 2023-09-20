@@ -101,23 +101,23 @@ directory called ``exported_dashboard_data`` and export the files to that.
 
     export_path = Path("/home/gareth/exported_dashboard_data")
 
-We want to: 
+We want to:
 
-* export to a temporary folder - ``data=agage_data`` 
-* downsample the data, taking every 5th measurement - ``downsample_n=5`` 
+* export to a temporary folder - ``data=agage_data``
+* downsample the data, taking every 5th measurement - ``downsample_n=5``
 * not compress the exported JSON - ``compress_json=False``
-* drop NaNs - ``drop_na=True`` 
+* drop NaNs - ``drop_na=True``
 * tell the dashboard to allow selection of source by inlet - ``selection_level="inlet"``
 * use a set inlet string for multi-inlet data (needed until the dashboard is updated and exported AGAGE data is tidied) - ``mock_inlet=True``
 
 .. code:: ipython3
 
-    to_dashboard(export_folder=export_path, 
-                 data=agage_data, 
-                 downsample_n=5, 
-                 compress_json=False, 
-                 drop_na=True, 
-                 selection_level="inlet", 
+    to_dashboard(export_folder=export_path,
+                 data=agage_data,
+                 downsample_n=5,
+                 compress_json=False,
+                 drop_na=True,
+                 selection_level="inlet",
                  mock_inlet=True)
 
 You'll see a long list of messages telling you the names of the exported
