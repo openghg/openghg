@@ -6,6 +6,7 @@ from helpers import (
     get_footprint_datapath,
     get_column_datapath,
     get_surface_datapath,
+    clear_test_stores
 )
 from openghg.standardise import (
     standardise_flux,
@@ -277,7 +278,6 @@ def test_standardise_column():
     assert "error" not in results
     assert "ch4" in results  # Should this be a more descriprive key?
 
-
 def test_standardise_footprint():
     datapath = get_footprint_datapath("footprint_test.nc")
 
@@ -285,7 +285,7 @@ def test_standardise_footprint():
     network = "LGHG"
     height = "10m"
     domain = "EUROPE"
-    model = "test_model"
+    model = "test_model_123"
 
     results = standardise_footprint(
         filepath=datapath,
@@ -376,3 +376,42 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
             },
         }
     )
+
+
+def test_why_writing_same_fp_twice_raises_error():
+    clear_test_stores()
+    datapath = get_footprint_datapath("footprint_test.nc")
+
+    site = "TMB"
+    network = "LGHG"
+    height = "10m"
+    domain = "EUROPE"
+    model = "test_model_123"
+
+    results = standardise_footprint(
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        high_spatial_resolution=True,
+        overwrite=True,
+        store="user",
+    )
+
+    print(results)
+
+    results = standardise_footprint(
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        high_spatial_resolution=True,
+        overwrite=True,
+        store="user",
+    )
+
+    print(results)
