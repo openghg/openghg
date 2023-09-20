@@ -22,10 +22,12 @@ def parse_agage(data_folder: Union[Path, str]) -> Dict:
     """
     data_folder = Path(data_folder)
     species_folders = [Path(f) for f in data_folder.iterdir() if f.is_dir()]
-    print(
-        "Warning: for now this function is not intelligent and will try and process all subfolders of this directory "
-        "and try to read the contained .nc files. It will report any files it can't process or it doesn't understand"
+    logger.warning(
+        "For now this function is not intelligent and will try and process all subfolders of this directory "
+        "and try to read the contained .nc files."
     )
+
+    logger.warning("This function will currently silently drop NaNs")
 
     skip_keys = ["comment", "file_created", "file_created_by", "github_url"]
     # TODO - this can be removed once we know the attributes will be populated correctly
@@ -81,7 +83,7 @@ def parse_agage(data_folder: Union[Path, str]) -> Dict:
 
             # TODO - do we want to just drop NaNs here?
             # Drop NaNs
-            logger.warning("This function will currently silently drop NaNs")
+
             ds = ds.dropna(dim="time", how="any", subset=[species_label_lower])
 
             # Check the file attributes and pull out for use as metadata, maybe just keep a subset of these
