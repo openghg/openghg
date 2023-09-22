@@ -4,7 +4,6 @@ from typing import DefaultDict, Dict, Optional, Union
 import logging
 from openghg.store.base import BaseStore
 from xarray import Dataset
-from types import TracebackType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -27,20 +26,6 @@ class EulerianModel(BaseStore):
     _root = "EulerianModel"
     _uuid = "63ff2365-3ba2-452a-a53d-110140805d06"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> EulerianModel:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_file(
         self,

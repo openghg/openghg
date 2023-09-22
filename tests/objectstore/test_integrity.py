@@ -1,23 +1,11 @@
 import pytest
 from openghg.objectstore import integrity_check
-from openghg.standardise import (
-    standardise_surface,
-    standardise_flux,
-    standardise_column,
-    standardise_footprint,
-)
+from openghg.standardise import standardise_flux, standardise_footprint
 from openghg.objectstore import get_writable_bucket, delete_object
 from openghg.types import ObjectStoreError
-from helpers import (
-    get_surface_datapath,
-    get_column_datapath,
-    get_footprint_datapath,
-    get_emissions_datapath,
-    clear_test_stores,
-)
-from openghg.store import Footprints, Emissions
+from helpers import get_footprint_datapath, get_emissions_datapath, clear_test_stores
 from openghg.store.base import Datasource
-import tinydb
+from openghg.objectstore.metastore import open_metastore
 
 
 @pytest.fixture(autouse=True)
@@ -59,8 +47,8 @@ def test_integrity_check_delete_Datasource_keys():
 
     # Now delete some of the Datasources
     bucket = get_writable_bucket(name="user")
-    with Emissions(bucket=bucket) as em:
-        uid = em.datasources()[0]
+    with open_metastore(bucket=bucket, data_type="emissions") as metastore:
+        uid = metastore.select("uuid")[0]
         ds = Datasource.load(bucket=bucket, uuid=uid)
         keys = ds.data_keys()
         for key in keys:

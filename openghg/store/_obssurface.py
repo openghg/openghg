@@ -10,7 +10,6 @@ import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
-from types import TracebackType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -23,20 +22,6 @@ class ObsSurface(BaseStore):
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> ObsSurface:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_data(
         self,
@@ -586,7 +571,6 @@ class ObsSurface(BaseStore):
         """
         from openghg.objectstore import delete_object
         from openghg.store.base import Datasource
-        from tinydb import where
 
         # Load the Datasource and get all its keys
         # iterate over these keys and delete them
@@ -605,10 +589,8 @@ class ObsSurface(BaseStore):
         key = f"{Datasource._datasource_root}/uuid/{uuid}"
         delete_object(bucket=self._bucket, key=key)
 
-        # Delete the UUID from the metastore and this instances
-        # list of UUIDs
-        self._metastore.remove(where("uuid") == uuid)
-        self._datasource_uuids.remove(uuid)
+        # Delete the UUID from the metastore
+        self._metastore.delete({"uuid": uuid})
 
     def seen_hash(self, file_hash: str) -> bool:
         return file_hash in self._file_hashes

@@ -1,5 +1,6 @@
-from openghg.store import data_manager, ObsSurface, Footprints
+from openghg.dataobjects import data_manager
 from openghg.store.base import Datasource
+from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import search_surface
 from openghg.standardise import standardise_surface, standardise_footprint
 from openghg.objectstore import get_writable_bucket
@@ -84,8 +85,8 @@ def test_delete_footprint_data(footprint_read):
     res = data_manager(data_type="footprints", site="tmb", store="user")
 
     bucket = get_writable_bucket(name="user")
-    with Footprints(bucket=bucket) as fps:
-        uuid = fps.datasources()[0]
+    with open_metastore(bucket=bucket, data_type="footprints") as metastore:
+        uuid = metastore.select('uuid')[0]
 
     ds = Datasource.load(bucket=bucket, uuid=uuid, shallow=True)
     key = ds.key()
@@ -98,7 +99,8 @@ def test_delete_footprint_data(footprint_read):
     for k in filepaths:
         assert k.exists()
 
-    assert uuid in fps._datasource_uuids
+    with open_metastore(bucket=bucket, data_type="footprints") as metastore:
+        assert metastore.search({'uuid': uuid})
 
     res.delete_datasource(uuid=uuid)
 
@@ -107,8 +109,8 @@ def test_delete_footprint_data(footprint_read):
     for k in filepaths:
         assert not k.exists()
 
-    with Footprints(bucket=bucket) as fps:
-        assert uuid not in fps._datasource_uuids
+    with open_metastore(bucket=bucket, data_type="footprints") as metastore:
+        assert metastore.search({'uuid': uuid}) == []
 
 
 def test_object_store_not_in_metadata():
@@ -308,8 +310,8 @@ def test_delete_data():
     d = Datasource.load(bucket=bucket, uuid=uid)
     key = d.key()
 
-    with ObsSurface(bucket) as obs:
-        assert uid in obs._datasource_uuids
+    with open_metastore(bucket=bucket, data_type="surface") as metastore:
+        assert metastore.search({'uuid': uid})
 
     datasource_path = key_to_local_filepath(key=key)[0]
 
@@ -330,8 +332,8 @@ def test_delete_data():
     for k in key_paths:
         assert not k.exists()
 
-    with ObsSurface(bucket) as obs:
-        assert uid not in obs._datasource_uuids
+    with open_metastore(bucket=bucket, data_type="surface") as metastore:
+        assert metastore.search({'uuid': uid}) == []
 
 
 @pytest.mark.xfail(reason="Failing due to the Datasource save bug - issue 724", raises=AssertionError)

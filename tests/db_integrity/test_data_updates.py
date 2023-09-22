@@ -2,8 +2,8 @@ import pytest
 import pandas as pd
 import numpy as np
 from helpers import get_surface_datapath, get_emissions_datapath, get_footprint_datapath
-from openghg.store import ObsSurface
 from openghg.store.base import Datasource
+from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_flux
 from openghg.retrieve import search
 from openghg.standardise import standardise_footprint, standardise_flux, standardise_surface
@@ -450,8 +450,8 @@ def test_obs_data_representative_date_overlap():
     bsd_data_read_crds_internal_overlap()
     bsd_data_read_crds_internal_overlap(overwrite=True)
 
-    with ObsSurface(bucket=bucket) as obs:
-        uuids = obs.datasources()
+    with open_metastore(bucket=bucket, data_type="surface") as metastore:
+        uuids = metastore.select('uuid')
 
     datasources = []
     for uuid in uuids:
@@ -481,8 +481,6 @@ def test_obs_data_representative_date_overlap():
 
 
 # Check appropriate metadata is updated when data is added to data sources
-
-
 def test_metadata_update():
     """
     Add data and then update this to check that the version is both added to the original

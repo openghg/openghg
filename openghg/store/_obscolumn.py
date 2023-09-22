@@ -8,7 +8,6 @@ from numpy import ndarray
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray
-from types import TracebackType
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -23,20 +22,6 @@ class ObsColumn(BaseStore):
     _root = "ObsColumn"
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> ObsColumn:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_file(
         self,
