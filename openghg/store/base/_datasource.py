@@ -714,6 +714,8 @@ class Datasource:
                 # instead of writing to a temporary space and reading the bytes
                 filepath = Path(f"{bucket}/{data_key}._data")
 
+                print(f"Writing to {filepath}")
+
                 try:
                     data.to_netcdf(filepath, engine="netcdf4")
                 except IOError:
