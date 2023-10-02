@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
 
 ### Added
+- Added ability for the user to add additional tags as `**kwargs` in metadata. - [PR #793](https://github.com/openghg/openghg/pull/793)
+
 - Added `environment-dev.yaml` file for developer conda environment - [PR #769](https://github.com/openghg/openghg/pull/769)
 
 - Added generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
