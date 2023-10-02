@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
-from types import TracebackType
 import numpy as np
 from xarray import Dataset
 
@@ -22,23 +21,10 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class BoundaryConditions(BaseStore):
     """This class is used to process boundary condition data"""
 
+    _data_type = "boundary_conditions"
     _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> BoundaryConditions:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
@@ -75,7 +61,7 @@ class BoundaryConditions(BaseStore):
         save_current: Optional[bool] = None,
         overwrite: bool = False,
         force: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read boundary conditions file
 
         Args:
@@ -145,7 +131,7 @@ class BoundaryConditions(BaseStore):
                 f"{self._file_hashes[file_hash]} - skipping.\n"
                 "If necessary, use force=True to bypass this to add this data."
             )
-            return None
+            return {}
 
         bc_data = open_dataset(filepath)
 
@@ -218,7 +204,7 @@ class BoundaryConditions(BaseStore):
             required_keys=required_keys,
         )
 
-        ## TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
         # update_keys = ["start_date", "end_date", "latest_version"]
         # boundary_conditions_data = update_metadata(
         #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys

@@ -5,8 +5,12 @@ on:
     branches: [master, devel]
     tags:
       - "*"
+    paths-ignore:
+      - 'CHANGELOG.md'
   pull_request:
     branches: [master, devel]
+    paths-ignore:
+      - 'CHANGELOG.md'
 
 jobs:
   test:
@@ -18,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         operating-system: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -27,6 +31,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
+      - name: Format code with black
+        run: |
+          python -m pip install black
+          black --check --line-length 110 openghg/
       - name: Lint with flake8
         run: |
           python -m pip install --upgrade pip wheel setuptools flake8
@@ -131,6 +139,7 @@ jobs:
         run: |
           micromamba create -n openghg_build anaconda-client boa -c conda-forge
           micromamba activate openghg_build
+          conda config --append channels openghg
           mkdir ${{ github.workspace }}/build
           conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge
           BUILD_DIR=${GITHUB_WORKSPACE}/build

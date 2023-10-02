@@ -1,14 +1,14 @@
 import pytest
 import pandas as pd
 import numpy as np
-from helpers import get_surface_datapath, get_emissions_datapath
-from openghg.store import ObsSurface, Emissions
+from helpers import get_surface_datapath, get_emissions_datapath, get_footprint_datapath
 from openghg.store.base import Datasource
+from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_flux
 from openghg.retrieve import search
+from openghg.standardise import standardise_footprint, standardise_flux, standardise_surface
 from openghg.objectstore import get_bucket
 from openghg.types import DataOverlapError
-
 
 from helpers import clear_test_stores
 
@@ -24,27 +24,30 @@ def flux_data_read(force=False):
 
     emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
 
-    bucket = get_bucket()
-    with Emissions(bucket=bucket) as ems:
-        ems.read_file(
-            filepath=emissions_datapath1,
-            species="ch4",
-            source=source1,
-            domain=domain,
-            high_time_resolution=False,
-            force=force,
-        )
+    standardise_flux(
+        filepath=emissions_datapath1,
+        species="ch4",
+        source=source1,
+        domain=domain,
+        high_time_resolution=False,
+        force=force,
+    )
 
 
 def test_database_update_repeat():
     """
     Test object store can handle the same date (flux data) being added twice.
     """
-    # Attempt to add same data to the database twice
     clear_test_stores()
-    flux_data_read()
-    flux_data_read()
+    # Attempt to add same data to the database twice
+    emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
+    args = (emissions_datapath1, "ch4", "anthro", "EUROPE")
+    kwargs = {"store": "user", "high_time_resolution": False}
 
+    standardise_flux(*args, **kwargs)
+    standardise_flux(*args, **kwargs)
+
+    # Search for the data we just added
     em_param = {}
     em_param["start_date"] = "2012-01-01"
     em_param["end_date"] = "2013-01-01"
@@ -52,36 +55,10 @@ def test_database_update_repeat():
     em_param["species"] = "ch4"
     em_param["domain"] = "EUROPE"
     em_param["source"] = "anthro"
-
     flux = get_flux(**em_param)
 
     assert flux is not None
     assert flux.metadata["latest_version"] == "v1"
-
-    # bc_param = {}
-    # bc_param["start_date"] = "2012-08-01"
-    # bc_param["end_date"] = "2012-09-01"
-
-    # bc_param["domain"] = "EUROPE"
-    # bc_param["species"] = "ch4"
-    # bc_param["bc_input"] = "MOZART"
-
-    # bc = get_bc(**bc_param)
-
-    # assert bc
-
-    # fp_param = {}
-    # fp_param["start_date"] = "2012-08-01"
-    # fp_param["end_date"] = "2012-09-01"
-
-    # fp_param["site"] = "TAC"
-    # fp_param["height"] = "100m"
-    # fp_param["domain"] = "EUROPE"
-    # fp_param["model"] = "NAME"
-
-    # footprint = get_footprint(**fp_param)
-
-    # assert footprint is not None
 
 
 def test_database_update_force():
@@ -109,23 +86,18 @@ def test_database_update_force():
     assert flux.metadata["latest_version"] == "v2"
 
 
-#%% Test variants in data from the same source being added
+# Test variants in data from the same source being added
 
 def bsd_data_read_crds():
     """
     Add Bilsdale *minutely* data for CRDS instrument to object store.
      - CRDS: ch4, co2, co
     """
-
     site = "bsd"
     network = "DECC"
     source_format1 = "CRDS"
-
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
-
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(filepath=bsd_path1, source_format=source_format1, site=site, network=network)
+    standardise_surface(store="user", filepath=bsd_path1, source_format=source_format1, site=site, network=network)
 
 
 def bsd_data_read_gcmd():
@@ -133,7 +105,6 @@ def bsd_data_read_gcmd():
     Add Bilsdale data GCMD instrument to object store.
      - GCMD: sf6, n2o
     """
-
     site = "bsd"
     network = "DECC"
     source_format2 = "GCWERKS"
@@ -142,15 +113,14 @@ def bsd_data_read_gcmd():
     bsd_path2 = get_surface_datapath(filename="bilsdale-md.14.C", source_format="GC")
     bsd_prec_path2 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=(bsd_path2, bsd_prec_path2),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-        )
+    standardise_surface(
+        store="user",
+        filepath=(bsd_path2, bsd_prec_path2),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+    )
 
 
 def bsd_small_edit_data_read(if_exists=None):
@@ -167,9 +137,7 @@ def bsd_small_edit_data_read(if_exists=None):
     bsd_path3 = get_surface_datapath(filename="bilsdale-md.small-edit.14.C", source_format="GC")
     bsd_prec_path3 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
+    standardise_surface(
             filepath=(bsd_path3, bsd_prec_path3),
             source_format=source_format2,
             site=site,
@@ -192,9 +160,7 @@ def bsd_diff_data_read(if_exists=None, save_current=None):
     bsd_path4 = get_surface_datapath(filename="bilsdale-md.diff-value.14.C", source_format="GC")
     bsd_prec_path4 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
+    standardise_surface(
             filepath=(bsd_path4, bsd_prec_path4),
             source_format=source_format2,
             site=site,
@@ -218,16 +184,15 @@ def bsd_diff_date_range_read(overwrite=False):
     bsd_path5 = get_surface_datapath(filename="bilsdale-md.diff-date-range.14.C", source_format="GC")
     bsd_prec_path5 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=(bsd_path5, bsd_prec_path5),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-            overwrite=overwrite,
-        )
+    standardise_surface(
+        store="user",
+        filepath=(bsd_path5, bsd_prec_path5),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+        overwrite=overwrite,
+    )
 
 
 def read_crds_file_pd(filename, species_list=["ch4", "co2", "co"]):
@@ -308,6 +273,7 @@ def test_obs_data_read_header_diff_update():
     Expect that GCMD (and CRDS) data can still be accessed.
     """
     clear_test_stores()
+
     # Load BSD data - CRDS data
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
@@ -368,6 +334,7 @@ def test_obs_data_read_data_diff():
     Expect CRDS data can still be accessed.
     """
     clear_test_stores()
+
     # Load BSD data - CRDS
     bsd_data_read_crds()
     # Load BSD data - GCMD data (GCWERKS)
@@ -466,7 +433,7 @@ def test_obs_data_read_data_new_version():
 
 def test_obs_data_read_data_overwrite_version():
     """
-    Same data setup as test_obs_data_read_data_diff() but checking previous version is 
+    Same data setup as test_obs_data_read_data_diff() but checking previous version is
     overwritten and correct data are stored when save_current=False.
     """
     clear_test_stores()
@@ -511,23 +478,18 @@ def test_obs_data_read_data_overwrite_version():
 # TODO: Add test for different time values as well.
 
 #  Look at different data frequencies for the same data
-
-
 def bsd_data_read_crds_diff_frequency():
     """
     Add Bilsdale *hourly* data for CRDS instrument to object store
      - CRDS: ch4, co2, co
     """
-
     site = "bsd"
     network = "DECC"
     source_format1 = "CRDS"
 
     bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.min.dat", source_format="CRDS")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
+    standardise_surface(store="user", filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
 
 
 def test_obs_data_read_two_frequencies():
@@ -542,6 +504,7 @@ def test_obs_data_read_two_frequencies():
     Expect GCMD data to still be available.
     """
     clear_test_stores()
+
     # Load BSD data - CRDS minutely frequency (and GCWERKS data)
     bsd_data_read_crds()
     # Load BSD data - CRDS hourly frequency
@@ -616,26 +579,19 @@ def test_obs_data_read_two_frequencies():
 
 
 #  Look at replacing data with different / overlapping internal time stamps
-
-
 def bsd_data_read_crds_internal_overlap(if_exists="new"):
     """
     Add Bilsdale *hourly* data for CRDS instrument to object store
      - CRDS: ch4, co2, co
     """
-
     site = "bsd"
     network = "DECC"
     source_format1 = "CRDS"
-
     bsd_path_hourly = get_surface_datapath(
         filename="bsd.picarro.hourly.108m.overlap-dates.dat", source_format="CRDS"
     )
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=bsd_path_hourly,
+    standardise_surface(filepath=bsd_path_hourly,
             source_format=source_format1,
             site=site,
             network=network,
@@ -643,6 +599,7 @@ def bsd_data_read_crds_internal_overlap(if_exists="new"):
         )
 
 
+#  Look at replacing data with different / overlapping internal time stamps
 def test_obs_data_representative_date_overlap():
     """
     Added test based on fix for Issue 506.
@@ -653,14 +610,15 @@ def test_obs_data_representative_date_overlap():
 
     This test checks this will no longer raise a KeyError based on this.
     """
-
     clear_test_stores()
+    bucket = get_bucket()
+
+    # Add same data twice, overwriting the second time
     bsd_data_read_crds_internal_overlap()
     bsd_data_read_crds_internal_overlap(if_exists="new")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        uuids = obs.datasources()
+    with open_metastore(bucket=bucket, data_type="surface") as metastore:
+        uuids = metastore.select('uuid')
 
     datasources = []
     for uuid in uuids:
@@ -690,14 +648,13 @@ def test_obs_data_representative_date_overlap():
 
 
 # Check appropriate metadata is updated when data is added to data sources
-
-
 def test_metadata_update():
     """
     Add data and then update this to check that the version is both added to the original
     metadata and subsequently updated when the datasource is updated.
     """
     clear_test_stores()
+
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
 
@@ -771,6 +728,7 @@ def test_metadata_update():
 #     Test adding new file for GC with same time points but some different data values
 #     """
 #     clear_test_stores()
+#     bucket = get_bucket()
 #     # Load BSD data - CRDS minutely frequency
 #     bsd_data_read_crds()
 #     # Load BSD data - CRDS hourly frequency
@@ -820,6 +778,69 @@ def test_metadata_update():
 
 #     # TODO: Can we check if this has been saved as a new version?
 
-#%% Deleting data
+# Deleting data
 
 # TODO: Add test to check data deletion and then adding the same data back
+
+@pytest.mark.parametrize(
+    "standard_filename,special_filename,site,domain,model,metmodel,inlet,species",
+    [
+        (
+            "TAC-185magl_UKV_EUROPE_TEST_201405.nc",
+            "TAC-185magl_UKV_co2_EUROPE_TEST_201405.nc",
+            "TAC",
+            "EUROPE",
+            "NAME",
+            "UKV",
+            "185m",
+            "co2",
+        ),
+        (
+            "HFD-100magl_UKV_EUROPE_202001_TRUNCATED.nc",
+            "HFD-100magl_UKV_rn_EUROPE_202001_TRUNCATED.nc",
+            "HFD",
+            "EUROPE",
+            "NAME",
+            "UKV",
+            "100m",
+            "rn",
+        )
+    ],
+)
+def test_standardising_footprint_with_additional_keys(standard_filename, special_filename, site, domain, model, metmodel, inlet, species):
+    """
+    Expected behavior: adding a high time resolution
+    (or short_lifetime) footprint whose other metadata
+    is the same as an existing footprint will create a
+    new uuid for the high resolution (or short_lifetime)
+    footprint.
+    """
+    standard_datapath = get_footprint_datapath(standard_filename)
+    special_datapath = get_footprint_datapath(special_filename)
+
+    clear_test_stores()
+
+    standard_standardised = standardise_footprint(standard_datapath,
+                                                site=site,
+                                                domain=domain,
+                                                model=model,
+                                                inlet=inlet,
+                                                metmodel=metmodel,
+                                                store="user",
+                                                )
+
+    special_standardised = standardise_footprint(special_datapath,
+                                                site=site,
+                                                domain=domain,
+                                                model=model,
+                                                inlet=inlet,
+                                                metmodel=metmodel,
+                                                species=species,
+                                                store="user",
+                                                )
+
+    standard_dict = standard_standardised[next(iter(standard_standardised))]
+    special_dict = special_standardised[next(iter(special_standardised))]
+
+    assert special_dict["new"] == True
+    assert special_dict["uuid"] != standard_dict["uuid"]  # redundant?

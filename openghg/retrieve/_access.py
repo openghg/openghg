@@ -747,7 +747,7 @@ def _metadata_difference(
 
     # - Extract string values  only from the underlying metadata dictionaries
     metadata = [{key: value for key, value in m.items() if isinstance(value, str)} for m in metadata]
-    
+
     # Select first metadata dictionary from list and use this to compare to others
     # - Look at difference between first metadata dict and other metadata dicts
     metadata0 = metadata[0]

@@ -1,18 +1,41 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, Literal, Optional, Union, Any
 from pandas import Timedelta
+import warnings
 
+from openghg.store.base import get_data_class
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub
 from openghg.types import optionalPathType, multiPathType
 
 
+def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> Dict:
+    """Generic standardise function, used by data-type specific versions.
+
+    Args:
+        data_type: type of data to standardise
+        filepath: path to file(s) to standardise
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
+        **kwargs: data type specific arguments, see specific implementations below.
+    Returns:
+        dict: Dictionary of result data.
+    """
+    dclass = get_data_class(data_type)
+    bucket = get_writable_bucket(name=store)
+
+    with dclass(bucket=bucket) as dc:
+        result = dc.read_file(filepath=filepath, **kwargs)
+    return result
+
+
 def standardise_surface(
-    filepaths: multiPathType,
     source_format: str,
     network: str,
     site: str,
+    filepath: Optional[multiPathType] = None,
+    filepaths: Optional[multiPathType] = None,
     inlet: Optional[str] = None,
     height: Optional[str] = None,
     instrument: Optional[str] = None,
@@ -27,7 +50,7 @@ def standardise_surface(
     save_current: Optional[bool] = None,
     overwrite: bool = False,
     force: bool = False,
-) -> Optional[Dict]:
+) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
     Args:
@@ -68,10 +91,18 @@ def standardise_surface(
         dict: Dictionary of result data
     """
     from openghg.cloud import call_function
-    from openghg.store import ObsSurface
 
-    if not isinstance(filepaths, list):
-        filepaths = [filepaths]
+    if filepath is None and filepaths is None:
+        raise ValueError("One of `filepath` and `filepaths` must be specified.")
+    elif filepath is None:
+        filepath = filepaths
+        warnings.warn(
+            "The argument 'filepaths' will be deprecated in a future release. Please use 'filepath' instead.",
+            FutureWarning,
+        )
+
+    if not isinstance(filepath, list):
+        filepath = [filepath]
 
     if running_on_hub():
         # TODO: Use input for site_filepath here? How to include this?
@@ -96,7 +127,7 @@ def standardise_surface(
             metadata["sampling_period"] = sampling_period
 
         responses = {}
-        for fpath in filepaths:
+        for fpath in filepath:
             gcwerks = False
             if source_format.lower() in ("gc", "gcwerks"):
                 metadata["source_format"] = "gcwerks"
@@ -148,30 +179,27 @@ def standardise_surface(
 
         return responses
     else:
-        bucket = get_writable_bucket(name=store)
-
-        with ObsSurface(bucket=bucket) as obs:
-            results = obs.read_file(
-                filepath=filepaths,
-                source_format=source_format,
-                network=network,
-                site=site,
-                inlet=inlet,
-                height=height,
-                instrument=instrument,
-                sampling_period=sampling_period,
-                calibration_scale=calibration_scale,
-                measurement_type=measurement_type,
-                verify_site_code=verify_site_code,
-                site_filepath=site_filepath,
-                update_mismatch=update_mismatch,
-                if_exists=if_exists,
-                save_current=save_current,
-                overwrite=overwrite,
-                force=force,
-            )
-
-        return results
+        return standardise(
+            store=store,
+            data_type="surface",
+            filepath=filepath,
+            source_format=source_format,
+            network=network,
+            site=site,
+            inlet=inlet,
+            height=height,
+            instrument=instrument,
+            sampling_period=sampling_period,
+            calibration_scale=calibration_scale,
+            measurement_type=measurement_type,
+            overwrite=overwrite,
+            verify_site_code=verify_site_code,
+            site_filepath=site_filepath,
+            update_mismatch=update_mismatch,
+            if_exists=if_exists,
+            save_current=save_current,
+            force=force,
+        )
 
 
 def standardise_column(
@@ -190,7 +218,7 @@ def standardise_column(
     save_current: Optional[bool] = None,
     overwrite: bool = False,
     force: bool = False,
-) -> Optional[Dict]:
+) -> Dict:
     """Read column observation file
 
     Args:
@@ -226,7 +254,6 @@ def standardise_column(
         dict: Dictionary containing confirmation of standardisation process.
     """
     from openghg.cloud import call_function
-    from openghg.store import ObsColumn
 
     filepath = Path(filepath)
 
@@ -257,27 +284,24 @@ def standardise_column(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_writable_bucket(name=store)
-
-        with ObsColumn(bucket=bucket) as obs_col:
-            result = obs_col.read_file(
-                filepath=filepath,
-                satellite=satellite,
-                domain=domain,
-                selection=selection,
-                site=site,
-                species=species,
-                network=network,
-                instrument=instrument,
-                platform=platform,
-                source_format=source_format,
-                if_exists=if_exists,
-                save_current=save_current,
-                overwrite=overwrite,
-                force=force,
-            )
-
-        return result
+        return standardise(
+            store=store,
+            data_type="column",
+            filepath=filepath,
+            satellite=satellite,
+            domain=domain,
+            selection=selection,
+            site=site,
+            species=species,
+            network=network,
+            instrument=instrument,
+            platform=platform,
+            source_format=source_format,
+            overwrite=overwrite,
+            if_exists=if_exists,
+            save_current=save_current,
+            force=force,
+        )
 
 
 def standardise_bc(
@@ -292,7 +316,7 @@ def standardise_bc(
     save_current: Optional[bool] = None,
     overwrite: bool = False,
     force: bool = False,
-) -> Optional[Dict]:
+) -> Dict:
     """Standardise boundary condition data and store it in the object store.
 
     Args:
@@ -319,7 +343,6 @@ def standardise_bc(
         dict: Dictionary containing confirmation of standardisation process.
     """
     from openghg.cloud import call_function
-    from openghg.store import BoundaryConditions
 
     filepath = Path(filepath)
 
@@ -345,22 +368,20 @@ def standardise_bc(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_writable_bucket(name=store)
-        with BoundaryConditions(bucket=bucket) as bcs:
-            result = bcs.read_file(
-                filepath=filepath,
-                species=species,
-                bc_input=bc_input,
-                domain=domain,
-                period=period,
-                continuous=continuous,
-                if_exists=if_exists,
-                save_current=save_current,
-                overwrite=overwrite,
-                force=force,
-            )
-
-        return result
+        return standardise(
+            store=store,
+            data_type="boundary_conditions",
+            filepath=filepath,
+            species=species,
+            bc_input=bc_input,
+            domain=domain,
+            period=period,
+            continuous=continuous,
+            overwrite=overwrite,
+            if_exists=if_exists,
+            save_current=save_current,
+            force=force,
+        )
 
 
 def standardise_footprint(
@@ -377,14 +398,14 @@ def standardise_footprint(
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
     retrieve_met: bool = False,
-    high_spatial_res: bool = False,
-    high_time_res: bool = False,
     store: Optional[str] = None,
     if_exists: str = "default",
     save_current: Optional[bool] = None,
     overwrite: bool = False,
     force: bool = False,
-) -> Optional[Dict]:
+    high_spatial_resolution: bool = False,
+    high_time_resolution: bool = False,
+) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
 
@@ -402,8 +423,8 @@ def standardise_footprint(
         chunks: Chunk size to use when opening the NetCDF. Set to "auto" for automated chunk sizing
         continuous: Whether time stamps have to be continuous.
         retrieve_met: Whether to also download meterological data for this footprints area
-        high_spatial_res : Indicate footprints include both a low and high spatial resolution.
-        high_time_res: Indicate footprints are high time resolution (include H_back dimension)
+        high_spatial_resolution : Indicate footprints include both a low and high spatial resolution.
+        high_time_resolution: Indicate footprints are high time resolution (include H_back dimension)
                         Note this will be set to True automatically for Carbon Dioxide data.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
@@ -421,7 +442,6 @@ def standardise_footprint(
         if file already processed.
     """
     from openghg.cloud import call_function
-    from openghg.store import Footprints
 
     filepath = Path(filepath)
 
@@ -436,8 +456,8 @@ def standardise_footprint(
             "height": height,
             "continuous": continuous,
             "retrieve_met": retrieve_met,
-            "high_spatial_res": high_spatial_res,
-            "high_time_res": high_time_res,
+            "high_spatial_resolution": high_spatial_resolution,
+            "high_time_resolution": high_time_resolution,
             "overwrite": overwrite,
             "metmodel": metmodel,
             "species": species,
@@ -456,31 +476,29 @@ def standardise_footprint(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_writable_bucket(name=store)
-        with Footprints(bucket=bucket) as fps:
-            result = fps.read_file(
-                filepath=filepath,
-                site=site,
-                domain=domain,
-                model=model,
-                inlet=inlet,
-                height=height,
-                metmodel=metmodel,
-                species=species,
-                network=network,
-                period=period,
-                chunks=chunks,
-                continuous=continuous,
-                retrieve_met=retrieve_met,
-                high_spatial_res=high_spatial_res,
-                high_time_res=high_time_res,
-                if_exists=if_exists,
-                save_current=save_current,
-                overwrite=overwrite,
-                force=force,
-            )
-
-        return result
+        return standardise(
+            store=store,
+            data_type="footprints",
+            filepath=filepath,
+            site=site,
+            domain=domain,
+            model=model,
+            inlet=inlet,
+            height=height,
+            metmodel=metmodel,
+            species=species,
+            network=network,
+            period=period,
+            chunks=chunks,
+            continuous=continuous,
+            retrieve_met=retrieve_met,
+            high_spatial_resolution=high_spatial_resolution,
+            high_time_resolution=high_time_resolution,
+            overwrite=overwrite,
+            if_exists=if_exists,
+            save_current=save_current,
+            force=force,
+        )
 
 
 def standardise_flux(
@@ -500,7 +518,7 @@ def standardise_flux(
     save_current: Optional[bool] = None,
     overwrite: bool = False,
     force: bool = False,
-) -> Optional[Dict]:
+) -> Dict:
     """Process flux data
 
     Args:
@@ -528,7 +546,6 @@ def standardise_flux(
         dict: Dictionary of Datasource UUIDs data assigned to
     """
     from openghg.cloud import call_function
-    from openghg.store import Emissions
 
     filepath = Path(filepath)
 
@@ -561,75 +578,93 @@ def standardise_flux(
         response_content: Dict = fn_response["content"]
         return response_content
     else:
-        bucket = get_writable_bucket(name=store)
-        with Emissions(bucket=bucket) as ems:
-            return ems.read_file(
-                filepath=filepath,
-                species=species,
-                source=source,
-                domain=domain,
-                database=database,
-                database_version=database_version,
-                model=model,
-                high_time_resolution=high_time_resolution,
-                period=period,
-                continuous=continuous,
-                chunks=chunks,
-                if_exists=if_exists,
-                save_current=save_current,
-                overwrite=overwrite,
-                force=force,
-            )
+        return standardise(
+            data_type="emissions",
+            store=store,
+            filepath=filepath,
+            species=species,
+            source=source,
+            domain=domain,
+            database=database,
+            database_version=database_version,
+            model=model,
+            high_time_resolution=high_time_resolution,
+            period=period,
+            continuous=continuous,
+            chunks=chunks,
+            overwrite=overwrite,
+            if_exists=if_exists,
+            save_current=save_current,
+            force=force,
+        )
 
 
-# def upload_to_par(filepath: Optional[Union[str, Path]] = None, data: Optional[bytes] = None) -> None:
-#     """Upload a file to the object store
+def standardise_eulerian(
+    filepath: Union[str, Path],
+    model: str,
+    species: str,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    setup: Optional[str] = None,
+    overwrite: bool = False,
+    store: Optional[str] = None,
+) -> Dict:
+    """Read Eulerian model output
 
-#     Args:
-#         filepath: Path of file to upload
-#     Returns:
-#         None
-#     """
-#     from gzip import compress
-#     import tempfile
-#     from openghg.objectstore import PAR
-#     from openghg.client import get_function_url, get_auth_key
+    Args:
+        filepath: Path of Eulerian model species output
+        model: Eulerian model name
+        species: Species name
+        start_date: Start date (inclusive) associated with model run
+        end_date: End date (exclusive) associated with model run
+        setup: Additional setup details for run
+        overwrite: Should this data overwrite currently stored data.
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
 
-#     auth_key = get_auth_key()
-#     fn_url = get_function_url(fn_name="get_par")
-#     # First we need to get a PAR to write the data
+    Returns:
+        dict: Dictionary of result data
+    """
+    if running_on_hub():
+        raise NotImplementedError("Serverless not implemented yet for Eulerian model.")
+    else:
+        return standardise(
+            store=store,
+            data_type="eulerian_model",
+            filepath=filepath,
+            model=model,
+            species=species,
+            start_date=start_date,
+            end_date=end_date,
+            setup=setup,
+            overwrite=overwrite,
+        )
 
-#     response = _post(url=fn_url, auth_key=auth_key)
-#     par_json = response.content
 
-#     par = PAR.from_json(json_str=par_json)
-#     # Get the URL to upload data to
-#     par_url = par.uri
+def standardise_from_binary_data(
+    store: str, data_type: str, binary_data: bytes, metadata: dict, file_metadata: dict, **kwargs: Any
+) -> Optional[Dict]:
+    """Standardise binary data from serverless function.
+        The data dictionary should contain sub-dictionaries that contain
+        data and metadata keys.
 
-#     if filepath is not None and data is None:
-#         filepath = Path(filepath)
-#         MB = 1e6
-#         file_size = Path("somefile.txt").stat().st_size / MB
+    args:
+        store: Name of object store to write to, required if user has access to more than one
+        writable store
+        data_type: type of data to standardise
+        binary_data: Binary measurement data
+        metadata: Metadata
+        file_metadata: File metadata such as original filename
+        **kwargs: data type specific arguments, see specific implementations in data classes.
 
-#         mem_limit = 50  # MiB
-#         if file_size < mem_limit:
-#             # Read the file, compress it and send the data
-#             file_data = filepath.read_bytes()
-#             compressed_data = compress(data=file_data)
-#         else:
-#             tmp_dir = tempfile.TemporaryDirectory()
-#             compressed_filepath = Path(tmp_dir.name).joinpath(f"{filepath.name}.tar.gz")
-#             # Compress in place and then upload
-#             with tarfile.open(compressed_filepath, mode="w:gz") as tar:
-#                 tar.add(filepath)
+    returns:
+        Dictionary of result data.
+    """
+    dclass = get_data_class(data_type)
+    bucket = get_writable_bucket(name=store)
 
-#             compressed_data = compressed_filepath.read_bytes()
-#     elif data is not None and filepath is None:
-#         compressed_data = gzip.compress(data)
-#     else:
-#         raise ValueError("Either filepath or data must be passed.")
-
-#     # Write the data to the object store
-#     put_response = _put(url=par_url, data=compressed_data, auth_key=auth_key)
-
-#     print(str(put_response))
+    with dclass(bucket) as dc:
+        result = dc.read_data(
+            binary_data=binary_data, metadata=metadata, file_metadata=file_metadata, **kwargs
+        )
+    return result

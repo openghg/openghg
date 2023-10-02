@@ -1,12 +1,12 @@
 from collections import defaultdict
 import copy
-from openghg.store.base import Datasource
-from openghg.store.spec import define_data_type_classes
-from openghg.store import load_metastore
-from openghg.objectstore import delete_object, get_writable_bucket
 import logging
-import tinydb
 from typing import DefaultDict, Dict, List, Set, Optional, Union
+
+from openghg.store.base import Datasource
+from openghg.objectstore.metastore import open_metastore
+from openghg.objectstore import get_writable_bucket, get_writable_buckets
+from openghg.types import ObjectStoreError
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -14,7 +14,9 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 
 class DataManager:
     def __init__(self, metadata: Dict[str, Dict], store: str):
-        self.metadata = metadata
+        # We don't want the object store in this metadata as we want it to be the
+        # unadulterated metadata to properly reflect what's stored.
+        self.metadata = self._clean_metadata(metadata=metadata)
         self._store = store
         self._bucket = get_writable_bucket(name=store)
         self._backup: DefaultDict[str, Dict[str, Dict]] = defaultdict(dict)
@@ -25,6 +27,25 @@ class DataManager:
 
     def __bool__(self) -> bool:
         return bool(self.metadata)
+
+    def _clean_metadata(self, metadata: Dict) -> Dict:
+        """Ensures the metadata we give to the user is the metadata
+        stored in the metastore and the Datasource and hasn't been modified by the
+        search function. Currently this just removes the object_store key
+
+        Args:
+            metadata: Dictionary of metadata, we expect
+        Returns:
+            dict: Metadata without specific keys
+        """
+        metadata = copy.deepcopy(metadata)
+        for m in metadata.values():
+            try:
+                del m["object_store"]
+            except KeyError:
+                pass
+
+        return metadata
 
     def _check_datatypes(self, uuid: Union[str, List]) -> str:
         """Check the UUIDs are correct and ensure they all
@@ -66,7 +87,15 @@ class DataManager:
 
         uuids = list(self.metadata.keys())
         res = search(uuid=uuids)
-        self.metadata = res.metadata
+        # We don't want the object store in this metadata as we want it to be the
+        # unadulterated metadata to properly reflect what's stored.
+        for m in res.metadata.values():
+            try:
+                del m["object_store"]
+            except KeyError:
+                pass
+
+        self.metadata = self._clean_metadata(metadata=res.metadata)
 
     def restore(self, uuid: str, version: Union[str, int] = "latest") -> None:
         """Restore a backed-up version of a Datasource's metadata.
@@ -83,20 +112,16 @@ class DataManager:
         version = str(version)
 
         dtype = self._check_datatypes(uuid=uuid)
-
-        data_objs = define_data_type_classes()
-        data_class = data_objs[dtype]
-
-        with data_class(bucket=self._bucket) as dclass:
-            metastore = dclass._metastore
+        with open_metastore(data_type=dtype, bucket=self._bucket) as metastore:
             backup = self._backup[uuid][version]
             self.metadata[uuid] = backup
 
-            metastore.remove(tinydb.where("uuid") == uuid)
+            metastore.delete({"uuid": uuid})
             metastore.insert(backup)
 
             d = Datasource.load(bucket=self._bucket, uuid=uuid)
             d._metadata = backup
+            d.save(bucket=self._bucket)
 
     def view_backup(self, uuid: Optional[str] = None, version: Optional[str] = None) -> Dict:
         """View backed-up metadata for all Datasources
@@ -133,25 +158,20 @@ class DataManager:
         Returns:
             None
         """
-        from tinydb.operations import delete as tinydb_delete
-
         if to_update is None and to_delete is None:
             return None
 
-        # Add in ability to delete metadata keys
         if not isinstance(uuid, list):
             uuid = [uuid]
 
         dtype = self._check_datatypes(uuid=uuid)
 
-        data_objs = define_data_type_classes()
-        metakey = data_objs[dtype]._metakey
-
-        with load_metastore(bucket=self._bucket, key=metakey) as store:
+        with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for u in uuid:
+                updated = False
                 d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
                 # Save a backup of the metadata for now
-                found_record = store.search(tinydb.where("uuid") == u)
+                found_record = metastore.search({"uuid": u})
                 current_metadata = found_record[0]
 
                 version = str(len(self._backup[u].keys()) + 1)
@@ -162,7 +182,10 @@ class DataManager:
                 n_records = len(self._backup[u][version])
 
                 # Do a quick check to make sure we're not being asked to delete all the metadata
-                if to_delete is not None:
+                if to_delete is not None and to_delete:
+                    if not isinstance(to_delete, list):
+                        to_delete = [to_delete]
+
                     if "uuid" in to_delete:
                         raise ValueError("Cannot delete the UUID key.")
 
@@ -173,34 +196,32 @@ class DataManager:
                         internal_copy.pop(k)
 
                     try:
-                        store.update_multiple(
-                            [(tinydb_delete(k), tinydb.where("uuid") == u) for k in to_delete]
-                        )
+                        metastore.update(where={"uuid": u}, to_delete=to_delete)
                     except KeyError:
                         raise ValueError(
                             "Unable to remove keys from metadata store, please ensure they exist."
                         )
 
-                if to_update is not None:
+                    updated = True
+
+                if to_update is not None and to_update:
                     if "uuid" in to_update:
                         raise ValueError("Cannot update the UUID.")
 
                     d._metadata.update(to_update)
                     internal_copy.update(to_update)
-                    response = store.update(to_update, tinydb.where("uuid") == u)
+                    metastore.update(where={"uuid": u}, to_update=to_update)
 
-                    if not response:
-                        raise ValueError("Unable to update metadata, possible metadata sync error.")
+                    updated = True
 
-                d.save(bucket=self._bucket)
-
-                # Update the metadata stored internally so we're up to date
-                self.metadata[u] = internal_copy
-
-                logger.info(f"Modified metadata for {u}.")
+                if updated:
+                    d.save(bucket=self._bucket)
+                    # Update the metadata stored internally so we're up to date
+                    self.metadata[u] = internal_copy
+                    logger.info(f"Modified metadata for {u}.")
 
     def delete_datasource(self, uuid: Union[List, str]) -> None:
-        """Delete a Datasource in the object store.
+        """Delete Datasource(s) in the object store.
         At the moment we only support deleting the complete Datasource.
 
         NOTE: Make sure you really want to delete the Datasource(s)
@@ -210,25 +231,47 @@ class DataManager:
         Returns:
             None
         """
+        from openghg.objectstore import delete_object
+
         # Add in ability to delete metadata keys
         if not isinstance(uuid, list):
             uuid = [uuid]
 
         dtype = self._check_datatypes(uuid=uuid)
-        data_objs = define_data_type_classes()
-        dclass = data_objs[dtype]
 
-        with dclass(bucket=self._bucket) as dc:
+        with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for uid in uuid:
                 # First remove the data from the metadata store
-                dc._metastore.remove(tinydb.where("uuid") == uid)
+                metastore.delete({"uuid": uid})
+
                 # Delete all the data associated with a Datasource
                 d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)
                 d.delete_all_data()
+
                 # Then delete the Datasource itself
-                key = d.key()
-                delete_object(bucket=self._bucket, key=key)
-                # Remove from the list of Datasources the object knows about
-                dc.remove_datasource(uuid=uid)
+                delete_object(bucket=self._bucket, key=d.key())
 
                 logger.info(f"Deleted Datasource with UUID {uid}.")
+
+
+def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
+    """Lookup the data / metadata you'd like to modify.
+
+    Args:
+        data_type: Type of data, for example surface, flux, footprint
+        store: Name of store
+        kwargs: Any pair of keyword arguments for searching
+    Returns:
+        DataManager: A handler object to help modify the metadata
+    """
+    from openghg.dataobjects import DataManager
+    from openghg.retrieve import search
+
+    writable_stores = get_writable_buckets()
+
+    if store not in writable_stores:
+        raise ObjectStoreError(f"You do not have permission to write to the {store} store.")
+
+    res = search(data_type=data_type, **kwargs)
+    metadata = res.metadata
+    return DataManager(metadata=metadata, store=store)

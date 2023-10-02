@@ -1,10 +1,12 @@
 from collections import defaultdict
+
+# import re
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
 import shutil
 from pandas import DataFrame, Timestamp, Timedelta
-from xarray import Dataset
+import xarray as xr
 from openghg.objectstore import exists, move_objects
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
@@ -36,7 +38,7 @@ class Datasource:
         self._creation_datetime = timestamp_now()
         self._metadata: Dict[str, str] = {}
         # Dictionary keyed by daterange of data in each Dataset
-        self._data: Dict[str, Dataset] = {}
+        self._data: Dict[str, xr.Dataset] = {}
 
         self._start_date = None
         self._end_date = None
@@ -85,7 +87,7 @@ class Datasource:
     def add_data(
         self,
         metadata: Dict,
-        data: Dataset,
+        data: xr.Dataset,
         data_type: str,
         skip_keys: Optional[List] = None,
         if_exists: str = "default",
@@ -120,7 +122,7 @@ class Datasource:
         else:
             raise NotImplementedError()
 
-    def add_timed_data(self, data: Dataset, data_type: str, if_exists: str = "default") -> None:
+    def add_timed_data(self, data: xr.Dataset, data_type: str, if_exists: str = "default") -> None:
         """Add data to this Datasource, splitting along the time axis
 
         Args:
@@ -327,6 +329,13 @@ class Datasource:
         """
         from openghg.util import to_lowercase
 
+        try:
+            del metadata["object_store"]
+        except KeyError:
+            pass
+        else:
+            logger.warning("object_store should not be added to the metadata, removing.")
+
         lowercased: Dict = to_lowercase(metadata, skip_keys=skip_keys)
         self._metadata.update(lowercased)
 
@@ -350,7 +359,7 @@ class Datasource:
 
         return start, end
 
-    def get_dataset_daterange(self, dataset: Dataset) -> Tuple[Timestamp, Timestamp]:
+    def get_dataset_daterange(self, dataset: xr.Dataset) -> Tuple[Timestamp, Timestamp]:
         """Get the daterange for the passed Dataset
 
         Args:
@@ -369,7 +378,7 @@ class Datasource:
         except AttributeError:
             raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
-    def get_dataset_daterange_str(self, dataset: Dataset) -> str:
+    def get_dataset_daterange_str(self, dataset: xr.Dataset) -> str:
         start, end = self.get_dataset_daterange(dataset=dataset)
 
         # Tidy the string and concatenate them
@@ -380,7 +389,7 @@ class Datasource:
 
         return daterange_str
 
-    def get_representative_daterange_str(self, dataset: Dataset, period: Optional[str] = None) -> str:
+    def get_representative_daterange_str(self, dataset: xr.Dataset, period: Optional[str] = None) -> str:
         """
         Get representative daterange which incorporates any period the data covers.
 
@@ -451,7 +460,7 @@ class Datasource:
 
         return daterange_str1_clipped
 
-    def _clip_daterange_label(self, labelled_datasets: Dict[str, Dataset]) -> Dict[str, Dataset]:
+    def _clip_daterange_label(self, labelled_datasets: Dict[str, xr.Dataset]) -> Dict[str, xr.Dataset]:
         """
         Check the daterange string labels for the datasets and ensure neighbouring
         date ranges are not overlapping. The daterange string labels will be updated
@@ -545,14 +554,14 @@ class Datasource:
         return data
 
     @staticmethod
-    def load_dataset(bucket: str, key: str) -> Dataset:
+    def load_dataset(bucket: str, key: str) -> xr.Dataset:
         """Loads a xarray Dataset from the passed key for creation of a Datasource object
 
-        Currently this function gets binary data back from the object store, writes it
-        to a temporary file and then gets xarray to read from this file.
+        Data is lazy-loaded because we use `xarray.open_dataset`. This means that the
+        file handler for the data file remains open until the data is actually required.
 
-        This is done in a long winded way due to xarray not being able to create a Dataset
-        from binary data at the moment.
+        This improves performance, since we often only update one or two chunks of the dataset
+        at a time.
 
         Args:
             bucket: Bucket containing data
@@ -560,11 +569,10 @@ class Datasource:
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
-        import io
-        from openghg.objectstore import get_object
-        from xarray import load_dataset
+        from openghg.objectstore import get_object_data_path
 
-        return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
+        file_path = get_object_data_path(bucket, key)
+        return xr.open_dataset(file_path)
 
     @classmethod
     def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:
@@ -622,13 +630,14 @@ class Datasource:
         version_backup = f"{version}_backup"
         return version_backup
 
-    def save(self, bucket: str, new_version: bool = True) -> None:
+    def save(self, bucket: str, new_version: bool = True, compression: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
             bucket: Bucket to hold data
             new_version: Create a new version for the data and save current
                 data to a previous version.
+            compression: True if data should be compressed on save
         Returns:
             None
         """
@@ -730,6 +739,70 @@ class Datasource:
 
             # Make sure status is reset now this has been saved
             self._status = None
+
+            #                 if compression:
+            #                     # variables with variable length data types shouldn't be compressed
+            #                     # e.g. object ("O") or unicode ("U") type
+            #                     do_not_compress = []
+
+            #                     # regex for Unicode and Object dtypes, with character code U or O
+            #                     # type strings may start with a byteorder character: <, >, =, or |,
+            #                     # so we skip these if present.
+            #                     dtype_pat = re.compile(r"[<>=|]?[UO]")
+            #                     for dv in data.data_vars:
+            #                         if dtype_pat.match(data[dv].data.dtype.str):
+            #                             do_not_compress.append(dv)
+
+            #                     # setting compression levels for data vars in data
+            #                     comp = dict(zlib=True, complevel=5)
+
+            #                     valid_encoding_keys = [
+            #                         "zlib",
+            #                         "fletcher32",
+            #                         "dtype",
+            #                         "complevel",
+            #                         "chunksizes",
+            #                         "compression",
+            #                         "shuffle",
+            #                         "contiguous",
+            #                         "least_significant_digit",
+            #                         "_FillValue",
+            #                     ]
+            #                     encoding = {}
+            #                     for var in data.data_vars:
+            #                         if var not in do_not_compress:
+            #                             enc = {k: v for k, v in data[var].encoding.items() if k in valid_encoding_keys}
+            #                             enc.update(comp)
+            #                             encoding[var] = enc
+
+            #                     try:
+            #                         data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
+            #                     except RuntimeError:
+            #                         logger.warning(
+            #                             f"Storing footprint for date range {daterange} without compression due to netCDF4 RuntimeError."
+            #                         )
+            #                         data.to_netcdf(filepath, engine="netcdf4")
+            #                     except ValueError as e:
+            #                         # chunksize might be set if the data was read from a netCDF file
+            #                         # and sometimes this causes errors.
+            #                         if "chunksize" in e.args[0].lstrip().split():
+            #                             for k in encoding:
+            #                                 encoding[k]["chunksizes"] = None
+            #                             data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
+            #                         else:
+            #                             raise e
+
+            #                 else:
+            #                     data.to_netcdf(filepath, engine="netcdf4")
+            #                 # Can we just take the bytes from the data here and then write then straight?
+            #                 # TODO - for now just create a temporary directory - will have to update Acquire
+            #                 # or work on a PR for xarray to allow returning a NetCDF as bytes
+            #                 # with tempfile.TemporaryDirectory() as tmpdir:
+            #                 #     filepath = f"{tmpdir}/temp.nc"
+            #                 #     data.to_netcdf(filepath)
+            #                 #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
+            #                 # path = f"{bucket_path}/data"
+            # >>>>>>> devel
 
             # Copy the last version
             if "latest" in self._data_keys:

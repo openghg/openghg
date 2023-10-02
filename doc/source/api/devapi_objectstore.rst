@@ -37,8 +37,6 @@ These functions handle data storage on disk.
 
 .. autofunction:: openghg.objectstore.set_object_from_json
 
-.. autofunction:: openghg.objectstore.visualise_store
-
 
 .. Cloud
 .. =====

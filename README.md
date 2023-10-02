@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![codecov](https://codecov.io/gh/openghg/openghg/branch/devel/graph/badge.svg)](https://codecov.io/gh/openghg/openghg) ![OpenGHG tests](https://github.com/openghg/openghg/workflows/OpenGHG%20tests/badge.svg?branch=master)
 
-OpenGHG is a project based on the prototype [HUGS platform](https://www.hugs-cloud.com) which aims to be a platform for collaboration and analysis
+OpenGHG is a project based on the prototype [HUGS platform](https://github.com/hugs-cloud/hugs) which aims to be a platform for collaboration and analysis
 of greenhouse gas (GHG) data.
 
 The platform will be built on open-source technologies and will allow researchers to collaborate on large datasets by harnessing the

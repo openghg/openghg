@@ -5,7 +5,50 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.6.0...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
+
+### Added
+- Added `DeprecationWarning` to the functions `parse_cranfield` and  `parse_btt`. - [PR #792](https://github.com/openghg/openghg/pull/792)
+
+- Added `environment-dev.yaml` file for developer conda environment - [PR #769](https://github.com/openghg/openghg/pull/769)
+
+- Added generic `standardise` function that accepts a bucket as an argument, and used this to refactor `standardise_surface` etc, and tests that standardise data - [PR #760](https://github.com/openghg/openghg/pull/760)
+
+- Added `MetaStore` abstract base class as interface for metastore classes, and a `ClassicMetaStore` subclass implements the same bucket/key structure as the previous metastore.
+  All references to TinyDB are now in the `objectstore` module, meaning that there is only one place where code needs to change to use a different backend with the metastore - [PR #771](https://github.com/openghg/openghg/pull/771)
+
+- Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of
+  lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
+
+- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718) 
+
+### Changed
+
+- Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
+
+
+## [0.6.2] - 2023-08-07
+
+### Fixed
+
+- Bug where the object store path being written to JSON led to an invalid path being given to some users - [PR #741](https://github.com/openghg/openghg/pull/741)
+
+### Changes
+
+- Added read-only opening of the metadata store of each storage class when searching. This is done using a `mode` argument pased to the `load_metastore` function - [PR #763](https://github.com/openghg/openghg/pull/763)
+
+## [0.6.1] - 2023-08-04
+
+### Added
+
+- Added `rich` package to printing out SearchResults object in a table format. If using an editable install please update your environment to match requirements.txt / environment.yml - [PR #696](https://github.com/openghg/openghg/pull/696)
+
+### Fixed
+
+- Bug in `get_readable_buckets`: missing check for tutorial store - [PR #729](https://github.com/openghg/openghg/pull/729)
+- Bug when adding high time resolution footprints to object store: they were not being distinguished from low resolution footprints - [PR #720](https://github.com/openghg/openghg/pull/720)
+- Bug due to `object_store` key not being present in `Datasource` metadata - [PR #725](https://github.com/openghg/openghg/pull/725)
+- Bug in `DataManager` where a string was interpreted as a list when processing metadata keys to be deleted - [PR #713](https://github.com/openghg/openghg/pull/713)
 
 ## [0.6.0] - 2023-07-18
 

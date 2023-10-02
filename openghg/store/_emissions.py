@@ -3,13 +3,11 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Literal, Optional, Tuple, Union
-import logging
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
-from types import TracebackType
 import warnings
 
 __all__ = ["Emissions"]
@@ -28,23 +26,10 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class Emissions(BaseStore):
     """This class is used to process emissions / flux data"""
 
+    _data_type = "emissions"
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> Emissions:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
@@ -87,7 +72,7 @@ class Emissions(BaseStore):
         save_current: Optional[bool] = None,
         overwrite: bool = False,
         force: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read emissions file
 
         Args:
@@ -132,8 +117,10 @@ class Emissions(BaseStore):
         domain = clean_string(domain)
 
         if overwrite and if_exists == "default":
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                           "See documentation for details of these inputs and options.")
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
             if_exists = "new"
 
         # Making sure data can be force overwritten if force keyword is included.
@@ -158,7 +145,7 @@ class Emissions(BaseStore):
                 f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping.\n"
                 "If necessary, use force=True to bypass this to add this data."
             )
-            return None
+            return {}
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -198,7 +185,7 @@ class Emissions(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required
+            required_keys=required,
         )
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
@@ -217,7 +204,7 @@ class Emissions(BaseStore):
         """
         Read and transform an emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
-        are determined by which database ie being used.
+        are determined by which database is being used.
 
         The underlying parser functions will be of the form:
             - openghg.transform.emissions.parse_{database.lower()}
@@ -245,8 +232,10 @@ class Emissions(BaseStore):
         from openghg.util import load_emissions_database_parser, check_if_need_new_version
 
         if overwrite and if_exists == "default":
-            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
-                           "See documentation for details of these inputs and options.")
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
@@ -283,7 +272,7 @@ class Emissions(BaseStore):
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
-            required_keys=required_keys
+            required_keys=required_keys,
         )
 
         return datasource_uuids
