@@ -50,6 +50,7 @@ def standardise_surface(
     verify_site_code: bool = True,
     site_filepath: optionalPathType = None,
     store: Optional[str] = None,
+    **kwargs: Any
 ) -> dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -78,6 +79,7 @@ def standardise_surface(
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         store: Name of object store to write to, required if user has access to more than one
         writable store
+        kwargs: To pass in additional tag as metadata
 
     Returns:
         dict: Dictionary of result data
@@ -117,6 +119,8 @@ def standardise_surface(
             metadata["instrument"] = instrument
         if sampling_period is not None:
             metadata["sampling_period"] = sampling_period
+
+        metadata.update(kwargs) if kwargs else None
 
         responses = {}
         for fpath in filepath:
@@ -204,6 +208,7 @@ def standardise_column(
     source_format: str = "openghg",
     overwrite: bool = False,
     store: Optional[str] = None,
+    **kwargs: Any
 ) -> dict:
     """Read column observation file
 
@@ -227,6 +232,8 @@ def standardise_column(
         source_format : Type of data being input e.g. openghg (internal format)
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
+        kwargs: To pass in additional tag as metadata
+
 
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -253,6 +260,7 @@ def standardise_column(
         }
 
         metadata = {k: v for k, v in metadata.items() if v is not None}
+        metadata.update(kwargs) if kwargs else None
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -288,6 +296,7 @@ def standardise_bc(
     continuous: bool = True,
     overwrite: bool = False,
     store: Optional[str] = None,
+    **kwargs: Any
 ) -> dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -302,6 +311,8 @@ def standardise_bc(
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
+        kwargs: To pass in additional tag as metadata
+
 
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -320,6 +331,7 @@ def standardise_bc(
             "continuous": continuous,
             "overwrite": overwrite,
         }
+        metadata.update(kwargs) if kwargs else None
 
         if period is not None:
             metadata["period"] = period
@@ -364,6 +376,7 @@ def standardise_footprint(
     overwrite: bool = False,
     store: Optional[str] = None,
     bucket: Optional[str] = None,
+    **kwargs: Any
 ) -> dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -388,6 +401,8 @@ def standardise_footprint(
         overwrite: Overwrite any currently stored data
         store: Name of store to write to
         bucket: object store bucket to use; this takes precendence over 'store'
+        kwargs: To pass in additional tag as metadata
+
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -418,6 +433,7 @@ def standardise_footprint(
         }
 
         metadata = {k: v for k, v in metadata.items() if v is not None}
+        metadata.update(kwargs) if kwargs else None
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -463,6 +479,7 @@ def standardise_flux(
     continuous: bool = True,
     overwrite: bool = False,
     store: Optional[str] = None,
+    **kwargs: Any
 ) -> dict:
     """Process flux data
 
@@ -478,6 +495,7 @@ def standardise_flux(
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
+        kwargs: To pass in additional tag as metadata
 
     Returns:
         dict: Dictionary of Datasource UUIDs data assigned to
@@ -506,6 +524,7 @@ def standardise_flux(
                 metadata[key] = value
 
         metadata = {k: v for k, v in metadata.items()}
+        metadata.update(kwargs) if kwargs else None
 
         to_post = create_post_dict(
             function_name="standardise", data=compressed_data, metadata=metadata, file_metadata=file_metadata
@@ -542,6 +561,7 @@ def standardise_eulerian(
     setup: Optional[str] = None,
     overwrite: bool = False,
     store: Optional[str] = None,
+    **kwargs: Any
 ) -> dict:
     """Read Eulerian model output
 
@@ -555,12 +575,16 @@ def standardise_eulerian(
         overwrite: Should this data overwrite currently stored data.
         store: Name of object store to write to, required if user has access to more than one
         writable store
+        kwargs: To pass in additional tag as metadata
 
     Returns:
         dict: Dictionary of result data
     """
     if running_on_hub():
+        metadata = {}
+        metadata.update(kwargs) if kwargs else None
         raise NotImplementedError("Serverless not implemented yet for Eulerian model.")
+
     else:
         return standardise(
             store=store,
