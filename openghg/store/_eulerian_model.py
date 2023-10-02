@@ -49,7 +49,10 @@ class EulerianModel(BaseStore):
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
+        if_exists: str = "default",
+        save_current: Optional[bool] = None,
         overwrite: bool = False,
+        force: bool = False,
     ) -> Dict:
         """Read Eulerian model output
 
@@ -60,13 +63,28 @@ class EulerianModel(BaseStore):
             start_date: Start date (inclusive) associated with model run
             end_date: End date (exclusive) associated with model run
             setup: Additional setup details for run
-            overwrite: Should this data overwrite currently stored data.
+            if_exists: What to do if existing data is present.
+                - "default" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "replace" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input ("default" -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+            force: Force adding of data even if this is identical to data stored.
         """
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
 
         from collections import defaultdict
-        from openghg.util import clean_string, hash_file, timestamp_now, timestamp_tzaware
+        from openghg.util import (
+            clean_string,
+            hash_file,
+            timestamp_now,
+            timestamp_tzaware,
+            check_if_need_new_version,
+        )
         from pandas import Timestamp as pd_Timestamp
         from xarray import open_dataset
 
@@ -76,12 +94,26 @@ class EulerianModel(BaseStore):
         end_date = clean_string(end_date)
         setup = clean_string(setup)
 
+        if overwrite and if_exists == "default":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        # Making sure data can be force overwritten if force keyword is included.
+        if force and if_exists == "default":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
         filepath = Path(filepath)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
+        if file_hash in self._file_hashes and not force:
             raise ValueError(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}."
+                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}.\n"
+                "If necessary, use force=True to bypass this to add this data."
             )
 
         em_data = open_dataset(filepath)
@@ -166,8 +198,22 @@ class EulerianModel(BaseStore):
 
         data_type = "eulerian_model"
         datasource_uuids = self.assign_data(
-            data=model_data, overwrite=overwrite, data_type=data_type, required_keys=required
+            data=model_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            required_keys=required
         )
+
+        ## TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # update_keys = ["start_date", "end_date", "latest_version"]
+        # model_data = update_metadata(
+        #     data_dict=model_data, uuid_dict=datasource_uuids, update_keys=update_keys
+        # )
+
+        # em_store.add_datasources(
+        #     uuids=datasource_uuids, data=model_data, metastore=metastore, update_keys=update_keys
+        # )
 
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name

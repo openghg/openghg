@@ -72,7 +72,10 @@ class ObsSurface(BaseStore):
             "instrument",
             "sampling_period",
             "measurement_type",
+            "if_exists",
+            "save_current",
             "overwrite",
+            "force",
             "source_format",
             "data_type",
         }
@@ -123,10 +126,13 @@ class ObsSurface(BaseStore):
         sampling_period: Optional[Union[Timedelta, str]] = None,
         calibration_scale: Optional[str] = None,
         measurement_type: str = "insitu",
-        update_mismatch: str = "never",
-        overwrite: bool = False,
         verify_site_code: bool = True,
         site_filepath: optionalPathType = None,
+        update_mismatch: str = "never",
+        if_exists: str = "default",
+        save_current: Optional[bool] = None,
+        overwrite: bool = False,
+        force: bool = False,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -145,16 +151,29 @@ class ObsSurface(BaseStore):
             instrument: Instrument name
             sampling_period: Sampling period in pandas style (e.g. 2H for 2 hour period, 2m for 2 minute period).
             measurement_type: Type of measurement e.g. insitu, flask
+            verify_site_code: Verify the site code
+            site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
+                Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+                        update_mismatch: This determines whether mismatches between the internal data
+                attributes and the supplied / derived metadata can be updated or whether
+                this should raise an AttrMismatchError.
+                If True, currently updates metadata with attribute value.
             update_mismatch: This determines how mismatches between the internal data
-                  "attributes" and the supplied / derived "metadata" are handled.
-                  This includes the options:
-                      - "never" - don't update mismatches and raise an AttrMismatchError
-                      - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
-                      - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
-            overwrite: Overwrite previously uploaded data
-                  verify_site_code: Verify the site code
-                  site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
-                      Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+                "attributes" and the supplied / derived "metadata" are handled.
+                This includes the options:
+                    - "never" - don't update mismatches and raise an AttrMismatchError
+                    - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+                    - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
+            if_exists: What to do if existing data is present.
+                - "default" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "replace" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input ("default" -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+            force: Force adding of data even if this is identical to data stored.
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -164,7 +183,14 @@ class ObsSurface(BaseStore):
         import sys
         from collections import defaultdict
         from openghg.types import SurfaceTypes
-        from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            hash_file,
+            load_surface_parser,
+            verify_site,
+            check_if_need_new_version,
+        )
         from tqdm import tqdm
 
         if not isinstance(filepath, list):
@@ -197,6 +223,19 @@ class ObsSurface(BaseStore):
         # Try to ensure inlet is 'NUM''UNIT' e.g. "10m"
         inlet = clean_string(inlet)
         inlet = format_inlet(inlet)
+
+        if overwrite and if_exists == "default":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        # Making sure data can be force overwritten if force keyword is included.
+        if force and if_exists == "default":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
 
         sampling_period_seconds: Union[str, None] = None
         # If we have a sampling period passed we want the number of seconds
@@ -254,10 +293,11 @@ class ObsSurface(BaseStore):
                     data_filepath = Path(fp)
 
                 file_hash = hash_file(filepath=data_filepath)
-                if file_hash in self._file_hashes and overwrite is False:
+                if file_hash in self._file_hashes and not force:
                     logger.warning(
                         "This file has been uploaded previously with the filename : "
-                        f"{self._file_hashes[file_hash]} - skipping."
+                        f"{self._file_hashes[file_hash]} - skipping.\n"
+                        "If necessary, use force=True to bypass this to add this data."
                     )
                     break
 
@@ -354,7 +394,8 @@ class ObsSurface(BaseStore):
                 data_type = "surface"
                 datasource_uuids = self.assign_data(
                     data=data,
-                    overwrite=overwrite,
+                    if_exists=if_exists,
+                    new_version=new_version,
                     data_type=data_type,
                     required_keys=required_keys,
                     min_keys=5,
@@ -381,6 +422,7 @@ class ObsSurface(BaseStore):
         instrument: str = "aqmesh",
         sampling_period: int = 60,
         measurement_type: str = "insitu",
+        if_exists: str = "default",
         overwrite: bool = False,
     ) -> DefaultDict:
         """Read AQMesh data for the Glasgow network
@@ -402,6 +444,13 @@ class ObsSurface(BaseStore):
         # data_filepath = Path(data_filepath)
         # metadata_filepath = Path(metadata_filepath)
 
+        # if overwrite and if_exists == "default":
+        #     logger.warning(
+        #         "Overwrite flag is deprecated in preference to `if_exists` input."
+        #         "See documentation for details of this input and options."
+        #     )
+        #     if_exists = "new"
+
         # # Get a dict of data and metadata
         # processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
@@ -412,9 +461,10 @@ class ObsSurface(BaseStore):
 
         #     file_hash = hash_file(filepath=data_filepath)
 
-        #     if self.seen_hash(file_hash=file_hash) and overwrite is False:
+        #     if self.seen_hash(file_hash=file_hash) and not force:
         #         raise ValueError(
-        #             f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}."
+        #             f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}.\n"
+        #              "If necessary, use force=True to bypass this to add this data."
         #         )
         #         break
 
@@ -505,22 +555,43 @@ class ObsSurface(BaseStore):
         data_schema.validate_data(data)
 
     def store_data(
-        self, data: Dict, overwrite: bool = False, required_metakeys: Optional[Sequence] = None
+        self,
+        data: Dict,
+        if_exists: str = "default",
+        overwrite: bool = False,
+        required_metakeys: Optional[Sequence] = None,
     ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
         Args:
             data: Dictionary of data in standard format, see the data spec under
             Development -> Data specifications in the documentation
-            overwrite: If True overwrite currently stored data
+            if_exists: What to do if existing data is present.
+                - "default" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - creates new version with just new data
+                - "replace" - replace and insert new data into current timeseries
+            overwrite: Deprecated. This will use options for if_exists="new".
             required_metakeys: Keys in the metadata we should use to store this metadata in the object store
-            if None it defaults to:
-            {"species", "site", "station_long_name", "inlet", "instrument",
-            "network", "source_format", "data_source", "icos_data_level"}
+                if None it defaults to:
+                    {"species", "site", "station_long_name", "inlet", "instrument",
+                    "network", "source_format", "data_source", "icos_data_level"}
         Returns:
             Dict or None:
         """
         from openghg.util import hash_retrieved_data
+
+        if overwrite and if_exists == "default":
+            logger.warning(
+                "Overwrite flag is deprecated in preference to `if_exists` input."
+                "See documentation for details of this input and options."
+            )
+            if_exists = "new"
+
+        # TODO: May need to delete
+        # obs = ObsSurface.load()
+        # metastore = load_metastore(key=obs._metakey)
 
         # Very rudimentary hash of the data and associated metadata
         hashes = hash_retrieved_data(to_hash=data)
@@ -558,7 +629,7 @@ class ObsSurface(BaseStore):
         # in the metastore
         datasource_uuids = self.assign_data(
             data=to_process,
-            overwrite=overwrite,
+            if_exists=if_exists,
             data_type=data_type,
             required_keys=required_metakeys,
             min_keys=5,

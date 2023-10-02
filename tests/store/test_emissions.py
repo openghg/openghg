@@ -13,7 +13,7 @@ from helpers import clear_test_stores
 
 def test_read_binary_data(mocker):
     clear_test_stores()
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
+    fake_uuids = [f"test-uuid-{n}" for n in range(100, 150)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
@@ -36,7 +36,7 @@ def test_read_binary_data(mocker):
     with Emissions(bucket=bucket) as ems:
         results = ems.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
 
-    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2",
+    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-101",
                                                     "new": True}}
 
     assert results == expected_results
@@ -53,7 +53,7 @@ def test_read_file():
             source="gpp-cardamom",
             domain="europe",
             high_time_resolution=False,
-            overwrite=True,
+            force=True,  # For ease, make sure we can add the same data.
         )
 
     assert "co2_gpp-cardamom_europe" in proc_results

@@ -13,7 +13,7 @@ from openghg.types import DataOverlapError
 from helpers import clear_test_stores
 
 
-def flux_data_read():
+def flux_data_read(force=False):
     """
     Flux data set up.
     """
@@ -32,6 +32,7 @@ def flux_data_read():
             source=source1,
             domain=domain,
             high_time_resolution=False,
+            force=force,
         )
 
 
@@ -55,6 +56,7 @@ def test_database_update_repeat():
     flux = get_flux(**em_param)
 
     assert flux is not None
+    assert flux.metadata["latest_version"] == "v1"
 
     # bc_param = {}
     # bc_param["start_date"] = "2012-08-01"
@@ -82,8 +84,32 @@ def test_database_update_repeat():
     # assert footprint is not None
 
 
-#  Test variants in data from the same source being added
+def test_database_update_force():
+    """
+    Test object store can update identical data, and create a new version
+    when force keyword is used.
+    """
 
+    # Attempt to add same data to the database twice
+    clear_test_stores()
+    flux_data_read()
+    flux_data_read(force=True)
+
+    em_param = {}
+    em_param["start_date"] = "2012-01-01"
+    em_param["end_date"] = "2013-01-01"
+
+    em_param["species"] = "ch4"
+    em_param["domain"] = "EUROPE"
+    em_param["source"] = "anthro"
+
+    flux = get_flux(**em_param)
+
+    assert flux is not None
+    assert flux.metadata["latest_version"] == "v2"
+
+
+#%% Test variants in data from the same source being added
 
 def bsd_data_read_crds():
     """
@@ -127,7 +153,7 @@ def bsd_data_read_gcmd():
         )
 
 
-def bsd_small_edit_data_read(overwrite=False):
+def bsd_small_edit_data_read(if_exists=None):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Same data
@@ -149,11 +175,11 @@ def bsd_small_edit_data_read(overwrite=False):
             site=site,
             network=network,
             instrument=instrument,
-            overwrite=overwrite
+            if_exists=if_exists
         )
 
 
-def bsd_diff_data_read(overwrite=False):
+def bsd_diff_data_read(if_exists=None, save_current=None):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data values (should create different hash)
@@ -174,7 +200,8 @@ def bsd_diff_data_read(overwrite=False):
             site=site,
             network=network,
             instrument=instrument,
-            overwrite=overwrite,
+            if_exists=if_exists,
+            save_current=save_current
         )
 
 
@@ -286,7 +313,7 @@ def test_obs_data_read_header_diff_update():
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with small edit in header
-    bsd_small_edit_data_read(overwrite=True)
+    bsd_small_edit_data_read(if_exists="new")
 
     # Search for expected species
     # CRDS data
@@ -326,18 +353,10 @@ def test_obs_data_read_header_diff_update():
     expected_sf6 = gcwerks_file_data["SF6"].values
     np.testing.assert_allclose(sf6, expected_sf6)
 
-    # Load datasource and keys, key dictionary includes "v1", "latest" etc.
+    metadata_sf6 = obs_data_sf6.metadata
+    assert metadata_sf6["latest_version"] == "v2"
 
-    # TODO: Can we check if this has been saved as a new version?
 
-
-@pytest.mark.xfail(
-    reason="Related to Issue #591.\n"
-    " This test is to check updated data values will be stored within the object store for a current data set.\n"
-    " Currently doesn't seem to be adding the new data and retains the original data.\n",
-    raises=AssertionError,
-    strict=True,
-)
 def test_obs_data_read_data_diff():
     """
     Test adding new file for GC with same time points but some different data values.
@@ -354,7 +373,8 @@ def test_obs_data_read_data_diff():
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    bsd_diff_data_read(overwrite=True)
+    # Including if_exists="new", save_current is None by defalult --> new_version will be True
+    bsd_diff_data_read(if_exists="new")
 
     # Search for expected species
     # CRDS data
@@ -373,7 +393,7 @@ def test_obs_data_read_data_diff():
     assert bool(search_n2o) == True
 
     # Find uuid values and use this to extract the Datasources to look at stored versions
-    # Make sure that updated data (using overwrite flag) has a new version.
+    # Make sure that updated data (using if_exists="new" flag) has a new version.
     search_sf6_results = search_sf6.results
     search_n2o_results = search_n2o.results
     uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
@@ -409,6 +429,83 @@ def test_obs_data_read_data_diff():
     sf6 = data_sf6["sf6"].values
     expected_sf6 = gcwerks_file_data["SF6"].values
     np.testing.assert_allclose(sf6, expected_sf6)
+
+    metadata_sf6 = obs_data_sf6.metadata
+    assert metadata_sf6["latest_version"] == "v2"
+
+
+def test_obs_data_read_data_new_version():
+    """
+    Same data setup as test_obs_data_read_data_diff() but checking new version and correct data
+    are stored when save_current=True.
+    """
+    clear_test_stores()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
+    # Including if_exists="new", save_current=True --> new_version will be True
+    bsd_diff_data_read(if_exists="new", save_current=True)
+
+    # Search for expected species
+    # GCMD data
+    search_sf6 = search(site="bsd", species="sf6")
+
+    # Compare against data from files
+    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
+
+    obs_data_sf6 = search_sf6.retrieve()
+    data_sf6 = obs_data_sf6.data
+
+    sf6 = data_sf6["sf6"].values
+    expected_sf6 = gcwerks_file_data["SF6"].values
+    np.testing.assert_allclose(sf6, expected_sf6)
+
+    metadata_sf6 = obs_data_sf6.metadata
+    assert metadata_sf6["latest_version"] == "v2"
+
+
+def test_obs_data_read_data_overwrite_version():
+    """
+    Same data setup as test_obs_data_read_data_diff() but checking previous version is 
+    overwritten and correct data are stored when save_current=False.
+    """
+    clear_test_stores()
+    # Load BSD data - GCMD data (GCWERKS)
+    bsd_data_read_gcmd()
+    # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
+    bsd_diff_data_read(if_exists="new", save_current=False)
+
+    # Search for expected species
+    # GCMD data
+    search_sf6 = search(site="bsd", species="sf6")
+    search_n2o = search(site="bsd", species="n2o")
+
+    # Find uuid values and use this to extract the Datasources to look at stored versions
+    # Make sure that updated data (using if_exists="new" flag) has a new version.
+    search_sf6_results = search_sf6.results
+    search_n2o_results = search_n2o.results
+    uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
+    uuid_n2o = search_n2o_results.iloc[0]["uuid"]
+
+    bucket = get_bucket()
+    d_sf6 = Datasource.load(bucket=bucket, uuid=uuid_sf6)
+    d_n2o = Datasource.load(bucket=bucket, uuid=uuid_n2o)
+
+    assert d_sf6._latest_version == "v1"
+    assert d_n2o._latest_version == "v1"
+
+    # Compare against data from files
+    gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
+
+    obs_data_sf6 = search_sf6.retrieve()
+    data_sf6 = obs_data_sf6.data
+
+    sf6 = data_sf6["sf6"].values
+    expected_sf6 = gcwerks_file_data["SF6"].values
+    np.testing.assert_allclose(sf6, expected_sf6)
+
+    metadata_sf6 = obs_data_sf6.metadata
+    assert metadata_sf6["latest_version"] == "v1"
 
 
 # TODO: Add test for different time values as well.
@@ -521,7 +618,7 @@ def test_obs_data_read_two_frequencies():
 #  Look at replacing data with different / overlapping internal time stamps
 
 
-def bsd_data_read_crds_internal_overlap(overwrite=False):
+def bsd_data_read_crds_internal_overlap(if_exists="new"):
     """
     Add Bilsdale *hourly* data for CRDS instrument to object store
      - CRDS: ch4, co2, co
@@ -542,7 +639,7 @@ def bsd_data_read_crds_internal_overlap(overwrite=False):
             source_format=source_format1,
             site=site,
             network=network,
-            overwrite=overwrite,
+            if_exists=if_exists,
         )
 
 
@@ -559,7 +656,7 @@ def test_obs_data_representative_date_overlap():
 
     clear_test_stores()
     bsd_data_read_crds_internal_overlap()
-    bsd_data_read_crds_internal_overlap(overwrite=True)
+    bsd_data_read_crds_internal_overlap(if_exists="new")
 
     bucket = get_bucket()
     with ObsSurface(bucket=bucket) as obs:
@@ -650,23 +747,23 @@ def test_metadata_update():
 # - need to be clear on what we expect to happen here
 
 
-def bsd_data_read_crds_overwrite():
-    """
-    Add Bilsdale data for CRDS instrument to object store.
-     - CRDS: ch4, co2, co
-    """
+# def bsd_data_read_crds_overwrite():
+#     """
+#     Add Bilsdale data for CRDS instrument to object store.
+#      - CRDS: ch4, co2, co
+#     """
 
-    site = "bsd"
-    network = "DECC"
-    source_format1 = "CRDS"
+#     site = "bsd"
+#     network = "DECC"
+#     source_format1 = "CRDS"
 
-    bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
+#     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
 
-    bucket = get_bucket()
-    with ObsSurface(bucket=bucket) as obs:
-        obs.read_file(
-            filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True
-        )
+#     bucket = get_bucket()
+#     with ObsSurface(bucket=bucket) as obs:
+#         obs.read_file(
+#             filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True
+#         )
 
 
 # def test_obs_data_read_overwrite():

@@ -67,11 +67,12 @@ class BaseStore:
     def assign_data(
         self,
         data: Dict,
-        overwrite: bool,
         data_type: str,
         required_keys: Sequence[str],
         min_keys: Optional[int] = None,
         update_keys: Optional[List] = None,
+        if_exists: str = "default",
+        new_version: bool = True,
     ) -> Dict[str, Dict]:
         """Assign data to a Datasource. This will either create a new Datasource
         Create or get an existing Datasource for each gas in the file
@@ -82,6 +83,14 @@ class BaseStore:
                 data_type: Type of data, timeseries etc
                 required_keys: Required minimum keys to lookup unique Datasource
                 min_keys: Minimum number of metadata keys needed to uniquely match a Datasource
+                if_exists: What to do if existing data is present.
+                    - "default" - checks new and current data for timeseries overlap
+                        - adds data if no overlap
+                        - raises DataOverlapError if there is an overlap
+                    - "new" - just include new data and ignore previous
+                    - "replace" - replace and insert new data into current timeseries
+                new_version: Create a new version for the data and save current
+                    data to a previous version.
             Returns:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
@@ -135,10 +144,10 @@ class BaseStore:
 
             # Add the dataframe to the datasource
             datasource.add_data(
-                metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type, skip_keys=skip_keys
+                metadata=meta_copy, data=_data, skip_keys=skip_keys, if_exists=if_exists, data_type=data_type
             )
             # Save Datasource to object store
-            datasource.save(bucket=self._bucket, overwrite=overwrite)
+            datasource.save(bucket=self._bucket, new_version=new_version)
 
             # Add the metadata to the metastore and make sure it's up to date with the metadata stored
             # in the Datasource

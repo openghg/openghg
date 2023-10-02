@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Literal, Optional, Tuple, Union
@@ -10,6 +11,13 @@ from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
 from types import TracebackType
 import warnings
+
+__all__ = ["Emissions"]
+
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -75,7 +83,10 @@ class Emissions(BaseStore):
         period: Optional[Union[str, tuple]] = None,
         chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
+        if_exists: str = "default",
+        save_current: Optional[bool] = None,
         overwrite: bool = False,
+        force: bool = False,
     ) -> Optional[Dict]:
         """Read emissions file
 
@@ -95,16 +106,41 @@ class Emissions(BaseStore):
                 - suitable pandas Offset Alias
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
             continuous: Whether time stamps have to be continuous.
-            overwrite: Should this data overwrite currently stored data.
+            if_exists: What to do if existing data is present.
+                - "default" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "replace" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input ("default" -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+            force: Force adding of data even if this is identical to data stored.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
         from openghg.types import EmissionsTypes
-        from openghg.util import clean_string, hash_file, load_emissions_parser
+        from openghg.util import (
+            clean_string,
+            hash_file,
+            load_emissions_parser,
+            check_if_need_new_version,
+        )
 
         species = clean_string(species)
         source = clean_string(source)
         domain = clean_string(domain)
+
+        if overwrite and if_exists == "default":
+            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                           "See documentation for details of these inputs and options.")
+            if_exists = "new"
+
+        # Making sure data can be force overwritten if force keyword is included.
+        if force and if_exists == "default":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
 
         filepath = Path(filepath)
 
@@ -117,9 +153,10 @@ class Emissions(BaseStore):
         parser_fn = load_emissions_parser(source_format=source_format)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
+        if file_hash in self._file_hashes and not force:
             warnings.warn(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
+                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping.\n"
+                "If necessary, use force=True to bypass this to add this data."
             )
             return None
 
@@ -157,7 +194,11 @@ class Emissions(BaseStore):
 
         data_type = "emissions"
         datasource_uuids = self.assign_data(
-            data=emissions_data, overwrite=overwrite, data_type=data_type, required_keys=required
+            data=emissions_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            required_keys=required
         )
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
@@ -168,6 +209,8 @@ class Emissions(BaseStore):
         self,
         datapath: Union[str, Path],
         database: str,
+        if_exists: str = "default",
+        save_current: Optional[bool] = None,
         overwrite: bool = False,
         **kwargs: Dict,
     ) -> Dict:
@@ -183,8 +226,15 @@ class Emissions(BaseStore):
         Args:
             datapath: Path to local copy of database archive (for now)
             database: Name of database
-            overwrite: Should this data overwrite currently stored data
-                which matches.
+            if_exists: What to do if existing data is present.
+                - "default" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "replace" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input ("default" -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
             **kwargs: Inputs for underlying parser function for the database.
                 Necessary inputs will depend on the database being parsed.
 
@@ -192,7 +242,14 @@ class Emissions(BaseStore):
         """
         import inspect
         from openghg.types import EmissionsDatabases
-        from openghg.util import load_emissions_database_parser
+        from openghg.util import load_emissions_database_parser, check_if_need_new_version
+
+        if overwrite and if_exists == "default":
+            logger.warning("Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                           "See documentation for details of these inputs and options.")
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
 
         datapath = Path(datapath)
 
@@ -221,9 +278,12 @@ class Emissions(BaseStore):
         required_keys = ("species", "source", "domain")
 
         data_type = "emissions"
-        overwrite = False
         datasource_uuids = self.assign_data(
-            data=emissions_data, overwrite=overwrite, data_type=data_type, required_keys=required_keys
+            data=emissions_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            required_keys=required_keys
         )
 
         return datasource_uuids

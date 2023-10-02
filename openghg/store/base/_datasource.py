@@ -1,11 +1,11 @@
-from pandas import DataFrame, Timestamp, Timedelta
-from xarray import Dataset
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
+import shutil
 from pandas import DataFrame, Timestamp, Timedelta
 from xarray import Dataset
+from openghg.objectstore import exists, move_objects
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -44,6 +44,9 @@ class Datasource:
         self._bucket = ""
 
         self._stored = False
+        self._status: Optional[dict] = None
+        # This dictionary stored the keys for each version of data uploaded
+        # data_key = d._data_keys["latest"]["keys"][date_key]
         self._data_keys: dataKeyType = defaultdict(dict)
         self._data_type: str = ""
         # Hold information regarding the versions of the data
@@ -85,7 +88,7 @@ class Datasource:
         data: Dataset,
         data_type: str,
         skip_keys: Optional[List] = None,
-        overwrite: Optional[bool] = False,
+        if_exists: str = "default",
     ) -> None:
         """Add data to this Datasource and segment the data by size.
         The data is stored as a tuple of the data and the daterange it covers.
@@ -94,7 +97,13 @@ class Datasource:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
             data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
-            overwrite: Overwrite existing data
+            skip_keys: Keys to not standardise as lowercase
+            if_exists: What to do if existing data is present.
+                - "default" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - creates new version with just new data
+                - "replace" - replace and insert new data into current timeseries
         Returns:
             None
         """
@@ -107,17 +116,23 @@ class Datasource:
         self.add_metadata(metadata=metadata, skip_keys=skip_keys)
 
         if "time" in data.coords:
-            return self.add_timed_data(data=data, data_type=data_type, overwrite=overwrite)
+            return self.add_timed_data(data=data, data_type=data_type, if_exists=if_exists)
         else:
             raise NotImplementedError()
 
-    def add_timed_data(self, data: Dataset, data_type: str, overwrite: Optional[bool] = False) -> None:
+    def add_timed_data(self, data: Dataset, data_type: str, if_exists: str = "default") -> None:
         """Add data to this Datasource, splitting along the time axis
 
         Args:
             data: An xarray.Dataset
-            data_type: Name of data_type defined by 
+            data_type: Name of data_type defined by
                 openghg.store.spec.define_data_types()
+            if_exists: What to do if existing data is present.
+                - "default" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - creates new version with just new data
+                - "replace" - replace and insert new data into current timeseries
         Returns:
             None
         """
@@ -144,6 +159,9 @@ class Datasource:
         # (this can occur due to representative date strings)
         new_data = self._clip_daterange_label(new_data)
 
+        # Save details of current Datasource status
+        self._status = {}
+
         if self._data:
             # We need to remove them from the current daterange
             overlapping = []
@@ -152,14 +170,22 @@ class Datasource:
                     if daterange_overlap(daterange_a=existing_daterange, daterange_b=new_daterange):
                         overlapping.append((existing_daterange, new_daterange))
 
-            # If we have overlapping data, we raise a DataOverlapError by default
-            # or print a warning and then combine the datasets in overwrite is True
+            # If we have overlapping data we raise a DataOverlapError by default
+            # or print a warning and then combine the datasets if_exists is "replace"
             # if we have duplicate timestamps, we first check if the data is just the same
             # or if it's not, we keep the first value and drop the others, we also
             # print that we've done this
 
-            if overlapping:
-                if overwrite:
+            self._status["current_data"] = True
+            self._status["overlapping"] = overlapping
+
+            if if_exists == "new":
+                # Remove all current data on Datasource and add new data
+                # self._data is a dictionary containing datestr: Dataset values
+                logger.info("Updating store to include new added data only.")
+                self._data = new_data
+            elif overlapping:
+                if if_exists == "replace":
                     combined_datasets = {}
                     for existing_daterange, new_daterange in overlapping:
                         ex = self._data.pop(existing_daterange)
@@ -211,16 +237,21 @@ class Datasource:
                     combined_datasets = self._clip_daterange_label(combined_datasets)
 
                     self._data.update(combined_datasets)
+                    # self._delete_version = True
                 else:
                     date_chunk_str = ""
                     for existing_daterange, new_daterange in overlapping:
                         date_chunk_str += f" - current: {existing_daterange}; new: {new_daterange}\n"
-                    raise DataOverlapError(f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
-                                           f"To update current data in object store set overwrite=True")
+                    raise DataOverlapError(
+                        f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
+                        f"To update current data in object store use `if_exists` input (see options in documentation)"
+                    )
             else:
                 self._data.update(new_data)
         else:
             self._data = new_data
+            self._status["current_data"] = False
+            self._status["overlapping"] = False
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
@@ -229,6 +260,9 @@ class Datasource:
         start, end = self.daterange()
         self.add_metadata_key(key="start_date", value=str(start))
         self.add_metadata_key(key="end_date", value=str(end))
+
+        self._status["updates"] = True
+        self._status["if_exists"] = if_exists
 
     def delete_all_data(self) -> None:
         """Delete the data associated with this Datasource
@@ -253,18 +287,41 @@ class Datasource:
         """Delete specific keys
 
         Args:
+            bucket: Bucket containing data
             keys: List of keys to delete
+        Returns:
+            None
         """
         from openghg.objectstore import delete_object
 
         for key in set(keys):
             delete_object(bucket=bucket, key=key)
 
+    def delete_version(self, bucket: str, version: str) -> None:
+        """Delete a specific version of data.
+
+        Args:
+            bucket: Bucket containing data
+            version: Version string
+        Returns:
+            None
+        """
+        if version not in self._data_keys:
+            raise KeyError("Invalid version.")
+
+        # Could delete version like this - one key at a time
+        data_keys = list(self._data_keys[version]["keys"].values())
+
+        self.delete_data(bucket=bucket, keys=data_keys)
+
+        # Or could just try and delete the whole version folder?
+
     def add_metadata(self, metadata: Dict, skip_keys: Optional[List] = None) -> None:
         """Add all metadata in the dictionary to this Datasource
 
         Args:
             metadata: Dictionary of metadata
+            skip_keys: Keys to not standardise as lowercase
         Returns:
             None
         """
@@ -546,12 +603,32 @@ class Datasource:
 
         return d
 
-    def save(self, bucket: str, overwrite: Optional[bool] = False) -> None:
+    def define_version_key(self, version: str) -> str:
+        """Define key for version on Datasource"""
+        datasource_key = self.key()
+        version_key = f"{datasource_key}/{version}"
+        return version_key
+
+    def define_data_key(self, label: str, version: str) -> str:
+        """Define data key for internally split data element
+        (e.g. by daterange) on Datasource
+        """
+        version_key = self.define_version_key(version)
+        data_key = f"{version_key}/{label}"
+        return data_key
+
+    def define_backup_version(self, version: str) -> str:
+        """Define backup name for version folder"""
+        version_backup = f"{version}_backup"
+        return version_backup
+
+    def save(self, bucket: str, new_version: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
             bucket: Bucket to hold data
-            overwrite: Whether to add new version
+            new_version: Create a new version for the data and save current
+                data to a previous version.
         Returns:
             None
         """
@@ -565,38 +642,94 @@ class Datasource:
             if "latest" not in self._data_keys:
                 self._data_keys["latest"] = {}
 
-            # Add data to same version as previous unless overwrite is True
-            if self._latest_version and not overwrite:
+            # Add data to same version as previous unless save_current is True
+            if self._latest_version and not new_version:
                 version_str = self._latest_version
             else:
                 # Backup the old data keys at "latest"
                 version_str = f"v{str(len(self._data_keys))}"
 
+            if self._status:
+                if_exists = self._status["if_exists"]
+                overlapping = self._status["overlapping"]
+            else:
+                if_exists = "default"
+                overlapping = False
+
             # Store the keys for the new data
             new_keys = {}
 
+            version_key = self.define_version_key(version_str)
+
+            # If version is already present, and we are not creating a new version
+            # we may need to delete the previous data.
+            delete_version = False
+            if exists(bucket=bucket, key=version_key) and not new_version:
+                # Check update mode and whether data was overlapping.
+                if (if_exists == "replace" and overlapping) or if_exists == "new":
+                    logger.info("Previous version of the data will be deleted.")
+                    delete_version = True
+
+            # Create back up of original data in case writing new data is unsuccessful
+            if delete_version:
+                version_str_backup = self.define_backup_version(version_str)
+                version_key_backup = self.define_version_key(version_str_backup)
+
+                move_objects(bucket=bucket, src_prefix=version_key, dst_prefix=version_key_backup)
+                # Create full path to back up folder and move current version folder
+                # version_folder_backup = Path(bucket) / version_key_backup
+                # version_folder.rename(version_folder_backup)
+
+                version_keys = self._data_keys[version_str]["keys"]
+                labels = version_keys.keys()
+
+                # Add record of backup version to self._data_keys
+                self._data_keys[version_str_backup] = self._data_keys[version_str].copy()
+                self._data_keys[version_str_backup]["keys"] = {
+                    label: self.define_data_key(label, version_str_backup) for label in labels
+                }
+                self._data_keys[version_str_backup]["timestamp"] = str(timestamp_now())  # type: ignore
+
+            # if not version_folder.exists():
+            # version_folder.mkdir(parents=True, exist_ok=True)
+
             # Iterate over the keys (daterange string) of the data dictionary
-            for daterange in self._data:
-                data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
+            for daterange, data in self._data.items():
+                # data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
+                data_key = self.define_data_key(label=daterange, version=version_str)
 
                 new_keys[daterange] = data_key
-                data = self._data[daterange]
-
+                # filepath = version_folder / f"{daterange}._data"
+                # TODO - we really just want to use set_object here but we need some bytes for that
+                # until the zarr changes are implemented let's stick to writing directly to NetCDF
+                # instead of writing to a temporary space and reading the bytes
                 filepath = Path(f"{bucket}/{data_key}._data")
-                parent_folder = filepath.parent
-                if not parent_folder.exists():
-                    parent_folder.mkdir(parents=True, exist_ok=True)
 
-                data.to_netcdf(filepath, engine="netcdf4")
+                try:
+                    data.to_netcdf(filepath, engine="netcdf4")
+                except IOError:
+                    try:
+                        filepath.parent.mkdir(parents=True)
+                        data.to_netcdf(filepath, engine="netcdf4")
+                    except IOError:
+                        # Remove this version
+                        shutil.rmtree(filepath.parent)
+                        # If unable to write, return original data from back up.
+                        if delete_version:
+                            move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
+                            self._data_keys.pop(version_str_backup)
+                        raise ObjectStoreError("Unable to write new data. Restored previous data.")
+                    # break
 
-                # Can we just take the bytes from the data here and then write then straight?
-                # TODO - for now just create a temporary directory - will have to update Acquire
-                # or work on a PR for xarray to allow returning a NetCDF as bytes
-                # with tempfile.TemporaryDirectory() as tmpdir:
-                #     filepath = f"{tmpdir}/temp.nc"
-                #     data.to_netcdf(filepath)
-                #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
-                # path = f"{bucket_path}/data"
+            # If write has been successful, remove any back up data.
+            if delete_version:
+                if exists(bucket=bucket, key=version_key_backup):
+                    # if version_folder_backup.exists():
+                    logger.warning(f"Deleting previous stored data for this version: {version_str}")
+                    self.delete_version(bucket=bucket, version=version_str_backup)
+
+            # Make sure status is reset now this has been saved
+            self._status = None
 
             # Copy the last version
             if "latest" in self._data_keys:

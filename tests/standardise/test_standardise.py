@@ -42,7 +42,7 @@ def test_standardise_obs_two_writable_stores():
         instrument="picarro",
         network="DECC",
         source_format="CRDS",
-        overwrite=True,
+        force=True,
         store="user",
     )
 
@@ -66,7 +66,6 @@ def test_standardise_obs_two_writable_stores():
         instrument="g2401",
         network="ICOS",
         source_format="ICOS",
-        overwrite=True,
         store="group",
     )
 
@@ -97,7 +96,7 @@ def test_standardise_obs_openghg():
         instrument="picarro",
         source_format="openghg",
         sampling_period="1H",
-        overwrite=True,
+        force=True,
         store="user",
     )
 
@@ -196,7 +195,6 @@ def test_local_obs_metadata_mismatch_meta():
         source_format="openghg",
         sampling_period="1H",
         update_mismatch=update_mismatch,
-        overwrite=True,
         store="user",
     )
 
@@ -245,7 +243,7 @@ def test_local_obs_metadata_mismatch_fail():
             source_format="openghg",
             sampling_period="1H",
             update_mismatch="never",
-            overwrite=True,
+            force=True,
             store="user",
         )
 
@@ -270,7 +268,7 @@ def test_standardise_column():
         satellite=satellite,
         domain=domain,
         species=species,
-        overwrite=True,
+        force=True,
         store="user",
     )
 
@@ -295,7 +293,7 @@ def test_standardise_footprint():
         height=height,
         domain=domain,
         high_spatial_res=True,
-        overwrite=True,
+        force=True,
         store="user",
     )
 
@@ -312,7 +310,7 @@ def test_standardise_flux():
         source="gpp-cardamom",
         domain="europe",
         high_time_resolution=False,
-        overwrite=True,
+        force=True,
         store="user",
     )
 
@@ -352,7 +350,6 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
         source_format="crds",
         sampling_period="1m",
         instrument="picarro",
-        overwrite=True,
     )
 
     assert call_fn_mock.call_args == mocker.call(

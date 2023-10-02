@@ -214,7 +214,10 @@ class Footprints(BaseStore):
         high_spatial_res: bool = False,
         high_time_res: bool = False,
         short_lifetime: bool = False,
+        if_exists: str = "default",
+        save_current: Optional[bool] = None,
         overwrite: bool = False,
+        force: bool = False,
         # model_params: Optional[Dict] = None,
     ) -> Optional[Dict]:
         """Reads footprints data files and returns the UUIDS of the Datasources
@@ -238,7 +241,16 @@ class Footprints(BaseStore):
                            Note this will be set to True automatically if species="co2" (Carbon Dioxide).
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
-            overwrite: Overwrite any currently stored data
+            if_exists: What to do if existing data is present.
+                - "default" - checks new and current data for timeseries overlap
+                   - adds data if no overlap
+                   - raises DataOverlapError if there is an overlap
+                - "new" - just include new data and ignore previous
+                - "replace" - replace and insert new data into current timeseries
+            save_current: Whether to save data in current form and create a new version.
+                If None, this will depend on if_exists input ("default" -> True), (other -> False)
+            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+            force: Force adding of data even if this is identical to data stored.
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -247,7 +259,14 @@ class Footprints(BaseStore):
             infer_date_range,
             update_zero_dim,
         )
-        from openghg.util import clean_string, format_inlet, hash_file, species_lifetime, timestamp_now
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            hash_file,
+            species_lifetime,
+            timestamp_now,
+            check_if_need_new_version,
+        )
 
         filepath = Path(filepath)
 
@@ -267,10 +286,30 @@ class Footprints(BaseStore):
         inlet = format_inlet(inlet)
         inlet = cast(str, inlet)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not overwrite:
+        if overwrite and if_exists == "default":
             logger.warning(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
+                "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
+                "See documentation for details of these inputs and options."
+            )
+            if_exists = "new"
+
+        # Making sure data can be force overwritten if force keyword is included.
+        if force and if_exists == "default":
+            if_exists = "new"
+
+        new_version = check_if_need_new_version(if_exists, save_current)
+
+        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # fp = Footprints.load()
+
+        # # Load in the metadata store
+        # metastore = load_metastore(key=fp._metakey)
+
+        file_hash = hash_file(filepath=filepath)
+        if file_hash in self._file_hashes and not force:
+            logger.warning(
+                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping.\n"
+                "If necessary, use force=True to bypass this to add this data."
             )
             return None
 
@@ -388,8 +427,20 @@ class Footprints(BaseStore):
 
         data_type = "footprints"
         datasource_uuids = self.assign_data(
-            data=footprint_data, overwrite=overwrite, data_type=data_type, required_keys=required
+            data=footprint_data,
+            if_exists=if_exists,
+            new_version=new_version,
+            data_type=data_type,
+            required_keys=required
         )
+
+        ## TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+        # update_keys = ["start_date", "end_date", "latest_version"]
+        # footprint_data = update_metadata(
+        #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
+        # )
+
+        # fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
 
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
