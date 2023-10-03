@@ -89,6 +89,7 @@ def data_read():
         source=source3,
         domain="TEST",
         high_time_resolution=True,
+        store="user",
     )
 
     # Ocean flux for CO2
@@ -105,6 +106,7 @@ def data_read():
         domain="TEST",
         high_time_resolution=False,
         period="1 month",
+        store="user",
     )
 
     standardise_flux(
@@ -114,6 +116,7 @@ def data_read():
         domain="TEST",
         high_time_resolution=False,
         period="1 month",
+        store="user",
     )
     # Ocean flux for CO2
     #  - monthly (cut down data to 1 month)
@@ -127,6 +130,7 @@ def data_read():
                              domain="TEST",
                              high_time_resolution=False,
                              )
+
     standardise_flux(store="user",
                              filepath=emissions_datapath4b,
                              species="co2",

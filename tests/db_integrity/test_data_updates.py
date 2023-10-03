@@ -21,6 +21,7 @@ def flux_data_read(force=False):
     # Anthropogenic ch4 (methane) data from 2012 for EUROPE
     source1 = "anthro"
     domain = "EUROPE"
+    store = "user"
 
     emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
 
@@ -31,6 +32,7 @@ def flux_data_read(force=False):
         domain=domain,
         high_time_resolution=False,
         force=force,
+        store=store,
     )
 
 
@@ -42,7 +44,7 @@ def test_database_update_repeat():
     # Attempt to add same data to the database twice
     emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
     args = (emissions_datapath1, "ch4", "anthro", "EUROPE")
-    kwargs = {"store": "user", "high_time_resolution": False}
+    kwargs = {"store": "user", "high_time_resolution": False, "store": "user"}
 
     standardise_flux(*args, **kwargs)
     standardise_flux(*args, **kwargs)
@@ -133,6 +135,7 @@ def bsd_small_edit_data_read(if_exists=None):
     network = "DECC"
     source_format2 = "GCWERKS"
     instrument = "GCMD"
+    store = "user"
 
     bsd_path3 = get_surface_datapath(filename="bilsdale-md.small-edit.14.C", source_format="GC")
     bsd_prec_path3 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
@@ -143,7 +146,8 @@ def bsd_small_edit_data_read(if_exists=None):
             site=site,
             network=network,
             instrument=instrument,
-            if_exists=if_exists
+            if_exists=if_exists,
+            store=store,
         )
 
 
@@ -167,7 +171,8 @@ def bsd_diff_data_read(if_exists=None, save_current=None):
             network=network,
             instrument=instrument,
             if_exists=if_exists,
-            save_current=save_current
+            save_current=save_current,
+            store="user"
         )
 
 
@@ -596,6 +601,7 @@ def bsd_data_read_crds_internal_overlap(if_exists="new"):
             site=site,
             network=network,
             if_exists=if_exists,
+            store="user",
         )
 
 
@@ -611,7 +617,7 @@ def test_obs_data_representative_date_overlap():
     This test checks this will no longer raise a KeyError based on this.
     """
     clear_test_stores()
-    bucket = get_bucket()
+    bucket = get_bucket(name="user")
 
     # Add same data twice, overwriting the second time
     bsd_data_read_crds_internal_overlap()

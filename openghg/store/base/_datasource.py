@@ -572,6 +572,7 @@ class Datasource:
         from openghg.objectstore import get_object_data_path
 
         file_path = get_object_data_path(bucket, key)
+        # return xr.load_dataset(file_path)
         return xr.open_dataset(file_path)
 
     @classmethod
@@ -714,23 +715,24 @@ class Datasource:
                 # instead of writing to a temporary space and reading the bytes
                 filepath = Path(f"{bucket}/{data_key}._data")
 
-                print(f"Writing to {filepath}")
-
                 try:
                     data.to_netcdf(filepath, engine="netcdf4")
                 except IOError:
-                    try:
-                        filepath.parent.mkdir(parents=True)
-                        data.to_netcdf(filepath, engine="netcdf4")
-                    except IOError:
-                        # Remove this version
-                        shutil.rmtree(filepath.parent)
-                        # If unable to write, return original data from back up.
-                        if delete_version:
-                            move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
-                            self._data_keys.pop(version_str_backup)
-                        raise ObjectStoreError("Unable to write new data. Restored previous data.")
-                    # break
+                    # try:
+                    filepath.parent.mkdir(parents=True)
+                    data.to_netcdf(filepath, engine="netcdf4")
+                    # except IOError:
+                    # Remove this version
+                    # shutil.rmtree(filepath.parent)
+                    # # If unable to write, return original data from back up.
+                    # if delete_version:
+                    #     move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
+                    #     self._data_keys.pop(version_str_backup)
+                    # raise ObjectStoreError("Unable to write new data. Restored previous data.")
+
+                # data.close()
+            for dataset in self._data.values():
+                dataset.close()
 
             # If write has been successful, remove any back up data.
             if delete_version:
@@ -869,6 +871,11 @@ class Datasource:
                 self._data[date_key] = Datasource.load_dataset(bucket=self._bucket, key=data_key)
 
         return self._data
+
+    def close_datasets(self) -> None:
+        """Close all open datasets"""
+        for dataset in self._data.values():
+            dataset.close()
 
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource

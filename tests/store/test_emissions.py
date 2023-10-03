@@ -19,7 +19,7 @@ def clear_stores():
 
 def test_read_binary_data(mocker, clear_stores):
     clear_test_stores()
-    fake_uuids = [f"test-uuid-{n}" for n in range(100, 150)]
+    fake_uuids = [f"test-uuid-{n}" for n in range(1, 101)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")

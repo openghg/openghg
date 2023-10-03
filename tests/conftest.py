@@ -62,7 +62,7 @@ def pytest_sessionfinish(session, exitstatus):
     returning the exit status to the system.
     """
     print("\n\nCleaning up testing stores.")
-    # clear_test_stores()
+    clear_test_stores()
 
 
 def pytest_addoption(parser):

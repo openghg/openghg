@@ -811,7 +811,7 @@ def test_store_icos_carbonportal_data(bucket, mocker):
         first_result = metastore.store_data(data=data)
         second_result = metastore.store_data(data=data)
 
-    assert first_result == {"co2": {"uuid": "test-uuid-101", "new": True}}
+    assert first_result == {"co2": {"uuid": "test-uuid-2", "new": True}}
 
     with ObsSurface(bucket=bucket) as obs:
         second_result = obs.store_data(data=data)
@@ -866,7 +866,9 @@ def test_gcwerks_fp_not_a_tuple_raises():
 
     with pytest.raises(TypeError):
         standardise_surface(store="user", filepath=filepath, source_format="GCWERKS", site="cgo", network="agage")
-        standardise_surface(store="user", filepath=filepath, source_format="gc", site="cgo", network="agage")
+
+    with pytest.raises(TypeError):
+        standardise_surface(store="user", filepath=filepath, source_format="gcwerks", site="cgo", network="agage")
 
 
 def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):

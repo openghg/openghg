@@ -262,13 +262,11 @@ class ObsSurface(BaseStore):
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepath:
             if source_format == "GCWERKS":
-                try:
-                    data_filepath = Path(fp[0])
-                    precision_filepath = Path(fp[1])
-                except (ValueError, TypeError):
-                    raise TypeError(
-                        "For GCWERKS data both data and precision filepaths must be given as a tuple."
-                    )
+                if not isinstance(fp, tuple):
+                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
+
+                data_filepath = Path(fp[0])
+                precision_filepath = Path(fp[1])
             else:
                 data_filepath = Path(fp)
 
@@ -279,6 +277,7 @@ class ObsSurface(BaseStore):
                     f"{self._file_hashes[file_hash]} - skipping.\n"
                     "If necessary, use force=True to bypass this to add this data."
                 )
+                continue
 
             # Define required input parameters for parser function
             required_parameters = {
