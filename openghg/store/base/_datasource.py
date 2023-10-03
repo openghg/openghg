@@ -633,6 +633,63 @@ class Datasource:
         version_backup = f"{version}_backup"
         return version_backup
 
+    # def save(self, bucket: str, compression: bool = True, **kwargs) -> None:
+    #     """Save this Datasource object as JSON to the object store
+
+    #     Args:
+    #         bucket: Bucket to hold data
+    #         compression: True if data should be compressed on save
+    #     Returns:
+    #         None
+    #     """
+    #     from copy import deepcopy
+    #     from pathlib import Path
+    #     from openghg.objectstore import set_object_from_json
+    #     from openghg.util import timestamp_now
+
+    #     if self._data:
+    #         # Ensure we have the latest key
+    #         if "latest" not in self._data_keys:
+    #             self._data_keys["latest"] = {}
+
+    #         # Backup the old data keys at "latest"
+    #         version_str = f"v{str(len(self._data_keys))}"
+    #         # Store the keys for the new data
+    #         new_keys = {}
+
+    #         # Iterate over the keys (daterange string) of the data dictionary
+    #         for daterange in self._data:
+    #             data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
+
+    #             new_keys[daterange] = data_key
+    #             data = self._data[daterange]
+
+    #             filepath = Path(f"{bucket}/{data_key}._data")
+    #             parent_folder = filepath.parent
+    #             if not parent_folder.exists():
+    #                 parent_folder.mkdir(parents=True)
+
+    #             data.to_netcdf(filepath, engine="netcdf4")
+
+    #         # Copy the last version
+    #         if "latest" in self._data_keys:
+    #             self._data_keys[version_str] = deepcopy(self._data_keys["latest"])
+
+    #         # Save the new keys and create a timestamp
+    #         self._data_keys[version_str]["keys"] = new_keys
+    #         self._data_keys[version_str]["timestamp"] = str(timestamp_now())  # type: ignore
+
+    #         # Link latest to the newest version
+    #         self._data_keys["latest"] = self._data_keys[version_str]
+    #         self._latest_version = version_str
+    #         self.add_metadata_key(key="latest_version", value=version_str)
+
+    #     self._stored = True
+    #     datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
+
+    #     set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
+
+    # This doesn't work
     def save(self, bucket: str, new_version: bool = True, compression: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
@@ -682,15 +739,22 @@ class Datasource:
                     logger.info("Previous version of the data will be deleted.")
                     delete_version = True
 
+            print("We'll delete the previous version")
             # Create back up of original data in case writing new data is unsuccessful
             if delete_version:
                 version_str_backup = self.define_backup_version(version_str)
                 version_key_backup = self.define_version_key(version_str_backup)
 
+                # I think the issue is that we move objects that are there
+                # If we want to move them then we should close the file handles so they're not left
+                # dangling in the xarray lru_cache
+
+                # Close any open file handles
+                # for data in self._data.values():
+                #     data.close()
+
+                # Now let's move the objects
                 move_objects(bucket=bucket, src_prefix=version_key, dst_prefix=version_key_backup)
-                # Create full path to back up folder and move current version folder
-                # version_folder_backup = Path(bucket) / version_key_backup
-                # version_folder.rename(version_folder_backup)
 
                 version_keys = self._data_keys[version_str]["keys"]
                 labels = version_keys.keys()
@@ -717,21 +781,26 @@ class Datasource:
                 # instead of writing to a temporary space and reading the bytes
                 filepath = Path(f"{bucket}/{data_key}._data")
 
+                if filepath.exists():
+                    raise FileExistsError(f"File already exists at {filepath}")
+
+                # Now we can just write out again
                 try:
                     data.to_netcdf(filepath, engine="netcdf4")
                 except IOError:
-                    try:
-                        filepath.parent.mkdir(parents=True)
-                        data.to_netcdf(filepath, engine="netcdf4")
-                    except IOError:
-                        # Remove this version
-                        shutil.rmtree(filepath.parent)
-                        # If unable to write, return original data from back up.
-                        if delete_version:
-                            move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
-                            self._data_keys.pop(version_str_backup)
-                        raise ObjectStoreError("Unable to write new data. Restored previous data.")
+                    # try:
+                    filepath.parent.mkdir(parents=True)
+                    data.to_netcdf(filepath, engine="netcdf4")
+                    # except IOError:
+                    #     # Remove this version
+                    #     shutil.rmtree(filepath.parent)
+                    #     # If unable to write, return original data from back up.
+                    #     if delete_version:
+                    #         move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
+                    #         self._data_keys.pop(version_str_backup)
+                    #     raise ObjectStoreError("Unable to write new data. Restored previous data.")
 
+                    data.close()
             # If write has been successful, remove any back up data.
             if delete_version:
                 if exists(bucket=bucket, key=version_key_backup):
