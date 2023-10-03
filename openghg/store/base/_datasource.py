@@ -573,9 +573,12 @@ class Datasource:
 
         file_path = get_object_data_path(bucket, key)
         # This works
-        # return xr.load_dataset(file_path)
+        # TODO - this should be changed to use open_dataset really
+        # but open_dataset causes issues due to internal xarray caching when
+        # we try and write out to the same file
+        return xr.load_dataset(file_path)
         # This does not
-        return xr.open_dataset(file_path)
+        # return xr.open_dataset(file_path)
 
     @classmethod
     def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:

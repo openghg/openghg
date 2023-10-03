@@ -126,6 +126,8 @@ def test_versioning(capfd, bucket):
 
     min_keys = d.versions()
 
+    raise ValueError("Should this return data keys instead of datasource keys?")
+
     expected_v1 = {
         "2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00",
         "2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00",
@@ -137,6 +139,27 @@ def test_versioning(capfd, bucket):
         "2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00",
         "2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00",
     }
+
+    got = {
+        "2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00",
+        "2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00",
+        "2014-07-26-13:51:30+00:00_2014-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-07-26-13:51:30+00:00_2014-07-28-13:02:30+00:00",
+        "2015-07-26-13:51:30+00:00_2015-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2015-07-26-13:51:30+00:00_2015-07-28-13:02:30+00:00",
+        "2016-07-26-13:51:30+00:00_2016-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2016-07-26-13:51:30+00:00_2016-07-28-13:02:30+00:00",
+        "2017-07-26-13:51:30+00:00_2017-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2017-07-26-13:51:30+00:00_2017-07-28-13:02:30+00:00",
+        "2018-07-26-13:51:30+00:00_2018-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2018-07-26-13:51:30+00:00_2018-07-28-13:02:30+00:00",
+        "2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00",
+        "2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00",
+    }
+
+    print(min_keys["v1"]["keys"])
+
+    return
+    # for k,v in min_keys["v1"]["keys"].items():
+    #     if min_keys["v1"]["keys"][k] == expected_v1[k]:
+    #         print(k, v)
+
+    # return
 
     assert min_keys["v1"]["keys"] == expected_v1
 
@@ -173,7 +196,9 @@ def test_replace_version():
     data and copying across the new data.
     """
     min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
-    detailed_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
+    detailed_tac_filepath = get_surface_datapath(
+        filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS"
+    )
 
     min_data = parse_crds(data_filepath=min_tac_filepath, site="tac", inlet="100m", network="decc")
 
@@ -536,6 +561,7 @@ def test_key_date_compare():
     with pytest.raises(ValueError):
         in_date = d.key_date_compare(keys=error_key, start_date=start, end_date=end)
 
+
 def test_integrity_check(data, bucket):
     d = Datasource()
 
@@ -560,6 +586,7 @@ def test_integrity_check(data, bucket):
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
 
+
 def test_datasource_compression(data, bucket):
     """Saving a Datasource with compression=True should
     result in a compressed netCDF file.
@@ -580,8 +607,8 @@ def test_datasource_compression(data, bucket):
     d2.add_data(metadata=metadata, data=data, data_type="surface")
     d2.save(bucket=bucket, compression=False)
 
-    key1 = next(iter((d1._data_keys['v1']['keys'].values())))
-    key2 = next(iter((d2._data_keys['v1']['keys'].values())))
+    key1 = next(iter((d1._data_keys["v1"]["keys"].values())))
+    key2 = next(iter((d2._data_keys["v1"]["keys"].values())))
     filepath1 = f"{bucket}/{key1}._data"
     filepath2 = f"{bucket}/{key2}._data"
 
