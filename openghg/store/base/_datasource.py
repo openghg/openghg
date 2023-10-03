@@ -633,70 +633,11 @@ class Datasource:
         version_backup = f"{version}_backup"
         return version_backup
 
-    # def save(self, bucket: str, compression: bool = True, **kwargs) -> None:
-    #     """Save this Datasource object as JSON to the object store
-
-    #     Args:
-    #         bucket: Bucket to hold data
-    #         compression: True if data should be compressed on save
-    #     Returns:
-    #         None
-    #     """
-    #     from copy import deepcopy
-    #     from pathlib import Path
-    #     from openghg.objectstore import set_object_from_json
-    #     from openghg.util import timestamp_now
-
-    #     if self._data:
-    #         # Ensure we have the latest key
-    #         if "latest" not in self._data_keys:
-    #             self._data_keys["latest"] = {}
-
-    #         # Backup the old data keys at "latest"
-    #         version_str = f"v{str(len(self._data_keys))}"
-    #         # Store the keys for the new data
-    #         new_keys = {}
-
-    #         # Iterate over the keys (daterange string) of the data dictionary
-    #         for daterange in self._data:
-    #             data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
-
-    #             new_keys[daterange] = data_key
-    #             data = self._data[daterange]
-
-    #             filepath = Path(f"{bucket}/{data_key}._data")
-    #             parent_folder = filepath.parent
-    #             if not parent_folder.exists():
-    #                 parent_folder.mkdir(parents=True)
-
-    #             data.to_netcdf(filepath, engine="netcdf4")
-
-    #         # Copy the last version
-    #         if "latest" in self._data_keys:
-    #             self._data_keys[version_str] = deepcopy(self._data_keys["latest"])
-
-    #         # Save the new keys and create a timestamp
-    #         self._data_keys[version_str]["keys"] = new_keys
-    #         self._data_keys[version_str]["timestamp"] = str(timestamp_now())  # type: ignore
-
-    #         # Link latest to the newest version
-    #         self._data_keys["latest"] = self._data_keys[version_str]
-    #         self._latest_version = version_str
-    #         self.add_metadata_key(key="latest_version", value=version_str)
-
-    #     self._stored = True
-    #     datasource_key = f"{Datasource._datasource_root}/uuid/{self._uuid}"
-
-    #     set_object_from_json(bucket=bucket, key=datasource_key, data=self.to_data())
-
-    # This doesn't work
-    def save(self, bucket: str, new_version: bool = True, compression: bool = True) -> None:
+    def save(self, bucket: str, new_version: bool = True, compression: bool = True, **kwargs) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
             bucket: Bucket to hold data
-            new_version: Create a new version for the data and save current
-                data to a previous version.
             compression: True if data should be compressed on save
         Returns:
             None
@@ -718,162 +659,24 @@ class Datasource:
                 # Backup the old data keys at "latest"
                 version_str = f"v{str(len(self._data_keys))}"
 
-            if self._status:
-                if_exists = self._status["if_exists"]
-                overlapping = self._status["overlapping"]
-            else:
-                if_exists = "default"
-                overlapping = False
-
+            # Backup the old data keys at "latest"
+            # version_str = f"v{str(len(self._data_keys))}"
             # Store the keys for the new data
             new_keys = {}
 
-            version_key = self.define_version_key(version_str)
-
-            # If version is already present, and we are not creating a new version
-            # we may need to delete the previous data.
-            delete_version = False
-            if exists(bucket=bucket, key=version_key) and not new_version:
-                # Check update mode and whether data was overlapping.
-                if (if_exists == "replace" and overlapping) or if_exists == "new":
-                    logger.info("Previous version of the data will be deleted.")
-                    delete_version = True
-
-            print("We'll delete the previous version")
-            # Create back up of original data in case writing new data is unsuccessful
-            if delete_version:
-                version_str_backup = self.define_backup_version(version_str)
-                version_key_backup = self.define_version_key(version_str_backup)
-
-                # I think the issue is that we move objects that are there
-                # If we want to move them then we should close the file handles so they're not left
-                # dangling in the xarray lru_cache
-
-                # Close any open file handles
-                # for data in self._data.values():
-                #     data.close()
-
-                # Now let's move the objects
-                move_objects(bucket=bucket, src_prefix=version_key, dst_prefix=version_key_backup)
-
-                version_keys = self._data_keys[version_str]["keys"]
-                labels = version_keys.keys()
-
-                # Add record of backup version to self._data_keys
-                self._data_keys[version_str_backup] = self._data_keys[version_str].copy()
-                self._data_keys[version_str_backup]["keys"] = {
-                    label: self.define_data_key(label, version_str_backup) for label in labels
-                }
-                self._data_keys[version_str_backup]["timestamp"] = str(timestamp_now())  # type: ignore
-
-            # if not version_folder.exists():
-            # version_folder.mkdir(parents=True, exist_ok=True)
-
             # Iterate over the keys (daterange string) of the data dictionary
-            for daterange, data in self._data.items():
-                # data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
-                data_key = self.define_data_key(label=daterange, version=version_str)
+            for daterange in self._data:
+                data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
 
                 new_keys[daterange] = data_key
-                # filepath = version_folder / f"{daterange}._data"
-                # TODO - we really just want to use set_object here but we need some bytes for that
-                # until the zarr changes are implemented let's stick to writing directly to NetCDF
-                # instead of writing to a temporary space and reading the bytes
+                data = self._data[daterange]
+
                 filepath = Path(f"{bucket}/{data_key}._data")
+                parent_folder = filepath.parent
+                if not parent_folder.exists():
+                    parent_folder.mkdir(parents=True)
 
-                if filepath.exists():
-                    raise FileExistsError(f"File already exists at {filepath}")
-
-                # Now we can just write out again
-                try:
-                    data.to_netcdf(filepath, engine="netcdf4")
-                except IOError:
-                    # try:
-                    filepath.parent.mkdir(parents=True)
-                    data.to_netcdf(filepath, engine="netcdf4")
-                    # except IOError:
-                    #     # Remove this version
-                    #     shutil.rmtree(filepath.parent)
-                    #     # If unable to write, return original data from back up.
-                    #     if delete_version:
-                    #         move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
-                    #         self._data_keys.pop(version_str_backup)
-                    #     raise ObjectStoreError("Unable to write new data. Restored previous data.")
-
-                    data.close()
-            # If write has been successful, remove any back up data.
-            if delete_version:
-                if exists(bucket=bucket, key=version_key_backup):
-                    # if version_folder_backup.exists():
-                    logger.warning(f"Deleting previous stored data for this version: {version_str}")
-                    self.delete_version(bucket=bucket, version=version_str_backup)
-
-            # Make sure status is reset now this has been saved
-            self._status = None
-
-            #                 if compression:
-            #                     # variables with variable length data types shouldn't be compressed
-            #                     # e.g. object ("O") or unicode ("U") type
-            #                     do_not_compress = []
-
-            #                     # regex for Unicode and Object dtypes, with character code U or O
-            #                     # type strings may start with a byteorder character: <, >, =, or |,
-            #                     # so we skip these if present.
-            #                     dtype_pat = re.compile(r"[<>=|]?[UO]")
-            #                     for dv in data.data_vars:
-            #                         if dtype_pat.match(data[dv].data.dtype.str):
-            #                             do_not_compress.append(dv)
-
-            #                     # setting compression levels for data vars in data
-            #                     comp = dict(zlib=True, complevel=5)
-
-            #                     valid_encoding_keys = [
-            #                         "zlib",
-            #                         "fletcher32",
-            #                         "dtype",
-            #                         "complevel",
-            #                         "chunksizes",
-            #                         "compression",
-            #                         "shuffle",
-            #                         "contiguous",
-            #                         "least_significant_digit",
-            #                         "_FillValue",
-            #                     ]
-            #                     encoding = {}
-            #                     for var in data.data_vars:
-            #                         if var not in do_not_compress:
-            #                             enc = {k: v for k, v in data[var].encoding.items() if k in valid_encoding_keys}
-            #                             enc.update(comp)
-            #                             encoding[var] = enc
-
-            #                     try:
-            #                         data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
-            #                     except RuntimeError:
-            #                         logger.warning(
-            #                             f"Storing footprint for date range {daterange} without compression due to netCDF4 RuntimeError."
-            #                         )
-            #                         data.to_netcdf(filepath, engine="netcdf4")
-            #                     except ValueError as e:
-            #                         # chunksize might be set if the data was read from a netCDF file
-            #                         # and sometimes this causes errors.
-            #                         if "chunksize" in e.args[0].lstrip().split():
-            #                             for k in encoding:
-            #                                 encoding[k]["chunksizes"] = None
-            #                             data.to_netcdf(filepath, engine="netcdf4", encoding=encoding)
-            #                         else:
-            #                             raise e
-
-            #                 else:
-            #                     data.to_netcdf(filepath, engine="netcdf4")
-            #                 # Can we just take the bytes from the data here and then write then straight?
-            #                 # TODO - for now just create a temporary directory - will have to update Acquire
-            #                 # or work on a PR for xarray to allow returning a NetCDF as bytes
-            #                 # with tempfile.TemporaryDirectory() as tmpdir:
-            #                 #     filepath = f"{tmpdir}/temp.nc"
-            #                 #     data.to_netcdf(filepath)
-            #                 #     set_object_from_file(bucket=bucket, key=data_key, filename=filepath)
-            #                 # path = f"{bucket_path}/data"
-            # >>>>>>> devel
+                data.to_netcdf(filepath, engine="netcdf4")
 
             # Copy the last version
             if "latest" in self._data_keys:
