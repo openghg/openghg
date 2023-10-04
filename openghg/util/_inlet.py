@@ -196,9 +196,7 @@ def extract_height_name(
                     # This assumes two lists of the same length map to each other with translating values
                     if (inlet is not None) and (height_attr in site_metadata):
                         height_values = site_metadata[height_attr]
-                        if len(height_values) == len(height_name_extracted) and (
-                            inlet in height_values
-                        ):
+                        if len(height_values) == len(height_name_extracted) and (inlet in height_values):
                             index = height_values.index(inlet)
                             height_name = height_name_extracted[index]
                         else:
