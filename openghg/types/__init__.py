@@ -23,6 +23,8 @@ from ._errors import (
     DataOverlapError,
     ConfigFileError,
     MetastoreError,
+    ZarrStoreError,
+    KeyExistsError,
     construct_xesmf_import_error,
 )
 from ._types import (
