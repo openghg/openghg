@@ -463,15 +463,24 @@ class ModelScenario:
 
                 flux_source = self._get_data(flux_keywords, data_type="flux")
                 # TODO: May need to update this check if flux_source is empty FluxData() object
+
                 if flux_source is not None:
+                    # try to infer source name from FluxData metadata
                     if name is None and len(sources) == 1:
-                        name = flux_source.metadata.get("source", "no_source_specified")
+                        try:
+                            name = flux_source.metadata["source"]
+                        except KeyError:
+                            raise ValueError("Flux 'source' could not be inferred from metadata/attributes. Please specify the source(s) of the flux.")
                     flux[name] = flux_source
 
         elif flux is not None:
             if not isinstance(flux, dict):
-                name = flux.metadata["source"]
-                flux = {name: flux}
+                try:
+                    name = flux.metadata["source"]
+                except KeyError:
+                    raise ValueError("Flux 'source' could not be inferred from `flux` metadata/attributes. Please specify the source(s) of the flux in the `FluxData` metadata..")
+                else:
+                    flux = {name: flux}
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
         if self.fluxes is not None:
