@@ -1451,17 +1451,14 @@ def test_scenario_infer_flux_source_ch4():
     if only a single flux matches the given metadata
     and source is in the flux metadata.
     """
-    import tinydb
-
-    from openghg.store import data_manager
+    from openghg.dataobjects import data_manager
     from openghg.objectstore import get_readable_buckets
     from openghg.store import Emissions
 
     # remove 'waste' flux file
     bucket = get_readable_buckets()["user"]
     with Emissions(bucket=bucket) as em:
-        query = tinydb.Query().fragment({'species': 'ch4', 'domain': 'europe', 'source': 'waste'})
-        result = em._metastore.search(query)[0]
+        result = em._metastore.search({'species': 'ch4', 'domain': 'europe', 'source': 'waste'})[0]
         uuid = result['uuid']
 
     manager = data_manager(data_type="emissions", store="user")
