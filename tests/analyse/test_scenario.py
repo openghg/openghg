@@ -1491,6 +1491,9 @@ def test_scenario_infer_flux_source_ch4():
         end_date=end_date,
     )
 
+    # flux should be found
+    assert model_scenario.fluxes
+
     # expect 'anthro' to be found in flux metadata:
     assert 'anthro' in model_scenario.fluxes
 
@@ -1515,3 +1518,5 @@ def test_modelscenario_doesnt_error_empty_objectstore():
                         end_date=end_date)
 
     assert not scenario
+
+# NOTE: the test store is modified by the last two tests
