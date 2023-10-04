@@ -164,9 +164,14 @@ def parse_edgar(
 
     if edgar_version not in known_versions:
         if edgar_version is None:
-            raise ValueError(f"Unable to infer EDGAR version ({edgar_version})." f" Please pass as an argument (one of {known_versions})")
+            raise ValueError(
+                f"Unable to infer EDGAR version ({edgar_version})."
+                f" Please pass as an argument (one of {known_versions})"
+            )
         else:
-            raise ValueError(f"Unable to infer EDGAR version." f" Please pass as an argument (one of {known_versions})")
+            raise ValueError(
+                f"Unable to infer EDGAR version." f" Please pass as an argument (one of {known_versions})"
+            )
 
     # TODO: May want to split out into a separate function, so we can use this for
     # - yearly - "v6.0_CH4_2015_TOTALS.0.1x0.1.nc"

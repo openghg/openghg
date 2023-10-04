@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
-
 import numpy as np
 from xarray import Dataset
 
@@ -22,26 +21,12 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class BoundaryConditions(BaseStore):
     """This class is used to process boundary condition data"""
 
+    _data_type = "boundary_conditions"
     _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    def save(self) -> None:
-        """Save the object to the object store
-
-        Returns:
-            None
-        """
-        from openghg.objectstore import get_bucket, set_object_from_json
-
-        bucket = get_bucket()
-        obs_key = f"{BoundaryConditions._root}/uuid/{BoundaryConditions._uuid}"
-
-        self._stored = True
-        set_object_from_json(bucket=bucket, key=obs_key, data=self.to_data())
-
-    @staticmethod
-    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
 
         Args:
@@ -62,10 +47,10 @@ class BoundaryConditions(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return BoundaryConditions.read_file(filepath=filepath, **metadata)
+            return self.read_file(filepath=filepath, **metadata)
 
-    @staticmethod
     def read_file(
+        self,
         filepath: Union[str, Path],
         species: str,
         bc_input: str,
@@ -73,7 +58,7 @@ class BoundaryConditions(BaseStore):
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read boundary conditions file
 
         Args:
@@ -96,12 +81,8 @@ class BoundaryConditions(BaseStore):
         from collections import defaultdict
 
         from openghg.store import (
-            assign_data,
-            datasource_lookup,
             infer_date_range,
             update_zero_dim,
-            load_metastore,
-            update_metadata,
         )
         from openghg.util import clean_string, hash_file, timestamp_now
         from xarray import open_dataset
@@ -112,18 +93,13 @@ class BoundaryConditions(BaseStore):
 
         filepath = Path(filepath)
 
-        bc_store = BoundaryConditions.load()
-
-        # Load in the metadata store
-        metastore = load_metastore(key=bc_store._metakey)
-
         file_hash = hash_file(filepath=filepath)
-        if file_hash in bc_store._file_hashes and not overwrite:
+        if file_hash in self._file_hashes and not overwrite:
             logger.warning(
                 "This file has been uploaded previously with the filename : "
-                f"{bc_store._file_hashes[file_hash]} - skipping."
+                f"{self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         bc_data = open_dataset(filepath)
 
@@ -185,28 +161,18 @@ class BoundaryConditions(BaseStore):
         boundary_conditions_data[key]["metadata"] = metadata
 
         required_keys = ("species", "bc_input", "domain")
-        lookup_results = datasource_lookup(
-            metastore=metastore, data=boundary_conditions_data, required_keys=required_keys
-        )
 
-        datasource_uuids = assign_data(
-            data_dict=boundary_conditions_data,
-            lookup_results=lookup_results,
+        # This performs the lookup and assignment of data to new or
+        # exisiting Datasources
+        datasource_uuids = self.assign_data(
+            data=boundary_conditions_data,
             overwrite=overwrite,
             data_type=data_type,
+            required_keys=required_keys,
         )
 
-        update_keys = ["start_date", "end_date", "latest_version"]
-        boundary_conditions_data = update_metadata(data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys)
-
-        bc_store.add_datasources(uuids=datasource_uuids, data=boundary_conditions_data, metastore=metastore, update_keys=update_keys)
-
         # Record the file hash in case we see this file again
-        bc_store._file_hashes[file_hash] = filepath.name
-
-        bc_store.save()
-
-        metastore.close()
+        self._file_hashes[file_hash] = filepath.name
 
         return datasource_uuids
 

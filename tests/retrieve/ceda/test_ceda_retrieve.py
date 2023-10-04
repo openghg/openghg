@@ -37,7 +37,7 @@ def test_ceda_retrieve_cloud(monkeypatch, mocker):
 
     mocker.patch("openghg.cloud.call_function", return_value=return_val)
 
-    res = retrieve_surface(site="hfd")
+    res = retrieve_surface(site="hfd", store="user")
 
     assert res.data.equals(ds)
     assert res.metadata == mock_metadata
@@ -54,7 +54,7 @@ def test_ceda_retrieve(mocker):
     )
 
     bsd_data = retrieve_surface(
-        url="http://test-url-123.openghg/bristol-crds_heathfield_20130101_co2-100m.nc"
+        url="http://test-url-123.openghg/bristol-crds_heathfield_20130101_co2-100m.nc", store="user"
     )
 
     assert retrieve_all.call_count == 0
@@ -94,7 +94,7 @@ def test_ceda_retrieve(mocker):
     assert expected_metadata.items() <= metadata.items()
 
     second_bsd_data = retrieve_surface(
-        url="http://test-url-123.openghg/bristol-crds_heathfield_20130101_co2-100m.nc"
+        url="http://test-url-123.openghg/bristol-crds_heathfield_20130101_co2-100m.nc", store="user"
     )
 
     assert retrieve_all.call_count == 1

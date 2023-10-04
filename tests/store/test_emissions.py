@@ -1,22 +1,25 @@
 import pytest
 from helpers import get_emissions_datapath
+from typing import Any, Union
 from openghg.retrieve import search, search_flux
-from openghg.store import Emissions, datasource_lookup, load_metastore
+from openghg.store import Emissions
+from openghg.standardise import standardise_flux, standardise_from_binary_data
+from openghg.transform import transform_emissions_data
 from openghg.util import hash_bytes
-from openghg.types import DatasourceLookupError
 from xarray import open_dataset
 from pandas import Timestamp
 
-from helpers import clear_test_store
+from helpers import clear_test_stores
 
 
-def test_read_binary_data(mocker):
-    clear_test_store()
+@pytest.fixture
+def clear_stores():
+    clear_test_stores()
 
-    # As well as uuid4() being called within this codebase, this is also called
-    # within one of the dependencies (xarray) (e.g. through xr.load_dataset(io.BytesIO(...))).
-    # - more fake_uuids may need to be added here to allow this to run successfully.
-    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3", "test-uuid-4"]
+
+def test_read_binary_data(mocker, clear_stores):
+    clear_test_stores()
+    fake_uuids = ["test-uuid-1", "test-uuid-2", "test-uuid-3"]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
@@ -35,10 +38,15 @@ def test_read_binary_data(mocker):
 
     file_metadata = {"filename": filename, "sha1_hash": sha1_hash, "compressed": False}
 
-    results = Emissions.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+    results = standardise_from_binary_data(
+        store="user",
+        data_type="emissions",
+        binary_data=binary_data,
+        metadata=metadata,
+        file_metadata=file_metadata)
 
     expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2",
-                                                    "new": True}}
+                                                        "new": True}}
 
     assert results == expected_results
 
@@ -46,20 +54,24 @@ def test_read_binary_data(mocker):
 def test_read_file():
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
-    proc_results = Emissions.read_file(
-        filepath=test_datapath,
-        species="co2",
-        source="gpp-cardamom",
-        domain="europe",
-        high_time_resolution=False,
-        overwrite=True,
-    )
+    proc_results = standardise_flux(store="user",
+                                    filepath=test_datapath,
+                                    species="co2",
+                                    source="gpp-cardamom",
+                                    domain="europe",
+                                    high_time_resolution=False,
+                                    overwrite=True,
+                                    )
 
     assert "co2_gpp-cardamom_europe" in proc_results
 
     search_results = search(
-        species="co2", source="gpp-cardamom", domain="europe", data_type="emissions",
-        start_date="2012", end_date="2013",
+        species="co2",
+        source="gpp-cardamom",
+        domain="europe",
+        data_type="emissions",
+        start_date="2012",
+        end_date="2013",
     )
 
     emissions_obs = search_results.retrieve_all()
@@ -101,10 +113,39 @@ def test_read_file():
     del metadata["prior_file_1_version"]
 
     assert metadata.items() >= expected_metadata.items()
+    # TODO: Add test for adding additional years data - 2013 gpp cardomom
 
-# TODO: Add test for adding additional years data - 2013 gpp cardomom
 
-def test_read_file_additional_keys():
+@pytest.fixture
+def load_edgar():
+    def _load_edgar(species: str, version: str, year: Union[str, int], database_version: bool = True):
+        """Load globaledgar data for given species, version, and year.
+
+        Currently, there is only data available for version v5.0, v6.0, and years 2014, 2015, 2016,
+        all with species CH_4.
+
+        Args:
+            species: species of gas
+            version: e.g. v5.0, v6.0, v4.3.2
+            year: e.g. 2014, 2015, 2016
+            database_version: if True, `database_version` argument passed to `read_file`
+        """
+        file_name = f'ch4-anthro_globaledgar_{version.replace(".", "-")}_{str(year)}.nc'
+        datapath = get_emissions_datapath(file_name)
+        kwargs: Any = dict(
+            filepath=datapath,
+            species=species,
+            source="anthro",
+            domain="globaledgar",
+            database="EDGAR",
+        )
+        if database_version:
+            kwargs["database_version"] = version.replace(".", "")
+        return standardise_flux(store="user", **kwargs)
+    return _load_edgar
+
+
+def test_read_file_additional_keys(clear_stores, load_edgar):
     """
     Test multiple files can be added using additional keywords
     ('database' and 'database_version' tested below).
@@ -116,32 +157,12 @@ def test_read_file_additional_keys():
 
     Should produce 2 search results.
     """
-    clear_test_store()
-
-    test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
-
-    proc_results1 = Emissions.read_file(
-        filepath=test_datapath1,
-        species="ch4",
-        source="anthro",
-        domain="globaledgar",
-        database="EDGAR",
-        database_version="v50",
-    )
-
+    # load 2014, v5
+    proc_results1 = load_edgar("ch4", "v5.0", 2014)
     assert "ch4_anthro_globaledgar" in proc_results1
 
-    test_datapath2 = get_emissions_datapath("ch4-anthro_globaledgar_v6-0_2015.nc")
-
-    proc_results2 = Emissions.read_file(
-        filepath=test_datapath2,
-        species="ch4",
-        source="anthro",
-        domain="globaledgar",
-        database="EDGAR",
-        database_version="v60",
-    )
-
+    # load 2015, v6
+    proc_results2 = load_edgar("ch4", "v6.0", 2015)
     assert "ch4_anthro_globaledgar" in proc_results2
 
     search_results_all = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR")
@@ -150,8 +171,12 @@ def test_read_file_additional_keys():
     assert len(search_results_all) == 2
 
     # Check these can be distinguished by searching by database_version
-    search_results_1 = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v50")
-    search_results_2 = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v60")
+    search_results_1 = search_flux(
+        species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v50"
+    )
+    search_results_2 = search_flux(
+        species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v60"
+    )
 
     assert len(search_results_1) == 1
     assert len(search_results_2) == 1
@@ -162,7 +187,7 @@ def test_read_file_additional_keys():
     assert search_results_2.results.iloc[0]["start_date"] == "2015-01-01 00:00:00+00:00"
 
 
-def test_read_file_align_correct_datasource():
+def test_read_file_align_correct_datasource(clear_stores, load_edgar):
     """
     Test datasources can be correctly aligned for additional keywords.
     ('database' and 'database_version' tested below).
@@ -173,43 +198,12 @@ def test_read_file_align_correct_datasource():
        - ch4, anthro, globaledgar domain, 2015
      - EDGAR v6.0 (v60)
        - ch4, anthro, globaledgar domain, 2015
-    
+
     Should produce 2 search results.
     """
-    clear_test_store()
-
-    test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
-
-    Emissions.read_file(
-        filepath=test_datapath1,
-        species="ch4",
-        source="anthro",
-        domain="globaledgar",
-        database="EDGAR",
-        database_version="v50",
-    )
-
-    test_datapath2 = get_emissions_datapath("ch4-anthro_globaledgar_v6-0_2015.nc")
-
-    Emissions.read_file(
-        filepath=test_datapath2,
-        species="ch4",
-        source="anthro",
-        domain="globaledgar",
-        database="EDGAR",
-        database_version="v60",
-    )
-
-    test_datapath3 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2015.nc")
-
-    Emissions.read_file(
-        filepath=test_datapath3,
-        species="ch4",
-        source="anthro",
-        domain="globaledgar",
-        database="EDGAR",
-        database_version="v50",
-    )
+    load_edgar("ch4", "v5.0", 2014)
+    load_edgar("ch4", "v6.0", 2015)
+    load_edgar("ch4", "v5.0", 2015)
 
     search_results_all = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR")
 
@@ -217,8 +211,12 @@ def test_read_file_align_correct_datasource():
     assert len(search_results_all) == 2
 
     # Check these can be distinguished by searching by database_version
-    search_results_1 = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v50")
-    search_results_2 = search_flux(species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v60")
+    search_results_1 = search_flux(
+        species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v50"
+    )
+    search_results_2 = search_flux(
+        species="ch4", source="anthro", domain="globaledgar", database="EDGAR", database_version="v60"
+    )
 
     assert len(search_results_1) == 1
     assert len(search_results_2) == 1
@@ -237,71 +235,36 @@ def test_read_file_align_correct_datasource():
     assert edgar_v5_metadata["end_date"] == "2015-12-31 23:59:59+00:00"
 
 
-def test_read_file_fails_ambiguous():
+def test_read_file_fails_ambiguous(clear_stores, load_edgar):
     """
     Test helpful error message is raised if read_file is unable to disambiguiate
-    between multiple datasources based on provided keywords when using 
+    between multiple datasources based on provided keywords when using
     additional keywords ('database' and 'database_version' tested).
 
     Data used:
-     - same as test_read_file_align_correct_datasource() but doesn't pass 
+     - same as test_read_file_align_correct_datasource() but doesn't pass
      `database_version` keyword at all for final file.
     """
-    clear_test_store()
+    load_edgar("ch4", "v5.0", 2014)
+    load_edgar("ch4", "v6.0", 2015)
 
-    test_datapath1 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
-
-    Emissions.read_file(
-        filepath=test_datapath1,
-        species="ch4",
-        source="anthro",
-        domain="globaledgar",
-        database="EDGAR",
-        database_version="v50",
-    )
-
-    test_datapath2 = get_emissions_datapath("ch4-anthro_globaledgar_v6-0_2015.nc")
-
-    Emissions.read_file(
-        filepath=test_datapath2,
-        species="ch4",
-        source="anthro",
-        domain="globaledgar",
-        database="EDGAR",
-        database_version="v60",
-    )
-
-    test_datapath3 = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2015.nc")
-
-    # Doesn't include a database_version input which would be needed to distinguish
-    # between the 2 previous datasources added.
-    with pytest.raises(DatasourceLookupError) as exc_info:
-        Emissions.read_file(
-            filepath=test_datapath3,
-            species="ch4",
-            source="anthro",
-            domain="globaledgar",
-            database="EDGAR",
-        )
-    
-    assert "More than once Datasource found for metadata" in exc_info.value.args[0]
+    try:
+        load_edgar("ch4", "v5.0", 2015, database_version=False)  # do not pass `database_version="v50"`
+    except Exception as e:
+        assert "More than once Datasource found for metadata" in e.args[0]
+    else:
+        raise AssertionError("This test should throw/catch a DatasourceLookupError with a useful message!")
 
 
-def test_add_edgar_database():
+def test_add_edgar_database(clear_stores):
     """Test edgar can be added to object store (default domain)"""
-    clear_test_store()
-    
     folder = "v6.0_CH4"
     test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
 
     database = "EDGAR"
     date = "2015"
 
-    proc_results = Emissions.transform_data(
-        datapath=test_datapath,
-        database=database,
-        date=date,
-    )
+    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date)
 
     default_domain = "globaledgar"
 
@@ -337,7 +300,7 @@ def test_add_edgar_database():
         # "min_longitude": -174.85857,
         # "max_longitude": 180.0,
         "min_longitude": -180.0,
-        "max_longitude": 174.85858,        
+        "max_longitude": 174.85858,
         "min_latitude": -89.95,
         "max_latitude": 89.95,
         "time_resolution": "standard",
@@ -347,7 +310,7 @@ def test_add_edgar_database():
     assert metadata.items() >= expected_metadata.items()
 
 
-def test_transform_and_add_edgar_database():
+def test_transform_and_add_edgar_database(clear_stores):
     """
     Test EDGAR database can be transformed (regridded) and added to the object store.
     """
@@ -362,12 +325,7 @@ def test_transform_and_add_edgar_database():
     date = "2015"
     domain = "EUROPE"
 
-    proc_results = Emissions.transform_data(
-        datapath=test_datapath,
-        database=database,
-        date=date,
-        domain=domain,
-    )
+    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date, domain=domain)
 
     version = "v6.0"
     species = "ch4"
@@ -410,33 +368,6 @@ def test_transform_and_add_edgar_database():
     }
 
     assert metadata.items() >= expected_metadata.items()
-
-
-def test_datasource_add_lookup():
-    e = Emissions()
-
-    fake_datasource = {"co2_gppcardamom_europe_2012": {"uuid": "mock-uuid-123456", "new": True}}
-
-    mock_data = {
-        "co2_gppcardamom_europe_2012": {
-            "metadata": {
-                "species": "co2",
-                "domain": "europe",
-                "source": "gppcardamom",
-                "date": "2012",
-            }
-        }
-    }
-
-    with load_metastore(key="test-key-123") as metastore:
-        e.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
-
-        assert e.datasources() == ["mock-uuid-123456"]
-
-        required = ["species", "domain", "source", "date"]
-        lookup = datasource_lookup(metastore=metastore, data=mock_data, required_keys=required)
-
-        assert lookup["co2_gppcardamom_europe_2012"] == fake_datasource["co2_gppcardamom_europe_2012"]["uuid"]
 
 
 def test_flux_schema():

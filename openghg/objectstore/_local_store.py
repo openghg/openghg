@@ -5,30 +5,93 @@ import threading
 from pathlib import Path
 import shutil
 from typing import Dict, List, Optional, Union
-from uuid import uuid4
 import logging
-import pyvis
 from openghg.types import ObjectStoreError
+from openghg.util import read_local_config
 
 rlock = threading.RLock()
 
 __all__ = [
     "delete_object",
-    "get_local_objectstore_path",
+    "get_user_objectstore_path",
     "get_tutorial_store_path",
     "get_all_object_names",
     "get_object_names",
     "get_object",
+    "get_object_data_path",
     "set_object",
     "set_object_from_json",
     "set_object_from_file",
     "get_object_from_json",
     "exists",
-    "visualise_store",
 ]
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+def get_readable_buckets() -> Dict[str, str]:
+    """Get a dictionary of readable buckets - {store_name: store_path, ...}
+
+    Returns:
+        dict: List of readable buckets
+    """
+    if os.getenv("OPENGHG_TUT_STORE") is not None:
+        return {"tutorial_store": str(get_tutorial_store_path())}
+
+    config = read_local_config()
+    object_stores = config["object_store"]
+
+    return {
+        store_name: data["path"] for store_name, data in object_stores.items() if "r" in data["permissions"]
+    }
+
+
+def get_writable_buckets() -> Dict[str, str]:
+    """Get a dictionary of writable buckets - {store_name: store_path, ...}
+
+    Returns:
+        dict: Dictionary of buckets this user can write to
+    """
+    config = read_local_config()
+    object_stores = config["object_store"]
+
+    return {
+        store_name: data["path"] for store_name, data in object_stores.items() if "w" in data["permissions"]
+    }
+
+
+def get_writable_bucket(name: Optional[str] = None) -> str:
+    """Get the path to a writable bucket, passing in the name of a bucket if
+    more than one writable bucket available.
+
+    Args:
+        name: Name of writable bucket
+    Returns:
+        str: Path to writable bucket
+    """
+    if os.getenv("OPENGHG_TUT_STORE") is not None:
+        return str(get_tutorial_store_path())
+
+    writable_buckets = get_writable_buckets()
+
+    if not writable_buckets:
+        raise ObjectStoreError("No writable object stores found. Check configuration file.")
+
+    if len(writable_buckets) == 1:
+        return next(iter(writable_buckets.values()))
+    elif name is not None:
+        try:
+            bucket_path = writable_buckets[name]
+        except KeyError:
+            raise ObjectStoreError(
+                f"Invalid object store name, stores you can write to are: {', '.join(writable_buckets)}"
+            )
+        return bucket_path
+    else:
+        raise ObjectStoreError(
+            f"More than one writable store, stores you can write to are: {', '.join(writable_buckets)}."
+        )
 
 
 def get_tutorial_store_path() -> Path:
@@ -37,22 +100,29 @@ def get_tutorial_store_path() -> Path:
     Returns:
         pathlib.Path: Path of tutorial store
     """
-    return get_local_objectstore_path() / "tutorial_store"
+    return get_user_objectstore_path() / "tutorial_store"
 
 
 # @lru_cache
-def get_local_objectstore_path() -> Path:
-    """Read
+def get_user_objectstore_path() -> Path:
+    """Returns the path of the user's local object store
 
     Returns:
         pathlib.Path: Path of object store
     """
-    from openghg.util import read_local_config
-
     config = read_local_config()
-    object_store_path = Path(config["object_store"]["local_store"])
+    return Path(config["object_store"]["user"]["path"])
 
-    return object_store_path
+
+def get_objectstore_info() -> Dict:
+    """Read the local config file and return the data of each of the object stores the
+    user has access to.
+
+    Returns:
+        dict: Dictionary of object store data
+    """
+    config = read_local_config()
+    return config["object_store"]
 
 
 def get_all_object_names(bucket: str, prefix: Optional[str] = None, without_prefix: bool = False) -> List:
@@ -151,6 +221,23 @@ def get_object(bucket: str, key: str) -> bytes:
             raise ObjectStoreError(f"No object at key '{key}'")
 
 
+def get_object_data_path(bucket: str, key: str) -> Path:
+    """Get path to object data at key in passed bucket.
+
+    Args:
+        bucket: Bucket containing data
+        key: Key for data in bucket
+    Returns:
+        Path to data
+    """
+    filepath = Path(f"{bucket}/{key}._data")
+
+    if filepath.exists():
+        return filepath
+    else:
+        raise ObjectStoreError(f"No object at key '{key}'")
+
+
 def set_object(bucket: str, key: str, data: bytes) -> None:
     """Store data in bucket at key
 
@@ -232,18 +319,29 @@ def exists(bucket: str, key: str) -> bool:
     return len(names) > 0
 
 
-def get_bucket() -> str:
-    """Find and return the local object store path (bucket)
+def get_bucket(name: Optional[str] = None) -> str:
+    """Find and return the local object store path. This will return
+    the path to the user's local object store if no name is given.
 
+    Args:
+        name: Object store name in config file
     Returns:
         str: Path to object store
     """
+    config = read_local_config()
+
+    if name is not None:
+        try:
+            return config["object_store"][name]["path"]
+        except KeyError:
+            raise ObjectStoreError("Invalid object store name.")
+
     tutorial_store = os.getenv("OPENGHG_TUT_STORE")
 
     if tutorial_store is not None:
         return str(get_tutorial_store_path())
 
-    local_store = get_local_objectstore_path()
+    local_store = get_user_objectstore_path()
 
     return str(local_store)
 
@@ -255,7 +353,7 @@ def clear_object_store() -> None:
     Returns:
         None
     """
-    local_store = str(get_local_objectstore_path())
+    local_store = str(get_user_objectstore_path())
     logger.warning(f"You have requested to delete {local_store}.")
 
     confirmed_path = input("Please enter the full path of the store: ")
@@ -271,6 +369,7 @@ def query_store() -> Dict:
     Returns:
         dict: Dictionary for data to be shown in force graph
     """
+    raise NotImplementedError
     from openghg.store import ObsSurface
     from openghg.store.base import Datasource
 
@@ -293,69 +392,3 @@ def query_store() -> Dict:
         data[d.uuid()] = result
 
     return data
-
-
-def visualise_store() -> pyvis.network.Network:
-    """View the object store using a pyvis force graph.
-
-    This function should only be called from within a notebook
-
-    Returns:
-        pyvis.network.Network
-    """
-    raise NotImplementedError
-    from addict import Dict as aDict
-
-    data = query_store()
-
-    net = pyvis.network.Network("800px", "100%", notebook=True)
-    net.force_atlas_2based()
-
-    # Create the ObsSurface node
-    net.add_node(0, label="Surface Observations", color="#4e79a7", value=5000)
-
-    network_split = aDict()
-
-    for key, value in data.items():
-        # Iterate over Datasources to select the networks
-        network = value["network"]
-        site = value["site"]
-        inlet = value["inlet"]
-        network_split[network][site][inlet][key] = value
-
-    for network, sites in network_split.items():
-        network_name = network.upper()
-        net.add_node(network, label=network_name, color="#59a14f", value=2500)
-        net.add_edge(source=0, to=network)
-
-        # Then we want a subnode for each site
-        for site, site_data in sites.items():
-            # Don't want to use a site here as a site might be in multiple networks
-            site_name = site.upper()
-            site_id = str(uuid4())
-            net.add_node(site_id, label=site_name, color="#e15759", value=1000)
-            net.add_edge(source=network, to=site_id)
-
-            for inlet, inlet_data in site_data.items():
-                inlet_name = str(inlet).lower()
-                inlet_id = str(uuid4())
-                net.add_node(n_id=inlet_id, label=inlet_name, color="#808080", value=500)
-                net.add_edge(source=site_id, to=inlet_id)
-
-                # Now for each site create the datasource nodes
-                for uid, datasource in inlet_data.items():
-                    species = datasource["species"]
-                    instrument = datasource["instrument"].upper()
-
-                    label = f"{species.upper()} {instrument}"
-                    title = "\n".join(
-                        [
-                            f"Site: {site.upper()}",
-                            f"Species : {species.upper()}",
-                            f"Instrument: {instrument}",
-                        ]
-                    )
-                    net.add_node(n_id=uid, label=label, title=title, color="#f28e2b", value=100)
-                    net.add_edge(source=inlet_id, to=uid)
-
-    return net.show("openghg_objstore.html")

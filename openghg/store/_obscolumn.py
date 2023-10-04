@@ -1,17 +1,13 @@
+from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from numpy import ndarray
 
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray
-
-# from openghg.types import multiPathType
-
-__all__ = ["ObsColumn"]
-
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -22,12 +18,13 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class ObsColumn(BaseStore):
     """This class is used to process emissions / flux data"""
 
+    _data_type = "column"
     _root = "ObsColumn"
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    @staticmethod
     def read_file(
+        self,
         filepath: Union[str, Path],
         satellite: Optional[str] = None,
         domain: Optional[str] = None,
@@ -39,7 +36,7 @@ class ObsColumn(BaseStore):
         platform: str = "satellite",
         source_format: str = "openghg",
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read column observation file
 
         Args:
@@ -64,7 +61,6 @@ class ObsColumn(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.store import assign_data, datasource_lookup, load_metastore, update_metadata
         from openghg.types import ColumnTypes
         from openghg.util import clean_string, hash_file, load_column_parser
 
@@ -87,18 +83,15 @@ class ObsColumn(BaseStore):
         # Load the data retrieve object
         parser_fn = load_column_parser(source_format=source_format)
 
-        obs_store = ObsColumn.load()
-
         # Load in the metadata store
-        metastore = load_metastore(key=obs_store._metakey)
 
         file_hash = hash_file(filepath=filepath)
-        if file_hash in obs_store._file_hashes and not overwrite:
+        if file_hash in self._file_hashes and not overwrite:
             logger.warning(
                 "This file has been uploaded previously with the filename : "
-                f"{obs_store._file_hashes[file_hash]} - skipping."
+                f"{self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Define parameters to pass to the parser function
         param = {
@@ -126,31 +119,14 @@ class ObsColumn(BaseStore):
         # platform = list(obs_data.keys())[0]["metadata"]["platform"]
 
         required = ("satellite", "selection", "domain", "site", "species", "network")
-        lookup_results = datasource_lookup(
-            metastore=metastore, data=obs_data, required_keys=required, min_keys=3
-        )
 
         data_type = "column"
-        datasource_uuids = assign_data(
-            data_dict=obs_data,
-            lookup_results=lookup_results,
-            overwrite=overwrite,
-            data_type=data_type,
+        datasource_uuids = self.assign_data(
+            data=obs_data, overwrite=overwrite, data_type=data_type, required_keys=required, min_keys=3
         )
 
-        update_keys = ["start_date", "end_date", "latest_version"]
-        obs_data = update_metadata(data_dict=obs_data, uuid_dict=datasource_uuids, update_keys=update_keys)
-
-        obs_store.add_datasources(uuids=datasource_uuids,
-                                  data=obs_data,
-                                  metastore=metastore,
-                                  update_keys=update_keys)
-
         # Record the file hash in case we see this file again
-        obs_store._file_hashes[file_hash] = filepath.name
-
-        obs_store.save()
-        metastore.close()
+        self._file_hashes[file_hash] = filepath.name
 
         return datasource_uuids
 

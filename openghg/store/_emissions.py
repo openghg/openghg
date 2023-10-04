@@ -1,7 +1,8 @@
+from __future__ import annotations
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Literal, Optional, Tuple, Union
-
+import logging
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
@@ -9,21 +10,21 @@ from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
 import warnings
 
-__all__ = ["Emissions"]
-
-
 ArrayType = Optional[Union[ndarray, DataArray]]
+
+logger = logging.getLogger("openghg.store")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class Emissions(BaseStore):
     """This class is used to process emissions / flux data"""
 
+    _data_type = "emissions"
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
-    @staticmethod
-    def read_data(binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
 
         Args:
@@ -44,10 +45,10 @@ class Emissions(BaseStore):
             filepath = tmpdir_path.joinpath(filename)
             filepath.write_bytes(binary_data)
 
-            return Emissions.read_file(filepath=filepath, **metadata)
+            return self.read_file(filepath=filepath, **metadata)
 
-    @staticmethod
     def read_file(
+        self,
         filepath: Union[str, Path],
         species: str,
         source: str,
@@ -61,7 +62,7 @@ class Emissions(BaseStore):
         chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read emissions file
 
         Args:
@@ -84,7 +85,6 @@ class Emissions(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.store import assign_data, datasource_lookup, load_metastore, update_metadata
         from openghg.types import EmissionsTypes
         from openghg.util import clean_string, hash_file, load_emissions_parser
 
@@ -102,17 +102,12 @@ class Emissions(BaseStore):
         # Load the data retrieve object
         parser_fn = load_emissions_parser(source_format=source_format)
 
-        em_store = Emissions.load()
-
-        # Load in the metadata store
-        metastore = load_metastore(key=em_store._metakey)
-
         file_hash = hash_file(filepath=filepath)
-        if file_hash in em_store._file_hashes and not overwrite:
+        if file_hash in self._file_hashes and not overwrite:
             warnings.warn(
-                f"This file has been uploaded previously with the filename : {em_store._file_hashes[file_hash]} - skipping."
+                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -128,9 +123,7 @@ class Emissions(BaseStore):
             "chunks": chunks,
         }
 
-        optional_keywords = {"database": database,
-                             "database_version": database_version,
-                             "model": model}
+        optional_keywords = {"database": database, "database_version": database_version, "model": model}
 
         param.update(optional_keywords)
 
@@ -147,31 +140,18 @@ class Emissions(BaseStore):
                 min_required.append(key)
 
         required = tuple(min_required)
-        lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
 
         data_type = "emissions"
-        datasource_uuids = assign_data(
-            data_dict=emissions_data,
-            lookup_results=lookup_results,
-            overwrite=overwrite,
-            data_type=data_type,
+        datasource_uuids = self.assign_data(
+            data=emissions_data, overwrite=overwrite, data_type=data_type, required_keys=required
         )
-
-        update_keys = ["start_date", "end_date", "latest_version"]
-        emissions_data = update_metadata(data_dict=emissions_data, uuid_dict=datasource_uuids, update_keys=update_keys)
-
-        em_store.add_datasources(uuids=datasource_uuids, data=emissions_data, metastore=metastore, update_keys=update_keys)
-
         # Record the file hash in case we see this file again
-        em_store._file_hashes[file_hash] = filepath.name
-
-        em_store.save()
-        metastore.close()
+        self._file_hashes[file_hash] = filepath.name
 
         return datasource_uuids
 
-    @staticmethod
     def transform_data(
+        self,
         datapath: Union[str, Path],
         database: str,
         overwrite: bool = False,
@@ -180,7 +160,7 @@ class Emissions(BaseStore):
         """
         Read and transform an emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
-        are determined by which database ie being used.
+        are determined by which database is being used.
 
         The underlying parser functions will be of the form:
             - openghg.transform.emissions.parse_{database.lower()}
@@ -197,8 +177,6 @@ class Emissions(BaseStore):
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
-
-        from openghg.store import assign_data, datasource_lookup, load_metastore
         from openghg.types import EmissionsDatabases
         from openghg.util import load_emissions_database_parser
 
@@ -211,11 +189,6 @@ class Emissions(BaseStore):
 
         # Load the data retrieve object
         parser_fn = load_emissions_database_parser(database=database)
-
-        em_store = Emissions.load()
-
-        # Load in the metadata store
-        metastore = load_metastore(key=em_store._metakey)
 
         # Find all parameters that can be accepted by parse function
         all_param = list(inspect.signature(parser_fn).parameters.keys())
@@ -231,22 +204,13 @@ class Emissions(BaseStore):
             em_data = split_data["data"]
             Emissions.validate_data(em_data)
 
-        required = ("species", "source", "domain")
-        lookup_results = datasource_lookup(metastore=metastore, data=emissions_data, required_keys=required)
+        required_keys = ("species", "source", "domain")
 
         data_type = "emissions"
         overwrite = False
-        datasource_uuids = assign_data(
-            data_dict=emissions_data,
-            lookup_results=lookup_results,
-            overwrite=overwrite,
-            data_type=data_type,
+        datasource_uuids = self.assign_data(
+            data=emissions_data, overwrite=overwrite, data_type=data_type, required_keys=required_keys
         )
-
-        em_store.add_datasources(uuids=datasource_uuids, data=emissions_data, metastore=metastore)
-
-        em_store.save()
-        metastore.close()
 
         return datasource_uuids
 

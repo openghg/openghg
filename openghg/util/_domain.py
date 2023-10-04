@@ -156,9 +156,9 @@ def convert_longitude(longitude: ArrayLikeMatch) -> ArrayLikeMatch:
     return longitude
 
 
-def convert_internal_longitude(data: XrDataLikeMatch,
-                               lon_name: Optional[str] = None,
-                               reorder: bool = True) -> XrDataLikeMatch:
+def convert_internal_longitude(
+    data: XrDataLikeMatch, lon_name: Optional[str] = None, reorder: bool = True
+) -> XrDataLikeMatch:
     """
     Convert longitude coordinate within an xarray data structure (DataArray or Dataset).
 
@@ -187,12 +187,14 @@ def convert_internal_longitude(data: XrDataLikeMatch,
     return data
 
 
-def cut_data_extent(data: XrDataLikeMatch,
-                    lat_out: ArrayLike,
-                    lon_out: ArrayLike,
-                    lat_name: Optional[str] = None,
-                    lon_name: Optional[str] = None,
-                    copy: bool = False) -> XrDataLikeMatch:
+def cut_data_extent(
+    data: XrDataLikeMatch,
+    lat_out: ArrayLike,
+    lon_out: ArrayLike,
+    lat_name: Optional[str] = None,
+    lon_name: Optional[str] = None,
+    copy: bool = False,
+) -> XrDataLikeMatch:
     """
     Cut down extent of data within an xarray data structure (DataArray or Dataset)
     against an output latitude and longitude range.
@@ -209,7 +211,7 @@ def cut_data_extent(data: XrDataLikeMatch,
         copy: Whether to explicitly copy the data.
 
     Returns:
-        xarray.DataArray / xarray.Dataset: data with reduced lat, lon ranges.        
+        xarray.DataArray / xarray.Dataset: data with reduced lat, lon ranges.
     """
     if lat_name is None:
         lat_options = ["lat", "latitude"]
