@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, Literal, Optional, Union
+from xarray import open_dataset
 
 
 def parse_openghg(
@@ -29,7 +30,6 @@ def parse_openghg(
     from openghg.standardise.meta import assign_flux_attributes
     from openghg.store import infer_date_range, update_zero_dim
     from openghg.util import timestamp_now
-    from xarray import open_dataset
 
     em_data = open_dataset(filepath, chunks=chunks)
 
@@ -97,5 +97,76 @@ def parse_openghg(
     emissions_data[key]["metadata"] = metadata
 
     emissions_data = assign_flux_attributes(emissions_data)
+
+    return emissions_data
+
+
+def parse_intem_emissions(
+    filepath: Path,
+    species: str,
+    source: str = 'intem',
+    domain: str = 'europe',
+    data_type: str = 'emissions',
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
+    period: Optional[Union[str, tuple]] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    continuous: bool = True,):
+
+    from openghg.util import timestamp_now
+    from openghg.store import infer_date_range
+    from openghg.store._emissions import Emissions
+
+    emissions_dataset = open_dataset(filepath)
+
+    author_name = "OpenGHG Cloud"
+    emissions_dataset.attrs["author"] = author_name
+    
+    attrs = {}
+    for key, value in emissions_dataset.attrs.items():
+        try:
+            attrs[key] = value.item()
+        except AttributeError:
+            attrs[key] = value
+
+    metadata = {}
+    metadata.update(attrs)
+
+    metadata["species"] = species
+    metadata["domain"] = domain
+    metadata["source"] = source
+
+    optional_keywords = {"database": database, "database_version": database_version, "model": model}
+
+    for key, value in optional_keywords.items():
+        if value is not None:
+            metadata[key] = value
+
+    metadata["author"] = author_name
+    metadata["data_type"] = data_type
+    metadata["processed"] = str(timestamp_now())
+    metadata["data_type"] = "emissions"
+    metadata["source_format"] = "openghg"
+
+    dataset_time = emissions_dataset["time"]
+
+    start_date, end_date, period_str = infer_date_range(
+        dataset_time, filepath=filepath, period=period, continuous=continuous
+    )
+
+    metadata["start_date"] = str(start_date)
+    metadata["end_date"] = str(end_date)
+    metadata["max_longitude"] = round(float(emissions_dataset["lon"].max()), 5)
+    metadata["min_longitude"] = round(float(emissions_dataset["lon"].min()), 5)
+    metadata["max_latitude"] = round(float(emissions_dataset["lat"].max()), 5)
+    metadata["min_latitude"] = round(float(emissions_dataset["lat"].min()), 5)
+
+    key = "_".join((species, source, domain))
+
+    emissions_data: Dict[str, dict] = {}
+    emissions_data[key] = {}
+    emissions_data[key]["data"] = emissions_dataset
+    emissions_data[key]["metadata"] = metadata
 
     return emissions_data
