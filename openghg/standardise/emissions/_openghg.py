@@ -101,7 +101,7 @@ def parse_openghg(
     return emissions_data
 
 
-def parse_intem_emissions(
+def parse_intem(
     filepath: Path,
     species: str,
     source: str = "intem",
