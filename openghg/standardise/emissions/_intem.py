@@ -27,8 +27,8 @@ def parse_intem(
         database (Optional[str]): Database name if applicable.
         database_version (Optional[str]): Version of the database if applicable.
         model (Optional[str]): Model name if applicable.
-        period "needs explainer"
-        chunks (Union[int, Dict, Literal["auto"], None]): Chunking configuration.
+        period : "needs explainer"
+        chunks : (Union[int, Dict, Literal["auto"], None]): Chunking configuration.
         continuous (bool): "needs explainer"
 
     Returns:
