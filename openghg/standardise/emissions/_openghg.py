@@ -112,17 +112,35 @@ def parse_intem_emissions(
     model: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
-    continuous: bool = True,):
+    continuous: bool = True,
+) -> Dict:
+    """
+    Parse INTEM emissions data from the specified file.
 
+    Parameters:
+    - filepath (Path): Path to the '.nc' file containing INTEM emissions data.
+    - species (str): Name of species
+    - source (str): Source of the emissions data, default is 'intem'.
+    - domain (str): Geographic domain, default is 'europe'.
+    - data_type (str): Type of data, default is 'emissions'.
+    - database (Optional[str]): Database name if applicable.
+    - database_version (Optional[str]): Version of the database if applicable.
+    - model (Optional[str]): Model name if applicable.
+    - period "needs explainer"
+    - chunks (Union[int, Dict, Literal["auto"], None]): Chunking configuration.
+    - continuous (bool): "needs explainer"
+
+    Returns:
+    - Dict: Parsed emissions data in dictionary format.
+    """
     from openghg.util import timestamp_now
     from openghg.store import infer_date_range
     from openghg.store._emissions import Emissions
 
-    emissions_dataset = open_dataset(filepath)
+    emissions_dataset = open_dataset(filepath, chunks=chunks)
 
     author_name = "OpenGHG Cloud"
     emissions_dataset.attrs["author"] = author_name
-    
     attrs = {}
     for key, value in emissions_dataset.attrs.items():
         try:
@@ -130,6 +148,7 @@ def parse_intem_emissions(
         except AttributeError:
             attrs[key] = value
 
+    # Creation of metadata dictionary
     metadata = {}
     metadata.update(attrs)
 
@@ -151,6 +170,7 @@ def parse_intem_emissions(
 
     dataset_time = emissions_dataset["time"]
 
+    # Fetching start_date and end_date from dataset time dimension
     start_date, end_date, period_str = infer_date_range(
         dataset_time, filepath=filepath, period=period, continuous=continuous
     )
@@ -164,6 +184,12 @@ def parse_intem_emissions(
 
     key = "_".join((species, source, domain))
 
+    emissions_dataset = emissions_dataset.rename_vars({'flux_mean': 'flux'})
+
+    # Dataset validation
+    Emissions.validate_data(emissions_dataset)
+
+    # Creation of final dictionary with data and metadata as key
     emissions_data: Dict[str, dict] = {}
     emissions_data[key] = {}
     emissions_data[key]["data"] = emissions_dataset
