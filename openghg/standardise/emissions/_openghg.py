@@ -104,9 +104,9 @@ def parse_openghg(
 def parse_intem_emissions(
     filepath: Path,
     species: str,
-    source: str = 'intem',
-    domain: str = 'europe',
-    data_type: str = 'emissions',
+    source: str = "intem",
+    domain: str = "europe",
+    data_type: str = "emissions",
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
@@ -184,7 +184,7 @@ def parse_intem_emissions(
 
     key = "_".join((species, source, domain))
 
-    emissions_dataset = emissions_dataset.rename_vars({'flux_mean': 'flux'})
+    emissions_dataset = emissions_dataset.rename_vars({"flux_mean": "flux"})
 
     # Dataset validation
     Emissions.validate_data(emissions_dataset)
