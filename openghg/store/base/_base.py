@@ -168,14 +168,14 @@ class BaseStore:
             new_ds = uuid is False
 
             if new_ds:
-                datasource = Datasource()
+                datasource = Datasource(bucket=self._bucket)
                 uid = datasource.uuid()
                 meta_copy["uuid"] = uid
                 # Make sure all the metadata is lowercase for easier searching later
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
                 meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
             else:
-                datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
+                datasource = Datasource(bucket=self._bucket, uuid=uuid)
 
             # Add the dataframe to the datasource
             datasource.add_data(

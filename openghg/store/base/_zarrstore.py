@@ -130,6 +130,10 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         encoding = {var: comp for var in dataset.data_vars}
         dataset.to_zarr(store=self._store, group=key, encoding=encoding)
 
+    def get(self, key: str) -> xr.Dataset:
+        """Get an xr.Dataset from the zarr store."""
+        return xr.open_zarr(store=self._store, group=key)
+
     def add_multiple(self, datasets: Dict[str, xr.Dataset]):
         """Add multiple xr.Datasets to the zarr store."""
         for key, dataset in datasets.items():
