@@ -86,7 +86,7 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
     # and not be loaded in or stored to the object store
     # TODO - happy for this name to change
     # Maybe just replace this with store if we're only storing a few things?
-    DO_NOT_STORE = ["_bucket", "_key", "_store"]
+    DO_NOT_STORE = ["_bucket", "_key", "_store", "_to_be_replaced"]
     _store_root = "zarrstore"
 
     def __init__(self, bucket: str, datasource_uuid: str) -> None:
@@ -95,6 +95,9 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         key = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/metadata"
 
         super().__init__(store_path)
+
+        # Store hashes of Datasets added to the store for easy checking
+        self._hashes = {}
 
         if exists(bucket=bucket, key=key):
             result = get_object_from_json(self._bucket, key=key)
@@ -105,6 +108,11 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         # TODO - move this to the objectstore submodule
         self._key = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/metadata"
         self._store = zarr.storage.NestedDirectoryStore(store_path)
+        self._to_be_replaced = []
+
+    def _create_key(self, key: str, version: str) -> str:
+        """Create a key for the zarr store."""
+        return f"{key}/{version}"
 
     def close(self):
         """Close object store connection.
@@ -115,29 +123,47 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in self.DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self._key, data=internal_metadata)
 
-    def add(self, key: str, dataset: xr.Dataset):
+    def add(self, key: str, version: str, dataset: xr.Dataset):
         """Add an xr.Dataset to the zarr store."""
+        from openghg.store.spec import get_zarr_encoding
+        from openghg.util import daterange_overlap
 
-        # Should we add to an in memory store and then write to disk?
-        # Could have a limit of a number of keys added and then flush to disk
+        if self._pop_keys:
+            first = self._pop_keys.pop(0)
+            if not daterange_overlap(first, key):
+                raise ValueError("Cannot add this key as we expect it to overlap a popped key")
+
+        versioned_key = self._create_key(key=key, version=version)
         # TODO - check if the key already exists and then ?
-        if key in self._store:
+        if versioned_key in self._store:
             raise KeyExistsError("Cannot overwrite key in zarr store using add - use update method")
 
-        # TODO - pull the compression out so user can set
-        zarr_compressor = Blosc(cname="zstd", clevel=5, shuffle=Blosc.BITSHUFFLE)
-        comp = {"compressor": zarr_compressor}
-        encoding = {var: comp for var in dataset.data_vars}
-        dataset.to_zarr(store=self._store, group=key, encoding=encoding)
+        encoding = get_zarr_encoding(data_vars=dataset.data_vars)
+        dataset.to_zarr(store=self._store, group=versioned_key, encoding=encoding)
 
-    def get(self, key: str) -> xr.Dataset:
+    def pop_but_not(self, key: str, version: str) -> xr.Dataset:
+        """Pop (but not actually remove, just add to a list to be removed) some data from the store."""
+        # We'll need to replace or delete these keys before closing the store
+        versioned_key = self._create_key(key=key, version=version)
+        self._pop_keys.append(versioned_key)
+        return xr.open_zarr(store=self._store, group=versioned_key)
+
+    def get(self, key: str, version: str) -> xr.Dataset:
         """Get an xr.Dataset from the zarr store."""
-        return xr.open_zarr(store=self._store, group=key)
+        versioned_key = self._create_key(key=key, version=version)
+        return xr.open_zarr(store=self._store, group=versioned_key)
 
-    def add_multiple(self, datasets: Dict[str, xr.Dataset]):
+    def latest_keys(self):
+        """Return the latest keys in the store"""
+        return self.version_keys(version="latest")
+
+    def version_keys(self, version: str):
+        return [k for k in list(self._store.keys()) if version in k]
+
+    def add_multiple(self, version: str, datasets: Dict[str, xr.Dataset]):
         """Add multiple xr.Datasets to the zarr store."""
         for key, dataset in datasets.items():
-            self.add(key=key, dataset=dataset)
+            self.add(key=key, version=version, dataset=dataset)
 
     def update(self, key: str, dataset: xr.Dataset):
         """Update the data at the given key"""
@@ -149,19 +175,20 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
 
     def delete(self, key: str):
         """Remove data from the zarr store"""
-        pass
+        del self._store[key]
 
     def delete_multiple(self, keys: list[str]):
         """Remove multiple keys from the zarr store"""
-        pass
+        for key in keys:
+            del self._store[key]
 
     def hash(self, data: str) -> str:
         """Hash the data at the given key"""
-        pass
+        raise NotImplementedError
 
     def hash_multiple(self, datasets: Dict[str, xr.Dataset]) -> Dict[str, str]:
         """Hash multiple xr.Datasets"""
-        pass
+        raise NotImplementedError
 
     def get_hash(self, key: str) -> str:
         """Get the hash of the data at the given key"""
