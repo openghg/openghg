@@ -5,7 +5,7 @@ from typing import Dict, Literal, Optional, Union
 def parse_crf2023(
     filepath: Path,
     species: str = "HFCs",
-    source: str = "intem",
+    source: str = "crf2023",
     domain: str = "europe",
     data_type: str = "emissions",
     database: Optional[str] = None,
@@ -35,18 +35,43 @@ def parse_crf2023(
         Dict: Parsed emissions data in dictionary format.
     """
     import pandas as pd
+    from openghg.util import timestamp_now
+
     dataframe_2023 = pd.read_excel(filepath, sheet_name='Table10s5', skiprows=4)
     # /Users/vq21425/crf-data-and-notebooks/GBR_2023_2021_13042023_170954.xlsx
     dataframe_2023 = dataframe_2023.iloc[1]
     dataframe_2023 = pd.DataFrame(dataframe_2023).iloc[2:-1]
-    dataframe_2023 = dataframe_2023.rename(columns={dataframe_2023.columns[0]: "HFCPFCInvent"})
+    dataframe_2023 = dataframe_2023.rename(columns={dataframe_2023.columns[0]: "Total_HFC"})
     dataframe_2023.index = pd.to_datetime(dataframe_2023.index, format='%Y')
 
+    metadata = {}
+    metadata["species"] = species
+    metadata["domain"] = domain
+    metadata["source"] = source
+    
+    optional_keywords = {"database": database, "database_version": database_version, "model": model}
+
+    for key, value in optional_keywords.items():
+        if value is not None:
+            metadata[key] = value
+
+    author_name = "OpenGHG Cloud"
+    # emissions_dataset.attrs["author"] = author_name
+    
+    metadata["author"] = author_name
+    metadata["data_type"] = data_type
+    metadata["processed"] = str(timestamp_now())
+    metadata["data_type"] = "emissions"
+    metadata["source_format"] = "openghg"
+
     dataframe_2023_dict = dataframe_2023.to_dict()
-    return dataframe_2023_dict
+    print(dataframe_2023_dict)
+    emissions_data: Dict[str, dict] = {}
+    emissions_data[key] = {}
+    emissions_data[key]["data"] = dataframe_2023_dict
+    emissions_data[key]["metadata"] = metadata
 
-
-
+    return emissions_data
 
     # from openghg.util import timestamp_now
     # from openghg.store import infer_date_range
