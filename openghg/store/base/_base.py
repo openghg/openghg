@@ -135,28 +135,29 @@ class BaseStore:
 
         for key, parsed_data in data.items():
             metadata = parsed_data["metadata"]
-            _data = parsed_data["data"]
+            dataset = parsed_data["data"]
 
             # Our lookup results and gas data have the same keys
             uuid = lookup_results[key]
 
             # Add the read metadata to the Dataset attributes being careful
             # not to overwrite any attributes that are already there
-            def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
-                """Attributes in a netCDF file can be strings, numbers, or sequences:
-                http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
+            # def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
+            #     """Attributes in a netCDF file can be strings, numbers, or sequences:
+            #     http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
 
-                This function converts any data whose type is not int, float, str, or list
-                to strings.
-                Booleans are converted to strings, even though they are a subtype of int.
-                """
-                if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
-                    return value
-                else:
-                    return str(value)
+            #     This function converts any data whose type is not int, float, str, or list
+            #     to strings.
+            #     Booleans are converted to strings, even though they are a subtype of int.
+            #     """
+            #     if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
+            #         return value
+            #     else:
+            #         return str(value)
 
-            to_add = {k: convert_to_netcdf4_types(v) for k, v in metadata.items() if k not in _data.attrs}
-            _data.attrs.update(to_add)
+            # Do we want all the metadata in the Dataset attributes?
+            to_add = {k: v for k, v in metadata.items() if k not in dataset.attrs}
+            dataset.attrs.update(to_add)
 
             # If we have a UUID for this Datasource load the existing object
             # from the object store
@@ -175,18 +176,24 @@ class BaseStore:
                 # TODO - do we want to do this or should be just perform lowercase comparisons?
                 meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
             else:
-                datasource = Datasource(bucket=self._bucket, uuid=uuid)
+                datasource = Datasource(bucket=self._bucket, uuid=uuid, new_version=new_version)
 
             # Add the dataframe to the datasource
             datasource.add_data(
-                metadata=meta_copy, data=_data, skip_keys=skip_keys, if_exists=if_exists, data_type=data_type
+                metadata=meta_copy,
+                data=dataset,
+                skip_keys=skip_keys,
+                if_exists=if_exists,
+                data_type=data_type,
             )
+
             # Save Datasource to object store
-            datasource.save(bucket=self._bucket, new_version=new_version)
+            datasource.save()
 
             # Add the metadata to the metastore and make sure it's up to date with the metadata stored
             # in the Datasource
             datasource_metadata = datasource.metadata()
+
             if new_ds:
                 self._metastore.insert(datasource_metadata)
             else:

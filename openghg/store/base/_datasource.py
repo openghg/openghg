@@ -61,10 +61,11 @@ class Datasource:
 
         # TODO - zarr - add type of stores in here for mypy
         self._zarr_store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid)
-        # So we can store the compressed version of data in memory
-        self._memory_store = {}
+        # We'll us this to store the dateranges we've added
         self._new_dateranges = []
+        # So we know where to write out to
         self._bucket = bucket
+        # Should we create a new version for the data we're adding
         self._new_version = new_version
 
     def __enter__(self):
@@ -734,11 +735,6 @@ class Datasource:
 
         # return self._data
 
-    def close_datasets(self) -> None:
-        """Close all open datasets"""
-        for dataset in self._data.values():
-            dataset.close()
-
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource
 
@@ -747,12 +743,7 @@ class Datasource:
         """
         from openghg.util import split_daterange_str
 
-        # If we've only shallow loaded (without the data)
-        # this Datasource we use the latest data keys
-        if not self._data:
-            date_keys = sorted(self._data_keys["latest"]["keys"])
-        else:
-            date_keys = sorted(self._data.keys())
+        date_keys = sorted(self._data_keys["latest"]["keys"])
 
         start, _ = split_daterange_str(daterange_str=date_keys[0])
         _, end = split_daterange_str(daterange_str=date_keys[-1])
