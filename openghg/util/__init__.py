@@ -46,6 +46,7 @@ from ._time import (
     daterange_contains,
     daterange_from_str,
     daterange_overlap,
+    dates_overlap,
     daterange_to_str,
     find_daterange_gaps,
     find_duplicate_timestamps,

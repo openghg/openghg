@@ -27,9 +27,7 @@ class SearchResults:
         start_result: ?
     """
 
-    def __init__(
-        self, keys: Optional[Dict] = None, metadata: Optional[Dict] = None, start_result: Optional[str] = None
-    ):
+    def __init__(self, metadata: Optional[Dict] = None, start_result: Optional[str] = None):
         if metadata is not None:
             self.metadata = metadata
         else:
@@ -49,11 +47,6 @@ class SearchResults:
             )
         else:
             self.results = {}  # type: ignore
-
-        if keys is not None:
-            self.key_data = keys
-        else:
-            self.key_data = {}
 
         self.hub = running_on_hub()
 
@@ -82,7 +75,6 @@ class SearchResults:
         """
         return {
             "metadata": self.metadata,
-            "keys": self.key_data,
             "hub": self.hub,
         }
 
@@ -105,7 +97,7 @@ class SearchResults:
         """
         loaded = json.loads(data)
 
-        return cls(keys=loaded["keys"], metadata=loaded["metadata"])
+        return cls(metadata=loaded["metadata"])
 
     def retrieve(
         self,
@@ -209,12 +201,9 @@ class SearchResults:
         """
         results = []
         for uid in uuids:
-            keys = self.key_data[uid]
             bucket = self.metadata[uid]["object_store"]
-            dataset = self._retrieve_dataset(bucket=bucket, keys=keys, sort=sort, elevate_inlet=elevate_inlet)
             metadata = self.metadata[uid]
-
-            results.append(ObsData(data=dataset, metadata=metadata))
+            results.append(ObsData(bucket=bucket, metadata=metadata, compute=True))
 
         if len(results) == 1:
             return results[0]
@@ -238,6 +227,7 @@ class SearchResults:
         Returns:
             Dataset:
         """
+        raise NotImplementedError("This will be removed")
         from openghg.cloud import call_function
 
         if self.hub:
@@ -257,6 +247,7 @@ class SearchResults:
             ds: Dataset = open_dataset(buf).load()  # type: ignore
             return ds
         else:
+            # This should just create an ObsData
             return recombine_datasets(
                 bucket=bucket,
                 keys=keys,
