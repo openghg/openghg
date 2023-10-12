@@ -86,8 +86,8 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
     # and not be loaded in or stored to the object store
     # TODO - happy for this name to change
     # Maybe just replace this with store if we're only storing a few things?
-    DO_NOT_STORE = ["_bucket", "_key", "_store", "_to_be_replaced"]
-    _store_root = "zarrstore"
+    DO_NOT_STORE = ["_bucket", "_key", "_store", "_to_be_replaced", "_pop_keys"]
+    _store_root = "zarr_data"
 
     def __init__(self, bucket: str, datasource_uuid: str) -> None:
         """ """
@@ -99,8 +99,9 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         # Store hashes of Datasets added to the store for easy checking
         self._hashes = {}
 
+        # Does this need to be stored? Maybe for dataset hashes?
         if exists(bucket=bucket, key=key):
-            result = get_object_from_json(self._bucket, key=key)
+            result = get_object_from_json(bucket, key=key)
             self.__dict__.update(result)
 
         self._bucket = bucket
@@ -108,7 +109,7 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         # TODO - move this to the objectstore submodule
         self._key = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/metadata"
         self._store = zarr.storage.NestedDirectoryStore(store_path)
-        self._to_be_replaced = []
+        self._pop_keys = []
 
     def _create_key(self, key: str, version: str) -> str:
         """Create a key for the zarr store."""

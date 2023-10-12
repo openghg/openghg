@@ -38,14 +38,14 @@ class Datasource:
         from openghg.util import timestamp_now
         from openghg.store.base import LocalZarrStore
 
-        if bucket is not None and uuid is not None:
+        if uuid is not None:
             key = f"{Datasource._datasource_root}/uuid/{uuid}"
-            if exists(bucket=bucket, key=uuid):
+            if exists(bucket=bucket, key=key):
                 stored_data = get_object_from_json(bucket=bucket, key=key)
                 self.__dict__.update(stored_data)
         else:
             self._uuid = str(uuid4())
-            self._creation_datetime = timestamp_now()
+            self._creation_datetime = str(timestamp_now())
             self._metadata: Dict[str, str] = {}
             # # Dictionary keyed by daterange of data in each Dataset
             self._start_date = None
@@ -79,7 +79,7 @@ class Datasource:
         if exc_type is not None:
             logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
-            self.save(self._new_version)
+            self.save()
 
     def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource
@@ -627,7 +627,6 @@ class Datasource:
         # This does not
         # return xr.open_dataset(file_path)
 
-
     def define_version_key(self, version: str) -> str:
         """Define key for version on Datasource"""
         datasource_key = self.key()
@@ -676,6 +675,7 @@ class Datasource:
 
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self.key(), data=internal_metadata)
+        print(internal_metadata)
         self._zarr_store.close()
 
     def get_latest_datekeys(self) -> List[str]:
