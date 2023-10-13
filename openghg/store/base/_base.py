@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 
 from pandas import Timestamp
 
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+
 from openghg.objectstore.metastore import ClassicMetaStore
 from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_now, to_lowercase
@@ -29,6 +29,8 @@ class BaseStore:
     _uuid = "root_uuid"
 
     def __init__(self, bucket: str) -> None:
+        from openghg.objectstore import get_object_from_json, exists
+
         self._creation_datetime = str(timestamp_now())
         self._stored = False
         # Hashes of previously uploaded files
@@ -73,6 +75,8 @@ class BaseStore:
         return f"{cls._root}/uuid/{cls._uuid}"
 
     def save(self) -> None:
+        from openghg.objectstore import set_object_from_json
+
         self._metastore.close()
         set_object_from_json(bucket=self._bucket, key=self.key(), data=self.to_data())
 

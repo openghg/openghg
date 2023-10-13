@@ -1,13 +1,17 @@
+from __future__ import annotations
 import glob
 import json
 import os
 import threading
 from pathlib import Path
 import shutil
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
+import warnings
+
+# from openghg.store.base import LocalZarrStore
 
 rlock = threading.RLock()
 
@@ -30,6 +34,21 @@ __all__ = [
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+
+
+# # TODO - context manage this? As writes are atomic not sure it needs to be closed
+# # see zarr docs
+# def open_zarr_store(bucket: str, datasource_uuid: str, mode: Literal["r", "rw"] = "rw") -> LocalZarrStore:
+#     """Open a Datasource zarr store directly
+
+#     Args:
+#         bucket: Bucket path
+#         datasource_uuid: UUID of the datasource
+#     Returns:
+#         LocalZarrStore: Local zarr store object
+#     """
+#     warnings.warn("WIP - zarr functions will move around", FutureWarning)
+#     return LocalZarrStore(bucket=bucket, datasource_uuid=datasource_uuid, mode=mode)
 
 
 def get_readable_buckets() -> Dict[str, str]:

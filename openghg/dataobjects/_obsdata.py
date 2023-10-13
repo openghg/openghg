@@ -1,25 +1,57 @@
 from collections import abc
-from dataclasses import dataclass
 from json import dumps
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Dict, Iterator, Union, Optional
 from openghg.plotting import plot_timeseries as general_plot_timeseries
 import plotly.graph_objects as go
+import xarray as xr
 
-from ._basedata import _BaseData
+from typing import Dict
+
+# from openghg.objectstore import
+from openghg.store.base import LocalZarrStore
+import zarr
+
+# from ._basedata import _BaseData
 
 __all__ = ["ObsData"]
 
 
-@dataclass(frozen=True)
-class ObsData(_BaseData, abc.Mapping):
+class ObsData:
     """This class is used to return observations data from the get_observations function
 
     Args:
         data: Dictionary of xarray Dataframes
         metadata: Dictionary of metadata
     """
+
+    def __init__(self, uuid: str, version: str, metadata: Dict, compute: bool = False) -> None:
+        self._bucket = metadata["object_store"]
+        self._uuid = uuid
+        self._compute = compute
+        self.version = version
+        self.metadata = metadata
+        self.data = False
+        self._memory_store = {}
+
+        # Retrieve the data from the memory store
+        # lazy_zarr_store = open_zarr_store(bucket=self._bucket, datasource_uuid=self._uuid)
+        self._lazy_zarr_store = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
+        # Copy the data we want to the memory store
+        zarr.convenience.copy_store(
+            source=self._lazy_zarr_store,
+            dest=self._memory_store,
+            source_path=version,
+            dest_path=version,
+            if_exists="replace",
+        )
+
+        if compute:
+            self.compute()
+
+    def __bool__(self) -> bool:
+        return bool(self._memory_store)
 
     # Compatability layer for legacy format - mimicking the behaviour of a dictionary
     # Previous format expected a dictionary containing the site code and data
@@ -57,6 +89,7 @@ class ObsData(_BaseData, abc.Mapping):
         return 1
 
     def __eq__(self, other: object) -> bool:
+        raise NotImplementedError
         if not isinstance(other, ObsData):
             return NotImplemented
 
@@ -68,6 +101,7 @@ class ObsData(_BaseData, abc.Mapping):
         Returns:
             dict: Dictionary of metadata and bytes
         """
+        raise NotImplementedError
         to_transfer: Dict[str, Union[str, bytes]] = {}
         to_transfer["metadata"] = dumps(self.metadata)
 
@@ -77,6 +111,9 @@ class ObsData(_BaseData, abc.Mapping):
             to_transfer["data"] = Path(tmpfile.name).read_bytes()
 
         return to_transfer
+
+    def compute(self) -> None:
+        self.data = xr.open_zarr(store=self._memory_store, group=self.version)
 
     def plot_timeseries(
         self,

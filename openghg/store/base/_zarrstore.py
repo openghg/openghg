@@ -2,7 +2,7 @@
 So this is a prototype for using zarr with the
 """
 from __future__ import annotations
-from typing import Dict, Union, Optional, MutableMapping
+from typing import Dict, Literal, Union, Optional, MutableMapping
 from types import TracebackType
 from pydantic import BaseModel
 from numcodecs import Blosc
@@ -81,15 +81,16 @@ class ZarrStore(ABC):
         pass
 
 
+# TODO - does this need to inherit this really?
 class LocalZarrStore(zarr.storage.NestedDirectoryStore):
     # These should only be stored when the instance is created
     # and not be loaded in or stored to the object store
     # TODO - happy for this name to change
     # Maybe just replace this with store if we're only storing a few things?
-    DO_NOT_STORE = ["_bucket", "_key", "_store", "_to_be_replaced", "_pop_keys"]
+    DO_NOT_STORE = ["_bucket", "_key", "_store", "_pop_keys", "_mode"]
     _store_root = "zarr_data"
 
-    def __init__(self, bucket: str, datasource_uuid: str) -> None:
+    def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
         """ """
         store_path = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/zarrstore"
         key = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/metadata"
@@ -104,6 +105,7 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
             result = get_object_from_json(bucket, key=key)
             self.__dict__.update(result)
 
+        self.mode = mode
         self._bucket = bucket
         self._key = key
         # TODO - move this to the objectstore submodule
@@ -113,7 +115,7 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
 
     def _create_key(self, key: str, version: str) -> str:
         """Create a key for the zarr store."""
-        return f"{key}/{version}"
+        return f"{version}/{key}"
 
     def close(self):
         """Close object store connection.
@@ -128,6 +130,9 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         """Add an xr.Dataset to the zarr store."""
         from openghg.store.spec import get_zarr_encoding
         from openghg.util import daterange_overlap
+
+        if self.mode == "r":
+            raise ValueError("Cannot add to a read-only zarr store")
 
         if self._pop_keys:
             first = self._pop_keys.pop(0)
@@ -144,6 +149,8 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
 
     def pop_but_not(self, key: str, version: str) -> xr.Dataset:
         """Pop (but not actually remove, just add to a list to be removed) some data from the store."""
+        if self.mode == "r":
+            raise ValueError("Cannot pop from a read-only zarr store")
         # We'll need to replace or delete these keys before closing the store
         versioned_key = self._create_key(key=key, version=version)
         self._pop_keys.append(versioned_key)
