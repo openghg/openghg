@@ -150,10 +150,13 @@ class Datasource:
         time_coord = "time"
         data = data.sortby(time_coord)
 
+        # Extract full representative date range for the data
+        new_full_start, new_full_end = self.get_representative_daterange(dataset=data, period=period, time_coord=time_coord)
+
         # Use a dictionary keyed with the daterange covered by each segment of data
         # Group by year
         new_data = {
-            self.get_representative_daterange_str(year_data, period=period): year_data
+            self.get_representative_daterange_str(year_data, period=period, time_coord=time_coord): year_data
             for _, year_data in data.groupby(f"{time_coord}.year")
         }
 
@@ -359,27 +362,35 @@ class Datasource:
 
         return start, end
 
-    def get_dataset_daterange(self, dataset: xr.Dataset) -> Tuple[Timestamp, Timestamp]:
+    def get_dataset_daterange(self, dataset: xr.Dataset, time_coord: str = "time") -> Tuple[Timestamp, Timestamp]:
         """Get the daterange for the passed Dataset
 
         Args:
-            dataset (xarray.DataSet): Dataset to parse
+            dataset (xarray.Dataset): Dataset to parse
+            time_coord : Name of the coordinate containing timestamps. Default = "time".
         Returns:
-            tuple (Timestamp, Timestamp): Start and end datetimes for DataSet
-
+            tuple (Timestamp, Timestamp): Start and end datetimes for Dataset
         """
         from openghg.util import timestamp_tzaware
 
         try:
-            start = timestamp_tzaware(dataset.time.min().values)
-            end = timestamp_tzaware(dataset.time.max().values)
+            start = timestamp_tzaware(dataset[time_coord].min().values)
+            end = timestamp_tzaware(dataset[time_coord].max().values)
 
             return start, end
         except AttributeError:
             raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
-    def get_dataset_daterange_str(self, dataset: xr.Dataset) -> str:
-        start, end = self.get_dataset_daterange(dataset=dataset)
+    def get_dataset_daterange_str(self, dataset: xr.Dataset, time_coord: str = "time") -> str:
+        """Get the daterange string for the passed Dataset
+
+        Args:
+            dataset (xarray.Dataset): Dataset to parse
+            time_coord : Name of the coordinate containing timestamps. Default = "time".
+        Returns:
+            str: Date string covering date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
+        """
+        start, end = self.get_dataset_daterange(dataset=dataset, time_coord=time_coord)
 
         # Tidy the string and concatenate them
         start = str(start).replace(" ", "-")
@@ -389,9 +400,8 @@ class Datasource:
 
         return daterange_str
 
-    def get_representative_daterange_str(self, dataset: xr.Dataset, period: Optional[str] = None) -> str:
-        """
-        Get representative daterange which incorporates any period the data covers.
+    def get_representative_daterange(self, dataset: xr.Dataset, period: Optional[str] = None, time_coord: str = "time") -> Tuple[Timestamp, Timestamp]:
+        """Get representative daterange which incorporates any period the data covers.
 
         A representative daterange covers the start - end time + any additional period that is covered
         by each time point. The start and end times can be extracted from the input dataset and
@@ -404,15 +414,16 @@ class Datasource:
             dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.
             period: Value representing a time period e.g. "12H", "1AS" "3MS". Should be suitable for
                 creation of a pandas Timedelta or DataOffset object.
+            time_coord : Name of the coordinate containing timestamps. Default = "time".
 
         Returns:
-            str : Date string covering representative date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
+            tuple (Timestamp, Timestamp): Start and end datetimes for Dataset
         """
-        from openghg.util import create_daterange_str, relative_time_offset
+        from openghg.util import relative_time_offset
         from pandas import Timedelta
 
         # Extract start and end dates from grouped data
-        start_date, end_date = self.get_dataset_daterange(dataset)
+        start_date, end_date = self.get_dataset_daterange(dataset=dataset, time_coord=time_coord)
 
         # If period is defined add this to the end date
         # This ensure start-end range includes time period covered by data
@@ -425,6 +436,26 @@ class Datasource:
         # If start and end times are identical add 1 second to ensure the range duration is > 0 seconds
         if start_date == end_date:
             end_date += Timedelta(seconds=1)
+        
+        return start_date, end_date
+
+    def get_representative_daterange_str(self, dataset: xr.Dataset, period: Optional[str] = None, time_coord: str = "time") -> str:
+        """Get representative daterange string which incorporates any period the data covers.
+
+        See self.get_representative_daterange() for details of how a representative date range is defined.
+
+        Args:
+            dataset: Data containing (at least) a time dimension. Used to extract start and end datetimes.
+            period: Value representing a time period e.g. "12H", "1AS" "3MS". Should be suitable for
+                creation of a pandas Timedelta or DataOffset object.
+            time_coord : Name of the coordinate containing timestamps. Default = "time".
+
+        Returns:
+            str : Date string covering representative date range e.g. "YYYY-MM-DD hh:mm:ss_YYYY-MM-DD hh:mm:ss"
+        """
+        from openghg.util import create_daterange_str
+
+        start_date, end_date = self.get_representative_daterange(dataset=dataset, period=period, time_coord=time_coord)
 
         daterange_str = create_daterange_str(start=start_date, end=end_date)
 
