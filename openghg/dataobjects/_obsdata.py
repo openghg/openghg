@@ -22,8 +22,10 @@ class ObsData:
     """This class is used to return observations data from the get_observations function
 
     Args:
-        data: Dictionary of xarray Dataframes
+        uuid: UUID of Datasource
+        version: Version of data requested from Datasrouce
         metadata: Dictionary of metadata
+        compute: Open zarr store as dataset
     """
 
     def __init__(self, uuid: str, version: str, metadata: Dict, compute: bool = False) -> None:
@@ -94,23 +96,6 @@ class ObsData:
             return NotImplemented
 
         return self.data.equals(other.data) and self.metadata == other.metadata
-
-    def to_data(self) -> Dict:
-        """Creates a dictionary package of this ObsData's metadata and data.
-
-        Returns:
-            dict: Dictionary of metadata and bytes
-        """
-        raise NotImplementedError
-        to_transfer: Dict[str, Union[str, bytes]] = {}
-        to_transfer["metadata"] = dumps(self.metadata)
-
-        # TODO - get better bytes
-        with NamedTemporaryFile() as tmpfile:
-            self.data.to_netcdf(tmpfile.name)
-            to_transfer["data"] = Path(tmpfile.name).read_bytes()
-
-        return to_transfer
 
     def compute(self) -> None:
         self.data = xr.open_zarr(store=self._memory_store, group=self.version)
