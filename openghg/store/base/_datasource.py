@@ -57,7 +57,6 @@ class Datasource:
             self._data_type: str = ""
             # Hold information regarding the versions of the data
             self._latest_version: str = ""
-            self._versions: Dict[str, List] = {}
 
         # TODO - zarr - add type of stores in here for mypy
         self._zarr_store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid)
@@ -198,10 +197,8 @@ class Datasource:
 
         version_str = self._get_version_str()
 
-        if daterange_str in self._new_dateranges:
-            raise ValueError(
-                "You've already tried adding this data - TODO - remove this error once checks are added"
-            )
+        # TODO - Check the hash of this data and compare it to our stored hashes
+        # NOTE - this means Dataset hash and not the file hash
 
         # Ensure daterange strings are independent and do not overlap each other
         # (this can occur due to representative date strings)
@@ -327,8 +324,16 @@ class Datasource:
         timestmap_str_now = str(timestamp_now())
         self._status["updates"] = True
         self._status["if_exists"] = if_exists
+        self._latest_version = version_str
+        # We'll store the daterange for this version of the data and update the latest to the current version
         self._data_keys[version_str]["keys"] = date_keys
         self._data_keys[version_str]["timestamp"] = timestmap_str_now
+        self._data_keys["latest"] = self._data_keys[version_str].copy()
+
+        self.add_metadata_key(key="latest_version", value=version_str)
+        self.add_metadata_key(key="last_changed", value=timestmap_str_now)
+
+        # TODO - do  we need these?
         self._latest_version = version_str
         self._last_updated = timestmap_str_now
 
