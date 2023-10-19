@@ -40,6 +40,7 @@ class ObsData:
         # Retrieve the data from the memory store
         # lazy_zarr_store = open_zarr_store(bucket=self._bucket, datasource_uuid=self._uuid)
         self._lazy_zarr_store = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
+        # TODO - do we even need to do this?
         # Copy the data we want to the memory store
         zarr.convenience.copy_store(
             source=self._lazy_zarr_store,

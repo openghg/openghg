@@ -1,6 +1,6 @@
 from pathlib import Path
 import pytest
-
+import xarray as xr
 from helpers import (
     get_emissions_datapath,
     get_footprint_datapath,
@@ -373,4 +373,25 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
                 "obs_type": "surface",
             },
         }
+    )
+
+
+def test_standardise_zep():
+    folder = Path("/Users/gar/Documents/Devel/openghg/fp_data")
+    footprints = sorted(list(folder.glob("*.nc")))
+
+    # Add the first few footprints
+    for file in footprints[:3]:
+        standardise_footprint(
+            filepath=file, site="ZEP", domain="EUROPE", model="NAME", store="user", inlet="10m"
+        )
+
+    june_fp = Path("/Users/gar/Documents/Devel/openghg/fp_data/ZEP-10magl_EUROPE_202101.nc")
+    june_ds = xr.open_dataset(june_fp)
+    june_fp_updated = june_fp.parent / "modified" / "ZEP-10magl_EUROPE_202101_updated.nc"
+    june_ds.head(400).to_netcdf(june_fp_updated)
+
+    # By default this should raise an error
+    standardise_footprint(
+        june_fp_updated, site="ZEP", domain="EUROPE", model="UKV", inlet="10m", store="user"
     )

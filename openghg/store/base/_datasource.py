@@ -681,7 +681,6 @@ class Datasource:
 
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self.key(), data=internal_metadata)
-        print(internal_metadata)
         self._zarr_store.close()
 
     def get_latest_datekeys(self) -> List[str]:

@@ -9,7 +9,7 @@ import pytest
 import xarray as xr
 from addict import Dict as aDict
 from helpers import get_surface_datapath, get_footprint_datapath
-from openghg.objectstore import get_bucket, get_object_names, delete_object
+from openghg.objectstore import get_bucket, get_object_names, delete_object, get_writable_bucket
 from openghg.standardise.surface import parse_crds
 from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
@@ -616,3 +616,18 @@ def test_datasource_compression(data, bucket):
     size2 = os.path.getsize(filepath2)
 
     assert size1 <= size2
+
+
+def test_datasource_zarrstore_concat_handling():
+    folder =  Path("/Users/gar/Documents/Devel/openghg/fp_data")
+    footprints = sorted(list(folder.glob("*.nc")))
+    bucket = get_writable_bucket(name="user")
+
+    ds_1 = xr.open_dataset(footprints[0])
+    ds_1_trimmed = ds_1.head(350)
+
+
+    # with Datasource(bucket=bucket, new_version=True) as d:
+    #     d.add_timed_data(data=ds_1, data_type="footprint")
+    #     d.add_timed_data(data=ds_1_trimmed, data_type="footprint", if_exists="new")
+    raise ValueError
