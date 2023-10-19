@@ -554,7 +554,7 @@ def test_combine_obs_sampling_period_infer():
     """
     If the sampling_period is "NOT_SET" then when combining obs and footprints
     this should infer the sampling period from the frequency of the data but this
-    was raising a value error. Reported as part of Issue #---.
+    was raising a value error. Reported as part of Issue #620.
 
     Test to ensure this functionality is now working.
      - sampling_period attribute for WAO data file is "NOT_SET"

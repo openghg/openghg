@@ -655,7 +655,7 @@ class ModelScenario:
 
             estimate = f"{obs_data_period_s:.1f}"
             logger.warning(f"Sampling period was estimated (inferred) from data frequency: {estimate}s")
-            self.obs.data.attrs["sampling_period_estimate"] = estimate
+            obs.data.attrs["sampling_period_estimate"] = estimate
 
         # TODO: Check regularity of the data - will need this to decide is resampling
         # is appropriate or need to do checks on a per time point basis
