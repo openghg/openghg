@@ -245,6 +245,7 @@ class Footprints(BaseStore):
             infer_date_range,
             update_zero_dim,
         )
+        from openghg.store.spec import get_chunks_footprint
         from openghg.util import (
             clean_string,
             format_inlet,
@@ -300,7 +301,8 @@ class Footprints(BaseStore):
             return {}
 
         # Open the dataset
-        fp_data = xr.open_dataset(filepath, chunks=chunks)
+        chunk_sizes = get_chunks_footprint()
+        fp_data = xr.open_dataset(filepath, chunks=chunks).chunk(chunk_sizes)
 
         if species == "co2":
             # Expect co2 data to have high time resolution

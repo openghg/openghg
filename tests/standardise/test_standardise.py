@@ -376,8 +376,28 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
     )
 
 
-def test_standardise_zep():
-    folder = Path("/Users/gar/Documents/Devel/openghg/fp_data")
+def test_standardise_zep_2021():
+    folder = Path("~/Documents/Devel/openghg/fp_data").expanduser().resolve()
+    footprints = sorted(list(folder.glob("*.nc")))
+
+    # Add the first few footprints
+    for file in footprints:
+        standardise_footprint(
+            filepath=file,
+            site="ZEP",
+            domain="EUROPE",
+            model="NAME",
+            store="user",
+            inlet="10m",
+        )
+
+    
+
+
+# TODO - remove this once zarr store is fully implemented and working
+# I'm using this for easy memory allocation testing
+def test_standardise_zep_and_add_new_section_of_january():
+    folder = Path("~/Documents/Devel/openghg/fp_data").expanduser().resolve()
     footprints = sorted(list(folder.glob("*.nc")))
 
     # Add the first few footprints
@@ -389,13 +409,12 @@ def test_standardise_zep():
             model="NAME",
             store="user",
             inlet="10m",
-            if_exists="replace",
         )
 
-    june_fp = Path("/Users/gar/Documents/Devel/openghg/fp_data/ZEP-10magl_EUROPE_202101.nc")
+    jan_fp = folder / "ZEP-10magl_EUROPE_202101.nc"
 
-    june_ds = xr.open_dataset(june_fp)
-    june_fp_updated = june_fp.parent / "modified" / "ZEP-10magl_EUROPE_202101_updated.nc"
+    june_ds = xr.open_dataset(jan_fp)
+    june_fp_updated = jan_fp.parent / "modified" / "ZEP-10magl_EUROPE_202101_updated.nc"
     june_ds.head(400).to_netcdf(june_fp_updated)
     june_ds.close()
 
@@ -408,4 +427,5 @@ def test_standardise_zep():
         inlet="10m",
         store="user",
         if_exists="replace",
+        save_current=False,
     )

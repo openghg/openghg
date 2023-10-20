@@ -88,7 +88,8 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
     # and not be loaded in or stored to the object store
     # TODO - happy for this name to change
     # Maybe just replace this with store if we're only storing a few things?
-    DO_NOT_STORE = ["_bucket", "_key", "_store", "_pop_keys", "_mode"]
+    # TODO - if we start storing hashes of datasets then we'll need to store them in here or in the Datasource?
+    DO_NOT_STORE = ["_bucket", "_key", "_store", "_pop_keys", "_mode", "_memory_store"]
     _store_root = "zarr_data"
 
     def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
@@ -113,6 +114,7 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         self._key = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/metadata"
         self._store = zarr.storage.NestedDirectoryStore(store_path)
         self._pop_keys = collections.deque()
+        self._memory_store = {}
 
     def _create_key(self, key: str, version: str) -> str:
         """Create a key for the zarr store."""
@@ -130,16 +132,9 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
     def add(self, key: str, version: str, dataset: xr.Dataset):
         """Add an xr.Dataset to the zarr store."""
         from openghg.store.spec import get_zarr_encoding
-        from openghg.util import daterange_overlap
 
         if self._mode == "r":
             raise ValueError("Cannot add to a read-only zarr store")
-
-        # If we've popped keys then we expect the key we're adding to overlap with the popped keys
-        if self._pop_keys:
-            popped_key, popped_version = self._pop_keys.popleft()
-            if not daterange_overlap(popped_key, key):
-                raise ValueError("Cannot add this key as we expect it to overlap a popped key")
 
         versioned_key = self._create_key(key=key, version=version)
         # TODO - check if the key already exists and then ?
@@ -149,18 +144,17 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         encoding = get_zarr_encoding(data_vars=dataset.data_vars)
         dataset.to_zarr(store=self._store, group=versioned_key, encoding=encoding)
 
-        # Once we've finished with the popped Dataset we can delete it
-        if self._pop_keys:
-            self.delete(key=popped_key, version=popped_version)
-
-    def pop_but_not(self, key: str, version: str) -> xr.Dataset:
+    def pop(self, key: str, version: str) -> xr.Dataset:
         """Pop (but not actually remove, just add to a list to be removed) some data from the store."""
         if self._mode == "r":
             raise ValueError("Cannot pop from a read-only zarr store")
-        # We'll need to replace or delete these keys before closing the store
+
         self._pop_keys.append((key, version))
         versioned_key = self._create_key(key=key, version=version)
-        return xr.open_zarr(store=self._store, group=versioned_key)
+        # Let's copy the data we want to pop into a memory store and return it from there
+        zarr.convenience.copy_store(source=self._store, dest=self._memory_store, source_path=versioned_key, dest_path=versioned_key)
+        self.delete(key=key, version=version)
+        return xr.open_zarr(store=self._memory_store, group=versioned_key, consolidated=False)
 
     def get(self, key: str, version: str) -> xr.Dataset:
         """Get an xr.Dataset from the zarr store."""

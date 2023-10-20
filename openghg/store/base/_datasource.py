@@ -177,6 +177,7 @@ class Datasource:
         Returns:
             None
         """
+        from openghg.store.spec import get_chunks
         from openghg.util import daterange_overlap, timestamp_now
         from xarray import concat as xr_concat
 
@@ -193,6 +194,7 @@ class Datasource:
         new_data = {self.get_representative_daterange_str(data, period=period): data}
         daterange_str = self.get_representative_daterange_str(dataset=data, period=period)
 
+        # NOTE - added version string here as we add data to the zarr store in this function
         version_str = self._get_version_str()
 
         # TODO - Check the hash of this data and compare it to our stored hashes
@@ -231,7 +233,7 @@ class Datasource:
                 if if_exists == "replace":
                     combined_datasets = {}
                     for existing_daterange, new_daterange in overlapping:
-                        ex = self._zarr_store.pop_but_not(key=existing_daterange, version=version_str)
+                        ex = self._zarr_store.pop(key=existing_daterange, version=self._latest_version)
                         new = new_data.pop(new_daterange)
                         # new = data
                         logger.info("Combining overlapping data dateranges")
@@ -285,6 +287,9 @@ class Datasource:
                     combined_datasets = self._clip_daterange_label(combined_datasets)
 
                     for key, dataset in combined_datasets.items():
+                        chunks = get_chunks(data_type=data_type)
+                        logger.info(f"Rechunking {data_type} data using: {chunks}")
+                        dataset = dataset.chunk(chunks)
                         self._zarr_store.add(key=key, version=version_str, dataset=dataset)
 
                     # Store the updated dateranges
