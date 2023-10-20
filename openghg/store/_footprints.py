@@ -435,6 +435,8 @@ class Footprints(BaseStore):
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
 
+        fp_data.close()
+
         return datasource_uuids
 
     @staticmethod

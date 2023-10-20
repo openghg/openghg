@@ -6,6 +6,7 @@ from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Unio
 from types import TracebackType
 import logging
 import numpy as np
+import copy
 import shutil
 from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
@@ -47,12 +48,11 @@ class Datasource:
             self._uuid = str(uuid4())
             self._creation_datetime = str(timestamp_now())
             self._metadata: Dict[str, str] = {}
-            # # Dictionary keyed by daterange of data in each Dataset
             self._start_date = None
             self._end_date = None
             self._status: Optional[Dict] = None
-            # This dictionary stored the keys for each version of data uploaded
-            # data_key = d._data_keys["latest"]["keys"][date_key]
+            # This dictionary stored the keys for each version of data added
+            # data_key = d._data_keys[version]["keys"][date_key]
             self._data_keys: dataKeyType = defaultdict(dict)
             self._data_type: str = ""
             # Hold information regarding the versions of the data
@@ -60,8 +60,6 @@ class Datasource:
 
         # TODO - zarr - add type of stores in here for mypy
         self._zarr_store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid)
-        # We'll us this to store the dateranges we've added
-        self._new_dateranges = []
         # So we know where to write out to
         self._bucket = bucket
         # Should we create a new version for the data we're adding
@@ -208,13 +206,13 @@ class Datasource:
         self._status = {}
 
         # We'll use this to store the dates covered by this version of the data
-        date_keys = []
+        date_keys = self._data_keys[self._latest_version]["keys"] if self._data_keys else []
 
-        # If we need to add more data then we do this
-        if self._zarr_store:
+        # If we have data already stored in the Datasource
+        if date_keys:
             # Check if we have any overlap
             overlapping = []
-            for existing_daterange in self._data_keys["latest"]["keys"]:
+            for existing_daterange in date_keys:
                 if daterange_overlap(daterange_a=existing_daterange, daterange_b=daterange_str):
                     overlapping.append((existing_daterange, daterange_str))
 
@@ -226,10 +224,9 @@ class Datasource:
                 # self._data is a dictionary containing datestr: Dataset values
                 logger.info("Updating store to include new added data only.")
                 # Add this to the memory store and move on
-                self._get_version_str()
                 self._zarr_store.add(key=daterange_str, version=version_str, dataset=data)
-                # Now add the daterange we've stored for this version
-                date_keys.append(daterange_str)
+                # We only want this key for a new version
+                date_keys = [daterange_str]
             elif overlapping:
                 if if_exists == "replace":
                     combined_datasets = {}
@@ -287,7 +284,9 @@ class Datasource:
                     # data and clipping the labels as necessary.
                     combined_datasets = self._clip_daterange_label(combined_datasets)
 
-                    self._zarr_store.add_multiple(version=version_str, datasets=combined_datasets)
+                    for key, dataset in combined_datasets.items():
+                        self._zarr_store.add(key=key, version=version_str, dataset=dataset)
+
                     # Store the updated dateranges
                     date_keys.extend(combined_datasets.keys())
                     # self._delete_version = True
@@ -328,10 +327,9 @@ class Datasource:
         # We'll store the daterange for this version of the data and update the latest to the current version
         self._data_keys[version_str]["keys"] = date_keys
         self._data_keys[version_str]["timestamp"] = timestmap_str_now
-        self._data_keys["latest"] = self._data_keys[version_str].copy()
 
         self.add_metadata_key(key="latest_version", value=version_str)
-        self.add_metadata_key(key="last_changed", value=timestmap_str_now)
+        self.add_metadata_key(key="timestamp", value=timestmap_str_now)
 
         # TODO - do  we need these?
         self._latest_version = version_str
@@ -663,15 +661,7 @@ class Datasource:
         """
         from openghg.objectstore import set_object_from_json
 
-        # We'll only do this if something has changed
-        if self._new_dateranges:
-            # Link latest to the newest version
-            self._data_keys["latest"] = self._data_keys[self._latest_version]
-            self.add_metadata_key(key="latest_version", value=self._latest_version)
-            self.add_metadata_key(key="last_changed", value=self._last_updated)
-
         DO_NOT_STORE = {
-            "_daterange_keys",
             "_memory_store",
             "_zarr_store",
             "_bucket",
@@ -689,7 +679,7 @@ class Datasource:
         Returns:
             list: List of date keys
         """
-        return list(self._data_keys["latest"]["keys"].keys())
+        return list(self._data_keys[self._latest_version]["keys"].keys())
 
     def key(self) -> str:
         """Returns the Datasource's key
@@ -747,7 +737,7 @@ class Datasource:
         """
         from openghg.util import split_daterange_str
 
-        date_keys = sorted(self._data_keys["latest"]["keys"])
+        date_keys = sorted(self._data_keys[self._latest_version]["keys"])
 
         start, _ = split_daterange_str(daterange_str=date_keys[0])
         _, end = split_daterange_str(daterange_str=date_keys[-1])
@@ -908,7 +898,7 @@ class Datasource:
         Return:
             list: List of keys to data
         """
-        data_keys = self._data_keys["latest"]["keys"]
+        data_keys = self._data_keys[self._latest_version]["keys"]
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
@@ -932,7 +922,7 @@ class Datasource:
         start_date = timestamp_tzaware(split_daterange[0])
         end_date = timestamp_tzaware(split_daterange[1])
 
-        data_keys = self._data_keys["latest"]["keys"]
+        data_keys = self._data_keys[self._latest_version]["keys"]
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
@@ -1040,6 +1030,9 @@ class Datasource:
         Returns:
             list: List of data keys
         """
+        if version == "latest":
+            version = self._latest_version
+
         try:
             keys = list(self._data_keys[version]["keys"].values())
         except KeyError:

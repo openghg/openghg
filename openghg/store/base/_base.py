@@ -173,7 +173,7 @@ class BaseStore:
             new_ds = uuid is False
 
             if new_ds:
-                datasource = Datasource(bucket=self._bucket)
+                datasource = Datasource(bucket=self._bucket, new_version=new_version)
                 uid = datasource.uuid()
                 meta_copy["uuid"] = uid
                 # Make sure all the metadata is lowercase for easier searching later

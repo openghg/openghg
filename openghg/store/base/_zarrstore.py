@@ -2,10 +2,11 @@
 So this is a prototype for using zarr with the
 """
 from __future__ import annotations
-from typing import Dict, Literal, Union, Optional, MutableMapping
+from typing import Dict, Literal, List, Union, Optional, MutableMapping
 from types import TracebackType
 from pydantic import BaseModel
 from numcodecs import Blosc
+import collections
 from openghg.objectstore import set_object_from_json, exists, get_object_from_json
 import xarray as xr
 import zarr
@@ -51,7 +52,7 @@ class ZarrStore(ABC):
         pass
 
     @abstractmethod
-    def delete_multiple(self, keys: list[str]):
+    def delete_multiple(self, keys: List[str]):
         """Remove multiple keys from the zarr store"""
         pass
 
@@ -105,13 +106,13 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
             result = get_object_from_json(bucket, key=key)
             self.__dict__.update(result)
 
-        self.mode = mode
+        self._mode = mode
         self._bucket = bucket
         self._key = key
         # TODO - move this to the objectstore submodule
         self._key = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/metadata"
         self._store = zarr.storage.NestedDirectoryStore(store_path)
-        self._pop_keys = []
+        self._pop_keys = collections.deque()
 
     def _create_key(self, key: str, version: str) -> str:
         """Create a key for the zarr store."""
@@ -131,12 +132,13 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         from openghg.store.spec import get_zarr_encoding
         from openghg.util import daterange_overlap
 
-        if self.mode == "r":
+        if self._mode == "r":
             raise ValueError("Cannot add to a read-only zarr store")
 
+        # If we've popped keys then we expect the key we're adding to overlap with the popped keys
         if self._pop_keys:
-            first = self._pop_keys.pop(0)
-            if not daterange_overlap(first, key):
+            popped_key, popped_version = self._pop_keys.popleft()
+            if not daterange_overlap(popped_key, key):
                 raise ValueError("Cannot add this key as we expect it to overlap a popped key")
 
         versioned_key = self._create_key(key=key, version=version)
@@ -147,19 +149,36 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         encoding = get_zarr_encoding(data_vars=dataset.data_vars)
         dataset.to_zarr(store=self._store, group=versioned_key, encoding=encoding)
 
+        # Once we've finished with the popped Dataset we can delete it
+        if self._pop_keys:
+            self.delete(key=popped_key, version=popped_version)
+
     def pop_but_not(self, key: str, version: str) -> xr.Dataset:
         """Pop (but not actually remove, just add to a list to be removed) some data from the store."""
-        if self.mode == "r":
+        if self._mode == "r":
             raise ValueError("Cannot pop from a read-only zarr store")
         # We'll need to replace or delete these keys before closing the store
+        self._pop_keys.append((key, version))
         versioned_key = self._create_key(key=key, version=version)
-        self._pop_keys.append(versioned_key)
         return xr.open_zarr(store=self._store, group=versioned_key)
 
     def get(self, key: str, version: str) -> xr.Dataset:
         """Get an xr.Dataset from the zarr store."""
         versioned_key = self._create_key(key=key, version=version)
         return xr.open_zarr(store=self._store, group=versioned_key)
+
+    def delete(self, key: str, version: str):
+        """Remove data from the zarr store"""
+        if self._mode == "r":
+            raise ValueError("Cannot delete from a read-only zarr store")
+
+        versioned_key = self._create_key(key=key, version=version)
+        del self._store[versioned_key]
+
+    def delete_multiple(self, keys: List[str]):
+        """Remove multiple keys from the zarr store"""
+        for key in keys:
+            del self._store[key]
 
     def latest_keys(self):
         """Return the latest keys in the store"""
@@ -180,15 +199,6 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
     def update_multiple(self, datasets: Dict[str, xr.Dataset]):
         """Update multiple xr.Datasets in the zarr store."""
         pass
-
-    def delete(self, key: str):
-        """Remove data from the zarr store"""
-        del self._store[key]
-
-    def delete_multiple(self, keys: list[str]):
-        """Remove multiple keys from the zarr store"""
-        for key in keys:
-            del self._store[key]
 
     def hash(self, data: str) -> str:
         """Hash the data at the given key"""
