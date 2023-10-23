@@ -179,7 +179,7 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.store.spec import get_chunks
+        # from openghg.store.spec import get_chunks
         from openghg.util import daterange_overlap, timestamp_now
         from xarray import concat as xr_concat
 
@@ -210,6 +210,7 @@ class Datasource:
         date_keys = self._data_keys[self._latest_version]["keys"] if self._data_keys else []
 
         # TODO - add sorting after checks
+        # QUESTION - how do we want to handle this, provide an option to sort or not?
         data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
 
         # If we have data already stored in the Datasource
@@ -273,14 +274,7 @@ class Datasource:
 
                         # TODO - zarr/dask - is there a better way of doing this?
                         # We sorted and drop the dupes
-                        # combined = combined.sortby(time_coord).drop_duplicates(time_coord)
-
-                        # TODO - remove this, can we drop dupes without loading everything into memory?
-                        # unique, index, count = np_unique(combined.time, return_counts=True, return_index=True)
-                        # We may have overlapping dates but not duplicate times
-                        # if unique[count > 1].size > 0:
-                        #     logger.info("Dropping measurements at duplicate timestamps")
-                        #     combined = combined.isel(time=index)
+                        combined = combined.sortby(time_coord).drop_duplicates(time_coord)
 
                         # TODO: May need to find a way to find period for *last point* rather than *current point*
                         # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
