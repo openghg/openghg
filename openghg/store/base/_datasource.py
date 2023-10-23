@@ -148,7 +148,13 @@ class Datasource:
         self.add_metadata(metadata=metadata, skip_keys=skip_keys)
 
         if "time" in data.coords:
-            return self.add_timed_data(data=data, data_type=data_type, if_exists=if_exists)
+            return self.add_timed_data(
+                data=data,
+                data_type=data_type,
+                sort=sort,
+                drop_duplicates=drop_duplicates,
+                if_exists=if_exists,
+            )
         else:
             raise NotImplementedError()
 

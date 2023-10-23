@@ -19,11 +19,10 @@ class ObsData:
 
     def __init__(self, uuid: str, version: str, metadata: Dict) -> None:
         self._bucket = metadata["object_store"]
-        self._uuid = uuid
         self._version = version
-        self.metadata = metadata
         self._memory_store = {}
         self._data = None
+        self.metadata = metadata
         # We'll use this to open the zarr store as a dataset
         # If the user wants to select data by a daterange then it's easy to just copy the daterange keys that match
         # the dates the user has requested. Nothing is copied from disk until the user requests it.

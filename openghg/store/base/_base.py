@@ -190,11 +190,11 @@ class BaseStore:
             datasource.add_data(
                 metadata=meta_copy,
                 data=dataset,
+                sort=sort,
+                drop_duplicates=drop_duplicates,
                 skip_keys=skip_keys,
                 if_exists=if_exists,
                 data_type=data_type,
-                sort=sort,
-                drop_duplicates=drop_duplicates,
             )
 
             # Save Datasource to object store

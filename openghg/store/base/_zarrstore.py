@@ -82,52 +82,24 @@ class ZarrStore(ABC):
         pass
 
 
-# TODO - does this need to inherit this really?
-class LocalZarrStore(zarr.storage.NestedDirectoryStore):
-    # These should only be stored when the instance is created
-    # and not be loaded in or stored to the object store
-    # TODO - happy for this name to change
-    # Maybe just replace this with store if we're only storing a few things?
-    # TODO - if we start storing hashes of datasets then we'll need to store them in here or in the Datasource?
-    DO_NOT_STORE = ["_bucket", "_key", "_store", "_pop_keys", "_mode", "_memory_store"]
+class LocalZarrStore:
     _store_root = "zarr_data"
 
     def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
-        """ """
-        store_path = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/zarrstore"
-        key = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/metadata"
-
-        super().__init__(store_path)
-
-        # Store hashes of Datasets added to the store for easy checking
-        self._hashes = {}
-
-        # Does this need to be stored? Maybe for dataset hashes?
-        if exists(bucket=bucket, key=key):
-            result = get_object_from_json(bucket, key=key)
-            self.__dict__.update(result)
+        store_path = f"{bucket}/data/{datasource_uuid}/zarr"
 
         self._mode = mode
         self._bucket = bucket
-        self._key = key
-        # TODO - move this to the objectstore submodule
-        self._key = f"{bucket}/{LocalZarrStore._store_root}/{datasource_uuid}/metadata"
         self._store = zarr.storage.NestedDirectoryStore(store_path)
         self._pop_keys = collections.deque()
         self._memory_store = {}
 
+    def __bool__(self) -> bool:
+        return bool(self._store)
+
     def _create_key(self, key: str, version: str) -> str:
         """Create a key for the zarr store."""
         return f"{version}/{key}"
-
-    def close(self):
-        """Close object store connection.
-        This closes the metastore and writes internal metadata.
-        If an Datastore is used without a context manager
-        ("with" statement), then it must be closed manually.
-        """
-        internal_metadata = {k: v for k, v in self.__dict__.items() if k not in self.DO_NOT_STORE}
-        set_object_from_json(bucket=self._bucket, key=self._key, data=internal_metadata)
 
     def add(self, key: str, version: str, dataset: xr.Dataset):
         """Add an xr.Dataset to the zarr store."""
@@ -152,7 +124,9 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
         self._pop_keys.append((key, version))
         versioned_key = self._create_key(key=key, version=version)
         # Let's copy the data we want to pop into a memory store and return it from there
-        zarr.convenience.copy_store(source=self._store, dest=self._memory_store, source_path=versioned_key, dest_path=versioned_key)
+        zarr.convenience.copy_store(
+            source=self._store, dest=self._memory_store, source_path=versioned_key, dest_path=versioned_key
+        )
         self.delete(key=key, version=version)
         return xr.open_zarr(store=self._memory_store, group=versioned_key, consolidated=False)
 
@@ -176,9 +150,11 @@ class LocalZarrStore(zarr.storage.NestedDirectoryStore):
 
     def latest_keys(self):
         """Return the latest keys in the store"""
+        raise NotImplementedError
         return self.version_keys(version="latest")
 
     def version_keys(self, version: str):
+        raise NotImplementedError
         return [k for k in list(self._store.keys()) if version in k]
 
     def add_multiple(self, version: str, datasets: Dict[str, xr.Dataset]):
