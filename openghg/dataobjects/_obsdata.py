@@ -1,19 +1,9 @@
-from collections import abc
-from json import dumps
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-from typing import Any, Dict, Iterator, Union, Optional
+from typing import Any, Dict, Iterator, Optional
 from openghg.plotting import plot_timeseries as general_plot_timeseries
 import plotly.graph_objects as go
-import xarray as xr
-
-from typing import Dict
-
-# from openghg.objectstore import
 from openghg.store.base import LocalZarrStore
+import xarray as xr
 import zarr
-
-# from ._basedata import _BaseData
 
 __all__ = ["ObsData"]
 
@@ -25,7 +15,6 @@ class ObsData:
         uuid: UUID of Datasource
         version: Version of data requested from Datasrouce
         metadata: Dictionary of metadata
-        compute: Open zarr store as dataset
     """
 
     def __init__(self, uuid: str, version: str, metadata: Dict) -> None:
@@ -35,15 +24,11 @@ class ObsData:
         self.metadata = metadata
         self._memory_store = {}
         self._data = None
-
-        # Add the data to the memory store
-        # TODO - make this a generic zarr store
-        with LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r") as zarr_store:
-            zarr.convenience.copy_store(
-                source=zarr_store,
-                dest=self._memory_store,
-                source_path=version,
-            )
+        # We'll use this to open the zarr store as a dataset
+        # If the user wants to select data by a daterange then it's easy to just copy the daterange keys that match
+        # the dates the user has requested. Nothing is copied from disk until the user requests it.
+        self._memory_stores = []
+        self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
 
     def __bool__(self) -> bool:
         return bool(self._memory_store)
@@ -84,21 +69,27 @@ class ObsData:
         return 1
 
     def __eq__(self, other: object) -> bool:
-        raise NotImplementedError
         if not isinstance(other, ObsData):
             return NotImplemented
 
         return self.data.equals(other.data) and self.metadata == other.metadata
 
-    def data(self, start_date: Optional[str], end_date: Optional[str]) -> xr.Dataset:
-        # get the date keys
+    @property
+    def data(self, start_date: Optional[str] = None, end_date: Optional[str] = None) -> xr.Dataset:
         # TODO - implement time selection of data
-        date_keys = self.metadata["versions"][self._version]["keys"]
-        fileset = [xr.open_zarr(store=self._memory_store, group=key) for key in date_keys]
-        ds = xr.open_mfdataset()
-        # combine them into a single dataset
+        if not self._memory_stores:
+            date_keys = self.metadata["versions"][self._version]["keys"]
+            for daterange in date_keys:
+                store = {}
+                zarr.copy_store(
+                    source=self._zarrstore, dest=store, source_path=f"{self._version}/{daterange}"
+                )
+                self._memory_stores.append(store)
 
-        return xr.open_zarr(store=self._memory_store, consolidated=False)
+        if self._data is None:
+            self._data = xr.open_mfdataset(self._memory_stores, engine="zarr", combine="by_coords")
+
+        return self._data
 
     def plot_timeseries(
         self,
