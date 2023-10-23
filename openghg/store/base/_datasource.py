@@ -115,6 +115,8 @@ class Datasource:
         metadata: Dict,
         data: xr.Dataset,
         data_type: str,
+        sort: bool,
+        drop_duplicates: bool,
         skip_keys: Optional[List] = None,
         if_exists: str = "default",
     ) -> None:
@@ -125,6 +127,8 @@ class Datasource:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
             data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
+            sort: Sort data in time dimension
+            drop_duplicates: Drop duplicate timestamps, keeping the first value
             skip_keys: Keys to not standardise as lowercase
             if_exists: What to do if existing data is present.
                 - "default" - checks new and current data for timeseries overlap
@@ -161,7 +165,12 @@ class Datasource:
         return version_str
 
     def add_timed_data(
-        self, data: xr.Dataset, data_type: str, if_exists: str = "default", sort: bool = True
+        self,
+        data: xr.Dataset,
+        data_type: str,
+        sort: bool,
+        drop_duplicates: bool,
+        if_exists: str = "default",
     ) -> None:
         """Add data to this Datasource
 
@@ -169,17 +178,17 @@ class Datasource:
             data: An xarray.Dataset
             data_type: Name of data_type defined by
                 openghg.store.spec.define_data_types()
+            sort: If True sort by time, may load all data into memory
+            drop_duplicates: If True drop duplicates, keeping first found duplicate
             if_exists: What to do if existing data is present.
                 - "default" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "replace" - replace and insert new data into current timeseries
-            sort: If True sort by time, may load all data into memory
         Returns:
             None
         """
-        # from openghg.store.spec import get_chunks
         from openghg.util import daterange_overlap, timestamp_now
         from xarray import concat as xr_concat
 
@@ -209,9 +218,13 @@ class Datasource:
         # We'll use this to store the dates covered by this version of the data
         date_keys = self._data_keys[self._latest_version]["keys"] if self._data_keys else []
 
-        # TODO - add sorting after checks
-        # QUESTION - how do we want to handle this, provide an option to sort or not?
-        data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
+        # TODO - test to see if this chaining does help
+        if sort and drop_duplicates:
+            data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
+        elif sort:
+            data = data.sortby(time_coord)
+        elif drop_duplicates:
+            data = data.drop_duplicates(time_coord, keep="first")
 
         # If we have data already stored in the Datasource
         if date_keys:
@@ -274,7 +287,12 @@ class Datasource:
 
                         # TODO - zarr/dask - is there a better way of doing this?
                         # We sorted and drop the dupes
-                        combined = combined.sortby(time_coord).drop_duplicates(time_coord)
+                        if sort and drop_duplicates:
+                            combined = combined.drop_duplicates(time_coord, keep="first").sortby(time_coord)
+                        elif sort:
+                            combined = combined.sortby(time_coord)
+                        elif drop_duplicates:
+                            combined = combined.drop_duplicates(time_coord, keep="first")
 
                         # TODO: May need to find a way to find period for *last point* rather than *current point*
                         # combined_daterange = self.get_dataset_daterange_str(dataset=combined)

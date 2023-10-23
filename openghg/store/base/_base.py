@@ -103,6 +103,8 @@ class BaseStore:
         data: Dict,
         data_type: str,
         required_keys: Sequence[str],
+        sort: bool = True,
+        drop_duplicates: bool = True,
         min_keys: Optional[int] = None,
         update_keys: Optional[List] = None,
         if_exists: str = "default",
@@ -116,6 +118,8 @@ class BaseStore:
                 overwrite: If True overwrite current data stored
                 data_type: Type of data, timeseries etc
                 required_keys: Required minimum keys to lookup unique Datasource
+                sort: Sort data in time dimension
+                drop_duplicates: Drop duplicate timestamps, keeping the first value
                 min_keys: Minimum number of metadata keys needed to uniquely match a Datasource
                 if_exists: What to do if existing data is present.
                     - "default" - checks new and current data for timeseries overlap
@@ -189,6 +193,8 @@ class BaseStore:
                 skip_keys=skip_keys,
                 if_exists=if_exists,
                 data_type=data_type,
+                sort=sort,
+                drop_duplicates=drop_duplicates,
             )
 
             # Save Datasource to object store

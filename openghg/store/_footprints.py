@@ -204,7 +204,8 @@ class Footprints(BaseStore):
         save_current: Optional[bool] = None,
         overwrite: bool = False,
         force: bool = False,
-        # model_params: Optional[Dict] = None,
+        sort: bool = False,
+        drop_duplicates: bool = False,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -237,6 +238,8 @@ class Footprints(BaseStore):
                 If None, this will depend on if_exists input ("default" -> True), (other -> False)
             overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
             force: Force adding of data even if this is identical to data stored.
+            sort: Sort data in time dimension. We recommend NOT sorting footprint data unless necessary.
+            drop_duplicates: Drop duplicate timestamps, keeping the first value
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -245,7 +248,7 @@ class Footprints(BaseStore):
             infer_date_range,
             update_zero_dim,
         )
-        from openghg.store.spec import get_chunks_footprint
+
         from openghg.util import (
             clean_string,
             format_inlet,
@@ -286,12 +289,6 @@ class Footprints(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-        # fp = Footprints.load()
-
-        # # Load in the metadata store
-        # metastore = load_metastore(key=fp._metakey)
-
         file_hash = hash_file(filepath=filepath)
         if file_hash in self._file_hashes and not force:
             logger.warning(
@@ -300,16 +297,16 @@ class Footprints(BaseStore):
             )
             return {}
 
-        # Open the dataset
-        # chunk_sizes = get_chunks_footprint()
         fp_data = xr.open_dataset(filepath, chunks=chunks)
-        # .chunk(chunk_sizes)
 
         if species == "co2":
             # Expect co2 data to have high time resolution
             if not high_time_resolution:
                 logger.info("Updating high_time_resolution to True for co2 data")
                 high_time_resolution = True
+
+            if sort:
+                logger.info("Sorting high time resolution data is very memory intensive, we recommend not sorting.")
 
         if short_lifetime and not species:
             raise ValueError(
@@ -425,6 +422,8 @@ class Footprints(BaseStore):
             new_version=new_version,
             data_type=data_type,
             required_keys=required,
+            sort=sort,
+            drop_duplicates=drop_duplicates,
         )
 
         # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
@@ -433,11 +432,10 @@ class Footprints(BaseStore):
         #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
         # )
 
-        # fp.add_datasources(uuids=datasource_uuids, data=footprint_data, metastore=metastore)
-
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
 
+        # Ensure we close the file so any memory used is freed
         fp_data.close()
 
         return datasource_uuids

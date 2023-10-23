@@ -405,6 +405,8 @@ def standardise_footprint(
     force: bool = False,
     high_spatial_resolution: bool = False,
     high_time_resolution: bool = False,
+    sort: bool = False,
+    drop_duplicates: bool = False,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -437,6 +439,8 @@ def standardise_footprint(
             If None, this will depend on if_exists input ("default" -> True), (other -> False)
         overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
         force: Force adding of data even if this is identical to data stored.
+        sort: Sort data in by time
+        drop_duplicates: Drop duplicate timestamps, keeping the first value
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -498,6 +502,8 @@ def standardise_footprint(
             if_exists=if_exists,
             save_current=save_current,
             force=force,
+            sort=sort,
+            drop_duplicates=drop_duplicates,
         )
 
 

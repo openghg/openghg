@@ -42,7 +42,6 @@ else:
         get_writable_bucket,
         get_writable_buckets,
         get_readable_buckets,
-        # open_zarr_store,
     )
 
 from ._encoding import bytes_to_string, datetime_to_datetime, get_datetime_now, string_to_bytes
