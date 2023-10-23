@@ -20,7 +20,6 @@ class ObsData:
     def __init__(self, uuid: str, version: str, metadata: Dict) -> None:
         self._bucket = metadata["object_store"]
         self._version = version
-        self._memory_store = {}
         self._data = None
         self.metadata = metadata
         # We'll use this to open the zarr store as a dataset
@@ -30,7 +29,7 @@ class ObsData:
         self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
 
     def __bool__(self) -> bool:
-        return bool(self._memory_store)
+        return bool(self._zarrstore)
 
     # Compatability layer for legacy format - mimicking the behaviour of a dictionary
     # Previous format expected a dictionary containing the site code and data
@@ -78,15 +77,8 @@ class ObsData:
         # TODO - implement time selection of data
         if not self._memory_stores:
             date_keys = self.metadata["versions"][self._version]["keys"]
-            for daterange in date_keys:
-                store = {}
-                zarr.copy_store(
-                    source=self._zarrstore, dest=store, source_path=f"{self._version}/{daterange}"
-                )
-                self._memory_stores.append(store)
-
-        if self._data is None:
-            self._data = xr.open_mfdataset(self._memory_stores, engine="zarr", combine="by_coords")
+            self._memory_stores = self._zarrstore.copy_to_stores(keys=date_keys, version=self._version)
+            self._data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords")
 
         return self._data
 

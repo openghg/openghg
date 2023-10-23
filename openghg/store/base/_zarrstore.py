@@ -2,7 +2,7 @@
 So this is a prototype for using zarr with the
 """
 from __future__ import annotations
-from typing import Dict, Literal, List, Union, Optional, MutableMapping
+from typing import Dict, Literal, Iterable, Generator, List, Union, Optional, MutableMapping
 from types import TracebackType
 from pydantic import BaseModel
 from numcodecs import Blosc
@@ -83,8 +83,6 @@ class ZarrStore(ABC):
 
 
 class LocalZarrStore:
-    _store_root = "zarr_data"
-
     def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
         store_path = f"{bucket}/data/{datasource_uuid}/zarr"
 
@@ -94,12 +92,25 @@ class LocalZarrStore:
         self._pop_keys = collections.deque()
         self._memory_store = {}
 
-    def __bool__(self) -> bool:
-        return bool(self._store)
-
     def _create_key(self, key: str, version: str) -> str:
         """Create a key for the zarr store."""
         return f"{version}/{key}"
+
+    def keys(self) -> Generator:
+        """Keys of data stored in the zarr store.
+
+        Returns:
+            Generator: Generator object
+        """
+        return self._store.keys()
+
+    def close(self) -> None:
+        """Close the zarr store.
+
+        Returns:
+            None
+        """
+        self._store.close()
 
     def add(self, key: str, version: str, dataset: xr.Dataset):
         """Add an xr.Dataset to the zarr store."""
@@ -129,6 +140,26 @@ class LocalZarrStore:
         )
         self.delete(key=key, version=version)
         return xr.open_zarr(store=self._memory_store, group=versioned_key, consolidated=False)
+
+    def copy_to_stores(self, keys: Iterable, version: str) -> List[Dict]:
+        """Copies the compressed data from the filesystem store to a list of in-memory stores.
+        This preserves the compression and chunking of the data and creates a list
+        that can be opened as a single dataset.
+
+        Args:
+            keys: List of keys
+            version: Version of data to copy
+        Returns:
+            List: List of dictionaries
+        """
+        memory_stores = []
+        for daterange_key in keys:
+            key = self._create_key(key=daterange_key, version=version)
+            store = {}
+            zarr.copy_store(source=self._store, dest=store, source_path=key)
+            memory_stores.append(store)
+
+        return memory_stores
 
     def get(self, key: str, version: str) -> xr.Dataset:
         """Get an xr.Dataset from the zarr store."""

@@ -286,11 +286,6 @@ class Datasource:
                             # Should now be able to concatenate successfully
                             combined = xr_concat((ex, new), dim=time_coord)
 
-                            # TODO - add sorting after running checks
-                            # combined = combined.drop_duplicates(dim=time_coord, keep="first").sortby(
-                            #     time_coord
-                            # )
-
                         # TODO - zarr/dask - is there a better way of doing this?
                         # We sorted and drop the dupes
                         if sort and drop_duplicates:
@@ -702,7 +697,6 @@ class Datasource:
 
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self.key(), data=internal_metadata)
-        self._zarr_store.close()
 
     def get_latest_datekeys(self) -> List[str]:
         """Get the latest date keys for this Datasource
