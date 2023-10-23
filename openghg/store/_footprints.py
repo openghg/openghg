@@ -301,8 +301,9 @@ class Footprints(BaseStore):
             return {}
 
         # Open the dataset
-        chunk_sizes = get_chunks_footprint()
-        fp_data = xr.open_dataset(filepath, chunks=chunks).chunk(chunk_sizes)
+        # chunk_sizes = get_chunks_footprint()
+        fp_data = xr.open_dataset(filepath, chunks=chunks)
+        # .chunk(chunk_sizes)
 
         if species == "co2":
             # Expect co2 data to have high time resolution

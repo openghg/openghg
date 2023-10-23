@@ -121,9 +121,9 @@ class SearchResults:
         """
         if dataframe is not None:
             uuids = dataframe["uuid"].to_list()
-            return self._retrieve_by_uuid(uuids=uuids, version=version, compute=compute)
+            return self._retrieve_by_uuid(uuids=uuids, version=version)
         else:
-            return self._retrieve_by_term(version=version, compute=compute, **kwargs)
+            return self._retrieve_by_term(version=version, **kwargs)
 
     def retrieve_all(
         self,
@@ -141,7 +141,7 @@ class SearchResults:
         Returns:
             ObsData / List[ObsData]: ObsData object(s)
         """
-        return self._retrieve_by_uuid(uuids=self.metadata.keys(), version=version, compute=compute)
+        return self._retrieve_by_uuid(uuids=self.metadata.keys(), version=version)
 
     def uuids(self) -> List:
         """Return the UUIDs of the found data
@@ -152,7 +152,7 @@ class SearchResults:
         return list(self.metadata.keys())
 
     def _retrieve_by_term(
-        self, version: str, compute: bool, sort: bool, elevate_inlet: bool, **kwargs: Any
+        self, version: str, sort: bool, elevate_inlet: bool, **kwargs: Any
     ) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from the object store by search term. This function scans the
         metadata of the retrieved results, retrieves the UUID associated with that data,
@@ -193,11 +193,9 @@ class SearchResults:
                 uuids.add(uid)
 
         # Now we can retrieve the data using the UUIDs
-        return self._retrieve_by_uuid(uuids=list(uuids), version=version, compute=compute)
+        return self._retrieve_by_uuid(uuids=list(uuids), version=version)
 
-    def _retrieve_by_uuid(
-        self, uuids: Iterable, version: str, compute: bool
-    ) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_uuid(self, uuids: Iterable, version: str) -> Union[ObsData, List[ObsData]]:
         """Internal retrieval function that uses the passed in UUIDs to retrieve
         the keys from the key_data dictionary, pull the data from the object store,
         create ObsData object(s) and return the result.
@@ -210,7 +208,13 @@ class SearchResults:
         results = []
         for uuid in uuids:
             metadata = self.metadata[uuid]
-            results.append(ObsData(uuid=uuid, version=version, metadata=metadata, compute=compute))
+            if version == "latest":
+                version = metadata["latest_version"]
+            else:
+                if version not in metadata["versions"]:
+                    raise ValueError(f"Invalid version {version} for UUID {uuid}")
+
+            results.append(ObsData(uuid=uuid, version=version, metadata=metadata))
 
         if len(results) == 1:
             return results[0]

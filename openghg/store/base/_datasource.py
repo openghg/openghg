@@ -47,7 +47,7 @@ class Datasource:
         else:
             self._uuid = str(uuid4())
             self._creation_datetime = str(timestamp_now())
-            self._metadata: Dict[str, str] = {}
+            self._metadata: Dict[str, Union[str, Dict]] = {}
             self._start_date = None
             self._end_date = None
             self._status: Optional[Dict] = None
@@ -64,6 +64,8 @@ class Datasource:
         self._bucket = bucket
         # Should we create a new version for the data we're adding
         self._new_version = new_version
+
+        self.update_daterange()
 
     def __enter__(self):
         return self
@@ -187,9 +189,6 @@ class Datasource:
 
         # Ensure data is in time order
         time_coord = "time"
-        # TODO - do we need to do this sort?
-        if sort:
-            data = data.sortby(time_coord)
 
         new_data = {self.get_representative_daterange_str(data, period=period): data}
         daterange_str = self.get_representative_daterange_str(dataset=data, period=period)
@@ -209,6 +208,9 @@ class Datasource:
 
         # We'll use this to store the dates covered by this version of the data
         date_keys = self._data_keys[self._latest_version]["keys"] if self._data_keys else []
+
+        # TODO - add sorting after checks
+        data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
 
         # If we have data already stored in the Datasource
         if date_keys:
@@ -264,8 +266,14 @@ class Datasource:
                             # Should now be able to concatenate successfully
                             combined = xr_concat((ex, new), dim=time_coord)
 
+                            # TODO - add sorting after running checks
+                            # combined = combined.drop_duplicates(dim=time_coord, keep="first").sortby(
+                            #     time_coord
+                            # )
+
                         # TODO - zarr/dask - is there a better way of doing this?
-                        # combined = combined.sortby(time_coord)
+                        # We sorted and drop the dupes
+                        # combined = combined.sortby(time_coord).drop_duplicates(time_coord)
 
                         # TODO - remove this, can we drop dupes without loading everything into memory?
                         # unique, index, count = np_unique(combined.time, return_counts=True, return_index=True)
@@ -287,9 +295,9 @@ class Datasource:
                     combined_datasets = self._clip_daterange_label(combined_datasets)
 
                     for key, dataset in combined_datasets.items():
-                        chunks = get_chunks(data_type=data_type)
-                        logger.info(f"Rechunking {data_type} data using: {chunks}")
-                        dataset = dataset.chunk(chunks)
+                        # chunks = get_chunks(data_type=data_type)
+                        # logger.info(f"Rechunking {data_type} data using: {chunks}")
+                        # dataset = dataset.chunk(chunks)
                         self._zarr_store.add(key=key, version=version_str, dataset=dataset)
 
                     # Store the updated dateranges
@@ -305,7 +313,7 @@ class Datasource:
                     )
             else:
                 date_keys.append(daterange_str)
-                self._zarr_store.add_multiple(version=version_str, datasets=new_data)
+                self._zarr_store.add(key=daterange_str, version=version_str, dataset=data)
         else:
             date_keys.append(daterange_str)
             self._zarr_store.add(key=daterange_str, version=version_str, dataset=data)
@@ -313,32 +321,30 @@ class Datasource:
             self._status["current_data"] = False
             self._status["overlapping"] = False
 
-        # Should we do this?
-        start = data.time.min().values
-        end = data.time.max().values
-
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
-        # self.update_daterange()
-        # Store the start and end date of the most recent data
-        # start, end = self.daterange()
-        self.add_metadata_key(key="start_date", value=str(start))
-        self.add_metadata_key(key="end_date", value=str(end))
 
-        timestmap_str_now = str(timestamp_now())
         self._status["updates"] = True
         self._status["if_exists"] = if_exists
         self._latest_version = version_str
+
         # We'll store the daterange for this version of the data and update the latest to the current version
+        timestamp_str_now = str(timestamp_now())
         self._data_keys[version_str]["keys"] = date_keys
-        self._data_keys[version_str]["timestamp"] = timestmap_str_now
-
+        self._data_keys[version_str]["timestamp"] = timestamp_str_now
         self.add_metadata_key(key="latest_version", value=version_str)
-        self.add_metadata_key(key="timestamp", value=timestmap_str_now)
+        self.add_metadata_key(key="timestamp", value=timestamp_str_now)
 
-        # TODO - do  we need these?
+        self.update_daterange()
+        # Store the start and end date of the most recent data
+        start, end = self.daterange()
+        self.add_metadata_key(key="start_date", value=str(start))
+        self.add_metadata_key(key="end_date", value=str(end))
+        # Store the version data, it's less information now and we can then present version data to the users
+        self._metadata["versions"] = self._data_keys
+
         self._latest_version = version_str
-        self._last_updated = timestmap_str_now
+        self._last_updated = timestamp_str_now
 
     def delete_all_data(self) -> None:
         """Delete the data associated with this Datasource
@@ -672,6 +678,8 @@ class Datasource:
             "_bucket",
             "_status",
             "_new_version",
+            "_start_date",
+            "_end_date",
         }
 
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
@@ -741,6 +749,9 @@ class Datasource:
             None
         """
         from openghg.util import split_daterange_str
+
+        if not self._data_keys:
+            return
 
         date_keys = sorted(self._data_keys[self._latest_version]["keys"])
 

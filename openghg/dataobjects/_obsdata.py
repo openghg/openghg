@@ -28,30 +28,22 @@ class ObsData:
         compute: Open zarr store as dataset
     """
 
-    def __init__(self, uuid: str, version: str, metadata: Dict, compute: bool = False) -> None:
+    def __init__(self, uuid: str, version: str, metadata: Dict) -> None:
         self._bucket = metadata["object_store"]
         self._uuid = uuid
-        self._compute = compute
-        self.version = version
+        self._version = version
         self.metadata = metadata
-        self.data = False
         self._memory_store = {}
+        self._data = None
 
-        # Retrieve the data from the memory store
-        # lazy_zarr_store = open_zarr_store(bucket=self._bucket, datasource_uuid=self._uuid)
-        self._lazy_zarr_store = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
-        # TODO - do we even need to do this?
-        # Copy the data we want to the memory store
-        zarr.convenience.copy_store(
-            source=self._lazy_zarr_store,
-            dest=self._memory_store,
-            source_path=version,
-            dest_path=version,
-            if_exists="replace",
-        )
-
-        if compute:
-            self.compute()
+        # Add the data to the memory store
+        # TODO - make this a generic zarr store
+        with LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r") as zarr_store:
+            zarr.convenience.copy_store(
+                source=zarr_store,
+                dest=self._memory_store,
+                source_path=version,
+            )
 
     def __bool__(self) -> bool:
         return bool(self._memory_store)
@@ -98,8 +90,15 @@ class ObsData:
 
         return self.data.equals(other.data) and self.metadata == other.metadata
 
-    def compute(self) -> None:
-        self.data = xr.open_zarr(store=self._memory_store, group=self.version)
+    def data(self, start_date: Optional[str], end_date: Optional[str]) -> xr.Dataset:
+        # get the date keys
+        # TODO - implement time selection of data
+        date_keys = self.metadata["versions"][self._version]["keys"]
+        fileset = [xr.open_zarr(store=self._memory_store, group=key) for key in date_keys]
+        ds = xr.open_mfdataset()
+        # combine them into a single dataset
+
+        return xr.open_zarr(store=self._memory_store, consolidated=False)
 
     def plot_timeseries(
         self,
