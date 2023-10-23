@@ -2,23 +2,17 @@
 So this is a prototype for using zarr with the
 """
 from __future__ import annotations
-from typing import Dict, Literal, Iterable, Generator, List, Union, Optional, MutableMapping
-from types import TracebackType
-from pydantic import BaseModel
-from numcodecs import Blosc
+from abc import ABC, abstractmethod
 import collections
-from openghg.objectstore import set_object_from_json, exists, get_object_from_json
+import logging
+from typing import Dict, Literal, Iterable, Generator, List, Union, MutableMapping
 import xarray as xr
 import zarr
-import logging
-from abc import ABC, abstractmethod
 
 from openghg.types import KeyExistsError
 
 logger = logging.getLogger("openghg.store.base")
-logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
-
-# NOTE - this is a prototype
+logger.setLevel(logging.DEBUG)
 
 StoreLike = Union[zarr.storage.BaseStore, MutableMapping]
 
@@ -112,8 +106,16 @@ class LocalZarrStore:
         """
         self._store.close()
 
-    def add(self, key: str, version: str, dataset: xr.Dataset):
-        """Add an xr.Dataset to the zarr store."""
+    def add(self, key: str, version: str, dataset: xr.Dataset) -> None:
+        """Add an xr.Dataset to the zarr store.
+
+        Args:
+            key: Key to add data under
+            version: Version of data to add
+            dataset: xr.Dataset to add
+        Returns:
+            None
+        """
         from openghg.store.spec import get_zarr_encoding
 
         if self._mode == "r":
@@ -128,7 +130,14 @@ class LocalZarrStore:
         dataset.to_zarr(store=self._store, group=versioned_key, encoding=encoding)
 
     def pop(self, key: str, version: str) -> xr.Dataset:
-        """Pop (but not actually remove, just add to a list to be removed) some data from the store."""
+        """Pop some data from the store.
+
+        Args:
+            key: Key to pop data
+            version: Version of data
+        Returns:
+            Dataset: Dataset popped from the store
+        """
         if self._mode == "r":
             raise ValueError("Cannot pop from a read-only zarr store")
 
@@ -162,44 +171,50 @@ class LocalZarrStore:
         return memory_stores
 
     def get(self, key: str, version: str) -> xr.Dataset:
-        """Get an xr.Dataset from the zarr store."""
+        """Get an xr.Dataset from the zarr store.
+
+        Args:
+            key: Key of data in store
+            version: Version of data
+        Returns:
+            Dataset: Dataset from the zarr store ̰
+        """
         versioned_key = self._create_key(key=key, version=version)
         return xr.open_zarr(store=self._store, group=versioned_key)
 
-    def delete(self, key: str, version: str):
-        """Remove data from the zarr store"""
+    def delete(self, key: str, version: str) -> None:
+        """Remove data from the zarr store
+
+        Args:
+            key: Key of data in store
+            version: Version of data
+        Returns:
+            None
+        """
         if self._mode == "r":
             raise ValueError("Cannot delete from a read-only zarr store")
 
         versioned_key = self._create_key(key=key, version=version)
         del self._store[versioned_key]
 
-    def delete_multiple(self, keys: List[str]):
-        """Remove multiple keys from the zarr store"""
-        for key in keys:
-            del self._store[key]
+    def update(self, key: str, version: str, dataset: xr.Dataset) -> None:
+        """Update the data at the given key.
 
-    def latest_keys(self):
-        """Return the latest keys in the store"""
-        raise NotImplementedError
-        return self.version_keys(version="latest")
+        Args:
+            key: Key of data in store
+            version: Version of data
+        Returns:
+            None
+        """
+        if self._mode == "r":
+            raise ValueError("Cannot update a read-only zarr store")
 
-    def version_keys(self, version: str):
-        raise NotImplementedError
-        return [k for k in list(self._store.keys()) if version in k]
+        versioned_key = self._create_key(key=key, version=version)
+        if versioned_key not in self._store:
+            raise KeyError(f"Key {versioned_key} not found in zarr store")
 
-    def add_multiple(self, version: str, datasets: Dict[str, xr.Dataset]):
-        """Add multiple xr.Datasets to the zarr store."""
-        for key, dataset in datasets.items():
-            self.add(key=key, version=version, dataset=dataset)
-
-    def update(self, key: str, dataset: xr.Dataset):
-        """Update the data at the given key"""
-        pass
-
-    def update_multiple(self, datasets: Dict[str, xr.Dataset]):
-        """Update multiple xr.Datasets in the zarr store."""
-        pass
+        self.delete(key=key, version=version)
+        self.add(key=key, version=version, dataset=dataset)
 
     def hash(self, data: str) -> str:
         """Hash the data at the given key"""
@@ -211,11 +226,11 @@ class LocalZarrStore:
 
     def get_hash(self, key: str) -> str:
         """Get the hash of the data at the given key"""
-        pass
+        raise NotImplementedError
 
     def hash_equal(self, key: str, dataset: xr.Dataset) -> bool:
         """Compare the hashes of the data at the given key and the passed xr.Dataset"""
-        pass
+        raise NotImplementedError
 
     def bytes_stored(self):
         """Return the number of bytes stored in the zarr store"""

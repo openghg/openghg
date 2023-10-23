@@ -1,9 +1,8 @@
-from typing import Any, Dict, Iterator, Optional
 from openghg.plotting import plot_timeseries as general_plot_timeseries
 import plotly.graph_objects as go
 from openghg.store.base import LocalZarrStore
 import xarray as xr
-import zarr
+from typing import Any, Dict, Iterator, Optional
 
 __all__ = ["ObsData"]
 
@@ -16,7 +15,6 @@ class ObsData:
         version: Version of data requested from Datasrouce
         metadata: Dictionary of metadata
     """
-
     def __init__(self, uuid: str, version: str, metadata: Dict) -> None:
         self._bucket = metadata["object_store"]
         self._version = version
