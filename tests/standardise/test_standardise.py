@@ -427,5 +427,5 @@ def test_standardise_zep_and_add_new_section_of_january():
         inlet="10m",
         store="user",
         if_exists="replace",
-        save_current=False,
+        save_current="n",
     )

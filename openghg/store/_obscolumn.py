@@ -36,7 +36,7 @@ class ObsColumn(BaseStore):
         platform: str = "satellite",
         source_format: str = "openghg",
         if_exists: str = "default",
-        save_current: Optional[bool] = None,
+        save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
     ) -> dict:
@@ -67,8 +67,10 @@ class ObsColumn(BaseStore):
                 - "new" - just include new data and ignore previous
                 - "replace" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                If None, this will depend on if_exists input ("default" -> True), (other -> False)
-            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+                - "auto" - this will depend on if_exists input ("default" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to

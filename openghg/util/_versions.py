@@ -166,27 +166,27 @@ def show_versions(file: IO = sys.stdout) -> None:
         print(f"{k}: {stat}", file=file)
 
 
-def check_if_need_new_version(if_exists: str = "default", save_current: Optional[bool] = None) -> bool:
+def check_if_need_new_version(if_exists: str = "default", save_current: str = "auto") -> bool:
     """
     Check combination of if_exists and save_current keywords to determine
     whether a new version should be created.
 
     Output related to these parameters:
-        - if_exists="default", save_current=None
+        - if_exists="default", save_current="auto"
            - new_version=False (default) - If both values are set
-             to None, data will only be updated if there is no
+             to "auto", data will only be updated if there is no
              overlapping data. In this case we can safely write
              to the same version with no data conflict.
-        - if_exists="replace"/"new", save_current=None
+        - if_exists="replace"/"new", save_current="auto"
            - new_version=True - If a scheme has been set for the
-             combination of new and current data and save_current is None,
+             combination of new and current data and save_current is "auto",
              create a new version.
-        - if_exists="default"/"replace"/"new", save_current=True
+        - if_exists="default"/"replace"/"new", save_current="y"/"yes"
            - new_version=True - If save_current is explicitly set
-             to True, create a new version.
-        - if_exists="default"/"replace"/"new", save_current=False
+             to "y", create a new version.
+        - if_exists="default"/"replace"/"new", save_current="n"/"no"
            - new_version=False - If save_current is explicitly set
-             to False, allow previous version to be overwritten.
+             to "n", allow previous version to be overwritten.
 
     Args:
         if_exists: How to combine new and current data, if present.
@@ -195,15 +195,18 @@ def check_if_need_new_version(if_exists: str = "default", save_current: Optional
         bool: Whether new version should be created
     """
     # Determining whether a new version should be created based on inputs.
-    if if_exists == "default" and save_current is None:
+    if if_exists == "default" and save_current == "auto":
         # Add new (non-overlapping) data on the same version
         new_version = False
-    elif if_exists != "default" and save_current is None:
+    elif if_exists != "default" and save_current == "auto":
         # If data could be modified based on if_exists input
         # default to creating a new version.
         new_version = True
-    elif save_current is not None:
+    elif save_current in ["y", "yes"]:
         # Otherwise match new version to the save_current input.
-        new_version = cast(bool, save_current)
+        new_version = True
+    elif save_current in ["n", "no"]:
+        # Otherwise match new version to the save_current input.
+        new_version = False
 
     return new_version

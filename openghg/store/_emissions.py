@@ -69,7 +69,7 @@ class Emissions(BaseStore):
         chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         if_exists: str = "default",
-        save_current: Optional[bool] = None,
+        save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
     ) -> dict:
@@ -98,8 +98,10 @@ class Emissions(BaseStore):
                 - "new" - just include new data and ignore previous
                 - "replace" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                If None, this will depend on if_exists input ("default" -> True), (other -> False)
-            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+                - "auto" - this will depend on if_exists input ("default" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
@@ -197,7 +199,7 @@ class Emissions(BaseStore):
         datapath: Union[str, Path],
         database: str,
         if_exists: str = "default",
-        save_current: Optional[bool] = None,
+        save_current: str = "auto",
         overwrite: bool = False,
         **kwargs: Dict,
     ) -> Dict:
@@ -220,8 +222,10 @@ class Emissions(BaseStore):
                 - "new" - just include new data and ignore previous
                 - "replace" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                If None, this will depend on if_exists input ("default" -> True), (other -> False)
-            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+                - "auto" - this will depend on if_exists input ("default" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
             **kwargs: Inputs for underlying parser function for the database.
                 Necessary inputs will depend on the database being parsed.
 
