@@ -426,6 +426,6 @@ def test_standardise_zep_and_add_new_section_of_january():
         model="NAME",
         inlet="10m",
         store="user",
-        if_exists="replace",
+        if_exists="combine",
         save_current="n",
     )

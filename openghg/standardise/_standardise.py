@@ -82,7 +82,7 @@ def standardise_surface(
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
              - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
@@ -247,7 +247,7 @@ def standardise_column(
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
              - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
@@ -338,7 +338,7 @@ def standardise_bc(
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
              - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
@@ -440,7 +440,7 @@ def standardise_footprint(
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
              - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
@@ -550,7 +550,7 @@ def standardise_flux(
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
              - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
              - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
@@ -640,7 +640,7 @@ def standardise_eulerian(
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version

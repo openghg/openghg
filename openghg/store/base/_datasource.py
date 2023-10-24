@@ -135,7 +135,7 @@ class Datasource:
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
         Returns:
             None
         """
@@ -191,7 +191,7 @@ class Datasource:
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
         Returns:
             None
         """
@@ -252,7 +252,7 @@ class Datasource:
                 # We only want this key for a new version
                 date_keys = [daterange_str]
             elif overlapping:
-                if if_exists == "replace":
+                if if_exists == "combine":
                     combined_datasets = {}
                     for existing_daterange, new_daterange in overlapping:
                         ex = self._zarr_store.pop(key=existing_daterange, version=self._latest_version)

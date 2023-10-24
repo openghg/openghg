@@ -177,14 +177,14 @@ def check_if_need_new_version(if_exists: str = "auto", save_current: str = "auto
              to "auto", data will only be updated if there is no
              overlapping data. In this case we can safely write
              to the same version with no data conflict.
-        - if_exists="replace"/"new", save_current="auto"
+        - if_exists="combine"/"new", save_current="auto"
            - new_version=True - If a scheme has been set for the
              combination of new and current data and save_current is "auto",
              create a new version.
-        - if_exists="auto"/"replace"/"new", save_current="y"/"yes"
+        - if_exists="auto"/"combine"/"new", save_current="y"/"yes"
            - new_version=True - If save_current is explicitly set
              to "y", create a new version.
-        - if_exists="auto"/"replace"/"new", save_current="n"/"no"
+        - if_exists="auto"/"combine"/"new", save_current="n"/"no"
            - new_version=False - If save_current is explicitly set
              to "n", allow previous version to be overwritten.
 

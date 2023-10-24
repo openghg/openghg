@@ -31,7 +31,7 @@ def assign_data(
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             new_version: Create a new version for the data and save current
                 data to a previous version.
         Returns:

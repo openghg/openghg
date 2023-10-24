@@ -22,7 +22,7 @@ class _BaseData:
         # lazy_zarr_store = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
         # Copy the data we want to the memory store
         # zarr.convenience.copy_store(
-        #     source=lazy_zarr_store, dest=self._memory_store, source_path=version, if_exists="replace"
+        #     source=lazy_zarr_store, dest=self._memory_store, source_path=version, if_exists="combine"
         # )
 
     def __bool__(self) -> bool:

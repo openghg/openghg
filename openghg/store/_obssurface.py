@@ -155,7 +155,7 @@ class ObsSurface(BaseStore):
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
                 - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
                 - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
@@ -529,7 +529,7 @@ class ObsSurface(BaseStore):
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             overwrite: Deprecated. This will use options for if_exists="new".
             required_metakeys: Keys in the metadata we should use to store this metadata in the object store
                 if None it defaults to:
