@@ -13,7 +13,7 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import List, IO, Union, Tuple, Optional, cast
+from typing import List, IO, Union, Tuple
 
 __all__ = ["show_versions", "check_if_need_new_version"]
 

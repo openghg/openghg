@@ -308,7 +308,9 @@ class Footprints(BaseStore):
                 high_time_resolution = True
 
             if sort:
-                logger.info("Sorting high time resolution data is very memory intensive, we recommend not sorting.")
+                logger.info(
+                    "Sorting high time resolution data is very memory intensive, we recommend not sorting."
+                )
 
         if short_lifetime and not species:
             raise ValueError(

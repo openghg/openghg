@@ -2,7 +2,7 @@
 
 """
 import logging
-from typing import Dict, Optional
+from typing import Dict
 
 
 __all__ = ["assign_data"]
