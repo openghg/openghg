@@ -68,7 +68,7 @@ class Emissions(BaseStore):
         period: Optional[Union[str, tuple]] = None,
         chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
-        if_exists: str = "default",
+        if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
@@ -92,13 +92,13 @@ class Emissions(BaseStore):
                 - tuple of (value, unit) as would be passed to pandas.Timedelta function
             continuous: Whether time stamps have to be continuous.
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
                 - "replace" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                - "auto" - this will depend on if_exists input ("default" -> False), (other -> True)
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
                 - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
@@ -118,15 +118,15 @@ class Emissions(BaseStore):
         source = clean_string(source)
         domain = clean_string(domain)
 
-        if overwrite and if_exists == "default":
+        if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
             )
             if_exists = "new"
 
-        # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "default":
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)
@@ -198,7 +198,7 @@ class Emissions(BaseStore):
         self,
         datapath: Union[str, Path],
         database: str,
-        if_exists: str = "default",
+        if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         **kwargs: Dict,
@@ -216,13 +216,13 @@ class Emissions(BaseStore):
             datapath: Path to local copy of database archive (for now)
             database: Name of database
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
                 - "replace" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                - "auto" - this will depend on if_exists input ("default" -> False), (other -> True)
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
                 - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
@@ -235,7 +235,7 @@ class Emissions(BaseStore):
         from openghg.types import EmissionsDatabases
         from openghg.util import load_emissions_database_parser, check_if_need_new_version
 
-        if overwrite and if_exists == "default":
+        if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."

@@ -35,7 +35,7 @@ class EulerianModel(BaseStore):
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         setup: Optional[str] = None,
-        if_exists: str = "default",
+        if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
@@ -50,13 +50,13 @@ class EulerianModel(BaseStore):
             end_date: End date (exclusive) associated with model run
             setup: Additional setup details for run
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
                 - "replace" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                - "auto" - this will depend on if_exists input ("default" -> False), (other -> True)
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
                 - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
@@ -82,15 +82,15 @@ class EulerianModel(BaseStore):
         end_date = clean_string(end_date)
         setup = clean_string(setup)
 
-        if overwrite and if_exists == "default":
+        if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
             )
             if_exists = "new"
 
-        # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "default":
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)

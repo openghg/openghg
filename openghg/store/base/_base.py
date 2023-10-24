@@ -107,7 +107,7 @@ class BaseStore:
         drop_duplicates: bool = True,
         min_keys: Optional[int] = None,
         update_keys: Optional[List] = None,
-        if_exists: str = "default",
+        if_exists: str = "auto",
         new_version: bool = True,
     ) -> Dict[str, Dict]:
         """Assign data to a Datasource. This will either create a new Datasource
@@ -122,7 +122,7 @@ class BaseStore:
                 drop_duplicates: Drop duplicate timestamps, keeping the first value
                 min_keys: Minimum number of metadata keys needed to uniquely match a Datasource
                 if_exists: What to do if existing data is present.
-                    - "default" - checks new and current data for timeseries overlap
+                    - "auto" - checks new and current data for timeseries overlap
                         - adds data if no overlap
                         - raises DataOverlapError if there is an overlap
                     - "new" - just include new data and ignore previous

@@ -125,7 +125,7 @@ def bsd_data_read_gcmd():
     )
 
 
-def bsd_small_edit_data_read(if_exists="default"):
+def bsd_small_edit_data_read(if_exists="auto"):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Same data
@@ -151,7 +151,7 @@ def bsd_small_edit_data_read(if_exists="default"):
         )
 
 
-def bsd_diff_data_read(if_exists="default", save_current="auto"):
+def bsd_diff_data_read(if_exists="auto", save_current="auto"):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data values (should create different hash)

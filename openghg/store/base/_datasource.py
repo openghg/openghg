@@ -118,7 +118,7 @@ class Datasource:
         sort: bool,
         drop_duplicates: bool,
         skip_keys: Optional[List] = None,
-        if_exists: str = "default",
+        if_exists: str = "auto",
     ) -> None:
         """Add data to this Datasource and segment the data by size.
         The data is stored as a tuple of the data and the daterange it covers.
@@ -131,7 +131,7 @@ class Datasource:
             drop_duplicates: Drop duplicate timestamps, keeping the first value
             skip_keys: Keys to not standardise as lowercase
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
@@ -176,7 +176,7 @@ class Datasource:
         data_type: str,
         sort: bool,
         drop_duplicates: bool,
-        if_exists: str = "default",
+        if_exists: str = "auto",
     ) -> None:
         """Add data to this Datasource
 
@@ -187,7 +187,7 @@ class Datasource:
             sort: If True sort by time, may load all data into memory
             drop_duplicates: If True drop duplicates, keeping first found duplicate
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
