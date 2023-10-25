@@ -8,23 +8,41 @@ __all__ = ["ObsData"]
 
 
 class ObsData:
-    """This class is used to return observations data from the get_observations function
+    """This class is used to return observations data. It be created with a preloaded xarray Dataset or
+    with a UUID and version number to retrieve data from Datasource zarr store.
 
     Args:
-        uuid: UUID of Datasource
-        version: Version of data requested from Datasrouce
         metadata: Dictionary of metadata
+        data: Dataset if data is already loaded
+        uuid: UUID of Datasource to retrieve data from
+        version: Version of data requested from Datasrouce
     """
-    def __init__(self, uuid: str, version: str, metadata: Dict) -> None:
-        self._bucket = metadata["object_store"]
-        self._version = version
-        self._data = None
+
+    def __init__(
+        self,
+        metadata: Dict,
+        data: Optional[xr.Dataset] = None,
+        uuid: Optional[str] = None,
+        version: Optional[str] = None,
+    ) -> None:
+        if data is None and uuid is None and version is None:
+            raise ValueError("Must supply either data or uuid and version")
+
         self.metadata = metadata
+        self._bucket = metadata["object_store"]
+        self._data = data
+        self._version = version
+        self._lazy = False
+        self._uuid = uuid
+
+        if uuid is not None and version is not None:
+            self._lazy = True
+            self._memory_stores = []
+            self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
+
         # We'll use this to open the zarr store as a dataset
         # If the user wants to select data by a daterange then it's easy to just copy the daterange keys that match
         # the dates the user has requested. Nothing is copied from disk until the user requests it.
-        self._memory_stores = []
-        self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
 
     def __bool__(self) -> bool:
         return bool(self._zarrstore)
@@ -72,8 +90,7 @@ class ObsData:
 
     @property
     def data(self, start_date: Optional[str] = None, end_date: Optional[str] = None) -> xr.Dataset:
-        # TODO - implement time selection of data
-        if not self._memory_stores:
+        if self._lazy and self._data is None:
             date_keys = self.metadata["versions"][self._version]["keys"]
             self._memory_stores = self._zarrstore.copy_to_stores(keys=date_keys, version=self._version)
             self._data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords")
