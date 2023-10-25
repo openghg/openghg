@@ -8,7 +8,6 @@ from openghg.store import recombine_datasets
 from openghg.util import running_on_hub
 from pandas import DataFrame
 from xarray import Dataset, open_dataset
-import tinydb
 
 __all__ = ["SearchResults"]
 
@@ -28,6 +27,7 @@ class SearchResults:
         start_result: ?
     """
 
+    # TODO - WIP move to tinydb metadata lookup to simplify code
     def __init__(self, metadata: Optional[Dict] = None, start_result: Optional[str] = None):
         # db = tinydb.TinyDB(tinydb.storages.MemoryStorage)
         if metadata is not None:

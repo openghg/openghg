@@ -1,13 +1,12 @@
+from ._basedata import _BaseData
 from openghg.plotting import plot_timeseries as general_plot_timeseries
 import plotly.graph_objects as go
 from openghg.store.base import LocalZarrStore
 import xarray as xr
 from typing import Any, Dict, Iterator, Optional
 
-__all__ = ["ObsData"]
 
-
-class ObsData:
+class ObsData(_BaseData):
     """This class is used to return observations data. It be created with a preloaded xarray Dataset or
     with a UUID and version number to retrieve data from Datasource zarr store.
 
@@ -87,15 +86,6 @@ class ObsData:
             return NotImplemented
 
         return self.data.equals(other.data) and self.metadata == other.metadata
-
-    @property
-    def data(self, start_date: Optional[str] = None, end_date: Optional[str] = None) -> xr.Dataset:
-        if self._lazy and self._data is None:
-            date_keys = self.metadata["versions"][self._version]["keys"]
-            self._memory_stores = self._zarrstore.copy_to_stores(keys=date_keys, version=self._version)
-            self._data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords")
-
-        return self._data
 
     def plot_timeseries(
         self,
