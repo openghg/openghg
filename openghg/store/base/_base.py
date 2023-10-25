@@ -109,6 +109,7 @@ class BaseStore:
         update_keys: Optional[List] = None,
         if_exists: str = "default",
         new_version: bool = True,
+        compressor: Optional[Any] = None,
     ) -> Dict[str, Dict]:
         """Assign data to a Datasource. This will either create a new Datasource
         Create or get an existing Datasource for each gas in the file
@@ -129,6 +130,7 @@ class BaseStore:
                     - "replace" - replace and insert new data into current timeseries
                 new_version: Create a new version for the data and save current
                     data to a previous version.
+                compressor: Compressor to be used by zarr store
             Returns:
                 dict: Dictionary of UUIDs of Datasources data has been assigned to keyed by species name
         """
@@ -195,6 +197,7 @@ class BaseStore:
                 skip_keys=skip_keys,
                 if_exists=if_exists,
                 data_type=data_type,
+                compressor=compressor,
             )
 
             # Save Datasource to object store

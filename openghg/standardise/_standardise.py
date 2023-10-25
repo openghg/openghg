@@ -407,6 +407,9 @@ def standardise_footprint(
     high_time_resolution: bool = False,
     sort: bool = False,
     drop_duplicates: bool = False,
+    compression: bool = True,
+    compressor: Optional[Any] = None,
+    filter: Optional[Any] = None,
 ) -> Dict:
     """Reads footprint data files and returns the UUIDs of the Datasources
     the processed data has been assigned to
@@ -441,6 +444,12 @@ def standardise_footprint(
         force: Force adding of data even if this is identical to data stored.
         sort: Sort data in by time
         drop_duplicates: Drop duplicate timestamps, keeping the first value
+        compression: Enable compression, we recommend enabling compression
+        compressor: A custom compressor to use. If None, this will default to
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.BITSHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+        filter: A filter to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking a filter.
     Returns:
         dict / None: Dictionary containing confirmation of standardisation process. None
         if file already processed.
@@ -504,6 +513,9 @@ def standardise_footprint(
             force=force,
             sort=sort,
             drop_duplicates=drop_duplicates,
+            compression=compression,
+            compressor=compressor,
+            filter=filter,
         )
 
 

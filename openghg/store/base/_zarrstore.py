@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import collections
 import logging
-from typing import Dict, Literal, Iterable, Generator, List, Union, MutableMapping
+from typing import Any, Dict, Literal, Iterable, Generator, List, Union, Optional, MutableMapping
 import xarray as xr
 import zarr
 
@@ -106,7 +106,14 @@ class LocalZarrStore:
         """
         self._store.close()
 
-    def add(self, key: str, version: str, dataset: xr.Dataset) -> None:
+    def add(
+        self,
+        key: str,
+        version: str,
+        dataset: xr.Dataset,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
+    ) -> None:
         """Add an xr.Dataset to the zarr store.
 
         Args:
@@ -126,7 +133,7 @@ class LocalZarrStore:
         if versioned_key in self._store:
             raise KeyExistsError("Cannot overwrite key in zarr store using add - use update method")
 
-        encoding = get_zarr_encoding(data_vars=dataset.data_vars)
+        encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
         dataset.to_zarr(store=self._store, group=versioned_key, encoding=encoding)
 
     def pop(self, key: str, version: str) -> xr.Dataset:
@@ -197,12 +204,14 @@ class LocalZarrStore:
         versioned_key = self._create_key(key=key, version=version)
         del self._store[versioned_key]
 
-    def update(self, key: str, version: str, dataset: xr.Dataset) -> None:
+    def update(self, key: str, version: str, dataset: xr.Dataset, compressor: Optional[Any]) -> None:
         """Update the data at the given key.
 
         Args:
             key: Key of data in store
             version: Version of data
+            dataset: xr.Dataset to add
+            compressor: Numcodecs compressor for zarr store
         Returns:
             None
         """
@@ -214,7 +223,7 @@ class LocalZarrStore:
             raise KeyError(f"Key {versioned_key} not found in zarr store")
 
         self.delete(key=key, version=version)
-        self.add(key=key, version=version, dataset=dataset)
+        self.add(key=key, version=version, dataset=dataset, compressor=compressor)
 
     def hash(self, data: str) -> str:
         """Hash the data at the given key"""
