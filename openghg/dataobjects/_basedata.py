@@ -18,13 +18,13 @@ class _BaseData:
             raise ValueError("Must supply either data or uuid and version")
 
         self.metadata = metadata
-        self._bucket = metadata["object_store"]
         self._data = data
         self._version = version
         self._lazy = False
         self._uuid = uuid
 
         if uuid is not None and version is not None:
+            self._bucket = metadata["object_store"]
             self._lazy = True
             self._memory_stores = []
             self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")

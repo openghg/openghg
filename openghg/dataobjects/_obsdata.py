@@ -17,35 +17,6 @@ class ObsData(_BaseData):
         version: Version of data requested from Datasrouce
     """
 
-    def __init__(
-        self,
-        metadata: Dict,
-        data: Optional[xr.Dataset] = None,
-        uuid: Optional[str] = None,
-        version: Optional[str] = None,
-    ) -> None:
-        if data is None and uuid is None and version is None:
-            raise ValueError("Must supply either data or uuid and version")
-
-        self.metadata = metadata
-        self._bucket = metadata["object_store"]
-        self._data = data
-        self._version = version
-        self._lazy = False
-        self._uuid = uuid
-
-        if uuid is not None and version is not None:
-            self._lazy = True
-            self._memory_stores = []
-            self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
-
-        # We'll use this to open the zarr store as a dataset
-        # If the user wants to select data by a daterange then it's easy to just copy the daterange keys that match
-        # the dates the user has requested. Nothing is copied from disk until the user requests it.
-
-    def __bool__(self) -> bool:
-        return bool(self._zarrstore)
-
     # Compatability layer for legacy format - mimicking the behaviour of a dictionary
     # Previous format expected a dictionary containing the site code and data
     # as key:value pairs.

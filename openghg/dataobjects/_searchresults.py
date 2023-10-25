@@ -103,10 +103,7 @@ class SearchResults:
     def retrieve(
         self,
         dataframe: Optional[DataFrame] = None,
-        sort: bool = True,
-        elevate_inlet: bool = False,
         version: str = "latest",
-        compute: bool = False,
         **kwargs: Any,
     ) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from object store using a filtered pandas DataFrame
@@ -128,9 +125,6 @@ class SearchResults:
     def retrieve_all(
         self,
         version: str = "latest",
-        compute: bool = False,
-        sort: bool = False,
-        elevate_inlet: bool = False,
     ) -> Union[ObsData, List[ObsData]]:
         """Retrieves all data found during the search
 
@@ -151,19 +145,13 @@ class SearchResults:
         """
         return list(self.metadata.keys())
 
-    def _retrieve_by_term(
-        self, version: str, sort: bool, elevate_inlet: bool, **kwargs: Any
-    ) -> Union[ObsData, List[ObsData]]:
+    def _retrieve_by_term(self, version: str, **kwargs: Any) -> Union[ObsData, List[ObsData]]:
         """Retrieve data from the object store by search term. This function scans the
         metadata of the retrieved results, retrieves the UUID associated with that data,
         pulls it from the object store, recombines it into an xarray Dataset and returns
         ObsData object(s).
 
         Args:
-            sort: Pass the sort argument to the recombination function
-            (sorts by time)
-            elevate_inlet: Elevate the inlet variable in the Dataset to
-            a variable (used for ranked data)
             kwargs: Metadata values to search for
         """
         uuids = set()

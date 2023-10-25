@@ -327,7 +327,13 @@ def test_scenario_uses_fp_inlet():
     fp_inlet = "999m"  # Incorrect inlet
 
     model_scenario = ModelScenario(
-        site=site, species=species, inlet=inlet, domain=domain, fp_inlet=fp_inlet, start_date=start_date, end_date=end_date
+        site=site,
+        species=species,
+        inlet=inlet,
+        domain=domain,
+        fp_inlet=fp_inlet,
+        start_date=start_date,
+        end_date=end_date,
     )
 
     # Expect observation data to be found
@@ -365,7 +371,7 @@ def test_scenario_matches_fp_inlet():
         site=site, species=species, inlet=inlet, domain=domain, start_date=start_date, end_date=end_date
     )
 
-    expected_obs_inlet = inlet # inlet for observation data
+    expected_obs_inlet = inlet  # inlet for observation data
     expected_fp_inlet = "20m"  # inlet for footprint data
 
     # Check obs and footprint data is found and inlets are expected values
@@ -501,7 +507,6 @@ def test_add_multiple_flux(model_scenario_1):
     expected_sources = ["anthro", source]
 
     for source in expected_sources:
-
         assert source in model_scenario_1.fluxes
 
         metadata = model_scenario_1.fluxes[source].metadata
@@ -557,7 +562,7 @@ def test_footprints_data_merge(model_scenario_1):
 # - species with monthly lifetime (e.g. "HFO-1234zee")
 #    - e.g. MHD-10magl_UKV_hfo-1234zee_EUROPE_201401.nc
 
-#%% Test method functionality with dummy data (CH4)
+# %% Test method functionality with dummy data (CH4)
 
 
 @pytest.fixture
@@ -580,7 +585,12 @@ def obs_ch4_dummy():
     inlet = "10m"
     sampling_period = "60.0"
 
-    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
+    attributes = {
+        "species": species,
+        "site": site,
+        "inlet": inlet,
+        "sampling_period": sampling_period,
+    }
 
     data = xr.Dataset({"mf": ("time", values)}, coords={"time": time}, attrs=attributes)
 
@@ -589,6 +599,7 @@ def obs_ch4_dummy():
     #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
     # - data_type
     metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
 
     obsdata = ObsData(data=data, metadata=metadata)
 
@@ -800,7 +811,6 @@ def test_model_modelled_obs_ch4(model_scenario_ch4_dummy, footprint_dummy, flux_
 
 
 def calc_expected_baseline(footprint: Dataset, bc: Dataset, lifetime_hrs: Optional[float] = None):
-
     fp_vars = ["particle_locations_n", "particle_locations_e", "particle_locations_s", "particle_locations_w"]
     bc_vars = ["vmr_n", "vmr_e", "vmr_s", "vmr_w"]
 
@@ -857,7 +867,7 @@ def test_modelled_baseline_ch4(model_scenario_ch4_dummy, footprint_dummy, bc_ch4
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
 
-#%% Test method functionality with dummy data (CO2)
+# %% Test method functionality with dummy data (CO2)
 
 
 @pytest.fixture
@@ -889,6 +899,7 @@ def obs_co2_dummy():
     #   long_name, data_owner, data_owner_email, station_longitude, station_latitude, ...
     # - data_type
     metadata = attributes
+    metadata["object_store"] = "/tmp/test-store-123"
 
     obsdata = ObsData(data=data, metadata=metadata)
 
@@ -1071,7 +1082,7 @@ def test_model_modelled_obs_co2(model_scenario_co2_dummy, footprint_co2_dummy, f
         assert np.isclose(modelled_mf_hr, expected_modelled_mf_hr)
 
 
-#%% Test baseline calculation for short-lived species
+# %% Test baseline calculation for short-lived species
 # Radon (Rn) - currently has one lifetime value defined
 # HFO-1234zee - currently has monthly lifetimes defined
 # - see openghg/data/acrg_species_info.json for details
@@ -1277,7 +1288,7 @@ def test_modelled_baseline_short_life(
     assert np.allclose(modelled_baseline, expected_modelled_baseline)
 
 
-#%% Test generic dataset functions
+# %% Test generic dataset functions
 
 
 @pytest.fixture
@@ -1456,12 +1467,14 @@ def test_modelscenario_doesnt_error_empty_objectstore():
     start_date = "2017-07-01"
     end_date = "2017-07-07"
 
-    scenario = ModelScenario(site=site,
-                        inlet=height,
-                        domain=domain,
-                        species=species,
-                        source=source_natural,
-                        start_date=start_date,
-                        end_date=end_date)
+    scenario = ModelScenario(
+        site=site,
+        inlet=height,
+        domain=domain,
+        species=species,
+        source=source_natural,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     assert not scenario
