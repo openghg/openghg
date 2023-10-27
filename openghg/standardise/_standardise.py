@@ -46,8 +46,8 @@ def standardise_surface(
     site_filepath: optionalPathType = None,
     store: Optional[str] = None,
     update_mismatch: str = "never",
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
 ) -> Dict:
@@ -78,14 +78,16 @@ def standardise_surface(
                 - "from_source" / "attributes" - update mismatches based on input attributes
                 - "from_definition" / "metadata" - update mismatches based on input metadata
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
     Returns:
         dict: Dictionary of result data
@@ -214,8 +216,8 @@ def standardise_column(
     platform: str = "satellite",
     source_format: str = "openghg",
     store: Optional[str] = None,
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
 ) -> Dict:
@@ -241,14 +243,16 @@ def standardise_column(
         source_format : Type of data being input e.g. openghg (internal format)
         store: Name of store to write to
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
     Returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -312,8 +316,8 @@ def standardise_bc(
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
     store: Optional[str] = None,
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
 ) -> Dict:
@@ -330,14 +334,16 @@ def standardise_bc(
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
     returns:
         dict: Dictionary containing confirmation of standardisation process.
@@ -399,8 +405,8 @@ def standardise_footprint(
     continuous: bool = True,
     retrieve_met: bool = False,
     store: Optional[str] = None,
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
     high_spatial_resolution: bool = False,
@@ -433,14 +439,15 @@ def standardise_footprint(
                         Note this will be set to True automatically for Carbon Dioxide data.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
         sort: Sort data in by time
         drop_duplicates: Drop duplicate timestamps, keeping the first value
@@ -532,8 +539,8 @@ def standardise_flux(
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
     store: Optional[str] = None,
-    if_exists: str = "default",
-    save_current: Optional[bool] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",
     overwrite: bool = False,
     force: bool = False,
 ) -> Dict:
@@ -551,14 +558,16 @@ def standardise_flux(
         continuous: Whether time stamps have to be continuous.
         store: Name of store to write to
         if_exists: What to do if existing data is present.
-            - "default" - checks new and current data for timeseries overlap
+            - "auto" - checks new and current data for timeseries overlap
                 - adds data if no overlap
                 - raises DataOverlapError if there is an overlap
             - "new" - just include new data and ignore previous
-            - "replace" - replace and insert new data into current timeseries
+            - "combine" - replace and insert new data into current timeseries
         save_current: Whether to save data in current form and create a new version.
-            If None, this will depend on if_exists input ("default" -> True), (other -> False)
-        overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+             - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+             - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+             - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         force: Force adding of data even if this is identical to data stored.
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
@@ -624,6 +633,8 @@ def standardise_eulerian(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     setup: Optional[str] = None,
+    if_exists: str = "auto",
+    save_current: str = "auto",    
     overwrite: bool = False,
     store: Optional[str] = None,
 ) -> Dict:
@@ -636,7 +647,17 @@ def standardise_eulerian(
         start_date: Start date (inclusive) associated with model run
         end_date: End date (exclusive) associated with model run
         setup: Additional setup details for run
-        overwrite: Should this data overwrite currently stored data.
+        if_exists: What to do if existing data is present.
+            - "auto" - checks new and current data for timeseries overlap
+                - adds data if no overlap
+                - raises DataOverlapError if there is an overlap
+            - "new" - just include new data and ignore previous
+            - "combine" - replace and insert new data into current timeseries
+        save_current: Whether to save data in current form and create a new version.
+            - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+            - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+            - "n" / "no" - Allow current data to updated / deleted
+        overwrite: Deprecated. This will use options for if_exists="new".
         store: Name of object store to write to, required if user has access to more than one
         writable store
 
@@ -656,6 +677,8 @@ def standardise_eulerian(
             end_date=end_date,
             setup=setup,
             overwrite=overwrite,
+            if_exists=if_exists,
+            save_current=save_current,
         )
 
 

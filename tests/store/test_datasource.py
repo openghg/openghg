@@ -188,7 +188,7 @@ def test_versioning(capfd, bucket):
 
     assert detailed_keys["v2"]["keys"] == expected_v2
 
-    # TODO: Add case for if_exists="replace" which should look more like original case above after updates
+    # TODO: Add case for if_exists="combine" which should look more like original case above after updates
 
 
 def test_replace_version():
@@ -232,7 +232,7 @@ def test_replace_version():
 
     assert detailed_keys["v1"]["keys"] == expected_new_v1
 
-    # TODO: Add case for if_exists="replace" which should look more like original case above after updates
+    # TODO: Add case for if_exists="combine" which should look more like original case above after updates
 
 
 def test_get_dataframe_daterange():

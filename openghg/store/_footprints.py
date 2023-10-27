@@ -201,8 +201,8 @@ class Footprints(BaseStore):
         high_spatial_resolution: bool = False,
         high_time_resolution: bool = False,
         short_lifetime: bool = False,
-        if_exists: str = "default",
-        save_current: Optional[bool] = None,
+        if_exists: str = "auto",
+        save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
         sort: bool = False,
@@ -233,14 +233,16 @@ class Footprints(BaseStore):
             short_lifetime: Indicate footprint is for a short-lived species. Needs species input.
                             Note this will be set to True if species has an associated lifetime.
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             save_current: Whether to save data in current form and create a new version.
-                If None, this will depend on if_exists input ("default" -> True), (other -> False)
-            overwrite: Deprecated. This will use options for if_exists="new" and save_current=True.
+                - "auto" - this will depend on if_exists input ("auto" -> False), (other -> True)
+                - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
+                - "n" / "no" - Allow current data to updated / deleted
+            overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
             sort: Sort data in time dimension. We recommend NOT sorting footprint data unless necessary.
             drop_duplicates: Drop duplicate timestamps, keeping the first value
@@ -286,15 +288,15 @@ class Footprints(BaseStore):
         inlet = format_inlet(inlet)
         inlet = cast(str, inlet)
 
-        if overwrite and if_exists == "default":
+        if overwrite and if_exists == "auto":
             logger.warning(
                 "Overwrite flag is deprecated in preference to `if_exists` (and `save_current`) inputs."
                 "See documentation for details of these inputs and options."
             )
             if_exists = "new"
 
-        # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "default":
+        # Making sure new version will be created by default if force keyword is included.
+        if force and if_exists == "auto":
             if_exists = "new"
 
         new_version = check_if_need_new_version(if_exists, save_current)

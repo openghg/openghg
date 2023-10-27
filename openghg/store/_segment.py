@@ -2,7 +2,7 @@
 
 """
 import logging
-from typing import Dict, Optional
+from typing import Dict
 
 
 __all__ = ["assign_data"]
@@ -16,7 +16,7 @@ def assign_data(
     data_dict: Dict,
     lookup_results: Dict,
     data_type: str,
-    if_exists: Optional[str] = None,
+    if_exists: str = "auto",
     new_version: bool = True,
 ) -> Dict[str, Dict]:
     """Assign data to a Datasource. This will either create a new Datasource
@@ -27,11 +27,11 @@ def assign_data(
             lookup_results: Dictionary of lookup results]
             data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
             if_exists: What to do if existing data is present.
-                - None - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - just include new data and ignore previous
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             new_version: Create a new version for the data and save current
                 data to a previous version.
         Returns:

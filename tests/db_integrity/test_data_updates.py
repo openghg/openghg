@@ -125,7 +125,7 @@ def bsd_data_read_gcmd():
     )
 
 
-def bsd_small_edit_data_read(if_exists=None):
+def bsd_small_edit_data_read(if_exists="auto"):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Same data
@@ -151,7 +151,7 @@ def bsd_small_edit_data_read(if_exists=None):
         )
 
 
-def bsd_diff_data_read(if_exists=None, save_current=None):
+def bsd_diff_data_read(if_exists="auto", save_current="auto"):
     """
     Add overlapping Bilsdale GCMD data to the object store:
      - Small difference in data values (should create different hash)
@@ -345,7 +345,7 @@ def test_obs_data_read_data_diff():
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    # Including if_exists="new", save_current is None by defalult --> new_version will be True
+    # Including if_exists="new", save_current="auto" by default --> new_version will be True
     bsd_diff_data_read(if_exists="new")
 
     # Search for expected species
@@ -409,14 +409,14 @@ def test_obs_data_read_data_diff():
 def test_obs_data_read_data_new_version():
     """
     Same data setup as test_obs_data_read_data_diff() but checking new version and correct data
-    are stored when save_current=True.
+    are stored when save_current="y".
     """
     clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    # Including if_exists="new", save_current=True --> new_version will be True
-    bsd_diff_data_read(if_exists="new", save_current=True)
+    # Including if_exists="new", save_current="y" --> new_version will be True
+    bsd_diff_data_read(if_exists="new", save_current="y")
 
     # Search for expected species
     # GCMD data
@@ -439,13 +439,14 @@ def test_obs_data_read_data_new_version():
 def test_obs_data_read_data_overwrite_version():
     """
     Same data setup as test_obs_data_read_data_diff() but checking previous version is
-    overwritten and correct data are stored when save_current=False.
+    overwritten and correct data are stored when save_current="n".
     """
     clear_test_stores()
     # Load BSD data - GCMD data (GCWERKS)
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
-    bsd_diff_data_read(if_exists="new", save_current=False)
+    # Including if_exists="new", save_current="n" --> new_version will be False
+    bsd_diff_data_read(if_exists="new", save_current="n")
 
     # Search for expected species
     # GCMD data

@@ -115,7 +115,7 @@ class Datasource:
         sort: bool,
         drop_duplicates: bool,
         skip_keys: Optional[List] = None,
-        if_exists: str = "default",
+        if_exists: str = "auto",
         compressor: Optional[Any] = None,
     ) -> None:
         """Add data to this Datasource and segment the data by size.
@@ -129,11 +129,11 @@ class Datasource:
             drop_duplicates: Drop duplicate timestamps, keeping the first value
             skip_keys: Keys to not standardise as lowercase
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
         Returns:
             None
         """
@@ -175,7 +175,7 @@ class Datasource:
         data_type: str,
         sort: bool,
         drop_duplicates: bool,
-        if_exists: str = "default",
+        if_exists: str = "auto",
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
     ) -> None:
@@ -188,11 +188,11 @@ class Datasource:
             sort: If True sort by time, may load all data into memory
             drop_duplicates: If True drop duplicates, keeping first found duplicate
             if_exists: What to do if existing data is present.
-                - "default" - checks new and current data for timeseries overlap
+                - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
-                - "replace" - replace and insert new data into current timeseries
+                - "combine" - replace and insert new data into current timeseries
             compressor: Compressor to use when adding data to the zarr store
             filters: Filters to apply to data when adding to the zarr store
         Returns:
@@ -255,7 +255,7 @@ class Datasource:
                 # We only want this key for a new version
                 date_keys = [daterange_str]
             elif overlapping:
-                if if_exists == "replace":
+                if if_exists == "combine":
                     combined_datasets = {}
                     for existing_daterange, new_daterange in overlapping:
                         ex = self._zarr_store.pop(key=existing_daterange, version=self._latest_version)
