@@ -1,29 +1,42 @@
 """
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
-from typing import Dict
-
-# from openghg.objectstore import open_zarr_store
-import zarr
+from typing import Dict, Optional
+from openghg.store.base import LocalZarrStore
+import xarray as xr
 
 
 class _BaseData:
-    def __init__(self, uuid: str, version: str, metadata: Dict, compute: bool = False) -> None:
-        self._bucket = metadata["bucket"]
-        self._uuid = uuid
-        self.version = version
-        self.metadata = metadata
-        self.compute = compute
-        self.data = None
-        self._memory_store = {}
+    def __init__(
+        self,
+        metadata: Dict,
+        data: Optional[xr.Dataset] = None,
+        uuid: Optional[str] = None,
+        version: Optional[str] = None,
+    ) -> None:
+        if data is None and uuid is None and version is None:
+            raise ValueError("Must supply either data or uuid and version")
 
-        # Retrieve the data from the memory store
-        # lazy_zarr_store = open_zarr_store(bucket=self._bucket, datasource_uuid=self._uuid)
-        # lazy_zarr_store = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
-        # Copy the data we want to the memory store
-        # zarr.convenience.copy_store(
-        #     source=lazy_zarr_store, dest=self._memory_store, source_path=version, if_exists="combine"
-        # )
+        self.metadata = metadata
+        self._data = data
+        self._version = version
+        self._lazy = False
+        self._uuid = uuid
+
+        if uuid is not None and version is not None:
+            self._bucket = metadata["object_store"]
+            self._lazy = True
+            self._memory_stores = []
+            self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
 
     def __bool__(self) -> bool:
-        return bool(self._memory_store)
+        return bool(self._data)
+
+    @property
+    def data(self, start_date: Optional[str] = None, end_date: Optional[str] = None) -> xr.Dataset:
+        if self._lazy and self._data is None:
+            date_keys = self.metadata["versions"][self._version]["keys"]
+            self._memory_stores = self._zarrstore.copy_to_stores(keys=date_keys, version=self._version)
+            self._data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords")
+
+        return self._data

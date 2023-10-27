@@ -1,11 +1,8 @@
-from dataclasses import dataclass
-
 from ._basedata import _BaseData
 
 __all__ = ["FluxData"]
 
 
-@dataclass(frozen=True)
 class FluxData(_BaseData):
     """This class is used to return flux/emissions data from the get_flux function
 

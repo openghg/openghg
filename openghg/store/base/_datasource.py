@@ -2,18 +2,15 @@ from collections import defaultdict
 import warnings
 
 # import re
-from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 from types import TracebackType
 import logging
 import numpy as np
-import copy
-import shutil
 from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
-import zarr
 from uuid import uuid4
-from openghg.objectstore import exists, move_objects, get_object_from_json
-from openghg.store.spec import define_data_types, get_zarr_encoding
+from openghg.objectstore import exists, get_object_from_json
+from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
 
@@ -119,6 +116,7 @@ class Datasource:
         drop_duplicates: bool,
         skip_keys: Optional[List] = None,
         if_exists: str = "auto",
+        compressor: Optional[Any] = None,
     ) -> None:
         """Add data to this Datasource and segment the data by size.
         The data is stored as a tuple of the data and the daterange it covers.
@@ -154,6 +152,7 @@ class Datasource:
                 sort=sort,
                 drop_duplicates=drop_duplicates,
                 if_exists=if_exists,
+                compressor=compressor,
             )
         else:
             raise NotImplementedError()
@@ -177,6 +176,8 @@ class Datasource:
         sort: bool,
         drop_duplicates: bool,
         if_exists: str = "auto",
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> None:
         """Add data to this Datasource
 
@@ -192,6 +193,8 @@ class Datasource:
                    - raises DataOverlapError if there is an overlap
                 - "new" - creates new version with just new data
                 - "combine" - replace and insert new data into current timeseries
+            compressor: Compressor to use when adding data to the zarr store
+            filters: Filters to apply to data when adding to the zarr store
         Returns:
             None
         """
@@ -311,7 +314,13 @@ class Datasource:
                         # chunks = get_chunks(data_type=data_type)
                         # logger.info(f"Rechunking {data_type} data using: {chunks}")
                         # dataset = dataset.chunk(chunks)
-                        self._zarr_store.add(key=key, version=version_str, dataset=dataset)
+                        self._zarr_store.add(
+                            key=key,
+                            version=version_str,
+                            dataset=dataset,
+                            compressor=compressor,
+                            filters=filters,
+                        )
 
                     # Store the updated dateranges
                     date_keys.extend(combined_datasets.keys())
@@ -326,10 +335,18 @@ class Datasource:
                     )
             else:
                 date_keys.append(daterange_str)
-                self._zarr_store.add(key=daterange_str, version=version_str, dataset=data)
+                self._zarr_store.add(
+                    key=daterange_str,
+                    version=version_str,
+                    dataset=data,
+                    compressor=compressor,
+                    filters=filters,
+                )
         else:
             date_keys.append(daterange_str)
-            self._zarr_store.add(key=daterange_str, version=version_str, dataset=data)
+            self._zarr_store.add(
+                key=daterange_str, version=version_str, dataset=data, compressor=compressor, filters=filters
+            )
 
             self._status["current_data"] = False
             self._status["overlapping"] = False
