@@ -42,7 +42,7 @@ def integrity_check(raise_error: bool = True) -> Optional[dict[str, dict[str, st
                 failures = []
                 for uid in datasource_uuids:
                     try:
-                        Datasource.load(bucket=bucket, uuid=uid, shallow=True).integrity_check()
+                        Datasource(bucket=bucket, uuid=uid).integrity_check()
                     except ObjectStoreError:
                         failures.append(uid)
 

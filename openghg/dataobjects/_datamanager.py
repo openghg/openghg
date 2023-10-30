@@ -119,9 +119,9 @@ class DataManager:
             metastore.delete({"uuid": uuid})
             metastore.insert(backup)
 
-            d = Datasource.load(bucket=self._bucket, uuid=uuid)
+            d = Datasource(bucket=self._bucket, uuid=uuid)
             d._metadata = backup
-            d.save(bucket=self._bucket)
+            d.save()
 
     def view_backup(self, uuid: Optional[str] = None, version: Optional[str] = None) -> Dict:
         """View backed-up metadata for all Datasources
@@ -169,7 +169,7 @@ class DataManager:
         with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for u in uuid:
                 updated = False
-                d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
+                d = Datasource(bucket=self._bucket, uuid=u)
                 # Save a backup of the metadata for now
                 found_record = metastore.search({"uuid": u})
                 current_metadata = found_record[0]
@@ -215,7 +215,7 @@ class DataManager:
                     updated = True
 
                 if updated:
-                    d.save(bucket=self._bucket)
+                    d.save()
                     # Update the metadata stored internally so we're up to date
                     self.metadata[u] = internal_copy
                     logger.info(f"Modified metadata for {u}.")
@@ -244,8 +244,9 @@ class DataManager:
                 # First remove the data from the metadata store
                 metastore.delete({"uuid": uid})
 
-                # Delete all the data associated with a Datasource
-                d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)
+                # Delete all the data associated with a Datasource and the
+                # data in its zarr store.
+                d = Datasource(bucket=self._bucket, uuid=uid)
                 d.delete_all_data()
 
                 # Then delete the Datasource itself
@@ -272,6 +273,6 @@ def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
     if store not in writable_stores:
         raise ObjectStoreError(f"You do not have permission to write to the {store} store.")
 
-    res = search(data_type=data_type, **kwargs)
+    res = search(data_type=data_type, store=store, **kwargs)
     metadata = res.metadata
     return DataManager(metadata=metadata, store=store)

@@ -20,7 +20,7 @@ from helpers import (
 def add_data(mocker):
     clear_test_stores()
     mock_uuids = [f"test-uuid-{n}" for n in range(100, 150)]
-    mocker.patch("uuid.uuid4", side_effect=mock_uuids)
+    # mocker.patch("uuid.uuid4", side_effect=mock_uuids)
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
 
     standardise_surface(filepaths=one_min, site="tac", network="decc", source_format="CRDS", store="user")
@@ -32,7 +32,7 @@ def footprint_read(mocker):
     datapath = get_footprint_datapath("footprint_test.nc")
 
     mock_uuids = [f"test-uuid-{n}" for n in range(100, 188)]
-    mocker.patch("uuid.uuid4", side_effect=mock_uuids)
+    # mocker.patch("uuid.uuid4", side_effect=mock_uuids)
     # model_params = {"simulation_params": "123"}
 
     site = "TMB"
@@ -88,7 +88,7 @@ def test_delete_footprint_data(footprint_read):
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
         uuid = metastore.select('uuid')[0]
 
-    ds = Datasource.load(bucket=bucket, uuid=uuid, shallow=True)
+    ds = Datasource(bucket=bucket, uuid=uuid)
     key = ds.key()
     datasource_path = key_to_local_filepath(key=key)
 
@@ -307,7 +307,7 @@ def test_delete_data():
     uid = next(iter(res.metadata))
 
     bucket = get_writable_bucket(name="user")
-    d = Datasource.load(bucket=bucket, uuid=uid)
+    d = Datasource(bucket=bucket, uuid=uid)
     key = d.key()
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:

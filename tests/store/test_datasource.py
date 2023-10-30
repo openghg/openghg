@@ -554,7 +554,7 @@ def test_integrity_check(data, bucket):
 
     uid = d.uuid()
 
-    d = Datasource.load(bucket=bucket, uuid=uid)
+    d = Datasource(bucket=bucket, uuid=uid)
     d.integrity_check()
 
     for key in d.data_keys():

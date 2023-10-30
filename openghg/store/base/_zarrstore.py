@@ -204,6 +204,18 @@ class LocalZarrStore:
         versioned_key = self._create_key(key=key, version=version)
         del self._store[versioned_key]
 
+    def delete_all(self) -> None:
+        """Delete all data from the zarr store.
+
+        Returns:
+            None
+        """
+        if self._mode == "r":
+            raise ValueError("Cannot delete from a read-only zarr store")
+
+        for key in self._store.keys():
+            del self._store[key]
+
     def update(self, key: str, version: str, dataset: xr.Dataset, compressor: Optional[Any]) -> None:
         """Update the data at the given key.
 

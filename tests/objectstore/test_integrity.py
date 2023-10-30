@@ -49,7 +49,7 @@ def test_integrity_check_delete_Datasource_keys():
     bucket = get_writable_bucket(name="user")
     with open_metastore(bucket=bucket, data_type="emissions") as metastore:
         uid = metastore.select("uuid")[0]
-        ds = Datasource.load(bucket=bucket, uuid=uid)
+        ds = Datasource(bucket=bucket, uuid=uid)
         keys = ds.data_keys()
         for key in keys:
             delete_object(bucket=bucket, key=key)

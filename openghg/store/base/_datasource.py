@@ -382,21 +382,9 @@ class Datasource:
         Returns:
             None
         """
-        raise NotImplementedError
-        from openghg.objectstore import delete_object
+        self._zarr_store.delete_all()
 
-        if not self._bucket:
-            raise ObjectStoreError("No bucket set, has this Datasource been previously saved?")
-
-        to_delete = []
-        for key_data in self._data_keys.values():
-            keys = list(key_data["keys"].values())
-            to_delete.extend(keys)
-
-        for key in set(to_delete):
-            delete_object(bucket=self._bucket, key=key)
-
-    def delete_data(self, bucket: str, keys: List) -> None:
+    def delete_data(self, version: str, keys: List) -> None:
         """Delete specific keys
 
         Args:
@@ -405,13 +393,10 @@ class Datasource:
         Returns:
             None
         """
-        raise NotImplementedError
-        from openghg.objectstore import delete_object
+        for key in keys:
+            self._zarr_store.delete(key=key, version=version)
 
-        for key in set(keys):
-            delete_object(bucket=bucket, key=key)
-
-    def delete_version(self, bucket: str, version: str) -> None:
+    def delete_version(self, version: str) -> None:
         """Delete a specific version of data.
 
         Args:
@@ -420,16 +405,10 @@ class Datasource:
         Returns:
             None
         """
-        raise NotImplementedError
         if version not in self._data_keys:
             raise KeyError("Invalid version.")
 
-        # Could delete version like this - one key at a time
-        data_keys = list(self._data_keys[version]["keys"].values())
-
-        self.delete_data(bucket=bucket, keys=data_keys)
-
-        # Or could just try and delete the whole version folder?
+        self.delete_data(version=version, keys=self._data_keys[version]["keys"])
 
     def add_metadata(self, metadata: Dict, skip_keys: Optional[List] = None) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -731,38 +710,13 @@ class Datasource:
         """
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-    @classmethod
-    def load(
-        cls: Type[T],
-        bucket: str,
-        uuid: str,
-        shallow: bool = False,
-    ) -> T:
-        """Load a Datasource from the object store either by name or UUID
-
-        Args:
-            bucket: Bucket to store object
-            uuid: UID of Datasource
-            key: Key of Datasource
-            shallow: Only load JSON data, do not read Datasets from object store.
-            This will speed up creation of the Datasource object.
-        Returns:
-            Datasource: Datasource object created from JSON
-        """
-        raise NotImplementedError
-        from openghg.objectstore import get_object_from_json
-
-        key = f"{Datasource._datasource_root}/uuid/{uuid}"
-        data = get_object_from_json(bucket=bucket, key=key)
-
-        return cls.from_data(bucket=bucket, data=data, shallow=shallow)
-
     def data(self) -> Dict:
         """Get the data stored in this Datasource
 
         Returns:
             dict: Dictionary of data keyed by daterange
         """
+        raise NotImplementedError("Data is now stored in the zarr store")
         return self._zarr_store
         # if not self._data:
         #     for date_key in self._data_keys["latest"]["keys"]:
@@ -1079,7 +1033,7 @@ class Datasource:
             version = self._latest_version
 
         try:
-            keys = list(self._data_keys[version]["keys"].values())
+            keys = self._data_keys[version]["keys"]
         except KeyError:
             raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
 

@@ -134,7 +134,6 @@ def key_to_local_filepath(key: Union[str, List]) -> List[Path]:
 def all_datasource_keys(keys: Dict) -> List[str]:
     ds_keys = []
     for key_data in keys.values():
-        data_keys = list(key_data["keys"].values())
-        ds_keys.extend(data_keys)
+        ds_keys.extend(key_data["keys"])
 
     return ds_keys

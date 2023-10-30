@@ -173,7 +173,7 @@ def test_read_CRDS(bucket):
 
     uid = data["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(bucket=bucket, uuid=uid).data()
+    ch4_data = Datasource(bucket=bucket, uuid=uid).data()
     ch4_data = ch4_data["2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"]
 
     assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")

@@ -50,6 +50,7 @@ def recombine_datasets(
     Returns:
         xarray.Dataset: Combined Dataset
     """
+    raise NotImplementedError("This will be removed with the merge of zarr store into devel.")
     from openghg.store.base import Datasource
     from xarray import concat as xr_concat
 
