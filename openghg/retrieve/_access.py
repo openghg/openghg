@@ -52,8 +52,18 @@ def _get_generic(
         logger.exception(err_msg)
         raise SearchError(err_msg)
 
+    if sort:
+        logger.warn(
+            "Sorting results by time has been moved to the data method of ObsData, please use that instead."
+        )
+
+    if elevate_inlets:
+        logger.warn(
+            "Elevating inlet functionality has been moved to the data method of ObsData, please use that instead."
+        )
+
     # TODO: UPDATE THIS - just use retrieve when retrieve_all is removed.
-    retrieved_data: Any = results.retrieve_all(sort=sort, elevate_inlet=elevate_inlets)
+    retrieved_data: Any = results.retrieve_all()
 
     if retrieved_data is None:
         err_msg = f"Unable to retrieve results for {keyword_string}"

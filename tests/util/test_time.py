@@ -24,6 +24,7 @@ from openghg.util import (
     time_offset,
     timestamp_tzaware,
     trim_daterange,
+    dates_in_range,
 )
 from pandas import DateOffset, Timedelta, Timestamp
 from xarray import Dataset
@@ -86,7 +87,6 @@ def test_daterange_overlap():
 
 
 def test_closest_daterange():
-
     dateranges = [
         "2012-01-01-00:00:00+00:00_2014-01-01-00:00:00+00:00",
         "2014-01-02-00:00:00+00:00_2015-01-01-00:00:00+00:00",
@@ -220,7 +220,6 @@ def test_combining_big_daterange():
 
 
 def test_split_daterange_str():
-
     start_true = Timestamp("2001-01-01-00:00:00", tz="UTC")
     end_true = Timestamp("2001-03-01-00:00:00", tz="UTC")
 
@@ -456,3 +455,42 @@ def test_in_daterange():
     end_b = timestamp_tzaware("1980-01-01")
 
     assert not in_daterange(start_a=start_a, end_a=end_a, start_b=start_b, end_b=end_b)
+
+
+def test_dates_in_range():
+    keys = [
+        "2022-01-01_2022-01-07",
+        "2022-01-08_2022-01-14",
+        "2022-01-15_2022-01-21",
+        "2022-01-22_2022-01-28",
+        "2022-01-29_2022-02-04",
+        "2022-02-05_2022-02-11",
+        "2022-02-12_2022-02-18",
+        "2022-02-19_2022-02-25",
+        "2022-02-26_2022-03-04",
+        "2022-03-05_2022-03-11",
+    ]
+
+    start_date = pd.Timestamp(2022, 1, 10)
+    end_date = pd.Timestamp(2022, 2, 20)
+
+    result = dates_in_range(keys, start_date, end_date)
+
+    expected_result = [
+        "2022-01-08_2022-01-14",
+        "2022-01-15_2022-01-21",
+        "2022-01-22_2022-01-28",
+        "2022-01-29_2022-02-04",
+        "2022-02-05_2022-02-11",
+        "2022-02-12_2022-02-18",
+        "2022-02-19_2022-02-25",
+    ]
+
+    assert result == expected_result
+
+    start_date = pd.Timestamp(2024, 1, 10)
+    end_date = pd.Timestamp(2024, 2, 20)
+
+    result = dates_in_range(keys, start_date, end_date)
+
+    assert not result

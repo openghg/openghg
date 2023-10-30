@@ -53,6 +53,7 @@ from ._time import (
     first_last_dates,
     in_daterange,
     parse_period,
+    dates_in_range,
     relative_time_offset,
     sanitise_daterange,
     split_daterange_str,

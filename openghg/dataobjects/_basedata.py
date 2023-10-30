@@ -1,9 +1,10 @@
 """
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from openghg.store.base import LocalZarrStore
 import xarray as xr
+from pandas import Timestamp
 
 
 class _BaseData:
@@ -13,30 +14,61 @@ class _BaseData:
         data: Optional[xr.Dataset] = None,
         uuid: Optional[str] = None,
         version: Optional[str] = None,
+        start_date: Optional[Union[str, Timestamp]] = None,
+        end_date: Optional[Union[str, Timestamp]] = None,
+        sort: bool = False,
+        elevate_inlet: bool = False,
+        attrs_to_check: Optional[Dict] = None,
     ) -> None:
+        """
+        Args:
+            start_date: Start date of data to retrieve
+            end_date: End date of data to retrieve
+            sort: Sort the resulting Dataset by the time dimension, defaults to False
+            attrs_to_check: Attributes to check for duplicates. If duplicates are present
+                a new data variable will be created containing the values from each dataset
+                If a dictionary is passed, the attribute(s) will be retained and the new value assigned.
+                If a list/string is passed, the attribute(s) will be removed.
+            elevate_inlet: Force the elevation of the inlet attribute
+        """
+        from openghg.util import timestamp_epoch, timestamp_now, dates_in_range
+
         if data is None and uuid is None and version is None:
             raise ValueError("Must supply either data or uuid and version")
 
         self.metadata = metadata
-        self._data = data
+        self.data = data
         self._version = version
         self._lazy = False
         self._uuid = uuid
 
+        if elevate_inlet:
+            raise NotImplementedError("elevate_inlet not implemented yet")
+
+        if attrs_to_check is not None:
+            raise NotImplementedError("attrs_to_check not implemented yet")
+
+        if sort:
+            raise NotImplementedError("sort not implemented yet")
+
         if uuid is not None and version is not None:
+            date_keys = self.metadata["versions"][self._version]["keys"]
+
+            if start_date is not None or end_date is not None:
+                if start_date is None:
+                    start_date = timestamp_epoch()
+                if end_date is None:
+                    end_date = timestamp_now()
+
+                date_keys = dates_in_range(keys=date_keys, start_date=start_date, end_date=end_date)
+
             self._bucket = metadata["object_store"]
-            self._lazy = True
-            self._memory_stores = []
-            self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
+
+            date_keys = self.metadata["versions"][self._version]["keys"]
+            zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
+            self._memory_stores = zarrstore.copy_to_stores(keys=date_keys, version=self._version)
+            self.data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords")
+            zarrstore.close()
 
     def __bool__(self) -> bool:
         return bool(self._data)
-
-    @property
-    def data(self, start_date: Optional[str] = None, end_date: Optional[str] = None) -> xr.Dataset:
-        if self._lazy and self._data is None:
-            date_keys = self.metadata["versions"][self._version]["keys"]
-            self._memory_stores = self._zarrstore.copy_to_stores(keys=date_keys, version=self._version)
-            self._data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords")
-
-        return self._data
