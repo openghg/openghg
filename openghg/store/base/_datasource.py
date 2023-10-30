@@ -4,10 +4,8 @@ from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
-import shutil
 from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
-from openghg.objectstore import exists, move_objects
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -636,12 +634,11 @@ class Datasource:
         version_backup = f"{version}_backup"
         return version_backup
 
-    def save(self, bucket: str, new_version: bool = True, compression: bool = True, **kwargs) -> None:
+    def save(self, bucket: str, new_version: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
             bucket: Bucket to hold data
-            compression: True if data should be compressed on save
         Returns:
             None
         """
@@ -669,7 +666,7 @@ class Datasource:
 
             # Iterate over the keys (daterange string) of the data dictionary
             for daterange in self._data:
-                data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
+                data_key = f"{Datasource._datasource_root}/uuid/{self._uuid}/{version_str}/{daterange}"
 
                 new_keys[daterange] = data_key
                 data = self._data[daterange]
