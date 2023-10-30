@@ -4,27 +4,36 @@ Searching and plotting
 In this short tutorial we'll show how to retrieve some data and create a
 simple plot using one of our plotting functions.
 
-As in the `previous tutorial <Adding_observation_data.ipynb>`__, we will
-start by setting up our temporary object store for our data. If you've
-already create your own local object store you can skip the next few
-steps and move onto the **Searching** section.
+Using the tutorial object store
+-------------------------------
+
+As in the :ref:`previous tutorial <using-the-tutorial-object-store>`,
+we will use the tutorial object store to avoid cluttering your personal
+object store.
+
+.. code:: ipython3
+
+    from openghg.tutorial import use_tutorial_store
+
+    use_tutorial_store()
+
+Now we'll add some data to the tutorial store.
 
 .. code:: ipython3
 
     from openghg.tutorial import populate_surface_data
-
-.. code:: ipython3
-
     populate_surface_data()
 
-Searching
----------
+1. Searching
+-------------
 
-Let's search for all the methane data from Tacolneston to do this we
-need to know the site code. We can see a summary of known site codes
-using the ``summary_site_codes()`` function
+Let's search for all the methane data from Tacolneston.
+To do this we need to know the site code ("TAC").
 
-.. code:: ipython3
+If we didn't know the site code, we could find it using
+the ``summary_site_codes()`` function:
+
+.. ipython:: python
 
     from openghg.standardise import summary_site_codes
 
@@ -35,21 +44,21 @@ using the ``summary_site_codes()`` function
     summary
 
 The output of this function is a `pandas
-DataFrame <https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#dataframe>`__.
-If we wanted to filter this to include sites containing the name
-“Tacolneston” we could do so as follows:
+DataFrame <https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#dataframe>`__,
+so we can filter to find sites containing the name “Tacolneston”:
 
-.. code:: ipython3
+.. ipython:: python
 
     site_long_name = summary["Long name"]
     find_tacolneston = site_long_name.str.contains("Tacolneston")
 
     summary[find_tacolneston]
 
-As you can see, there will sometimes be multiple entries for a site if
-this is included under multiple networks.
+This shows us that the site code for Tacolneston is "TAC", and also that
+there are two entries for Tacolneston, since it is included under
+multiple networks.
 
-If we wanted to see all available data associated with Tacolneston we
+To see all available data associated with Tacolneston we
 can search for this using the site code of “TAC”.
 
 .. code:: ipython3
@@ -79,17 +88,22 @@ to extract, for example, just the methane data:
 There are also equivalent search functions for other data types
 including ``search_footprints``, ``search_emissions`` and ``search_bc``.
 
+2. Plotting
+-----------------
+
 If we want to take a look at the data from the 185m inlet we can first
 retrieve the data from the object store and then create a quick
-timeseries plot. See the
-```SearchResults`` <https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResults>`__
-object documentation for more information.
+timeseries plot. See the |SearchResults|_ object documentation for more information.
+
+.. |SearchResults| replace:: ``SearchResults``
+.. _SearchResults: https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult
 
 .. code:: ipython3
 
     data_185m = tac_surface_search.retrieve(inlet="185m")
 
-   **NOTE:** the plots created below may not show up on the online
+.. note::
+   The plots created below may not show up on the online
    documentation version of this notebook.
 
 We can visualise this data using the in-built plotting commands from the
@@ -102,25 +116,14 @@ this is displayed:
 
     plot_timeseries(data_185m, title="Methane at Tacolneston", xlabel="Time", ylabel="Conc.", units="ppm")
 
-Searching a specific store
---------------------------
-
-If you only want to search for data from a specific object store you can pass the store name to the ``store`` argument of the search functions.
-To search for Tacolneston data from out ``group`` object store you could do
-
-.. code:: ipython3
-
-    tac_data_search = search(site="tac", store="group")
-
-This will then only search for data in the ``group`` object store.
-
-Plot all the data
------------------
+Plotting multiple timeseries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If there are multiple results for a given search, we can also retrieve
-all the data and receive a ``list`` of
-```ObsData`` <https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData>`__
-objects.
+all the data and receive a ``list`` of |ObsData|_ objects.
+
+.. |ObsData| replace:: ``ObsData``
+.. _ObsData: https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.ObsData
 
 .. code:: ipython3
 
@@ -135,8 +138,8 @@ and and responsive, even with relatively large amounts of data.
 
     plot_timeseries(data=all_ch4_tac, units="ppb")
 
-Compare different sites
------------------------
+3. Comparing different sites
+-----------------------------
 
 We can easily compare data for the same species from different sites by
 doing a quick search to see what's available
@@ -145,18 +148,10 @@ doing a quick search to see what's available
 
     ch4_data = search_surface(species="ch4")
 
-.. code:: ipython3
-
-    ch4_data
-
-Then we refine our search to only retrieve the sites (and inlets) that
-we want:
-
-.. code:: ipython3
-
     ch4_data.results
 
-We can retrieve the data we want to compare and make a plot
+Then we refine our search to only retrieve the sites (and inlets) that
+we want to compare and make a plot
 
 .. code:: ipython3
 

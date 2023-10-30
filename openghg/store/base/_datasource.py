@@ -1,11 +1,11 @@
 from collections import defaultdict
+
+# import re
 from typing import DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 import logging
 import numpy as np
-import shutil
 from pandas import DataFrame, Timestamp, Timedelta
-from xarray import Dataset
-from openghg.objectstore import exists, move_objects
+import xarray as xr
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -36,7 +36,7 @@ class Datasource:
         self._creation_datetime = timestamp_now()
         self._metadata: Dict[str, str] = {}
         # Dictionary keyed by daterange of data in each Dataset
-        self._data: Dict[str, Dataset] = {}
+        self._data: Dict[str, xr.Dataset] = {}
 
         self._start_date = None
         self._end_date = None
@@ -85,7 +85,7 @@ class Datasource:
     def add_data(
         self,
         metadata: Dict,
-        data: Dataset,
+        data: xr.Dataset,
         data_type: str,
         skip_keys: Optional[List] = None,
         if_exists: str = "default",
@@ -120,7 +120,7 @@ class Datasource:
         else:
             raise NotImplementedError()
 
-    def add_timed_data(self, data: Dataset, data_type: str, if_exists: str = "default") -> None:
+    def add_timed_data(self, data: xr.Dataset, data_type: str, if_exists: str = "default") -> None:
         """Add data to this Datasource, splitting along the time axis
 
         Args:
@@ -327,6 +327,13 @@ class Datasource:
         """
         from openghg.util import to_lowercase
 
+        try:
+            del metadata["object_store"]
+        except KeyError:
+            pass
+        else:
+            logger.warning("object_store should not be added to the metadata, removing.")
+
         lowercased: Dict = to_lowercase(metadata, skip_keys=skip_keys)
         self._metadata.update(lowercased)
 
@@ -350,7 +357,7 @@ class Datasource:
 
         return start, end
 
-    def get_dataset_daterange(self, dataset: Dataset) -> Tuple[Timestamp, Timestamp]:
+    def get_dataset_daterange(self, dataset: xr.Dataset) -> Tuple[Timestamp, Timestamp]:
         """Get the daterange for the passed Dataset
 
         Args:
@@ -369,7 +376,7 @@ class Datasource:
         except AttributeError:
             raise AttributeError("This dataset does not have a time attribute, unable to read date range")
 
-    def get_dataset_daterange_str(self, dataset: Dataset) -> str:
+    def get_dataset_daterange_str(self, dataset: xr.Dataset) -> str:
         start, end = self.get_dataset_daterange(dataset=dataset)
 
         # Tidy the string and concatenate them
@@ -380,7 +387,7 @@ class Datasource:
 
         return daterange_str
 
-    def get_representative_daterange_str(self, dataset: Dataset, period: Optional[str] = None) -> str:
+    def get_representative_daterange_str(self, dataset: xr.Dataset, period: Optional[str] = None) -> str:
         """
         Get representative daterange which incorporates any period the data covers.
 
@@ -451,7 +458,7 @@ class Datasource:
 
         return daterange_str1_clipped
 
-    def _clip_daterange_label(self, labelled_datasets: Dict[str, Dataset]) -> Dict[str, Dataset]:
+    def _clip_daterange_label(self, labelled_datasets: Dict[str, xr.Dataset]) -> Dict[str, xr.Dataset]:
         """
         Check the daterange string labels for the datasets and ensure neighbouring
         date ranges are not overlapping. The daterange string labels will be updated
@@ -545,14 +552,14 @@ class Datasource:
         return data
 
     @staticmethod
-    def load_dataset(bucket: str, key: str) -> Dataset:
+    def load_dataset(bucket: str, key: str) -> xr.Dataset:
         """Loads a xarray Dataset from the passed key for creation of a Datasource object
 
-        Currently this function gets binary data back from the object store, writes it
-        to a temporary file and then gets xarray to read from this file.
+        Data is lazy-loaded because we use `xarray.open_dataset`. This means that the
+        file handler for the data file remains open until the data is actually required.
 
-        This is done in a long winded way due to xarray not being able to create a Dataset
-        from binary data at the moment.
+        This improves performance, since we often only update one or two chunks of the dataset
+        at a time.
 
         Args:
             bucket: Bucket containing data
@@ -560,11 +567,16 @@ class Datasource:
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
-        import io
-        from openghg.objectstore import get_object
-        from xarray import load_dataset
+        from openghg.objectstore import get_object_data_path
 
-        return load_dataset(io.BytesIO(get_object(bucket=bucket, key=key)))
+        file_path = get_object_data_path(bucket, key)
+        # This works
+        # TODO - this should be changed to use open_dataset really
+        # but open_dataset causes issues due to internal xarray caching when
+        # we try and write out to the same file
+        return xr.load_dataset(file_path)
+        # This does not
+        # return xr.open_dataset(file_path)
 
     @classmethod
     def from_data(cls: Type[T], bucket: str, data: Dict, shallow: bool) -> T:
@@ -622,13 +634,12 @@ class Datasource:
         version_backup = f"{version}_backup"
         return version_backup
 
-    def save(self, bucket: str, new_version: bool = True) -> None:
+    def save(self, bucket: str, new_version: bool = True, compression: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
             bucket: Bucket to hold data
-            new_version: Create a new version for the data and save current
-                data to a previous version.
+            compression: True if data should be compressed on save
         Returns:
             None
         """
@@ -649,87 +660,24 @@ class Datasource:
                 # Backup the old data keys at "latest"
                 version_str = f"v{str(len(self._data_keys))}"
 
-            if self._status:
-                if_exists = self._status["if_exists"]
-                overlapping = self._status["overlapping"]
-            else:
-                if_exists = "default"
-                overlapping = False
-
+            # Backup the old data keys at "latest"
+            # version_str = f"v{str(len(self._data_keys))}"
             # Store the keys for the new data
             new_keys = {}
 
-            version_key = self.define_version_key(version_str)
-
-            # If version is already present, and we are not creating a new version
-            # we may need to delete the previous data.
-            delete_version = False
-            if exists(bucket=bucket, key=version_key) and not new_version:
-                # Check update mode and whether data was overlapping.
-                if (if_exists == "replace" and overlapping) or if_exists == "new":
-                    logger.info("Previous version of the data will be deleted.")
-                    delete_version = True
-
-            # Create back up of original data in case writing new data is unsuccessful
-            if delete_version:
-                version_str_backup = self.define_backup_version(version_str)
-                version_key_backup = self.define_version_key(version_str_backup)
-
-                move_objects(bucket=bucket, src_prefix=version_key, dst_prefix=version_key_backup)
-                # Create full path to back up folder and move current version folder
-                # version_folder_backup = Path(bucket) / version_key_backup
-                # version_folder.rename(version_folder_backup)
-
-                version_keys = self._data_keys[version_str]["keys"]
-                labels = version_keys.keys()
-
-                # Add record of backup version to self._data_keys
-                self._data_keys[version_str_backup] = self._data_keys[version_str].copy()
-                self._data_keys[version_str_backup]["keys"] = {
-                    label: self.define_data_key(label, version_str_backup) for label in labels
-                }
-                self._data_keys[version_str_backup]["timestamp"] = str(timestamp_now())  # type: ignore
-
-            # if not version_folder.exists():
-            # version_folder.mkdir(parents=True, exist_ok=True)
-
             # Iterate over the keys (daterange string) of the data dictionary
-            for daterange, data in self._data.items():
-                # data_key = f"{Datasource._data_root}/uuid/{self._uuid}/{version_str}/{daterange}"
-                data_key = self.define_data_key(label=daterange, version=version_str)
+            for daterange in self._data:
+                data_key = f"{Datasource._datasource_root}/uuid/{self._uuid}/{version_str}/{daterange}"
 
                 new_keys[daterange] = data_key
-                # filepath = version_folder / f"{daterange}._data"
-                # TODO - we really just want to use set_object here but we need some bytes for that
-                # until the zarr changes are implemented let's stick to writing directly to NetCDF
-                # instead of writing to a temporary space and reading the bytes
+                data = self._data[daterange]
+
                 filepath = Path(f"{bucket}/{data_key}._data")
+                parent_folder = filepath.parent
+                if not parent_folder.exists():
+                    parent_folder.mkdir(parents=True)
 
-                try:
-                    data.to_netcdf(filepath, engine="netcdf4")
-                except IOError:
-                    try:
-                        filepath.parent.mkdir(parents=True)
-                        data.to_netcdf(filepath, engine="netcdf4")
-                    except IOError:
-                        # Remove this version
-                        shutil.rmtree(filepath.parent)
-                        # If unable to write, return original data from back up.
-                        if delete_version:
-                            move_objects(bucket=bucket, src_prefix=version_key_backup, dst_prefix=version_key)
-                            self._data_keys.pop(version_str_backup)
-                        raise ObjectStoreError("Unable to write new data. Restored previous data.")
-                    # break
-
-            # If write has been successful, remove any back up data.
-            if delete_version:
-                if exists(bucket=bucket, key=version_key_backup):
-                    # if version_folder_backup.exists():
-                    logger.warning(f"Deleting previous stored data for this version: {version_str}")
-                    self.delete_version(bucket=bucket, version=version_str_backup)
-
-            # Make sure status is reset now this has been saved
-            self._status = None
+                data.to_netcdf(filepath, engine="netcdf4")
 
             # Copy the last version
             if "latest" in self._data_keys:
@@ -794,6 +742,11 @@ class Datasource:
                 self._data[date_key] = Datasource.load_dataset(bucket=self._bucket, key=data_key)
 
         return self._data
+
+    def close_datasets(self) -> None:
+        """Close all open datasets"""
+        for dataset in self._data.values():
+            dataset.close()
 
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource

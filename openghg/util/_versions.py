@@ -127,7 +127,7 @@ def show_versions(file: IO = sys.stdout) -> None:
         ("scipy", lambda mod: mod.__version__),
         ("tinydb", lambda mod: mod.__version__),
         ("toml", lambda mod: mod.__version__),
-        ("tqdm", lambda mod: mod.__version__),
+        ("rich", lambda mod: mod.__version__),
         ("xarray", lambda mod: mod.__version__),
         ("urllib3", lambda mod: mod.__version__),
         # openghg setup/test/doc

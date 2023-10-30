@@ -292,8 +292,9 @@ def test_standardise_footprint():
         network=network,
         height=height,
         domain=domain,
-        high_spatial_res=True,
         force=True,
+        high_spatial_resolution=True,
+        overwrite=True,
         store="user",
     )
 
