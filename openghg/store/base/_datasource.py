@@ -634,11 +634,12 @@ class Datasource:
         version_backup = f"{version}_backup"
         return version_backup
 
-    def save(self, bucket: str, new_version: bool = True) -> None:
+    def save(self, bucket: str, new_version: bool = True, compression: bool = True) -> None:
         """Save this Datasource object as JSON to the object store
 
         Args:
             bucket: Bucket to hold data
+            compression: True if data should be compressed on save
         Returns:
             None
         """

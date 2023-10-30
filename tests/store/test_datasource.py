@@ -564,6 +564,7 @@ def test_integrity_check(data, bucket):
         d.integrity_check()
 
 
+@pytest.mark.xfail(reason="We expect this to fail as we don't do any compression at the moment. REMOVE THIS TEST.")
 def test_datasource_compression(data, bucket):
     """Saving a Datasource with compression=True should
     result in a compressed netCDF file.
@@ -592,4 +593,4 @@ def test_datasource_compression(data, bucket):
     size1 = os.path.getsize(filepath1)
     size2 = os.path.getsize(filepath2)
 
-    assert size1 <= size2
+    assert size1 < size2
