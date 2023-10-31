@@ -1,8 +1,0 @@
-config_version: ""
-database:
-  type: "" #tinydb or "mongodb"
-  tinydb:
-    file_path: "tinydb config file"
-  mongodb:
-    uri: "mongodb connection string"
-  
