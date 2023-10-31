@@ -19,16 +19,16 @@ def parse_intem(
     Parse INTEM emissions data from the specified file.
 
     Args:
-        filepath (Path): Path to the '.nc' file containing INTEM emissions data.
-        species (str): Name of species
-        source (str): Source of the emissions data, default is 'intem'.
-        domain (str): Geographic domain, default is 'europe'.
-        data_type (str): Type of data, default is 'emissions'.
-        database (Optional[str]): Database name if applicable.
-        database_version (Optional[str]): Version of the database if applicable.
-        model (Optional[str]): Model name if applicable.
-        period : "needs explainer"
-        chunks : (Union[int, Dict, Literal["auto"], None]): Chunking configuration.
+        filepath: Path to the '.nc' file containing INTEM emissions data.
+        species: Name of species
+        source: Source of the emissions data, default is 'intem'.
+        domain: Geographic domain, default is 'europe'.
+        data_type: Type of data, default is 'emissions'.
+        database: Database name if applicable.
+        database_version: Version of the database if applicable.
+        model: Model name if applicable.
+        period: "needs explainer"
+        chunks: (Union[int, Dict, Literal["auto"], None]): Chunking configuration.
         continuous (bool): "needs explainer"
 
     Returns:
