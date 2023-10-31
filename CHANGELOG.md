@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
 
 - Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718) 
+
 - Added database configuration file to specify database type as tinydb or mongodb. - [PR #800](https://github.com/openghg/openghg/pull/800)
 
 
