@@ -631,7 +631,6 @@ class ModelScenario:
                 infer_sampling_period = True
             else:
                 obs_data_period_s = float(sampling_period)
-            obs_data_period_s = float(obs_attributes["sampling_period"])
         elif "sampling_period_estimate" in obs_attributes:
             estimate = obs_attributes["sampling_period_estimate"]
             logger.warning(f"Using estimated sampling period of {estimate}s for observational data")
@@ -653,6 +652,10 @@ class ModelScenario:
             # Check if the periods differ by more than 1 second
             if max_diff > 1.0:
                 raise ValueError("Sample period can be not be derived from observations")
+
+            estimate = f"{obs_data_period_s:.1f}"
+            logger.warning(f"Sampling period was estimated (inferred) from data frequency: {estimate}s")
+            obs.data.attrs["sampling_period_estimate"] = estimate
 
         # TODO: Check regularity of the data - will need this to decide is resampling
         # is appropriate or need to do checks on a per time point basis
@@ -773,7 +776,7 @@ class ModelScenario:
         try:
             mf = obs.data["mf"]
             units: Optional[float] = float(mf.attrs["units"])
-        except KeyError:
+        except (ValueError, KeyError):
             units = None
         except AttributeError:
             raise AttributeError("Unable to read mf attribute from observation data.")

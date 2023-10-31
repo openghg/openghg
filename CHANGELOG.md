@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
 
 ### Added
-- Added database configuration file to specify database type as tinydb or mongodb. - [PR #800](https://github.com/openghg/openghg/pull/800)
 
 - Added `DeprecationWarning` to the functions `parse_cranfield` and  `parse_btt`. - [PR #792](https://github.com/openghg/openghg/pull/792)
 
@@ -23,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
 
 - Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718) 
+- Added database configuration file to specify database type as tinydb or mongodb. - [PR #800](https://github.com/openghg/openghg/pull/800)
+
+
+### Fixed
+
+ - Bug fix for sampling period attribute having a value of "NOT_SET" and combining the observation and footprint data. Previously this was raising a ValueError. [PR #808](https://github.com/openghg/openghg/pull/808)
 
 ### Changed
 
