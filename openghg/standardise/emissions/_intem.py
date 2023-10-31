@@ -39,7 +39,7 @@ def parse_intem(
     from openghg.store._emissions import Emissions
     from xarray import open_dataset
 
-    emissions_dataset = open_dataset(filepath, chunks=chunks)
+    emissions_dataset = open_dataset(filepath).chunk(chunks)
 
     author_name = "OpenGHG Cloud"
     emissions_dataset.attrs["author"] = author_name
