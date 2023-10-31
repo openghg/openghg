@@ -7,7 +7,6 @@ def parse_intem(
     species: str,
     source: str = "intem",
     domain: str = "europe",
-    data_type: str = "emissions",
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
