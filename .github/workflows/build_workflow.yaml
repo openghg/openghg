@@ -22,15 +22,9 @@ jobs:
           pip install --upgrade build
       - name: Build a binary wheel and a source tarball
         run: |
-          python -m build --sdist --wheel --outdir dist/
-
-  publish_pypi:
-    name: Publish Python distributions to PyPI and TestPyPI
-    runs-on: ubuntu-latest
-    needs: build_pypi
-    if: github.event_name == 'push' && github.ref_type == 'tag'
-    steps:
+          python -m build --sdist --wheel --outdir dist/      
       - name: Publish distribution to Test PyPI
+        if: success() && github.event_name == 'push' && github.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8
         with:
           password:  ${{ secrets.TEST_PYPI_API_TOKEN }}
@@ -58,14 +52,8 @@ jobs:
           conda config --append channels openghg
           mkdir ${{ github.workspace }}/build
           conda mambabuild --croot ${{ github.workspace }}/build recipes -c conda-forge
-
-  publish_conda:
-    name: Publish Conda package
-    runs-on: ubuntu-latest
-    needs: build_conda
-    if: github.event_name == 'push' && github.ref_type == 'tag'
-    steps:
       - name: Upload the Conda package
+        if: success() && github.event_name == 'push' && github.ref_type == 'tag'
         run: |
           BUILD_DIR=${GITHUB_WORKSPACE}/build
           BUILD=$(find "$BUILD_DIR" -name '*.tar.bz2')
