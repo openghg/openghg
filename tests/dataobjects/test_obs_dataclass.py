@@ -19,7 +19,7 @@ def test_str_representation_correct(data, metadata):
 
     obs = ObsData(data=data, metadata=metadata)
 
-    expected_str = "Data: {'data': 'test'}\nMetadata : {'test': 1, 'key': 2}"
+    expected_str = "Data: {'data': 'test'}\nMetadata: {'test': 1, 'key': 2}"
 
     assert expected_str == str(obs)
 

@@ -12,6 +12,7 @@ import zarr
 from openghg.types import KeyExistsError
 from pathlib import Path
 from openghg.objectstore import get_folder_size
+from openghg.store.spec import get_zarr_encoding
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
@@ -77,6 +78,7 @@ class ZarrStore(ABC):
         """Return the number of bytes stored in the zarr store"""
         pass
 
+
 # TODO - ensure the zarr store inherits from the above class
 class LocalZarrStore:
     def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
@@ -118,10 +120,10 @@ class LocalZarrStore:
             str: Key of zarr store
         """
         return self._store_key
-    
+
     def store_path(self) -> Path:
         """Return the path of this zarr Store
-        
+
         Returns:
             Path: Path of zarr store
         """
@@ -141,11 +143,11 @@ class LocalZarrStore:
             key: Key to add data under
             version: Version of data to add
             dataset: xr.Dataset to add
+            compressor: Compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
+            filters: Filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
         Returns:
             None
         """
-        from openghg.store.spec import get_zarr_encoding
-
         if self._mode == "r":
             raise ValueError("Cannot add to a read-only zarr store")
 
@@ -178,7 +180,7 @@ class LocalZarrStore:
         self.delete(key=key, version=version)
         return xr.open_zarr(store=self._memory_store, group=versioned_key, consolidated=False)
 
-    def copy_to_stores(self, keys: Iterable, version: str) -> List[Dict]:
+    def copy_to_memorystore(self, keys: Iterable, version: str) -> List[Dict]:
         """Copies the compressed data from the filesystem store to a list of in-memory stores.
         This preserves the compression and chunking of the data and creates a list
         that can be opened as a single dataset.
@@ -237,14 +239,17 @@ class LocalZarrStore:
         for key in self._store.keys():
             del self._store[key]
 
-    def update(self, key: str, version: str, dataset: xr.Dataset, compressor: Optional[Any]) -> None:
+    def update(
+        self, key: str, version: str, dataset: xr.Dataset, compressor: Optional[Any], filters: Optional[Any]
+    ) -> None:
         """Update the data at the given key.
 
         Args:
             key: Key of data in store
             version: Version of data
             dataset: xr.Dataset to add
-            compressor: Numcodecs compressor for zarr store
+            compressor: Compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
+            filters: Filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
         Returns:
             None
         """
@@ -256,14 +261,10 @@ class LocalZarrStore:
             raise KeyError(f"Key {versioned_key} not found in zarr store")
 
         self.delete(key=key, version=version)
-        self.add(key=key, version=version, dataset=dataset, compressor=compressor)
+        self.add(key=key, version=version, dataset=dataset, compressor=compressor, filters=filters)
 
     def hash(self, data: str) -> str:
         """Hash the data at the given key"""
-        raise NotImplementedError
-
-    def hash_multiple(self, datasets: Dict[str, xr.Dataset]) -> Dict[str, str]:
-        """Hash multiple xr.Datasets"""
         raise NotImplementedError
 
     def get_hash(self, key: str) -> str:
@@ -277,4 +278,3 @@ class LocalZarrStore:
     def size(self) -> int:
         """Return the number of bytes stored in the zarr store"""
         return get_folder_size(folder_path=self.store_path())
-        

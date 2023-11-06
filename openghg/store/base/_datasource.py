@@ -9,7 +9,7 @@ import numpy as np
 from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
 from uuid import uuid4
-from openghg.objectstore import exists, get_object_from_json, delete_object
+from openghg.objectstore import exists, get_object_from_json, delete_objects
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -379,14 +379,15 @@ class Datasource:
         self._last_updated = timestamp_str_now
 
     def delete_all_data(self) -> None:
-        """Delete the data associated with this Datasource
+        """Delete the zarr stor that contains all the data
+        associated with this Datasource
 
         Returns:
             None
         """
         self._zarr_store.delete_all()
         self._zarr_store.close()
-        delete_object(bucket=self._bucket, key=self._zarr_store.store_key())
+        delete_objects(bucket=self._bucket, prefix=self._zarr_store.store_key())
 
     def delete_data(self, version: str, keys: List) -> None:
         """Delete specific keys

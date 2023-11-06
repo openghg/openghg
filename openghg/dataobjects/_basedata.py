@@ -66,9 +66,12 @@ class _BaseData:
 
             date_keys = self.metadata["versions"][self._version]["keys"]
             zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
-            self._memory_stores = zarrstore.copy_to_stores(keys=date_keys, version=self._version)
+            self._memory_stores = zarrstore.copy_to_memorystore(keys=date_keys, version=self._version)
             self.data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords")
             zarrstore.close()
 
     def __bool__(self) -> bool:
-        return bool(self._data)
+        return bool(self.data)
+
+    def __str__(self) -> str:
+        return f"Data: {self.data}\nMetadata: {self.metadata}"
