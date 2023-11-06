@@ -159,18 +159,6 @@ class Datasource:
         else:
             raise NotImplementedError()
 
-    def _get_version_str(self) -> str:
-        """Get the version string needed to add data to this Datasource, depending on the
-        parameters given. Should be given new_version, if_exists etc
-        """
-        # Add data to same version as previous unless new_version is True
-        if self._latest_version and not self._new_version:
-            version_str = self._latest_version
-        else:
-            version_str = f"v{str(len(self._data_keys))}"
-
-        return version_str
-
     def add_timed_data(
         self,
         data: xr.Dataset,
@@ -178,6 +166,7 @@ class Datasource:
         sort: bool,
         drop_duplicates: bool,
         if_exists: str = "auto",
+        new_version: bool = True,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
     ) -> None:
@@ -214,7 +203,10 @@ class Datasource:
         daterange_str = self.get_representative_daterange_str(dataset=data, period=period)
 
         # NOTE - added version string here as we add data to the zarr store in this function
-        version_str = self._get_version_str()
+        if self._latest_version and not new_version:
+            version_str = self._latest_version
+        else:
+            version_str = f"v{str(len(self._data_keys))}"
 
         # TODO - Check the hash of this data and compare it to our stored hashes
         # this means Dataset hash and not the file hash
@@ -715,20 +707,27 @@ class Datasource:
         """
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
+    def memory_store(self, version="latest") -> List:
+        """Copy all the compressed data from the zarr store into memory
+
+        Returns:
+            list: List of zarr memory stores
+        """
+        if version == "latest":
+            version = self._latest_version
+
+        return self._zarr_store.copy_to_memorystore(keys=self.data_keys(), version=version)
+
     def data(self) -> Dict:
         """Get the data stored in this Datasource
 
         Returns:
             dict: Dictionary of data keyed by daterange
         """
+        # TODO - in the future we may store data in other formats
+        # we'll need to check the storage_type and inform the user
+        # what function to use e.g. memory_store, etc?
         raise NotImplementedError("Data is now stored in the zarr store")
-        return self._zarr_store
-        # if not self._data:
-        #     for date_key in self._data_keys["latest"]["keys"]:
-        #         data_key = self._data_keys["latest"]["keys"][date_key]
-        #         self._data[date_key] = Datasource.load_dataset(bucket=self._bucket, key=data_key)
-
-        # return self._data
 
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource

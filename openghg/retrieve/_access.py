@@ -137,6 +137,7 @@ def get_obs_surface(
     inlet = format_inlet(inlet)
 
     if running_on_hub():
+        raise NotImplementedError("Cloud functionality marked for rewrite.")
         to_post: Dict[str, Union[str, Dict]] = {}
 
         to_post["function"] = "get_obs_surface"

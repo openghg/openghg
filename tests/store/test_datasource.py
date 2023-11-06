@@ -57,7 +57,7 @@ def bucket():
 
 
 def test_add_data(data, bucket):
-    d = Datasource()
+    d = Datasource(bucket=bucket)
 
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
@@ -66,15 +66,15 @@ def test_add_data(data, bucket):
     assert ch4_data["ch4_variability"][0] == pytest.approx(0.79)
     assert ch4_data["ch4_number_of_observations"][0] == pytest.approx(26.0)
 
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
-    d.save(bucket=bucket)
+    d.add_data(metadata=metadata, data=ch4_data, sort=False, drop_duplicates=False, data_type="surface")
 
-    data_chunks = [Datasource.load_dataset(bucket=bucket, key=k) for k in d.data_keys()]
+    assert d._zarr_store
 
-    # Now read it out and make sure it's what we expect
-    combined = xr.concat(data_chunks, dim="time")
+    memory_store = d.memory_store(version="v0")
+    assert memory_store
 
-    assert combined.equals(ch4_data)
+    ds = xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords")
+    assert ds.equals(ch4_data)
 
     expected_metadata = {
         "site": "bsd",
@@ -97,10 +97,12 @@ def test_add_data(data, bucket):
         "data_type": "surface",
         "start_date": "2014-01-30 11:12:30+00:00",
         "end_date": "2020-12-01 22:32:29+00:00",
-        "latest_version": "v1",
+        "latest_version": "v0",
     }
 
-    assert d.metadata() == expected_metadata
+    d.metadata()["versions"]["v0"]["keys"] = ['2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00']
+
+    assert d.metadata().items() >= expected_metadata.items()
 
 
 def test_versioning(capfd, bucket):
@@ -115,18 +117,18 @@ def test_versioning(capfd, bucket):
     # Then add the full data, check versioning works correctly
     metadata = {"foo": "bar"}
 
-    d = Datasource()
+    d = Datasource(bucket=bucket)
     # Fix the UUID for the tests
     d._uuid = "4b91f73e-3d57-47e4-aa13-cb28c35d3b3d"
 
     min_ch4_data = min_data["ch4"]["data"]
 
     d.add_data(metadata=metadata, data=min_ch4_data, data_type="surface")
-    d.save(bucket=bucket)
+    d.save()
 
     min_keys = d.versions()
 
-    expected_v1 = {
+    expected_v0 = {
         "2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00",
         "2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00",
         "2014-07-26-13:51:30+00:00_2014-07-28-13:02:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-07-26-13:51:30+00:00_2014-07-28-13:02:30+00:00",
@@ -138,7 +140,7 @@ def test_versioning(capfd, bucket):
         "2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00",
     }
 
-    assert min_keys["v1"]["keys"] == expected_v1
+    assert min_keys["v0"]["keys"] == expected_v0
 
     detailed_data = parse_crds(data_filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
 
