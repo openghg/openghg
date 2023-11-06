@@ -1,20 +1,12 @@
 from ._basedata import _BaseData
 from openghg.plotting import plot_timeseries as general_plot_timeseries
 import plotly.graph_objects as go
-from openghg.store.base import LocalZarrStore
-import xarray as xr
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Iterator, Optional
 
 
 class ObsData(_BaseData):
     """This class is used to return observations data. It be created with a preloaded xarray Dataset or
     with a UUID and version number to retrieve data from Datasource zarr store.
-
-    Args:
-        metadata: Dictionary of metadata
-        data: Dataset if data is already loaded
-        uuid: UUID of Datasource to retrieve data from
-        version: Version of data requested from Datasrouce
     """
 
     # Compatability layer for legacy format - mimicking the behaviour of a dictionary
@@ -55,6 +47,9 @@ class ObsData(_BaseData):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ObsData):
             return NotImplemented
+        
+        if self.data is None or other.data is None:
+            raise ValueError("Cannot compare data if it is not loaded")
 
         return self.data.equals(other.data) and self.metadata == other.metadata
 

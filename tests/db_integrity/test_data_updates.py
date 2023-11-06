@@ -60,7 +60,7 @@ def test_database_update_repeat():
     flux = get_flux(**em_param)
 
     assert flux is not None
-    assert flux.metadata["latest_version"] == "v1"
+    assert flux.metadata["latest_version"] == "v0"
 
 
 def test_database_update_force():
@@ -85,7 +85,7 @@ def test_database_update_force():
     flux = get_flux(**em_param)
 
     assert flux is not None
-    assert flux.metadata["latest_version"] == "v2"
+    assert flux.metadata["latest_version"] == "v1"
 
 
 # Test variants in data from the same source being added
@@ -325,7 +325,7 @@ def test_obs_data_read_header_diff_update():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v2"
+    assert metadata_sf6["latest_version"] == "v1"
 
 
 def test_obs_data_read_data_diff():

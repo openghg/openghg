@@ -4,10 +4,8 @@ from io import BytesIO
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union, Iterable
 
 from openghg.dataobjects import ObsData
-from openghg.store import recombine_datasets
 from openghg.util import running_on_hub
 from pandas import DataFrame
-from xarray import Dataset, open_dataset
 
 __all__ = ["SearchResults"]
 
@@ -28,7 +26,13 @@ class SearchResults:
     """
 
     # TODO - WIP move to tinydb metadata lookup to simplify code
-    def __init__(self, metadata: Optional[Dict] = None, start_result: Optional[str] = None):
+    def __init__(
+        self,
+        metadata: Optional[Dict] = None,
+        start_result: Optional[str] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ):
         # db = tinydb.TinyDB(tinydb.storages.MemoryStorage)
         if metadata is not None:
             self.metadata = metadata
@@ -48,6 +52,9 @@ class SearchResults:
         else:
             self.results = {}  # type: ignore
             self.metadata = {}
+
+        self._start_date = start_date
+        self._end_date = end_date
 
         self.hub = running_on_hub()
 
@@ -202,58 +209,20 @@ class SearchResults:
                 if version not in metadata["versions"]:
                     raise ValueError(f"Invalid version {version} for UUID {uuid}")
 
-            results.append(ObsData(uuid=uuid, version=version, metadata=metadata))
+            results.append(
+                ObsData(
+                    uuid=uuid,
+                    version=version,
+                    metadata=metadata,
+                    start_date=self._start_date,
+                    end_date=self._end_date,
+                )
+            )
 
         if len(results) == 1:
             return results[0]
         else:
             return results
-
-    def _retrieve_dataset(
-        self,
-        bucket: str,
-        keys: List,
-        sort: bool,
-        elevate_inlet: bool = True,
-        attrs_to_check: Optional[Dict] = None,
-    ) -> Dataset:
-        """Retrieves datasets from either cloud or local object store
-
-        Args:
-            keys: List of object store keys
-            sort: Sort data on recombination
-            elevate_inlet: Elevate inlet from attribute to variable
-        Returns:
-            Dataset:
-        """
-        raise NotImplementedError("This will be removed")
-        from openghg.cloud import call_function
-
-        if self.hub:
-            to_post: Dict[str, Union[Dict, List, bool, str]] = {}
-            to_post["keys"] = keys
-            to_post["sort"] = sort
-            to_post["elevate_inlet"] = elevate_inlet
-            to_post["function"] = "retrieve"
-
-            if attrs_to_check is not None:
-                to_post["attrs_to_check"] = attrs_to_check
-
-            result = call_function(data=to_post)
-            binary_netcdf = result["content"]["data"]
-            buf = BytesIO(binary_netcdf)
-            # TODO - remove this ignore once xarray have updated their type hints
-            ds: Dataset = open_dataset(buf).load()  # type: ignore
-            return ds
-        else:
-            # This should just create an ObsData
-            return recombine_datasets(
-                bucket=bucket,
-                keys=keys,
-                sort=sort,
-                elevate_inlet=elevate_inlet,
-                attrs_to_check=attrs_to_check,
-            )
 
     @staticmethod
     def df_to_table_console_output(df: DataFrame) -> None:

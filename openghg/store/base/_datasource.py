@@ -217,7 +217,7 @@ class Datasource:
         version_str = self._get_version_str()
 
         # TODO - Check the hash of this data and compare it to our stored hashes
-        # NOTE - this means Dataset hash and not the file hash
+        # this means Dataset hash and not the file hash
 
         # Ensure daterange strings are independent and do not overlap each other
         # (this can occur due to representative date strings)

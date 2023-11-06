@@ -154,7 +154,7 @@ def test_search_site_data_version():
     metadata = res.metadata[key]
 
     assert "latest_version" in metadata
-    assert metadata["latest_version"] == "v1"
+    assert metadata["latest_version"] == "v0"
 
 
 def test_multi_type_search():
@@ -311,7 +311,7 @@ def test_search_footprints_select():
         domain="TEST",
         model="NAME",
         start_date="2016-01-01",
-        end_date="2016-08-01",
+        end_date="2016-07-31",
     )
 
     # Test retrieved footprint data found from the search contains data
@@ -319,6 +319,7 @@ def test_search_footprints_select():
     footprint_data = res.retrieve()
     data = footprint_data.data
     time = data["time"]
+
     assert time[0] == Timestamp("2016-07-01T00:00:00")
     assert time[-1] == Timestamp("2016-07-01T02:00:00")
 

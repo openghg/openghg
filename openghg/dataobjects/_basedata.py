@@ -22,14 +22,18 @@ class _BaseData:
     ) -> None:
         """
         Args:
+            metadata: Dictionary of metadata
+            data: Dataset if data is already loaded
+            uuid: UUID of Datasource to retrieve data from
+            version: Version of data requested from Datasrouce
             start_date: Start date of data to retrieve
             end_date: End date of data to retrieve
             sort: Sort the resulting Dataset by the time dimension, defaults to False
+            elevate_inlet: Force the elevation of the inlet attribute
             attrs_to_check: Attributes to check for duplicates. If duplicates are present
                 a new data variable will be created containing the values from each dataset
                 If a dictionary is passed, the attribute(s) will be retained and the new value assigned.
                 If a list/string is passed, the attribute(s) will be removed.
-            elevate_inlet: Force the elevation of the inlet attribute
         """
         from openghg.util import timestamp_epoch, timestamp_now, dates_in_range
 
@@ -61,10 +65,11 @@ class _BaseData:
                     end_date = timestamp_now()
 
                 date_keys = dates_in_range(keys=date_keys, start_date=start_date, end_date=end_date)
+            else:
+                date_keys = self.metadata["versions"][self._version]["keys"]
 
             self._bucket = metadata["object_store"]
 
-            date_keys = self.metadata["versions"][self._version]["keys"]
             zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
             self._memory_stores = zarrstore.copy_to_memorystore(keys=date_keys, version=self._version)
             self.data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords")
