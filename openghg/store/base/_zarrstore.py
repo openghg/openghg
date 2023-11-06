@@ -75,16 +75,18 @@ class ZarrStore(ABC):
         """Return the number of bytes stored in the zarr store"""
         pass
 
-
+# TODO - ensure the zarr store inherits from the above class
 class LocalZarrStore:
     def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
-        store_path = f"{bucket}/data/{datasource_uuid}/zarr"
-
+        self._store_key = f"{bucket}/data/{datasource_uuid}/zarr"
         self._mode = mode
         self._bucket = bucket
-        self._store = zarr.storage.NestedDirectoryStore(store_path)
+        self._store = zarr.storage.NestedDirectoryStore(self._store_key)
         self._pop_keys = collections.deque()
         self._memory_store = {}
+
+    def __bool__(self) -> bool:
+        return bool(self._store)
 
     def _create_key(self, key: str, version: str) -> str:
         """Create a key for the zarr store."""
@@ -105,6 +107,14 @@ class LocalZarrStore:
             None
         """
         self._store.close()
+
+    def store_key(self) -> str:
+        """Return the key of this zarr Store
+
+        Returns:
+            str: Key of zarr store
+        """
+        return self._store_key
 
     def add(
         self,

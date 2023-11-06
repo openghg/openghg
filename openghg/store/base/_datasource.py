@@ -9,7 +9,7 @@ import numpy as np
 from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
 from uuid import uuid4
-from openghg.objectstore import exists, get_object_from_json
+from openghg.objectstore import exists, get_object_from_json, delete_object
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -41,6 +41,8 @@ class Datasource:
             if exists(bucket=bucket, key=key):
                 stored_data = get_object_from_json(bucket=bucket, key=key)
                 self.__dict__.update(stored_data)
+            else:
+                raise ObjectStoreError(f"No Datasource with uuid {uuid} found in bucket {bucket}")
         else:
             self._uuid = str(uuid4())
             self._creation_datetime = str(timestamp_now())
@@ -383,6 +385,8 @@ class Datasource:
             None
         """
         self._zarr_store.delete_all()
+        self._zarr_store.close()
+        delete_object(bucket=self._bucket, key=self._zarr_store.store_key())
 
     def delete_data(self, version: str, keys: List) -> None:
         """Delete specific keys
