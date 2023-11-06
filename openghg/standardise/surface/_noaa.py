@@ -3,6 +3,7 @@ from typing import Any, Dict, Hashable, Optional, Union, cast
 import logging
 import xarray as xr
 
+
 from openghg.types import optionalPathType
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -495,34 +496,12 @@ def _read_raw_data(
         dict: Dictionary containing attributes, data and metadata keys
     """
     from openghg.util import clean_string, read_header, get_site_info, load_internal_json
-    from pandas import Timestamp, read_csv
+    import pandas as pd
+    from pandas import read_csv
 
     header = read_header(filepath=data_filepath)
 
     column_names = header[-1][14:].split()
-
-    def date_parser(year: str, month: str, day: str, hour: str, minute: str, second: str) -> Timestamp:
-        return Timestamp(year, month, day, hour, minute, second)
-
-    date_parsing = {
-        "time": [
-            "sample_year",
-            "sample_month",
-            "sample_day",
-            "sample_hour",
-            "sample_minute",
-            "sample_seconds",
-        ]
-    }
-
-    data_types = {
-        "sample_year": int,
-        "sample_month": int,
-        "sample_day": int,
-        "sample_hour": int,
-        "sample_minute": int,
-        "sample_seconds": int,
-    }
 
     # Number of header lines to skip
     n_skip = len(header)
@@ -532,12 +511,27 @@ def _read_raw_data(
         skiprows=n_skip,
         names=column_names,
         sep=r"\s+",
-        dtype=data_types,
-        parse_dates=date_parsing,
-        date_parser=date_parser,
-        index_col="time",
         skipinitialspace=True,
     )
+
+    # combine year, month, etc... columns into single 'time' column
+    date_cols = ["sample_year",
+            "sample_month",
+            "sample_day",
+            "sample_hour",
+            "sample_minute",
+            "sample_seconds"]
+    data['time'] = pd.to_datetime(
+        arg=data[date_cols].rename(mapper=(lambda x: x.split('_')[1]), axis=1),  # type: ignore  # remove 'sample_' from col names
+        format="%Y-%m-%d %H:%M:%S",
+    )
+    data = (data.drop(labels=date_cols, axis=1)
+            .set_index('time', drop=True)
+            )
+
+
+    print(data.iloc[0:5, :])
+    print(data.index)
 
     # Drop duplicates
     data = data.loc[~data.index.duplicated(keep="first")]
