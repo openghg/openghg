@@ -347,11 +347,8 @@ def _read_data_small_header(
         na_values="-999.99",
     )
 
-    data['time'] = pd.to_datetime(data[datetime_columns], format="%Y-%m-%d %H:%M:%S")
-    data = (data.drop(labels=datetime_columns, axis=1)
-            .set_index('time', drop=True)
-            )
-
+    data["time"] = pd.to_datetime(data[datetime_columns], format="%Y-%m-%d %H:%M:%S")
+    data = data.drop(labels=datetime_columns, axis=1).set_index("time", drop=True)
 
     data = data[data[species_fname.lower()] >= 0.0]
 

@@ -515,20 +515,19 @@ def _read_raw_data(
     )
 
     # combine year, month, etc... columns into single 'time' column
-    date_cols = ["sample_year",
-            "sample_month",
-            "sample_day",
-            "sample_hour",
-            "sample_minute",
-            "sample_seconds"]
-    data['time'] = pd.to_datetime(
-        arg=data[date_cols].rename(mapper=(lambda x: x.split('_')[1]), axis=1),  # type: ignore  # remove 'sample_' from col names
+    date_cols = [
+        "sample_year",
+        "sample_month",
+        "sample_day",
+        "sample_hour",
+        "sample_minute",
+        "sample_seconds",
+    ]
+    data["time"] = pd.to_datetime(
+        arg=data[date_cols].rename(mapper=(lambda x: x.split("_")[1]), axis=1),  # type: ignore  # remove 'sample_' from col names
         format="%Y-%m-%d %H:%M:%S",
     )
-    data = (data.drop(labels=date_cols, axis=1)
-            .set_index('time', drop=True)
-            )
-
+    data = data.drop(labels=date_cols, axis=1).set_index("time", drop=True)
 
     print(data.iloc[0:5, :])
     print(data.index)
