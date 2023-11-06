@@ -10,6 +10,8 @@ import xarray as xr
 import zarr
 
 from openghg.types import KeyExistsError
+from pathlib import Path
+from openghg.objectstore import get_folder_size
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
@@ -78,10 +80,11 @@ class ZarrStore(ABC):
 # TODO - ensure the zarr store inherits from the above class
 class LocalZarrStore:
     def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
-        self._store_key = f"{bucket}/data/{datasource_uuid}/zarr"
-        self._mode = mode
         self._bucket = bucket
-        self._store = zarr.storage.NestedDirectoryStore(self._store_key)
+        self._store_key = f"data/{datasource_uuid}/zarr"
+        self._mode = mode
+        dir_path = Path(bucket, self._store_key)
+        self._store = zarr.storage.NestedDirectoryStore(dir_path)
         self._pop_keys = collections.deque()
         self._memory_store = {}
 
@@ -115,6 +118,14 @@ class LocalZarrStore:
             str: Key of zarr store
         """
         return self._store_key
+    
+    def store_path(self) -> Path:
+        """Return the path of this zarr Store
+        
+        Returns:
+            Path: Path of zarr store
+        """
+        return Path(self._bucket, self._store_key)
 
     def add(
         self,
@@ -263,6 +274,7 @@ class LocalZarrStore:
         """Compare the hashes of the data at the given key and the passed xr.Dataset"""
         raise NotImplementedError
 
-    def bytes_stored(self):
+    def size(self) -> int:
         """Return the number of bytes stored in the zarr store"""
-        pass
+        return get_folder_size(folder_path=self.store_path())
+        
