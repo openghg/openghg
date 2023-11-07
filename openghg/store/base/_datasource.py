@@ -840,7 +840,7 @@ class Datasource:
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
-    def key_date_compare(self, keys: Dict[str, str], start_date: Timestamp, end_date: Timestamp) -> List:
+    def key_date_compare(self, keys: List, start_date: Timestamp, end_date: Timestamp) -> List:
         """Returns the keys in the key list that are between the given dates
 
         Args:
@@ -853,7 +853,7 @@ class Datasource:
         from openghg.util import timestamp_tzaware
 
         in_date = []
-        for key, data_key in keys.items():
+        for key in keys:
             end_key = key.split("/")[-1]
             dates = end_key.split("_")
 
@@ -866,7 +866,7 @@ class Datasource:
             # For this logic see
             # https://stackoverflow.com/a/325964
             if (start_key <= end_date) and (end_key >= start_date):
-                in_date.append(data_key)
+                in_date.append(key)
 
         return in_date
 
@@ -945,11 +945,31 @@ class Datasource:
         Returns:
             None
         """
-        from openghg.objectstore import exists
+        zarr_keys = list(self._zarr_store.keys())
 
-        for version, key_data in self._data_keys.items():
-            for key in key_data["keys"].values():
-                if not exists(bucket=self._bucket, key=key):
+        for version in self._data_keys:
+            versioned_keys = [f"{version}/{key}" for key in self._data_keys[version]["keys"]]
+            for key in versioned_keys:
+                if not any(key in zarr_key for zarr_key in zarr_keys):
                     raise ObjectStoreError(
-                        f"The key {key} for version {version} of this Datasource does not exist in the object store {self._bucket}"
+                        f"The key {key} for version {version} of this Datasource does not exist in its zarr store."
                     )
+
+        # We also need to ensure the opposite isn't true, that there are keys in the zarr store that aren't in the
+        # Datasource
+        versioned_keys = set(["/".join(k.split("/")[:2]) for k in zarr_keys if k.startswith("v")])
+        versioned_keys = [k for k in versioned_keys if ".zgroup" not in k]
+
+        for key in versioned_keys:
+            split_key = key.split("/")
+            version = split_key[0]
+            daterange = split_key[1]
+            if version not in self._data_keys:
+                raise ObjectStoreError(
+                    f"The key {key} for version {version} of this Datasource exists in its zarr store but not in the Datasource key record."
+                )
+
+            if daterange not in self._data_keys[version]["keys"]:
+                raise ObjectStoreError(
+                    f"The key {key} for version {version} of this Datasource exists in its zarr store but not in the Datasource key record."
+                )

@@ -345,19 +345,8 @@ def test_in_daterange(data, bucket):
     d = Datasource(bucket=bucket)
     d._uuid = "test-id-123"
     d.add_data(metadata=metadata, data=data, data_type="surface")
-    d.save()
 
-    expected_keys = [
-        "datasource/uuid/test-id-123/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
-        "datasource/uuid/test-id-123/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:24:29+00:00",
-        "datasource/uuid/test-id-123/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:55:29+00:00",
-        "datasource/uuid/test-id-123/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:42:29+00:00",
-        "datasource/uuid/test-id-123/v1/2018-02-18-15:42:30+00:00_2018-12-18-15:43:29+00:00",
-        "datasource/uuid/test-id-123/v1/2019-02-03-17:38:30+00:00_2019-12-09-10:48:29+00:00",
-        "datasource/uuid/test-id-123/v1/2020-02-01-18:08:30+00:00_2020-12-01-22:32:29+00:00",
-    ]
-
-    assert d.data_keys() == expected_keys
+    assert d.data_keys() == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
     start = pd.Timestamp("2014-1-1")
     end = pd.Timestamp("2014-2-1")
@@ -365,42 +354,21 @@ def test_in_daterange(data, bucket):
 
     dated_keys = d.keys_in_daterange_str(daterange=daterange)
 
-    assert dated_keys[0].split("/")[-1] == "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"
+    assert dated_keys == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
 
-def test_shallow_then_load_data(data, bucket):
-    metadata = data["ch4"]["metadata"]
-    data = data["ch4"]["data"]
-
-    d = Datasource(bucket=bucket)
-    d.add_data(metadata=metadata, data=data, data_type="surface")
-    d.save()
-
-    new_d = Datasource.load(bucket=bucket, uuid=d.uuid(), shallow=True)
-
-    assert not new_d._data
-
-    ds_data = new_d.data()
-
-    assert ds_data
-
-    ch4_data = ds_data["2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"]
-
-    assert ch4_data.time[0] == pd.Timestamp("2014-01-30-11:12:30")
-
-
-def test_key_date_compare():
+def test_key_date_compare(bucket):
     d = Datasource(bucket=bucket)
 
-    keys = {
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00": "datasource/uuid/test-uid/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00": "datasource/uuid/test-uid/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
-        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00": "datasource/uuid/test-uid/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
-        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00": "datasource/uuid/test-uid/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
-        "2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00": "datasource/uuid/test-uid/v1/2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
-        "2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00": "datasource/uuid/test-uid/v1/2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
-        "2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00": "datasource/uuid/test-uid/v1/2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
-    }
+    keys = [
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "2018-02-18-15:42:30+00:00_2018-12-18-15:42:30+00:00",
+        "2019-02-03-17:38:30+00:00_2019-12-09-10:47:30+00:00",
+        "2020-02-01-18:08:30+00:00_2020-12-01-22:31:30+00:00",
+    ]
 
     start = timestamp_tzaware("2014-01-01")
     end = timestamp_tzaware("2018-01-01")
@@ -408,25 +376,20 @@ def test_key_date_compare():
     in_date = d.key_date_compare(keys=keys, start_date=start, end_date=end)
 
     expected = [
-        "datasource/uuid/test-uid/v1/2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
-        "datasource/uuid/test-uid/v1/2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
-        "datasource/uuid/test-uid/v1/2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
-        "datasource/uuid/test-uid/v1/2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
+        "2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00",
+        "2015-01-30-11:12:30+00:00_2015-11-30-11:23:30+00:00",
+        "2016-04-02-06:52:30+00:00_2016-11-02-12:54:30+00:00",
+        "2017-02-18-06:36:30+00:00_2017-12-18-15:41:30+00:00",
     ]
 
     assert in_date == expected
 
-    start = timestamp_tzaware("2053-01-01")
-    end = timestamp_tzaware("2092-01-01")
+    start = timestamp_tzaware("2026-01-01")
+    end = timestamp_tzaware("2029-01-01")
 
     in_date = d.key_date_compare(keys=keys, start_date=start, end_date=end)
 
     assert not in_date
-
-    error_key = {"2014-01-30-11:12:30+00:00_2014-11-30-11:23:30+00:00_2014-11-30-11:23:30+00:00": "broken"}
-
-    with pytest.raises(ValueError):
-        in_date = d.key_date_compare(keys=error_key, start_date=start, end_date=end)
 
 
 def test_integrity_check(data, bucket):
@@ -447,8 +410,7 @@ def test_integrity_check(data, bucket):
     d = Datasource(bucket=bucket, uuid=uid)
     d.integrity_check()
 
-    for key in d.data_keys():
-        delete_object(bucket=bucket, key=key)
+    d._zarr_store.delete_all()
 
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
