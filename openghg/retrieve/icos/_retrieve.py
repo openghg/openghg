@@ -21,6 +21,7 @@ def retrieve_atmospheric(
     dataset_source: Optional[str] = None,
     store: Optional[str] = None,
     update_mismatch: str = "never",
+    force: bool = False,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
     data will be retrieved from the ICOS Carbon Portal. Data retrieval from the Carbon Portal may take a short time.
@@ -49,6 +50,8 @@ def retrieve_atmospheric(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
                 - "from_definition" / "metadata" - update mismatches based on input metadata
+        force: If True, disregard previously retrieved hashes. Use this if you are unable to re-add
+            previously deleted data.
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -64,6 +67,7 @@ def retrieve_atmospheric(
         dataset_source=dataset_source,
         update_mismatch=update_mismatch,
         store=store,
+        force=force,
     )
 
 
@@ -148,6 +152,7 @@ def local_retrieve(
     dataset_source: Optional[str] = None,
     store: Optional[str] = None,
     update_mismatch: str = "never",
+    force: bool = False,
     **kwargs: Any,
 ) -> Union[ObsData, List[ObsData], None]:
     """Retrieve ICOS atmospheric measurement data. If data is found in the object store it is returned. Otherwise
@@ -177,6 +182,8 @@ def local_retrieve(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
                 - "from_definition" / "metadata" - update mismatches based on input metadata
+        force: If True, disregard previously retrieved hashes. Use this if you are unable to re-add
+            previously deleted data.
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -225,7 +232,7 @@ def local_retrieve(
 
         bucket = get_writable_bucket(name=store)
         with ObsSurface(bucket=bucket) as obs:
-            obs.store_data(data=standardised_data)
+            obs.store_data(data=standardised_data, force=force)
 
         # Create the expected ObsData type
         obs_data = []

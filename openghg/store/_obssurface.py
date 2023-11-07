@@ -483,18 +483,24 @@ class ObsSurface(BaseStore):
         data_schema.validate_data(data)
 
     def store_data(
-        self, data: Dict, overwrite: bool = False, required_metakeys: Optional[Sequence] = None
+        self,
+        data: Dict,
+        overwrite: bool = False,
+        force: bool = False,
+        required_metakeys: Optional[Sequence] = None,
     ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
         Args:
             data: Dictionary of data in standard format, see the data spec under
-            Development -> Data specifications in the documentation
+                Development -> Data specifications in the documentation
             overwrite: If True overwrite currently stored data
+            force: If True, disregard previously retrieved hashes. Use this if you are unable to re-add
+                previously deleted data.
             required_metakeys: Keys in the metadata we should use to store this metadata in the object store
-            if None it defaults to:
-            {"species", "site", "station_long_name", "inlet", "instrument",
-            "network", "source_format", "data_source", "icos_data_level"}
+                if None it defaults to:
+                {"species", "site", "station_long_name", "inlet", "instrument",
+                "network", "source_format", "data_source", "icos_data_level"}
         Returns:
             Dict or None:
         """
@@ -503,7 +509,10 @@ class ObsSurface(BaseStore):
         # Very rudimentary hash of the data and associated metadata
         hashes = hash_retrieved_data(to_hash=data)
         # Find the keys in data we've seen before
-        seen_before = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
+        if force:
+            seen_before = set()
+        else:
+            seen_before = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
 
         if len(seen_before) == len(data):
             logger.warning("Note: There is no new data to process.")
