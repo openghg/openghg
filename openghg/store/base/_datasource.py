@@ -1,7 +1,5 @@
 from collections import defaultdict
 import warnings
-
-# import re
 from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
 from types import TracebackType
 import logging
@@ -58,7 +56,6 @@ class Datasource:
             # Hold information regarding the versions of the data
             self._latest_version: str = ""
 
-        # TODO - zarr - add type of stores in here for mypy
         self._zarr_store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid)
         # So we know where to write out to
         self._bucket = bucket
@@ -715,7 +712,14 @@ class Datasource:
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
     def memory_store(self, version="latest") -> List:
-        """Copy all the compressed data from the zarr store into memory
+        """Copy the compressed data for a version from the zarr store into memory.
+
+        Example:
+            memory_store = datasource.memory_store(version="v0")
+            with xr.open_mfdataset(memory_store, engine="zarr", combine='by_coords') as ds:
+                ...
+
+        This will create a lazily loaded xarray Dataset.
 
         Returns:
             list: List of zarr memory stores
@@ -725,16 +729,17 @@ class Datasource:
 
         return self._zarr_store.copy_to_memorystore(keys=self.data_keys(), version=version)
 
-    def data(self) -> Dict:
-        """Get the data stored in this Datasource
+    def data(self) -> None:
+        """Directly accessing a Datasource's data is no longer supported.
+        Use the `memory_store` function. See its documentation for accessing data
+        stored by this Datasource.
 
         Returns:
-            dict: Dictionary of data keyed by daterange
+            None
         """
-        # TODO - in the future we may store data in other formats
-        # we'll need to check the storage_type and inform the user
-        # what function to use e.g. memory_store, etc?
-        raise NotImplementedError("Data is now stored in the zarr store")
+        raise NotImplementedError(
+            "Directly accessing a Datasource's data is no longer supported. See the memory_store function."
+        )
 
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource

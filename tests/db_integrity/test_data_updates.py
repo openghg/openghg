@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import xarray as xr
 import pytest
 from helpers import (
     clear_test_stores,
@@ -92,6 +93,7 @@ def test_database_update_force():
 
 # Test variants in data from the same source being added
 
+
 def bsd_data_read_crds():
     """
     Add Bilsdale *minutely* data for CRDS instrument to object store.
@@ -101,7 +103,9 @@ def bsd_data_read_crds():
     network = "DECC"
     source_format1 = "CRDS"
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
-    standardise_surface(store="user", filepath=bsd_path1, source_format=source_format1, site=site, network=network)
+    standardise_surface(
+        store="user", filepath=bsd_path1, source_format=source_format1, site=site, network=network
+    )
 
 
 def bsd_data_read_gcmd():
@@ -143,14 +147,14 @@ def bsd_small_edit_data_read(if_exists="auto"):
     bsd_prec_path3 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
     standardise_surface(
-            filepath=(bsd_path3, bsd_prec_path3),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-            if_exists=if_exists,
-            store=store,
-        )
+        filepath=(bsd_path3, bsd_prec_path3),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+        if_exists=if_exists,
+        store=store,
+    )
 
 
 def bsd_diff_data_read(if_exists="auto", save_current="auto"):
@@ -167,15 +171,15 @@ def bsd_diff_data_read(if_exists="auto", save_current="auto"):
     bsd_prec_path4 = get_surface_datapath(filename="bilsdale-md.14.precisions.C", source_format="GC")
 
     standardise_surface(
-            filepath=(bsd_path4, bsd_prec_path4),
-            source_format=source_format2,
-            site=site,
-            network=network,
-            instrument=instrument,
-            if_exists=if_exists,
-            save_current=save_current,
-            store="user"
-        )
+        filepath=(bsd_path4, bsd_prec_path4),
+        source_format=source_format2,
+        site=site,
+        network=network,
+        instrument=instrument,
+        if_exists=if_exists,
+        save_current=save_current,
+        store="user",
+    )
 
 
 def bsd_diff_date_range_read(overwrite=False):
@@ -485,6 +489,7 @@ def test_obs_data_read_data_overwrite_version():
 
 # TODO: Add test for different time values as well.
 
+
 #  Look at different data frequencies for the same data
 def bsd_data_read_crds_diff_frequency():
     """
@@ -497,7 +502,9 @@ def bsd_data_read_crds_diff_frequency():
 
     bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.min.dat", source_format="CRDS")
 
-    standardise_surface(store="user", filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
+    standardise_surface(
+        store="user", filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network
+    )
 
 
 def test_obs_data_read_two_frequencies():
@@ -585,7 +592,6 @@ def test_obs_data_read_two_frequencies():
     assert d_co_minutely._latest_version == "v0"
 
 
-
 #  Look at replacing data with different / overlapping internal time stamps
 def bsd_data_read_crds_internal_overlap(if_exists="new"):
     """
@@ -599,16 +605,18 @@ def bsd_data_read_crds_internal_overlap(if_exists="new"):
         filename="bsd.picarro.hourly.108m.overlap-dates.dat", source_format="CRDS"
     )
 
-    standardise_surface(filepath=bsd_path_hourly,
-            source_format=source_format1,
-            site=site,
-            network=network,
-            if_exists=if_exists,
-            store="user",
-        )
+    standardise_surface(
+        filepath=bsd_path_hourly,
+        source_format=source_format1,
+        site=site,
+        network=network,
+        if_exists=if_exists,
+        store="user",
+    )
 
 
 #  Look at replacing data with different / overlapping internal time stamps
+@pytest.mark.skip(reason="We no longer split Datasets up by year so we don't need this test.")
 def test_obs_data_representative_date_overlap():
     """
     Added test based on fix for Issue 506.
@@ -627,7 +635,7 @@ def test_obs_data_representative_date_overlap():
     bsd_data_read_crds_internal_overlap(if_exists="new")
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        uuids = metastore.select('uuid')
+        uuids = metastore.select("uuid")
 
     datasources = []
     for uuid in uuids:
@@ -685,7 +693,7 @@ def test_metadata_update():
     )
 
     sf6_metadata_1 = search_sf6_1.retrieve().metadata
-    assert sf6_metadata_1["latest_version"] == "v1"
+    assert sf6_metadata_1["latest_version"] == "v0"
     assert sf6_metadata_1["start_date"] == expected_start_1
     assert sf6_metadata_1["end_date"] == expected_end_1
 
@@ -703,7 +711,7 @@ def test_metadata_update():
     )
 
     sf6_metadata_2 = search_sf6_2.retrieve().metadata
-    assert sf6_metadata_2["latest_version"] == "v2"
+    assert sf6_metadata_2["latest_version"] == "v1"
     assert sf6_metadata_2["start_date"] == expected_start_2
     assert sf6_metadata_2["end_date"] == expected_end_2
 
@@ -791,6 +799,7 @@ def test_metadata_update():
 
 # TODO: Add test to check data deletion and then adding the same data back
 
+
 @pytest.mark.parametrize(
     "standard_filename,special_filename,site,domain,model,metmodel,inlet,species",
     [
@@ -813,10 +822,12 @@ def test_metadata_update():
             "UKV",
             "100m",
             "rn",
-        )
+        ),
     ],
 )
-def test_standardising_footprint_with_additional_keys(standard_filename, special_filename, site, domain, model, metmodel, inlet, species):
+def test_standardising_footprint_with_additional_keys(
+    standard_filename, special_filename, site, domain, model, metmodel, inlet, species
+):
     """
     Expected behavior: adding a high time resolution
     (or short_lifetime) footprint whose other metadata
@@ -829,24 +840,26 @@ def test_standardising_footprint_with_additional_keys(standard_filename, special
 
     clear_test_stores()
 
-    standard_standardised = standardise_footprint(standard_datapath,
-                                                site=site,
-                                                domain=domain,
-                                                model=model,
-                                                inlet=inlet,
-                                                metmodel=metmodel,
-                                                store="user",
-                                                )
+    standard_standardised = standardise_footprint(
+        standard_datapath,
+        site=site,
+        domain=domain,
+        model=model,
+        inlet=inlet,
+        metmodel=metmodel,
+        store="user",
+    )
 
-    special_standardised = standardise_footprint(special_datapath,
-                                                site=site,
-                                                domain=domain,
-                                                model=model,
-                                                inlet=inlet,
-                                                metmodel=metmodel,
-                                                species=species,
-                                                store="user",
-                                                )
+    special_standardised = standardise_footprint(
+        special_datapath,
+        site=site,
+        domain=domain,
+        model=model,
+        inlet=inlet,
+        metmodel=metmodel,
+        species=species,
+        store="user",
+    )
 
     standard_dict = standard_standardised[next(iter(standard_standardised))]
     special_dict = special_standardised[next(iter(special_standardised))]
