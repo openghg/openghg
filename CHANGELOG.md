@@ -35,10 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818)
 
-### Fixed
-
-
-
 ## [0.6.2] - 2023-08-07
 
 ### Fixed
