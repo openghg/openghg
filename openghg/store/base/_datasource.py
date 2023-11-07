@@ -32,7 +32,7 @@ class Datasource:
     _datasource_root = "datasource"
     _data_root = "data"
 
-    def __init__(self, bucket: str, uuid: Optional[str] = None, new_version: bool = True) -> None:
+    def __init__(self, bucket: str, uuid: Optional[str] = None) -> None:
         from openghg.util import timestamp_now
         from openghg.store.base import LocalZarrStore
 
@@ -61,8 +61,6 @@ class Datasource:
         self._zarr_store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid)
         # So we know where to write out to
         self._bucket = bucket
-        # Should we create a new version for the data we're adding
-        self._new_version = new_version
 
         self.update_daterange()
 
@@ -114,9 +112,10 @@ class Datasource:
         metadata: Dict,
         data: xr.Dataset,
         data_type: str,
-        sort: bool,
-        drop_duplicates: bool,
+        sort: bool = False,
+        drop_duplicates: bool = False,
         skip_keys: Optional[List] = None,
+        new_version: bool = True,
         if_exists: str = "auto",
         compressor: Optional[Any] = None,
     ) -> None:
@@ -130,6 +129,7 @@ class Datasource:
             sort: Sort data in time dimension
             drop_duplicates: Drop duplicate timestamps, keeping the first value
             skip_keys: Keys to not standardise as lowercase
+            new_version: Create a new version of the data
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
@@ -153,6 +153,7 @@ class Datasource:
                 data_type=data_type,
                 sort=sort,
                 drop_duplicates=drop_duplicates,
+                new_version=new_version,
                 if_exists=if_exists,
                 compressor=compressor,
             )
@@ -165,8 +166,8 @@ class Datasource:
         data_type: str,
         sort: bool,
         drop_duplicates: bool,
-        if_exists: str = "auto",
         new_version: bool = True,
+        if_exists: str = "auto",
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
     ) -> None:
@@ -178,6 +179,7 @@ class Datasource:
                 openghg.store.spec.define_data_types()
             sort: If True sort by time, may load all data into memory
             drop_duplicates: If True drop duplicates, keeping first found duplicate
+            new_version: Create a new version of the data
             if_exists: What to do if existing data is present.
                 - "auto" - checks new and current data for timeseries overlap
                    - adds data if no overlap
