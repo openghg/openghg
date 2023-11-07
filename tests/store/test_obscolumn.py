@@ -1,4 +1,5 @@
 import numpy as np
+import xarray as xr
 from helpers import get_column_datapath
 from openghg.standardise import standardise_column
 from openghg.objectstore import get_bucket
@@ -37,8 +38,10 @@ def test_read_openghg_format():
 
     bucket = get_bucket()
 
-    ch4_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    ch4_data = ch4_data['2017-03-18-15:32:54+00:00_2017-03-18-17:22:23+00:00']
+    d = Datasource(bucket=bucket, uuid=uuid)
 
-    assert ch4_data.time[0] == Timestamp("2017-03-18T15:32:54")
-    assert np.isclose(ch4_data["xch4"][0], 1844.2019)
+    memory_store = d.memory_store()
+
+    with xr.open_mfdataset(memory_store, engine="zarr", combine="by_coords") as ch4_data:
+        assert ch4_data.time[0] == Timestamp("2017-03-18T15:32:54")
+        assert np.isclose(ch4_data["xch4"][0], 1844.2019)

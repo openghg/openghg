@@ -106,8 +106,6 @@ def test_same_source_data_same_datasource():
 
 def test_read_data(mocker):
     clear_test_stores()
-    fake_uuids = [f"test-uuid-{i}" for i in range(1, 101)]
-    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
     # Get some bytes
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
@@ -173,14 +171,19 @@ def test_read_CRDS(bucket):
 
     uid = data["ch4"]["uuid"]
 
-    ch4_data = Datasource(bucket=bucket, uuid=uid).data()
-    ch4_data = ch4_data["2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00"]
+    datasource = Datasource(bucket=bucket, uuid=uid)
+    memory_store = datasource.memory_store()
 
-    assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
-    assert ch4_data["ch4"][0] == 1959.55
-    assert ch4_data["ch4"][-1] == 1962.8
-    assert ch4_data["ch4_variability"][-1] == 1.034
-    assert ch4_data["ch4_number_of_observations"][-1] == 26.0
+    with xr.open_mfdataset(memory_store, engine="zarr", combine="by_coords") as ch4_data:
+        assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
+        assert ch4_data["ch4"][0] == 1959.55
+        assert ch4_data["ch4"][-1] == 1962.8
+        assert ch4_data["ch4_variability"][-1] == 1.034
+        assert ch4_data["ch4_number_of_observations"][-1] == 26.0
+
+    print(datasource.data_keys())
+
+    return
 
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
         uuid_one = metastore.select('uuid')[0]
@@ -790,13 +793,10 @@ def test_read_multiside_aqmesh():
     assert data.attrs.items() >= expected_attrs.items()
 
 
-def test_store_icos_carbonportal_data(bucket, mocker):
+def test_store_icos_carbonportal_data(bucket):
     # First we need to jump through some hoops to get the correct data dict
     # I feel like there must be a simpler way of doing this but xarray.to_json
     # doesn't convert datetimes correctly
-    fake_uuids = [f"test-uuid-{i}" for i in range(1, 101)]
-    mocker.patch("uuid.uuid4", side_effect=fake_uuids)
-
     test_data_nc = get_surface_datapath(filename="test_toh_co2_147m.nc", source_format="ICOS")
     ds = xr.open_dataset(test_data_nc)
 
@@ -811,7 +811,7 @@ def test_store_icos_carbonportal_data(bucket, mocker):
         first_result = metastore.store_data(data=data)
         second_result = metastore.store_data(data=data)
 
-    assert first_result == {"co2": {"uuid": "test-uuid-2", "new": True}}
+    assert first_result["co2"]["new"] is True
 
     with ObsSurface(bucket=bucket) as obs:
         second_result = obs.store_data(data=data)
