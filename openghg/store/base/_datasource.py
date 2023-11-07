@@ -870,38 +870,6 @@ class Datasource:
 
         return in_date
 
-    def species(self) -> str:
-        """Returns the species of this Datasource
-
-        Returns:
-            str: Species of this Datasource
-        """
-        return self._metadata["species"]
-
-    def inlet(self) -> str:
-        """Returns the inlet height of this Datasource
-
-        Returns:
-            str: Inlet height of this Datasource
-        """
-        return self._metadata["inlet"]
-
-    def site(self) -> str:
-        """Return the site name
-
-        Returns:
-            str: Site name
-        """
-        return self._metadata.get("site", "NA")
-
-    def instrument(self) -> str:
-        """Return the instrument name
-
-        Returns:
-            str: Instrument name
-        """
-        return self._metadata.get("instrument", "NA")
-
     def uuid(self) -> str:
         """Return the UUID of this object
 
