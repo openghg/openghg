@@ -53,12 +53,12 @@ def _get_generic(
         raise SearchError(err_msg)
 
     if sort:
-        logger.warn(
+        logger.warning(
             "Sorting results by time has been moved to the data method of ObsData, please use that instead."
         )
 
     if elevate_inlets:
-        logger.warn(
+        logger.warning(
             "Elevating inlet functionality has been moved to the data method of ObsData, please use that instead."
         )
 
@@ -290,6 +290,7 @@ def get_obs_surface_local(
     )
 
     data = retrieved_data.data
+    data.compute()
 
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"

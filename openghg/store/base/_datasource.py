@@ -907,12 +907,10 @@ class Datasource:
         return self._data_keys
 
     def data_keys(self, version: str = "latest") -> List:
-        """Returns the object store keys where data related
-        to this Datasource is stored
+        """Returns the dateranges of data covered by a specific version of the data stored.
 
         Args:
             version: Version of keys to retrieve
-            return_all: Return all data keys
         Returns:
             list: List of data keys
         """
@@ -926,7 +924,7 @@ class Datasource:
 
         return keys
 
-    def versions(self) -> Dict:
+    def all_data_keys(self) -> Dict:
         """Return a summary of the versions of data stored for
         this Datasource
 

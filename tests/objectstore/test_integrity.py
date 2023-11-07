@@ -42,7 +42,7 @@ def populate_store():
     )
 
 
-def test_integrity_check_delete_Datasource_keys():
+def test_integrity_check_delete_datasource_keys():
     integrity_check()
 
     # Now delete some of the Datasources
@@ -50,9 +50,10 @@ def test_integrity_check_delete_Datasource_keys():
     with open_metastore(bucket=bucket, data_type="emissions") as metastore:
         uid = metastore.select("uuid")[0]
         ds = Datasource(bucket=bucket, uuid=uid)
-        keys = ds.data_keys()
-        for key in keys:
-            delete_object(bucket=bucket, key=key)
+
+        ds._zarr_store.delete_all()
 
     with pytest.raises(ObjectStoreError):
         integrity_check()
+
+# TODO - expand these integrity tests

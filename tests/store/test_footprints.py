@@ -33,7 +33,13 @@ def test_read_footprint_co2_from_data(mocker):
 
     # Expect co2 data to be high time resolution
     # - could include high_time_resolution=True but don't need to as this will be set automatically
-    result = standardise_from_binary_data(store="user", data_type="footprints", binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+    result = standardise_from_binary_data(
+        store="user",
+        data_type="footprints",
+        binary_data=binary_data,
+        metadata=metadata,
+        file_metadata=file_metadata,
+    )
 
     assert result == {"tac_test_NAME_100m": {"uuid": "test-uuid-1", "new": True}}
 
@@ -59,6 +65,7 @@ def test_read_footprint_standard(keyword, value):
     domain = "EUROPE"
     model = "NAME"
     kwargs = {keyword: value}  # can't pass `keyword=value` as argument to standardise_footprint
+
     standardise_footprint(
         filepath=get_footprint_datapath("TAC-100magl_EUROPE_201208.nc"),
         site=site,
@@ -97,8 +104,8 @@ def test_read_footprint_standard(keyword, value):
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "high_spatial_resolution": "False",
-        "high_time_resolution": "False",
+        "high_spatial_resolution": False,
+        "high_time_resolution": False,
         "time_period": "2 hours",
     }
 
@@ -116,16 +123,17 @@ def test_read_footprint_high_spatial_resolution():
     """
     site = "TMB"
     domain = "EUROPE"
-    standardise_footprint(store="user",
-                          filepath=get_footprint_datapath("footprint_test.nc"),
-                          site=site,
-                          network="LGHG",
-                          inlet="10m",
-                          domain=domain,
-                          model="test_model",
-                          period="monthly",
-                          high_spatial_resolution=True,
-                          )
+    standardise_footprint(
+        store="user",
+        filepath=get_footprint_datapath("footprint_test.nc"),
+        site=site,
+        network="LGHG",
+        inlet="10m",
+        domain=domain,
+        model="test_model",
+        period="monthly",
+        high_spatial_resolution=True,
+    )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
@@ -144,31 +152,28 @@ def test_read_footprint_high_spatial_resolution():
     assert footprint_coords == ["height", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
     assert footprint_dims == ["height", "index", "lat", "lat_high", "lev", "lon", "lon_high", "time"]
 
-    assert (
-        footprint_data.attrs["heights"]
-        == [
-            500.0,
-            1500.0,
-            2500.0,
-            3500.0,
-            4500.0,
-            5500.0,
-            6500.0,
-            7500.0,
-            8500.0,
-            9500.0,
-            10500.0,
-            11500.0,
-            12500.0,
-            13500.0,
-            14500.0,
-            15500.0,
-            16500.0,
-            17500.0,
-            18500.0,
-            19500.0,
-        ]
-    ).all()
+    assert footprint_data.attrs["heights"] == [
+        500.0,
+        1500.0,
+        2500.0,
+        3500.0,
+        4500.0,
+        5500.0,
+        6500.0,
+        7500.0,
+        8500.0,
+        9500.0,
+        10500.0,
+        11500.0,
+        12500.0,
+        13500.0,
+        14500.0,
+        15500.0,
+        16500.0,
+        17500.0,
+        18500.0,
+        19500.0,
+    ]
 
     assert footprint_data.attrs["variables"] == [
         "fp",
@@ -213,13 +218,13 @@ def test_read_footprint_high_spatial_resolution():
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "high_spatial_resolution": "True",
+        "high_spatial_resolution": True,
         "max_latitude_high": 52.01937,
         "max_longitude_high": 0.468,
         "min_latitude_high": 50.87064,
         "min_longitude_high": -1.26,
-        "high_time_resolution": "False",
-        "short_lifetime": "False",
+        "high_time_resolution": False,
+        "short_lifetime": False,
     }
 
     assert footprint_data.attrs == expected_attrs
@@ -273,7 +278,8 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
 
     # Expect co2 data to be high time resolution
     # - could include high_time_resolution=True but don't need to as this will be set automatically
-    standardise_footprint(store="user",
+    standardise_footprint(
+        store="user",
         filepath=datapath,
         site=site,
         model=model,
@@ -315,9 +321,9 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "high_spatial_resolution": "False",
-        "high_time_resolution": "True",
-        "short_lifetime": "False",
+        "high_spatial_resolution": False,
+        "high_time_resolution": True,
+        "short_lifetime": False,
         "time_period": "1 hour",
     }
 
@@ -383,9 +389,9 @@ def test_read_footprint_short_lived():
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "high_spatial_resolution": "False",
-        "high_time_resolution": "False",
-        "short_lifetime": "True",
+        "high_spatial_resolution": False,
+        "high_time_resolution": False,
+        "short_lifetime": True,
         "time_period": "1 hour",
     }
 

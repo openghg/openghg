@@ -126,7 +126,7 @@ def test_versioning(capfd, bucket):
     d.add_data(metadata=metadata, data=min_ch4_data, sort=False, drop_duplicates=False, data_type="surface")
     d.save()
 
-    min_keys = d.versions()
+    min_keys = d.all_data_keys()
 
     assert min_keys["v0"]["keys"] == ["2012-07-26-13:51:30+00:00_2020-07-04-09:58:30+00:00"]
 
@@ -147,7 +147,7 @@ def test_versioning(capfd, bucket):
 
     d.save()
 
-    detailed_keys = d.versions()
+    detailed_keys = d.all_data_keys()
 
     assert detailed_keys["v1"]["keys"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
 
@@ -194,7 +194,7 @@ def test_replace_version(bucket):
     # Save and overwrite with new data
     d.save()
 
-    detailed_keys = d.versions()
+    detailed_keys = d.all_data_keys()
 
     assert detailed_keys["v1"]["keys"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
 
