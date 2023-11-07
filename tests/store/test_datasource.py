@@ -334,27 +334,8 @@ def test_update_daterange_replacement(data, bucket):
 
 
 def test_load_dataset(bucket):
-    filepath = get_footprint_datapath(filename="WAO-20magl_UKV_rn_TEST_202112.nc")
-
-    ds = xr.load_dataset(filepath)
-
-    metadata = {"test": "testing123", "start_date": "2013-06-02", "end_date": "2013-06-30"}
-
-    d = Datasource(bucket=bucket)
-
-    d.add_data(metadata=metadata, data=ds, data_type="footprints")
-
-    d.save()
-
-    keys = d._data_keys["latest"]["keys"]
-
-    key = list(keys.values())[0]
-
-    bucket = get_bucket()
-
-    loaded_ds = Datasource.load_dataset(bucket=bucket, key=key)
-
-    assert loaded_ds.equals(ds)
+    with pytest.raises(NotImplementedError):
+        Datasource.load_dataset(bucket=bucket, key="key")
 
 
 def test_search_metadata():
@@ -525,6 +506,58 @@ def test_integrity_check(data, bucket):
 
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
+
+
+def test_data_deletion(data, bucket):
+    d = Datasource(bucket=bucket)
+
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+
+    keys = d.data_keys()
+
+    zarr_keys = set(d._zarr_store.keys())
+
+    partial_expected_keys = {
+        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zarray",
+        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zattrs",
+        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/0",
+        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4_variability/.zarray",
+    }
+
+    assert partial_expected_keys.issubset(zarr_keys)
+
+    d.delete_data(version="latest", keys=keys)
+
+    assert not d._data_keys["v0"]["keys"]
+    assert list(d._zarr_store.keys()) == [".zgroup", ".zmetadata", "v0/.zgroup"]
+
+
+def test_data_version_deletion(data, bucket):
+    d = Datasource(bucket=bucket)
+
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+
+    zarr_keys = set(d._zarr_store.keys())
+
+    partial_expected_keys = {
+        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zarray",
+        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zattrs",
+        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/0",
+        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4_variability/.zarray",
+    }
+
+    assert partial_expected_keys.issubset(zarr_keys)
+
+    d.delete_version(version="v0")
+
+    assert "v0" not in d._data_keys
+    assert list(d._zarr_store.keys()) == [".zgroup", ".zmetadata", "v0/.zgroup"]
 
 
 @pytest.mark.xfail(

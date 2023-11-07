@@ -392,6 +392,15 @@ class Datasource:
         Returns:
             None
         """
+        if version == "latest":
+            version = self._latest_version
+
+        # Delete the keys
+        current_keys = set(self._data_keys[version]["keys"])
+
+        self._data_keys[version]["keys"] = sorted(list(current_keys - set(keys)))
+
+        # Delete the data
         for key in keys:
             self._zarr_store.delete(key=key, version=version)
 
@@ -404,10 +413,14 @@ class Datasource:
         Returns:
             None
         """
+        if version == "latest":
+            raise ValueError("Specific version required for deletion.")
+
         if version not in self._data_keys:
             raise KeyError("Invalid version.")
 
         self.delete_data(version=version, keys=self._data_keys[version]["keys"])
+        del self._data_keys[version]
 
     def add_metadata(self, metadata: Dict, skip_keys: Optional[List] = None) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -639,16 +652,7 @@ class Datasource:
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
-        from openghg.objectstore import get_object_data_path
-
-        file_path = get_object_data_path(bucket, key)
-        # This works
-        # TODO - this should be changed to use open_dataset really
-        # but open_dataset causes issues due to internal xarray caching when
-        # we try and write out to the same file
-        return xr.load_dataset(file_path)
-        # This does not
-        # return xr.open_dataset(file_path)
+        raise NotImplementedError("Loading of data directly from Datasource no longer supported. Use memory_store to access data stored in zarr store.")
 
     def define_version_key(self, version: str) -> str:
         """Define key for version on Datasource"""
