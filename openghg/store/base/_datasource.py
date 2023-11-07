@@ -205,6 +205,7 @@ class Datasource:
         daterange_str = self.get_representative_daterange_str(dataset=data, period=period)
 
         # NOTE - added version string here as we add data to the zarr store in this function
+        # Do we have a latest version?
         if self._latest_version and not new_version:
             version_str = self._latest_version
         else:
@@ -244,9 +245,8 @@ class Datasource:
 
             if if_exists == "new":
                 # Remove all current data on Datasource and add new data
-                # self._data is a dictionary containing datestr: Dataset values
                 logger.info("Updating store to include new added data only.")
-                # Add this to the memory store and move on
+                self._zarr_store.delete_all()
                 self._zarr_store.add(key=daterange_str, version=version_str, dataset=data)
                 # We only want this key for a new version
                 date_keys = [daterange_str]
@@ -256,10 +256,8 @@ class Datasource:
                     for existing_daterange, new_daterange in overlapping:
                         ex = self._zarr_store.pop(key=existing_daterange, version=self._latest_version)
                         new = new_data.pop(new_daterange)
-                        # new = data
-                        logger.info("Combining overlapping data dateranges")
 
-                        # What's another way of storing this data?
+                        logger.info("Combining overlapping data dateranges")
                         # Concatenate datasets along time dimension
                         try:
                             # TODO - how to lazy concatenate?
