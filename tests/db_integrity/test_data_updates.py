@@ -1,16 +1,18 @@
-import pytest
-import pandas as pd
 import numpy as np
-from helpers import get_surface_datapath, get_emissions_datapath, get_footprint_datapath
-from openghg.store.base import Datasource
+import pandas as pd
+import pytest
+from helpers import (
+    clear_test_stores,
+    get_emissions_datapath,
+    get_footprint_datapath,
+    get_surface_datapath,
+)
+from openghg.objectstore import get_writable_bucket
 from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import get_flux
-from openghg.retrieve import search
-from openghg.standardise import standardise_footprint, standardise_flux, standardise_surface
-from openghg.objectstore import get_bucket
+from openghg.retrieve import get_flux, search
+from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
+from openghg.store.base import Datasource
 from openghg.types import DataOverlapError
-
-from helpers import clear_test_stores
 
 
 def flux_data_read(force=False):
@@ -358,11 +360,11 @@ def test_obs_data_read_data_diff():
     search_n2o = search(site="bsd", species="n2o")
 
     # Check something is found for each search
-    assert bool(search_ch4) == True
-    assert bool(search_co2) == True
-    assert bool(search_co) == True
-    assert bool(search_sf6) == True
-    assert bool(search_n2o) == True
+    assert search_ch4
+    assert search_co2
+    assert search_co
+    assert search_sf6
+    assert search_n2o
 
     # Find uuid values and use this to extract the Datasources to look at stored versions
     # Make sure that updated data (using if_exists="new" flag) has a new version.
@@ -371,13 +373,13 @@ def test_obs_data_read_data_diff():
     uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
     uuid_n2o = search_n2o_results.iloc[0]["uuid"]
 
-    bucket = get_bucket()
+    bucket = get_writable_bucket(name="user")
 
-    d_sf6 = Datasource.load(uuid=uuid_sf6, bucket=bucket)
-    d_n2o = Datasource.load(uuid=uuid_n2o, bucket=bucket)
+    d_sf6 = Datasource(uuid=uuid_sf6, bucket=bucket)
+    d_n2o = Datasource(uuid=uuid_n2o, bucket=bucket)
 
-    assert d_sf6._latest_version == "v2"
-    assert d_n2o._latest_version == "v2"
+    assert d_sf6._latest_version == "v1"
+    assert d_n2o._latest_version == "v1"
 
     # Compare against data from files
     crds_file_data = read_crds_file_pd(filename="bsd.picarro.1minute.108m.min.dat")
@@ -403,7 +405,7 @@ def test_obs_data_read_data_diff():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v2"
+    assert metadata_sf6["latest_version"] == "v1"
 
 
 def test_obs_data_read_data_new_version():
@@ -433,7 +435,7 @@ def test_obs_data_read_data_new_version():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v2"
+    assert metadata_sf6["latest_version"] == "v1"
 
 
 def test_obs_data_read_data_overwrite_version():
@@ -460,12 +462,12 @@ def test_obs_data_read_data_overwrite_version():
     uuid_sf6 = search_sf6_results.iloc[0]["uuid"]
     uuid_n2o = search_n2o_results.iloc[0]["uuid"]
 
-    bucket = get_bucket()
-    d_sf6 = Datasource.load(bucket=bucket, uuid=uuid_sf6)
-    d_n2o = Datasource.load(bucket=bucket, uuid=uuid_n2o)
+    bucket = get_writable_bucket(name="user")
+    d_sf6 = Datasource(bucket=bucket, uuid=uuid_sf6)
+    d_n2o = Datasource(bucket=bucket, uuid=uuid_n2o)
 
-    assert d_sf6._latest_version == "v1"
-    assert d_n2o._latest_version == "v1"
+    assert d_sf6._latest_version == "v0"
+    assert d_n2o._latest_version == "v0"
 
     # Compare against data from files
     gcwerks_file_data = read_gcmd_file_pd("bilsdale-md.diff-value.14.C")
@@ -478,7 +480,7 @@ def test_obs_data_read_data_overwrite_version():
     np.testing.assert_allclose(sf6, expected_sf6)
 
     metadata_sf6 = obs_data_sf6.metadata
-    assert metadata_sf6["latest_version"] == "v1"
+    assert metadata_sf6["latest_version"] == "v0"
 
 
 # TODO: Add test for different time values as well.
@@ -528,11 +530,11 @@ def test_obs_data_read_two_frequencies():
     search_n2o = search(site="bsd", species="n2o")
 
     # Check something is found for each search
-    assert bool(search_ch4) == True
-    assert bool(search_co2) == True
-    assert bool(search_co) == True
-    assert bool(search_sf6) == True
-    assert bool(search_n2o) == True
+    assert search_ch4
+    assert search_co2
+    assert search_co
+    assert search_sf6
+    assert search_n2o
 
     # Extract data from original files
     crds_file_data_hourly = read_crds_file_pd(filename="bsd.picarro.hourly.108m.min.dat")
@@ -574,13 +576,13 @@ def test_obs_data_read_two_frequencies():
     uuid_co_hourly = search_co_results[search_co_results["sampling_period"] == "3600.0"].iloc[0]["uuid"]
     uuid_co_minutely = search_co_results[search_co_results["sampling_period"] == "60.0"].iloc[0]["uuid"]
 
-    bucket = get_bucket()
+    bucket = get_writable_bucket(name="user")
 
-    d_co_hourly = Datasource.load(uuid=uuid_co_hourly, bucket=bucket)
-    d_co_minutely = Datasource.load(uuid=uuid_co_minutely, bucket=bucket)
+    d_co_hourly = Datasource(uuid=uuid_co_hourly, bucket=bucket)
+    d_co_minutely = Datasource(uuid=uuid_co_minutely, bucket=bucket)
 
-    assert d_co_hourly._latest_version == "v1"
-    assert d_co_minutely._latest_version == "v1"
+    assert d_co_hourly._latest_version == "v0"
+    assert d_co_minutely._latest_version == "v0"
 
 
 
@@ -618,7 +620,7 @@ def test_obs_data_representative_date_overlap():
     This test checks this will no longer raise a KeyError based on this.
     """
     clear_test_stores()
-    bucket = get_bucket(name="user")
+    bucket = get_writable_bucket(name="user")
 
     # Add same data twice, overwriting the second time
     bsd_data_read_crds_internal_overlap()
@@ -629,7 +631,7 @@ def test_obs_data_representative_date_overlap():
 
     datasources = []
     for uuid in uuids:
-        datasource = Datasource.load(bucket=bucket, uuid=uuid)
+        datasource = Datasource(bucket=bucket, uuid=uuid)
         datasources.append(datasource)
 
     data = [datasource.data() for datasource in datasources]
@@ -723,7 +725,7 @@ def test_metadata_update():
 
 #     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
 
-#     bucket = get_bucket()
+#     bucket = get_writable_bucket(name="user")
 #     with ObsSurface(bucket=bucket) as obs:
 #         obs.read_file(
 #             filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True
@@ -735,7 +737,7 @@ def test_metadata_update():
 #     Test adding new file for GC with same time points but some different data values
 #     """
 #     clear_test_stores()
-#     bucket = get_bucket()
+#     bucket = get_writable_bucket(name="user")
 #     # Load BSD data - CRDS minutely frequency
 #     bsd_data_read_crds()
 #     # Load BSD data - CRDS hourly frequency

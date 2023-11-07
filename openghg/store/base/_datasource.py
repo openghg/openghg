@@ -41,6 +41,7 @@ class Datasource:
             if exists(bucket=bucket, key=key):
                 stored_data = get_object_from_json(bucket=bucket, key=key)
                 self.__dict__.update(stored_data)
+                self._data_keys = defaultdict(dict, self._data_keys)
             else:
                 raise ObjectStoreError(f"No Datasource with uuid {uuid} found in bucket {bucket}")
         else:
