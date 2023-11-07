@@ -338,60 +338,6 @@ def test_load_dataset(bucket):
         Datasource.load_dataset(bucket=bucket, key="key")
 
 
-def test_search_metadata():
-    d = Datasource(bucket=bucket)
-
-    d._metadata = {"unladen": "swallow", "spam": "eggs"}
-
-    assert d.search_metadata(unladen="swallow") == True
-    assert d.search_metadata(spam="eggs") == True
-    assert d.search_metadata(unladen="Swallow") == True
-
-    assert d.search_metadata(giraffe="beans") == False
-    assert d.search_metadata(bird="flamingo") == False
-
-
-def test_dated_metadata_search():
-    d = Datasource(bucket=bucket)
-
-    start = pd.Timestamp("2001-01-01-00:00:00", tz="UTC")
-    end = pd.Timestamp("2001-03-01-00:00:00", tz="UTC")
-
-    d._start_date = start
-    d._end_date = end
-
-    d._metadata = {"inlet": "100m", "instrument": "violin", "site": "timbuktu"}
-
-    assert d.search_metadata(inlet="100m", instrument="violin") == True
-
-    assert not d.search_metadata(
-        search_terms=["100m", "violin"],
-        start_date=pd.Timestamp("2015-01-01"),
-        end_date=pd.Timestamp("2021-01-01"),
-    )
-
-    assert d.search_metadata(
-        inlet="100m",
-        instrument="violin",
-        start_date=pd.Timestamp("2001-01-01"),
-        end_date=pd.Timestamp("2002-01-01"),
-    )
-
-
-def test_search_metadata_find_all():
-    d = Datasource(bucket=bucket)
-
-    d._metadata = {"inlet": "100m", "instrument": "violin", "car": "toyota"}
-
-    result = d.search_metadata(inlet="100m", instrument="violin", car="toyota", find_all=True)
-
-    assert result is True
-
-    result = d.search_metadata(inlet="100m", instrument="violin", car="subaru", find_all=True)
-
-    assert result is False
-
-
 def test_in_daterange(data, bucket):
     metadata = data["ch4"]["metadata"]
     data = data["ch4"]["data"]

@@ -652,7 +652,9 @@ class Datasource:
         Returns:
             xarray.Dataset: Dataset from NetCDF file
         """
-        raise NotImplementedError("Loading of data directly from Datasource no longer supported. Use memory_store to access data stored in zarr store.")
+        raise NotImplementedError(
+            "Loading of data directly from Datasource no longer supported. Use memory_store to access data stored in zarr store."
+        )
 
     def define_version_key(self, version: str) -> str:
         """Define key for version on Datasource"""
@@ -778,103 +780,6 @@ class Datasource:
         start, end = self.daterange()
 
         return create_daterange_str(start=start, end=end)
-
-    def search_metadata_old(
-        self,
-        search_terms: Union[str, List[str]],
-        start_date: Optional[Timestamp] = None,
-        end_date: Optional[Timestamp] = None,
-        find_all: Optional[bool] = False,
-    ) -> bool:
-        """Search the values of the metadata of this Datasource for search terms
-
-        Args:
-            search_term: String or list of strings to search for in metadata
-            find_all: If True all search terms must be matched
-        Returns:
-            bool: True if found else False
-        """
-        from warnings import warn
-
-        warn("This function will be removed in a future release", DeprecationWarning)
-
-        if start_date is not None and end_date is not None:
-            if not self.in_daterange(start_date=start_date, end_date=end_date):
-                return False
-
-        if not isinstance(search_terms, list):
-            search_terms = [search_terms]
-
-        search_terms = [s.lower() for s in search_terms if s is not None]
-
-        results = {}
-
-        def search_recurse(term: str, data: Dict) -> None:
-            for v in data.values():
-                if v == term:
-                    results[term] = True
-                elif isinstance(v, dict):
-                    search_recurse(term, v)
-
-        for term in search_terms:
-            search_recurse(term, self._metadata)
-
-        # If we want all the terms to match these should be the same length
-        if find_all:
-            return len(results) == len(search_terms)
-        # Otherwise there should be at least a True in results
-        else:
-            return len(results) > 0
-
-    def search_metadata(self, find_all: Optional[bool] = True, **kwargs: str) -> bool:
-        """Search the metadata for any available keyword
-
-        Args:
-            find_all: If True all arguments must be matched
-        Keyword Arguments:
-            Keyword arguments passed will be checked against the metadata of the Datasource
-        Returns:
-            bool: True if some/all parameters matched
-        """
-        start_date = kwargs.get("start_date")
-        end_date = kwargs.get("end_date")
-
-        if start_date is not None and end_date is not None:
-            if not self.in_daterange(start_date=start_date, end_date=end_date):
-                return False
-
-        # Now we've checked the dates we can remove them as it's unlikely a comparison below
-        # will match the dates exactly
-        try:
-            del kwargs["start_date"]
-            del kwargs["end_date"]
-        except KeyError:
-            pass
-
-        results = []
-        for key, value in kwargs.items():
-            try:
-                # Here we want to check if it's a list and if so iterate over it
-                if isinstance(value, (list, tuple)):
-                    for val in value:
-                        val = str(val).lower()
-                        if self._metadata[key.lower()] == val:
-                            results.append(val)
-                else:
-                    value = str(value).lower()
-                    if self._metadata[key.lower()] == value:
-                        results.append(value)
-            except KeyError:
-                pass
-
-        # If we want all the terms to match these should be the same length
-        if find_all and not len(kwargs.keys()) == len(results):
-            return False
-
-        if results:
-            return True
-        else:
-            return False
 
     def in_daterange(self, start_date: Union[str, Timestamp], end_date: Union[str, Timestamp]) -> bool:
         """Check if the data contained within this Datasource overlaps with the
