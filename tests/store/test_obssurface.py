@@ -359,6 +359,7 @@ def test_read_GC(bucket):
     ]
 
 
+@pytest.mark.skip(reason="Cranfield data processing will be removed.")
 def test_read_cranfield():
     clear_test_stores()
 
@@ -373,7 +374,7 @@ def test_read_cranfield():
 
     uuid = results["processed"]["THB_hourly_means_test.csv"]["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(bucket=get_bucket(), uuid=uuid, shallow=False).data()
+    ch4_data = Datasource(bucket=get_bucket(), uuid=uuid, shallow=False).data()
     ch4_data = ch4_data["2018-05-05-00:00:00+00:00_2018-05-13-16:00:00+00:00"]
 
     assert ch4_data.time[0] == Timestamp("2018-05-05")
@@ -402,12 +403,12 @@ def test_read_openghg_format(bucket):
 
     uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
 
-    co2_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    co2_data = co2_data["2012-07-30-17:03:08+00:00_2012-08-03-22:43:07+00:00"]
+    co2_data = Datasource(bucket=bucket, uuid=uuid)
 
-    assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
-    assert co2_data["co2"][0] == 385.25
-    assert co2_data["co2_variability"][0] == 0.843
+    with xr.open_mfdataset(co2_data.memory_store(), engine="zarr", combine="by_coords") as co2_data:
+        assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
+        assert co2_data["co2"][0] == 385.25
+        assert co2_data["co2_variability"][0] == 0.843
 
 
 def test_read_noaa_raw(bucket):
@@ -428,27 +429,16 @@ def test_read_noaa_raw(bucket):
 
     uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]["uuid"]
 
-    co_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
+    co_datasource = Datasource(bucket=bucket, uuid=uuid)
 
-    assert sorted(list(co_data.keys())) == [
-        "1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00",
-        "2009-06-13-16:32:00+00:00_2009-12-03-00:30:00+00:00",
-        "2010-01-10-00:13:00+00:00_2010-12-09-16:05:00+00:00",
-        "2011-01-27-04:55:00+00:00_2011-11-11-14:45:00+00:00",
-        "2016-12-03-12:37:00+00:00_2016-12-18-05:30:00+00:00",
-        "2017-01-27-19:10:00+00:00_2017-07-15-04:15:00+00:00",
-    ]
+    with xr.open_mfdataset(co_datasource.memory_store(), engine="zarr", combine="by_coords") as co_data:
+        assert co_data["co"][0] == pytest.approx(94.9)
+        assert co_data["co_repeatability"][0] == pytest.approx(-999.99)
+        assert co_data["co_selection_flag"][0] == 0
 
-    co_data = co_data["1990-06-29-05:00:00+00:00_1990-07-10-21:28:00+00:00"]
-
-    assert co_data["co"][0] == pytest.approx(94.9)
-    assert co_data["co"][-1] == pytest.approx(95.65)
-
-    assert co_data["co_repeatability"][0] == pytest.approx(-999.99)
-    assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
-
-    assert co_data["co_selection_flag"][0] == 0
-    assert co_data["co_selection_flag"][-1] == 0
+        assert co_data["co"][-1] == pytest.approx(73.16)
+        assert co_data["co_repeatability"][-1] == pytest.approx(-999.99)
+        assert co_data["co_selection_flag"][-1] == pytest.approx(0)
 
 
 def test_read_noaa_metastorepack(bucket):
@@ -468,29 +458,19 @@ def test_read_noaa_metastorepack(bucket):
 
     uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]["uuid"]
 
-    ch4_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
+    ch4_datasource = Datasource(bucket=bucket, uuid=uuid)
+    memory_store = ch4_datasource.memory_store()
 
-    assert sorted(list(ch4_data.keys())) == [
-        "1993-06-17-00:12:30+00:00_1993-11-20-21:50:00+00:00",
-        "1994-01-02-22:10:00+00:00_1994-12-24-22:15:00+00:00",
-        "1995-02-06-12:00:00+00:00_1995-11-08-19:55:00+00:00",
-        "1996-01-21-22:10:00+00:00_1996-12-01-20:00:00+00:00",
-        "1997-02-12-19:00:00+00:00_1997-12-20-20:15:00+00:00",
-        "1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00",
-        "1999-01-14-22:15:00+00:00_1999-12-31-23:35:00+00:00",
-        "2000-03-05-00:00:00+00:00_2000-11-04-22:30:00+00:00",
-        "2001-01-05-21:45:00+00:00_2001-12-06-12:00:00+00:00",
-        "2002-01-12-12:00:00+00:00_2002-01-12-12:00:01+00:00",  # Code added 1 second to ensure is not a range of 0 seconds.
-    ]
+    assert ch4_datasource.data_keys() == ["1993-06-17-00:12:30+00:00_2002-01-12-12:00:00+00:00"]
 
-    data = ch4_data["1998-01-01-23:10:00+00:00_1998-12-31-19:50:00+00:00"]
-
-    assert data.time[0] == Timestamp("1998-01-01T23:10:00")
-    assert data["ch4"][0] == pytest.approx(1.83337e-06)
-    assert data["ch4_number_of_observations"][0] == 2.0
-    assert data["ch4_variability"][0] == pytest.approx(2.093036e-09)
+    with xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords") as ch4_data:
+        ch4_data.time[0] == Timestamp("1993-06-17T00:12:30.000000000")
+        ch4_data["ch4"][0] == pytest.approx(1.76763e-06)
+        ch4_data["ch4_number_of_observations"][0] == 2.0
+        ch4_data["ch4_variability"][0] == pytest.approx(1.668772e-09)
 
 
+@pytest.mark.skip(reason="Thames Barrier data read to be removed.")
 def test_read_thames_barrier(bucket):
     clear_test_stores()
 

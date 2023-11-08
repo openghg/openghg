@@ -198,8 +198,6 @@ class Datasource:
 
         # Ensure data is in time order
         time_coord = "time"
-
-        new_data = {self.get_representative_daterange_str(data, period=period): data}
         daterange_str = self.get_representative_daterange_str(dataset=data, period=period)
 
         # NOTE - added version string here as we add data to the zarr store in this function
@@ -214,14 +212,16 @@ class Datasource:
 
         # Ensure daterange strings are independent and do not overlap each other
         # (this can occur due to representative date strings)
-        new_data = self._clip_daterange_label(new_data)
+        # new_data = self._clip_daterange_label(new_data)
 
         # Save details of current Datasource status
         self._status = {}
 
+        # TODO - rename self._data_keys to self._dates_covered
         # We'll use this to store the dates covered by this version of the data
         date_keys = self._data_keys[self._latest_version]["keys"] if self._data_keys else []
 
+        # We'll sort and drop duplicates here
         # TODO - test to see if this chaining does help
         if sort and drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
@@ -238,6 +238,8 @@ class Datasource:
                 if daterange_overlap(daterange_a=existing_daterange, daterange_b=daterange_str):
                     overlapping.append((existing_daterange, daterange_str))
 
+            # I don't think these do anything?
+            # TODO - remove?
             self._status["current_data"] = True
             self._status["overlapping"] = overlapping
 
@@ -251,35 +253,35 @@ class Datasource:
             elif overlapping:
                 if if_exists == "combine":
                     combined_datasets = {}
+                    # There can really only be one overlap so we can do away with this
                     for existing_daterange, new_daterange in overlapping:
-                        ex = self._zarr_store.pop(key=existing_daterange, version=self._latest_version)
-                        new = new_data.pop(new_daterange)
+                        existing = self._zarr_store.pop(key=existing_daterange, version=self._latest_version)
 
                         logger.info("Combining overlapping data dateranges")
                         # Concatenate datasets along time dimension
                         try:
                             # TODO - how to lazy concatenate?
-                            combined = xr_concat((ex, new), dim=time_coord)
+                            combined = xr_concat((existing, data), dim=time_coord)
                         except (ValueError, KeyError):
                             # If data variables in the two datasets are not identical,
                             # xr_concat will raise an error
-                            dv_ex = set(ex.data_vars.keys())
-                            dv_new = set(new.data_vars.keys())
+                            dv_ex = set(existing.data_vars.keys())
+                            dv_new = set(data.data_vars.keys())
 
                             # Check difference between datasets and fill any
                             # missing variables with NaN values.
                             dv_not_in_new = dv_ex - dv_new
                             for dv in dv_not_in_new:
-                                fill_values = np.zeros(len(new[time_coord])) * np.nan
-                                new = new.assign({dv: (time_coord, fill_values)})
+                                fill_values = np.zeros(len(data[time_coord])) * np.nan
+                                data = data.assign({dv: (time_coord, fill_values)})
 
                             dv_not_in_ex = dv_new - dv_ex
                             for dv in dv_not_in_ex:
-                                fill_values = np.zeros(len(ex[time_coord])) * np.nan
-                                ex = ex.assign({dv: (time_coord, fill_values)})
+                                fill_values = np.zeros(len(existing[time_coord])) * np.nan
+                                existing = existing.assign({dv: (time_coord, fill_values)})
 
                             # Should now be able to concatenate successfully
-                            combined = xr_concat((ex, new), dim=time_coord)
+                            combined = xr_concat((existing, data), dim=time_coord)
 
                         # TODO - zarr/dask - is there a better way of doing this?
                         # We sorted and drop the dupes
@@ -568,9 +570,8 @@ class Datasource:
         as required.
 
         Args:
-            labelled_datasets : Dictionary of datasets labelled by date range strings.
+            labelled_datasets: Dictionary of datasets labelled by date range strings.
                 These are expected to be in time order.
-
         Returns:
             Dict : Same format as input with labels updated as necessary.
         """
