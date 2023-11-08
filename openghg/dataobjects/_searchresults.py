@@ -1,6 +1,5 @@
 import json
 import logging
-from io import BytesIO
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union, Iterable
 
 from openghg.dataobjects import ObsData

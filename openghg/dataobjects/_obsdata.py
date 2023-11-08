@@ -47,7 +47,7 @@ class ObsData(_BaseData):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ObsData):
             return NotImplemented
-        
+
         if self.data is None or other.data is None:
             raise ValueError("Cannot compare data if it is not loaded")
 

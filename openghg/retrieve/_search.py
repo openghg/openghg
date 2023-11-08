@@ -430,7 +430,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
         SearchResults or None: SearchResults object is results found, otherwise None
     """
     import itertools
-    from openghg.store.base import Datasource
     from openghg.dataobjects import SearchResults
     from openghg.util import (
         clean_string,
@@ -531,7 +530,6 @@ def _base_search(**kwargs: Any) -> SearchResults:
     else:
         expanded_search.append(not_a_list)
 
-    data_keys = {}
     general_metadata = {}
 
     for bucket_name, bucket in readable_buckets.items():

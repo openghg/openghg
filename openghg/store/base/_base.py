@@ -6,9 +6,7 @@ from __future__ import annotations
 import logging
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
-
 from pandas import Timestamp
-
 
 from openghg.objectstore.metastore import ClassicMetaStore
 from openghg.types import DatasourceLookupError
@@ -16,7 +14,6 @@ from openghg.util import timestamp_now, to_lowercase
 
 
 T = TypeVar("T", bound="BaseStore")
-
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler

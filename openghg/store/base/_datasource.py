@@ -1,6 +1,6 @@
 from collections import defaultdict
 import warnings
-from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Tuple, TypeVar, Union
 from types import TracebackType
 import logging
 import numpy as np
@@ -13,7 +13,7 @@ from openghg.types import DataOverlapError, ObjectStoreError
 
 
 logger = logging.getLogger("openghg.store.base")
-logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
+logger.setLevel(logging.DEBUG)
 
 dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
@@ -32,7 +32,7 @@ class Datasource:
 
     def __init__(self, bucket: str, uuid: Optional[str] = None) -> None:
         from openghg.util import timestamp_now
-        from openghg.store.base import LocalZarrStore
+        from openghg.store.zarr import LocalZarrStore
 
         if uuid is not None:
             key = f"{Datasource._datasource_root}/uuid/{uuid}"

@@ -44,11 +44,6 @@ class ZarrStore(ABC):
         pass
 
     @abstractmethod
-    def hash_multiple(self) -> Dict[str, str]:
-        """Hash multiple xr.Datasets"""
-        pass
-
-    @abstractmethod
     def get_hash(self, key: str) -> str:
         """Get the hash of the data at the given key"""
         pass

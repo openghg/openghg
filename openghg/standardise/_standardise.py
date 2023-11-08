@@ -634,7 +634,7 @@ def standardise_eulerian(
     end_date: Optional[str] = None,
     setup: Optional[str] = None,
     if_exists: str = "auto",
-    save_current: str = "auto",    
+    save_current: str = "auto",
     overwrite: bool = False,
     store: Optional[str] = None,
 ) -> Dict:

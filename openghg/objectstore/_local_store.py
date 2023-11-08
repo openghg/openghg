@@ -5,13 +5,11 @@ import os
 import threading
 from pathlib import Path
 import shutil
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Optional, Union
 import logging
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
-import warnings
 
-# from openghg.store.base import LocalZarrStore
 
 rlock = threading.RLock()
 
@@ -436,6 +434,7 @@ def clear_object_store() -> None:
     else:
         logger.warning("Cannot delete object store.")
 
+
 def get_folder_size(folder_path: Union[str, Path]) -> int:
     """Get the total size of a folder
 
@@ -453,6 +452,7 @@ def get_folder_size(folder_path: Union[str, Path]) -> int:
             total += path.stat().st_size
 
     return total
+
 
 def query_store() -> Dict:
     """Create a dictionary that can be used to visualise the object store
