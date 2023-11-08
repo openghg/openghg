@@ -56,14 +56,18 @@ def test_different_sampling_periods_diff_datasources():
     clear_test_stores()
 
     one_min = get_surface_datapath("tac.picarro.1minute.100m.test.dat", source_format="CRDS")
-    one_min_res = standardise_surface(store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS")
+    one_min_res = standardise_surface(
+        store="user", filepath=one_min, site="tac", network="decc", source_format="CRDS"
+    )
 
     min_uuids = one_min_res["processed"]["tac.picarro.1minute.100m.test.dat"]
     for sp, data in min_uuids.items():
         assert data["new"] is True
 
     one_hour = get_surface_datapath("tac.picarro.hourly.100m.test.dat", source_format="CRDS")
-    one_hour_res = standardise_surface(store="user", filepath=one_hour, site="tac", network="decc", source_format="CRDS")
+    one_hour_res = standardise_surface(
+        store="user", filepath=one_hour, site="tac", network="decc", source_format="CRDS"
+    )
 
     hour_uuids = one_hour_res["processed"]["tac.picarro.hourly.100m.test.dat"]
     for sp, data in hour_uuids.items():
@@ -78,21 +82,23 @@ def test_same_source_data_same_datasource():
     tac_path1 = get_surface_datapath(filename="tac.picarro.1minute.100m.201208.dat", source_format="CRDS")
     tac_path2 = get_surface_datapath(filename="tac.picarro.1minute.100m.201407.dat", source_format="CRDS")
 
-    res = standardise_surface(store="user",
-                              filepath=tac_path1,
-                              source_format=source_format,
-                              site=site,
-                              network=network,
-                              overwrite=True,
-                              )
+    res = standardise_surface(
+        store="user",
+        filepath=tac_path1,
+        source_format=source_format,
+        site=site,
+        network=network,
+        overwrite=True,
+    )
 
-    res_2 = standardise_surface(store="user",
-                                filepath=tac_path2,
-                                source_format=source_format,
-                                site=site,
-                                network=network,
-                                overwrite=True,
-                                )
+    res_2 = standardise_surface(
+        store="user",
+        filepath=tac_path2,
+        source_format=source_format,
+        site=site,
+        network=network,
+        overwrite=True,
+    )
 
     proc_data = res["processed"]["tac.picarro.1minute.100m.201208.dat"]
     proc_data_2 = res_2["processed"]["tac.picarro.1minute.100m.201407.dat"]
@@ -119,11 +125,13 @@ def test_read_data(mocker):
 
     file_metadata = {"filename": "bsd.picarro.1minute.248m.min.dat"}
 
-    result = standardise_from_binary_data(store="user",
-                                          data_type="surface",
-                                          binary_data=binary_bsd,
-                                          metadata=metadata,
-                                          file_metadata=file_metadata)
+    result = standardise_from_binary_data(
+        store="user",
+        data_type="surface",
+        binary_data=binary_bsd,
+        metadata=metadata,
+        file_metadata=file_metadata,
+    )
 
     species = ["ch4", "co2", "co"]
     for k, v in result["processed"]["bsd.picarro.1minute.248m.min.dat"].items():
@@ -132,13 +140,23 @@ def test_read_data(mocker):
 
     with pytest.raises(ValueError):
         metadata = {}
-        standardise_from_binary_data(store="user", data_type="surface",
-                                     binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+        standardise_from_binary_data(
+            store="user",
+            data_type="surface",
+            binary_data=binary_bsd,
+            metadata=metadata,
+            file_metadata=file_metadata,
+        )
 
     with pytest.raises(KeyError):
         file_metadata = {}
-        standardise_from_binary_data(store="user", data_type="surface",
-                                     binary_data=binary_bsd, metadata=metadata, file_metadata=file_metadata)
+        standardise_from_binary_data(
+            store="user",
+            data_type="surface",
+            binary_data=binary_bsd,
+            metadata=metadata,
+            file_metadata=file_metadata,
+        )
 
 
 @pytest.mark.parametrize("sampling_period", ["60", 60, "60000000000", "twelve-thousand"])
@@ -148,19 +166,24 @@ def test_read_CRDS_incorrect_sampling_period_raises(sampling_period):
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
     with pytest.raises(ValueError) as exec_info:
-        standardise_surface(store="user",
+        standardise_surface(
+            store="user",
             filepath=filepath,
             source_format="CRDS",
             site="bsd",
             network="DECC",
             sampling_period=sampling_period,
         )
-        assert "Invalid sampling period" in str(exec_info) or "Could not evaluate sampling period" in str(exec_info)
+        assert "Invalid sampling period" in str(exec_info) or "Could not evaluate sampling period" in str(
+            exec_info
+        )
 
 
 def test_read_CRDS(bucket):
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
-    results = standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+    results = standardise_surface(
+        store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
+    )
 
     keys = results["processed"]["bsd.picarro.1minute.248m.min.dat"].keys()
 
@@ -174,62 +197,30 @@ def test_read_CRDS(bucket):
     datasource = Datasource(bucket=bucket, uuid=uid)
     memory_store = datasource.memory_store()
 
+    assert datasource.data_keys() == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
+
+    # Values here have changed from the previous test as we're now looking at the whole
+    # dataset rather than the first year
     with xr.open_mfdataset(memory_store, engine="zarr", combine="by_coords") as ch4_data:
         assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
         assert ch4_data["ch4"][0] == 1959.55
-        assert ch4_data["ch4"][-1] == 1962.8
-        assert ch4_data["ch4_variability"][-1] == 1.034
-        assert ch4_data["ch4_number_of_observations"][-1] == 26.0
-
-    print(datasource.data_keys())
-
-    return
-
-    with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        uuid_one = metastore.select('uuid')[0]
-        datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
-
-        first_set_datasources = metastore.select('uuid')
-
-    data_keys = list(datasource.data().keys())
-
-    expected_keys = [
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:24:29+00:00",
-        "2016-04-02-06:52:30+00:00_2016-11-02-12:55:29+00:00",
-        "2017-02-18-06:36:30+00:00_2017-12-18-15:42:29+00:00",
-        "2018-02-18-15:42:30+00:00_2018-12-18-15:43:29+00:00",
-        "2019-02-03-17:38:30+00:00_2019-12-09-10:48:29+00:00",
-        "2020-02-01-18:08:30+00:00_2020-12-01-22:32:29+00:00",
-    ]
-
-    assert data_keys == expected_keys
+        assert ch4_data["ch4"][-1] == 1955.93
+        assert ch4_data["ch4_variability"][-1] == 0.232
+        assert ch4_data["ch4_number_of_observations"][-1] == 23.0
 
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.future.dat", source_format="CRDS")
 
-    results = standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+    results = standardise_surface(
+        store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
+    )
 
-    with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        assert len(metastore.search()) == 3
+    # Let's load the same Datasource again and check that the data has been updated
+    datasource = Datasource(bucket=bucket, uuid=uid)
 
-        uuid_one = metastore.select('uuid')[0]
-        datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
-        data_keys = sorted(list(datasource.data().keys()))
-
-        assert first_set_datasources == metastore.select('uuid')
-
-    new_expected_keys = [
-        "2014-01-30-11:12:30+00:00_2014-11-30-11:24:29+00:00",
-        "2015-01-30-11:12:30+00:00_2015-11-30-11:24:29+00:00",
-        "2016-04-02-06:52:30+00:00_2016-11-02-12:55:29+00:00",
-        "2017-02-18-06:36:30+00:00_2017-12-18-15:42:29+00:00",
-        "2018-02-18-15:42:30+00:00_2018-12-18-15:43:29+00:00",
-        "2019-02-03-17:38:30+00:00_2019-12-09-10:48:29+00:00",
-        "2020-02-01-18:08:30+00:00_2020-12-01-22:32:29+00:00",
+    assert datasource.data_keys() == [
+        "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
         "2023-01-30-13:56:30+00:00_2023-01-30-14:21:29+00:00",
     ]
-
-    assert data_keys == new_expected_keys
 
 
 def test_read_GC(bucket):
@@ -238,11 +229,12 @@ def test_read_GC(bucket):
     data_filepath = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
-    results = standardise_surface(store="user",
+    results = standardise_surface(
+        store="user",
         filepath=(data_filepath, precision_filepath),
         source_format="GCWERKS",
         site="CGO",
-        network="AGAGE"
+        network="AGAGE",
     )
 
     # 30/11/2021: Species labels were updated to be standardised in line with variable naming
@@ -311,53 +303,57 @@ def test_read_GC(bucket):
     # Load in some data
     uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]["uuid"]
 
-    hfc152a_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
+    hfc_datasource = Datasource(bucket=bucket, uuid=uuid)
+    memory_store = hfc_datasource.memory_store()
 
-    assert hfc152a_data.time[0] == Timestamp("2018-01-01T02:24:00")
-    assert hfc152a_data.time[-1] == Timestamp("2018-01-31T23:33:00")
+    with xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords") as ds:
+        # hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
 
-    assert hfc152a_data["hfc152a"][0] == 4.409
-    assert hfc152a_data["hfc152a"][-1] == 4.262
+        assert ds.time[0] == Timestamp("2018-01-01T02:24:00")
+        assert ds["hfc152a"][0] == 4.409
+        assert ds["hfc152a_repeatability"][0] == 0.03557
+        assert ds["hfc152a_status_flag"][0] == 0
+        assert ds["hfc152a_integration_flag"][0] == 0
 
-    assert hfc152a_data["hfc152a_repeatability"][0] == 0.03557
-    assert hfc152a_data["hfc152a_repeatability"][-1] == 0.03271
+        assert ds.time[-1] == Timestamp("2018-01-31T23:33:00")
+        assert ds["hfc152a"][-1] == 4.262
+        assert ds["hfc152a_repeatability"][-1] == 0.03271
+        assert ds["hfc152a_status_flag"][-1] == 0
+        assert ds["hfc152a_integration_flag"][-1] == 0
 
-    assert hfc152a_data["hfc152a_status_flag"][0] == 0
-    assert hfc152a_data["hfc152a_status_flag"][-1] == 0
-
-    assert hfc152a_data["hfc152a_integration_flag"][0] == 0
-    assert hfc152a_data["hfc152a_integration_flag"][-1] == 0
+        hfc152a_attrs = ds.attrs
 
     # Check we have the Datasource info saved
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        uuids = metastore.select('uuid')
+        uuids = metastore.select("uuid")
 
-        attrs = hfc152a_data.attrs
+        attrs = hfc152a_attrs
 
         assert attributes_checker_obssurface(attrs=attrs, species="hfc152a")
 
         # # Now test that if we add more data it adds it to the same Datasource
         uuid_one = uuids[0]  # metastore.search()[0]['uuid']
 
-    datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
+    datasource = Datasource(bucket=bucket, uuid=uuid_one)
 
-    data_one = datasource.data()
-    assert list(data_one.keys()) == ["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
+    assert datasource.data_keys() == ["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
 
     data_filepath = get_surface_datapath(filename="capegrim-medusa.future.C", source_format="GC")
     precision_filepath = get_surface_datapath(
         filename="capegrim-medusa.future.precisions.C", source_format="GC"
     )
 
-    results = standardise_surface(store="user",
-        filepath=(data_filepath, precision_filepath), source_format="GCWERKS", site="CGO", network="AGAGE"
+    results = standardise_surface(
+        store="user",
+        filepath=(data_filepath, precision_filepath),
+        source_format="GCWERKS",
+        site="CGO",
+        network="AGAGE",
     )
 
-    datasource = Datasource.load(bucket=bucket, uuid=uuid_one)
-    data_one = datasource.data()
+    datasource = Datasource(bucket=bucket, uuid=uuid_one)
 
-    assert sorted(list(data_one.keys())) == [
+    assert datasource.data_keys() == [
         "2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00",
         "2023-01-01-02:24:00+00:00_2023-01-31-23:52:59+00:00",
     ]
@@ -367,8 +363,8 @@ def test_read_cranfield():
     clear_test_stores()
 
     data_filepath = get_surface_datapath(filename="THB_hourly_means_test.csv", source_format="Cranfield_CRDS")
-    results = standardise_surface(store="user",
-        filepath=data_filepath, source_format="CRANFIELD", site="TMB", network="CRANFIELD"
+    results = standardise_surface(
+        store="user", filepath=data_filepath, source_format="CRANFIELD", site="TMB", network="CRANFIELD"
     )
 
     expected_keys = ["ch4", "co", "co2"]
@@ -390,24 +386,6 @@ def test_read_cranfield():
     assert ch4_data["ch4 variability"][-1] == pytest.approx(6.48413)
 
 
-@pytest.mark.skip(reason="Update to read both US and Glasgow site data")
-def test_read_beaco2n(bucket):
-    data_filepath = get_surface_datapath(filename="Charlton_Community_Center.csv", source_format="BEACO2N")
-
-    results = standardise_surface(store="user",
-            filepath=data_filepath, source_format="BEACO2N", site="CCC", network="BEACO2N", overwrite=True
-        )
-
-    uuid = results["processed"]["Charlton_Community_Center.csv"]["co2"]["uuid"]
-
-    co2_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    co2_data = co2_data["2015-04-18-04:00:00+00:00_2015-04-18-10:00:00+00:00"]
-
-    assert co2_data.time[0] == Timestamp("2015-04-18T04:00:00")
-    assert co2_data["co2"][0] == 410.4
-    assert co2_data["co2_qc"][0] == 2
-
-
 def test_read_openghg_format(bucket):
     """
     Test that files already in OpenGHG format can be read. This file includes:
@@ -418,7 +396,9 @@ def test_read_openghg_format(bucket):
     """
     datafile = get_surface_datapath(filename="tac_co2_openghg.nc", source_format="OPENGHG")
 
-    results = standardise_surface(store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC")
+    results = standardise_surface(
+        store="user", filepath=datafile, source_format="OPENGHG", site="TAC", network="DECC"
+    )
 
     uuid = results["processed"]["tac_co2_openghg.nc"]["co2"]["uuid"]
 
@@ -437,8 +417,13 @@ def test_read_noaa_raw(bucket):
         filename="co_pocn25_surface-flask_1_ccgg_event.txt", source_format="NOAA"
     )
 
-    results = standardise_surface(store="user",
-        filepath=data_filepath, source_format="NOAA", site="POCN25", network="NOAA", inlet="flask"
+    results = standardise_surface(
+        store="user",
+        filepath=data_filepath,
+        source_format="NOAA",
+        site="POCN25",
+        network="NOAA",
+        inlet="flask",
     )
 
     uuid = results["processed"]["co_pocn25_surface-flask_1_ccgg_event.txt"]["co"]["uuid"]
@@ -471,7 +456,8 @@ def test_read_noaa_metastorepack(bucket):
         filename="ch4_esp_surface-flask_2_representative.nc", source_format="NOAA"
     )
 
-    results = standardise_surface(store="user",
+    results = standardise_surface(
+        store="user",
         filepath=data_filepath,
         inlet="flask",
         source_format="NOAA",
@@ -510,7 +496,8 @@ def test_read_thames_barrier(bucket):
 
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
 
-    results = standardise_surface(store="user",
+    results = standardise_surface(
+        store="user",
         filepath=data_filepath,
         source_format="THAMESBARRIER",
         site="TMB",
@@ -535,12 +522,12 @@ def test_read_thames_barrier(bucket):
     assert data["co2_variability"][-1] == 0
 
 
-
 @pytest.mark.xfail(reason="Deleting datasources will be handled by ObjectStore objects - links to issue #727")
 def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectStore` class created
     data_filepath = get_surface_datapath(filename="thames_test_20190707.csv", source_format="THAMESBARRIER")
 
-    standardise_surface(store="user",
+    standardise_surface(
+        store="user",
         filepath=data_filepath,
         source_format="THAMESBARRIER",
         site="tmb",
@@ -549,16 +536,16 @@ def test_delete_Datasource(bucket):  # TODO: revive/move this test when `ObjectS
     )
 
     with open_metastore(data_type="surface", bucket=bucket) as metastore:
-        uuid = metastore.select('uuid')[0]
+        uuid = metastore.select("uuid")[0]
         datasource = Datasource.load(bucket=bucket, uuid=uuid)
         data_keys = datasource.data_keys()
         key = data_keys[0]
 
         assert exists(bucket=bucket, key=key)
 
-        metastore.delete({'uuid': uuid})
+        metastore.delete({"uuid": uuid})
 
-        assert uuid not in metastore.select('uuid')
+        assert uuid not in metastore.select("uuid")
         assert not exists(bucket=bucket, key=key)
 
 
@@ -568,8 +555,12 @@ def test_add_new_data_correct_datasource():
     data_filepath = get_surface_datapath(filename="capegrim-medusa.05.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.05.precisions.C", source_format="GC")
 
-    results = standardise_surface(store="user",
-        filepath=(data_filepath, precision_filepath), source_format="GCWERKS", site="CGO", network="AGAGE"
+    results = standardise_surface(
+        store="user",
+        filepath=(data_filepath, precision_filepath),
+        source_format="GCWERKS",
+        site="CGO",
+        network="AGAGE",
     )
 
     first_results = results["processed"]["capegrim-medusa.05.C"]
@@ -583,8 +574,12 @@ def test_add_new_data_correct_datasource():
     data_filepath = get_surface_datapath(filename="capegrim-medusa.06.C", source_format="GC")
     precision_filepath = get_surface_datapath(filename="capegrim-medusa.06.precisions.C", source_format="GC")
 
-    new_results = standardise_surface(store="user",
-        filepath=(data_filepath, precision_filepath), source_format="GCWERKS", site="CGO", network="AGAGE"
+    new_results = standardise_surface(
+        store="user",
+        filepath=(data_filepath, precision_filepath),
+        source_format="GCWERKS",
+        site="CGO",
+        network="AGAGE",
     )
 
     second_results = new_results["processed"]["capegrim-medusa.06.C"]
@@ -755,7 +750,9 @@ def test_read_multiside_aqmesh():
     metafile = get_surface_datapath(filename="co2_metadata.csv", source_format="AQMESH")
 
     with ObsSurface(bucket=bucket) as metastore:
-        result = metastore.read_multisite_aqmesh(data_filepath=datafile, metadata_filepath=metafile, overwrite=True)
+        result = metastore.read_multisite_aqmesh(
+            data_filepath=datafile, metadata_filepath=metafile, overwrite=True
+        )
 
     # This crazy structure will be fixed when add_datsources is updated
     raith_uuid = result["raith"]["raith"]["uuid"]
@@ -852,11 +849,15 @@ def test_obs_schema(species, obs_variable):
 def test_check_obssurface_same_file_skips():
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
 
-    results = standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+    results = standardise_surface(
+        store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
+    )
 
     assert results
 
-    results = standardise_surface(store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC")
+    results = standardise_surface(
+        store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
+    )
 
     assert not results
 
@@ -865,10 +866,14 @@ def test_gcwerks_fp_not_a_tuple_raises():
     filepath = "/tmp/test_filepath.txt"
 
     with pytest.raises(TypeError):
-        standardise_surface(store="user", filepath=filepath, source_format="GCWERKS", site="cgo", network="agage")
+        standardise_surface(
+            store="user", filepath=filepath, source_format="GCWERKS", site="cgo", network="agage"
+        )
 
     with pytest.raises(TypeError):
-        standardise_surface(store="user", filepath=filepath, source_format="gcwerks", site="cgo", network="agage")
+        standardise_surface(
+            store="user", filepath=filepath, source_format="gcwerks", site="cgo", network="agage"
+        )
 
 
 def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):
