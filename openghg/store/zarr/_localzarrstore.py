@@ -2,61 +2,20 @@
 So this is a prototype for using zarr with the
 """
 from __future__ import annotations
-from abc import ABC, abstractmethod
-import collections
 import logging
-from typing import Any, Dict, Literal, Iterable, Generator, List, Union, Optional, MutableMapping
+from typing import Any, Dict, Literal, Iterable, Iterator, List, Union, Optional, MutableMapping
 import xarray as xr
 import zarr
 
 from openghg.types import KeyExistsError
 from pathlib import Path
 from openghg.objectstore import get_folder_size
-from openghg.store.spec import get_zarr_encoding
+from openghg.store.zarr import ZarrStore, get_zarr_encoding
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
 
 StoreLike = Union[zarr.storage.BaseStore, MutableMapping]
-
-
-class ZarrStore(ABC):
-    """Interface for our zarr stores."""
-
-    @abstractmethod
-    def add(self):
-        """Add an xr.Dataset to the zarr store."""
-        pass
-
-    @abstractmethod
-    def update(self):
-        """Update the data at the given key"""
-        pass
-
-    @abstractmethod
-    def delete(self):
-        """Remove data from the zarr store"""
-        pass
-
-    @abstractmethod
-    def hash(self):
-        """Hash the data at the given key"""
-        pass
-
-    @abstractmethod
-    def get_hash(self, key: str) -> str:
-        """Get the hash of the data at the given key"""
-        pass
-
-    @abstractmethod
-    def hash_equal(self, key: str, dataset: xr.Dataset) -> bool:
-        """Compare the hashes of the data at the given key and the passed xr.Dataset"""
-        pass
-
-    @abstractmethod
-    def bytes_stored(self):
-        """Return the number of bytes stored in the zarr store"""
-        pass
 
 
 class LocalZarrStore(ZarrStore):
@@ -65,9 +24,8 @@ class LocalZarrStore(ZarrStore):
         self._store_key = f"data/{datasource_uuid}/zarr"
         self._mode = mode
         dir_path = Path(bucket, self._store_key)
-        self._store = zarr.storage.NestedDirectoryStore(dir_path)
-        self._pop_keys = collections.deque()
-        self._memory_store = {}
+        self._store: zarr.storage.Store = zarr.storage.NestedDirectoryStore(dir_path)
+        self._memory_store: Dict[str, bytes] = {}
 
     def __bool__(self) -> bool:
         return bool(self._store)
@@ -76,13 +34,14 @@ class LocalZarrStore(ZarrStore):
         """Create a key for the zarr store."""
         return f"{version}/{key}"
 
-    def keys(self) -> Generator:
+    def keys(self) -> Iterator[str]:
         """Keys of data stored in the zarr store.
 
         Returns:
             Generator: Generator object
         """
-        return self._store.keys()
+        iterator: Iterator = self._store.keys()
+        return iterator
 
     def close(self) -> None:
         """Close the zarr store.
@@ -150,14 +109,14 @@ class LocalZarrStore(ZarrStore):
         if self._mode == "r":
             raise ValueError("Cannot pop from a read-only zarr store")
 
-        self._pop_keys.append((key, version))
         versioned_key = self._create_key(key=key, version=version)
         # Let's copy the data we want to pop into a memory store and return it from there
         zarr.convenience.copy_store(
             source=self._store, dest=self._memory_store, source_path=versioned_key, dest_path=versioned_key
         )
         self.delete(key=key, version=version)
-        return xr.open_zarr(store=self._memory_store, group=versioned_key, consolidated=False)
+        ds: xr.Dataset = xr.open_zarr(store=self._memory_store, group=versioned_key, consolidated=False)
+        return ds
 
     def copy_to_memorystore(self, keys: Iterable, version: str) -> List[Dict]:
         """Copies the compressed data from the filesystem store to a list of in-memory stores.
@@ -173,7 +132,7 @@ class LocalZarrStore(ZarrStore):
         memory_stores = []
         for daterange_key in keys:
             key = self._create_key(key=daterange_key, version=version)
-            store = {}
+            store: Dict[str, bytes] = {}
             zarr.copy_store(source=self._store, dest=store, source_path=key)
             memory_stores.append(store)
 

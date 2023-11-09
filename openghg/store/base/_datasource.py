@@ -1,6 +1,6 @@
 from collections import defaultdict
 import warnings
-from typing import Any, DefaultDict, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, cast, DefaultDict, Dict, List, Optional, Tuple, TypeVar, Union
 from types import TracebackType
 import logging
 import numpy as np
@@ -14,8 +14,6 @@ from openghg.types import DataOverlapError, ObjectStoreError
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
-
-dataKeyType = DefaultDict[str, Dict[str, Dict[str, str]]]
 
 __all___ = ["Datasource"]
 
@@ -39,22 +37,21 @@ class Datasource:
             if exists(bucket=bucket, key=key):
                 stored_data = get_object_from_json(bucket=bucket, key=key)
                 self.__dict__.update(stored_data)
-                self._data_keys = defaultdict(dict, self._data_keys)
+                self._data_keys: Dict[str, List] = defaultdict(list, self._data_keys)
             else:
                 raise ObjectStoreError(f"No Datasource with uuid {uuid} found in bucket {bucket}")
         else:
             self._uuid = str(uuid4())
             self._creation_datetime = str(timestamp_now())
-            self._metadata: Dict[str, Union[str, Dict]] = {}
+            self._metadata: Dict[str, Union[str, List, Dict]] = {}
             self._start_date = None
             self._end_date = None
             self._status: Optional[Dict] = None
-            # This dictionary stored the keys for each version of data added
-            # data_key = d._data_keys[version]["keys"][date_key]
-            self._data_keys: dataKeyType = defaultdict(dict)
+            self._data_keys = defaultdict(list)
             self._data_type: str = ""
             # Hold information regarding the versions of the data
             self._latest_version: str = ""
+            self._timestamps: Dict[str, str] = {}
 
         self._zarr_store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid)
         # So we know where to write out to
@@ -62,7 +59,7 @@ class Datasource:
 
         self.update_daterange()
 
-    def __enter__(self):
+    def __enter__(self) -> Datasource:
         return self
 
     def __exit__(
@@ -219,7 +216,7 @@ class Datasource:
 
         # TODO - rename self._data_keys to self._dates_covered
         # We'll use this to store the dates covered by this version of the data
-        date_keys = self._data_keys[self._latest_version]["keys"] if self._data_keys else []
+        date_keys = self._data_keys[self._latest_version] if self._data_keys else []
 
         # We'll sort and drop duplicates here
         # TODO - test to see if this chaining does help
@@ -354,8 +351,8 @@ class Datasource:
 
         # We'll store the daterange for this version of the data and update the latest to the current version
         timestamp_str_now = str(timestamp_now())
-        self._data_keys[version_str]["keys"] = date_keys
-        self._data_keys[version_str]["timestamp"] = timestamp_str_now
+        self._data_keys[version_str] = date_keys
+        self._timestamps[version_str] = timestamp_str_now
         self.add_metadata_key(key="latest_version", value=version_str)
         self.add_metadata_key(key="timestamp", value=timestamp_str_now)
 
@@ -364,10 +361,10 @@ class Datasource:
         start, end = self.daterange()
         self.add_metadata_key(key="start_date", value=str(start))
         self.add_metadata_key(key="end_date", value=str(end))
-        # Store the version data, it's less information now and we can then present version data to the users
+        # Store the version data, it's less information now and we can then 
+        # present version data to the users
         self._metadata["versions"] = self._data_keys
 
-        self._latest_version = version_str
         self._last_updated = timestamp_str_now
 
     def delete_all_data(self) -> None:
@@ -394,9 +391,9 @@ class Datasource:
             version = self._latest_version
 
         # Delete the keys
-        current_keys = set(self._data_keys[version]["keys"])
+        current_keys = set(self._data_keys[version])
 
-        self._data_keys[version]["keys"] = sorted(list(current_keys - set(keys)))
+        self._data_keys[version] = sorted(list(current_keys - set(keys)))
 
         # Delete the data
         for key in keys:
@@ -417,7 +414,7 @@ class Datasource:
         if version not in self._data_keys:
             raise KeyError("Invalid version.")
 
-        self.delete_data(version=version, keys=self._data_keys[version]["keys"])
+        self.delete_data(version=version, keys=self._data_keys[version])
         del self._data_keys[version]
 
     def add_metadata(self, metadata: Dict, skip_keys: Optional[List] = None) -> None:
@@ -607,7 +604,8 @@ class Datasource:
 
         time_period_attrs = ["sampling_period", "time_period"]
         for attr in time_period_attrs:
-            value = metadata.get(attr)
+            # These will always be strings
+            value = cast(str, metadata.get(attr))
             if value is not None:
                 # For sampling period data, expect this to be in seconds
                 if attr == "sampling_period":
@@ -696,14 +694,6 @@ class Datasource:
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self.key(), data=internal_metadata)
 
-    def get_latest_datekeys(self) -> List[str]:
-        """Get the latest date keys for this Datasource
-
-        Returns:
-            list: List of date keys
-        """
-        return list(self._data_keys[self._latest_version]["keys"].keys())
-
     def key(self) -> str:
         """Returns the Datasource's key
 
@@ -712,7 +702,7 @@ class Datasource:
         """
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-    def memory_store(self, version="latest") -> List:
+    def memory_store(self, version: str = "latest") -> List:
         """Copy the compressed data for a version from the zarr store into memory.
 
         Example:
@@ -725,6 +715,9 @@ class Datasource:
         Returns:
             list: List of zarr memory stores
         """
+        if not self._data_keys:
+            return []
+
         if version == "latest":
             version = self._latest_version
 
@@ -753,7 +746,7 @@ class Datasource:
         if not self._data_keys:
             return
 
-        date_keys = sorted(self._data_keys[self._latest_version]["keys"])
+        date_keys = sorted(self._data_keys[self._latest_version])
 
         start, _ = split_daterange_str(daterange_str=date_keys[0])
         _, end = split_daterange_str(daterange_str=date_keys[-1])
@@ -768,7 +761,7 @@ class Datasource:
         Returns:
             tuple (Timestamp, Timestamp): Start, end timestamps
         """
-        if self._start_date is None and self._data is not None:
+        if self._start_date is None and self._data_keys is not None:
             self.update_daterange()
 
         return self._start_date, self._end_date
@@ -817,7 +810,7 @@ class Datasource:
         Return:
             list: List of keys to data
         """
-        data_keys = self._data_keys[self._latest_version]["keys"]
+        data_keys = self._data_keys[self._latest_version]
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
@@ -841,7 +834,7 @@ class Datasource:
         start_date = timestamp_tzaware(split_daterange[0])
         end_date = timestamp_tzaware(split_daterange[1])
 
-        data_keys = self._data_keys[self._latest_version]["keys"]
+        data_keys = self._data_keys[self._latest_version]
 
         return self.key_date_compare(keys=data_keys, start_date=start_date, end_date=end_date)
 
@@ -899,7 +892,7 @@ class Datasource:
         """
         return self._data_type
 
-    def raw_keys(self) -> dataKeyType:
+    def raw_keys(self) -> Dict[str, List]:
         """Returns the raw keys dictionary
 
         Returns:
@@ -919,7 +912,7 @@ class Datasource:
             version = self._latest_version
 
         try:
-            keys = self._data_keys[version]["keys"]
+            keys = self._data_keys[version]
         except KeyError:
             raise KeyError(f"Invalid version, valid versions {list(self._data_keys.keys())}")
 
@@ -951,7 +944,7 @@ class Datasource:
         zarr_keys = list(self._zarr_store.keys())
 
         for version in self._data_keys:
-            versioned_keys = [f"{version}/{key}" for key in self._data_keys[version]["keys"]]
+            versioned_keys = [f"{version}/{key}" for key in self._data_keys[version]]
             for key in versioned_keys:
                 if not any(key in zarr_key for zarr_key in zarr_keys):
                     raise ObjectStoreError(
@@ -960,8 +953,11 @@ class Datasource:
 
         # We also need to ensure the opposite isn't true, that there are keys in the zarr store that aren't in the
         # Datasource
-        versioned_keys = set(["/".join(k.split("/")[:2]) for k in zarr_keys if k.startswith("v")])
-        versioned_keys = [k for k in versioned_keys if ".zgroup" not in k]
+        versioned_keys = [
+            k
+            for k in set(["/".join(k.split("/")[:2]) for k in zarr_keys if k.startswith("v")])
+            if ".zgroup" not in k
+        ]
 
         for key in versioned_keys:
             split_key = key.split("/")
@@ -972,7 +968,7 @@ class Datasource:
                     f"The key {key} for version {version} of this Datasource exists in its zarr store but not in the Datasource key record."
                 )
 
-            if daterange not in self._data_keys[version]["keys"]:
+            if daterange not in self._data_keys[version]:
                 raise ObjectStoreError(
                     f"The key {key} for version {version} of this Datasource exists in its zarr store but not in the Datasource key record."
                 )

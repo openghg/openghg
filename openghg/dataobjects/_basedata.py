@@ -2,7 +2,7 @@
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
 from typing import Dict, Optional, Union
-from openghg.store.base import LocalZarrStore
+from openghg.store.zarr import LocalZarrStore
 import xarray as xr
 from pandas import Timestamp
 
@@ -41,8 +41,6 @@ class _BaseData:
             raise ValueError("Must supply either data or uuid and version")
 
         self.metadata = metadata
-        self.data = data
-        self._version = version
         self._lazy = False
         self._uuid = uuid
 
@@ -55,8 +53,10 @@ class _BaseData:
         if sort:
             raise NotImplementedError("sort not implemented yet")
 
-        if uuid is not None and version is not None:
-            date_keys = self.metadata["versions"][self._version]["keys"]
+        if data is not None:
+            self.data = data
+        elif uuid is not None and version is not None:
+            date_keys = self.metadata["versions"][version]
 
             if start_date is not None or end_date is not None:
                 if start_date is None:
@@ -66,14 +66,17 @@ class _BaseData:
 
                 date_keys = dates_in_range(keys=date_keys, start_date=start_date, end_date=end_date)
             else:
-                date_keys = self.metadata["versions"][self._version]["keys"]
+                date_keys = self.metadata["versions"][version]
 
             self._bucket = metadata["object_store"]
+            self._version = version
 
             zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
-            self._memory_stores = zarrstore.copy_to_memorystore(keys=date_keys, version=self._version)
+            self._memory_stores = zarrstore.copy_to_memorystore(keys=date_keys, version=version)
             self.data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords")
             zarrstore.close()
+        else:
+            raise ValueError("Must supply either data or uuid and version, cannot create an empty data object.")
 
     def __bool__(self) -> bool:
         return bool(self.data)

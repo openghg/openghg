@@ -100,7 +100,7 @@ def test_add_data(data, bucket):
         "latest_version": "v0",
     }
 
-    d.metadata()["versions"]["v0"]["keys"] = ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
+    d.metadata()["versions"]["v0"] = ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
     assert d.metadata().items() >= expected_metadata.items()
 
@@ -128,7 +128,7 @@ def test_versioning(capfd, bucket):
 
     min_keys = d.all_data_keys()
 
-    assert min_keys["v0"]["keys"] == ["2012-07-26-13:51:30+00:00_2020-07-04-09:58:30+00:00"]
+    assert min_keys["v0"] == ["2012-07-26-13:51:30+00:00_2020-07-04-09:58:30+00:00"]
 
     detailed_data = parse_crds(data_filepath=detailed_tac_filepath, site="tac", inlet="100m", network="decc")
 
@@ -149,7 +149,7 @@ def test_versioning(capfd, bucket):
 
     detailed_keys = d.all_data_keys()
 
-    assert detailed_keys["v1"]["keys"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
+    assert detailed_keys["v1"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
 
     # TODO: Add case for if_exists="combine" which should look more like original case above after updates
 
@@ -196,7 +196,7 @@ def test_replace_version(bucket):
 
     detailed_keys = d.all_data_keys()
 
-    assert detailed_keys["v1"]["keys"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
+    assert detailed_keys["v1"] == ["2014-06-30-00:06:30+00:00_2014-08-01-23:49:30+00:00"]
 
     # TODO: Add case for if_exists="combine" which should look more like original case above after updates
 
@@ -439,7 +439,7 @@ def test_data_deletion(data, bucket):
 
     d.delete_data(version="latest", keys=keys)
 
-    assert not d._data_keys["v0"]["keys"]
+    assert not d._data_keys["v0"]
     assert list(d._zarr_store.keys()) == [".zgroup", ".zmetadata", "v0/.zgroup"]
 
 

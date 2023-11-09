@@ -630,7 +630,7 @@ class ObsSurface(BaseStore):
         data_keys = datasource.raw_keys()
 
         for version in data_keys:
-            key_data = data_keys[version]["keys"]
+            key_data = data_keys[version]
 
             for daterange in key_data:
                 key = key_data[daterange]
