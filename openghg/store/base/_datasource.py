@@ -1,6 +1,7 @@
+from __future__ import annotations
 from collections import defaultdict
 import warnings
-from typing import Any, cast, DefaultDict, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, cast, Dict, List, Optional, Tuple, TypeVar, Union
 from types import TracebackType
 import logging
 import numpy as np
@@ -361,7 +362,7 @@ class Datasource:
         start, end = self.daterange()
         self.add_metadata_key(key="start_date", value=str(start))
         self.add_metadata_key(key="end_date", value=str(end))
-        # Store the version data, it's less information now and we can then 
+        # Store the version data, it's less information now and we can then
         # present version data to the users
         self._metadata["versions"] = self._data_keys
 

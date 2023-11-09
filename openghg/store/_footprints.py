@@ -309,6 +309,9 @@ class Footprints(BaseStore):
             )
             return {}
 
+        if chunks is None:
+            chunks = {}
+
         fp_data = xr.open_dataset(filepath).chunk(chunks=chunks)
 
         if species == "co2":
