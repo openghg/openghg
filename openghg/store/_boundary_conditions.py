@@ -135,94 +135,93 @@ class BoundaryConditions(BaseStore):
             )
             return {}
 
-        bc_data = open_dataset(filepath)
+        with open_dataset(filepath) as bc_data:
+            # Some attributes are numpy types we can't serialise to JSON so convert them
+            # to their native types here
+            attrs = {}
+            for key, value in bc_data.attrs.items():
+                try:
+                    attrs[key] = value.item()
+                except AttributeError:
+                    attrs[key] = value
 
-        # Some attributes are numpy types we can't serialise to JSON so convert them
-        # to their native types here
-        attrs = {}
-        for key, value in bc_data.attrs.items():
-            try:
-                attrs[key] = value.item()
-            except AttributeError:
-                attrs[key] = value
+            author_name = "OpenGHG Cloud"
+            bc_data.attrs["author"] = author_name
 
-        author_name = "OpenGHG Cloud"
-        bc_data.attrs["author"] = author_name
+            metadata = {}
+            metadata.update(attrs)
 
-        metadata = {}
-        metadata.update(attrs)
+            metadata["species"] = species
+            metadata["domain"] = domain
+            metadata["bc_input"] = bc_input
+            metadata["author"] = author_name
+            metadata["processed"] = str(timestamp_now())
 
-        metadata["species"] = species
-        metadata["domain"] = domain
-        metadata["bc_input"] = bc_input
-        metadata["author"] = author_name
-        metadata["processed"] = str(timestamp_now())
+            # Check if time has 0-dimensions and, if so, expand this so time is 1D
+            if "time" in bc_data.coords:
+                bc_data = update_zero_dim(bc_data, dim="time")
 
-        # Check if time has 0-dimensions and, if so, expand this so time is 1D
-        if "time" in bc_data.coords:
-            bc_data = update_zero_dim(bc_data, dim="time")
+            # Currently ACRG boundary conditions are split by month or year
+            bc_time = bc_data["time"]
 
-        # Currently ACRG boundary conditions are split by month or year
-        bc_time = bc_data["time"]
+            start_date, end_date, period_str = infer_date_range(
+                bc_time, filepath=filepath, period=period, continuous=continuous
+            )
 
-        start_date, end_date, period_str = infer_date_range(
-            bc_time, filepath=filepath, period=period, continuous=continuous
-        )
+            # Checking against expected format for boundary conditions
+            BoundaryConditions.validate_data(bc_data)
+            data_type = "boundary_conditions"
 
-        # Checking against expected format for boundary conditions
-        BoundaryConditions.validate_data(bc_data)
-        data_type = "boundary_conditions"
+            metadata["start_date"] = str(start_date)
+            metadata["end_date"] = str(end_date)
+            metadata["data_type"] = data_type
 
-        metadata["start_date"] = str(start_date)
-        metadata["end_date"] = str(end_date)
-        metadata["data_type"] = data_type
+            metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
+            metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
+            metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
+            metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
+            metadata["min_height"] = round(float(bc_data["height"].min()), 5)
+            metadata["max_height"] = round(float(bc_data["height"].max()), 5)
 
-        metadata["max_longitude"] = round(float(bc_data["lon"].max()), 5)
-        metadata["min_longitude"] = round(float(bc_data["lon"].min()), 5)
-        metadata["max_latitude"] = round(float(bc_data["lat"].max()), 5)
-        metadata["min_latitude"] = round(float(bc_data["lat"].min()), 5)
-        metadata["min_height"] = round(float(bc_data["height"].min()), 5)
-        metadata["max_height"] = round(float(bc_data["height"].max()), 5)
+            metadata["input_filename"] = filepath.name
 
-        metadata["input_filename"] = filepath.name
+            metadata["time_period"] = period_str
 
-        metadata["time_period"] = period_str
+            key = "_".join((species, bc_input, domain))
 
-        key = "_".join((species, bc_input, domain))
+            boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
+            boundary_conditions_data[key]["data"] = bc_data
+            boundary_conditions_data[key]["metadata"] = metadata
 
-        boundary_conditions_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-        boundary_conditions_data[key]["data"] = bc_data
-        boundary_conditions_data[key]["metadata"] = metadata
+            required_keys = ("species", "bc_input", "domain")
 
-        required_keys = ("species", "bc_input", "domain")
+            # This performs the lookup and assignment of data to new or
+            # existing Datasources
+            datasource_uuids = self.assign_data(
+                data=boundary_conditions_data,
+                if_exists=if_exists,
+                new_version=new_version,
+                data_type=data_type,
+                required_keys=required_keys,
+            )
 
-        # This performs the lookup and assignment of data to new or
-        # existing Datasources
-        datasource_uuids = self.assign_data(
-            data=boundary_conditions_data,
-            if_exists=if_exists,
-            new_version=new_version,
-            data_type=data_type,
-            required_keys=required_keys,
-        )
+            # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
+            # update_keys = ["start_date", "end_date", "latest_version"]
+            # boundary_conditions_data = update_metadata(
+            #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
+            # )
 
-        # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
-        # update_keys = ["start_date", "end_date", "latest_version"]
-        # boundary_conditions_data = update_metadata(
-        #     data_dict=boundary_conditions_data, uuid_dict=datasource_uuids, update_keys=update_keys
-        # )
+            # bc_store.add_datasources(
+            #     uuids=datasource_uuids,
+            #     data=boundary_conditions_data,
+            #     metastore=metastore,
+            #     update_keys=update_keys,
+            # )
 
-        # bc_store.add_datasources(
-        #     uuids=datasource_uuids,
-        #     data=boundary_conditions_data,
-        #     metastore=metastore,
-        #     update_keys=update_keys,
-        # )
+            # Record the file hash in case we see this file again
+            self._file_hashes[file_hash] = filepath.name
 
-        # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
-
-        return datasource_uuids
+            return datasource_uuids
 
     @staticmethod
     def schema() -> DataSchema:

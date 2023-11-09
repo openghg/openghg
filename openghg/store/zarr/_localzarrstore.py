@@ -10,7 +10,7 @@ import zarr
 from openghg.types import KeyExistsError
 from pathlib import Path
 from openghg.objectstore import get_folder_size
-from openghg.store.zarr import ZarrStore, get_zarr_encoding
+from openghg.store.zarr import ZarrStore
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
@@ -86,6 +86,8 @@ class LocalZarrStore(ZarrStore):
         Returns:
             None
         """
+        from openghg.store.zarr import get_zarr_encoding
+
         if self._mode == "r":
             raise ValueError("Cannot add to a read-only zarr store")
 

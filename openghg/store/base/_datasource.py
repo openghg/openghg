@@ -683,17 +683,16 @@ class Datasource:
         from openghg.objectstore import set_object_from_json
 
         DO_NOT_STORE = {
-            "_memory_store",
             "_zarr_store",
             "_bucket",
             "_status",
-            "_new_version",
             "_start_date",
             "_end_date",
         }
 
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self.key(), data=internal_metadata)
+        self._zarr_store.close()
 
     def key(self) -> str:
         """Returns the Datasource's key

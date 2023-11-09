@@ -290,7 +290,6 @@ def get_obs_surface_local(
     )
 
     data = retrieved_data.data
-    data.compute()
 
     if data.attrs["inlet"] == "multiple":
         data.attrs["inlet_height_magl"] = "multiple"
@@ -324,6 +323,9 @@ def get_obs_surface_local(
         return None
 
     if average is not None:
+        # We need to compute the value here for the operations done further down
+        logger.info("Loading Dataset data into memory for resampling operations.")
+        data = data.compute()
         # GJ - 2021-03-09
         # TODO - check by RT
 
