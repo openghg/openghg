@@ -2,7 +2,7 @@
 This is used as a base for the other dataclasses and shouldn't be used directly.
 """
 from typing import Dict, Optional, Union
-from openghg.store.zarr import LocalZarrStore
+from openghg.store.storage import LocalZarrStore
 import xarray as xr
 from pandas import Timestamp
 

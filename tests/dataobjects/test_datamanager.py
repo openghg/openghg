@@ -91,9 +91,9 @@ def test_delete_footprint_data(footprint_read):
     assert datasource_path[0].exists()
 
     # Assert there are files in the zarr store
-    assert ds._zarr_store
+    assert ds._store
 
-    zarr_store_key = ds._zarr_store.store_key()
+    zarr_store_key = ds._store.store_key()
 
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
         assert metastore.search({'uuid': uuid})
@@ -320,9 +320,9 @@ def test_delete_data():
         assert metastore.search({'uuid': uid})
 
     assert d._data_keys
-    assert d._zarr_store
+    assert d._store
 
-    zarr_store_path = d._zarr_store.store_path()
+    zarr_store_path = d._store.store_path()
 
     res.delete_datasource(uuid=uid)
 

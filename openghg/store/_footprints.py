@@ -7,7 +7,6 @@ import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import Dataset
-from numcodecs import Blosc
 
 __all__ = ["Footprints"]
 
@@ -209,7 +208,7 @@ class Footprints(BaseStore):
         drop_duplicates: bool = False,
         compression: bool = True,
         compressor: Optional[Any] = None,
-        filter: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
@@ -248,10 +247,10 @@ class Footprints(BaseStore):
             drop_duplicates: Drop duplicate timestamps, keeping the first value
             compression: Enable compression, we recommend enabling compression
             compressor: A custom compressor to use. If None, this will default to
-            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.BITSHUFFLE)`.
+            `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
-            filter: A filter to apply to the data on storage, this defaults to no filtering. See
-            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking a filter.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+            https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: UUIDs of Datasources data has been assigned to
         """
@@ -433,13 +432,6 @@ class Footprints(BaseStore):
                 "short_lifetime",
             )
 
-            if compression:
-                if compressor is None:
-                    compressor = Blosc(cname="zstd", clevel=5, shuffle=Blosc.BITSHUFFLE)
-            else:
-                logger.info("Compression is disabled")
-                compressor = None
-
             data_type = "footprints"
             # TODO - filter options
             datasource_uuids = self.assign_data(
@@ -451,6 +443,7 @@ class Footprints(BaseStore):
                 sort=sort,
                 drop_duplicates=drop_duplicates,
                 compressor=compressor,
+                filters=filters,
             )
 
             # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE

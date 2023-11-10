@@ -4,8 +4,9 @@ from xarray import Dataset
 from collections.abc import Iterator
 
 
-class ZarrStore(ABC):
-    """Interface for our zarr stores."""
+class Store(ABC):
+    """Interface for storing data in a Datasource. This may be in a zarr directory
+    store, compressed NetCDF, a sparse storage format or others."""
 
     @abstractmethod
     def add(

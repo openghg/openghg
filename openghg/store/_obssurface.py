@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
+from typing import Any, DefaultDict, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from pandas import Timedelta
@@ -119,6 +119,8 @@ class ObsSurface(BaseStore):
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -162,6 +164,11 @@ class ObsSurface(BaseStore):
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+            See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: Dictionary of Datasource UUIDs
 
@@ -360,6 +367,8 @@ class ObsSurface(BaseStore):
                 data_type=data_type,
                 required_keys=required_keys,
                 min_keys=5,
+                compressor=compressor,
+                filters=filters,
             )
 
             results["processed"][data_filepath.name] = datasource_uuids
@@ -518,6 +527,8 @@ class ObsSurface(BaseStore):
         if_exists: str = "auto",
         overwrite: bool = False,
         required_metakeys: Optional[Sequence] = None,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
@@ -535,6 +546,11 @@ class ObsSurface(BaseStore):
                 if None it defaults to:
                     {"species", "site", "station_long_name", "inlet", "instrument",
                     "network", "source_format", "data_source", "icos_data_level"}
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             Dict or None:
         """
@@ -591,6 +607,8 @@ class ObsSurface(BaseStore):
             data_type=data_type,
             required_keys=required_metakeys,
             min_keys=5,
+            compressor=compressor,
+            filters=filters,
         )
 
         self.store_hashes(hashes=hashes)

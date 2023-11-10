@@ -68,7 +68,7 @@ def test_add_data(data, bucket):
 
     d.add_data(metadata=metadata, data=ch4_data, sort=False, drop_duplicates=False, data_type="surface")
 
-    assert d._zarr_store
+    assert d._store
 
     memory_store = d.memory_store(version="v0")
     assert memory_store
@@ -410,7 +410,7 @@ def test_integrity_check(data, bucket):
     d = Datasource(bucket=bucket, uuid=uid)
     d.integrity_check()
 
-    d._zarr_store.delete_all()
+    d._store.delete_all()
 
     with pytest.raises(ObjectStoreError):
         d.integrity_check()
@@ -426,7 +426,7 @@ def test_data_deletion(data, bucket):
 
     keys = d.data_keys()
 
-    zarr_keys = set(d._zarr_store.keys())
+    zarr_keys = set(d._store.keys())
 
     partial_expected_keys = {
         "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zarray",
@@ -440,7 +440,7 @@ def test_data_deletion(data, bucket):
     d.delete_data(version="latest", keys=keys)
 
     assert not d._data_keys["v0"]
-    assert list(d._zarr_store.keys()) == [".zgroup", ".zmetadata", "v0/.zgroup"]
+    assert list(d._store.keys()) == [".zgroup", ".zmetadata", "v0/.zgroup"]
 
 
 def test_data_version_deletion(data, bucket):
@@ -451,7 +451,7 @@ def test_data_version_deletion(data, bucket):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
-    zarr_keys = set(d._zarr_store.keys())
+    zarr_keys = set(d._store.keys())
 
     partial_expected_keys = {
         "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zarray",
@@ -465,4 +465,4 @@ def test_data_version_deletion(data, bucket):
     d.delete_version(version="v0")
 
     assert "v0" not in d._data_keys
-    assert list(d._zarr_store.keys()) == [".zgroup", ".zmetadata", "v0/.zgroup"]
+    assert list(d._store.keys()) == [".zgroup", ".zmetadata", "v0/.zgroup"]

@@ -72,6 +72,8 @@ class Emissions(BaseStore):
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> dict:
         """Read emissions file
 
@@ -103,6 +105,11 @@ class Emissions(BaseStore):
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -188,6 +195,8 @@ class Emissions(BaseStore):
             new_version=new_version,
             data_type=data_type,
             required_keys=required,
+            compressor=compressor,
+            filters=filters,
         )
         # Record the file hash in case we see this file again
         self._file_hashes[file_hash] = filepath.name
@@ -201,6 +210,8 @@ class Emissions(BaseStore):
         if_exists: str = "auto",
         save_current: str = "auto",
         overwrite: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
         **kwargs: Dict,
     ) -> Dict:
         """
@@ -226,7 +237,13 @@ class Emissions(BaseStore):
                 - "y" / "yes" - Save current data exactly as it exists as a separate (previous) version
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
             **kwargs: Inputs for underlying parser function for the database.
+
                 Necessary inputs will depend on the database being parsed.
 
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
@@ -277,6 +294,8 @@ class Emissions(BaseStore):
             new_version=new_version,
             data_type=data_type,
             required_keys=required_keys,
+            compressor=compressor,
+            filters=filters,
         )
 
         return datasource_uuids

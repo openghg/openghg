@@ -51,7 +51,7 @@ def test_integrity_check_delete_datasource_keys():
         uid = metastore.select("uuid")[0]
         ds = Datasource(bucket=bucket, uuid=uid)
 
-        ds._zarr_store.delete_all()
+        ds._store.delete_all()
 
     with pytest.raises(ObjectStoreError):
         integrity_check()

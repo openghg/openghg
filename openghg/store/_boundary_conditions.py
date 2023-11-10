@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
+from typing import Any, TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
 import numpy as np
 from xarray import Dataset
 
@@ -61,6 +61,8 @@ class BoundaryConditions(BaseStore):
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> dict:
         """Read boundary conditions file
 
@@ -89,6 +91,11 @@ class BoundaryConditions(BaseStore):
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -203,6 +210,8 @@ class BoundaryConditions(BaseStore):
                 new_version=new_version,
                 data_type=data_type,
                 required_keys=required_keys,
+                compressor=compressor,
+                filters=filters,
             )
 
             # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE

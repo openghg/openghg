@@ -31,7 +31,7 @@ class Datasource:
 
     def __init__(self, bucket: str, uuid: Optional[str] = None) -> None:
         from openghg.util import timestamp_now
-        from openghg.store.zarr import LocalZarrStore
+        from openghg.store.storage import LocalZarrStore
 
         if uuid is not None:
             key = f"{Datasource._datasource_root}/uuid/{uuid}"
@@ -54,7 +54,8 @@ class Datasource:
             self._latest_version: str = ""
             self._timestamps: Dict[str, str] = {}
 
-        self._zarr_store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid)
+        # TODO - add in selection of other store types, this could NetCDF, sparse, whatever
+        self._store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid)
         # So we know where to write out to
         self._bucket = bucket
 
@@ -244,8 +245,8 @@ class Datasource:
             if if_exists == "new":
                 # Remove all current data on Datasource and add new data
                 logger.info("Updating store to include new added data only.")
-                self._zarr_store.delete_all()
-                self._zarr_store.add(key=daterange_str, version=version_str, dataset=data)
+                self._store.delete_all()
+                self._store.add(key=daterange_str, version=version_str, dataset=data)
                 # We only want this key for a new version
                 date_keys = [daterange_str]
             elif overlapping:
@@ -253,7 +254,7 @@ class Datasource:
                     combined_datasets = {}
                     # There can really only be one overlap so we can do away with this
                     for existing_daterange, new_daterange in overlapping:
-                        existing = self._zarr_store.pop(key=existing_daterange, version=self._latest_version)
+                        existing = self._store.pop(key=existing_daterange, version=self._latest_version)
 
                         logger.info("Combining overlapping data dateranges")
                         # Concatenate datasets along time dimension
@@ -306,7 +307,7 @@ class Datasource:
                         # chunks = get_chunks(data_type=data_type)
                         # logger.info(f"Rechunking {data_type} data using: {chunks}")
                         # dataset = dataset.chunk(chunks)
-                        self._zarr_store.add(
+                        self._store.add(
                             key=key,
                             version=version_str,
                             dataset=dataset,
@@ -327,7 +328,7 @@ class Datasource:
                     )
             else:
                 date_keys.append(daterange_str)
-                self._zarr_store.add(
+                self._store.add(
                     key=daterange_str,
                     version=version_str,
                     dataset=data,
@@ -336,7 +337,7 @@ class Datasource:
                 )
         else:
             date_keys.append(daterange_str)
-            self._zarr_store.add(
+            self._store.add(
                 key=daterange_str, version=version_str, dataset=data, compressor=compressor, filters=filters
             )
 
@@ -375,9 +376,9 @@ class Datasource:
         Returns:
             None
         """
-        self._zarr_store.delete_all()
-        self._zarr_store.close()
-        delete_objects(bucket=self._bucket, prefix=self._zarr_store.store_key())
+        self._store.delete_all()
+        self._store.close()
+        delete_objects(bucket=self._bucket, prefix=self._store.store_key())
 
     def delete_data(self, version: str, keys: List) -> None:
         """Delete specific keys
@@ -398,7 +399,7 @@ class Datasource:
 
         # Delete the data
         for key in keys:
-            self._zarr_store.delete(key=key, version=version)
+            self._store.delete(key=key, version=version)
 
     def delete_version(self, version: str) -> None:
         """Delete a specific version of data.
@@ -683,7 +684,7 @@ class Datasource:
         from openghg.objectstore import set_object_from_json
 
         DO_NOT_STORE = {
-            "_zarr_store",
+            "_store",
             "_bucket",
             "_status",
             "_start_date",
@@ -692,7 +693,7 @@ class Datasource:
 
         internal_metadata = {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
         set_object_from_json(bucket=self._bucket, key=self.key(), data=internal_metadata)
-        self._zarr_store.close()
+        self._store.close()
 
     def key(self) -> str:
         """Returns the Datasource's key
@@ -721,7 +722,7 @@ class Datasource:
         if version == "latest":
             version = self._latest_version
 
-        return self._zarr_store.copy_to_memorystore(keys=self.data_keys(), version=version)
+        return self._store.copy_to_memorystore(keys=self.data_keys(), version=version)
 
     def data(self) -> None:
         """Directly accessing a Datasource's data is no longer supported.
@@ -941,7 +942,7 @@ class Datasource:
         Returns:
             None
         """
-        zarr_keys = list(self._zarr_store.keys())
+        zarr_keys = list(self._store.keys())
 
         for version in self._data_keys:
             versioned_keys = [f"{version}/{key}" for key in self._data_keys[version]]

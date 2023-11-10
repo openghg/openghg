@@ -107,6 +107,7 @@ class BaseStore:
         if_exists: str = "auto",
         new_version: bool = True,
         compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> Dict[str, Dict]:
         """Assign data to a Datasource. This will either create a new Datasource
         Create or get an existing Datasource for each gas in the file

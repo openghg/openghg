@@ -6,11 +6,12 @@ import logging
 from typing import Any, Dict, Literal, Iterable, Iterator, List, Union, Optional, MutableMapping
 import xarray as xr
 import zarr
+from numcodecs import Blosc
 
-from openghg.types import KeyExistsError
+from openghg.types import KeyExistsError, ZarrStoreError
 from pathlib import Path
 from openghg.objectstore import get_folder_size
-from openghg.store.zarr import ZarrStore
+from openghg.store.storage import Store
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
@@ -18,7 +19,7 @@ logger.setLevel(logging.DEBUG)
 StoreLike = Union[zarr.storage.BaseStore, MutableMapping]
 
 
-class LocalZarrStore(ZarrStore):
+class LocalZarrStore(Store):
     def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
         self._bucket = bucket
         self._store_key = f"data/{datasource_uuid}/zarr"
@@ -82,19 +83,25 @@ class LocalZarrStore(ZarrStore):
             version: Version of data to add
             dataset: xr.Dataset to add
             compressor: Compressor to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#compressors
+            Defaults to using the Blosc compressor with ztd compression level 5
             filters: Filters to use, see https://zarr.readthedocs.io/en/stable/tutorial.html#filters
         Returns:
             None
         """
-        from openghg.store.zarr import get_zarr_encoding
+        from openghg.store.storage import get_zarr_encoding
 
         if self._mode == "r":
-            raise ValueError("Cannot add to a read-only zarr store")
+            raise PermissionError("Cannot add to a read-only zarr store")
+
+        if compressor is None:
+            compressor = Blosc(cname="zstd", clevel=5, shuffle=Blosc.BITSHUFFLE)
 
         versioned_key = self._create_key(key=key, version=version)
-        # TODO - check if the key already exists and then ?
+
         if versioned_key in self._store:
-            raise KeyExistsError("Cannot overwrite key in zarr store using add - use update method")
+            raise KeyExistsError(
+                f"Cannot overwrite key {versioned_key} in zarr store using add - use update method"
+            )
 
         encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
         dataset.to_zarr(store=self._store, group=versioned_key, encoding=encoding)
@@ -109,9 +116,13 @@ class LocalZarrStore(ZarrStore):
             Dataset: Dataset popped from the store
         """
         if self._mode == "r":
-            raise ValueError("Cannot pop from a read-only zarr store")
+            raise PermissionError("Cannot pop from a read-only zarr store")
 
         versioned_key = self._create_key(key=key, version=version)
+
+        # if versioned_key not in self._store:
+        #     raise ZarrStoreError(f"Key {versioned_key} not found in zarr store")
+
         # Let's copy the data we want to pop into a memory store and return it from there
         zarr.convenience.copy_store(
             source=self._store, dest=self._memory_store, source_path=versioned_key, dest_path=versioned_key
@@ -150,10 +161,14 @@ class LocalZarrStore(ZarrStore):
             None
         """
         if self._mode == "r":
-            raise ValueError("Cannot delete from a read-only zarr store")
+            raise PermissionError("Cannot delete from a read-only zarr store")
 
         versioned_key = self._create_key(key=key, version=version)
-        del self._store[versioned_key]
+
+        try:
+            del self._store[versioned_key]
+        except KeyError:
+            raise ZarrStoreError(f"Key {versioned_key} not found in zarr store")
 
     def delete_all(self) -> None:
         """Delete all data from the zarr store.
@@ -162,13 +177,18 @@ class LocalZarrStore(ZarrStore):
             None
         """
         if self._mode == "r":
-            raise ValueError("Cannot delete from a read-only zarr store")
+            raise PermissionError("Cannot delete from a read-only zarr store")
 
         for key in self._store.keys():
             del self._store[key]
 
     def update(
-        self, key: str, version: str, dataset: xr.Dataset, compressor: Optional[Any], filters: Optional[Any]
+        self,
+        key: str,
+        version: str,
+        dataset: xr.Dataset,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> None:
         """Update the data at the given key.
 
@@ -182,11 +202,7 @@ class LocalZarrStore(ZarrStore):
             None
         """
         if self._mode == "r":
-            raise ValueError("Cannot update a read-only zarr store")
-
-        versioned_key = self._create_key(key=key, version=version)
-        if versioned_key not in self._store:
-            raise KeyError(f"Key {versioned_key} not found in zarr store")
+            raise PermissionError("Cannot update a read-only zarr store")
 
         self.delete(key=key, version=version)
         self.add(key=key, version=version, dataset=dataset, compressor=compressor, filters=filters)
@@ -204,5 +220,9 @@ class LocalZarrStore(ZarrStore):
         raise NotImplementedError
 
     def bytes_stored(self) -> int:
-        """Return the number of bytes stored in the zarr store"""
+        """Return the number of bytes stored in the zarr store
+
+        Returns:
+            int: Number of bytes stored in zarr store
+        """
         return get_folder_size(folder_path=self.store_path())

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Union
+from typing import Any, DefaultDict, Dict, Optional, Union
 import logging
 from openghg.store.base import BaseStore
 from xarray import Dataset
@@ -39,6 +39,8 @@ class EulerianModel(BaseStore):
         save_current: str = "auto",
         overwrite: bool = False,
         force: bool = False,
+        compressor: Optional[Any] = None,
+        filters: Optional[Any] = None,
     ) -> Dict:
         """Read Eulerian model output
 
@@ -61,6 +63,11 @@ class EulerianModel(BaseStore):
                 - "n" / "no" - Allow current data to updated / deleted
             overwrite: Deprecated. This will use options for if_exists="new".
             force: Force adding of data even if this is identical to data stored.
+            compressor: A custom compressor to use. If None, this will default to
+                `Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)`.
+                See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
+            filters: Filters to apply to the data on storage, this defaults to no filtering. See
+                https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
         """
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
@@ -190,6 +197,8 @@ class EulerianModel(BaseStore):
                 new_version=new_version,
                 data_type=data_type,
                 required_keys=required,
+                compressor=compressor,
+                filters=filters,
             )
 
             # TODO: MAY NEED TO ADD BACK IN OR CAN DELETE
