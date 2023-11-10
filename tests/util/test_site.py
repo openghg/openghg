@@ -26,11 +26,11 @@ def test_site_info_file_mock():
     "network,expected_site",
     [
         ("NOAA", "MHD"),
-        # ("AGAGE", "MHD"),
-        # ("ICOS", "MHD"),
-        # ("icos", "MHD"),
-        # ("DECC", "TAC"),
-        # ("nonetwork", None)
+        ("AGAGE", "MHD"),
+        ("ICOS", "MHD"),
+        ("icos", "MHD"),
+        ("DECC", "TAC"),
+        ("nonetwork", None)
     ]
 )
 def test_sites_in_network(network, expected_site):
