@@ -32,8 +32,8 @@ __all__ = [
     "util",
 ]
 
-if _sys.version_info < (3, 8):
-    raise ImportError("openghg requires Python >= 3.8")
+if _sys.version_info < (3, 9):
+    raise ImportError("openghg requires Python >= 3.9")
 
 v = get_versions()
 

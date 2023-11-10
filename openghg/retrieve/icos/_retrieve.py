@@ -319,6 +319,13 @@ def _retrieve_remote(
     # Now filter the dataframe so we can extract the PIDS
     filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
 
+    if filtered_sources.empty:
+        species_lower = [s.lower() for s in species]
+        # For this see https://stackoverflow.com/a/55335207
+        search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
+        # Now filter the dataframe so we can extract the PIDS
+        filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
+
     if inlet is not None:
         inlet = str(float(inlet.rstrip("m")))
         height_filter = [inlet in str(x) for x in filtered_sources["samplingheight"]]

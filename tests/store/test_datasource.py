@@ -126,8 +126,6 @@ def test_versioning(capfd, bucket):
 
     min_keys = d.versions()
 
-    raise ValueError("Should this return data keys instead of datasource keys?")
-
     expected_v1 = {
         "2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00",
         "2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00",
@@ -139,27 +137,6 @@ def test_versioning(capfd, bucket):
         "2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00",
         "2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00": "datasource/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00",
     }
-
-    got = {
-        "2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2012-07-26-13:51:30+00:00_2012-07-28-02:45:30+00:00",
-        "2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2013-07-26-13:51:30+00:00_2013-07-28-13:02:30+00:00",
-        "2014-07-26-13:51:30+00:00_2014-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2014-07-26-13:51:30+00:00_2014-07-28-13:02:30+00:00",
-        "2015-07-26-13:51:30+00:00_2015-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2015-07-26-13:51:30+00:00_2015-07-28-13:02:30+00:00",
-        "2016-07-26-13:51:30+00:00_2016-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2016-07-26-13:51:30+00:00_2016-07-28-13:02:30+00:00",
-        "2017-07-26-13:51:30+00:00_2017-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2017-07-26-13:51:30+00:00_2017-07-28-13:02:30+00:00",
-        "2018-07-26-13:51:30+00:00_2018-07-28-13:02:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2018-07-26-13:51:30+00:00_2018-07-28-13:02:30+00:00",
-        "2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2019-06-01-07:54:30+00:00_2019-06-21-07:13:30+00:00",
-        "2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00": "data/uuid/4b91f73e-3d57-47e4-aa13-cb28c35d3b3d/v1/2020-06-21-17:53:30+00:00_2020-07-04-09:58:30+00:00",
-    }
-
-    print(min_keys["v1"]["keys"])
-
-    return
-    # for k,v in min_keys["v1"]["keys"].items():
-    #     if min_keys["v1"]["keys"][k] == expected_v1[k]:
-    #         print(k, v)
-
-    # return
 
     assert min_keys["v1"]["keys"] == expected_v1
 
@@ -587,6 +564,7 @@ def test_integrity_check(data, bucket):
         d.integrity_check()
 
 
+@pytest.mark.xfail(reason="We expect this to fail as we don't do any compression at the moment. REMOVE THIS TEST.")
 def test_datasource_compression(data, bucket):
     """Saving a Datasource with compression=True should
     result in a compressed netCDF file.
@@ -615,4 +593,4 @@ def test_datasource_compression(data, bucket):
     size1 = os.path.getsize(filepath1)
     size2 = os.path.getsize(filepath2)
 
-    assert size1 <= size2
+    assert size1 < size2
