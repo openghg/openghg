@@ -118,7 +118,7 @@ def _read_data_large_header(
         dict: Dictionary of gas data
     """
     from openghg.util import read_header, format_inlet
-    from pandas import read_csv, to_datetime
+    from pandas import read_csv
 
     # Read metadata from the filename and cross check to make sure the passed
     # arguments match
@@ -175,12 +175,11 @@ def _read_data_large_header(
         header=len_header - 1,
         sep=";",
         parse_dates={"time": [2, 3, 4, 5, 6]},
+        date_format="%Y %m %d %H %M",
         index_col="time",
         na_values=["-9.990", "-999.990"],
         dtype=dtypes,
     )
-
-    df.index = to_datetime(df.index, format="%Y %m %d %H %M")
 
     # Lowercase all the column titles
     df.columns = [str(c).lower() for c in df.columns]
@@ -293,7 +292,6 @@ def _read_data_small_header(
         dict: Dictionary of gas data
     """
     from openghg.util import read_header, format_inlet
-    import pandas as pd
     from pandas import read_csv
 
     # Read some metadata from the filename
@@ -327,11 +325,6 @@ def _read_data_small_header(
     ]
 
     dtypes = {
-        "Day": int,
-        "Month": int,
-        "Year": int,
-        "Hour": int,
-        "Minute": int,
         species_fname.lower(): float,
         "Stdev": float,
         "SamplingHeight": float,
@@ -345,10 +338,10 @@ def _read_data_small_header(
         usecols=use_cols,
         dtype=dtypes,
         na_values="-999.99",
+        parse_dates={"time": datetime_columns},
+        date_format="%Y %m %d %H %M",
+        index_col="time",
     )
-
-    data["time"] = pd.to_datetime(data[datetime_columns], format="%Y-%m-%d %H:%M:%S")
-    data = data.drop(labels=datetime_columns, axis=1).set_index("time", drop=True)
 
     data = data[data[species_fname.lower()] >= 0.0]
 
