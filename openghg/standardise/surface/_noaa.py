@@ -557,18 +557,12 @@ def _read_raw_data(
 
     species = species.upper()
 
-    flag = []
-    selection_flag = []
-    for flag_str in data.analysis_flag:
-        flag.append(flag_str[0] == ".")
-        selection_flag.append(int(flag_str[1] != "."))
+    # add 0/1 variable for second part of analysis flag
+    data[species + "_selection_flag"] = (data["analysis_flag"].str[1] != ".").apply(int)
 
-    combined_data = {}
-
-    data[species + "_status_flag"] = flag
-    data[species + "_selection_flag"] = selection_flag
-
-    data = data[data[species + "_status_flag"]]
+    # filter data by first part of analysis flag
+    flag = data["analysis_flag"].str[0] == "."
+    data = data[flag]
 
     data = data[
         [
@@ -611,10 +605,12 @@ def _read_raw_data(
     metadata["data_type"] = "surface"
     metadata["source_format"] = "noaa"
 
-    combined_data[species.lower()] = {
-        "metadata": metadata,
-        "data": data,
-        "attributes": site_attributes,
+    combined_data = {
+        species.lower(): {
+            "metadata": metadata,
+            "data": data,
+            "attributes": site_attributes,
+        }
     }
 
     return combined_data
