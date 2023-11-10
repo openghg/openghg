@@ -21,7 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of
   lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
 
-- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718) 
+- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718)
+
+- Added config for Black to `pyproject.toml` - [PR #822](https://github.com/openghg/openghg/pull/822)
 
 ### Fixed
 
