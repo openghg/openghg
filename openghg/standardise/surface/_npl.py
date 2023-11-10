@@ -54,14 +54,7 @@ def parse_npl(
     site_data = get_site_info()
     site_info = site_data[site_upper][network_upper]
 
-    # mypy doesn't like NaT or NaNs - look into this
-    def parser(date: str):  # type: ignore
-        try:
-            return datetime.strptime(str(date), "%d/%m/%Y %H:%M")
-        except ValueError:
-            return NaT
-
-    data = read_csv(data_filepath, index_col=0, date_parser=parser)
+    data = read_csv(data_filepath, parse_dates={"time": [0]}, index_col=0, date_format="%d/%m/%Y %H:%M")
 
     # Drop the NaT/NaNs
     data = data.loc[data.index.dropna()]
@@ -70,7 +63,6 @@ def parse_npl(
     rename_dict = {"Cal_CO2_dry": "CO2", "Cal_CH4_dry": "CH4"}
 
     data = data.rename(columns=rename_dict)
-    data.index.name = "time"
 
     try:
         site_inlet_values = site_info["height"]
