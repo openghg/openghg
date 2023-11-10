@@ -1,11 +1,10 @@
-from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 
 from openghg.standardise.meta import assign_attributes
 from openghg.types import pathType
 from openghg.util import clean_string, load_internal_json
-from pandas import NaT, read_csv
+from pandas import read_csv
 
 
 def parse_npl(
@@ -38,7 +37,7 @@ def parse_npl(
     Returns:
         list: UUIDs of Datasources data has been assigned to
     """
-    from openghg.util import get_site_info, format_inlet, synonyms
+    from openghg.util import format_inlet, get_site_info, synonyms
 
     if sampling_period is None:
         sampling_period = "NOT_SET"
