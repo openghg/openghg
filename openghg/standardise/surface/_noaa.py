@@ -496,7 +496,6 @@ def _read_raw_data(
         dict: Dictionary containing attributes, data and metadata keys
     """
     from openghg.util import clean_string, read_header, get_site_info, load_internal_json
-    import pandas as pd
     from pandas import read_csv
 
     header = read_header(filepath=data_filepath)
@@ -506,15 +505,6 @@ def _read_raw_data(
     # Number of header lines to skip
     n_skip = len(header)
 
-    data = read_csv(
-        data_filepath,
-        skiprows=n_skip,
-        names=column_names,
-        sep=r"\s+",
-        skipinitialspace=True,
-    )
-
-    # combine year, month, etc... columns into single 'time' column
     date_cols = [
         "sample_year",
         "sample_month",
@@ -523,12 +513,17 @@ def _read_raw_data(
         "sample_minute",
         "sample_seconds",
     ]
-    data["time"] = pd.to_datetime(
-        arg=data[date_cols].rename(mapper=(lambda x: x.split("_")[1]), axis=1),  # type: ignore  # remove 'sample_' from col names
-        format="%Y-%m-%d %H:%M:%S",
-    )
-    data = data.drop(labels=date_cols, axis=1).set_index("time", drop=True)
 
+    data = read_csv(
+        data_filepath,
+        skiprows=n_skip,
+        names=column_names,
+        sep=r"\s+",
+        skipinitialspace=True,
+        parse_dates={"time": date_cols},
+        date_format="%Y %m %d %H %M %S",
+        index_col="time",
+    )
     print(data.iloc[0:5, :])
     print(data.index)
 
