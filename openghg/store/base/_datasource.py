@@ -216,7 +216,6 @@ class Datasource:
         # Save details of current Datasource status
         self._status = {}
 
-        # TODO - rename self._data_keys to self._dates_covered
         # We'll use this to store the dates covered by this version of the data
         date_keys = self._data_keys[self._latest_version] if self._data_keys else []
 
@@ -231,7 +230,6 @@ class Datasource:
 
         # If we have data already stored in the Datasource
         if date_keys:
-            # Check if we have any overlap
             overlapping = []
             for existing_daterange in date_keys:
                 if daterange_overlap(daterange_a=existing_daterange, daterange_b=daterange_str):
@@ -245,8 +243,7 @@ class Datasource:
             if if_exists == "new":
                 # Remove all current data on Datasource and add new data
                 logger.info("Updating store to include new added data only.")
-                self._store.delete_all()
-                self._store.add(key=daterange_str, version=version_str, dataset=data)
+                self._store.update(version=version_str, dataset=data)
                 # We only want this key for a new version
                 date_keys = [daterange_str]
             elif overlapping:
@@ -254,7 +251,7 @@ class Datasource:
                     combined_datasets = {}
                     # There can really only be one overlap so we can do away with this
                     for existing_daterange, new_daterange in overlapping:
-                        existing = self._store.pop(key=existing_daterange, version=self._latest_version)
+                        existing = self._store.pop(version=self._latest_version)
 
                         logger.info("Combining overlapping data dateranges")
                         # Concatenate datasets along time dimension
@@ -282,15 +279,6 @@ class Datasource:
                             # Should now be able to concatenate successfully
                             combined = xr_concat((existing, data), dim=time_coord)
 
-                        # TODO - zarr/dask - is there a better way of doing this?
-                        # We sorted and drop the dupes
-                        if sort and drop_duplicates:
-                            combined = combined.drop_duplicates(time_coord, keep="first").sortby(time_coord)
-                        elif sort:
-                            combined = combined.sortby(time_coord)
-                        elif drop_duplicates:
-                            combined = combined.drop_duplicates(time_coord, keep="first")
-
                         # TODO: May need to find a way to find period for *last point* rather than *current point*
                         # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
                         combined_daterange = self.get_representative_daterange_str(
@@ -303,12 +291,8 @@ class Datasource:
                     # data and clipping the labels as necessary.
                     combined_datasets = self._clip_daterange_label(combined_datasets)
 
-                    for key, dataset in combined_datasets.items():
-                        # chunks = get_chunks(data_type=data_type)
-                        # logger.info(f"Rechunking {data_type} data using: {chunks}")
-                        # dataset = dataset.chunk(chunks)
+                    for dataset in combined_datasets.values():
                         self._store.add(
-                            key=key,
                             version=version_str,
                             dataset=dataset,
                             compressor=compressor,
@@ -317,7 +301,6 @@ class Datasource:
 
                     # Store the updated dateranges
                     date_keys.extend(combined_datasets.keys())
-                    # self._delete_version = True
                 else:
                     date_chunk_str = ""
                     for existing_daterange, new_daterange in overlapping:
@@ -329,7 +312,6 @@ class Datasource:
             else:
                 date_keys.append(daterange_str)
                 self._store.add(
-                    key=daterange_str,
                     version=version_str,
                     dataset=data,
                     compressor=compressor,
@@ -337,9 +319,7 @@ class Datasource:
                 )
         else:
             date_keys.append(daterange_str)
-            self._store.add(
-                key=daterange_str, version=version_str, dataset=data, compressor=compressor, filters=filters
-            )
+            self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
 
             self._status["current_data"] = False
             self._status["overlapping"] = False
@@ -378,7 +358,6 @@ class Datasource:
         """
         self._store.delete_all()
         self._store.close()
-        delete_objects(bucket=self._bucket, prefix=self._store.store_key())
 
     def delete_data(self, version: str, keys: List) -> None:
         """Delete specific keys
@@ -942,6 +921,7 @@ class Datasource:
         Returns:
             None
         """
+        raise NotImplementedError
         zarr_keys = list(self._store.keys())
 
         for version in self._data_keys:

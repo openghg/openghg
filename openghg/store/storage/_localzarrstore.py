@@ -3,12 +3,14 @@ So this is a prototype for using zarr with the
 """
 from __future__ import annotations
 import logging
-from typing import Any, Dict, Literal, Iterable, Iterator, List, Union, Optional, MutableMapping
+from typing import Any, Dict, Literal, Iterable, Iterator, Union, Optional, MutableMapping
 import xarray as xr
 import zarr
-from numcodecs import Blosc
+import os
+import re
+import shutil
 
-from openghg.types import KeyExistsError, ZarrStoreError
+from openghg.types import ZarrStoreError
 from pathlib import Path
 from openghg.objectstore import get_folder_size
 from openghg.store.storage import Store
@@ -22,26 +24,38 @@ StoreLike = Union[zarr.storage.BaseStore, MutableMapping]
 class LocalZarrStore(Store):
     def __init__(self, bucket: str, datasource_uuid: str, mode: Literal["rw", "r"] = "rw") -> None:
         self._bucket = bucket
-        self._store_key = f"data/{datasource_uuid}/zarr"
         self._mode = mode
-        dir_path = Path(bucket, self._store_key)
-        self._store: zarr.storage.Store = zarr.storage.NestedDirectoryStore(dir_path)
+        self._root_store_key = f"data/{datasource_uuid}/zarr"
+        self._stores_path = Path(bucket, self._root_store_key).expanduser().resolve()
+
+        # QUESTION - is this better than storing more JSON with the path names?
+        # It means we don't have to worry about saving of the store
+        # and is similar to the way that zarr does it with their directory stores
+        if not self._stores_path.exists():
+            self._stores_path.mkdir(parents=True)
+            self._stores = {}
+        else:
+            compiled_reg = re.compile("v\d+")
+            for f in os.listdir(self._stores_path):
+                if compiled_reg.match(str(f)):
+                    full_path = Path(self._stores_path, f).expanduser().resolve(strict=True)
+                    self._stores = {f: zarr.storage.NestedDirectoryStore(full_path)}
+
         self._memory_store: Dict[str, bytes] = {}
 
     def __bool__(self) -> bool:
-        return bool(self._store)
+        return any(self._stores)
 
-    def _create_key(self, key: str, version: str) -> str:
-        """Create a key for the zarr store."""
-        return f"{version}/{key}"
-
-    def keys(self) -> Iterator[str]:
+    def keys(self, version: str) -> Iterator[str]:
         """Keys of data stored in the zarr store.
 
         Returns:
             Generator: Generator object
         """
-        iterator: Iterator = self._store.keys()
+        if version not in self._stores:
+            raise KeyError("Invalid version")
+
+        iterator: Iterator = self._stores[version].keys()
         return iterator
 
     def close(self) -> None:
@@ -50,31 +64,45 @@ class LocalZarrStore(Store):
         Returns:
             None
         """
-        self._store.close()
+        for store in self._stores.values():
+            store.close()
 
-    def store_key(self) -> str:
+    def store_key(self, version: str) -> str:
         """Return the key of this zarr Store
 
         Returns:
             str: Key of zarr store
         """
-        return self._store_key
+        if version not in self._stores:
+            raise KeyError("Invalid version")
 
-    def store_path(self) -> Path:
+        return str(Path(self._root_store_key, version))
+
+    def store_path(self, version: str) -> Path:
         """Return the path of this zarr Store
 
         Returns:
             Path: Path of zarr store
         """
-        return Path(self._bucket, self._store_key)
+        return Path(self._stores_path, version)
+
+    def version_exists(self, version: str) -> bool:
+        """Check if a version exists in the current store
+
+        Args:
+            version: Version e.g. v0, v1
+        Returns:
+            bool: True if version exists
+        """
+        return version.lower() in self._stores
 
     def add(
         self,
-        key: str,
         version: str,
         dataset: xr.Dataset,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        append_dim: str = "time",
     ) -> None:
         """Add an xr.Dataset to the zarr store.
 
@@ -90,27 +118,51 @@ class LocalZarrStore(Store):
         """
         from openghg.store.storage import get_zarr_encoding
 
+        version = version.lower()
+
         if self._mode == "r":
             raise PermissionError("Cannot add to a read-only zarr store")
 
-        if compressor is None:
-            compressor = Blosc(cname="zstd", clevel=5, shuffle=Blosc.BITSHUFFLE)
+        # Used to append new data to the current version's zarr store
+        if version in self._stores:
+            dataset.to_zarr(
+                store=self._stores[version],
+                mode="a",
+                consolidated=True,
+                append_dim=append_dim,
+            )
+        else:
+            if not self._stores and version != "v0":
+                raise ValueError("First version must be v0")
 
-        versioned_key = self._create_key(key=key, version=version)
-
-        if versioned_key in self._store:
-            raise KeyExistsError(
-                f"Cannot overwrite key {versioned_key} in zarr store using add - use update method"
+            self._stores[version] = zarr.storage.NestedDirectoryStore(self.store_path(version=version))
+            encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
+            dataset.to_zarr(
+                store=self._stores[version],
+                mode="w",
+                encoding=encoding,
+                consolidated=True,
             )
 
-        encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
-        dataset.to_zarr(store=self._store, group=versioned_key, encoding=encoding)
+    def get(self, version: str) -> xr.Dataset:
+        """Get the version of the dataset stored in the zarr store.
 
-    def pop(self, key: str, version: str) -> xr.Dataset:
+        Args:
+            version: Version of data to get
+        Returns:
+            xr.Dataset: Dataset from the store
+        """
+        if version not in self._stores:
+            raise KeyError("Invalid version")
+
+        store = self._stores[version]
+        ds: xr.Dataset = xr.open_zarr(store=store, consolidated=True)
+        return ds
+
+    def pop(self, version: str) -> xr.Dataset:
         """Pop some data from the store.
 
         Args:
-            key: Key to pop data
             version: Version of data
         Returns:
             Dataset: Dataset popped from the store
@@ -118,41 +170,38 @@ class LocalZarrStore(Store):
         if self._mode == "r":
             raise PermissionError("Cannot pop from a read-only zarr store")
 
-        versioned_key = self._create_key(key=key, version=version)
+        if version not in self._stores:
+            raise KeyError("Invalid version")
 
-        # if versioned_key not in self._store:
-        #     raise ZarrStoreError(f"Key {versioned_key} not found in zarr store")
+        store = self._stores[version]
 
         # Let's copy the data we want to pop into a memory store and return it from there
-        zarr.convenience.copy_store(
-            source=self._store, dest=self._memory_store, source_path=versioned_key, dest_path=versioned_key
-        )
-        self.delete(key=key, version=version)
-        ds: xr.Dataset = xr.open_zarr(store=self._memory_store, group=versioned_key, consolidated=False)
+        zarr.convenience.copy_store(source=store, dest=self._memory_store)
+        self.delete_version(version=version)
+        ds: xr.Dataset = xr.open_zarr(store=self._memory_store, consolidated=True)
         return ds
 
-    def copy_to_memorystore(self, keys: Iterable, version: str) -> List[Dict]:
-        """Copies the compressed data from the filesystem store to a list of in-memory stores.
-        This preserves the compression and chunking of the data and creates a list
-        that can be opened as a single dataset.
+    def copy_to_memorystore(self, keys: Iterable, version: str) -> Dict:
+        """Copies the compressed data from the filesystem store to an in-memory store.
+        This preserves the compression and chunking of the data and the store
+        can be opened as a single dataset
 
         Args:
-            keys: List of keys
             version: Version of data to copy
         Returns:
-            List: List of dictionaries
+            Dict: In-memory copy of compressed data
         """
-        memory_stores = []
-        for daterange_key in keys:
-            key = self._create_key(key=daterange_key, version=version)
-            store: Dict[str, bytes] = {}
-            zarr.copy_store(source=self._store, dest=store, source_path=key)
-            memory_stores.append(store)
+        if version not in self._stores:
+            raise KeyError("Invalid version")
 
-        return memory_stores
+        store = self._stores[version]
+        mem_store: Dict[str, bytes] = {}
+        zarr.copy_store(source=store, dest=mem_store)
+        return mem_store
 
     def delete(self, key: str, version: str) -> None:
-        """Remove data from the zarr store
+        """Remove a specific piece of data from the zarr store. The key will need to be
+        retrieved from the keys method of the store.
 
         Args:
             key: Key of data in store
@@ -163,12 +212,32 @@ class LocalZarrStore(Store):
         if self._mode == "r":
             raise PermissionError("Cannot delete from a read-only zarr store")
 
-        versioned_key = self._create_key(key=key, version=version)
+        if version not in self._stores:
+            raise KeyError("Invalid version")
 
         try:
-            del self._store[versioned_key]
+            del self._stores[version][key]
         except KeyError:
-            raise ZarrStoreError(f"Key {versioned_key} not found in zarr store")
+            raise ZarrStoreError(f"Key {key} not found in zarr store")
+
+    def delete_version(self, version: str) -> None:
+        """Delete a version from the store
+
+        Args:
+            version: Version to delete
+        Returns:
+            None
+        """
+        version = version.lower()
+        if self._mode == "r":
+            raise PermissionError("Cannot delete from a read-only zarr store")
+
+        if version not in self._stores:
+            raise KeyError("Invalid version")
+
+        path = self.store_path(version=version)
+        shutil.rmtree(path)
+        del self._stores[version]
 
     def delete_all(self) -> None:
         """Delete all data from the zarr store.
@@ -177,20 +246,21 @@ class LocalZarrStore(Store):
             None
         """
         if self._mode == "r":
-            raise PermissionError("Cannot delete from a read-only zarr store")
+            raise PermissionError("Cannot delete a read-only zarr store")
 
-        for key in self._store.keys():
-            del self._store[key]
+        self._stores.clear()
+        shutil.rmtree(self._stores_path, ignore_errors=True)
 
     def update(
         self,
-        key: str,
         version: str,
         dataset: xr.Dataset,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
     ) -> None:
-        """Update the data at the given key.
+        """Update a version of the data. This first deletes the current version
+        and then adds the new version. To update a version in place, keeping the current data,
+        use the append function.
 
         Args:
             key: Key of data in store
@@ -204,8 +274,8 @@ class LocalZarrStore(Store):
         if self._mode == "r":
             raise PermissionError("Cannot update a read-only zarr store")
 
-        self.delete(key=key, version=version)
-        self.add(key=key, version=version, dataset=dataset, compressor=compressor, filters=filters)
+        self.delete_version(version=version)
+        self.add(version=version, dataset=dataset, compressor=compressor, filters=filters)
 
     def hash(self, data: str) -> str:
         """Hash the data at the given key"""
@@ -225,4 +295,8 @@ class LocalZarrStore(Store):
         Returns:
             int: Number of bytes stored in zarr store
         """
-        return get_folder_size(folder_path=self.store_path())
+        bytes_stored = 0
+        for version in self._stores:
+            bytes_stored += get_folder_size(folder_path=self.store_path(version=version))
+
+        return bytes_stored

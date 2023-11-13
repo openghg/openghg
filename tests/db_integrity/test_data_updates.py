@@ -71,7 +71,6 @@ def test_database_update_force():
     Test object store can update identical data, and create a new version
     when force keyword is used.
     """
-
     # Attempt to add same data to the database twice
     clear_test_stores()
     flux_data_read()

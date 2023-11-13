@@ -72,9 +72,7 @@ class _BaseData:
             self._version = version
 
             zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
-            self._memory_stores = zarrstore.copy_to_memorystore(keys=date_keys, version=version)
-            self.data = xr.open_mfdataset(paths=self._memory_stores, engine="zarr", combine="by_coords", consolidated=False)  # type: ignore
-            zarrstore.close()
+            self.data = zarrstore.get(version=version)
         else:
             raise ValueError(
                 "Must supply either data or uuid and version, cannot create an empty data object."
