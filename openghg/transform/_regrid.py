@@ -5,6 +5,7 @@ import xarray as xr
 from numpy import ndarray
 
 from openghg.types import construct_xesmf_import_error, ArrayLike, ArrayLikeMatch
+from openghg.util import find_domain
 
 
 def _getGridCC(lat: ndarray, lon: ndarray) -> Tuple[ndarray, ndarray]:
@@ -247,3 +248,70 @@ def regrid_uniform_cc(
 #     regridder.clean_weight_file()
 
 #     return regridded
+
+
+def regrid_2d(
+    input_data: Union[xr.Dataset, xr.DataArray],
+    in_lat_coord: str = "lat",
+    in_lon_coord: str = "lon",
+    in_data_var: str = "flux",
+    domain: str = "EUROPE",
+) -> xr.Dataset:
+    """Regrid 2d data to given domain.
+
+    NOTE: only one data variable is regridded.
+
+    Args:
+        input_data: data to regrid
+        in_lat_coord: name of latitude coordinate for input_data
+        in_lon_coord: name of longitude coordinate for input_data
+        in_data_var: name of the data variabile to regrid
+        domain: name of domain to regrid to.
+    Returns:
+        xr.Dataset containing the regridded data.
+    """
+    from iris.coords import DimCoord
+    from iris.cube import Cube
+    from iris.analysis import AreaWeighted
+
+    lat_out, lon_out = find_domain(domain)
+    cube_lat_out = DimCoord(lat_out, standard_name="latitude", units="degrees")
+    cube_lon_out = DimCoord(lon_out, standard_name="longitude", units="degrees")
+    cube_out = Cube(
+        np.zeros((len(lat_out), len(lon_out)), np.float32),
+        dim_coords_and_dims=[(cube_lat_out, 0), (cube_lon_out, 1)],
+    )
+    cube_out.coord("latitude").guess_bounds()
+    cube_out.coord("longitude").guess_bounds()
+
+    cube_lat_in = DimCoord(
+        input_data.coords[in_lat_coord].values,
+        standard_name="latitude",
+        units="degrees",
+    )
+    cube_lon_in = DimCoord(
+        input_data.coords[in_lon_coord].values,
+        standard_name="longitude",
+        units="degrees",
+    )
+    if isinstance(input_data, xr.Dataset):
+        data_in = input_data[in_data_var].values
+    else:
+        data_in = input_data.values
+    cube_in = Cube(
+        data_in,
+        dim_coords_and_dims=[(cube_lat_in, 0), (cube_lon_in, 1)],
+    )
+
+    cube_in.coord("latitude").guess_bounds()
+    cube_in.coord("longitude").guess_bounds()
+
+    cube_regridded = cube_in.regrid(cube_out, AreaWeighted(mdtol=1.0))
+
+    result = xr.Dataset(
+        data_vars={in_data_var: ((in_lat_coord, in_lon_coord), cube_regridded.data)},
+        coords={in_lat_coord: lat_out, in_lon_coord: lon_out},
+        attrs=input_data.attrs,
+    )
+
+    return result
