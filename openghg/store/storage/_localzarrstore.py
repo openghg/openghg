@@ -31,15 +31,15 @@ class LocalZarrStore(Store):
         # QUESTION - is this better than storing more JSON with the path names?
         # It means we don't have to worry about saving of the store
         # and is similar to the way that zarr does it with their directory stores
+        self._stores = {}
         if not self._stores_path.exists():
             self._stores_path.mkdir(parents=True)
-            self._stores = {}
         else:
-            compiled_reg = re.compile("v\d+")
-            for f in os.listdir(self._stores_path):
+            compiled_reg = re.compile(r"v\d+")
+            for f in sorted(os.listdir(self._stores_path)):
                 if compiled_reg.match(str(f)):
-                    full_path = Path(self._stores_path, f).expanduser().resolve(strict=True)
-                    self._stores = {f: zarr.storage.NestedDirectoryStore(full_path)}
+                    full_path = Path(self._stores_path, f).expanduser().resolve()
+                    self._stores[f] = zarr.storage.NestedDirectoryStore(full_path)
 
         self._memory_store: Dict[str, bytes] = {}
 
@@ -53,7 +53,7 @@ class LocalZarrStore(Store):
             Generator: Generator object
         """
         if version not in self._stores:
-            raise KeyError("Invalid version")
+            raise KeyError(f"Invalid version - {version}")
 
         iterator: Iterator = self._stores[version].keys()
         return iterator
@@ -73,8 +73,8 @@ class LocalZarrStore(Store):
         Returns:
             str: Key of zarr store
         """
-        if version not in self._stores:
-            raise KeyError("Invalid version")
+        if version.lower() not in self._stores:
+            raise KeyError(f"Invalid version - {version}")
 
         return str(Path(self._root_store_key, version))
 
@@ -153,7 +153,7 @@ class LocalZarrStore(Store):
             xr.Dataset: Dataset from the store
         """
         if version not in self._stores:
-            raise KeyError("Invalid version")
+            raise KeyError(f"Invalid version - {version}")
 
         store = self._stores[version]
         ds: xr.Dataset = xr.open_zarr(store=store, consolidated=True)
@@ -171,7 +171,7 @@ class LocalZarrStore(Store):
             raise PermissionError("Cannot pop from a read-only zarr store")
 
         if version not in self._stores:
-            raise KeyError("Invalid version")
+            raise KeyError(f"Invalid version - {version}")
 
         store = self._stores[version]
 
@@ -192,7 +192,7 @@ class LocalZarrStore(Store):
             Dict: In-memory copy of compressed data
         """
         if version not in self._stores:
-            raise KeyError("Invalid version")
+            raise KeyError(f"Invalid version - {version}")
 
         store = self._stores[version]
         mem_store: Dict[str, bytes] = {}
@@ -213,7 +213,7 @@ class LocalZarrStore(Store):
             raise PermissionError("Cannot delete from a read-only zarr store")
 
         if version not in self._stores:
-            raise KeyError("Invalid version")
+            raise KeyError(f"Invalid version - {version}")
 
         try:
             del self._stores[version][key]
@@ -233,7 +233,7 @@ class LocalZarrStore(Store):
             raise PermissionError("Cannot delete from a read-only zarr store")
 
         if version not in self._stores:
-            raise KeyError("Invalid version")
+            raise KeyError(f"Invalid version - {version}")
 
         path = self.store_path(version=version)
         shutil.rmtree(path)

@@ -199,8 +199,6 @@ class Datasource:
         time_coord = "time"
         daterange_str = self.get_representative_daterange_str(dataset=data, period=period)
 
-        # NOTE - added version string here as we add data to the zarr store in this function
-        # Do we have a latest version?
         if self._latest_version and not new_version:
             version_str = self._latest_version
         else:
@@ -242,8 +240,10 @@ class Datasource:
 
             if if_exists == "new":
                 # Remove all current data on Datasource and add new data
+                # At the moment we expect the data to be stored at v1 but the comments here
+                # suggest all current data should be removed
                 logger.info("Updating store to include new added data only.")
-                self._store.update(version=version_str, dataset=data)
+                self._store.add(version=version_str, dataset=data)
                 # We only want this key for a new version
                 date_keys = [daterange_str]
             elif overlapping:
