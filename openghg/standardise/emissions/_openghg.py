@@ -1,19 +1,24 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Callable, Dict, Literal, Optional, Union
+
+import xarray as xr
 
 
-def parse_openghg(
+chunk_type = Union[int, Dict, Literal["auto"]]
+
+
+def _parse_generic(
     filepath: Path,
     species: str,
     source: str,
     domain: str,
     data_type: str,
+    raw_file_hook: Callable[[Path], xr.Dataset],
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
 ) -> Dict:
     """
@@ -29,9 +34,8 @@ def parse_openghg(
     from openghg.standardise.meta import assign_flux_attributes
     from openghg.store import infer_date_range, update_zero_dim
     from openghg.util import timestamp_now
-    from xarray import open_dataset
 
-    em_data = open_dataset(filepath, chunks=chunks)
+    em_data = raw_file_hook(filepath)
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -52,7 +56,11 @@ def parse_openghg(
     metadata["domain"] = domain
     metadata["source"] = source
 
-    optional_keywords = {"database": database, "database_version": database_version, "model": model}
+    optional_keywords = {
+        "database": database,
+        "database_version": database_version,
+        "model": model,
+    }
     for key, value in optional_keywords.items():
         if value is not None:
             metadata[key] = value
@@ -99,3 +107,52 @@ def parse_openghg(
     emissions_data = assign_flux_attributes(emissions_data)
 
     return emissions_data
+
+
+def parse_openghg(
+    filepath: Path,
+    species: str,
+    source: str,
+    domain: str,
+    data_type: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
+    high_time_resolution: Optional[bool] = False,
+    period: Optional[Union[str, tuple]] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    continuous: bool = True,
+) -> Dict:
+    """
+    Read and parse input emissions data already in OpenGHG format.
+
+    Args:
+        filepath: Path to data file
+        chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
+        Passing "auto" will ask xarray to calculate a chunk size.
+    Returns:
+        dict: Dictionary of data
+    """
+    from xarray import open_dataset
+
+    def raw_file_hook(filepath: Path) -> xr.Dataset:
+        return open_dataset(filepath, chunks=chunks)
+
+    return _parse_generic(
+        filepath=filepath,
+        species=species,
+        source=source,
+        domain=domain,
+        raw_file_hook=raw_file_hook,
+        data_type=data_type,
+        database=database,
+        database_version=database_version,
+        model=model,
+        high_time_resolution=high_time_resolution,
+        period=period,
+        continuous=continuous,
+    )
+
+
+def parse_edgar() -> None:
+    pass
