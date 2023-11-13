@@ -92,7 +92,9 @@ class ObsSurface(BaseStore):
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
                 result = self.read_file(
-                    filepath=(filepath, precision_filepath), site_filepath=site_filepath, **meta_kwargs
+                    filepath=(filepath, precision_filepath),
+                    site_filepath=site_filepath,
+                    **meta_kwargs,
                 )
 
         return result
@@ -149,7 +151,13 @@ class ObsSurface(BaseStore):
         """
         from collections import defaultdict
         from openghg.types import SurfaceTypes
-        from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            hash_file,
+            load_surface_parser,
+            verify_site,
+        )
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -495,8 +503,7 @@ class ObsSurface(BaseStore):
             data: Dictionary of data in standard format, see the data spec under
                 Development -> Data specifications in the documentation
             overwrite: If True overwrite currently stored data
-            force: If True, disregard previously retrieved hashes. Use this if you are unable to re-add
-                previously deleted data.
+            force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
             required_metakeys: Keys in the metadata we should use to store this metadata in the object store
                 if None it defaults to:
                 {"species", "site", "station_long_name", "inlet", "instrument",
@@ -510,19 +517,19 @@ class ObsSurface(BaseStore):
         hashes = hash_retrieved_data(to_hash=data)
         # Find the keys in data we've seen before
         if force:
-            seen_before = set()
+            file_hashes_to_compare = set()
         else:
-            seen_before = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
+            file_hashes_to_compare = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
 
-        if len(seen_before) == len(data):
+        if len(file_hashes_to_compare) == len(data):
             logger.warning("Note: There is no new data to process.")
             return None
 
         keys_to_process = set(data.keys())
-        if seen_before:
+        if file_hashes_to_compare:
             # TODO - add this to log
-            logger.warning(f"Note: We've seen {seen_before} before. Processing new data only.")
-            keys_to_process -= seen_before
+            logger.warning(f"Note: We've seen {file_hashes_to_compare} before. Processing new data only.")
+            keys_to_process -= file_hashes_to_compare
 
         to_process = {k: v for k, v in data.items() if k in keys_to_process}
 

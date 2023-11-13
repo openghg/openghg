@@ -50,8 +50,7 @@ def retrieve_atmospheric(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
                 - "from_definition" / "metadata" - update mismatches based on input metadata
-        force: If True, disregard previously retrieved hashes. Use this if you are unable to re-add
-            previously deleted data.
+        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -182,8 +181,7 @@ def local_retrieve(
                 - "never" - don't update mismatches and raise an AttrMismatchError
                 - "from_source" / "attributes" - update mismatches based on attributes from ICOS Header
                 - "from_definition" / "metadata" - update mismatches based on input metadata
-        force: If True, disregard previously retrieved hashes. Use this if you are unable to re-add
-            previously deleted data.
+        force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
     Returns:
         ObsData, list[ObsData] or None
     """
@@ -239,7 +237,12 @@ def local_retrieve(
         for data in standardised_data.values():
             measurement_data = data["data"]
             # These contain URLs that are case sensitive so skip lowercasing these
-            skip_keys = ["citation_string", "instrument_data", "dobj_pid", "dataset_source"]
+            skip_keys = [
+                "citation_string",
+                "instrument_data",
+                "dobj_pid",
+                "dataset_source",
+            ]
             metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
             obs_data.append(ObsData(data=measurement_data, metadata=metadata))
 
