@@ -40,8 +40,6 @@ def test_read_openghg_format():
 
     d = Datasource(bucket=bucket, uuid=uuid)
 
-    memory_store = d.memory_store()
-
-    with xr.open_mfdataset(memory_store, engine="zarr", combine="by_coords", consolidated=True) as ch4_data:
+    with d.get_data(version="latest") as ch4_data:
         assert ch4_data.time[0] == Timestamp("2017-03-18T15:32:54")
         assert np.isclose(ch4_data["xch4"][0], 1844.2019)

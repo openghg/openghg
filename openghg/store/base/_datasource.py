@@ -9,6 +9,7 @@ from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
 from uuid import uuid4
 from openghg.objectstore import exists, get_object_from_json, delete_objects
+from openghg.util import split_daterange_str
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -243,8 +244,12 @@ class Datasource:
                 # At the moment we expect the data to be stored at v1 but the comments here
                 # suggest all current data should be removed
                 logger.info("Updating store to include new added data only.")
-                self._store.update(version=version_str, dataset=data)
-                # We only want this key for a new version
+
+                if new_version:
+                    self._store.add(version=version_str, dataset=data)
+                else:
+                    self._store.update(version=version_str, dataset=data)
+
                 date_keys = [daterange_str]
             elif overlapping:
                 if if_exists == "combine":
@@ -347,36 +352,32 @@ class Datasource:
 
         self._last_updated = timestamp_str_now
 
+    def get_data(self, version: str) -> xr.Dataset:
+        """Open an xr.Dataset loaded from the zarr store
+
+        Args:
+            version: Version string
+        Returns:
+            xr.Dataset: Dataset loaded from zarr store
+        """
+        if version == "latest":
+            version = self._latest_version
+
+        return self._store.get(version=version)
+
     def delete_all_data(self) -> None:
-        """Delete the zarr stor that contains all the data
-        associated with this Datasource
+        """Delete the zarr store that contains all the data
+        associated with this Datasource and clear out all keys
+        stored in this Datasource.=
 
         Returns:
             None
         """
         self._store.delete_all()
         self._store.close()
-
-    def delete_data(self, version: str, keys: List) -> None:
-        """Delete specific keys
-
-        Args:
-            bucket: Bucket containing data
-            keys: List of keys to delete
-        Returns:
-            None
-        """
-        if version == "latest":
-            version = self._latest_version
-
-        # Delete the keys
-        current_keys = set(self._data_keys[version])
-
-        self._data_keys[version] = sorted(list(current_keys - set(keys)))
-
-        # Delete the data
-        for key in keys:
-            self._store.delete(key=key, version=version)
+        self._data_keys.clear()
+        self._metadata.clear()
+        self._timestamps.clear()
 
     def delete_version(self, version: str) -> None:
         """Delete a specific version of data.
@@ -393,8 +394,9 @@ class Datasource:
         if version not in self._data_keys:
             raise KeyError("Invalid version.")
 
-        self.delete_data(version=version, keys=self._data_keys[version])
+        self._store.delete_version(version=version)
         del self._data_keys[version]
+        del self._timestamps[version]
 
     def add_metadata(self, metadata: Dict, skip_keys: Optional[List] = None) -> None:
         """Add all metadata in the dictionary to this Datasource
@@ -680,26 +682,26 @@ class Datasource:
         """
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-    def memory_store(self, version: str = "latest") -> List:
+    def memory_store(self, version: str = "latest") -> Dict:
         """Copy the compressed data for a version from the zarr store into memory.
 
         Example:
             memory_store = datasource.memory_store(version="v0")
-            with xr.open_mfdataset(memory_store, engine="zarr", combine='by_coords') as ds:
+            with xr.open_zarr(memory_store, consolidated=True) as ds:
                 ...
 
         This will create a lazily loaded xarray Dataset.
 
         Returns:
-            list: List of zarr memory stores
+            Dict: In-memory copy of compressed data
         """
         if not self._data_keys:
-            return []
+            return {}
 
         if version == "latest":
             version = self._latest_version
 
-        return self._store.copy_to_memorystore(keys=self.data_keys(), version=version)
+        return self._store.copy_to_memorystore(version=version)
 
     def data(self) -> None:
         """Directly accessing a Datasource's data is no longer supported.
@@ -919,35 +921,17 @@ class Datasource:
         Returns:
             None
         """
-        raise NotImplementedError
-        zarr_keys = list(self._store.keys())
+        for version, dateranges in self._data_keys.items():
+            start_date, _ = split_daterange_str(daterange_str=dateranges[0])
+            _, end_date = split_daterange_str(daterange_str=dateranges[-1])
 
-        for version in self._data_keys:
-            versioned_keys = [f"{version}/{key}" for key in self._data_keys[version]]
-            for key in versioned_keys:
-                if not any(key in zarr_key for zarr_key in zarr_keys):
-                    raise ObjectStoreError(
-                        f"The key {key} for version {version} of this Datasource does not exist in its zarr store."
+            with self.get_data(version=version) as ds:
+                if Timestamp(start_date) != ds.time[0]:
+                    raise ValueError(
+                        f"Timestamp mismatch between expected ({start_date}) and stored {ds.time[0]}"
                     )
 
-        # We also need to ensure the opposite isn't true, that there are keys in the zarr store that aren't in the
-        # Datasource
-        versioned_keys = [
-            k
-            for k in set(["/".join(k.split("/")[:2]) for k in zarr_keys if k.startswith("v")])
-            if ".zgroup" not in k
-        ]
-
-        for key in versioned_keys:
-            split_key = key.split("/")
-            version = split_key[0]
-            daterange = split_key[1]
-            if version not in self._data_keys:
-                raise ObjectStoreError(
-                    f"The key {key} for version {version} of this Datasource exists in its zarr store but not in the Datasource key record."
-                )
-
-            if daterange not in self._data_keys[version]:
-                raise ObjectStoreError(
-                    f"The key {key} for version {version} of this Datasource exists in its zarr store but not in the Datasource key record."
-                )
+                if Timestamp(start_date) != ds.time[-1]:
+                    raise ValueError(
+                        f"Timestamp mismatch between expected ({start_date}) and stored {ds.time[0]}"
+                    )

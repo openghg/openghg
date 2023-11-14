@@ -195,13 +195,12 @@ def test_read_CRDS(bucket):
     uid = data["ch4"]["uuid"]
 
     datasource = Datasource(bucket=bucket, uuid=uid)
-    memory_store = datasource.memory_store()
 
     assert datasource.data_keys() == ["2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00"]
 
     # Values here have changed from the previous test as we're now looking at the whole
     # dataset rather than the first year
-    with xr.open_mfdataset(memory_store, engine="zarr", combine="by_coords", consolidated=True) as ch4_data:
+    with datasource.get_data(version="latest") as ch4_data:
         assert ch4_data.time[0] == Timestamp("2014-01-30T11:12:30")
         assert ch4_data["ch4"][0] == 1959.55
         assert ch4_data["ch4"][-1] == 1955.93
@@ -304,9 +303,8 @@ def test_read_GC(bucket):
     uuid = results["processed"]["capegrim-medusa.18.C"]["hfc152a_70m"]["uuid"]
 
     hfc_datasource = Datasource(bucket=bucket, uuid=uuid)
-    memory_store = hfc_datasource.memory_store()
 
-    with xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords", consolidated=True) as ds:
+    with hfc_datasource.get_data(version="latest") as ds:
         # hfc152a_data = hfc152a_data["2018-01-01-02:24:00+00:00_2018-01-31-23:52:59+00:00"]
 
         assert ds.time[0] == Timestamp("2018-01-01T02:24:00")
@@ -405,7 +403,7 @@ def test_read_openghg_format(bucket):
 
     co2_data = Datasource(bucket=bucket, uuid=uuid)
 
-    with xr.open_mfdataset(co2_data.memory_store(), engine="zarr", combine="by_coords", consolidated=True) as co2_data:
+    with co2_data.get_data(version="latest") as co2_data:
         assert co2_data.time[0] == Timestamp("2012-07-30-17:03:08")
         assert co2_data["co2"][0] == 385.25
         assert co2_data["co2_variability"][0] == 0.843
@@ -431,7 +429,7 @@ def test_read_noaa_raw(bucket):
 
     co_datasource = Datasource(bucket=bucket, uuid=uuid)
 
-    with xr.open_mfdataset(co_datasource.memory_store(), engine="zarr", combine="by_coords", consolidated=True) as co_data:
+    with co_datasource.get_data(version="latest") as co_data:
         assert co_data["co"][0] == pytest.approx(94.9)
         assert co_data["co_repeatability"][0] == pytest.approx(-999.99)
         assert co_data["co_selection_flag"][0] == 0
@@ -459,11 +457,10 @@ def test_read_noaa_metastorepack(bucket):
     uuid = results["processed"]["ch4_esp_surface-flask_2_representative.nc"]["ch4"]["uuid"]
 
     ch4_datasource = Datasource(bucket=bucket, uuid=uuid)
-    memory_store = ch4_datasource.memory_store()
 
     assert ch4_datasource.data_keys() == ["1993-06-17-00:12:30+00:00_2002-01-12-12:00:00+00:00"]
 
-    with xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords", consolidated=True) as ch4_data:
+    with ch4_datasource.get_data(version="latest") as ch4_data:
         ch4_data.time[0] == Timestamp("1993-06-17T00:12:30.000000000")
         ch4_data["ch4"][0] == pytest.approx(1.76763e-06)
         ch4_data["ch4_number_of_observations"][0] == 2.0

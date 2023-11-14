@@ -181,7 +181,7 @@ class LocalZarrStore(Store):
         ds: xr.Dataset = xr.open_zarr(store=self._memory_store, consolidated=True)
         return ds
 
-    def copy_to_memorystore(self, keys: Iterable, version: str) -> Dict:
+    def copy_to_memorystore(self, version: str) -> Dict:
         """Copies the compressed data from the filesystem store to an in-memory store.
         This preserves the compression and chunking of the data and the store
         can be opened as a single dataset

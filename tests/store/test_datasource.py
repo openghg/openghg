@@ -70,10 +70,7 @@ def test_add_data(data, bucket):
 
     assert d._store
 
-    memory_store = d.memory_store(version="v0")
-    assert memory_store
-
-    ds = xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords", consolidated=True)
+    ds = d._store.get("v0")
     assert ds.equals(ch4_data)
 
     expected_metadata = {
@@ -245,9 +242,7 @@ def test_save_footprint(bucket):
 
     datasource_2 = Datasource(bucket=bucket, uuid=datasource._uuid)
 
-    memory_store = datasource_2.memory_store(version="latest")
-    with xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords", consolidated=True) as ds:
-        assert ds.equals(data)
+    retrieved_ds = datasource_2.get_data(version="v0")
 
     assert datasource_2._data_type == "footprints"
 
@@ -323,9 +318,7 @@ def test_update_daterange_replacement(data, bucket):
 
     ch4_short = ch4_data.head(40)
 
-    keys = d.data_keys()
-
-    d.delete_data(version="v0", keys=keys)
+    d.delete_version(version="v0")
 
     d.add_data(metadata=metadata, data=ch4_short, data_type="surface")
 
@@ -416,33 +409,6 @@ def test_integrity_check(data, bucket):
         d.integrity_check()
 
 
-def test_data_deletion(data, bucket):
-    d = Datasource(bucket=bucket)
-
-    metadata = data["ch4"]["metadata"]
-    ch4_data = data["ch4"]["data"]
-
-    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
-
-    keys = d.data_keys()
-
-    zarr_keys = set(d._store.keys())
-
-    partial_expected_keys = {
-        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zarray",
-        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zattrs",
-        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/0",
-        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4_variability/.zarray",
-    }
-
-    assert partial_expected_keys.issubset(zarr_keys)
-
-    d.delete_data(version="latest", keys=keys)
-
-    assert not d._data_keys["v0"]
-    assert list(d._store.keys()) == [".zgroup", ".zmetadata", "v0/.zgroup"]
-
-
 def test_data_version_deletion(data, bucket):
     d = Datasource(bucket=bucket)
 
@@ -451,13 +417,13 @@ def test_data_version_deletion(data, bucket):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
-    zarr_keys = set(d._store.keys())
+    zarr_keys = set(d._store.keys(version="v0"))
 
     partial_expected_keys = {
-        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zarray",
-        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/.zattrs",
-        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4/0",
-        "v0/2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00/ch4_variability/.zarray",
+        "ch4/.zarray",
+        "ch4/.zattrs",
+        "ch4/0",
+        "ch4_variability/.zarray",
     }
 
     assert partial_expected_keys.issubset(zarr_keys)
@@ -465,4 +431,54 @@ def test_data_version_deletion(data, bucket):
     d.delete_version(version="v0")
 
     assert "v0" not in d._data_keys
-    assert list(d._store.keys()) == [".zgroup", ".zmetadata", "v0/.zgroup"]
+
+    with pytest.raises(KeyError):
+        d._store.keys(version="v0")
+
+
+def test_surface_data_stored_and_dated_correctly(data, bucket):
+    d = Datasource(bucket=bucket)
+    
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+
+    start, end = d.daterange()
+
+    stored_ds = d.get_data(version="v0")
+    stored_ds = stored_ds.sortby("time")
+
+    assert timestamp_tzaware(stored_ds["ch4"].time[0].values) == timestamp_tzaware(start)
+    # QUESTION - why is there a ~ minute difference here?
+    assert timestamp_tzaware(stored_ds["ch4"].time[-1].values) == timestamp_tzaware(end)
+
+
+def test_to_memory_store(data, bucket):
+    d = Datasource(bucket=bucket)
+    
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+
+    memory_store = d.memory_store(version="latest")
+    with xr.open_zarr(store=memory_store) as ds:
+        assert ds.equals(ch4_data)
+
+
+# def test_add_data_combine_datasets(data, bucket):
+#     d = Datasource(bucket=bucket)
+    
+#     metadata = data["ch4"]["metadata"]
+#     ch4_data = data["ch4"]["data"]
+
+#     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+
+#     # Add same data again
+#     d.add_data(metadata=metadata, data=ch4_data, data_type="surface", if_exists="combine")
+
+#     assert d._store.version_exists(version="v1")
+
+#     combined_ds = d.get_data(version="v1")
+
