@@ -463,6 +463,7 @@ def standardise_flux(
     continuous: bool = True,
     overwrite: bool = False,
     store: Optional[str] = None,
+    source_format: str = "openghg",
 ) -> dict:
     """Process flux data
 
@@ -478,6 +479,7 @@ def standardise_flux(
         continuous: Whether time stamps have to be continuous.
         overwrite: Should this data overwrite currently stored data.
         store: Name of store to write to
+        source_format: format of raw data file (e.g. "openghg" or "edgar")
 
     Returns:
         dict: Dictionary of Datasource UUIDs data assigned to
@@ -530,6 +532,7 @@ def standardise_flux(
             continuous=continuous,
             chunks=chunks,
             overwrite=overwrite,
+            source_format=source_format,
         )
 
 

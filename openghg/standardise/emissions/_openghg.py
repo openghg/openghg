@@ -1,6 +1,9 @@
 from pathlib import Path
 from typing import Callable, Dict, Literal, Optional, Union
 
+import numpy as np
+from openghg.transform import regrid_2d
+import pandas as pd
 import xarray as xr
 
 
@@ -41,10 +44,16 @@ def _parse_generic(
     # to their native types here
     attrs = {}
     for key, value in em_data.attrs.items():
+        print(key, value, type(value))
         try:
             attrs[key] = value.item()
         except AttributeError:
             attrs[key] = value
+        except ValueError:
+            if isinstance(value, np.ndarray):
+                attrs[key] = value.tolist()
+            else:
+                raise
 
     author_name = "OpenGHG Cloud"
     em_data.attrs["author"] = author_name
@@ -133,10 +142,9 @@ def parse_openghg(
     Returns:
         dict: Dictionary of data
     """
-    from xarray import open_dataset
 
     def raw_file_hook(filepath: Path) -> xr.Dataset:
-        return open_dataset(filepath, chunks=chunks)
+        return xr.open_dataset(filepath, chunks=chunks)
 
     return _parse_generic(
         filepath=filepath,
@@ -154,5 +162,60 @@ def parse_openghg(
     )
 
 
-def parse_edgar() -> None:
-    pass
+def parse_edgar(
+    filepath: Path,
+    species: str,
+    source: str,
+    domain: str,
+    data_type: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
+    high_time_resolution: Optional[bool] = False,
+    period: Optional[Union[str, tuple]] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    continuous: bool = True,
+    year: Optional[str] = None,
+) -> Dict:
+    """
+    Read and parse input emissions data downloaded from EDGAR in netCDF format.
+
+    Args:
+        filepath: Path to data file
+        chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
+            Passing "auto" will ask xarray to calculate a chunk size.
+    Returns:
+        dict: Dictionary of data
+    """
+    import re
+
+    def raw_file_hook(filepath: Path) -> xr.Dataset:
+        raw_data = xr.open_dataset(filepath, chunks=chunks)
+        regridded_data = regrid_2d(raw_data.fluxes, in_data_var="flux", domain=domain)
+
+        nonlocal year  # need to specify that we want `year` from `parse_edgar`
+        if year is None:
+            match = re.search(r"[0-9]{4}", filepath.name)
+            if match:
+                year = match.group(0)
+            else:
+                raise ValueError("Could not infer year, please specify the year explicitly.")
+
+        regridded_data = regridded_data.expand_dims({"time": [pd.to_datetime(year)]}, axis=2)
+
+        return regridded_data
+
+    return _parse_generic(
+        filepath=filepath,
+        species=species,
+        source=source,
+        domain=domain,
+        raw_file_hook=raw_file_hook,
+        data_type=data_type,
+        database=database,
+        database_version=database_version,
+        model=model,
+        high_time_resolution=high_time_resolution,
+        period=period,
+        continuous=continuous,
+    )

@@ -36,6 +36,7 @@ class EmissionsTypes(Enum):
     """For standardising emissions/flux inputs"""
 
     OPENGHG = "OPENGHG"
+    EDGAR = "EDGAR"
 
 
 class EmissionsDatabases(Enum):
