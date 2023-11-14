@@ -290,6 +290,20 @@ class Datasource:
                             dataset=combined, period=period
                         )
 
+                        # We'll try and read the chunk sizes of the incoming data,
+                        # this does only assume we've chunked along the time dimension
+                        try:
+                            time_chunksize = data.chunksizes[time_coord][0]
+                        except (KeyError, IndexError):
+                            time_chunksize = "auto"
+
+                        logger.warning(
+                            f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize}"
+                        )
+                        combined = combined.drop_duplicates(dim=time_coord, keep="first").chunk(
+                            {"time": time_chunksize}
+                        )
+
                         combined_datasets[combined_daterange] = combined
 
                     # Checking for overlapping date range strings in combined
