@@ -73,7 +73,7 @@ def test_add_data(data, bucket):
     memory_store = d.memory_store(version="v0")
     assert memory_store
 
-    ds = xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords", consolidated=False)
+    ds = xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords", consolidated=True)
     assert ds.equals(ch4_data)
 
     expected_metadata = {
@@ -246,7 +246,7 @@ def test_save_footprint(bucket):
     datasource_2 = Datasource(bucket=bucket, uuid=datasource._uuid)
 
     memory_store = datasource_2.memory_store(version="latest")
-    with xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords", consolidated=False) as ds:
+    with xr.open_mfdataset(paths=memory_store, engine="zarr", combine="by_coords", consolidated=True) as ds:
         assert ds.equals(data)
 
     assert datasource_2._data_type == "footprints"

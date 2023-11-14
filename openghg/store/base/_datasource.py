@@ -243,7 +243,7 @@ class Datasource:
                 # At the moment we expect the data to be stored at v1 but the comments here
                 # suggest all current data should be removed
                 logger.info("Updating store to include new added data only.")
-                self._store.add(version=version_str, dataset=data)
+                self._store.update(version=version_str, dataset=data)
                 # We only want this key for a new version
                 date_keys = [daterange_str]
             elif overlapping:
@@ -292,11 +292,9 @@ class Datasource:
                     combined_datasets = self._clip_daterange_label(combined_datasets)
 
                     for dataset in combined_datasets.values():
-                        self._store.add(
+                        self._store.append(
                             version=version_str,
                             dataset=dataset,
-                            compressor=compressor,
-                            filters=filters,
                         )
 
                     # Store the updated dateranges

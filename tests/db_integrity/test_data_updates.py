@@ -74,6 +74,7 @@ def test_database_update_force():
     # Attempt to add same data to the database twice
     clear_test_stores()
     flux_data_read()
+    # This creates a new version
     flux_data_read(force=True)
 
     em_param = {}
@@ -451,6 +452,7 @@ def test_obs_data_read_data_overwrite_version():
     bsd_data_read_gcmd()
     # Load BSD data - GCMD data (GCWERKS) with edit to data values (will produce different hash)
     # Including if_exists="new", save_current="n" --> new_version will be False
+    # So this should just overwrite the data in that version
     bsd_diff_data_read(if_exists="new", save_current="n")
 
     # Search for expected species

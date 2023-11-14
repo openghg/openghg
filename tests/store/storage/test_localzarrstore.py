@@ -41,12 +41,13 @@ def test_localzarrstore_add_retrieve(store):
 
 #         memory_store = store.copy_to_memorystore(keys=["test"], version="v0")
 #         ds_recombined = xr.open_mfdataset(
-#             paths=memory_store, engine="zarr", combine="by_coords", consolidated=False
+#             paths=memory_store, engine="zarr", combine="by_coords", consolidated=True
 #         )
 
 #         # Let's not let xarray mess around
 #         ds_recombined = ds_recombined.compute()
 #         assert ds.equals(ds_recombined)
+
 
 def test_update(store):
     fp_1 = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
@@ -113,3 +114,14 @@ def test_delete_all(store):
     store.delete_all()
 
     assert not parent.exists()
+
+
+def test_dataset_retrieved_same_shape_etc(store):
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    with xr.open_dataset(datapath) as ds:
+        store.add(version="v0", dataset=ds)
+
+        retrieved = store.get(version="v0")
+        assert ds.dims == retrieved.dims
+        assert ds.coords.equals(retrieved.coords)
+        assert ds.identical(retrieved)

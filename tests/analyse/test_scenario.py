@@ -108,7 +108,9 @@ def test_scenario_infer_inputs_ch4():
 
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
+
     footprint_time = footprint_data["time"]
+
     assert footprint_time[0] == Timestamp("2012-08-01T00:00:00")
     assert footprint_time[-1] == Timestamp("2012-08-31T22:00:00")
 
