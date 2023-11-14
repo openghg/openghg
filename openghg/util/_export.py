@@ -3,6 +3,7 @@ from json import dump, loads
 from pathlib import Path
 from typing import Dict, List, Union, Optional, TYPE_CHECKING
 from addict import Dict as aDict
+from pandas import DataFrame
 
 if TYPE_CHECKING:
     from openghg.dataobjects import ObsData
@@ -12,9 +13,8 @@ __all__ = ["to_dashboard", "to_dashboard_mobile"]
 
 def to_dashboard(
     data: Union[ObsData, List[ObsData]],
-    selected_vars: List,
     downsample_n: int = 3,
-    filename: Optional[str] = None,
+    filepath: Optional[str] = None,
 ) -> Union[Dict, None]:
     """Takes a Dataset produced by OpenGHG and outputs it into a JSON
     format readable by the OpenGHG dashboard or a related project.
@@ -27,38 +27,28 @@ def to_dashboard(
 
     Args:
         data: Dictionary of retrieved data
-        selected_vars: The variables to want to export
         downsample_n: Take every nth value from the data
-        filename: filename to write output to
+        filepath: filepath to write out JSON data
     Returns:
         None
     """
     to_export = aDict()
 
-    if not isinstance(selected_vars, list):
-        selected_vars = [selected_vars]
-
-    selected_vars = [str(c).lower() for c in selected_vars]
-
     if not isinstance(data, list):
         data = [data]
+
+    filtered_species = list(set([species.metadata['species'] for species in data]))
 
     for obs in data:
         measurement_data = obs.data
         attributes = measurement_data.attrs
         metadata = obs.metadata
 
-        df = measurement_data.to_dataframe()
+        df: DataFrame = measurement_data.to_dataframe()
 
         rename_lower = {c: str(c).lower() for c in df.columns}
         df = df.rename(columns=rename_lower)
-        # We just want the selected variables
-        to_extract = [c for c in df.columns if c in selected_vars]
-
-        if not to_extract:
-            continue
-
-        df = df[to_extract]
+        df = df.filter(items=filtered_species)
 
         # Downsample the data
         if downsample_n > 1:
@@ -68,19 +58,19 @@ def to_dashboard(
         instrument = metadata["instrument"]
 
         try:
-            latitude = attributes["latitude"]
+            station_latitude = attributes["station_latitude"]
         except KeyError:
-            latitude = metadata["latitude"]
+            station_latitude = metadata["station_latitude"]
 
         try:
-            longitude = attributes["longitude"]
+            station_longitude = attributes["station_longitude"]
         except KeyError:
-            longitude = metadata["longitude"]
+            station_longitude = metadata["station_longitude"]
 
         # TODO - remove this if we add site location to standard metadata
         location = {
-            "latitude": latitude,
-            "longitude": longitude,
+            "station_latitude": station_latitude,
+            "station_longitude": station_longitude,
         }
         metadata.update(location)
 
@@ -95,8 +85,8 @@ def to_dashboard(
             "metadata": metadata,
         }
 
-    if filename is not None:
-        with open(filename, "w") as f:
+    if filepath is not None:
+        with open(filepath, "w") as f:
             dump(obj=to_export, fp=f)
         return None
     else:
