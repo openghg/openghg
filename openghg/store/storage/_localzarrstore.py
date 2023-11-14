@@ -3,7 +3,7 @@ So this is a prototype for using zarr with the
 """
 from __future__ import annotations
 import logging
-from typing import Any, Dict, Literal, Iterable, Iterator, Union, Optional, MutableMapping
+from typing import Any, Dict, Literal, Iterator, Union, Optional, MutableMapping
 import xarray as xr
 import zarr
 import os
@@ -174,7 +174,7 @@ class LocalZarrStore(Store):
             raise KeyError(f"Invalid version - {version}")
 
         store = self._stores[version]
-
+        self._memory_store.clear()
         # Let's copy the data we want to pop into a memory store and return it from there
         zarr.convenience.copy_store(source=store, dest=self._memory_store)
         self.delete_version(version=version)

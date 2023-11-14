@@ -438,7 +438,7 @@ def test_data_version_deletion(data, bucket):
 
 def test_surface_data_stored_and_dated_correctly(data, bucket):
     d = Datasource(bucket=bucket)
-    
+
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
@@ -456,7 +456,7 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
 
 def test_to_memory_store(data, bucket):
     d = Datasource(bucket=bucket)
-    
+
     metadata = data["ch4"]["metadata"]
     ch4_data = data["ch4"]["data"]
 
@@ -467,18 +467,93 @@ def test_to_memory_store(data, bucket):
         assert ds.equals(ch4_data)
 
 
-# def test_add_data_combine_datasets(data, bucket):
-#     d = Datasource(bucket=bucket)
-    
-#     metadata = data["ch4"]["metadata"]
-#     ch4_data = data["ch4"]["data"]
+def test_add_data_with_gaps_check_stored_dataset(bucket):
+    time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
+    time_b = pd.date_range("2012-04-01T00:00:00", "2012-04-30T00:00:00", freq="1d")
+    time_c = pd.date_range("2012-09-01T00:00:00", "2012-09-30T00:00:00", freq="1d")
 
-#     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+    values_a = np.arange(0, len(time_a), 1)
+    values_b = np.arange(0, len(time_b), 1)
+    values_c = np.arange(0, len(time_c), 1)
 
-#     # Add same data again
-#     d.add_data(metadata=metadata, data=ch4_data, data_type="surface", if_exists="combine")
+    species = "co2"
+    site = "TEST_SITE"
+    inlet = "10m"
+    sampling_period = "60.0"
 
-#     assert d._store.version_exists(version="v1")
+    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
 
-#     combined_ds = d.get_data(version="v1")
+    data_a = xr.Dataset({"mf": ("time", values_a)}, coords={"time": time_a}, attrs=attributes)
+    data_b = xr.Dataset({"mf": ("time", values_b)}, coords={"time": time_b}, attrs=attributes)
+    data_c = xr.Dataset({"mf": ("time", values_c)}, coords={"time": time_c}, attrs=attributes)
 
+    d = Datasource(bucket=bucket)
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False)
+
+    assert d.data_keys() == [
+        "2012-01-01-00:00:00+00:00_2012-01-31-00:00:59+00:00",
+        "2012-04-01-00:00:00+00:00_2012-04-30-00:00:59+00:00",
+        "2012-09-01-00:00:00+00:00_2012-09-30-00:00:59+00:00",
+    ]
+
+    assert d.latest_version() == "v0"
+
+    with d.get_data(version="latest") as ds:
+        assert ds.equals(xr.concat([data_a, data_b, data_c], dim="time"))
+        assert ds.time.size == 91
+
+
+def test_add_data_with_overlap_check_stored_dataset(bucket):
+    time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
+    time_b = pd.date_range("2012-01-29T00:00:00", "2012-04-30T00:00:00", freq="1d")
+    time_c = pd.date_range("2012-04-16T00:00:00", "2012-09-30T00:00:00", freq="1d")
+
+    values_a = np.arange(0, len(time_a), 1)
+    values_b = np.arange(0, len(time_b), 1)
+    values_c = np.arange(0, len(time_c), 1)
+
+    species = "co2"
+    site = "TEST_SITE"
+    inlet = "10m"
+    sampling_period = "60.0"
+
+    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
+
+    data_a = xr.Dataset({"mf": ("time", values_a)}, coords={"time": time_a}, attrs=attributes)
+    data_b = xr.Dataset({"mf": ("time", values_b)}, coords={"time": time_b}, attrs=attributes)
+    data_c = xr.Dataset({"mf": ("time", values_c)}, coords={"time": time_c}, attrs=attributes)
+
+    d = Datasource(bucket=bucket)
+
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False, if_exists="combine")
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False, if_exists="combine")
+    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False, if_exists="combine")
+
+    with d.get_data(version="v0") as ds:
+        n_days_expected =  pd.date_range("2012-01-01T00:00:00", "2012-09-30T00:00:00", freq="1d").size
+        # QUESTION - do we want duplcated days here?
+        assert ds.time.size == n_days_expected
+        assert ds.equals(xr.concat([data_a, data_b, data_c], dim="time"))
+
+
+
+
+
+def test_add_data_combine_datasets(data, bucket):
+    d = Datasource(bucket=bucket)
+
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
+
+    ch4_data_clipped = ch4_data.isel(time=slice(10, ch4_data.time.size - 10))
+
+    d.add_data(metadata=metadata, data=ch4_data_clipped, data_type="surface", if_exists="combine")
+
+    assert d._store.version_exists(version="v1")
+
+    combined_ds = d.get_data(version="v1")

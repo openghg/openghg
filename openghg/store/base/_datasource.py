@@ -8,7 +8,7 @@ import numpy as np
 from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
 from uuid import uuid4
-from openghg.objectstore import exists, get_object_from_json, delete_objects
+from openghg.objectstore import exists, get_object_from_json
 from openghg.util import split_daterange_str
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
@@ -297,7 +297,7 @@ class Datasource:
                     combined_datasets = self._clip_daterange_label(combined_datasets)
 
                     for dataset in combined_datasets.values():
-                        self._store.append(
+                        self._store.add(
                             version=version_str,
                             dataset=dataset,
                         )
