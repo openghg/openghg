@@ -11,7 +11,7 @@ from openghg.objectstore import get_writable_bucket
 from openghg.store.base import get_data_class
 
 
-def transform_emissions_data(
+def transform_flux_data(
     datapath: Union[str, Path],
     database: str,
     overwrite: bool = False,
