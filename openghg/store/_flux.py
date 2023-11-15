@@ -108,7 +108,7 @@ class Flux(BaseStore):
         from openghg.util import (
             clean_string,
             hash_file,
-            load_emissions_parser,
+            load_flux_parser,
             check_if_need_new_version,
         )
 
@@ -137,7 +137,7 @@ class Flux(BaseStore):
             raise ValueError(f"Unknown data type {source_format} selected.")
 
         # Load the data retrieve object
-        parser_fn = load_emissions_parser(source_format=source_format)
+        parser_fn = load_flux_parser(source_format=source_format)
 
         file_hash = hash_file(filepath=filepath)
         if file_hash in self._file_hashes and not force:

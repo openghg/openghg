@@ -10,7 +10,7 @@ __all__ = [
     "load_surface_parser",
     "load_column_parser",
     "load_column_source_parser",
-    "load_emissions_parser",
+    "load_flux_parser",
     "load_emissions_database_parser",
     "get_datapath",
     "get_logfile_path",
@@ -94,17 +94,17 @@ def load_column_source_parser(source_format: str) -> Callable:
     return fn
 
 
-def load_emissions_parser(source_format: str) -> Callable:
-    """Load a parsing object for the emissions data type.
-    Used with `openghg.standardise.emissions` sub-module
+def load_flux_parser(source_format: str) -> Callable:
+    """Load a parsing object for the "flux" data type.
+    Used with `openghg.standardise.flux` sub-module
 
     Args:
         source_format: Name of data type e.g. OPENGHG
     Returns:
         callable: parser function
     """
-    emissions_st_module_name = "openghg.standardise.emissions"
-    fn = load_parser(data_name=source_format, module_name=emissions_st_module_name)
+    flux_st_module_name = "openghg.standardise.flux"
+    fn = load_parser(data_name=source_format, module_name=flux_st_module_name)
 
     return fn
 
