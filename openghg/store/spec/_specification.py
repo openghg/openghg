@@ -11,7 +11,7 @@ def define_data_types() -> Tuple[str, ...]:
     data_types = (
         "surface",
         "column",
-        "emissions",
+        "flux",
         # "met",
         "footprints",
         "boundary_conditions",
@@ -27,7 +27,7 @@ def define_data_type_classes() -> Dict[str, Any]:
     """
     from openghg.store import (
         BoundaryConditions,
-        Emissions,
+        Flux,
         EulerianModel,
         Footprints,
         ObsColumn,
@@ -37,7 +37,7 @@ def define_data_type_classes() -> Dict[str, Any]:
     data_type_classes = {
         "surface": ObsSurface,
         "column": ObsColumn,
-        "emissions": Emissions,
+        "flux": Flux,
         # "met": ???
         "footprints": Footprints,
         "boundary_conditions": BoundaryConditions,

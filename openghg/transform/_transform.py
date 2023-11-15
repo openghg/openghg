@@ -18,13 +18,13 @@ def transform_emissions_data(
     store: Optional[str] = None,
     **kwargs: Any,
 ) -> dict:
-    """Read and transform an emissions database. This will find the appropriate
+    """Read and transform a flux / emissions database. This will find the appropriate
     parser function to use for the database specified. The necessary inputs
     are determined by which database is being used.
 
     The underlying parser functions will be of the form:
-        - openghg.transform.emissions.parse_{database.lower()}
-        - e.g. openghg.transform.emissions.parse_edgar()
+        - openghg.transform.flux.parse_{database.lower()}
+        - e.g. openghg.transform.flux.parse_edgar()
 
     Args:
         datapath: Path to local copy of database archive (for now)
@@ -38,7 +38,7 @@ def transform_emissions_data(
     Returns:
     """
     bucket = get_writable_bucket(name=store)
-    dclass = get_data_class("emissions")
+    dclass = get_data_class("flux")
 
     with dclass(bucket) as dc:
         result = dc.transform_data(datapath=datapath, database=database, overwrite=overwrite, **kwargs)
