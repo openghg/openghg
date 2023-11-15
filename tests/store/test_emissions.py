@@ -2,9 +2,9 @@ import pytest
 from helpers import get_emissions_datapath
 from typing import Any, Union
 from openghg.retrieve import search, search_flux
-from openghg.store import Emissions
+from openghg.store import Flux
 from openghg.standardise import standardise_flux, standardise_from_binary_data
-from openghg.transform import transform_emissions_data
+from openghg.transform import transform_flux_data
 from openghg.util import hash_bytes
 from xarray import open_dataset
 from pandas import Timestamp
@@ -264,7 +264,7 @@ def test_add_edgar_database(clear_stores):
     database = "EDGAR"
     date = "2015"
 
-    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date)
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date)
 
     default_domain = "globaledgar"
 
@@ -325,7 +325,7 @@ def test_transform_and_add_edgar_database(clear_stores):
     date = "2015"
     domain = "EUROPE"
 
-    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date, domain=domain)
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, domain=domain)
 
     version = "v6.0"
     species = "ch4"
@@ -371,8 +371,8 @@ def test_transform_and_add_edgar_database(clear_stores):
 
 
 def test_flux_schema():
-    """Check expected data variables are being included for default Emissions schema"""
-    data_schema = Emissions.schema()
+    """Check expected data variables are being included for default Flux schema"""
+    data_schema = Flux.schema()
 
     data_vars = data_schema.data_vars
     assert "flux" in data_vars
