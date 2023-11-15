@@ -11,7 +11,7 @@ __all__ = [
     "load_column_parser",
     "load_column_source_parser",
     "load_flux_parser",
-    "load_emissions_database_parser",
+    "load_flux_database_parser",
     "get_datapath",
     "get_logfile_path",
     "load_json",
@@ -109,17 +109,17 @@ def load_flux_parser(source_format: str) -> Callable:
     return fn
 
 
-def load_emissions_database_parser(database: str) -> Callable:
+def load_flux_database_parser(database: str) -> Callable:
     """Load a parsing object for the source of column data.
-    Used with `openghg.transform.emissions` sub-module
+    Used with `openghg.transform.flux` sub-module
 
     Args:
         database: Name of data source e.g. EDGAR
     Returns:
         callable: parser function
     """
-    emissions_tr_module_name = "openghg.transform.emissions"
-    fn = load_parser(data_name=database, module_name=emissions_tr_module_name)
+    flux_tr_module_name = "openghg.transform.flux"
+    fn = load_parser(data_name=database, module_name=flux_tr_module_name)
 
     return fn
 

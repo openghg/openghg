@@ -207,8 +207,8 @@ class Flux(BaseStore):
         are determined by which database is being used.
 
         The underlying parser functions will be of the form:
-            - openghg.transform.emissions.parse_{database.lower()}
-                - e.g. openghg.transform.emissions.parse_edgar()
+            - openghg.transform.flux.parse_{database.lower()}
+                - e.g. openghg.transform.flux.parse_edgar()
 
         Args:
             datapath: Path to local copy of database archive (for now)
@@ -229,7 +229,7 @@ class Flux(BaseStore):
         """
         import inspect
         from openghg.types import FluxDatabases
-        from openghg.util import load_emissions_database_parser, check_if_need_new_version
+        from openghg.util import load_flux_database_parser, check_if_need_new_version
 
         if overwrite and if_exists == "default":
             logger.warning(
@@ -248,7 +248,7 @@ class Flux(BaseStore):
             raise ValueError(f"Unable to transform '{database}' selected.")
 
         # Load the data retrieve object
-        parser_fn = load_emissions_database_parser(database=database)
+        parser_fn = load_flux_database_parser(database=database)
 
         # Find all parameters that can be accepted by parse function
         all_param = list(inspect.signature(parser_fn).parameters.keys())
