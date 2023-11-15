@@ -256,33 +256,36 @@ class Datasource:
                     combined_datasets = {}
                     # There can really only be one overlap so we can do away with this
                     for existing_daterange, new_daterange in overlapping:
-                        existing = self._store.pop(version=self._latest_version)
+                        # NOTE - pop to get
+                        # With the new store we don't want to pop the data as that will
+                        # actually remove it from the store
+                        # With the old setup pop just removed it from the loaded Datasource's data store
+                        with self._store.get(version=self._latest_version) as existing:
+                            logger.info("Combining overlapping data dateranges")
+                            # Concatenate datasets along time dimension
+                            try:
+                                # TODO - how to lazy concatenate?
+                                combined = xr_concat((existing, data), dim=time_coord)
+                            except (ValueError, KeyError):
+                                # If data variables in the two datasets are not identical,
+                                # xr_concat will raise an error
+                                dv_ex = set(existing.data_vars.keys())
+                                dv_new = set(data.data_vars.keys())
 
-                        logger.info("Combining overlapping data dateranges")
-                        # Concatenate datasets along time dimension
-                        try:
-                            # TODO - how to lazy concatenate?
-                            combined = xr_concat((existing, data), dim=time_coord)
-                        except (ValueError, KeyError):
-                            # If data variables in the two datasets are not identical,
-                            # xr_concat will raise an error
-                            dv_ex = set(existing.data_vars.keys())
-                            dv_new = set(data.data_vars.keys())
+                                # Check difference between datasets and fill any
+                                # missing variables with NaN values.
+                                dv_not_in_new = dv_ex - dv_new
+                                for dv in dv_not_in_new:
+                                    fill_values = np.zeros(len(data[time_coord])) * np.nan
+                                    data = data.assign({dv: (time_coord, fill_values)})
 
-                            # Check difference between datasets and fill any
-                            # missing variables with NaN values.
-                            dv_not_in_new = dv_ex - dv_new
-                            for dv in dv_not_in_new:
-                                fill_values = np.zeros(len(data[time_coord])) * np.nan
-                                data = data.assign({dv: (time_coord, fill_values)})
+                                dv_not_in_ex = dv_new - dv_ex
+                                for dv in dv_not_in_ex:
+                                    fill_values = np.zeros(len(existing[time_coord])) * np.nan
+                                    existing = existing.assign({dv: (time_coord, fill_values)})
 
-                            dv_not_in_ex = dv_new - dv_ex
-                            for dv in dv_not_in_ex:
-                                fill_values = np.zeros(len(existing[time_coord])) * np.nan
-                                existing = existing.assign({dv: (time_coord, fill_values)})
-
-                            # Should now be able to concatenate successfully
-                            combined = xr_concat((existing, data), dim=time_coord)
+                                # Should now be able to concatenate successfully
+                                combined = xr_concat((existing, data), dim=time_coord)
 
                         # TODO: May need to find a way to find period for *last point* rather than *current point*
                         # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
@@ -300,6 +303,7 @@ class Datasource:
                         logger.warning(
                             f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize}"
                         )
+
                         combined = combined.drop_duplicates(dim=time_coord, keep="first").chunk(
                             {"time": time_chunksize}
                         )

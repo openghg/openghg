@@ -18,8 +18,30 @@ from openghg.util import create_daterange_str, daterange_overlap, pairwise, time
 mocked_uuid = "00000000-0000-0000-00000-000000000000"
 mocked_uuid2 = "10000000-0000-0000-00000-000000000001"
 
+
+def create_attributes():
+    species = "co2"
+    site = "TEST_SITE"
+    inlet = "10m"
+    sampling_period = "60.0"
+
+    return {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
+
+
 # Disable this for long strings below - Line break occurred before a binary operator (W503)
 # flake8: noqa: W503
+def create_three_datasets(a, b, c):
+    values_a = np.arange(0, len(a), 1)
+    values_b = np.arange(0, len(b), 1)
+    values_c = np.arange(0, len(c), 1)
+
+    attributes = create_attributes()
+
+    data_a = xr.Dataset({"mf": ("time", values_a)}, coords={"time": a}, attrs=attributes)
+    data_b = xr.Dataset({"mf": ("time", values_b)}, coords={"time": b}, attrs=attributes)
+    data_c = xr.Dataset({"mf": ("time", values_c)}, coords={"time": c}, attrs=attributes)
+
+    return data_a, data_b, data_c
 
 
 @pytest.fixture(scope="session")
@@ -54,6 +76,24 @@ def mock_uuid2(monkeypatch):
 @pytest.fixture
 def bucket():
     return get_bucket()
+
+
+@pytest.fixture
+def datasets_with_gaps():
+    time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
+    time_b = pd.date_range("2012-04-01T00:00:00", "2012-04-30T00:00:00", freq="1d")
+    time_c = pd.date_range("2012-09-01T00:00:00", "2012-09-30T00:00:00", freq="1d")
+
+    return create_three_datasets(time_a, time_b, time_c)
+
+
+@pytest.fixture()
+def datasets_with_overlap():
+    time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
+    time_b = pd.date_range("2012-01-29T00:00:00", "2012-04-30T00:00:00", freq="1d")
+    time_c = pd.date_range("2012-04-16T00:00:00", "2012-09-30T00:00:00", freq="1d")
+
+    return create_three_datasets(time_a, time_b, time_c)
 
 
 def test_add_data(data, bucket):
@@ -467,25 +507,9 @@ def test_to_memory_store(data, bucket):
         assert ds.equals(ch4_data)
 
 
-def test_add_data_with_gaps_check_stored_dataset(bucket):
-    time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
-    time_b = pd.date_range("2012-04-01T00:00:00", "2012-04-30T00:00:00", freq="1d")
-    time_c = pd.date_range("2012-09-01T00:00:00", "2012-09-30T00:00:00", freq="1d")
-
-    values_a = np.arange(0, len(time_a), 1)
-    values_b = np.arange(0, len(time_b), 1)
-    values_c = np.arange(0, len(time_c), 1)
-
-    species = "co2"
-    site = "TEST_SITE"
-    inlet = "10m"
-    sampling_period = "60.0"
-
-    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
-
-    data_a = xr.Dataset({"mf": ("time", values_a)}, coords={"time": time_a}, attrs=attributes)
-    data_b = xr.Dataset({"mf": ("time", values_b)}, coords={"time": time_b}, attrs=attributes)
-    data_c = xr.Dataset({"mf": ("time", values_c)}, coords={"time": time_c}, attrs=attributes)
+def test_add_data_with_gaps_check_stored_dataset(bucket, datasets_with_gaps):
+    data_a, data_b, data_c = datasets_with_gaps
+    attributes = create_attributes()
 
     d = Datasource(bucket=bucket)
 
@@ -506,25 +530,9 @@ def test_add_data_with_gaps_check_stored_dataset(bucket):
         assert ds.time.size == 91
 
 
-def test_add_data_with_overlap_check_stored_dataset(bucket):
-    time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
-    time_b = pd.date_range("2012-01-29T00:00:00", "2012-04-30T00:00:00", freq="1d")
-    time_c = pd.date_range("2012-04-16T00:00:00", "2012-09-30T00:00:00", freq="1d")
-
-    values_a = np.arange(0, len(time_a), 1)
-    values_b = np.arange(0, len(time_b), 1)
-    values_c = np.arange(0, len(time_c), 1)
-
-    species = "co2"
-    site = "TEST_SITE"
-    inlet = "10m"
-    sampling_period = "60.0"
-
-    attributes = {"species": species, "site": site, "inlet": inlet, "sampling_period": sampling_period}
-
-    data_a = xr.Dataset({"mf": ("time", values_a)}, coords={"time": time_a}, attrs=attributes).chunk({"time": 10})
-    data_b = xr.Dataset({"mf": ("time", values_b)}, coords={"time": time_b}, attrs=attributes).chunk({"time": 10})
-    data_c = xr.Dataset({"mf": ("time", values_c)}, coords={"time": time_c}, attrs=attributes).chunk({"time": 10})
+def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overlap):
+    data_a, data_b, data_c = datasets_with_overlap
+    attributes = create_attributes()
 
     d = Datasource(bucket=bucket)
 
@@ -533,13 +541,9 @@ def test_add_data_with_overlap_check_stored_dataset(bucket):
     d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False, if_exists="combine")
 
     with d.get_data(version="v0") as ds:
-        n_days_expected =  pd.date_range("2012-01-01T00:00:00", "2012-09-30T00:00:00", freq="1d").size
-        # QUESTION - do we want duplcated days here?
-        assert ds.time.size == n_days_expected
-        # assert ds.equals(xr.concat([data_a, data_b, data_c], dim="time"))
-
-
-
+        n_days_expected = pd.date_range("2012-01-01T00:00:00", "2012-09-30T00:00:00", freq="1d").size
+        assert ds.equals(xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time"))
+        # assert ds.time.size == n_days_expected
 
 
 def test_add_data_combine_datasets(data, bucket):
@@ -554,6 +558,21 @@ def test_add_data_combine_datasets(data, bucket):
 
     d.add_data(metadata=metadata, data=ch4_data_clipped, data_type="surface", if_exists="combine")
 
-    assert d._store.version_exists(version="v1")
+    assert d._store.version_exists(version="v0")
 
-    combined_ds = d.get_data(version="v1")
+    combined_ds = d.get_data(version="v0")
+
+    assert combined_ds.equals(ch4_data)
+
+
+def test_add_data_out_of_order(bucket, datasets_with_gaps):
+    data_a, data_b, data_c = datasets_with_gaps
+    attributes = create_attributes()
+
+    d = Datasource(bucket=bucket)
+
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False)
+
+    print(d.data_keys())
