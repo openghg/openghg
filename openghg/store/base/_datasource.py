@@ -4,7 +4,6 @@ import warnings
 from typing import Any, cast, Dict, List, Optional, Tuple, TypeVar, Union
 from types import TracebackType
 import logging
-import numpy as np
 from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
 from uuid import uuid4
@@ -198,7 +197,7 @@ class Datasource:
 
         # Ensure data is in time order
         time_coord = "time"
-        daterange_str = self.get_representative_daterange_str(dataset=data, period=period)
+        new_daterange_str = self.get_representative_daterange_str(dataset=data, period=period)
 
         if self._latest_version and not new_version:
             version_str = self._latest_version
@@ -218,132 +217,114 @@ class Datasource:
         # We'll use this to store the dates covered by this version of the data
         date_keys = self._data_keys[self._latest_version] if self._data_keys else []
 
-        # We'll sort and drop duplicates here
-        # TODO - test to see if this chaining does help
-        if sort and drop_duplicates:
-            data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
-        elif sort:
-            data = data.sortby(time_coord)
-        elif drop_duplicates:
-            data = data.drop_duplicates(time_coord, keep="first")
+        # # We'll sort and drop duplicates here
+        # # TODO - test to see if this chaining does help
+        # if sort and drop_duplicates:
+        #     data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
+        # elif sort:
+        #     data = data.sortby(time_coord)
+        # elif drop_duplicates:
+        #     data = data.drop_duplicates(time_coord, keep="first")
 
-        # If we have data already stored in the Datasource
-        if date_keys:
-            overlapping = []
-            for existing_daterange in date_keys:
-                if daterange_overlap(daterange_a=existing_daterange, daterange_b=daterange_str):
-                    overlapping.append((existing_daterange, daterange_str))
+        overlapping = [
+            (existing, new_daterange_str)
+            for existing in date_keys
+            if daterange_overlap(daterange_a=existing, daterange_b=new_daterange_str)
+        ]
 
-            # I don't think these do anything?
-            # TODO - remove?
-            self._status["current_data"] = True
-            self._status["overlapping"] = overlapping
-
+        # If we don't have any data in this Datasource or we have no overlap we'll just add the new data
+        if not self._store or not overlapping:
+            self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
+            date_keys.append(new_daterange_str)
+        # Otherwise if we have data already stored in the Datasource
+        else:
+            # If we have existing data we'll just keep the new data
+            # If new_version is True then we create a new version containing just this data
+            # If new_version is False then we delete the current data and replace it with just the new data
             if if_exists == "new":
-                # Remove all current data on Datasource and add new data
-                # At the moment we expect the data to be stored at v1 but the comments here
-                # suggest all current data should be removed
                 logger.info("Updating store to include new added data only.")
 
                 if new_version:
                     self._store.add(version=version_str, dataset=data)
                 else:
                     self._store.update(version=version_str, dataset=data)
+                # Only save the current daterange string for this version
+                date_keys = [new_daterange_str]
+            elif if_exists == "combine":
+                with self._store.get(version=self._latest_version) as existing_dataset:
+                    logger.info("Combining overlapping data dateranges")
+                    # Concatenate datasets along time dimension
+                    # try:
+                    combined = xr_concat((existing_dataset, data), dim=time_coord)
+                    # except (ValueError, KeyError):
+                    #     # If data variables in the two datasets are not identical,
+                    #     # xr_concat will raise an error
+                    #     dv_ex = set(existing.data_vars.keys())
+                    #     dv_new = set(data.data_vars.keys())
 
-                date_keys = [daterange_str]
-            elif overlapping:
-                if if_exists == "combine":
-                    combined_datasets = {}
-                    # There can really only be one overlap so we can do away with this
-                    for existing_daterange, new_daterange in overlapping:
-                        # NOTE - pop to get
-                        # With the new store we don't want to pop the data as that will
-                        # actually remove it from the store
-                        # With the old setup pop just removed it from the loaded Datasource's data store
-                        with self._store.get(version=self._latest_version) as existing:
-                            logger.info("Combining overlapping data dateranges")
-                            # Concatenate datasets along time dimension
-                            try:
-                                # TODO - how to lazy concatenate?
-                                combined = xr_concat((existing, data), dim=time_coord)
-                            except (ValueError, KeyError):
-                                # If data variables in the two datasets are not identical,
-                                # xr_concat will raise an error
-                                dv_ex = set(existing.data_vars.keys())
-                                dv_new = set(data.data_vars.keys())
+                    #     # Check difference between datasets and fill any
+                    #     # missing variables with NaN values.
+                    #     dv_not_in_new = dv_ex - dv_new
+                    #     for dv in dv_not_in_new:
+                    #         fill_values = np.zeros(len(data[time_coord])) * np.nan
+                    #         data = data.assign({dv: (time_coord, fill_values)})
 
-                                # Check difference between datasets and fill any
-                                # missing variables with NaN values.
-                                dv_not_in_new = dv_ex - dv_new
-                                for dv in dv_not_in_new:
-                                    fill_values = np.zeros(len(data[time_coord])) * np.nan
-                                    data = data.assign({dv: (time_coord, fill_values)})
+                    #     dv_not_in_ex = dv_new - dv_ex
+                    #     for dv in dv_not_in_ex:
+                    #         fill_values = np.zeros(len(existing[time_coord])) * np.nan
+                    #         existing = existing.assign({dv: (time_coord, fill_values)})
 
-                                dv_not_in_ex = dv_new - dv_ex
-                                for dv in dv_not_in_ex:
-                                    fill_values = np.zeros(len(existing[time_coord])) * np.nan
-                                    existing = existing.assign({dv: (time_coord, fill_values)})
+                    #     # Should now be able to concatenate successfully
+                    #     combined = xr_concat((existing, data), dim=time_coord)
 
-                                # Should now be able to concatenate successfully
-                                combined = xr_concat((existing, data), dim=time_coord)
+                    # TODO: May need to find a way to find period for *last point* rather than *current point*
+                    # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
+                    combined_daterange = self.get_representative_daterange_str(
+                        dataset=combined, period=period
+                    )
 
-                        # TODO: May need to find a way to find period for *last point* rather than *current point*
-                        # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
-                        combined_daterange = self.get_representative_daterange_str(
-                            dataset=combined, period=period
-                        )
+                    # We'll try and read the chunk sizes of the incoming data,
+                    # this does only assume we've chunked along the time dimension
+                    try:
+                        time_chunksize = data.chunksizes[time_coord][0]
+                    except (KeyError, IndexError):
+                        time_chunksize = "auto"
 
-                        # We'll try and read the chunk sizes of the incoming data,
-                        # this does only assume we've chunked along the time dimension
-                        try:
-                            time_chunksize = data.chunksizes[time_coord][0]
-                        except (KeyError, IndexError):
-                            time_chunksize = "auto"
+                    logger.warning(
+                        f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize}"
+                    )
 
-                        logger.warning(
-                            f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize}"
-                        )
+                    # combined = combined.drop_duplicates(dim=time_coord, keep="first")
 
-                        combined = combined.drop_duplicates(dim=time_coord, keep="first").chunk(
-                            {"time": time_chunksize}
-                        )
-
-                        combined_datasets[combined_daterange] = combined
+                    combined = combined.drop_duplicates(dim=time_coord, keep="first").chunk(
+                        {"time": time_chunksize}
+                    )
 
                     # Checking for overlapping date range strings in combined
                     # data and clipping the labels as necessary.
-                    combined_datasets = self._clip_daterange_label(combined_datasets)
+                    # combined_datasets = self._clip_daterange_label(combined_datasets)
 
-                    for dataset in combined_datasets.values():
+                    if new_version:
                         self._store.add(
                             version=version_str,
-                            dataset=dataset,
+                            dataset=combined,
+                        )
+                    else:
+                        self._store.update(
+                            version=version_str,
+                            dataset=combined,
                         )
 
-                    # Store the updated dateranges
-                    date_keys.extend(combined_datasets.keys())
-                else:
-                    date_chunk_str = ""
-                    for existing_daterange, new_daterange in overlapping:
-                        date_chunk_str += f" - current: {existing_daterange}; new: {new_daterange}\n"
-                    raise DataOverlapError(
-                        f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
-                        f"To update current data in object store use `if_exists` input (see options in documentation)"
-                    )
+                date_keys = [combined_daterange]
+            # If we don't know what (i.e. we've got "auto") to do we'll raise an error
             else:
-                date_keys.append(daterange_str)
-                self._store.add(
-                    version=version_str,
-                    dataset=data,
-                    compressor=compressor,
-                    filters=filters,
+                date_chunk_str = ""
+                for existing_daterange, new_daterange in overlapping.pop():
+                    date_chunk_str += f" - current: {existing_daterange}; new: {new_daterange}\n"
+                raise DataOverlapError(
+                    f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
+                    f"To update current data in object store use `if_exists` input (see options in documentation)"
                 )
-        else:
-            date_keys.append(daterange_str)
-            self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
-
-            self._status["current_data"] = False
-            self._status["overlapping"] = False
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
@@ -354,7 +335,7 @@ class Datasource:
 
         # We'll store the daterange for this version of the data and update the latest to the current version
         timestamp_str_now = str(timestamp_now())
-        self._data_keys[version_str] = date_keys
+        self._data_keys[version_str] = sorted(date_keys)
         self._timestamps[version_str] = timestamp_str_now
         self.add_metadata_key(key="latest_version", value=version_str)
         self.add_metadata_key(key="timestamp", value=timestamp_str_now)

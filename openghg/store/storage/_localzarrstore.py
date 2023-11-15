@@ -9,6 +9,7 @@ import zarr
 import os
 import re
 import shutil
+from contextlib import contextmanager
 
 from openghg.types import ZarrStoreError
 from pathlib import Path
@@ -146,6 +147,8 @@ class LocalZarrStore(Store):
 
     def get(self, version: str) -> xr.Dataset:
         """Get the version of the dataset stored in the zarr store.
+        This first copies the data from the store on the local filesystem into
+        a local memory store and then opens the dataset from there.
 
         Args:
             version: Version of data to get
@@ -155,12 +158,15 @@ class LocalZarrStore(Store):
         if version not in self._stores:
             raise KeyError(f"Invalid version - {version}")
 
+        self._memory_store.clear()
         store = self._stores[version]
+        zarr.convenience.copy_store(source=store, dest=self._memory_store)
         ds: xr.Dataset = xr.open_zarr(store=store, consolidated=True)
         return ds
 
     def pop(self, version: str) -> xr.Dataset:
-        """Pop some data from the store.
+        """Pop some data from the store. Note that this will delete
+        the data from the store on the local filesystem.
 
         Args:
             version: Version of data
@@ -173,8 +179,8 @@ class LocalZarrStore(Store):
         if version not in self._stores:
             raise KeyError(f"Invalid version - {version}")
 
-        store = self._stores[version]
         self._memory_store.clear()
+        store = self._stores[version]
         # Let's copy the data we want to pop into a memory store and return it from there
         zarr.convenience.copy_store(source=store, dest=self._memory_store)
         self.delete_version(version=version)
@@ -274,7 +280,7 @@ class LocalZarrStore(Store):
         if self._mode == "r":
             raise PermissionError("Cannot update a read-only zarr store")
 
-        self.delete_version(version=version)
+        # self.delete_version(version=version)
         self.add(version=version, dataset=dataset, compressor=compressor, filters=filters)
 
     def hash(self, data: str) -> str:

@@ -487,7 +487,8 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
     start, end = d.daterange()
 
     stored_ds = d.get_data(version="v0")
-    stored_ds = stored_ds.sortby("time")
+    with d.get_data(version="v0") as stored_ds:
+        assert stored_ds.equals(ch4_data)
 
     assert timestamp_tzaware(stored_ds["ch4"].time[0].values) == timestamp_tzaware(start)
     # QUESTION - why is there a ~ minute difference here?
@@ -531,7 +532,20 @@ def test_add_data_with_gaps_check_stored_dataset(bucket, datasets_with_gaps):
 
 
 def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overlap):
-    data_a, data_b, data_c = datasets_with_overlap
+    time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
+    time_b = pd.date_range("2012-01-29T00:00:00", "2012-04-30T00:00:00", freq="1d")
+    time_c = pd.date_range("2012-04-16T00:00:00", "2012-09-30T00:00:00", freq="1d")
+
+    values_a = np.zeros(len(time_a))
+    values_b = np.full(len(time_b), 1)
+    values_c = np.full(len(time_c), 2)
+
+    attributes = create_attributes()
+
+    data_a = xr.Dataset({"mf": ("time", values_a)}, coords={"time": time_a}, attrs=attributes)
+    data_b = xr.Dataset({"mf": ("time", values_b)}, coords={"time": time_b}, attrs=attributes)
+    data_c = xr.Dataset({"mf": ("time", values_c)}, coords={"time": time_c}, attrs=attributes)
+
     attributes = create_attributes()
 
     d = Datasource(bucket=bucket)
@@ -541,9 +555,12 @@ def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overla
     d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False, if_exists="combine")
 
     with d.get_data(version="v0") as ds:
+        ds = ds.compute()
         n_days_expected = pd.date_range("2012-01-01T00:00:00", "2012-09-30T00:00:00", freq="1d").size
-        assert ds.equals(xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time"))
-        # assert ds.time.size == n_days_expected
+        assert ds.time.size == n_days_expected
+        combined = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time")
+        assert ds.equals(combined)
+
 
 
 def test_add_data_combine_datasets(data, bucket):
@@ -560,9 +577,8 @@ def test_add_data_combine_datasets(data, bucket):
 
     assert d._store.version_exists(version="v0")
 
-    combined_ds = d.get_data(version="v0")
-
-    assert combined_ds.equals(ch4_data)
+    with d.get_data(version="v0") as combined_ds:
+        assert combined_ds.equals(ch4_data)
 
 
 def test_add_data_out_of_order(bucket, datasets_with_gaps):
@@ -576,3 +592,4 @@ def test_add_data_out_of_order(bucket, datasets_with_gaps):
     d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False)
 
     print(d.data_keys())
+    assert False
