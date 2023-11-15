@@ -104,7 +104,7 @@ class Flux(BaseStore):
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
-        from openghg.types import EmissionsTypes
+        from openghg.types import FluxTypes
         from openghg.util import (
             clean_string,
             hash_file,
@@ -132,7 +132,7 @@ class Flux(BaseStore):
         filepath = Path(filepath)
 
         try:
-            source_format = EmissionsTypes[source_format.upper()].value
+            source_format = FluxTypes[source_format.upper()].value
         except KeyError:
             raise ValueError(f"Unknown data type {source_format} selected.")
 
@@ -228,7 +228,7 @@ class Flux(BaseStore):
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
-        from openghg.types import EmissionsDatabases
+        from openghg.types import FluxDatabases
         from openghg.util import load_emissions_database_parser, check_if_need_new_version
 
         if overwrite and if_exists == "default":
@@ -243,7 +243,7 @@ class Flux(BaseStore):
         datapath = Path(datapath)
 
         try:
-            data_type = EmissionsDatabases[database.upper()].value
+            data_type = FluxDatabases[database.upper()].value
         except KeyError:
             raise ValueError(f"Unable to transform '{database}' selected.")
 
