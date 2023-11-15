@@ -95,7 +95,9 @@ class ObsSurface(BaseStore):
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
                 result = self.read_file(
-                    filepath=(filepath, precision_filepath), site_filepath=site_filepath, **meta_kwargs
+                    filepath=(filepath, precision_filepath),
+                    site_filepath=site_filepath,
+                    **meta_kwargs,
                 )
 
         return result
@@ -515,6 +517,7 @@ class ObsSurface(BaseStore):
         data: Dict,
         if_exists: str = "default",
         overwrite: bool = False,
+        force: bool = False,
         required_metakeys: Optional[Sequence] = None,
     ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
@@ -529,6 +532,7 @@ class ObsSurface(BaseStore):
                 - "new" - creates new version with just new data
                 - "replace" - replace and insert new data into current timeseries
             overwrite: Deprecated. This will use options for if_exists="new".
+            force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
             required_metakeys: Keys in the metadata we should use to store this metadata in the object store
                 if None it defaults to:
                     {"species", "site", "station_long_name", "inlet", "instrument",
@@ -552,17 +556,20 @@ class ObsSurface(BaseStore):
         # Very rudimentary hash of the data and associated metadata
         hashes = hash_retrieved_data(to_hash=data)
         # Find the keys in data we've seen before
-        seen_before = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
+        if force:
+            file_hashes_to_compare = set()
+        else:
+            file_hashes_to_compare = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
 
-        if len(seen_before) == len(data):
+        if len(file_hashes_to_compare) == len(data):
             logger.warning("Note: There is no new data to process.")
             return None
 
         keys_to_process = set(data.keys())
-        if seen_before:
+        if file_hashes_to_compare:
             # TODO - add this to log
-            logger.warning(f"Note: We've seen {seen_before} before. Processing new data only.")
-            keys_to_process -= seen_before
+            logger.warning(f"Note: We've seen {file_hashes_to_compare} before. Processing new data only.")
+            keys_to_process -= file_hashes_to_compare
 
         to_process = {k: v for k, v in data.items() if k in keys_to_process}
 
