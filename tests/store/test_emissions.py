@@ -1,5 +1,5 @@
 import pytest
-from helpers import get_emissions_datapath
+from helpers import get_flux_datapath
 from typing import Any, Union
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
@@ -22,7 +22,7 @@ def test_read_binary_data(mocker, clear_stores):
     fake_uuids = [f"test-uuid-{n}" for n in range(1, 101)]
     mocker.patch("uuid.uuid4", side_effect=fake_uuids)
 
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     binary_data = test_datapath.read_bytes()
 
@@ -52,7 +52,7 @@ def test_read_binary_data(mocker, clear_stores):
 
 
 def test_read_file():
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(store="user",
                                     filepath=test_datapath,
@@ -131,7 +131,7 @@ def load_edgar():
             database_version: if True, `database_version` argument passed to `read_file`
         """
         file_name = f'ch4-anthro_globaledgar_{version.replace(".", "-")}_{str(year)}.nc'
-        datapath = get_emissions_datapath(file_name)
+        datapath = get_flux_datapath(file_name)
         kwargs: Any = dict(
             filepath=datapath,
             species=species,
@@ -259,7 +259,7 @@ def test_read_file_fails_ambiguous(clear_stores, load_edgar):
 def test_add_edgar_database(clear_stores):
     """Test edgar can be added to object store (default domain)"""
     folder = "v6.0_CH4"
-    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     database = "EDGAR"
     date = "2015"
@@ -319,7 +319,7 @@ def test_transform_and_add_edgar_database(clear_stores):
     xesmf = pytest.importorskip("xesmf")
 
     folder = "v6.0_CH4"
-    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     database = "EDGAR"
     date = "2015"

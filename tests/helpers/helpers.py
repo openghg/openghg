@@ -50,8 +50,8 @@ def get_column_datapath(filename: str) -> Path:
     return get_datapath_base(data_type="column", filename=filename)
 
 
-def get_emissions_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
+def get_flux_datapath(filename: str) -> Path:
+    """Return the path to the flux test data file"""
     return get_datapath_base(data_type="flux", filename=filename)
 
 

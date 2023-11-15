@@ -2,7 +2,7 @@ import pytest
 from helpers import (
     get_bc_datapath,
     get_column_datapath,
-    get_emissions_datapath,
+    get_flux_datapath,
     get_eulerian_datapath,
     get_footprint_datapath,
     get_surface_datapath,
@@ -98,8 +98,8 @@ def data_read():
 
     # Emissions data - added consecutive data for 2012-2013
     # This will be seen as "yearly" data and each file only contains one time point.
-    test_datapath1 = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
-    test_datapath2 = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
+    test_datapath1 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    test_datapath2 = get_flux_datapath("co2-gpp-cardamom_EUROPE_2013.nc")
 
     species = "co2"
     source = "gpp-cardamom"
