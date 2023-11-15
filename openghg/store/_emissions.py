@@ -10,7 +10,7 @@ from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
 import warnings
 
-__all__ = ["Emissions"]
+__all__ = ["Flux"]
 
 
 logger = logging.getLogger("openghg.store")
@@ -23,11 +23,11 @@ logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
-class Emissions(BaseStore):
-    """This class is used to process emissions / flux data"""
+class Flux(BaseStore):
+    """This class is used to process flux / emissions flux data"""
 
-    _data_type = "emissions"
-    _root = "Emissions"
+    _data_type = "flux"
+    _root = "Flux"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
 
@@ -73,13 +73,13 @@ class Emissions(BaseStore):
         overwrite: bool = False,
         force: bool = False,
     ) -> dict:
-        """Read emissions file
+        """Read flux / emissions file
 
         Args:
-            filepath: Path of emissions file
+            filepath: Path of flux / emissions file
             species: Species name
-            domain: Emissions domain
-            source: Emissions source
+            domain: Flux / Emissions domain
+            source: Flux / Emissions source
             database: Name of database source for this input (if relevant)
             database_version: Name of database version (if relevant)
             model: Model name (if relevant)
@@ -157,7 +157,7 @@ class Emissions(BaseStore):
             "high_time_resolution": high_time_resolution,
             "period": period,
             "continuous": continuous,
-            "data_type": "emissions",
+            "data_type": "flux",
             "chunks": chunks,
         }
 
@@ -165,12 +165,12 @@ class Emissions(BaseStore):
 
         param.update(optional_keywords)
 
-        emissions_data = parser_fn(**param)
+        flux_data = parser_fn(**param)
 
-        # Checking against expected format for Emissions
-        for split_data in emissions_data.values():
+        # Checking against expected format for Flux
+        for split_data in flux_data.values():
             em_data = split_data["data"]
-            Emissions.validate_data(em_data)
+            Flux.validate_data(em_data)
 
         min_required = ["species", "source", "domain"]
         for key, value in optional_keywords.items():
@@ -179,9 +179,9 @@ class Emissions(BaseStore):
 
         required = tuple(min_required)
 
-        data_type = "emissions"
+        data_type = "flux"
         datasource_uuids = self.assign_data(
-            data=emissions_data,
+            data=flux_data,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
@@ -202,7 +202,7 @@ class Emissions(BaseStore):
         **kwargs: Dict,
     ) -> Dict:
         """
-        Read and transform an emissions database. This will find the appropriate
+        Read and transform a flux / emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
         are determined by which database is being used.
 
@@ -257,18 +257,18 @@ class Emissions(BaseStore):
         param: Dict[Any, Any] = {key: value for key, value in kwargs.items() if key in all_param}
         param["datapath"] = datapath  # Add datapath explicitly (for now)
 
-        emissions_data = parser_fn(**param)
+        flux_data = parser_fn(**param)
 
-        # Checking against expected format for Emissions
-        for split_data in emissions_data.values():
+        # Checking against expected format for Flux
+        for split_data in flux_data.values():
             em_data = split_data["data"]
-            Emissions.validate_data(em_data)
+            Flux.validate_data(em_data)
 
         required_keys = ("species", "source", "domain")
 
-        data_type = "emissions"
+        data_type = "flux"
         datasource_uuids = self.assign_data(
-            data=emissions_data,
+            data=flux_data,
             if_exists=if_exists,
             new_version=new_version,
             data_type=data_type,
@@ -280,7 +280,7 @@ class Emissions(BaseStore):
     @staticmethod
     def schema() -> DataSchema:
         """
-        Define schema for emissions Dataset.
+        Define schema for flux / emissions Dataset.
 
         Includes flux/emissions for each time and position:
             - "flux"
@@ -289,7 +289,7 @@ class Emissions(BaseStore):
         Expected data types for all variables and coordinates also included.
 
         Returns:
-            DataSchema : Contains schema for Emissions.
+            DataSchema : Contains schema for Flux.
         """
         data_vars: Dict[str, Tuple[str, ...]] = {"flux": ("time", "lat", "lon")}
         dtypes = {"lat": np.floating, "lon": np.floating, "time": np.datetime64, "flux": np.floating}
@@ -301,8 +301,8 @@ class Emissions(BaseStore):
     @staticmethod
     def validate_data(data: Dataset) -> None:
         """
-        Validate input data against Emissions schema - definition from
-        Emissions.schema() method.
+        Validate input data against Flux schema - definition from
+        Flux.schema() method.
 
         Args:
             data : xarray Dataset in expected format
@@ -311,7 +311,7 @@ class Emissions(BaseStore):
             None
 
             Raises a ValueError with details if the input data does not adhere
-            to the Emissions schema.
+            to the Flux schema.
         """
-        data_schema = Emissions.schema()
+        data_schema = Flux.schema()
         data_schema.validate_data(data)
