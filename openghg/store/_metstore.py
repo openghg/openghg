@@ -47,13 +47,16 @@ class METStore(BaseStore):
         variables: Optional[List[str]] = None,
         save_path: Optional[str] = None,
     ) -> Union[METData, None]:
-        """Retrieve data from either the local METStore or from a
-        remote store if we don't have it locally
+        """Retrieve data from the local METStore, or from a
+        remote store if not found locally
 
         Args:
             site: Three letter site code
             network: Network name
             years: Year(s) required
+            start_date and end_date: full-date string or month/year strings defining the beginning and end of period to retrieve (either years or start_date and end_date are required)
+            variables: list of variables to retrieve
+            save_path: path to save met data. Defaults to openghg/metdata
         Returns:
             METData: METData object holding data and metadata
         """
@@ -78,13 +81,11 @@ class METStore(BaseStore):
 
         store = METStore.load()
 
-        # We'll just do full years for now, I don't think it's a huge amount of data (currently)
-
         print("Retrieving")
+        # check the local store
         result = store.search(site=site, network=network, start_date=start_date, end_date=end_date)
 
-        # print(f"search result {result}")
-        # Retrieve from the Copernicus store
+        # If not found in the local store, retrieve from the Copernicus store
         if result is None:
 
             data = retrieve_met(
@@ -100,7 +101,7 @@ class METStore(BaseStore):
             store._store(data)
             store.save()
         else:
-            print("File already exists")
+            print("File already exists in the local store")
 
         return result
 
