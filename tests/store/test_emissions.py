@@ -40,7 +40,7 @@ def test_read_binary_data(mocker, clear_stores):
 
     results = standardise_from_binary_data(
         store="user",
-        data_type="emissions",
+        data_type="flux",
         binary_data=binary_data,
         metadata=metadata,
         file_metadata=file_metadata)
@@ -69,7 +69,7 @@ def test_read_file():
         species="co2",
         source="gpp-cardamom",
         domain="europe",
-        data_type="emissions",
+        data_type="flux",
         start_date="2012",
         end_date="2013",
     )
@@ -105,7 +105,7 @@ def test_read_file():
         "max_latitude": 79.057,
         "min_latitude": 10.729,
         "time_resolution": "standard",
-        "data_type": "emissions",
+        "data_type": "flux",
         "time_period": "1 year",
     }
 
@@ -340,7 +340,7 @@ def test_transform_and_add_edgar_database(clear_stores):
         domain=domain,
         database=database,  # would searching for lowercase not work?
         database_version=version,
-        data_type="emissions",
+        data_type="flux",
     )
 
     edgar_data = search_results.retrieve_all()

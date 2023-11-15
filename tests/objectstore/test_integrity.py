@@ -47,7 +47,7 @@ def test_integrity_check_delete_Datasource_keys():
 
     # Now delete some of the Datasources
     bucket = get_writable_bucket(name="user")
-    with open_metastore(bucket=bucket, data_type="emissions") as metastore:
+    with open_metastore(bucket=bucket, data_type="flux") as metastore:
         uid = metastore.select("uuid")[0]
         ds = Datasource.load(bucket=bucket, uuid=uid)
         keys = ds.data_keys()

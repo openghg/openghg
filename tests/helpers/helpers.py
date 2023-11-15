@@ -41,18 +41,18 @@ def get_surface_datapath(filename: str, source_format: str) -> Path:
 
 
 def get_mobile_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
+    """Return the path to the mobile test data file"""
     return get_datapath_base(data_type="mobile", filename=filename)
 
 
 def get_column_datapath(filename: str) -> Path:
-    """Return the path to the emissions test data file"""
+    """Return the path to the column test data file"""
     return get_datapath_base(data_type="column", filename=filename)
 
 
 def get_emissions_datapath(filename: str) -> Path:
     """Return the path to the emissions test data file"""
-    return get_datapath_base(data_type="emissions", filename=filename)
+    return get_datapath_base(data_type="flux", filename=filename)
 
 
 def get_bc_datapath(filename: str) -> Path:
