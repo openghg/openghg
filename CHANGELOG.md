@@ -21,16 +21,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of
   lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
 
-- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718) 
+- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718)
+
+- Added `force` option to `retrieve_atmospheric` and `ObsSurface.store_data` so that retrieved hashes can be ignored.
 
 ### Fixed
 
- - Bug fix for sampling period attribute having a value of "NOT_SET" and combining the observation and footprint data. Previously this was raising a ValueError. [PR #808](https://github.com/openghg/openghg/pull/808)
+- Bug fix for sampling period attribute having a value of "NOT_SET" and combining the observation and footprint data. Previously this was raising a ValueError. [PR #808](https://github.com/openghg/openghg/pull/808)
+
+- Bug where `radon` was not fetched using `retrieve_atmospheric` from icos data. - [PR #794](https://github.com/openghg/openghg/pull/794)
 
 ### Changed
 
 - Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
 
+- Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818)
 
 ## [0.6.2] - 2023-08-07
 
@@ -38,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bug where the object store path being written to JSON led to an invalid path being given to some users - [PR #741](https://github.com/openghg/openghg/pull/741)
 
-### Changes
+### Changed
 
 - Added read-only opening of the metadata store of each storage class when searching. This is done using a `mode` argument pased to the `load_metastore` function - [PR #763](https://github.com/openghg/openghg/pull/763)
 
