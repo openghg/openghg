@@ -17,7 +17,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 @pytest.fixture(scope="session")
 def thd_data():
-    thd_path = get_surface_datapath(filename="trinidadhead.01.C", source_format="GC")
+    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11.nc", source_format="GC_nc")
 
     gas_data = parse_gcwerks_nc(
         data_filepath=thd_path,
@@ -31,8 +31,7 @@ def thd_data():
 
 @pytest.fixture(scope="session")
 def cgo_data():
-    cgo_data = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
-    cgo_prec = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
+    cgo_data = get_surface_datapath(filename="AGAGE-GCMS-MEDUSA_CGO_hcfc-133a.nc", source_format="GC")
 
     gas_data = parse_gcwerks_nc(
         data_filepath=cgo_data,

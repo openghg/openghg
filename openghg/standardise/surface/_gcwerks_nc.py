@@ -299,11 +299,11 @@ def _format_species(
     from openghg.standardise.meta import define_species_label
 
     # Read inlets from the parameters
-    expected_inlets = _get_inlets(site_code=site, gc_params=gc_params)
+    expected_inlets = _get_inlets(site_code=site, gc_params=gc_params) 
 
     # data_inlets is a list of unique inlets for this species
     try:
-        data_inlets = data["inlet_height"].unique().tolist()
+        data_inlets = data["inlet_height"].unique().tolist() 
     except KeyError:
         raise KeyError(
             "Unable to read inlets from data, please ensure this data is of the GC type expected by this retrieve module"
@@ -336,7 +336,7 @@ def _format_species(
             species_metadata["inlet"] = inlet_label
         else: # this is when there are multiple inlets
             # Find the inlet
-            matching_inlets = [i for i in data_inlets if fnmatch(i, inlet)]
+            matching_inlets = [i for i in data_inlets if fnmatch(str(i), inlet)] 
             if not matching_inlets:
                 continue
 
