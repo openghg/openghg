@@ -1,7 +1,7 @@
 Site,Instrument,Network,Species,source_format
 MHD,medusa,AGAGE,,GCWERKS
 CGO,medusa,AGAGE,,GCWERKS
-GSN,medusa,AGAGE,,GCWERKS
+GSN,medusa,AGAGE,,GCWERKS_NC
 SDZ,medusa,AGAGE,,GCWERKS
 THD,medusa,AGAGE,,GCWERKS
 RPB,medusa,AGAGE,,GCWERKS

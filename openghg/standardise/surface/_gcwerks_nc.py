@@ -54,7 +54,7 @@ def find_files(
     return data_nc_files
 
 def parse_gcwerks_nc(
-    nc_data_filepath: Union[str, Path],
+    data_filepath: Union[str, Path],
     site: str,
     network: str,
     inlet: Optional[str] = None,
@@ -67,7 +67,7 @@ def parse_gcwerks_nc(
     """Reads a GC data file by creating a GC object and associated datasources
 
     Args:
-        nc_data_filepath: Path of .nc data file
+        data_filepath: Path of .nc data file
         site: Three letter code or name for site
         instrument: Instrument name
         network: Network name
@@ -87,7 +87,7 @@ def parse_gcwerks_nc(
     from openghg.standardise.meta import assign_attributes
     from openghg.util import clean_string, load_internal_json
 
-    nc_data_filepath = Path(nc_data_filepath)
+    data_filepath = Path(data_filepath)
 
     # Do some setup for processing
     # Load site data
@@ -102,18 +102,11 @@ def parse_gcwerks_nc(
     if instrument is not None:
         instrument = clean_string(instrument)
 
-    # Check if the site code passed matches that read from the filename
-    site = _check_site(
-        filepath=nc_data_filepath,
-        site_code=site,
-        gc_params=gc_params,
-    )
-
     # If we're not passed the instrument name and we can't find it raise an error
     if instrument is None:
-        instrument = _check_instrument(filepath=nc_data_filepath, gc_params=gc_params, should_raise=True)
+        instrument = _check_instrument(filepath=data_filepath, gc_params=gc_params, should_raise=True)
     else:
-        fname_instrument = _check_instrument(filepath=nc_data_filepath, gc_params=gc_params, should_raise=False)
+        fname_instrument = _check_instrument(filepath=data_filepath, gc_params=gc_params, should_raise=False)
 
         if fname_instrument is not None and instrument != fname_instrument:
             raise ValueError(
@@ -123,7 +116,7 @@ def parse_gcwerks_nc(
     instrument = str(instrument)
 
     gas_data = _read_data(
-        data_filepath=nc_data_filepath,
+        data_filepath=data_filepath,
         site=site,
         instrument=instrument,
         network=network,
@@ -137,40 +130,6 @@ def parse_gcwerks_nc(
     )
 
     return gas_data
-
-
-def _check_site(filepath: Path, site_code: str, gc_params: Dict) -> str:
-    """Check if the site passed in matches that in the filename
-
-    Args:
-        filepath: Path to data file
-        site: Site code
-        gc_params: Dictionary of GCWERKS parameters
-    Returns:
-        str: Site code
-    """
-    from re import findall
-
-    site_data = gc_params["sites"]
-    name_code_conversion = {value["gcwerks_site_name"]: site_code for site_code, value in site_data.items()}
-
-    site_code = site_code.lower()
-    site_name = findall(r"[\w']+", str(filepath.name))[0].lower()
-
-    if len(site_code) > 3:
-        raise ValueError("Please pass in a 3 letter site code as the site argument.")
-
-    try:
-        confirmed_code = name_code_conversion[site_name].lower()
-    except KeyError:
-        raise ValueError(f"Cannot match {site_name} to a site code.")
-
-    if site_code != confirmed_code:
-        raise ValueError(
-            f"Mismatch between code reasd from filename: {confirmed_code} and that given: {site_code}"
-        )
-
-    return site_code
 
 
 def _check_instrument(filepath: Path, gc_params: Dict, should_raise: bool = False) -> Union[str, None]:
@@ -208,7 +167,7 @@ def _check_instrument(filepath: Path, gc_params: Dict, should_raise: bool = Fals
 
 
 def _read_data(
-    nc_data_filepath: Path,
+    data_filepath: Path,
     site: str,
     instrument: str,
     network: str,
@@ -218,7 +177,7 @@ def _read_data(
     """Read data from the .nc data files
 
     Args:
-        nc_data_filepath: Path of data file
+        data_filepath: Path of data file
         site: Name of site
         instrument: Instrument name
         network: Network name
@@ -229,18 +188,20 @@ def _read_data(
     """
     from pandas import Series
     from pandas import Timedelta as pd_Timedelta
-    from pandas import read_csv, to_datetime
+    from openghg.standardise.meta import define_species_label
+
 
     # Extract the species name from the filename. This is the bit after the second underscore but before the .nc
 
-    species = str(nc_data_filepath).split(sep='_')[2]
+    species = str(data_filepath).split(sep='_')[2]
     species = species.strip('.nc')
+    species=define_species_label(species)[0]
 
-    with nc_data_filepath as f:
+    with data_filepath as f:
         with xr.load_dataset(f) as ds:
             dataset=ds.load()
     
-    data=dataset.to_DataFrame()
+    data=dataset.to_dataframe()
 
     if data.empty:
         raise ValueError("Cannot process empty file.")
@@ -274,6 +235,9 @@ def _read_data(
 
     units = {}
     scale = {}
+
+    units[species]=dataset.units
+    scale[species]=dataset.calibration_scale
 
     # These .nc files do not have flags attached to them. 
 
@@ -313,7 +277,8 @@ def _format_species(
     scale: Dict,
     gc_params: Dict,
 ) -> Dict:
-    """Splits the species into separate dataframe into sections to be stored within individual Datasources
+    """Formats the dataframes and splits up by species_inlet combination to be stored within individual Datasources.
+    Note that because .nc files contain only a single species, this function is no longer called _split_species
 
     Args:
         data: DataFrame of raw data
@@ -346,7 +311,7 @@ def _format_species(
 
 
     # Skip this species if the data is all NaNs
-    if data[species].isnull().all():
+    if data['mf'].isnull().all():
         raise ValueError(f'All values for this species {species} is null')
     
     combined_data = aDict()
@@ -360,13 +325,13 @@ def _format_species(
         species_metadata["calibration_scale"] = scale[species]
         # If we've only got a single inlet, pick out the mf and mf_repeatability
         if inlet == "any" or inlet == "air":
-            species_data = data['mf', 'mf_repeatability']
+            species_data = data[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
             species_metadata["inlet"] = inlet_label
         elif "date" in inlet:
             dates = inlet.split("_")[1:] # this is the two dates in the string
             data_sliced = data.loc[dates[0] : dates[1]] # this slices up the dataframe between these two dates
-            species_data = data_sliced['mf', 'mf_repeatability']
+            species_data = data_sliced[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
             species_metadata["inlet"] = inlet_label
         else: # this is when there are multiple inlets
@@ -382,11 +347,8 @@ def _format_species(
             # Take only data for this inlet from the dataframe
             inlet_data = data.loc[data["Inlet"] == select_inlet]
 
-            species_data = inlet_data['mf', 'mf_repeatability']
+            species_data = inlet_data[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
-
-        # Now we drop the inlet column
-        species_data = species_data.drop("Inlet", axis="columns")
 
         # Check that the Dataframe has something in it
         if species_data.empty:
@@ -397,8 +359,9 @@ def _format_species(
         )
         attributes = attributes.copy()
 
-        # We want an xarray Dataset
+        # We want an xarray Dataset, and to rename the variables from mf to {species}
         species_data = species_data.to_xarray()
+        species_data=species_data.rename({'mf':species, 'mf_repeatability':f'{species}_repeatability'})
 
         # Create a standardised / cleaned species label
         comp_species = define_species_label(species)[0]
@@ -410,11 +373,12 @@ def _format_species(
         if comp_species != species.lower() and comp_species != species.upper():
             species_metadata["species_alt"] = species
 
-        # Rename variables so they have lowercase and alphanumeric names
+        # Reformat variables so they have lowercase and alphanumeric names
         to_rename = {}
         for var in species_data.variables:
             if species in var:
                 new_name = var.replace(species, comp_species)
+                new_name = new_name.replace("-","")
                 to_rename[var] = new_name
 
         species_data = species_data.rename(to_rename)
