@@ -110,7 +110,8 @@ def test_add_data(data, bucket):
 
     assert d._store
 
-    ds = d._store.get("v0")
+    ds_data = d.copy_to_memorystore(version="v0")
+    ds = xr.open_zarr(store=ds_data, consolidated=True)
 
     assert ds.equals(ch4_data)
 
@@ -281,9 +282,10 @@ def test_save_footprint(bucket):
     )
     datasource.save()
 
-    datasource_2 = Datasource(bucket=bucket, uuid=datasource._uuid)
+    datasource_2 = Datasource(bucket=bucket, uuid=datasource._uuid, mode="r")
 
     retrieved_ds = datasource_2.get_data(version="v0")
+    assert retrieved_ds.equals(data)
 
     assert datasource_2._data_type == "footprints"
 
@@ -563,7 +565,6 @@ def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overla
         assert ds.equals(combined)
 
 
-
 def test_add_data_combine_datasets(data, bucket):
     d = Datasource(bucket=bucket)
 
@@ -578,8 +579,9 @@ def test_add_data_combine_datasets(data, bucket):
 
     assert d._store.version_exists(version="v0")
 
-    with d.get_data(version="v0") as combined_ds:
-        assert combined_ds.equals(ch4_data)
+    ds_data = d.copy_to_memorystore(version="v0")
+    combined_ds = xr.open_zarr(store=ds_data, consolidated=True)
+    assert combined_ds.equals(ch4_data)
 
 
 def test_add_data_out_of_order(bucket, datasets_with_gaps):
@@ -588,9 +590,19 @@ def test_add_data_out_of_order(bucket, datasets_with_gaps):
 
     d = Datasource(bucket=bucket)
 
-    d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False)
-    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
-    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False, if_exists="combine")
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False, if_exists="combine")
+    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False, if_exists="combine")
 
-    print(d.data_keys())
-    assert False
+    assert d.data_keys() == [
+        "2012-01-01-00:00:00+00:00_2012-01-31-00:00:59+00:00",
+        "2012-04-01-00:00:00+00:00_2012-04-30-00:00:59+00:00",
+        "2012-09-01-00:00:00+00:00_2012-09-30-00:00:59+00:00",
+    ]
+
+    expected = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time").sortby("time")
+
+    ds = d.get_data(version="v0").compute()
+
+    assert ds.time.size == expected.time.size
+    assert ds.equals(expected)

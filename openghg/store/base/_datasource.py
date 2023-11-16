@@ -1,7 +1,7 @@
 from __future__ import annotations
 from collections import defaultdict
 import warnings
-from typing import Any, cast, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, cast, Dict, List, Literal, Optional, Tuple, TypeVar, Union
 from types import TracebackType
 import logging
 from pandas import DataFrame, Timestamp, Timedelta
@@ -30,7 +30,7 @@ class Datasource:
     _datasource_root = "datasource"
     _data_root = "data"
 
-    def __init__(self, bucket: str, uuid: Optional[str] = None) -> None:
+    def __init__(self, bucket: str, uuid: Optional[str] = None, mode: Literal["r", "rw"] = "rw") -> None:
         from openghg.util import timestamp_now
         from openghg.store.storage import LocalZarrStore
 
@@ -55,8 +55,12 @@ class Datasource:
             self._latest_version: str = ""
             self._timestamps: Dict[str, str] = {}
 
+        if mode not in ("r", "rw"):
+            raise ValueError("Invalid mode. Please select r or rw.")
+
+        self._mode = mode
         # TODO - add in selection of other store types, this could NetCDF, sparse, whatever
-        self._store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid)
+        self._store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid, mode=mode)
         # So we know where to write out to
         self._bucket = bucket
 
@@ -218,6 +222,13 @@ class Datasource:
         # We'll use this to store the dates covered by this version of the data
         date_keys = self._data_keys[self._latest_version] if self._data_keys else []
 
+        # We'll try and read the chunk sizes of the incoming data,
+        # this does only assume we've chunked along the time dimension
+        try:
+            time_chunksize: Union[str, int] = data.chunksizes[time_coord][0]
+        except (KeyError, IndexError):
+            time_chunksize = "auto"
+
         # # We'll sort and drop duplicates here
         if sort and drop_duplicates:
             data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
@@ -234,10 +245,16 @@ class Datasource:
             if daterange_overlap(daterange_a=existing, daterange_b=new_daterange_str)
         ]
 
+        # We'll only need to sort the new dataset if the data we add comes before the current data
+        already_sorted = True
+
         # If we don't have any data in this Datasource or we have no overlap we'll just add the new data
         if not self._store or not overlapping:
             self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
             date_keys.append(new_daterange_str)
+
+            if not overlapping and sorted(date_keys) != date_keys:
+                already_sorted = False
         # Otherwise if we have data already stored in the Datasource
         else:
             # If we have existing data we'll just keep the new data
@@ -284,23 +301,19 @@ class Datasource:
 
                 # TODO: May need to find a way to find period for *last point* rather than *current point*
                 # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
-                combined_daterange = self.get_representative_daterange_str(
-                    dataset=combined, period=period
-                )
-
-                # We'll try and read the chunk sizes of the incoming data,
-                # this does only assume we've chunked along the time dimension
-                try:
-                    time_chunksize = data.chunksizes[time_coord][0]
-                except (KeyError, IndexError):
-                    time_chunksize = "auto"
+                combined_daterange = self.get_representative_daterange_str(dataset=combined, period=period)
 
                 logger.warning(
-                    f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize}"
+                    f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize} and sorting."
                 )
 
-                combined = combined.drop_duplicates(dim=time_coord, keep="first").chunk(
-                    {"time": time_chunksize}
+                if data_type == "footprints":
+                    logger.warning("Sorting footprints by time may consume large amounts of memory.")
+
+                combined = (
+                    combined.drop_duplicates(dim=time_coord, keep="first")
+                    .chunk({"time": time_chunksize})
+                    .sortby(time_coord)
                 )
 
                 if new_version:
@@ -317,13 +330,23 @@ class Datasource:
                 date_keys = [combined_daterange]
             # If we don't know what (i.e. we've got "auto") to do we'll raise an error
             else:
-                date_chunk_str = ""
-                for existing_daterange, new_daterange in overlapping.pop():
-                    date_chunk_str += f" - current: {existing_daterange}; new: {new_daterange}\n"
+                date_chunk_str = f"Current: {date_keys}; new: {overlapping}\n"
                 raise DataOverlapError(
                     f"Unable to add new data. Time overlaps with current data:\n{date_chunk_str}"
                     f"To update current data in object store use `if_exists` input (see options in documentation)"
                 )
+
+        # Do we need to sort?
+        # Could we do this more cleanly when adding and put
+        # the data into a new zarr store and if it's before the current data
+        # just create a new larger empty zarr store, add the earlier data
+        # and then add back in the old data? Would that be more efficient?
+        if not already_sorted:
+            logger.info("Sorting data")
+            memory_store = self._store.copy_to_memorystore(version=version_str)
+            existing = xr.open_zarr(store=memory_store, consolidated=True)
+            existing = existing.chunk(chunks={"time": time_chunksize}).sortby(time_coord)
+            self._store.update(version=version_str, dataset=existing)
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
@@ -688,17 +711,20 @@ class Datasource:
 
         return self._store.copy_to_memorystore(version=version)
 
-    def data(self) -> None:
+    def get_data(self, version: str = "latest") -> xr.Dataset:
         """Directly accessing a Datasource's data is no longer supported.
-        Use the `memory_store` function. See its documentation for accessing data
+        Use the copy_to_memorystore function. See its documentation for accessing data
         stored by this Datasource.
 
+        Args:
+            version: Version string, e.g. v0, v1
         Returns:
             None
         """
-        raise NotImplementedError(
-            "Directly accessing a Datasource's data is no longer supported. See the memory_store function."
-        )
+        if version == "latest":
+            version = self._latest_version
+
+        return self._store.get(version=version)
 
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource
@@ -910,13 +936,13 @@ class Datasource:
             start_date, _ = split_daterange_str(daterange_str=dateranges[0])
             _, end_date = split_daterange_str(daterange_str=dateranges[-1])
 
-            with self.get_data(version=version) as ds:
+            with xr.open_zarr(self._store._stores[version], consolidated=True) as ds:
                 if Timestamp(start_date) != ds.time[0]:
                     raise ValueError(
                         f"Timestamp mismatch between expected ({start_date}) and stored {ds.time[0]}"
                     )
 
-                if Timestamp(start_date) != ds.time[-1]:
+                if Timestamp(end_date) != ds.time[-1]:
                     raise ValueError(
-                        f"Timestamp mismatch between expected ({start_date}) and stored {ds.time[0]}"
+                        f"Timestamp mismatch between expected ({end_date}) and stored {ds.time[-1]}"
                     )

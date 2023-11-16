@@ -4,7 +4,7 @@ This is used as a base for the other dataclasses and shouldn't be used directly.
 from typing import Dict, Optional, Union
 from openghg.store.storage import LocalZarrStore
 import xarray as xr
-from pandas import Timestamp, Timedelta
+from pandas import Timestamp
 
 
 class _BaseData:
@@ -46,6 +46,7 @@ class _BaseData:
 
         self._start_date = start_date
         self._end_date = end_date
+        self._zarrstore = None
 
         if elevate_inlet:
             raise NotImplementedError("elevate_inlet not implemented yet")
@@ -70,9 +71,8 @@ class _BaseData:
             self._version = version
             self._bucket = metadata["object_store"]
 
-            zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
-            self.data = zarrstore.get(version=version)
-
+            self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
+            self.data = self._zarrstore.get(version=version)
             # TODO - how do we want to handle time slicing?
             # The get_ functions do some local time slicing, do we want to do that here?
             # if slice_time:

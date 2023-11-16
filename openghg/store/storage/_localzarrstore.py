@@ -1,5 +1,6 @@
 """
-So this is a prototype for using zarr with the
+A zarr store on the local filesystem. This is used by Datasource to handle the
+storage of data on the local filesystem and different versions of data.
 """
 from __future__ import annotations
 import logging
@@ -9,7 +10,6 @@ import zarr
 import os
 import re
 import shutil
-from contextlib import contextmanager
 
 from openghg.types import ZarrStoreError
 from pathlib import Path
@@ -127,10 +127,7 @@ class LocalZarrStore(Store):
         # Used to append new data to the current version's zarr store
         if version in self._stores:
             dataset.to_zarr(
-                store=self._stores[version],
-                mode="a",
-                consolidated=True,
-                append_dim=append_dim,
+                store=self._stores[version], mode="a", consolidated=True, append_dim=append_dim, compute=True
             )
         else:
             if not self._stores and version != "v0":
@@ -139,30 +136,28 @@ class LocalZarrStore(Store):
             self._stores[version] = zarr.storage.NestedDirectoryStore(self.store_path(version=version))
             encoding = get_zarr_encoding(data_vars=dataset.data_vars, filters=filters, compressor=compressor)
             dataset.to_zarr(
-                store=self._stores[version],
-                mode="w",
-                encoding=encoding,
-                consolidated=True,
+                store=self._stores[version], mode="w", encoding=encoding, consolidated=True, compute=True
             )
 
     def get(self, version: str) -> xr.Dataset:
-        """Get the version of the dataset stored in the zarr store.
-        This first copies the data from the store on the local filesystem into
-        a local memory store and then opens the dataset from there.
+        """Open the version of the dataset stored in the zarr store.
+        This should only be used when no data will be changed in the store
+        as changes to data in the store will result in errors with an open
+        dataset.
+
+        Note that this function should not be used if the store is to be modified.
+        Please use copy_to_memorystore for that otherwise data may be lost.
 
         Args:
             version: Version of data to get
         Returns:
             xr.Dataset: Dataset from the store
         """
-        raise NotImplementedError("Use copy_to_memorystore instead")
         if version not in self._stores:
             raise KeyError(f"Invalid version - {version}")
 
-        self._memory_store.clear()
         store = self._stores[version]
-        zarr.convenience.copy_store(source=store, dest=self._memory_store)
-        ds: xr.Dataset = xr.open_zarr(store=store, consolidated=True)
+        ds: xr.Dataset = xr.open_zarr(store=store)
         return ds
 
     def pop(self, version: str) -> xr.Dataset:
@@ -185,13 +180,15 @@ class LocalZarrStore(Store):
         # Let's copy the data we want to pop into a memory store and return it from there
         zarr.convenience.copy_store(source=store, dest=self._memory_store)
         self.delete_version(version=version)
-        ds: xr.Dataset = xr.open_zarr(store=self._memory_store, consolidated=True)
+        ds: xr.Dataset = xr.open_zarr(store=self._memory_store)
         return ds
 
     def copy_to_memorystore(self, version: str) -> Dict:
         """Copies the compressed data from the filesystem store to an in-memory store.
         This preserves the compression and chunking of the data and the store
-        can be opened as a single dataset
+        can be opened as a single dataset.
+
+        Note that this function should be used if the store is to be modified.
 
         Args:
             version: Version of data to copy
@@ -281,7 +278,7 @@ class LocalZarrStore(Store):
         if self._mode == "r":
             raise PermissionError("Cannot update a read-only zarr store")
 
-        # self.delete_version(version=version)
+        self.delete_version(version=version)
         self.add(version=version, dataset=dataset, compressor=compressor, filters=filters)
 
     def hash(self, data: str) -> str:
