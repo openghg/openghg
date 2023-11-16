@@ -6,6 +6,7 @@ from types import TracebackType
 import logging
 from pandas import DataFrame, Timestamp, Timedelta
 import xarray as xr
+import numpy as np
 from uuid import uuid4
 from openghg.objectstore import exists, get_object_from_json
 from openghg.util import split_daterange_str
@@ -218,16 +219,17 @@ class Datasource:
         date_keys = self._data_keys[self._latest_version] if self._data_keys else []
 
         # # We'll sort and drop duplicates here
-        # # TODO - test to see if this chaining does help
-        # if sort and drop_duplicates:
-        #     data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
-        # elif sort:
-        #     data = data.sortby(time_coord)
-        # elif drop_duplicates:
-        #     data = data.drop_duplicates(time_coord, keep="first")
+        if sort and drop_duplicates:
+            data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
+        elif sort:
+            data = data.sortby(time_coord)
+        elif drop_duplicates:
+            data = data.drop_duplicates(time_coord, keep="first")
 
+        # We'll only do a concat if we actually have overlapping data
+        # Othwerwise we'll just add the new data
         overlapping = [
-            (existing, new_daterange_str)
+            new_daterange_str
             for existing in date_keys
             if daterange_overlap(daterange_a=existing, daterange_b=new_daterange_str)
         ]
@@ -251,69 +253,66 @@ class Datasource:
                 # Only save the current daterange string for this version
                 date_keys = [new_daterange_str]
             elif if_exists == "combine":
-                with self._store.get(version=self._latest_version) as existing_dataset:
-                    logger.info("Combining overlapping data dateranges")
-                    # Concatenate datasets along time dimension
-                    # try:
-                    combined = xr_concat((existing_dataset, data), dim=time_coord)
-                    # except (ValueError, KeyError):
-                    #     # If data variables in the two datasets are not identical,
-                    #     # xr_concat will raise an error
-                    #     dv_ex = set(existing.data_vars.keys())
-                    #     dv_new = set(data.data_vars.keys())
+                # We'll copy the data into a temporary store and then combine the data
+                memory_store = self._store.copy_to_memorystore(version=self._latest_version)
+                existing = xr.open_zarr(store=memory_store, consolidated=True)
 
-                    #     # Check difference between datasets and fill any
-                    #     # missing variables with NaN values.
-                    #     dv_not_in_new = dv_ex - dv_new
-                    #     for dv in dv_not_in_new:
-                    #         fill_values = np.zeros(len(data[time_coord])) * np.nan
-                    #         data = data.assign({dv: (time_coord, fill_values)})
+                logger.info("Combining overlapping data dateranges")
+                # Concatenate datasets along time dimension
+                try:
+                    combined = xr_concat((existing, data), dim=time_coord)
+                except (ValueError, KeyError):
+                    # If data variables in the two datasets are not identical,
+                    # xr_concat will raise an error
+                    dv_ex = set(existing.data_vars.keys())
+                    dv_new = set(data.data_vars.keys())
 
-                    #     dv_not_in_ex = dv_new - dv_ex
-                    #     for dv in dv_not_in_ex:
-                    #         fill_values = np.zeros(len(existing[time_coord])) * np.nan
-                    #         existing = existing.assign({dv: (time_coord, fill_values)})
+                    # Check difference between datasets and fill any
+                    # missing variables with NaN values.
+                    dv_not_in_new = dv_ex - dv_new
+                    for dv in dv_not_in_new:
+                        fill_values = np.zeros(len(data[time_coord])) * np.nan
+                        data = data.assign({dv: (time_coord, fill_values)})
 
-                    #     # Should now be able to concatenate successfully
-                    #     combined = xr_concat((existing, data), dim=time_coord)
+                    dv_not_in_ex = dv_new - dv_ex
+                    for dv in dv_not_in_ex:
+                        fill_values = np.zeros(len(existing[time_coord])) * np.nan
+                        existing = existing.assign({dv: (time_coord, fill_values)})
 
-                    # TODO: May need to find a way to find period for *last point* rather than *current point*
-                    # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
-                    combined_daterange = self.get_representative_daterange_str(
-                        dataset=combined, period=period
+                    # Should now be able to concatenate successfully
+                    combined = xr_concat((existing, data), dim=time_coord)
+
+                # TODO: May need to find a way to find period for *last point* rather than *current point*
+                # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
+                combined_daterange = self.get_representative_daterange_str(
+                    dataset=combined, period=period
+                )
+
+                # We'll try and read the chunk sizes of the incoming data,
+                # this does only assume we've chunked along the time dimension
+                try:
+                    time_chunksize = data.chunksizes[time_coord][0]
+                except (KeyError, IndexError):
+                    time_chunksize = "auto"
+
+                logger.warning(
+                    f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize}"
+                )
+
+                combined = combined.drop_duplicates(dim=time_coord, keep="first").chunk(
+                    {"time": time_chunksize}
+                )
+
+                if new_version:
+                    self._store.add(
+                        version=version_str,
+                        dataset=combined,
                     )
-
-                    # We'll try and read the chunk sizes of the incoming data,
-                    # this does only assume we've chunked along the time dimension
-                    try:
-                        time_chunksize = data.chunksizes[time_coord][0]
-                    except (KeyError, IndexError):
-                        time_chunksize = "auto"
-
-                    logger.warning(
-                        f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize}"
+                else:
+                    self._store.update(
+                        version=version_str,
+                        dataset=combined,
                     )
-
-                    # combined = combined.drop_duplicates(dim=time_coord, keep="first")
-
-                    combined = combined.drop_duplicates(dim=time_coord, keep="first").chunk(
-                        {"time": time_chunksize}
-                    )
-
-                    # Checking for overlapping date range strings in combined
-                    # data and clipping the labels as necessary.
-                    # combined_datasets = self._clip_daterange_label(combined_datasets)
-
-                    if new_version:
-                        self._store.add(
-                            version=version_str,
-                            dataset=combined,
-                        )
-                    else:
-                        self._store.update(
-                            version=version_str,
-                            dataset=combined,
-                        )
 
                 date_keys = [combined_daterange]
             # If we don't know what (i.e. we've got "auto") to do we'll raise an error
@@ -350,19 +349,6 @@ class Datasource:
         self._metadata["versions"] = self._data_keys
 
         self._last_updated = timestamp_str_now
-
-    def get_data(self, version: str) -> xr.Dataset:
-        """Open an xr.Dataset loaded from the zarr store
-
-        Args:
-            version: Version string
-        Returns:
-            xr.Dataset: Dataset loaded from zarr store
-        """
-        if version == "latest":
-            version = self._latest_version
-
-        return self._store.get(version=version)
 
     def delete_all_data(self) -> None:
         """Delete the zarr store that contains all the data
@@ -681,11 +667,11 @@ class Datasource:
         """
         return f"{Datasource._datasource_root}/uuid/{self._uuid}"
 
-    def memory_store(self, version: str = "latest") -> Dict:
+    def copy_to_memorystore(self, version: str = "latest") -> Dict:
         """Copy the compressed data for a version from the zarr store into memory.
 
         Example:
-            memory_store = datasource.memory_store(version="v0")
+            memory_store = datasource.copy_to_memorystore(version="v0")
             with xr.open_zarr(memory_store, consolidated=True) as ds:
                 ...
 

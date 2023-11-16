@@ -155,6 +155,7 @@ class LocalZarrStore(Store):
         Returns:
             xr.Dataset: Dataset from the store
         """
+        raise NotImplementedError("Use copy_to_memorystore instead")
         if version not in self._stores:
             raise KeyError(f"Invalid version - {version}")
 

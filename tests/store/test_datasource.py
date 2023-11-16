@@ -111,6 +111,7 @@ def test_add_data(data, bucket):
     assert d._store
 
     ds = d._store.get("v0")
+
     assert ds.equals(ch4_data)
 
     expected_metadata = {
@@ -503,7 +504,7 @@ def test_to_memory_store(data, bucket):
 
     d.add_data(metadata=metadata, data=ch4_data, data_type="surface")
 
-    memory_store = d.memory_store(version="latest")
+    memory_store = d.copy_to_memorystore(version="latest")
     with xr.open_zarr(store=memory_store) as ds:
         assert ds.equals(ch4_data)
 
