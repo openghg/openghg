@@ -191,15 +191,15 @@ def _read_data(
     from openghg.standardise.meta import define_species_label
 
 
-    # Extract the species name from the filename. This is the bit after the second underscore but before the .nc
+    # Extract the species name from the filename. This is the bit after the final underscore but before the .nc
 
-    species = str(data_filepath).split(sep='_')[2]
-    species = species.strip('.nc')
+    species = str(data_filepath).split(sep='_')[-1]
+    species = species[:-3]
     species=define_species_label(species)[0]
 
-    with data_filepath as f:
-        with xr.load_dataset(f) as ds:
-            dataset=ds.load()
+    
+    dataset=xr.load_dataset(data_filepath)
+        
     
     data=dataset.to_dataframe()
 
@@ -263,8 +263,8 @@ def _read_data(
         scale=scale,
         gc_params=gc_params,
     )
-
     return gas_data
+
 
 
 def _format_species(
@@ -293,6 +293,7 @@ def _format_species(
         dict: Dictionary of gas data and metadata, paired by species_inlet combination (so for a single inlet this is just a single entry)
     """
     from fnmatch import fnmatch
+    import re
 
     from addict import Dict as aDict
     from openghg.util import format_inlet
@@ -309,7 +310,6 @@ def _format_species(
             "Unable to read inlets from data, please ensure this data is of the GC type expected by this retrieve module"
         )
 
-
     # Skip this species if the data is all NaNs
     if data['mf'].isnull().all():
         raise ValueError(f'All values for this species {species} is null')
@@ -317,18 +317,18 @@ def _format_species(
     combined_data = aDict()
 
     # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
-    for inlet, inlet_label in expected_inlets.items():
+    for inlet, inlet_label in expected_inlets.items(): # iterates through the two pairs above
         inlet_label = format_inlet(inlet_label)
         # Create a copy of metadata for local modification and give it the species-specific metadata
         species_metadata = metadata.copy()
         species_metadata["units"] = units[species]
         species_metadata["calibration_scale"] = scale[species]
         # If we've only got a single inlet, pick out the mf and mf_repeatability
-        if inlet == "any" or inlet == "air":
+        if inlet == "any" or inlet == "air": 
             species_data = data[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
             species_metadata["inlet"] = inlet_label
-        elif "date" in inlet:
+        elif "date" in inlet: 
             dates = inlet.split("_")[1:] # this is the two dates in the string
             data_sliced = data.loc[dates[0] : dates[1]] # this slices up the dataframe between these two dates
             species_data = data_sliced[['mf', 'mf_repeatability']]
@@ -336,16 +336,15 @@ def _format_species(
             species_metadata["inlet"] = inlet_label
         else: # this is when there are multiple inlets
             # Find the inlet
-            matching_inlets = [i for i in data_inlets if fnmatch(str(i), inlet)] 
+            matching_inlets = [i for i in data_inlets if re.match(inlet, str(i))] 
             if not matching_inlets:
                 continue
-
             # Only set the label in metadata when we have the correct label
             species_metadata["inlet"] = inlet_label
             # There should only be one matching label
             select_inlet = matching_inlets[0]
             # Take only data for this inlet from the dataframe
-            inlet_data = data.loc[data["Inlet"] == select_inlet]
+            inlet_data = data.loc[data["inlet_height"] == select_inlet]
 
             species_data = inlet_data[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
@@ -353,18 +352,21 @@ def _format_species(
         # Check that the Dataframe has something in it
         if species_data.empty:
             continue
-
+            
         attributes = _get_site_attributes(
            site=site, inlet=inlet_label, instrument=instrument, gc_params=gc_params
         )
         attributes = attributes.copy()
 
-        # We want an xarray Dataset, and to rename the variables from mf to {species}
+        # We want an xarray Dataset
         species_data = species_data.to_xarray()
-        species_data=species_data.rename({'mf':species, 'mf_repeatability':f'{species}_repeatability'})
 
         # Create a standardised / cleaned species label
         comp_species = define_species_label(species)[0]
+
+        # change the column names
+        species_data=species_data.rename({'mf':comp_species, 'mf_repeatability':f'{comp_species}_repeatability'})
+
 
         # Add the cleaned species name to the metadata and alternative name if present
         species_metadata["species"] = comp_species
@@ -389,9 +391,8 @@ def _format_species(
 
         combined_data[data_key]["metadata"] = species_metadata
         combined_data[data_key]["data"] = species_data
-        combined_data[data_key]["attributes"] = attributes
+        combined_data[data_key]["attributes"] = attributes    
 
-        
     to_return: Dict = combined_data.to_dict()
 
     return to_return
