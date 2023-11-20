@@ -1,5 +1,6 @@
 name: openghg_env
 channels:
+  - openghg
   - conda-forge
   - defaults
   - anaconda
@@ -31,5 +32,6 @@ dependencies:
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
+  - cdsapi
   - pip:
     - icoscp
