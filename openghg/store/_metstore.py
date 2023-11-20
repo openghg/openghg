@@ -105,7 +105,6 @@ class METStore(BaseStore):
 
         # If not found in the local store, retrieve from the Copernicus store and save
         if result is None:
-
             result = retrieve_met(
                 site=site,
                 network=network,
