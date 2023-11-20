@@ -3,8 +3,8 @@ from ._enum import (
     ColumnTypes,
     ColumnSources,
     ObsTypes,
-    EmissionsTypes,
-    EmissionsDatabases,
+    FluxTypes,
+    FluxDatabases,
     DataTypes,
 )
 from ._errors import (

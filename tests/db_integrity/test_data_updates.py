@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from helpers import get_surface_datapath, get_emissions_datapath, get_footprint_datapath
+from helpers import get_surface_datapath, get_flux_datapath, get_footprint_datapath
 from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
 from openghg.retrieve import get_flux
@@ -23,10 +23,10 @@ def flux_data_read(force=False):
     domain = "EUROPE"
     store = "user"
 
-    emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
+    flux_datapath1 = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
 
     standardise_flux(
-        filepath=emissions_datapath1,
+        filepath=flux_datapath1,
         species="ch4",
         source=source1,
         domain=domain,
@@ -42,8 +42,8 @@ def test_database_update_repeat():
     """
     clear_test_stores()
     # Attempt to add same data to the database twice
-    emissions_datapath1 = get_emissions_datapath("ch4-anthro_EUROPE_2012.nc")
-    args = (emissions_datapath1, "ch4", "anthro", "EUROPE")
+    flux_datapath1 = get_flux_datapath("ch4-anthro_EUROPE_2012.nc")
+    args = (flux_datapath1, "ch4", "anthro", "EUROPE")
     kwargs = {"store": "user", "high_time_resolution": False, "store": "user"}
 
     standardise_flux(*args, **kwargs)
