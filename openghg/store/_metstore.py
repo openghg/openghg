@@ -14,7 +14,6 @@ import xarray as xr
 from openghg.dataobjects import METData
 from openghg.util import to_lowercase
 
-
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)
 
