@@ -96,7 +96,7 @@ class Datasource:
         Args:
             metadata: Metadata on the data for this Datasource
             data: xarray.Dataset
-            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
+            data_type: Type of data, one of ["surface", "flux", "met", "footprints", "eulerian_model"].
             skip_keys: Keys to not standardise as lowercase
             if_exists: What to do if existing data is present.
                 - "default" - checks new and current data for timeseries overlap

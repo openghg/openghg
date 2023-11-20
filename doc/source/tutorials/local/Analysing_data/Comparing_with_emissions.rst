@@ -62,7 +62,7 @@ to retrieve raw data in the :ref:`expected format <2. Input format>`:
 With this ancillary data, we can start to make comparisons between model
 data, such as bottom-up inventories, and our observations. This analysis
 is based around a ``ModelScenario`` object which can be created to link
-together observation, footprint, emissions data and boundary conditions
+together observation, footprint, flux / emissions data and boundary conditions
 data.
 
 Above we loaded observation data from the Tacolneston site into the

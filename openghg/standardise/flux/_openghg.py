@@ -17,7 +17,7 @@ def parse_openghg(
     continuous: bool = True,
 ) -> Dict:
     """
-    Read and parse input emissions data already in OpenGHG format.
+    Read and parse input flux / emissions data already in OpenGHG format.
 
     Args:
         filepath: Path to data file
@@ -60,10 +60,10 @@ def parse_openghg(
     metadata["author"] = author_name
     metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
-    metadata["data_type"] = "emissions"
+    metadata["data_type"] = "flux"
     metadata["source_format"] = "openghg"
 
-    # As emissions files handle things slightly differently we need to check the time values
+    # As flux / emissions files handle things slightly differently we need to check the time values
     # more carefully.
     # e.g. a flux / emissions file could contain e.g. monthly data and be labelled as 2012 but
     # contain 12 time points labelled as 2012-01-01, 2012-02-01, etc.
@@ -91,11 +91,11 @@ def parse_openghg(
 
     key = "_".join((species, source, domain))
 
-    emissions_data: Dict[str, dict] = {}
-    emissions_data[key] = {}
-    emissions_data[key]["data"] = em_data
-    emissions_data[key]["metadata"] = metadata
+    flux_data: Dict[str, dict] = {}
+    flux_data[key] = {}
+    flux_data[key]["data"] = em_data
+    flux_data[key]["metadata"] = metadata
 
-    emissions_data = assign_flux_attributes(emissions_data)
+    flux_data = assign_flux_attributes(flux_data)
 
-    return emissions_data
+    return flux_data

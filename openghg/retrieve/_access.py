@@ -533,7 +533,7 @@ def get_flux(
         time_resolution=time_resolution,
         start_date=start_date,
         end_date=end_date,
-        data_type="emissions",
+        data_type="flux",
         **kwargs,
     )
 

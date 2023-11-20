@@ -472,11 +472,11 @@ def get_data_class(data_type: str) -> type[BaseStore]:
     """Return data class corresponding to given data type.
 
     Args:
-        data_type: one of "surface", "column", "emissions", "footprints",
+        data_type: one of "surface", "column", "flux", "footprints",
     "boundary_conditions", or "eulerian_model"
 
     Returns:
-        Data class, one of `ObsSurface`, `ObsColumn`, `Emissions`, `EulerianModel`,
+        Data class, one of `ObsSurface`, `ObsColumn`, `Flux`, `EulerianModel`,
     `Footprints`, `BoundaryConditions`.
     """
     try:

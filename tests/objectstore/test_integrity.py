@@ -3,7 +3,7 @@ from openghg.objectstore import integrity_check
 from openghg.standardise import standardise_flux, standardise_footprint
 from openghg.objectstore import get_writable_bucket, delete_object
 from openghg.types import ObjectStoreError
-from helpers import get_footprint_datapath, get_emissions_datapath, clear_test_stores
+from helpers import get_footprint_datapath, get_flux_datapath, clear_test_stores
 from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
 
@@ -31,9 +31,9 @@ def populate_store():
         store="user",
     )
 
-    emissions_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    flux_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
     standardise_flux(
-        filepath=emissions_datapath,
+        filepath=flux_datapath,
         species="co2",
         source="gpp-cardamom",
         domain="europe",
@@ -47,7 +47,7 @@ def test_integrity_check_delete_Datasource_keys():
 
     # Now delete some of the Datasources
     bucket = get_writable_bucket(name="user")
-    with open_metastore(bucket=bucket, data_type="emissions") as metastore:
+    with open_metastore(bucket=bucket, data_type="flux") as metastore:
         uid = metastore.select("uuid")[0]
         ds = Datasource.load(bucket=bucket, uuid=uid)
         keys = ds.data_keys()

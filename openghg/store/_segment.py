@@ -25,7 +25,7 @@ def assign_data(
         Args:
             data_dict: Dictionary containing data and metadata for species
             lookup_results: Dictionary of lookup results]
-            data_type: Type of data, one of ["surface", "emissions", "met", "footprints", "eulerian_model"].
+            data_type: Type of data, one of ["surface", "flux", "met", "footprints", "eulerian_model"].
             if_exists: What to do if existing data is present.
                 - None - checks new and current data for timeseries overlap
                    - adds data if no overlap
