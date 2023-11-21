@@ -44,7 +44,6 @@ def _parse_generic(
     # to their native types here
     attrs = {}
     for key, value in em_data.attrs.items():
-        print(key, value, type(value))
         try:
             attrs[key] = value.item()
         except AttributeError:
@@ -203,13 +202,16 @@ def parse_edgar(
 
         nonlocal year  # need to specify that we want `year` from `parse_edgar`
         if year is None:
-            match = re.search(r"[0-9]{4}", filepath.name)
-            if match:
-                year = match.group(0)
-            else:
-                raise ValueError(
-                    "Could not infer year, please specify the year explicitly."
-                )
+            try:
+                year = raw_data[flux_data_var].attrs["year"]
+            except KeyError:
+                match = re.search(r"[0-9]{4}", filepath.name)
+                if match:
+                    year = match.group(0)
+                else:
+                    raise ValueError(
+                        "Could not infer year, please specify the year explicitly."
+                    )
 
         regridded_data = regridded_data.expand_dims(
             {"time": [pd.to_datetime(year)]}, axis=2
@@ -224,7 +226,7 @@ def parse_edgar(
         )
         regridded_data[flux_data_var].attrs["units"] = "mol/m2/s"
 
-        return regridded_data.rename({flux_data_var: "flux"})
+        return regridded_data.rename_vars({flux_data_var: "flux"})
 
     return _parse_generic(
         filepath=filepath,
