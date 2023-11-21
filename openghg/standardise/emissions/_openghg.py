@@ -176,6 +176,7 @@ def parse_edgar(
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
     year: Optional[str] = None,
+    flux_data_var: str = "fluxes",
 ) -> Dict:
     """
     Read and parse input emissions data downloaded from EDGAR in netCDF format.
@@ -188,10 +189,14 @@ def parse_edgar(
         dict: Dictionary of data
     """
     import re
+    from openghg.standardise.meta import define_species_label
+    from openghg.util import molar_mass
 
     def raw_file_hook(filepath: Path) -> xr.Dataset:
         raw_data = xr.open_dataset(filepath, chunks=chunks)
-        regridded_data = regrid_2d(raw_data.fluxes, in_data_var="flux", domain=domain)
+        regridded_data = regrid_2d(
+            raw_data.fluxes, in_data_var=flux_data_var, domain=domain
+        )
 
         nonlocal year  # need to specify that we want `year` from `parse_edgar`
         if year is None:
@@ -199,9 +204,22 @@ def parse_edgar(
             if match:
                 year = match.group(0)
             else:
-                raise ValueError("Could not infer year, please specify the year explicitly.")
+                raise ValueError(
+                    "Could not infer year, please specify the year explicitly."
+                )
 
-        regridded_data = regridded_data.expand_dims({"time": [pd.to_datetime(year)]}, axis=2)
+        regridded_data = regridded_data.expand_dims(
+            {"time": [pd.to_datetime(year)]}, axis=2
+        )
+
+        # convert kg/m^2/s to mol/m^2/s
+        kg_to_g = 1e3
+        species_name = define_species_label(species, filepath)[0]
+        species_molar_mass = molar_mass(species_name)
+        regridded_data[flux_data_var] = (
+            regridded_data[flux_data_var] * kg_to_g / species_molar_mass
+        )
+        regridded_data[flux_data_var].attrs["units"] = "mol/m2/s"
 
         return regridded_data
 
