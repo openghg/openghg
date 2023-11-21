@@ -181,6 +181,9 @@ def parse_edgar(
     """
     Read and parse input emissions data downloaded from EDGAR in netCDF format.
 
+    The expected units are kg / (m^2 s). For v8.0, these are the "flx" files from
+    the EDGAR website (not the "emi" files).
+
     Args:
         filepath: Path to data file
         chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
