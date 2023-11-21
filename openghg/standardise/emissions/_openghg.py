@@ -224,7 +224,7 @@ def parse_edgar(
         )
         regridded_data[flux_data_var].attrs["units"] = "mol/m2/s"
 
-        return regridded_data
+        return regridded_data.rename({flux_data_var: "flux"})
 
     return _parse_generic(
         filepath=filepath,
