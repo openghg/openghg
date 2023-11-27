@@ -550,6 +550,36 @@ def test_footprints_data_merge(model_scenario_1):
     assert attributes["resample_to"] == "coarsest"
 
 
+def test_combine_obs_sampling_period_infer():
+    """
+    If the sampling_period is "NOT_SET" then when combining obs and footprints
+    this should infer the sampling period from the frequency of the data but this
+    was raising a value error. Reported as part of Issue #620.
+
+    Test to ensure this functionality is now working.
+     - sampling_period attribute for WAO data file is "NOT_SET"
+    """
+    start_date = "2021-12-01"
+    end_date = "2022-01-01"
+
+    site = "wao"
+    domain = "TEST"
+    species = "rn"
+    inlet = "10m"
+
+    model_scenario = ModelScenario(
+        site=site, species=species, inlet=inlet, domain=domain, start_date=start_date, end_date=end_date
+    )
+
+    obs_data_1 = model_scenario.obs.data
+    assert obs_data_1.attrs["sampling_period"] == "NOT_SET"
+
+    model_scenario.combine_obs_footprint()  # Check operation can be run
+
+    obs_data_2 = model_scenario.obs.data
+    assert obs_data_2.attrs["sampling_period_estimate"] == "3600.0"
+
+
 # TODO: Dummy tests included below but may want to add checks which use real
 # data for short-lived species (different footprint)
 # - species with single lifetime (e.g. "Rn")
