@@ -34,7 +34,7 @@ jobs:
       - name: Format code with black
         run: |
           python -m pip install black
-          black --check --line-length 110 openghg/
+          black --check openghg/
       - name: Lint with flake8
         run: |
           python -m pip install --upgrade pip wheel setuptools flake8

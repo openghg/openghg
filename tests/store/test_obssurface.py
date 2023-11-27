@@ -1,6 +1,7 @@
 import os
 import json
 import pytest
+import numpy as np
 import xarray as xr
 from pandas import Timestamp
 from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_stores
@@ -15,7 +16,7 @@ from openghg.objectstore import (
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
 from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import search_surface
+from openghg.retrieve import search_surface, get_obs_surface
 from openghg.standardise import standardise_surface, standardise_from_binary_data
 from openghg.util import create_daterange_str
 from pandas import Timestamp
@@ -879,3 +880,48 @@ def test_object_loads_if_invalid_objectstore_path_in_json(tmpdir):
 
     # Now we search for the object, in versions before 0.6.2 this would cause a PermissionError
     search_surface(site="bsd", species="ch4")
+
+
+def test_drop_only_correct_nan():
+    """
+    Create a test for Issue #826 where all columns were being dropped from CRDS data even if
+    only column contains NaN values.
+
+    Example to demonstrate this:
+     -      -         -    -       ch4     ch4   ch4       co2     co2   co2
+    date   time      type port         C   stdev     N         C   stdev     N
+    ...
+    140616 033330       air   10       nan     nan   nan       nan     nan   nan
+    140616 033430       air   10   1906.27   1.697    17       nan     nan   nan
+    140616 033530       air   10   1907.20   0.792    17    405.30   0.382    17
+    """
+
+    rgl_filepath = get_surface_datapath(filename="rgl.picarro.1minute.90m.minimum.dat", source_format="CRDS")
+
+    standardise_surface(filepath=rgl_filepath,
+                        source_format="CRDS",
+                        network="DECC",
+                        site="RGL",
+                        store="group")
+
+    # Compare output to GCWerks - there should be a valid CH4 data point at 2014-06-16 03:34
+
+    rgl_ch4 = get_obs_surface(site="rgl",
+                              species="ch4",
+                              inlet="90m")
+    rgl_ch4_data = rgl_ch4.data
+
+    time_str1 = "2014-06-16T03:34:30"
+    time_str2 = "2014-06-16T03:35:30"
+
+    assert len(rgl_ch4_data["time"]) == 2
+    assert np.isclose(rgl_ch4_data.sel(time=time_str1)["mf"].values, 1906.27)
+    assert np.isclose(rgl_ch4_data.sel(time=time_str2)["mf"].values, 1907.20)
+
+    rgl_co2 = get_obs_surface(site="rgl",
+                              species="co2",
+                              inlet="90m")
+    rgl_co2_data = rgl_co2.data
+
+    assert len(rgl_co2_data["time"]) == 1
+    assert np.isclose(rgl_co2_data.sel(time=time_str2)["mf"].values, 405.30)
