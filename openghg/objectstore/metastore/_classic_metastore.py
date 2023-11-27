@@ -28,11 +28,12 @@ import json
 from typing import Literal, Optional, TypeVar
 
 import tinydb
-from tinydb.middlewares import CachingMiddleware
+from tinydb.middlewares import Middleware, CachingMiddleware
 
 from openghg.objectstore import exists, get_object, set_object_from_json
 from openghg.objectstore.metastore._metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
+from openghg.util import hash_string
 
 
 object_store_data_classes = {  # TODO: move this to central location after ObjectStore PR
@@ -128,6 +129,54 @@ class BucketKeyStorage(tinydb.Storage):
 
     def close(self) -> None:
         pass
+
+
+class SafetyCachingMiddleware(Middleware):
+    """Middleware that caches changes to the database, and writes
+    these changes when the database is closed. Changes are only written
+    if the underlying file has not changed. (The underlying file is the
+    persistent record of the database that is read in by the storage class.)
+
+    This differs from CachingMiddleware in two ways:
+    1) changes are never written before closing the database, whereas
+    CachingMiddleware will write after 1000 changes by default.
+
+    2) CachingMiddleware does not check if the underlying file
+    has changed since it was first accessed by the storage class.
+    """
+
+    def __init__(self, storage_cls: tinydb.Storage) -> None:
+        super().__init__(storage_cls)
+        self.cache = None
+        self.database_hash = None
+
+    def read(self):
+        if self.cache is None:
+            self.cache = self.storage.read()
+            self.database_hash = hash_string(self.cache)
+
+        return self.cache
+
+    def write(self, data):
+        # store data in cache
+        self.cache = data
+
+    def close(self):
+        # check if stored hash matches current hash
+        if self.database_hash == hash_string(self.storage.read()):
+            # if underlying file not changed, write data
+            self.storage.write(self.cache)
+        elif self.cache is not None and hash_string(self.cache) != self.database_hash:
+            # changes were made and the underlying file was changed
+            # NOTE: if self.cache is None, then self.database_hash will not equal
+            # the hash of `None`, but we don't want to raise an error if the file
+            # was not read.
+            raise MetastoreError(
+                "Could not write to object store: object store modified while write in progress."
+            )
+
+        # let underlying storage clean up
+        self.storage.close()
 
 
 @contextmanager
