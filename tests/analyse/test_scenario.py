@@ -1493,7 +1493,7 @@ def test_scenario_infer_flux_source_ch4():
     model_scenario = ModelScenario()
     model_scenario.add_flux(flux=result)
 
-    # expect 'anthro' to be found in flux metadata:
+    # expect 'waste' to be found in flux metadata:
     assert "waste" in model_scenario.fluxes
 
 
