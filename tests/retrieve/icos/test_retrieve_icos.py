@@ -4,7 +4,7 @@ import json
 import pickle
 import pandas as pd
 import pytest
-from helpers import get_retrieval_datapath, metadata_checker_obssurface
+from helpers import get_retrieval_datapath, metadata_checker_obssurface, clear_test_stores
 from icoscp.cpb.dobj import Dobj  # type: ignore
 from icoscp.station.station import Station
 from openghg.cloud import package_from_function
@@ -194,3 +194,51 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     )
 
     assert "There is no new data to process." in caplog.text
+
+
+@pytest.fixture
+def mock_retrieve_remote(mocker):
+    mock_metadata = {
+                "species": "ch4",
+                "site": "tac",
+                "station_long_name": "Tacolneston",
+                "inlet": "185m",
+                "instrument": "picarro",
+                "network": "decc",
+                "source_format": "icos",
+                "data_source": "icoscp",
+                "icos_data_level": 1,
+            }
+    n_days = 100
+    epoch = datetime.datetime(1970, 1, 1, 1, 1)
+    mock_data = pd.DataFrame(
+        data={"A": range(0, n_days), "time": pd.date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D")}
+    ).set_index("time").to_xarray()
+
+    mocker.patch("openghg.retrieve.icos._retrieve._retrieve_remote", return_value={"ch4": {"metadata": mock_metadata, "data": mock_data}})
+
+
+
+def test_retrieved_hash_prevents_storing_twice(mock_retrieve_remote, caplog):
+    """Test if retrieving the same data twice issues a warning the second time."""
+    clear_test_stores()
+
+    retrieve_atmospheric(site="tac", store="user")
+    assert "There is no new data to process." not in caplog.text
+
+    retrieve_atmospheric(site="tac", store="user")
+    assert "There is no new data to process." in caplog.text
+
+
+def test_force_allows_storing_twice(mock_retrieve_remote, caplog):
+    """Test if retrieving the same data twice does *not* issue a warning if
+    `force=True` is passed to `retrieve_atmospheric` (and hence propegated down
+    to `ObsSurface.store_data`).
+    """
+    clear_test_stores()
+
+    retrieve_atmospheric(site="tac", store="user")
+    assert "There is no new data to process." not in caplog.text
+
+    retrieve_atmospheric(site="tac", store="user", force=True)
+    assert "There is no new data to process." not in caplog.text

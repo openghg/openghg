@@ -21,7 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added compression to `Datasource.save` and modified `Datasource.load` to take advantage of
   lazy loading via `xarray.open_dataset` - [PR #755](https://github.com/openghg/openghg/pull/755)
 
-- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718) 
+- Added progress bars using `rich` package - [PR #718](https://github.com/openghg/openghg/pull/718)
+
+
+- Added config for Black to `pyproject.toml` - [PR #822](https://github.com/openghg/openghg/pull/822)
+
+- Added `force` option to `retrieve_atmospheric` and `ObsSurface.store_data` so that retrieved hashes can be ignored - [PR #819](https://github.com/openghg/openghg/pull/819)
+)
+
 
 ### Fixed
 
@@ -29,7 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bug where `radon` was not fetched using `retrieve_atmospheric` from icos data. - [PR #794](https://github.com/openghg/openghg/pull/794)
 
+- Bug with CRDS parse function where data for all species was being dropped if only one species was missing - [PR #829](https://github.com/openghg/openghg/pull/829)
+
 - Datetime processing has been updated to be compatible with Pandas 2.0: the `date_parser` argument of `read_csv` was deprecated in favour of `date_format`. [PR #816](https://github.com/openghg/openghg/pull/816)
+
 
 ### Changed
 
