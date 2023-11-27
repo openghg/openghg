@@ -23,13 +23,12 @@ def get_zarr_encoding(
     return {var: encoding for var in data_vars}
 
 
-def get_chunks_footprint() -> Dict[str, int]:
-    """Get chunks for a footprint Dataset over the EUROPE domain"""
-    # if domain == "EUROPE":
-    raise NotImplementedError("Chunks should be set for each data type by the user")
-    return {"time": 12}
-    # else:
-    #     raise NotImplementedError(f"Domain {domain} not implemented")
+def get_chunks_footprint(high_time_resolution: bool) -> Dict[str, int]:
+    """Get suggested chunks for footprint data"""
+    if high_time_resolution:
+        return {"time": 12}
+    else:
+        return {"time": 144}
 
 
 def get_chunks(data_type: Literal["footprint"]) -> Dict[str, int]:

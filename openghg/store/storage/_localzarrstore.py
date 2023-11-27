@@ -161,8 +161,11 @@ class LocalZarrStore(Store):
         return ds
 
     def pop(self, version: str) -> xr.Dataset:
-        """Pop some data from the store. Note that this will delete
-        the data from the store on the local filesystem.
+        """Pop some data from the store. This copies the data in the version specified
+        to a memory store, deletes the version and returns an xarray Dataset loaded from the
+        memory store.
+
+        Note that this will delete the data from the store on the local filesystem.
 
         Args:
             version: Version of data
@@ -280,18 +283,6 @@ class LocalZarrStore(Store):
 
         self.delete_version(version=version)
         self.add(version=version, dataset=dataset, compressor=compressor, filters=filters)
-
-    def hash(self, data: str) -> str:
-        """Hash the data at the given key"""
-        raise NotImplementedError
-
-    def get_hash(self, key: str) -> str:
-        """Get the hash of the data at the given key"""
-        raise NotImplementedError
-
-    def hash_equal(self, key: str, dataset: xr.Dataset) -> bool:
-        """Compare the hashes of the data at the given key and the passed xr.Dataset"""
-        raise NotImplementedError
 
     def bytes_stored(self) -> int:
         """Return the number of bytes stored in the zarr store

@@ -61,7 +61,8 @@ class Store(ABC):
 
     @abstractmethod
     def pop(self, version: str) -> Dataset:
-        """Pop some data from the store."""
+        """Pop some data from the store. This removes the data at this version from the store
+        and returns it."""
         pass
 
     @abstractmethod
@@ -69,21 +70,6 @@ class Store(ABC):
         self, version: str, dataset: Dataset, compressor: Optional[Any], filters: Optional[Any]
     ) -> None:
         """Update the data at the given key"""
-        pass
-
-    @abstractmethod
-    def hash(self, data: str) -> str:
-        """Hash the data at the given key"""
-        pass
-
-    @abstractmethod
-    def get_hash(self, key: str) -> str:
-        """Get the hash of the data at the given key"""
-        pass
-
-    @abstractmethod
-    def hash_equal(self, key: str, dataset: Dataset) -> bool:
-        """Compare the hashes of the data at the given key and the passed xr.Dataset"""
         pass
 
     @abstractmethod
