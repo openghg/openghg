@@ -36,6 +36,9 @@ def test_metastore_read_write_mode(tmp_path):
 
 
 def test_safety_caching_middleware_cache(tmp_path):
+    """Check that SafetyCachingMiddleware only writes once
+    database is closed.
+    """
     db_file = tmp_path / "test.json"
     with tinydb.TinyDB(db_file, storage=SafetyCachingMiddleware(JSONStorage)) as db:
         db.insert({"some_key": "some_value"})
@@ -49,7 +52,13 @@ def test_safety_caching_middleware_cache(tmp_path):
 
 
 def test_safety_caching_middleware_error(tmp_path):
-    # add some data to tinydb
+    """Check that SafetyCachingMiddleware raises and error
+    if the database is changed by another process.
+
+    The error will be raised when the database opened with Safety caching
+    is closed.
+    """
+    # Add some data to tinydb
     db_file = tmp_path / "test.json"
     with tinydb.TinyDB(db_file) as db:
         first_item = db.insert({"some_key": "some_value"})
@@ -65,6 +74,9 @@ def test_safety_caching_middleware_error(tmp_path):
 
 
 def test_safety_caching_middleware_no_write_no_error(tmp_path):
+    """A similar scenario to the error test, but no writes are made, so
+    no error is raised.
+    """
     # add some data to tinydb
     db_file = tmp_path / "test.json"
     with tinydb.TinyDB(db_file) as db:
@@ -72,6 +84,9 @@ def test_safety_caching_middleware_no_write_no_error(tmp_path):
 
     # unlike the previous test, no error will be raised here
     with tinydb.TinyDB(db_file, storage=SafetyCachingMiddleware(JSONStorage)) as db:
+        # make a read
+        results = db.all()
+
         # another modification made elsewhere
         with tinydb.TinyDB(db_file) as db2:
             db2.remove(doc_ids=[first_item])
