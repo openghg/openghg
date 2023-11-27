@@ -523,8 +523,6 @@ def _read_raw_data(
         date_format="%Y %m %d %H %M %S",
         index_col="time",
     )
-    print(data.iloc[0:5, :])
-    print(data.index)
 
     # Drop duplicates
     data = data.loc[~data.index.duplicated(keep="first")]
