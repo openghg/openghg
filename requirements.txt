@@ -10,7 +10,7 @@ nbformat
 numexpr
 numpy
 nc-time-axis
-pandas
+pandas >= 2.0
 plotly
 pyvis
 rapidfuzz
