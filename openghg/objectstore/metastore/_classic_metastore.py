@@ -28,7 +28,6 @@ import json
 from typing import Literal, Optional, TypeVar
 
 import tinydb
-from tinydb.middlewares import Middleware, CachingMiddleware
 
 from openghg.objectstore import exists, get_object, set_object_from_json
 from openghg.objectstore.metastore._metastore import TinyDBMetaStore
@@ -131,7 +130,7 @@ class BucketKeyStorage(tinydb.Storage):
         pass
 
 
-class SafetyCachingMiddleware(Middleware):
+class SafetyCachingMiddleware(tinydb.Middleware):
     """Middleware that caches changes to the database, and writes
     these changes when the database is closed. Changes are only written
     if the underlying file has not changed. (The underlying file is the
