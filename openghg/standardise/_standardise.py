@@ -478,7 +478,7 @@ def standardise_footprint(
     the processed data has been assigned to
 
     Args:
-        filepath: Path of file to load
+        filepath: Path(s) of file to standardise
         site: Site name
         domain: Domain of footprints
         model: Model used to create footprint (e.g. NAME or FLEXPART)
@@ -520,9 +520,8 @@ def standardise_footprint(
     """
     from openghg.cloud import call_function
 
-    filepath = Path(filepath)
-
     if running_on_hub():
+        raise NotImplementedError("Cloud support not yet implemented.")
         compressed_data, file_metadata = create_file_package(filepath=filepath, obs_type="footprints")
 
         metadata = {
