@@ -27,13 +27,13 @@ from contextlib import contextmanager
 import json
 from typing import Literal, Optional
 
-import tinydb
-from tinydb.middlewares import Middleware
-
-from openghg.objectstore import exists, get_object, set_object_from_json
+from filelock import FileLock
+from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
 from openghg.objectstore.metastore._metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
 from openghg.util import hash_string
+import tinydb
+from tinydb.middlewares import Middleware
 
 
 object_store_data_classes = {  # TODO: move this to central location after ObjectStore PR
@@ -234,6 +234,18 @@ class DataClassMetaStore(TinyDBMetaStore):
         )
         super().__init__(database=database)
 
+        lock_path = get_object_lock_path(bucket, self.key)
+        self.lock = FileLock(lock_path, timeout=600)  # file lock with 10 minute timeout
+
+    def acquire_lock(self) -> None:
+        """Acquire a lock for the object store."""
+        self.lock.acquire(poll_interval=1)
+
+    def release_lock(self) -> None:
+        """Acquire a lock for the object store."""
+        self.lock.release()
+
     def close(self) -> None:
         """Close the underlying TinyDB database."""
+        self.lock.release()
         self._db.close()
