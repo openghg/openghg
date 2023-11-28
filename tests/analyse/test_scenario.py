@@ -1488,6 +1488,24 @@ def test_stack_datasets_with_alignment(flux_daily, flux_daily_small_dim_diff):
     np.testing.assert_allclose(output_flux, expected_flux)
 
 
+def test_scenario_infer_flux_source_ch4():
+    """
+    Test ModelScenario can find the source of a flux
+    if only a single flux matches the given metadata
+    and source is in the flux metadata.
+    """
+    from openghg.objectstore import get_readable_buckets
+    from openghg.retrieve import get_flux
+
+    result = get_flux(species="ch4", domain="europe", source="waste")
+
+    model_scenario = ModelScenario()
+    model_scenario.add_flux(flux=result)
+
+    # expect 'waste' to be found in flux metadata:
+    assert "waste" in model_scenario.fluxes
+
+
 def test_modelscenario_doesnt_error_empty_objectstore():
     clear_test_stores()
 
@@ -1510,3 +1528,6 @@ def test_modelscenario_doesnt_error_empty_objectstore():
     )
 
     assert not scenario
+
+
+# NOTE: the test store is modified by the last two tests

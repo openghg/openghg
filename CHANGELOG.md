@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `force` option to `retrieve_atmospheric` and `ObsSurface.store_data` so that retrieved hashes can be ignored - [PR #819](https://github.com/openghg/openghg/pull/819)
 )
 
+- Added `SafetyCachingMiddleware` to metastore, which caches writes and only saves them to disk if the underlying file
+has not changed. This is to prevent errors when concurrent writes are made to the metastore. [PR #836](https://github.com/openghg/openghg/pull/836)
 
 ### Fixed
 
