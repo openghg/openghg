@@ -25,7 +25,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 import json
-from typing import Literal, Optional, TypeVar
+from typing import Literal, Optional
 
 import tinydb
 from tinydb.middlewares import Middleware
@@ -200,7 +200,7 @@ class SafetyCachingMiddleware(Middleware):
 @contextmanager
 def open_metastore(
     bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
-) -> Generator[ClassicMetaStore, None, None]:
+) -> Generator[TinyDBMetaStore, None, None]:
     """Context manager for TinyDBMetaStore based on OpenGHG v<=6.2 set-up for keys
     and TinyDB.
 
@@ -214,37 +214,25 @@ def open_metastore(
     """
     key = get_metakey(data_type)
     with tinydb.TinyDB(bucket, key, mode, storage=SafetyCachingMiddleware(BucketKeyStorage)) as db:
-        metastore = ClassicMetaStore(database=db, data_type=data_type)
+        metastore = TinyDBMetaStore(database=db)
         yield metastore
 
 
-CM = TypeVar("CM", bound="ClassicMetaStore")
+class DataClassMetaStore(TinyDBMetaStore):
+    """Class that allows:
+    - creating a TinyDB MetaStore via bucket and data type
+    - locking the MetaStore
 
+    There is also a `close` method, for use inside the `BaseStore` context-manager.
+    """
 
-class ClassicMetaStore(TinyDBMetaStore):
-    """TinyDBMetaStore using set-up for keys and TinyDB from OpenGHG <=v6.2"""
-
-    def __init__(self, database: tinydb.TinyDB, data_type: str) -> None:
-        super().__init__(database=database)
+    def __init__(self, bucket: str, data_type: str) -> None:
         self.data_type = data_type
-
-    @classmethod
-    def from_bucket(cls: type[CM], bucket: str, data_type: str) -> CM:
-        """Initialise a ClassicMetaStore given a bucket and data type.
-
-        A ClassicMetaStore opened with this method must be closed to
-        ensure that writes are saved.
-
-        Args:
-            bucket: path to object store
-            data_type: data type of metastore to open
-
-        Returns:
-            ClassicMetastore object for given bucket and data type.
-        """
-        key = get_metakey(data_type)
-        database = tinydb.TinyDB(bucket, key, mode="rw", storage=SafetyCachingMiddleware(BucketKeyStorage))
-        return cls(database=database, data_type=data_type)
+        self.key = get_metakey(data_type)
+        database = tinydb.TinyDB(
+            bucket, self.key, mode="rw", storage=SafetyCachingMiddleware(BucketKeyStorage)
+        )
+        super().__init__(database=database)
 
     def close(self) -> None:
         """Close the underlying TinyDB database."""

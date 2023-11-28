@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 from pandas import Timestamp
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
-from openghg.objectstore.metastore import ClassicMetaStore
+from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_now, to_lowercase
 
@@ -43,7 +43,7 @@ class BaseStore:
             # Update myself
             self.__dict__.update(data)
 
-        self._metastore = ClassicMetaStore.from_bucket(bucket=bucket, data_type=self._data_type)
+        self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
         self._datasource_uuids = self._metastore.select("uuid")
 
