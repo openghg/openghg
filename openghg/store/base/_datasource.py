@@ -224,18 +224,18 @@ class Datasource:
 
         # We'll try and read the chunk sizes of the incoming data,
         # this does only assume we've chunked along the time dimension
-        try:
-            time_chunksize: Union[str, int] = data.chunksizes[time_coord][0]
-        except (KeyError, IndexError):
-            time_chunksize = "auto"
+        # try:
+        #     time_chunksize: Union[str, int] = data.chunksizes[time_coord][0]
+        # except (KeyError, IndexError):
+        #     time_chunksize = "auto"
 
         # # We'll sort and drop duplicates here
-        if sort and drop_duplicates:
-            data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
-        elif sort:
-            data = data.sortby(time_coord)
-        elif drop_duplicates:
-            data = data.drop_duplicates(time_coord, keep="first")
+        # if sort and drop_duplicates:
+        #     data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
+        # elif sort:
+        #     data = data.sortby(time_coord)
+        # elif drop_duplicates:
+        #     data = data.drop_duplicates(time_coord, keep="first")
 
         # We'll only do a concat if we actually have overlapping data
         # Othwerwise we'll just add the new data
@@ -310,6 +310,10 @@ class Datasource:
                 if data_type == "footprints":
                     logger.warning("Sorting footprints by time may consume large amounts of memory.")
 
+                logger.debug(
+                    "Dropping duplicates, rechunking data and sorting by time variable in add_timed_data."
+                )
+
                 combined = (
                     combined.drop_duplicates(dim=time_coord, keep="first")
                     .chunk({"time": time_chunksize})
@@ -342,9 +346,10 @@ class Datasource:
         # just create a new larger empty zarr store, add the earlier data
         # and then add back in the old data? Would that be more efficient?
         if not already_sorted:
-            logger.info("Sorting data")
+            logger.debug("Sorting data by time coordinate in add_timed_data.")
             memory_store = self._store.copy_to_memorystore(version=version_str)
             existing = xr.open_zarr(store=memory_store, consolidated=True)
+            logger.debug("Sorting and chunking data in add_timed_data.")
             existing = existing.chunk(chunks={"time": time_chunksize}).sortby(time_coord)
             self._store.update(version=version_str, dataset=existing)
 

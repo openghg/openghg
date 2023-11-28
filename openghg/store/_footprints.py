@@ -321,7 +321,7 @@ class Footprints(BaseStore):
             chunks = {}
 
         # This accepts both single and multiple files
-        with xr.open_mfdataset(filepath).reset_encoding().chunk(chunks=chunks).unify_chunks() as fp_data:
+        with xr.open_mfdataset(filepath).reset_encoding().chunk(chunks=chunks) as fp_data:
             logger.info(f"Rechunking with chunks={chunks}")
 
             if species == "co2":
