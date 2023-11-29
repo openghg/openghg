@@ -4,6 +4,7 @@ from openghg.retrieve import search
 from openghg.store import Footprints
 from openghg.util import hash_bytes
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
+import xarray as xr
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -482,7 +483,9 @@ def test_footprint_schema_lifetime():
     assert "mean_age_particles_w" in data_vars
 
 
-def test_pass_multiple_footprints_in_works():
+# TODO: These tests need filling in, need input on these once we've decided on
+# a method for footprint chunking with open_mfdataset
+def test_footprint_read_using_mfdataset():
     assert False
 
 
@@ -490,5 +493,59 @@ def test_passing_chunks_reduces_memory_consumption():
     assert False
 
 
+def test_process_footprints():
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    for fp in (file1, file2):
+        standardise_footprint(
+            filepath=fp,
+            site="TAC",
+            inlet="100m",
+            domain="TEST_DOMAIN_MULTIFILE",
+            model="UKV",
+            store="user",
+            chunks={"time": 4},
+        )
+
+    # Get the footprints data
+    fp_res = search(site="TAC", domain="TEST_DOMAIN_MULTIFILE", data_type="footprints")
+
+    fp_obs = fp_res.retrieve_all()
+
+    with xr.open_dataset(file1) as ds, xr.open_dataset(file2) as ds2:
+        xr.concat([ds, ds2], dim="time").identical(fp_obs.data)
+
+
 def test_passing_in_different_chunks_to_same_store_works():
-    assert False
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    standardise_footprint(
+        filepath=file1,
+        site="TAC",
+        inlet="100m",
+        domain="TEST_CHUNK_DOMAIN",
+        model="UKV",
+        store="user",
+        chunks={"time": 4},
+        force=True,
+    )
+    standardise_footprint(
+        filepath=file2,
+        site="TAC",
+        inlet="100m",
+        domain="TEST_CHUNK_DOMAIN",
+        model="UKV",
+        store="user",
+        chunks={"time": 2},
+        force=True,
+    )
+
+    # Get the footprints data
+    fp_res = search(site="TAC", domain="TEST_CHUNK_DOMAIN", data_type="footprints")
+
+    fp_obs = fp_res.retrieve_all()
+
+    with xr.open_dataset(file1) as ds, xr.open_dataset(file2) as ds2:
+        xr.concat([ds, ds2], dim="time").identical(fp_obs.data)
