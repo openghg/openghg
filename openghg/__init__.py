@@ -2,7 +2,8 @@ import logging
 import os as _os
 import sys as _sys
 from pathlib import Path as _Path
-from rich.logging import RichHandler as _RichHandler
+
+# from rich.logging import RichHandler as _RichHandler
 from . import (
     analyse,
     cloud,
@@ -65,7 +66,8 @@ fileHandler.setLevel(logging.DEBUG)
 logger.addHandler(fileHandler)
 
 # Create console handler - set to WARNING (lower level)
-consoleHandler = _RichHandler()
+# consoleHandler = _RichHandler()
+consoleHandler = logging.StreamHandler()
 consoleFormatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
 consoleHandler.setFormatter(consoleFormatter)
 consoleHandler.setLevel(logging.INFO)

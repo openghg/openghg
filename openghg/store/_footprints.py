@@ -184,7 +184,7 @@ class Footprints(BaseStore):
 
     def read_file(
         self,
-        filepath: Union[str, Path],
+        filepath: Union[List, str, Path],
         site: str,
         domain: str,
         model: str,
@@ -214,7 +214,7 @@ class Footprints(BaseStore):
         the processed data has been assigned to
 
         Args:
-            filepath: Path of file to load
+            filepath: Path(s) of file(s) to standardise
             site: Site name
             domain: Domain of footprints
             model: Model used to create footprint (e.g. NAME or FLEXPART)
@@ -269,7 +269,11 @@ class Footprints(BaseStore):
             check_if_need_new_version,
         )
 
-        filepath = Path(filepath)
+        if not isinstance(filepath, list):
+            filepath = [filepath]
+
+        # We wanted sorted Path objects
+        filepath = sorted([Path(f) for f in filepath])
 
         site = clean_string(site)
         network = clean_string(network)
@@ -300,18 +304,39 @@ class Footprints(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not force:
-            logger.warning(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping.\n"
-                "If necessary, use force=True to bypass this to add this data."
-            )
-            return {}
+        # Save the hashes so we don't have to compute them again
+        new_files_hashes = {}
+        for f in filepath:
+            file_hash = hash_file(filepath=f)
+            if file_hash in self._file_hashes and not force:
+                logger.warning(
+                    f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping.\n"
+                    "If necessary, use force=True to bypass this to add this data."
+                )
+                return {}
+
+            new_files_hashes[file_hash] = f.name
 
         if chunks is None:
             chunks = {}
 
-        with xr.open_dataset(filepath).chunk(chunks=chunks) as fp_data:
+        # TODO - this needs some tidying once we decide on how to chunk things without errors constantly
+        if len(filepath) > 1:
+            xr_open_fn = xr.open_mfdataset
+            logger.warning(
+                "Opening a number of footprints as a single Dataset is currently an experimental feature "
+                + "and may result in chunking errors, slow operation or high memory usage."
+            )
+        else:
+            xr_open_fn = xr.open_dataset
+            filepath = filepath[0]
+
+        # This accepts both single and multiple files
+        # Using open_mfdataset handles chunks different so we have this setup
+        with xr_open_fn(filepath).reset_encoding().chunk(chunks) as fp_data:
+            if chunks:
+                logger.info(f"Rechunking with chunks={chunks}")
+
             if species == "co2":
                 # Expect co2 data to have high time resolution
                 if not high_time_resolution:
@@ -371,6 +396,8 @@ class Footprints(BaseStore):
 
             fp_time = fp_data["time"]
 
+            # TODO - fix this setup
+            filepath = cast(Path, filepath)
             start_date, end_date, period_str = infer_date_range(
                 fp_time, filepath=filepath, period=period, continuous=continuous
             )
@@ -452,8 +479,8 @@ class Footprints(BaseStore):
             #     data_dict=footprint_data, uuid_dict=datasource_uuids, update_keys=update_keys
             # )
 
-            # Record the file hash in case we see this file again
-            self._file_hashes[file_hash] = filepath.name
+            # Record the file hash in case we see the file(s) again
+            self._file_hashes.update(new_files_hashes)
 
             return datasource_uuids
 

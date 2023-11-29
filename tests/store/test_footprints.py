@@ -480,3 +480,15 @@ def test_footprint_schema_lifetime():
     assert "mean_age_particles_e" in data_vars
     assert "mean_age_particles_s" in data_vars
     assert "mean_age_particles_w" in data_vars
+
+
+def test_pass_multiple_footprints_in_works():
+    assert False
+
+
+def test_passing_chunks_reduces_memory_consumption():
+    assert False
+
+
+def test_passing_in_different_chunks_to_same_store_works():
+    assert False

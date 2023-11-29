@@ -23,8 +23,10 @@ def get_zarr_encoding(
     return {var: encoding for var in data_vars}
 
 
+# TODO - update these functions once we've tested the new zarr storage with the populate scripts
 def get_chunks_footprint(high_time_resolution: bool) -> Dict[str, int]:
     """Get suggested chunks for footprint data"""
+    raise NotImplementedError
     if high_time_resolution:
         return {"time": 12}
     else:
@@ -33,6 +35,7 @@ def get_chunks_footprint(high_time_resolution: bool) -> Dict[str, int]:
 
 def get_chunks(data_type: Literal["footprint"]) -> Dict[str, int]:
     """Get chunks for a given data type"""
+    raise NotImplementedError
     if data_type == "footprints":
         return get_chunks_footprint()
     else:

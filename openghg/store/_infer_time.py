@@ -16,7 +16,7 @@ __all__ = ["infer_date_range", "update_zero_dim"]
 
 def infer_date_range(
     time: DataArray,
-    filepath: Optional[Union[str, Path]] = None,
+    filepath: Optional[Path] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
 ) -> Tuple[Timestamp, Timestamp, str]:
@@ -42,9 +42,6 @@ def infer_date_range(
         Timestamp, Timestamp, str: Derived start date, end date and period (containing the value and unit).
     """
     from openghg.util import create_frequency_str, parse_period, relative_time_offset, timestamp_tzaware
-
-    if filepath is not None:
-        filepath = Path(filepath)
 
     # Find frequency from period, if specified
     if period is not None:
@@ -72,7 +69,7 @@ def infer_date_range(
             start_date = timestamp_tzaware(timestamp)
 
         if filepath is not None:
-            filename = filepath.stem  # Filename without the extension
+            filename = Path(filepath).stem
             filename_identifiers = filename.split("_")
             filename_identifiers.reverse()  # Date identifier usually at the end
 
