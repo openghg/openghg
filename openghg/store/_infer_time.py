@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 import logging
 import pandas as pd
 from pandas import DateOffset, Timedelta, Timestamp
@@ -16,7 +16,7 @@ __all__ = ["infer_date_range", "update_zero_dim"]
 
 def infer_date_range(
     time: DataArray,
-    filepath: Optional[Union[Path, List[Path]]] = None,
+    filepath: Optional[Path] = None,
     period: Optional[Union[str, tuple]] = None,
     continuous: bool = True,
 ) -> Tuple[Timestamp, Timestamp, str]:
@@ -69,12 +69,7 @@ def infer_date_range(
             start_date = timestamp_tzaware(timestamp)
 
         if filepath is not None:
-            # Not sure mypy will like this, can always do isinstance check
-            try:
-                filename = filepath[0].stem
-            except TypeError:
-                filename = filepath.stem
-
+            filename = Path(filepath).stem
             filename_identifiers = filename.split("_")
             filename_identifiers.reverse()  # Date identifier usually at the end
 

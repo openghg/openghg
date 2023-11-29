@@ -320,9 +320,22 @@ class Footprints(BaseStore):
         if chunks is None:
             chunks = {}
 
+        # TODO - this needs some tidying once we decide on how to chunk things without errors constantly
+        if len(filepath) > 1:
+            xr_open_fn = xr.open_mfdataset
+            logger.warning(
+                "Opening a number of footprints as a single Dataset is currently an experimental feature "
+                + "and may result in chunking errors, slow operation or high memory usage."
+            )
+        else:
+            xr_open_fn = xr.open_dataset
+            filepath = filepath[0]
+
         # This accepts both single and multiple files
-        with xr.open_mfdataset(filepath).reset_encoding().chunk(chunks=chunks) as fp_data:
-            logger.info(f"Rechunking with chunks={chunks}")
+        # Using open_mfdataset handles chunks different so we have this setup
+        with xr_open_fn(filepath).reset_encoding().chunk(chunks) as fp_data:
+            if chunks:
+                logger.info(f"Rechunking with chunks={chunks}")
 
             if species == "co2":
                 # Expect co2 data to have high time resolution
@@ -383,6 +396,8 @@ class Footprints(BaseStore):
 
             fp_time = fp_data["time"]
 
+            # TODO - fix this setup
+            filepath = cast(Path, filepath)
             start_date, end_date, period_str = infer_date_range(
                 fp_time, filepath=filepath, period=period, continuous=continuous
             )

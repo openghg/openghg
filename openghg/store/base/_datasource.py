@@ -209,9 +209,6 @@ class Datasource:
         else:
             version_str = f"v{str(len(self._data_keys))}"
 
-        # TODO - Check the hash of this data and compare it to our stored hashes
-        # this means Dataset hash and not the file hash
-
         # Ensure daterange strings are independent and do not overlap each other
         # (this can occur due to representative date strings)
         # new_data = self._clip_daterange_label(new_data)
@@ -224,18 +221,21 @@ class Datasource:
 
         # We'll try and read the chunk sizes of the incoming data,
         # this does only assume we've chunked along the time dimension
-        # try:
-        #     time_chunksize: Union[str, int] = data.chunksizes[time_coord][0]
-        # except (KeyError, IndexError):
-        #     time_chunksize = "auto"
+        # TODO - This can raise errors with open_mfdataset is used for a whole year of files with footprints
+        # add some tests during the populate stage
+        # Test this
+        try:
+            time_chunksize: Union[str, int] = data.chunksizes[time_coord][0]
+        except (KeyError, IndexError):
+            time_chunksize = "auto"
 
-        # # We'll sort and drop duplicates here
-        # if sort and drop_duplicates:
-        #     data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
-        # elif sort:
-        #     data = data.sortby(time_coord)
-        # elif drop_duplicates:
-        #     data = data.drop_duplicates(time_coord, keep="first")
+        # We'll sort and drop duplicates here
+        if sort and drop_duplicates:
+            data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
+        elif sort:
+            data = data.sortby(time_coord)
+        elif drop_duplicates:
+            data = data.drop_duplicates(time_coord, keep="first")
 
         # We'll only do a concat if we actually have overlapping data
         # Othwerwise we'll just add the new data
