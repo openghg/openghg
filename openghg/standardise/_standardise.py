@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union, Any
+from typing import Dict, List, Literal, Optional, Union, Any
 from pandas import Timedelta
 import warnings
 
@@ -448,7 +448,7 @@ def standardise_bc(
 
 
 def standardise_footprint(
-    filepath: Union[str, Path],
+    filepath: Union[str, Path, List],
     site: str,
     domain: str,
     model: str,

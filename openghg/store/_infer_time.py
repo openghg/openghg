@@ -134,7 +134,7 @@ def infer_date_range(
         if inferred_period is None:
             if continuous:
                 raise ValueError(
-                    "Continuous data with no gaps is expected but no time period can be inferred. Run with continous=False to remove this constraint."
+                    "Continuous data with no gaps is expected but no time period can be inferred. Run with continuous=False to remove this constraint."
                 )
             else:
                 inferred_freq = None

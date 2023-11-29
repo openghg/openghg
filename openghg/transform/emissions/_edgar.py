@@ -363,7 +363,7 @@ def parse_edgar(
 
     # Infer the date range associated with the flux data
     em_time = em_data.time
-    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file.name, period=period)
+    start_date, end_date, period_str = infer_date_range(em_time, filepath=edgar_file, period=period)
 
     prior_info_dict = {
         "EDGAR": {

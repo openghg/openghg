@@ -442,6 +442,9 @@ def test_relative_time_offset(kwargs, expected):
     assert relative_time_offset(**kwargs) == expected
 
 
+def test_relative_time_offset_with_vaies():
+    print(relative_time_offset)
+
 def test_in_daterange():
     start_a = timestamp_tzaware("2021-01-01")
     end_a = timestamp_tzaware("2021-06-01")

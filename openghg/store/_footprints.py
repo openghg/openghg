@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, DefaultDict, Dict, Literal, List, Optional, Tuple, Union, cast
 import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
@@ -322,7 +322,7 @@ class Footprints(BaseStore):
 
         # TODO - this needs some tidying once we decide on how to chunk things without errors constantly
         if len(filepath) > 1:
-            xr_open_fn = xr.open_mfdataset
+            xr_open_fn: Callable = xr.open_mfdataset
             logger.warning(
                 "Opening a number of footprints as a single Dataset is currently an experimental feature "
                 + "and may result in chunking errors, slow operation or high memory usage."
