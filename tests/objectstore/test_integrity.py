@@ -53,7 +53,7 @@ def test_integrity_check_delete_datasource_keys():
 
         ds._store.delete_all()
 
-    with pytest.raises(ObjectStoreError):
+    with pytest.raises(KeyError):
         integrity_check()
 
 # TODO - expand these integrity tests

@@ -4,7 +4,7 @@ This is used as a base for the other dataclasses and shouldn't be used directly.
 from typing import Dict, Optional, Union
 from openghg.store.storage import LocalZarrStore
 import xarray as xr
-from pandas import Timestamp
+from pandas import Timestamp, Timedelta
 
 
 class _BaseData:
@@ -41,7 +41,6 @@ class _BaseData:
             raise ValueError("Must supply either data or uuid and version")
 
         self.metadata = metadata
-        self._lazy = False
         self._uuid = uuid
 
         self._start_date = start_date
@@ -60,9 +59,9 @@ class _BaseData:
         if data is not None:
             self.data = data
         elif uuid is not None and version is not None:
-            # slice_time = False
+            slice_time = False
             if start_date is not None or end_date is not None:
-                # slice_time = True
+                slice_time = True
                 if start_date is None:
                     start_date = timestamp_epoch()
                 if end_date is None:
@@ -72,11 +71,12 @@ class _BaseData:
             self._bucket = metadata["object_store"]
 
             self._zarrstore = LocalZarrStore(bucket=self._bucket, datasource_uuid=uuid, mode="r")
+
             self.data = self._zarrstore.get(version=version)
-            # TODO - how do we want to handle time slicing?
-            # The get_ functions do some local time slicing, do we want to do that here?
-            # if slice_time:
-            #     self.data = self.data.sel(time=slice(start_date, end_date))
+            if slice_time:
+                start_date = start_date - Timedelta("1m")
+                end_date = end_date + Timedelta("1m")
+                self.data = self.data.sel(time=slice(start_date, end_date))
         else:
             raise ValueError(
                 "Must supply either data or uuid and version, cannot create an empty data object."

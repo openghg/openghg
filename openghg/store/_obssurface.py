@@ -580,7 +580,7 @@ class ObsSurface(BaseStore):
             file_hashes_to_compare = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
 
         # Making sure data can be force overwritten if force keyword is included.
-        if force and if_exists == "default":
+        if force and if_exists == "auto":
             if_exists = "new"
 
         if len(file_hashes_to_compare) == len(data):

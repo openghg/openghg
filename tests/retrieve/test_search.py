@@ -53,6 +53,22 @@ def test_search_surface(inlet_keyword, inlet_value):
     assert not search_surface(site="hfd", species="co2", inlet="888m")
 
 
+def test_search_surface_selects_dates():
+    res = search_surface(site="hfd", species="co2", inlet="50m")
+
+    data = res.retrieve_all().data
+
+    assert data.time[0] == Timestamp("2013-11-23T12:28:30")
+    assert data.time[-1] == Timestamp("2020-06-24T09:41:30")
+
+    res = search_surface(site="hfd", species="co2", inlet="50m", start_date="2014-01-01", end_date="2014-12-31")
+
+    data_sliced = res.retrieve_all().data
+
+    assert data_sliced.time[0] == Timestamp("2014-01-01T22:36:30")
+    assert data_sliced.time[-1] == Timestamp("2014-01-07T09:17:30")
+
+
 def test_search_surface_range():
     res = search_surface(
         site="TAC",

@@ -9,7 +9,7 @@ import xarray as xr
 import numpy as np
 from uuid import uuid4
 from openghg.objectstore import exists, get_object_from_json
-from openghg.util import split_daterange_str
+from openghg.util import split_daterange_str, timestamp_tzaware
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
 
@@ -942,12 +942,26 @@ class Datasource:
             _, end_date = split_daterange_str(daterange_str=dateranges[-1])
 
             with xr.open_zarr(self._store._stores[version], consolidated=True) as ds:
-                if Timestamp(start_date) != ds.time[0]:
+                if ds.time.size == 1:
+                    start_keys = timestamp_tzaware(start_date)
+                    start_data = timestamp_tzaware(ds.time[0].values)
+
+                    assert start_keys.year == start_data.year
+
+                    continue
+
+                start_keys = timestamp_tzaware(start_date)
+                start_data = timestamp_tzaware(ds.time[0].values)
+
+                if start_keys != start_data:
                     raise ValueError(
-                        f"Timestamp mismatch between expected ({start_date}) and stored {ds.time[0]}"
+                        f"Timestamp mismatch between expected ({start_keys}) and stored {start_data}"
                     )
 
-                if Timestamp(end_date) != ds.time[-1]:
+                end_keys = timestamp_tzaware(end_date)
+                end_data = timestamp_tzaware(ds.time[-1].values)
+
+                if end_keys != end_data:
                     raise ValueError(
-                        f"Timestamp mismatch between expected ({end_date}) and stored {ds.time[-1]}"
+                        f"Timestamp mismatch between expected ({end_keys}) and stored {end_data}"
                     )

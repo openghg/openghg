@@ -8,7 +8,7 @@ from xarray import Dataset
 
 from openghg.analyse import ModelScenario, calc_dim_resolution, match_dataset_dims, stack_datasets
 from openghg.retrieve import get_bc, get_flux, get_footprint, get_obs_surface
-from helpers import clear_test_stores
+from helpers import clear_test_stores, get_surface_datapath
 
 
 def test_scenario_direct_objects():
@@ -58,8 +58,8 @@ def test_scenario_infer_inputs_ch4():
     """
     Test ModelScenario can find underlying data based on keyword inputs.
     """
-    start_date = "2012-08-01"
-    end_date = "2012-09-01"
+    start_date = "2012-07-31-23:59:59"
+    end_date = "2012-09-01-23:59:59"
 
     site = "tac"
     domain = "EUROPE"
@@ -99,16 +99,19 @@ def test_scenario_infer_inputs_ch4():
     obs_data = model_scenario.obs.data
     obs_time = obs_data["time"]
     assert obs_time[0] == Timestamp("2012-08-01T00:00:30")
-    assert obs_time[-1] == Timestamp("2012-08-31T23:47:30")
+    # This time has changed but I've checked it in the data returned by parse_crds and it's correct
+    assert obs_time[-1] == Timestamp("2012-09-01T23:59:30")
 
     # Obs data - values
     obs_mf = obs_data["mf"]
     assert np.isclose(obs_mf[0], 1915.11)
-    assert np.isclose(obs_mf[-1], 1942.41)
+    assert np.isclose(obs_mf[-1], 1923.29)
 
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
 
+    print(model_scenario.footprint.data.time[0])
+    print(model_scenario.footprint.data.time[-1])
     footprint_time = footprint_data["time"]
 
     assert footprint_time[0] == Timestamp("2012-08-01T00:00:00")
@@ -119,6 +122,8 @@ def test_scenario_infer_inputs_ch4():
     assert source in fluxes
     assert len(fluxes.keys()) == 1
 
+    # QUESTION - How do we want to handle fluxes and the new date slicing?
+    raise AssertionError("How do we want to handle fluxes and the new date slicing?")
     flux_data = model_scenario.fluxes[source].data
     flux_time = flux_data["time"]
     assert flux_time[0] == Timestamp("2012-01-01T00:00:00")
@@ -189,6 +194,7 @@ def test_scenario_infer_inputs_co2():
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
     footprint_time = footprint_data["time"]
+
     assert footprint_time[0] == Timestamp("2014-07-01T00:00:00")
     assert footprint_time[-1] == Timestamp("2014-07-04T00:00:00")  # Test file - reduced time axis
 

@@ -8,14 +8,12 @@ from helpers import (
     get_surface_datapath,
     clear_test_stores,
 )
-from openghg.objectstore import get_bucket
 from openghg.standardise import standardise_surface, standardise_footprint, standardise_flux, standardise_bc, standardise_column, standardise_eulerian
 
 
 @pytest.fixture(scope="module", autouse=True)
 def data_read():
     clear_test_stores()
-    bucket = get_bucket()
 
     # DECC network sites
     network = "DECC"
