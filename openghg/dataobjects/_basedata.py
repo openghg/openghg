@@ -75,7 +75,7 @@ class _BaseData:
             self.data = self._zarrstore.get(version=version)
             if slice_time:
                 start_date = start_date - Timedelta("1m")
-                end_date = end_date + Timedelta("1m")
+                end_date = end_date - Timedelta("1m")
                 self.data = self.data.sel(time=slice(start_date, end_date))
         else:
             raise ValueError(
