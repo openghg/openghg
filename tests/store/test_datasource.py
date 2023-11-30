@@ -495,6 +495,8 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
 
     assert timestamp_tzaware(stored_ds["ch4"].time[0].values) == timestamp_tzaware(start)
     # QUESTION - why is there a ~ minute difference here?
+    # Is it because of the use of the representative daterange function?
+    # Should we have some kind of tolerance we accept?
     assert timestamp_tzaware(stored_ds["ch4"].time[-1].values) == timestamp_tzaware(end)
 
 

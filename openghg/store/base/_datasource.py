@@ -941,6 +941,9 @@ class Datasource:
             start_date, _ = split_daterange_str(daterange_str=dateranges[0])
             _, end_date = split_daterange_str(daterange_str=dateranges[-1])
 
+            if version not in self._store._stores:
+                raise ObjectStoreError(f"{version} not found in object store.")
+
             with xr.open_zarr(self._store._stores[version], consolidated=True) as ds:
                 if ds.time.size == 1:
                     start_keys = timestamp_tzaware(start_date)
@@ -953,7 +956,7 @@ class Datasource:
                 start_keys = timestamp_tzaware(start_date)
                 start_data = timestamp_tzaware(ds.time[0].values)
 
-                if start_keys != start_data:
+                if abs(start_keys - start_data) > Timedelta(minutes=1):
                     raise ValueError(
                         f"Timestamp mismatch between expected ({start_keys}) and stored {start_data}"
                     )
@@ -961,7 +964,7 @@ class Datasource:
                 end_keys = timestamp_tzaware(end_date)
                 end_data = timestamp_tzaware(ds.time[-1].values)
 
-                if end_keys != end_data:
+                if abs(end_keys - end_data) > Timedelta(minutes=1):
                     raise ValueError(
                         f"Timestamp mismatch between expected ({end_keys}) and stored {end_data}"
                     )

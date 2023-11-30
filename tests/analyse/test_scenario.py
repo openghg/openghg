@@ -58,8 +58,8 @@ def test_scenario_infer_inputs_ch4():
     """
     Test ModelScenario can find underlying data based on keyword inputs.
     """
-    start_date = "2012-07-31-23:59:59"
-    end_date = "2012-09-01-23:59:59"
+    start_date = "2012-08-01"
+    end_date = "2012-09-01"
 
     site = "tac"
     domain = "EUROPE"
@@ -99,8 +99,7 @@ def test_scenario_infer_inputs_ch4():
     obs_data = model_scenario.obs.data
     obs_time = obs_data["time"]
     assert obs_time[0] == Timestamp("2012-08-01T00:00:30")
-    # This time has changed but I've checked it in the data returned by parse_crds and it's correct
-    assert obs_time[-1] == Timestamp("2012-09-01T23:59:30")
+    assert obs_time[-1] == Timestamp("2012-08-31T23:47:30")
 
     # Obs data - values
     obs_mf = obs_data["mf"]
