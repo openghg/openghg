@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
 
+## 0.8.0 - xxxx.xx.xx
+
+### Changed
+
+- Moved to store data in local zarr stores, this should reduce both the size of the object store and memory consumption whilst processing and retrieving data - [PR #803](https://github.com/openghg/openghg/pull/803)
+
+## [0.7.0] - 2023-12-15
+
 ### Added
 
 - Added `DeprecationWarning` to the functions `parse_cranfield` and  `parse_btt`. - [PR #792](https://github.com/openghg/openghg/pull/792)
