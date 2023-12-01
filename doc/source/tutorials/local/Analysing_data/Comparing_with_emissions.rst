@@ -66,8 +66,8 @@ together observation, footprint, flux / emissions data and boundary conditions
 data.
 
 Above we loaded observation data from the Tacolneston site into the
-object store. We also added an associated footprint (sensitivity map)
-and anthropogenic emissions maps both for a domain defined over Europe.
+object store. We also added both an associated footprint (sensitivity map)
+and an anthropogenic emissions map for a domain defined over Europe.
 
 To access and link this data we can set up our ``ModelScenario``
 instance using a similiar set of keywords. In this case we have also
@@ -222,7 +222,7 @@ be calculated in a similar way:
     modelled_baseline = scenario.calc_modelled_baseline()
     modelled_baseline.plot()  # Can plot using xarray plotting methods
 
-To compare the these modelled observations to the observations
+To compare these modelled observations to the observations
 themselves, the ``ModelScenario.plot_comparison()`` method can be used.
 This will stack the modelled observations and the modelled baseline by
 default to allow comparison:
