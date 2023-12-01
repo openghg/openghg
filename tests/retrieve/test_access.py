@@ -3,14 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
-from helpers import (
-    attributes_checker_get_obs,
-    call_function_packager,
-    get_emissions_datapath,
-    get_footprint_datapath,
-    get_surface_datapath,
-    metadata_checker_obssurface,
-)
+from helpers import call_function_packager
 from openghg.dataobjects import ObsData
 from openghg.retrieve import get_flux, get_bc, get_footprint, get_obs_column, get_obs_surface, search
 from openghg.util import compress, compress_str, hash_bytes

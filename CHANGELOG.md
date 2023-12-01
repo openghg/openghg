@@ -54,6 +54,8 @@ has not changed. This is to prevent errors when concurrent writes are made to th
 
 - Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818)
 
+- Updated internal naming and input data_type to use "flux" rather than "emissions" consistently. - [PR #827](https://github.com/openghg/openghg/pull/827)
+
 ## [0.6.2] - 2023-08-07
 
 ### Fixed

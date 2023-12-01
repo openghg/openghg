@@ -8,7 +8,7 @@ import numpy as np
 import xarray as xr
 from numpy import ndarray
 
-logger = logging.getLogger("openghg.transform.emissions")
+logger = logging.getLogger("openghg.transform.flux")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 ArrayType = Optional[Union[ndarray, xr.DataArray]]
@@ -357,7 +357,7 @@ def parse_edgar(
     metadata["database_version"] = database_version
     metadata["author"] = author_name
     metadata["processed"] = str(timestamp_now())
-    metadata["data_type"] = "emissions"
+    metadata["data_type"] = "flux"
 
     attrs = {"author": metadata["author"], "processed": metadata["processed"]}
 

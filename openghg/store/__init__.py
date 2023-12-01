@@ -1,6 +1,6 @@
 from ._boundary_conditions import BoundaryConditions
 from ._data_schema import DataSchema
-from ._emissions import Emissions
+from ._flux import Flux
 from ._eulerian_model import EulerianModel
 from ._footprints import Footprints
 from ._infer_time import infer_date_range, update_zero_dim

@@ -112,12 +112,12 @@ def search_flux(
     continuous: Optional[bool] = None,
     **kwargs: Any,
 ) -> SearchResults:
-    """Search for emissions data
+    """Search for flux / emissions data
 
     Args:
         species: Species name
-        domain: Emissions domain
-        source: Emissions source
+        domain: Flux / Emissions domain
+        source: Flux / Emissions source
         database: Name of database source for this input (if relevant)
         database_version: Name of database version (if relevant)
         model: Model name (if relevant)
@@ -151,7 +151,7 @@ def search_flux(
         high_time_resolution=high_time_resolution,
         period=period,
         continuous=continuous,
-        data_type="emissions",
+        data_type="flux",
         **kwargs,
     )
 
@@ -261,7 +261,7 @@ def search_surface(
         height: Alias for inlet
         instrument: Instrument name
         measurement_type: Measurement type
-        data_type: Data type e.g. "surface", "column", "emissions"
+        data_type: Data type e.g. "surface", "column", "flux"
             See openghg.store.spec.define_data_types() for full details.
         start_date: Start date
         end_date: End date

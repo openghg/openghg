@@ -6,7 +6,7 @@ OpenGHG store. These are split into several data types which currently
 include:
 
 -  “footprints”: regional outputs from an LPDM model [#f3]_ (e.g. NAME)
--  “emissions”: estimates of species emissions/flux [#f2]_ within a region
+-  “flux”: estimates of species flux/emissions [#f2]_ within a region
 -  “boundary_conditions”: vertical curtains at the boundary of a
    regional domain
 -  “eulerian_model”: Global CTM output (e.g. GEOSChem) [#f1]_
@@ -317,7 +317,7 @@ use the ``search`` function from within the ``openghg.retrieve`` sub-module:
       <tbody>
         <tr>
           <th>0</th>
-          <td>emissions</td>
+          <td>flux</td>
           <td>cv18710@bristol.ac.uk</td>
           <td>2021-01-08 12:18:49.803837+00:00</td>
           <td>/home/cv18710/work_shared/gridded_fluxes/ch4/u...</td>
@@ -397,7 +397,7 @@ standarising the data.
 
 
 To search for just one data type a specific ``search_*`` function can be
-used (or the ``data_type`` input of ``"emissions"`` or
+used (or the ``data_type`` input of ``"flux"`` or
 ``"boundary_conditions"`` can be passed to the ``search`` function). For
 example, for flux data:
 
@@ -455,7 +455,7 @@ example, for flux data:
       <tbody>
         <tr>
           <th>0</th>
-          <td>emissions</td>
+          <td>flux</td>
           <td>cv18710@bristol.ac.uk</td>
           <td>2021-01-08 12:18:49.803837+00:00</td>
           <td>/home/cv18710/work_shared/gridded_fluxes/ch4/u...</td>
@@ -495,7 +495,7 @@ For each of the data types seen above, there is an associated object from the
 ``openghg.store`` sub-module:
 
 -  ``Footprints``
--  ``Emissions``
+-  ``Flux``
 -  ``BoundaryConditions``
 -  ``EulerianModel`` [#f1]_
 
@@ -509,9 +509,9 @@ For instance, to see the schema for flux data:
 
 .. code:: ipython3
 
-    from openghg.store import Emissions
+    from openghg.store import Flux
 
-    Emissions.schema()
+    Flux.schema()
 
 
 
@@ -521,7 +521,7 @@ For instance, to see the schema for flux data:
     DataSchema(data_vars={'flux': ('time', 'lat', 'lon')}, dtypes={'lat': <class 'numpy.floating'>, 'lon': <class 'numpy.floating'>, 'time': <class 'numpy.datetime64'>, 'flux': <class 'numpy.floating'>}, dims=None)
 
 
-This tells us that the netCDF input for “emissions” should contain:
+This tells us that the netCDF input for “flux” should contain:
 
 - Data variables:
 

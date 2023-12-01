@@ -1,10 +1,10 @@
 import pytest
-from helpers import get_emissions_datapath
+from helpers import get_flux_datapath
 from typing import Any, Union
 from openghg.retrieve import search, search_flux
-from openghg.store import Emissions
+from openghg.store import Flux
 from openghg.standardise import standardise_flux, standardise_from_binary_data
-from openghg.transform import transform_emissions_data
+from openghg.transform import transform_flux_data
 from openghg.util import hash_bytes
 from xarray import open_dataset
 from pandas import Timestamp
@@ -20,7 +20,7 @@ def clear_stores():
 def test_read_binary_data(mocker, clear_stores):
     clear_test_stores()
 
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     binary_data = test_datapath.read_bytes()
 
@@ -38,7 +38,7 @@ def test_read_binary_data(mocker, clear_stores):
 
     results = standardise_from_binary_data(
         store="user",
-        data_type="emissions",
+        data_type="flux",
         binary_data=binary_data,
         metadata=metadata,
         file_metadata=file_metadata)
@@ -47,7 +47,7 @@ def test_read_binary_data(mocker, clear_stores):
 
 
 def test_read_file():
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(store="user",
                                     filepath=test_datapath,
@@ -64,7 +64,7 @@ def test_read_file():
         species="co2",
         source="gpp-cardamom",
         domain="europe",
-        data_type="emissions",
+        data_type="flux",
         start_date="2012",
         end_date="2013",
     )
@@ -100,7 +100,7 @@ def test_read_file():
         "max_latitude": 79.057,
         "min_latitude": 10.729,
         "time_resolution": "standard",
-        "data_type": "emissions",
+        "data_type": "flux",
         "time_period": "1 year",
     }
 
@@ -126,7 +126,7 @@ def load_edgar():
             database_version: if True, `database_version` argument passed to `read_file`
         """
         file_name = f'ch4-anthro_globaledgar_{version.replace(".", "-")}_{str(year)}.nc'
-        datapath = get_emissions_datapath(file_name)
+        datapath = get_flux_datapath(file_name)
         kwargs: Any = dict(
             filepath=datapath,
             species=species,
@@ -254,12 +254,12 @@ def test_read_file_fails_ambiguous(clear_stores, load_edgar):
 def test_add_edgar_database(clear_stores):
     """Test edgar can be added to object store (default domain)"""
     folder = "v6.0_CH4"
-    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     database = "EDGAR"
     date = "2015"
 
-    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date)
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date)
 
     default_domain = "globaledgar"
 
@@ -314,13 +314,13 @@ def test_transform_and_add_edgar_database(clear_stores):
     xesmf = pytest.importorskip("xesmf")
 
     folder = "v6.0_CH4"
-    test_datapath = get_emissions_datapath(f"EDGAR/yearly/{folder}")
+    test_datapath = get_flux_datapath(f"EDGAR/yearly/{folder}")
 
     database = "EDGAR"
     date = "2015"
     domain = "EUROPE"
 
-    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date, domain=domain)
+    proc_results = transform_flux_data(store="user", datapath=test_datapath, database=database, date=date, domain=domain)
 
     version = "v6.0"
     species = "ch4"
@@ -335,7 +335,7 @@ def test_transform_and_add_edgar_database(clear_stores):
         domain=domain,
         database=database,  # would searching for lowercase not work?
         database_version=version,
-        data_type="emissions",
+        data_type="flux",
     )
 
     edgar_data = search_results.retrieve_all()
@@ -366,8 +366,8 @@ def test_transform_and_add_edgar_database(clear_stores):
 
 
 def test_flux_schema():
-    """Check expected data variables are being included for default Emissions schema"""
-    data_schema = Emissions.schema()
+    """Check expected data variables are being included for default Flux schema"""
+    data_schema = Flux.schema()
 
     data_vars = data_schema.data_vars
     assert "flux" in data_vars

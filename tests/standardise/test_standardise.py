@@ -2,7 +2,7 @@ from pathlib import Path
 import pytest
 import xarray as xr
 from helpers import (
-    get_emissions_datapath,
+    get_flux_datapath,
     get_footprint_datapath,
     get_column_datapath,
     get_surface_datapath,
@@ -303,7 +303,7 @@ def test_standardise_footprint():
 
 
 def test_standardise_flux():
-    test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
+    test_datapath = get_flux_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
     proc_results = standardise_flux(
         filepath=test_datapath,
@@ -319,7 +319,7 @@ def test_standardise_flux():
 
 
 def test_standardise_flux_additional_keywords():
-    test_datapath = get_emissions_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
+    test_datapath = get_flux_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 
     proc_results = standardise_flux(
         filepath=test_datapath,
@@ -374,4 +374,3 @@ def test_cloud_standardise(monkeypatch, mocker, tmpdir):
             },
         }
     )
-

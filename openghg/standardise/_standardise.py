@@ -603,13 +603,13 @@ def standardise_flux(
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
 ) -> Dict:
-    """Process flux data
+    """Process flux / emissions data
 
     Args:
-        filepath: Path of emissions file
+        filepath: Path of flux / emissions file
         species: Species name
-        source: Emissions source
-        domain: Emissions domain
+        source: Flux / Emissions source
+        domain: Flux / Emissions domain
         date : Date as a string e.g. "2012" or "201206" associated with emissions as a string.
                Only needed if this can not be inferred from the time coords
         high_time_resolution: If this is a high resolution file
@@ -671,7 +671,7 @@ def standardise_flux(
         return response_content
     else:
         return standardise(
-            data_type="emissions",
+            data_type="flux",
             store=store,
             filepath=filepath,
             species=species,

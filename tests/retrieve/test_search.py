@@ -183,20 +183,20 @@ def test_multi_type_search():
     res = search(species="co2")
     data_types = set([m["data_type"] for m in res.metadata.values()])
 
-    assert data_types == {"emissions", "surface"}
+    assert data_types == {"flux", "surface"}
 
     obs = res.retrieve_all()
 
     # Make sure the retrieval works correctly
     data_types = set([ob.metadata["data_type"] for ob in obs])
 
-    assert data_types == {"emissions", "surface"}
+    assert data_types == {"flux", "surface"}
 
     res = search(species="ch4", data_type=["surface"])
 
     assert len(res.metadata) == 7
 
-    res = search(species="co2", data_type=["surface", "emissions"])
+    res = search(species="co2", data_type=["surface", "flux"])
 
     assert len(res.metadata) == 8
 
@@ -388,7 +388,7 @@ def test_search_flux():
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
-        "data_type": "emissions",
+        "data_type": "flux",
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
@@ -424,7 +424,7 @@ def test_search_flux_select():
         "species": "co2",
         "domain": "europe",
         "source": "gpp-cardamom",
-        "data_type": "emissions",
+        "data_type": "flux",
     }
 
     assert partial_metadata.items() <= res.metadata[key].items()
