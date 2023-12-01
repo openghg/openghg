@@ -21,6 +21,10 @@ class _BaseData:
         attrs_to_check: Optional[Dict] = None,
     ) -> None:
         """
+        This handles data for each of the data type classes. It accepts either a Dataset
+        or a UUID and version to lazy load a Dataset from a zarr store. If dates are passed then the
+        dataset is sliced to the requested time period.
+
         Args:
             metadata: Dictionary of metadata
             data: Dataset if data is already loaded
