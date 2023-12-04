@@ -180,7 +180,7 @@ def test_read_CRDS_incorrect_sampling_period_raises(sampling_period):
         )
 
 
-def test_read_CRDS(bucket):
+def test_read_CRDS(bucket, tmpdir):
     filepath = get_surface_datapath(filename="bsd.picarro.1minute.248m.min.dat", source_format="CRDS")
     results = standardise_surface(
         store="user", filepath=filepath, source_format="CRDS", site="bsd", network="DECC"
@@ -221,6 +221,12 @@ def test_read_CRDS(bucket):
         "2014-01-30-11:12:30+00:00_2020-12-01-22:32:29+00:00",
         "2023-01-30-13:56:30+00:00_2023-01-30-14:21:29+00:00",
     ]
+
+    # Now let's make sure we can write out this retrieved data to NetCDF
+    tmppath = Path(tmpdir).joinpath("test.nc")
+
+    with datasource.get_data(version="latest") as ch4_data:
+        ch4_data.to_netcdf(tmppath)
 
 
 def test_read_GC(bucket):
@@ -898,17 +904,13 @@ def test_drop_only_correct_nan():
 
     rgl_filepath = get_surface_datapath(filename="rgl.picarro.1minute.90m.minimum.dat", source_format="CRDS")
 
-    standardise_surface(filepath=rgl_filepath,
-                        source_format="CRDS",
-                        network="DECC",
-                        site="RGL",
-                        store="group")
+    standardise_surface(
+        filepath=rgl_filepath, source_format="CRDS", network="DECC", site="RGL", store="group"
+    )
 
     # Compare output to GCWerks - there should be a valid CH4 data point at 2014-06-16 03:34
 
-    rgl_ch4 = get_obs_surface(site="rgl",
-                              species="ch4",
-                              inlet="90m")
+    rgl_ch4 = get_obs_surface(site="rgl", species="ch4", inlet="90m")
     rgl_ch4_data = rgl_ch4.data
 
     time_str1 = "2014-06-16T03:34:30"
@@ -918,9 +920,7 @@ def test_drop_only_correct_nan():
     assert np.isclose(rgl_ch4_data.sel(time=time_str1)["mf"].values, 1906.27)
     assert np.isclose(rgl_ch4_data.sel(time=time_str2)["mf"].values, 1907.20)
 
-    rgl_co2 = get_obs_surface(site="rgl",
-                              species="co2",
-                              inlet="90m")
+    rgl_co2 = get_obs_surface(site="rgl", species="co2", inlet="90m")
     rgl_co2_data = rgl_co2.data
 
     assert len(rgl_co2_data["time"]) == 1

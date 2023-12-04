@@ -5,6 +5,7 @@ from openghg.store import Footprints
 from openghg.util import hash_bytes
 from openghg.standardise import standardise_footprint, standardise_from_binary_data
 import xarray as xr
+from pathlib import Path
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -23,7 +24,7 @@ def test_read_footprint_co2_from_data(mocker):
         "model": "NAME",
         "metmodel": "UKV",
         "species": "co2",
-        "high_time_resolution": True,
+        "high_time_resolution": "True",
     }
 
     binary_data = datapath.read_bytes()
@@ -105,8 +106,8 @@ def test_read_footprint_standard(keyword, value):
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "high_spatial_resolution": False,
-        "high_time_resolution": False,
+        "high_spatial_resolution": "False",
+        "high_time_resolution": "False",
         "time_period": "2 hours",
     }
 
@@ -114,7 +115,7 @@ def test_read_footprint_standard(keyword, value):
         assert footprint_data.attrs[key] == expected_attrs[key]
 
 
-def test_read_footprint_high_spatial_resolution():
+def test_read_footprint_high_spatial_resolution(tmpdir):
     """
     Test high spatial resolution footprint
      - expects additional parameters for `fp_low` and `fp_high`
@@ -219,13 +220,13 @@ def test_read_footprint_high_spatial_resolution():
         "min_longitude": -97.9,
         "max_latitude": 79.057,
         "min_latitude": 10.729,
-        "high_spatial_resolution": True,
+        "high_spatial_resolution": "True",
         "max_latitude_high": 52.01937,
         "max_longitude_high": 0.468,
         "min_latitude_high": 50.87064,
         "min_longitude_high": -1.26,
-        "high_time_resolution": False,
-        "short_lifetime": False,
+        "high_time_resolution": "False",
+        "short_lifetime": "False",
     }
 
     assert footprint_data.attrs == expected_attrs
@@ -236,6 +237,10 @@ def test_read_footprint_high_spatial_resolution():
     assert footprint_data["fp_low"].min().values == 0.0
     assert footprint_data["fp_high"].min().values == 0.0
     assert footprint_data["pressure"].min().values == pytest.approx(1011.92)
+
+    # Make sure we can write out a NetCDF
+    tmppath = Path(tmpdir).joinpath("footprint_test.nc")
+    footprint_data.to_netcdf(tmppath)
 
 
 @pytest.mark.parametrize(
@@ -322,9 +327,9 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "high_spatial_resolution": False,
-        "high_time_resolution": True,
-        "short_lifetime": False,
+        "high_spatial_resolution": "False",
+        "high_time_resolution": "True",
+        "short_lifetime": "False",
         "time_period": "1 hour",
     }
 
@@ -390,9 +395,9 @@ def test_read_footprint_short_lived():
         "min_longitude": -0.396,
         "max_latitude": 53.785,
         "min_latitude": 51.211,
-        "high_spatial_resolution": False,
-        "high_time_resolution": False,
-        "short_lifetime": True,
+        "high_spatial_resolution": "False",
+        "high_time_resolution": "False",
+        "short_lifetime": "True",
         "time_period": "1 hour",
     }
 
@@ -500,8 +505,6 @@ def test_footprint_read_using_mfdataset():
         chunks={"time": 4},
         continuous=False,
     )
-
-
 
 
 def test_passing_chunks_reduces_memory_consumption():
