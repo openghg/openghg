@@ -10,7 +10,7 @@ from pandas import Timestamp
 
 from openghg.objectstore.metastore import ClassicMetaStore
 from openghg.types import DatasourceLookupError
-from openghg.util import timestamp_now, to_lowercase
+from openghg.util import timestamp_now
 
 
 T = TypeVar("T", bound="BaseStore")
@@ -180,9 +180,6 @@ class BaseStore:
                 datasource = Datasource(bucket=self._bucket)
                 uid = datasource.uuid()
                 meta_copy["uuid"] = uid
-                # Make sure all the metadata is lowercase for easier searching later
-                # TODO - do we want to do this or should be just perform lowercase comparisons?
-                meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
             else:
                 datasource = Datasource(bucket=self._bucket, uuid=uuid)
 
@@ -233,8 +230,6 @@ class BaseStore:
         Return:
             dict: Dictionary of datasource information
         """
-        from openghg.util import to_lowercase
-
         if min_keys is None:
             min_keys = len(required_keys)
 
@@ -242,9 +237,7 @@ class BaseStore:
         for key, _data in data.items():
             metadata = _data["metadata"]
 
-            required_metadata = {
-                k.lower(): to_lowercase(v) for k, v in metadata.items() if k in required_keys
-            }
+            required_metadata = {k: v for k, v in metadata.items() if k in required_keys}
 
             if len(required_metadata) < min_keys:
                 raise ValueError(

@@ -23,6 +23,7 @@ from typing import Any, Dict, List, Optional, Union
 import tinydb
 from tinydb.operations import delete as tinydb_delete
 
+from openghg.util import to_lowercase
 from openghg.types import MetastoreError
 
 MetaData = Dict[str, Any]
@@ -161,7 +162,7 @@ class TinyDBMetaStore(MetaStore):
         Returns:
             formatted metadata.
         """
-        return {k.lower(): v for k, v in metadata.items()}
+        return to_lowercase(metadata)
 
     def _get_query(self, metadata: MetaData) -> tinydb.queries.QueryInstance:
         """Return a TinyDB query that searches for all records whose metadata
@@ -195,7 +196,7 @@ class TinyDBMetaStore(MetaStore):
         """Add new metadata to the metastore.
 
         Args:
-            metadata: metdata to add to the metastore.
+            metadata: metadata to add to the metastore.
 
         Returns:
             None
