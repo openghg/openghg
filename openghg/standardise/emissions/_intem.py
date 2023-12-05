@@ -5,12 +5,14 @@ from typing import Dict, Literal, Optional, Union
 def parse_intem(
     filepath: Path,
     species: str,
+    data_type: str,
     source: str = "intem",
     domain: str = "europe",
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
     period: Optional[Union[str, tuple]] = None,
+    high_time_resolution: Optional[bool] = False,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
 ) -> Dict:
@@ -64,7 +66,6 @@ def parse_intem(
             metadata[key] = value
 
     metadata["author"] = author_name
-    metadata["data_type"] = data_type
     metadata["processed"] = str(timestamp_now())
     metadata["data_type"] = "emissions"
     metadata["source_format"] = "openghg"

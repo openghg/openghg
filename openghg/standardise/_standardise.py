@@ -464,7 +464,6 @@ def standardise_flux(
     continuous: bool = True,
     overwrite: bool = False,
     store: Optional[str] = None,
-    
 ) -> dict:
     """Process flux data
 
@@ -534,7 +533,7 @@ def standardise_flux(
             continuous=continuous,
             chunks=chunks,
             overwrite=overwrite,
-            source_format = source_format,
+            source_format=source_format,
         )
 
 

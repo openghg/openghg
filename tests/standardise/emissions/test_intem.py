@@ -17,13 +17,16 @@ def test_read_file():
     domain = "europe"
     species = "ch4"
 
-    data = parse_intem(filepath,
-                         domain=domain,
-                         species=species)
+    data = parse_intem(
+        filepath,
+        domain=domain,
+        species=species,
+        data_type="emissions",
+    )
     assert "ch4_intem_europe" in data
     output_ch4 = data["ch4_intem_europe"]
     data_ch4 = output_ch4["data"]
-    
+
     time = data_ch4["time"]
     assert time[0] == Timestamp("2012-01-01T00:00:00.000000000")
     assert time[-1] == Timestamp("2012-10-01T00:00:00.000000000")
@@ -35,4 +38,3 @@ def test_read_file():
 
     metadata = output_ch4["metadata"]
     assert metadata.items() >= expected_metadata.items()
-
