@@ -5,7 +5,8 @@ This tutorial demonstrates how to add ancillary spatial data to the
 OpenGHG store. These are split into several data types which currently
 include:
 
--  “footprints”: regional outputs from an LPDM model [#f3]_ (e.g. NAME)
+-  “footprints”: regional outputs from an LPDM model [#f3]_ (e.g. NAME).
+   The LPDM set up for these outputs is based on e.g. `Lunt et al. 2016 <https://gmd.copernicus.org/articles/9/3213/2016/>`
 -  “emissions”: estimates of species emissions/flux [#f2]_ within a region
 -  “boundary_conditions”: vertical curtains at the boundary of a
    regional domain
