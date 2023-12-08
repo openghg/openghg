@@ -25,7 +25,7 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 import json
-from typing import Literal, Optional
+from typing import Any, cast, Literal, Optional, Type
 
 from filelock import FileLock
 from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
@@ -145,7 +145,7 @@ class SafetyCachingMiddleware(Middleware):
     has changed since it was first accessed by the storage class.
     """
 
-    def __init__(self, storage_cls: tinydb.Storage) -> None:
+    def __init__(self, storage_cls: Type[tinydb.Storage]) -> None:
         """Follows the standard pattern for middleware.
 
         Args:
@@ -164,7 +164,7 @@ class SafetyCachingMiddleware(Middleware):
         """
         if self.cache is None:
             self.cache = self.storage.read()
-            self.database_hash = hash_string(self.cache)
+            self.database_hash = hash_string(str(self.cache))
 
         return self.cache
 
@@ -184,8 +184,11 @@ class SafetyCachingMiddleware(Middleware):
         Raises: MetaStoreError if writes have been made and the underlying file *has* been changed.
         """
         if self.writes_made:
+            # we know that the cache is a dictionary of dictionaries
+            self.cache = cast(dict[str, dict[str, Any]], self.cache)
+
             # check if stored hash matches current hash
-            if self.database_hash == hash_string(self.storage.read()):
+            if self.database_hash == hash_string(str(self.storage.read())):
                 # if underlying file not changed, write data
                 self.storage.write(self.cache)
             else:
