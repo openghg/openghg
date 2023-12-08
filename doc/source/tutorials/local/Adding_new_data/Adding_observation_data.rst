@@ -63,6 +63,20 @@ For instance, the Tacolneston site in the UK (site code “TAC”) has four entr
 
     summary[summary["Site code"] == "TAC"]
 
+
+Let's see what data is available for a given source.
+First, we'll list all source formats.
+
+.. ipython:: python
+
+    summary["Source format"].unique()
+
+Now we'll find all data with source format ``"CRDS"``.
+
+.. ipython:: python
+
+    summary[summary["Source format"] == "CRDS"]
+
 DECC network
 ~~~~~~~~~~~~
 
