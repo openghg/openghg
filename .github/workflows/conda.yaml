@@ -1,16 +1,11 @@
 name: Create conda environment and run tests
 
 on:
- workflow_run:
-    workflows: [workflow]
+  workflow_run:
+    workflows:
+      - workflow
     types:
       - completed
-  push:
-    branches: [main, devel]
-    tags:
-    - '*'
-  pull_request:
-    branches: [main, devel]
 
 jobs:
   test:
@@ -32,7 +27,7 @@ jobs:
         with:
           environment-file: environment-dev.yaml
           cache-environment: true
-          post-cleanup: 'all'
+          post-cleanup: "all"
           init-shell: bash
       - name: Run the tests
         run: pytest tests/
