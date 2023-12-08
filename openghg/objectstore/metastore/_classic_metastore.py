@@ -28,11 +28,12 @@ import json
 from typing import Literal, Optional, TypeVar
 
 import tinydb
-from tinydb.middlewares import CachingMiddleware
+from tinydb.middlewares import Middleware
 
 from openghg.objectstore import exists, get_object, set_object_from_json
 from openghg.objectstore.metastore._metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
+from openghg.util import hash_string
 
 
 object_store_data_classes = {  # TODO: move this to central location after ObjectStore PR
@@ -130,6 +131,72 @@ class BucketKeyStorage(tinydb.Storage):
         pass
 
 
+class SafetyCachingMiddleware(Middleware):
+    """Middleware that caches changes to the database, and writes
+    these changes when the database is closed. Changes are only written
+    if the underlying file has not changed. (The underlying file is the
+    persistent record of the database that is read in by the storage class.)
+
+    This differs from CachingMiddleware in two ways:
+    1) changes are never written before closing the database, whereas
+    CachingMiddleware will write after 1000 changes by default.
+
+    2) CachingMiddleware does not check if the underlying file
+    has changed since it was first accessed by the storage class.
+    """
+
+    def __init__(self, storage_cls: tinydb.Storage) -> None:
+        """Follows the standard pattern for middleware.
+
+        Args:
+            storage_cls: tinydb storage class to wrap with Middleware
+        Returns:
+            None
+        """
+        super().__init__(storage_cls)
+        self.cache = None  # in-memory version of database
+        self.database_hash = None  # hash taken when database first read
+        self.writes_made = False  # flag to check if writes made
+
+    def read(self):
+        """Read the database from the cache, if present, otherwise load
+        the database from the underlying storage and save a hash of the result.
+        """
+        if self.cache is None:
+            self.cache = self.storage.read()
+            self.database_hash = hash_string(self.cache)
+
+        return self.cache
+
+    def write(self, data):
+        """Store data in the cache.
+
+        Args:
+            data: data to store (this is used internally by TinyDB)
+        """
+        self.cache = data
+        self.writes_made = True
+
+    def close(self):
+        """Close the database. If writes have been made, and the underlying
+        file has not changed, writes will be saved to disk at this point.
+
+        Raises: MetaStoreError if writes have been made and the underlying file *has* been changed.
+        """
+        if self.writes_made:
+            # check if stored hash matches current hash
+            if self.database_hash == hash_string(self.storage.read()):
+                # if underlying file not changed, write data
+                self.storage.write(self.cache)
+            else:
+                raise MetastoreError(
+                    "Could not write to object store: object store modified while write in progress."
+                )
+
+        # let underlying storage clean up
+        self.storage.close()
+
+
 @contextmanager
 def open_metastore(
     bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
@@ -146,7 +213,7 @@ def open_metastore(
         ClassicMetaStore instance.
     """
     key = get_metakey(data_type)
-    with tinydb.TinyDB(bucket, key, mode, storage=CachingMiddleware(BucketKeyStorage)) as db:
+    with tinydb.TinyDB(bucket, key, mode, storage=SafetyCachingMiddleware(BucketKeyStorage)) as db:
         metastore = ClassicMetaStore(database=db, data_type=data_type)
         yield metastore
 
@@ -176,7 +243,7 @@ class ClassicMetaStore(TinyDBMetaStore):
             ClassicMetastore object for given bucket and data type.
         """
         key = get_metakey(data_type)
-        database = tinydb.TinyDB(bucket, key, mode="rw", storage=CachingMiddleware(BucketKeyStorage))
+        database = tinydb.TinyDB(bucket, key, mode="rw", storage=SafetyCachingMiddleware(BucketKeyStorage))
         return cls(database=database, data_type=data_type)
 
     def close(self) -> None:
