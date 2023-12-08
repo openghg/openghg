@@ -1,6 +1,5 @@
-name: openghg_env
+name: openghg_dev_env
 channels:
-  - openghg
   - conda-forge
   - defaults
   - anaconda
@@ -32,5 +31,20 @@ dependencies:
   - rich
   - urllib3>=1.26.3
   - xesmf>=0.7
+  - git
+  - flake8
+  - pre-commit
+  - pytest
+  - pytest-cov
+  - pytest-mock
+  - requests-mock
+  - pytest-tornasync
+  - mypy==1.4.0
+  - types-PyYAML
+  - types-requests
+  - types-toml
+  - types-urllib3
   - pip:
-    - icoscp
+      - cfchecker @ git+https://github.com/openghg/cf-checker@master#egg=cf-checker
+      - msgpack-types
+      - icoscp
