@@ -29,7 +29,7 @@ from typing import Any, cast, Literal, Optional, Type
 
 from filelock import FileLock
 from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
-from openghg.objectstore.metastore._metastore import TinyDBMetaStore
+from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
 from openghg.util import hash_string
 import tinydb
