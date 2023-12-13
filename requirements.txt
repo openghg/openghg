@@ -7,6 +7,7 @@ matplotlib
 msgpack
 netcdf4
 nbformat
+numcodecs
 numexpr
 numpy
 nc-time-axis
@@ -23,3 +24,4 @@ xarray
 urllib3 >= 1.26.3
 openghg_defs
 rich
+zarr
