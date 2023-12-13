@@ -1,11 +1,16 @@
 name: Create conda environment and run tests
 
 on:
-  workflow_run:
-    workflows:
-      - workflow
-    types:
-      - completed
+  push:
+    branches: [master, devel]
+    tags:
+      - "*"
+    paths-ignore:
+      - 'CHANGELOG.md'
+  pull_request:
+    branches: [master, devel]
+    paths-ignore:
+      - 'CHANGELOG.md'
 
 jobs:
   test:
