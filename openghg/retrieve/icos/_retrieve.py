@@ -236,16 +236,15 @@ def local_retrieve(
         # Create the expected ObsData type
         obs_data = []
         for data in standardised_data.values():
-            measurement_data = data["data"]
             # These contain URLs that are case sensitive so skip lowercasing these
-            skip_keys = [
-                "citation_string",
-                "instrument_data",
-                "dobj_pid",
-                "dataset_source",
-            ]
-            metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
-            obs_data.append(ObsData(data=measurement_data, metadata=metadata))
+            # skip_keys = [
+            #     "citation_string",
+            #     "instrument_data",
+            #     "dobj_pid",
+            #     "dataset_source",
+            # ]
+            # metadata = to_lowercase(data["metadata"], skip_keys=skip_keys)
+            obs_data.append(ObsData(data=data["data"], metadata=data["metadata"]))
 
     if isinstance(obs_data, list) and len(obs_data) == 1:
         return obs_data[0]
