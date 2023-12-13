@@ -1,5 +1,6 @@
 name: openghg_dev_env
 channels:
+  - openghg
   - conda-forge
   - defaults
   - anaconda
