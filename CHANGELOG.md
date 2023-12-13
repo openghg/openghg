@@ -44,7 +44,7 @@ has not changed. This is to prevent errors when concurrent writes are made to th
 
 - Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
 
-- Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818)
+- Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818). OpenGHG now supports Python >= 3.9.
 
 ## [0.6.2] - 2023-08-07
 
