@@ -462,13 +462,28 @@ class ModelScenario:
 
                 flux_source = self._get_data(flux_keywords, data_type="flux")
                 # TODO: May need to update this check if flux_source is empty FluxData() object
+
                 if flux_source is not None:
+                    # try to infer source name from FluxData metadata
+                    if name is None and len(sources) == 1:
+                        try:
+                            name = flux_source.metadata["source"]
+                        except KeyError:
+                            raise ValueError(
+                                "Flux 'source' could not be inferred from metadata/attributes. Please specify the source(s) of the flux."
+                            )
                     flux[name] = flux_source
 
         elif flux is not None:
             if not isinstance(flux, dict):
-                name = flux.metadata["source"]
-                flux = {name: flux}
+                try:
+                    name = flux.metadata["source"]
+                except KeyError:
+                    raise ValueError(
+                        "Flux 'source' could not be inferred from `flux` metadata/attributes. Please specify the source(s) of the flux in the `FluxData` metadata.."
+                    )
+                else:
+                    flux = {name: flux}
 
         # TODO: Make this so flux.anthro can be called etc. - link in some way
         if self.fluxes is not None:
@@ -631,7 +646,6 @@ class ModelScenario:
                 infer_sampling_period = True
             else:
                 obs_data_period_s = float(sampling_period)
-            obs_data_period_s = float(obs_attributes["sampling_period"])
         elif "sampling_period_estimate" in obs_attributes:
             estimate = obs_attributes["sampling_period_estimate"]
             logger.warning(f"Using estimated sampling period of {estimate}s for observational data")
@@ -653,6 +667,10 @@ class ModelScenario:
             # Check if the periods differ by more than 1 second
             if max_diff > 1.0:
                 raise ValueError("Sample period can be not be derived from observations")
+
+            estimate = f"{obs_data_period_s:.1f}"
+            logger.warning(f"Sampling period was estimated (inferred) from data frequency: {estimate}s")
+            obs.data.attrs["sampling_period_estimate"] = estimate
 
         # TODO: Check regularity of the data - will need this to decide is resampling
         # is appropriate or need to do checks on a per time point basis
@@ -773,7 +791,7 @@ class ModelScenario:
         try:
             mf = obs.data["mf"]
             units: Optional[float] = float(mf.attrs["units"])
-        except KeyError:
+        except (ValueError, KeyError):
             units = None
         except AttributeError:
             raise AttributeError("Unable to read mf attribute from observation data.")
