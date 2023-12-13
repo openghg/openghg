@@ -34,6 +34,9 @@ jobs:
           cache-environment: true
           post-cleanup: "all"
           init-shell: bash
+      - name: Install OpenGHG
+        run: conda develop .
+        shell: micromamba-shell {0}
       - name: Run the tests
         run: pytest tests/
         shell: micromamba-shell {0}
