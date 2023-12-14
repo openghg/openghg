@@ -56,7 +56,7 @@ def parse_intem(
     metadata["species"] = species
     metadata["domain"] = domain
     metadata["source"] = source
-    
+
     optional_keywords = {"model": model}
 
     for key, value in optional_keywords.items():
