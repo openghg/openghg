@@ -6,7 +6,6 @@ provided the fixtures are changed.
 """
 import pytest
 import tinydb
-
 from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
 

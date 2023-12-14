@@ -1,10 +1,9 @@
 import pytest
-
+import tinydb
 from openghg.objectstore import get_object_from_json
 from openghg.objectstore.metastore import open_metastore
 from openghg.objectstore.metastore._classic_metastore import SafetyCachingMiddleware
 from openghg.types import MetastoreError
-import tinydb
 from tinydb.storages import JSONStorage
 
 

@@ -1,14 +1,17 @@
-import pytest
-import pandas as pd
 import numpy as np
-from helpers import get_surface_datapath, get_emissions_datapath, get_footprint_datapath
-from openghg.store.base import Datasource
-from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import get_flux
-from openghg.retrieve import search
-from openghg.standardise import standardise_footprint, standardise_flux, standardise_surface
+import pandas as pd
+import pytest
+from helpers import (
+    clear_test_stores,
+    get_emissions_datapath,
+    get_footprint_datapath,
+    get_surface_datapath,
+)
 from openghg.objectstore import get_bucket
-from helpers import clear_test_stores
+from openghg.objectstore.metastore import open_metastore
+from openghg.retrieve import get_flux, search
+from openghg.standardise import standardise_flux, standardise_footprint, standardise_surface
+from openghg.store.base import Datasource
 
 
 def test_database_update_repeat():

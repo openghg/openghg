@@ -1,5 +1,5 @@
 import pytest
-from openghg.util import format_inlet, extract_height_name
+from openghg.util import extract_height_name, format_inlet
 
 
 @pytest.mark.parametrize(
