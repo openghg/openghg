@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Dict, Literal, Optional, Union
 
 
 def parse_intem(
