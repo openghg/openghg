@@ -37,7 +37,6 @@ def parse_intem(
     """
     from openghg.util import timestamp_now
     from openghg.store import infer_date_range
-    from openghg.store._emissions import Emissions
     from xarray import open_dataset
 
     emissions_dataset = open_dataset(filepath).chunk(chunks)
