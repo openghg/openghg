@@ -25,15 +25,15 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 import json
-from typing import Literal, Optional, TypeVar
+from typing import Any, cast, Literal, Optional, Type
 
-import tinydb
-from tinydb.middlewares import Middleware
-
-from openghg.objectstore import exists, get_object, set_object_from_json
-from openghg.objectstore.metastore._metastore import TinyDBMetaStore
+from filelock import FileLock
+from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
+from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
 from openghg.util import hash_string
+import tinydb
+from tinydb.middlewares import Middleware
 
 
 object_store_data_classes = {  # TODO: move this to central location after ObjectStore PR
@@ -145,7 +145,7 @@ class SafetyCachingMiddleware(Middleware):
     has changed since it was first accessed by the storage class.
     """
 
-    def __init__(self, storage_cls: tinydb.Storage) -> None:
+    def __init__(self, storage_cls: Type[tinydb.Storage]) -> None:
         """Follows the standard pattern for middleware.
 
         Args:
@@ -164,7 +164,7 @@ class SafetyCachingMiddleware(Middleware):
         """
         if self.cache is None:
             self.cache = self.storage.read()
-            self.database_hash = hash_string(self.cache)
+            self.database_hash = hash_string(str(self.cache))
 
         return self.cache
 
@@ -184,14 +184,22 @@ class SafetyCachingMiddleware(Middleware):
         Raises: MetaStoreError if writes have been made and the underlying file *has* been changed.
         """
         if self.writes_made:
+            # we know that the cache is a dictionary of dictionaries
+            self.cache = cast(dict[str, dict[str, Any]], self.cache)
+
             # check if stored hash matches current hash
-            if self.database_hash == hash_string(self.storage.read()):
+            if self.database_hash == hash_string(str(self.storage.read())):
                 # if underlying file not changed, write data
                 self.storage.write(self.cache)
             else:
                 raise MetastoreError(
                     "Could not write to object store: object store modified while write in progress."
                 )
+
+        # if close is called explicitly, rather than through a context manager,
+        # then the cache should be empty, otherwise if the metastore instance is reused
+        # it won't reflect the actual state of the metastore. (This is an edge case.)
+        self.cache = None
 
         # let underlying storage clean up
         self.storage.close()
@@ -200,7 +208,7 @@ class SafetyCachingMiddleware(Middleware):
 @contextmanager
 def open_metastore(
     bucket: str, data_type: str, mode: Literal["r", "rw"] = "rw"
-) -> Generator[ClassicMetaStore, None, None]:
+) -> Generator[TinyDBMetaStore, None, None]:
     """Context manager for TinyDBMetaStore based on OpenGHG v<=6.2 set-up for keys
     and TinyDB.
 
@@ -214,38 +222,38 @@ def open_metastore(
     """
     key = get_metakey(data_type)
     with tinydb.TinyDB(bucket, key, mode, storage=SafetyCachingMiddleware(BucketKeyStorage)) as db:
-        metastore = ClassicMetaStore(database=db, data_type=data_type)
+        metastore = TinyDBMetaStore(database=db)
         yield metastore
 
 
-CM = TypeVar("CM", bound="ClassicMetaStore")
+class DataClassMetaStore(TinyDBMetaStore):
+    """Class that allows:
+    - creating a TinyDB MetaStore via bucket and data type
+    - locking the MetaStore
 
+    There is also a `close` method, for use inside the `BaseStore` context-manager.
+    """
 
-class ClassicMetaStore(TinyDBMetaStore):
-    """TinyDBMetaStore using set-up for keys and TinyDB from OpenGHG <=v6.2"""
-
-    def __init__(self, database: tinydb.TinyDB, data_type: str) -> None:
-        super().__init__(database=database)
+    def __init__(self, bucket: str, data_type: str) -> None:
         self.data_type = data_type
+        self.key = get_metakey(data_type)
+        database = tinydb.TinyDB(
+            bucket, self.key, mode="rw", storage=SafetyCachingMiddleware(BucketKeyStorage)
+        )
+        super().__init__(database=database)
 
-    @classmethod
-    def from_bucket(cls: type[CM], bucket: str, data_type: str) -> CM:
-        """Initialise a ClassicMetaStore given a bucket and data type.
+        lock_path = get_object_lock_path(bucket, self.key)
+        self.lock = FileLock(lock_path, timeout=600)  # file lock with 10 minute timeout
 
-        A ClassicMetaStore opened with this method must be closed to
-        ensure that writes are saved.
+    def acquire_lock(self) -> None:
+        """Acquire a lock for the object store."""
+        self.lock.acquire(poll_interval=1)
 
-        Args:
-            bucket: path to object store
-            data_type: data type of metastore to open
-
-        Returns:
-            ClassicMetastore object for given bucket and data type.
-        """
-        key = get_metakey(data_type)
-        database = tinydb.TinyDB(bucket, key, mode="rw", storage=SafetyCachingMiddleware(BucketKeyStorage))
-        return cls(database=database, data_type=data_type)
+    def release_lock(self) -> None:
+        """Acquire a lock for the object store."""
+        self.lock.release()
 
     def close(self) -> None:
         """Close the underlying TinyDB database."""
+        self.lock.release()
         self._db.close()
