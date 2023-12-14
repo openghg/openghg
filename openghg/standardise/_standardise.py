@@ -1,13 +1,13 @@
-from pathlib import Path
-from typing import Dict, Literal, Optional, Union, Any
-from pandas import Timedelta
 import warnings
+from pathlib import Path
+from typing import Any, Dict, Literal, Optional, Union
 
-from openghg.store.base import get_data_class
 from openghg.cloud import create_file_package, create_post_dict
 from openghg.objectstore import get_writable_bucket
+from openghg.store.base import get_data_class
+from openghg.types import multiPathType, optionalPathType
 from openghg.util import running_on_hub
-from openghg.types import optionalPathType, multiPathType
+from pandas import Timedelta
 
 
 def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = None, **kwargs: Any) -> dict:

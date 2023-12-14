@@ -1,9 +1,10 @@
+import logging
 from typing import Any, Dict, List, Optional, Union
+
+import openghg_defs
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
-from openghg.util import running_on_hub, load_json
-import openghg_defs
-import logging
+from openghg.util import load_json, running_on_hub
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -103,8 +104,9 @@ def retrieve(**kwargs: Any) -> Union[ObsData, List[ObsData], None]:
         ObsData, list[ObsData] or None
     """
     from io import BytesIO
-    from xarray import load_dataset
+
     from openghg.cloud import call_function, unpackage
+    from xarray import load_dataset
 
     # The hub is the only place we want to make remote calls
     if running_on_hub():
@@ -296,6 +298,7 @@ def _retrieve_remote(
         )
 
     import re
+
     from openghg.standardise.meta import assign_attributes
     from openghg.util import format_inlet
     from pandas import to_datetime

@@ -1,1 +1,1 @@
-from ._specification import define_data_types, define_data_type_classes
+from ._specification import define_data_type_classes, define_data_types

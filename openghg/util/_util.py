@@ -1,9 +1,9 @@
 """ Utility functions that are used by multiple modules
 
 """
+import logging
 from collections.abc import Iterable
 from typing import Any, Dict, Iterator, Optional, Tuple
-import logging
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -157,8 +157,8 @@ def _create_site_lookup_dict() -> Dict:
     Returns:
         dict: Dictionary of site_name: site_code values
     """
-    from openghg_defs import site_info_file
     from openghg.util import load_json, remove_punctuation
+    from openghg_defs import site_info_file
 
     site_info = load_json(path=site_info_file)
 

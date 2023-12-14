@@ -3,8 +3,7 @@ from typing import Optional, Tuple, Union, cast
 import numpy as np
 import xarray as xr
 from numpy import ndarray
-
-from openghg.types import construct_xesmf_import_error, ArrayLike, ArrayLikeMatch
+from openghg.types import ArrayLike, ArrayLikeMatch, construct_xesmf_import_error
 
 
 def _getGridCC(lat: ndarray, lon: ndarray) -> Tuple[ndarray, ndarray]:

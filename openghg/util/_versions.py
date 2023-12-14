@@ -13,7 +13,7 @@ import platform
 import struct
 import subprocess
 import sys
-from typing import List, IO, Union, Tuple
+from typing import IO, List, Tuple, Union
 
 
 def get_sys_info() -> List:

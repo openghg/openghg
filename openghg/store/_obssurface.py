@@ -1,15 +1,16 @@
 from __future__ import annotations
+
+import inspect
 import logging
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Sequence, Tuple, Union
 
 import numpy as np
-from pandas import Timedelta
-from xarray import Dataset
-import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
-from openghg.types import multiPathType, pathType, resultsType, optionalPathType
+from openghg.types import multiPathType, optionalPathType, pathType, resultsType
+from pandas import Timedelta
+from xarray import Dataset
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -150,6 +151,7 @@ class ObsSurface(BaseStore):
         with ModelScenario and ObsColumn?
         """
         from collections import defaultdict
+
         from openghg.types import SurfaceTypes
         from openghg.util import (
             clean_string,

@@ -2,7 +2,6 @@ import json
 import logging
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Union
-from openghg.types import SearchError
 
 from openghg.dataobjects import (
     BoundaryConditionsData,
@@ -11,6 +10,7 @@ from openghg.dataobjects import (
     ObsColumnData,
     ObsData,
 )
+from openghg.types import SearchError
 from openghg.util import decompress, decompress_str, hash_bytes, running_on_hub
 from pandas import Timestamp
 from xarray import Dataset, load_dataset
@@ -234,7 +234,14 @@ def get_obs_surface_local(
     """
     import numpy as np
     from openghg.retrieve import search_surface
-    from openghg.util import clean_string, format_inlet, load_json, synonyms, timestamp_tzaware, get_site_info
+    from openghg.util import (
+        clean_string,
+        format_inlet,
+        get_site_info,
+        load_json,
+        synonyms,
+        timestamp_tzaware,
+    )
     from pandas import Timedelta
 
     if running_on_hub():
@@ -618,7 +625,7 @@ def get_footprint(
     Returns:
         FootprintData: FootprintData dataclass
     """
-    from openghg.util import clean_string, synonyms, format_inlet
+    from openghg.util import clean_string, format_inlet, synonyms
 
     # Find the correct synonym for the passed species
     if species is not None:

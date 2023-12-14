@@ -1,8 +1,8 @@
+import logging
 from pathlib import Path
 from typing import Any, Dict, Hashable, Optional, Union, cast
-import logging
-import xarray as xr
 
+import xarray as xr
 from openghg.types import optionalPathType
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -494,7 +494,7 @@ def _read_raw_data(
     Returns:
         dict: Dictionary containing attributes, data and metadata keys
     """
-    from openghg.util import clean_string, read_header, get_site_info, load_internal_json
+    from openghg.util import clean_string, get_site_info, load_internal_json, read_header
     from pandas import Timestamp, read_csv
 
     header = read_header(filepath=data_filepath)

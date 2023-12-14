@@ -1,6 +1,7 @@
-from typing import Dict, Any
-from openghg.util import load_json
+from typing import Any, Dict
+
 from openghg.types import optionalPathType
+from openghg.util import load_json
 
 __all__ = ["get_site_info", "sites_in_network"]
 

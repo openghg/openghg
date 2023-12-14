@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from json import dump, loads
 from pathlib import Path
-from typing import Dict, List, Union, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
+
 from addict import Dict as aDict
 
 if TYPE_CHECKING:

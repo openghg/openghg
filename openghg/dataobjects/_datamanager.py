@@ -1,11 +1,11 @@
-from collections import defaultdict
 import copy
 import logging
-from typing import DefaultDict, Dict, List, Set, Optional, Union
+from collections import defaultdict
+from typing import DefaultDict, Dict, List, Optional, Set, Union
 
-from openghg.store.base import Datasource
-from openghg.objectstore.metastore import open_metastore
 from openghg.objectstore import get_writable_bucket, get_writable_buckets
+from openghg.objectstore.metastore import open_metastore
+from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
 
 logger = logging.getLogger("openghg.dataobjects")

@@ -1,14 +1,16 @@
 from __future__ import annotations
+
+import logging
+import warnings
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Literal, Optional, Tuple, Union
-import logging
+
 import numpy as np
 from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
-import warnings
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -177,6 +179,7 @@ class Emissions(BaseStore):
         TODO: Could allow Callable[..., Dataset] type for a pre-defined function be passed
         """
         import inspect
+
         from openghg.types import EmissionsDatabases
         from openghg.util import load_emissions_database_parser
 

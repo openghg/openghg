@@ -30,7 +30,7 @@ def parse_beaco2n(
     from collections import defaultdict
 
     import pandas as pd
-    from openghg.util import clean_string, load_internal_json, format_inlet
+    from openghg.util import clean_string, format_inlet, load_internal_json
 
     if sampling_period is None:
         sampling_period = "NOT_SET"

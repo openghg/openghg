@@ -1,7 +1,8 @@
-from pathlib import Path
-from rich.progress import wrap_file
-from typing import Optional, Union
 import logging
+from pathlib import Path
+from typing import Optional, Union
+
+from rich.progress import wrap_file
 
 logger = logging.getLogger("openghg.util")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler

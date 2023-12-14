@@ -1,8 +1,9 @@
-from pathlib import Path
-from rich.progress import track
-from typing import Dict, List, Optional, Union
 import logging
+from pathlib import Path
+from typing import Dict, List, Optional, Union
+
 from openghg.standardise import standardise_surface
+from rich.progress import track
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler

@@ -1,11 +1,12 @@
 import glob
 import json
+import logging
 import os
+import shutil
 import threading
 from pathlib import Path
-import shutil
 from typing import Dict, List, Optional, Union
-import logging
+
 from openghg.types import ObjectStoreError
 from openghg.util import read_local_config
 

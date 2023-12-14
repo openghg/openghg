@@ -1,7 +1,7 @@
-from typing import List, Optional, Union, Dict, Any
+from typing import Any, Dict, List, Optional, Union
 
-from openghg.util import load_json
 from openghg.types import optionalPathType
+from openghg.util import load_json
 
 __all__ = ["get_species_info", "synonyms", "species_lifetime", "check_lifetime_monthly", "molar_mass"]
 

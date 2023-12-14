@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from collections import defaultdict
 import logging
+from collections import defaultdict
 from typing import Optional
 
 from openghg.objectstore import get_readable_buckets
 from openghg.objectstore.metastore import open_metastore
 from openghg.store.spec import define_data_types
 from openghg.types import ObjectStoreError
-
 
 logger = logging.getLogger("openghg.objectstore")
 logger.setLevel(level=logging.DEBUG)

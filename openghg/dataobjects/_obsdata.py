@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from json import dumps
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any, Dict, Iterator, Union, Optional
-from openghg.plotting import plot_timeseries as general_plot_timeseries
+from typing import Any, Dict, Iterator, Optional, Union
+
 import plotly.graph_objects as go
+from openghg.plotting import plot_timeseries as general_plot_timeseries
 
 from ._basedata import _BaseData
 

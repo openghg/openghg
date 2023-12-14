@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
-from pandas import DataFrame
 
 from openghg.types import optionalPathType
+from pandas import DataFrame
 
 
 def find_files(
@@ -414,8 +414,8 @@ def _split_species(
     from fnmatch import fnmatch
 
     from addict import Dict as aDict
-    from openghg.util import format_inlet
     from openghg.standardise.meta import define_species_label
+    from openghg.util import format_inlet
 
     # Read inlets from the parameters
     expected_inlets = _get_inlets(site_code=site, gc_params=gc_params)

@@ -5,7 +5,7 @@ data to the object store via transformations.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Union, Any
+from typing import Any, Optional, Union
 
 from openghg.objectstore import get_writable_bucket
 from openghg.store.base import get_data_class
