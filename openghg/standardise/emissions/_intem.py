@@ -6,8 +6,6 @@ def parse_intem(
     filepath: Path,
     species: str,
     source: str,
-    database: Optional[str] = None,
-    database_version: Optional[str] = None,
     data_type: str = "emissions",
     domain: str = "europe",
     model: str = "intem",
@@ -15,6 +13,7 @@ def parse_intem(
     high_time_resolution: Optional[bool] = False,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
+    **kwargs
 ) -> Dict:
     """
     Parse INTEM emissions data from the specified file.
