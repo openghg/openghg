@@ -23,7 +23,6 @@ def parse_intem(
         data_type: Type of data, default is 'emissions'.
         source: Source of the emissions data
         domain: Geographic domain, default is 'europe'.
-        database_version: Version of the database if applicable.
         model: Model name if applicable.
         period: The time period for which data is to be parsed.
         chunks: (Union[int, Dict, Literal["auto"], None]): Chunking configuration.
