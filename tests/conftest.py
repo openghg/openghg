@@ -1,8 +1,7 @@
 import os
 import sys
 import pytest
-import shutil
-from helpers import temporary_store_path
+from helpers import temporary_store_paths, clear_test_stores
 from typing import Iterator
 from unittest.mock import patch
 
@@ -12,17 +11,22 @@ from helpers import get_info_datapath
 # Added for import of openghg from testing directory
 sys.path.insert(0, os.path.abspath("."))
 
-tmp_store_path = temporary_store_path()
+tmp_store_paths = temporary_store_paths()
 
 
 @pytest.fixture(scope="session", autouse=True)
 def default_session_fixture() -> Iterator[None]:
     mock_config = {
-        "object_store": {"local_store": str(tmp_store_path)},
+        "object_store": {
+            "user": {"path": str(tmp_store_paths["user"]), "permissions": "rw"},
+            "group": {"path": str(tmp_store_paths["group"]), "permissions": "rw"},
+            "shared": {"path": str(tmp_store_paths["shared"]), "permissions": "r"},
+        },
         "user_id": "test-id-123",
+        "config_version": "2",
     }
 
-    with patch("openghg.util.read_local_config", return_value=mock_config):
+    with patch("openghg.objectstore._local_store.read_local_config", return_value=mock_config):
         yield
 
 
@@ -50,15 +54,15 @@ def pytest_sessionstart(session):
     """Set the required environment variables for OpenGHG
     at the start of the test session.
     """
-    shutil.rmtree(tmp_store_path, ignore_errors=True)
+    clear_test_stores()
 
 
 def pytest_sessionfinish(session, exitstatus):
     """Called after whole test run finished, right before
     returning the exit status to the system.
     """
-    print(f"\n\nCleaning up testing store at {tmp_store_path}")
-    shutil.rmtree(tmp_store_path, ignore_errors=True)
+    print("\n\nCleaning up testing stores.")
+    clear_test_stores()
 
 
 def pytest_addoption(parser):

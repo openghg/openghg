@@ -20,7 +20,7 @@ def assign_attributes(
     site: Optional[str] = None,
     network: Optional[str] = None,
     sampling_period: Optional[Union[str, float, int]] = None,
-    update_metadata_mismatch: bool = False,
+    update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
     species_filepath: optionalPathType = None,
 ) -> Dict:
@@ -37,8 +37,12 @@ def assign_attributes(
         sampling_period: Number of seconds for which air
                          sample is taken. Only for time variable attribute
         network: Network name
-        update_metadata_mismatch: If current metadata does not match to attributes
-            update metadata.
+        update_mismatch: This determines how mismatches between the internal data
+            "attributes" and the supplied / derived "metadata" are handled.
+            This includes the options:
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
         site_filepath: Alternative site info file
         species_filepath: Alternative species info file
 
@@ -80,9 +84,13 @@ def assign_attributes(
 
         attrs = measurement_data.attrs
 
-        gas_data["metadata"] = sync_surface_metadata(
-            metadata=metadata, attributes=attrs, update_mismatch=update_metadata_mismatch
+        metadata_aligned, attrs_aligned = sync_surface_metadata(
+            metadata=metadata, attributes=attrs, update_mismatch=update_mismatch
         )
+
+        gas_data["metadata"] = metadata_aligned
+        gas_data["attributes"] = attrs_aligned
+        measurement_data.attrs = gas_data["attributes"]
 
     return data
 
@@ -216,12 +224,14 @@ def get_attributes(
             except KeyError:
                 units = ""
 
-    # Update the Dataset attributes
-    ds.attrs.update(global_attributes)  # type: ignore
-
+    # 04/2023: Switched around global and site attributes so
+    # global attributes now supercede site attributes.
     # Add some site attributes
     site_attributes = _site_info_attributes(site.upper(), network, site_filepath)
     ds.attrs.update(site_attributes)
+
+    # Update the Dataset attributes
+    ds.attrs.update(global_attributes)  # type: ignore
 
     # Species-specific attributes
     # Extract long name
@@ -254,7 +264,6 @@ def get_attributes(
 
             # If units are required for variable, add attribute
             if key == species_label or any(word in key for word in match_words):
-
                 if units in unit_interpret:
                     ds[key].attrs["units"] = unit_interpret[units]
                     # If units are non-standard, add details
@@ -579,7 +588,6 @@ def get_flux_attributes(
         # For composite emissions files this may contain > 1 prior input
         global_attributes["number_of_prior_files_used"] = len(prior_info_dict.keys())
         for i, source_key in enumerate(prior_info_dict.keys()):
-
             prior_number = i + 1
             label_start = f"prior_file_{prior_number}"
             global_attributes[label_start] = source_key

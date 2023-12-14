@@ -31,7 +31,7 @@ from ._file import (
     read_header,
 )
 from ._hashing import hash_bytes, hash_file, hash_retrieved_data, hash_string
-from ._inlet import format_inlet
+from ._inlet import format_inlet, extract_height_name
 from ._site import get_site_info, sites_in_network
 from ._species import get_species_info, check_lifetime_monthly, molar_mass, species_lifetime, synonyms
 from ._strings import clean_string, is_number, remove_punctuation, to_lowercase

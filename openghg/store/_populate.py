@@ -1,14 +1,18 @@
 from pathlib import Path
+from rich.progress import track
 from typing import Dict, List, Optional, Union
 import logging
-from openghg.store import ObsSurface
+from openghg.standardise import standardise_surface
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 def add_noaa_obspack(
-    data_directory: Union[str, Path], project: Optional[str] = None, overwrite: bool = False
+    data_directory: Union[str, Path],
+    project: Optional[str] = None,
+    overwrite: bool = False,
+    store: Optional[str] = None,
 ) -> Dict:
     """
     Function to detect and add files from the NOAA ObsPack to the object store.
@@ -18,6 +22,7 @@ def add_noaa_obspack(
         project (optional) : Can specify project or type to process only e.g. "surface"
         or "surface-flask"
         overwrite : Whether to overwrite existing entries in the object store
+        store: Name of object store to write to
     Returns:
         Dict: Details of data which has been processed into the object store
     Examples:
@@ -81,16 +86,19 @@ def add_noaa_obspack(
     files_with_errors = []
     # Find relevant details for each file and call parse_noaa() function
     processed_summary: Dict[str, Dict] = {}
-    for filepath in files:
+    for filepath in track(files, description="Standardising "):
         param = _param_from_filename(filepath)
         site = param["site"]
         _project = param["project"]
         measurement_type = param["measurement_type"]
 
+        processed = dict()
         if _project in projects_to_read:
             try:
-                processed = ObsSurface.read_file(
-                    filepath,
+                # TODO - can we streamline this a bit to save repeated loads?
+                processed = standardise_surface(
+                    store=store,
+                    filepath=filepath,
                     site=site,
                     measurement_type=measurement_type,
                     network="NOAA",
@@ -104,9 +112,6 @@ def add_noaa_obspack(
             logger.warning(
                 f"Not processing {filepath.name} - no standardisation for {_project} data implemented yet."
             )
-            processed = {}
-        else:
-            processed = {}
 
         # Expect "processed" dictionary and/or "error" dictionary within `processed`
         for key, value in processed.items():

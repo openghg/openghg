@@ -1,6 +1,7 @@
 from helpers import get_bc_datapath
 from openghg.retrieve import search
-from openghg.store import BoundaryConditions, load_metastore, recombine_datasets
+from openghg.store import BoundaryConditions
+from openghg.standardise import standardise_bc, standardise_from_binary_data
 from openghg.util import hash_bytes
 from xarray import open_dataset
 import numpy as np
@@ -26,9 +27,9 @@ def test_read_data_monthly(mocker):
 
     file_metadata = {"sha1_hash": sha1_hash, "filename": filename, "compressed": False}
 
-    proc_results = BoundaryConditions.read_data(
-        binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
-    )
+    proc_results = standardise_from_binary_data(data_type="boundary_conditions", store="user",
+                                                binary_data=binary_data, metadata=metadata, file_metadata=file_metadata
+                                                )
 
     # assert proc_results == {"ch4_mozart_europe": {"uuid": "test-uuid-1", "new": True}}
     assert proc_results["ch4_mozart_europe"]["new"] is True
@@ -37,14 +38,15 @@ def test_read_data_monthly(mocker):
 def test_read_file_monthly():
     test_datapath = get_bc_datapath("ch4_EUROPE_201208.nc")
 
-    proc_results = BoundaryConditions.read_file(
+    proc_results = standardise_bc(
+        store="user",
         filepath=test_datapath,
         species="ch4",
         bc_input="MOZART",
         domain="EUROPE",
         period="monthly",
         overwrite=True,
-    )
+        )
 
     assert "ch4_mozart_europe" in proc_results
 
@@ -91,12 +93,12 @@ def test_read_file_yearly():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    BoundaryConditions.read_file(
-        filepath=test_datapath,
-        species=species,
-        bc_input=bc_input,
-        domain=domain,
-    )
+    standardise_bc(store="user",
+                   filepath=test_datapath,
+                   species=species,
+                   bc_input=bc_input,
+                   domain=domain,
+                   )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
@@ -152,12 +154,12 @@ def test_read_file_co2_no_time_dim():
     bc_input = "CAMS"
     domain = "EUROPE"
 
-    BoundaryConditions.read_file(
-        filepath=test_datapath,
-        species=species,
-        bc_input=bc_input,
-        domain=domain,
-    )
+    standardise_bc(store="user",
+                   filepath=test_datapath,
+                   species=species,
+                   bc_input=bc_input,
+                   domain=domain,
+                   )
 
     search_results = search(
         species=species, bc_input=bc_input, domain=domain, data_type="boundary_conditions"
@@ -206,36 +208,6 @@ def test_read_file_co2_no_time_dim():
 
 # TODO: Add test for multiple values within a file - continuous (maybe monthly)
 # TODO: Add test around non-continuous data and key word?
-
-
-def test_datasource_add_lookup():
-    from openghg.store import datasource_lookup
-
-    bc = BoundaryConditions()
-
-    fake_datasource = {"ch4_mozart_europe_201208": {"uuid": "mock-uuid-123456", "new": True}}
-
-    mock_data = {
-        "ch4_mozart_europe_201208": {
-            "metadata": {
-                "species": "ch4",
-                "domain": "europe",
-                "bc_input": "mozart",
-                "date": "201208",
-            }
-        }
-    }
-
-    with load_metastore(key="test-key-123") as metastore:
-        bc.add_datasources(uuids=fake_datasource, data=mock_data, metastore=metastore)
-
-        assert bc.datasources() == ["mock-uuid-123456"]
-
-        required = ["species", "domain", "bc_input", "date"]
-
-        lookup = datasource_lookup(metastore=metastore, data=mock_data, required_keys=required)
-
-        assert lookup["ch4_mozart_europe_201208"] == fake_datasource["ch4_mozart_europe_201208"]["uuid"]
 
 
 def test_bc_schema():

@@ -26,15 +26,21 @@ else:
         get_all_object_names,
         get_bucket,
         get_object,
+        get_object_data_path,
+        get_object_lock_path,
         get_object_from_json,
         get_object_names,
-        get_local_objectstore_path,
+        get_objectstore_info,
+        get_user_objectstore_path,
         get_tutorial_store_path,
         query_store,
         set_object,
         set_object_from_file,
         set_object_from_json,
-        visualise_store,
+        get_writable_bucket,
+        get_writable_buckets,
+        get_readable_buckets,
     )
 
 from ._encoding import bytes_to_string, datetime_to_datetime, get_datetime_now, string_to_bytes
+from ._integrity import integrity_check

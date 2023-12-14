@@ -1,37 +1,40 @@
 from typing import Dict
 from openghg.store.base import Datasource
 from openghg.store import ObsSurface
+from openghg.objectstore import get_bucket
 
 
 def set_rank(args: Dict) -> None:
-    obs = ObsSurface.load()
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        rank = args["rank"]
+        uuid = args["uuid"]
+        dateranges = args["dateranges"]
+        overwrite = args["overwrite"]
 
-    rank = args["rank"]
-    uuid = args["uuid"]
-    dateranges = args["dateranges"]
-    overwrite = args["overwrite"]
-
-    obs.set_rank(uuid=uuid, rank=rank, date_range=dateranges, overwrite=overwrite)
+        obs.set_rank(uuid=uuid, rank=rank, date_range=dateranges, overwrite=overwrite)
 
 
 def clear_rank(args: Dict) -> None:
-    obs = ObsSurface.load()
+    bucket = get_bucket()
 
-    uuid = args["uuid"]
+    with ObsSurface(bucket=bucket) as obs:
+        uuid = args["uuid"]
 
-    obs.clear_rank(uuid=uuid)
+        obs.clear_rank(uuid=uuid)
 
 
 def get_sources(args: Dict) -> Dict:
-    obs = ObsSurface.load()
-    datasource_uuids = obs.datasources()
-    rank_table = obs.rank_data()
+    bucket = get_bucket()
+    with ObsSurface(bucket=bucket) as obs:
+        datasource_uuids = obs.datasources()
+        rank_table = obs.rank_data()
 
     site = args["site"]
     species = args["species"]
 
     # Shallow load the Datasources (only get their JSON metadata)
-    datasources = (Datasource.load(uuid=uuid, shallow=True) for uuid in datasource_uuids)
+    datasources = (Datasource.load(bucket=bucket, uuid=uuid, shallow=True) for uuid in datasource_uuids)
 
     matching_sources = [d for d in datasources if d.search_metadata(site=site, species=species)]
 

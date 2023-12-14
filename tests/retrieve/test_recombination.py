@@ -27,8 +27,8 @@ def test_recombination_CRDS():
     uuid = next(iter(result.key_data))
 
     keys = result.key_data[uuid]
-
-    ch4_data_recombined = recombine_datasets(keys=keys)
+    bucket = get_bucket()
+    ch4_data_recombined = recombine_datasets(bucket=bucket, keys=keys)
 
     ch4_data_recombined.attrs = {}
 
@@ -56,7 +56,8 @@ def test_recombination_GC():
 
     keys = result.key_data[uuid]
 
-    toluene_data_recombined = recombine_datasets(keys=keys)
+    bucket = get_bucket()
+    toluene_data_recombined = recombine_datasets(bucket=bucket, keys=keys)
 
     toluene_data.attrs = {}
     toluene_data_recombined.attrs = {}

@@ -4,7 +4,7 @@ import json
 import pickle
 import pandas as pd
 import pytest
-from helpers import get_retrieval_datapath, metadata_checker_obssurface
+from helpers import get_retrieval_datapath, metadata_checker_obssurface, clear_test_stores
 from icoscp.cpb.dobj import Dobj  # type: ignore
 from icoscp.station.station import Station
 from openghg.cloud import package_from_function
@@ -83,7 +83,7 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
 
     # Mock the dobj values, here we'll get two values we read and the third dobj contains
     # ObsPack GlobalView data that should currently be skipped
-    dobj_mock = mocker.patch("icoscp.cpb.dobj.Dobj", side_effect=dobjs)
+    mocker.patch("icoscp.cpb.dobj.Dobj", side_effect=dobjs)
 
     # Note that we get an extra Unamed column in these dataframes due to the trip to csv and back
     data_dobj1 = pd.read_csv(get_retrieval_datapath(filename="df_1.csv.bz2"))
@@ -101,8 +101,9 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         SearchResults, "retrieve_all", side_effect=SearchResults.retrieve_all, autospec=True
     )
 
+    # 05/01/2023: Added update_mismatch to account for WAO difference
     data_first_retrieval = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True
+        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata", store="user"
     )
 
     meta1 = data_first_retrieval[0].metadata
@@ -113,33 +114,27 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         "site": "wao",
         "measurement_type": "co2 mixing ratio (dry mole fraction)",
         # "units": "µmol mol-1",  # units removed from metadata / global attributes
-        "sampling_height": "10m",
-        "sampling_height_units": "metres",
+        # REMOVED sampling_height from metadata --> included inlet
+        # - This was to better align with metadata within the obs_surface data_type
+        # "sampling_height": "10m",
+        # "sampling_height_units": "metres",
         "inlet": "10m",
         "inlet_height_magl": "10",
         "station_long_name": "weybourne observatory, uk",
-        "station_latitude": "52.95",
-        "station_longitude": "1.121",
-        "station_altitude": "31m",
-        "station_height_masl": 10.0,
-        "licence_name": "icos ccby4 data licence",
-        "licence_info": "http://meta.icos-cp.eu/ontologies/cpmeta/icoslicence",
+        "station_latitude": 52.95042,
+        "station_longitude": 1.12194,
+        # TODO: May need to be updated if station_height versus height_station naming is corrected.
+        # "station_altitude": "31m",
+        # "station_height_masl": 10.0,
+        "station_height_masl": 31.0,
         "network": "icos",
         "data_type": "surface",
         "data_source": "icoscp",
         "source_format": "icos",
         "icos_data_level": "2",
-        "conditions_of_use": "ensure that you contact the data owner at the outset of your project.",
-        "source": "in situ measurements of air",
-        "conventions": "cf-1.8",
-        "processed_by": "openghg_cloud",
-        "calibration_scale": "unknown",
-        "sampling_period": "not_set",
-        "sampling_period_unit": "s",
-        "instrument_data": ["FTIR", "http://meta.icos-cp.eu/resources/instruments/ATC_505"],
-        "citation_string": "Forster, G., Manning, A. (2022). ICOS ATC CO2 Release, Weybourne (10.0 m), 2021-10-21–2022-02-28, ICOS RI, https://hdl.handle.net/11676/NR9p9jxC7B7M46MdGuCOrzD3",
+        "calibration_scale": "unknown",  # Update when possible (icoscp Issue - ICOS-Carbon-Portal/pylib#148)
+        "sampling_period": "not_set",  # Update when possible (icoscp Issue - ICOS-Carbon-Portal/pylib#148)
         "dataset_source": "ICOS",
-        "Conventions": "CF-1.8",
     }
 
     assert meta1_expected.items() <= meta1.items()
@@ -153,8 +148,28 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
     assert retrieve_all.call_count == 0
     assert get_mock.call_count == 2
 
+    # Check attributes within stored Dataset contain extra keys
+    attr1_expected_additional = {
+        "measurement_type": "co2 mixing ratio (dry mole fraction)",
+        "sampling_height": "10m",
+        "sampling_height_units": "metres",
+        "licence_name": "ICOS CCBY4 Data Licence",
+        "licence_info": "http://meta.icos-cp.eu/ontologies/cpmeta/icosLicence",
+        "conditions_of_use": "Ensure that you contact the data owner at the outset of your project.",
+        "source": "In situ measurements of air",
+        "sampling_period_unit": "s",
+        "instrument_data": ["FTIR", "http://meta.icos-cp.eu/resources/instruments/ATC_505"],
+        "citation_string": "Forster, G., Manning, A. (2022). ICOS ATC CO2 Release, Weybourne (10.0 m), 2021-10-21–2022-02-28, ICOS RI, https://hdl.handle.net/11676/NR9p9jxC7B7M46MdGuCOrzD3",
+        "Conventions": "CF-1.8",
+    }
+
+    data1_attrs = data1.attrs
+
+    assert attr1_expected_additional.items() <= data1_attrs.items()
+
+    # 05/01/2023: Added update_mismatch to account for WAO difference
     data_second_retrieval = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True
+        site="WAO", species="co2", sampling_height="10m", update_mismatch="metadata", store="user"
     )
 
     data2 = data_second_retrieval[0].data
@@ -170,8 +185,62 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
         in caplog.text
     )
 
-    _ = retrieve_atmospheric(
-        site="WAO", species="co2", sampling_height="10m", update_metadata_mismatch=True, force_retrieval=True
+    # 05/01/2023: Added update_mismatch to account for WAO difference
+    retrieve_atmospheric(
+        site="WAO",
+        species="co2",
+        sampling_height="10m",
+        force_retrieval=True,
+        update_mismatch="metadata",
+        store="user",
     )
 
     assert "There is no new data to process." in caplog.text
+
+
+@pytest.fixture
+def mock_retrieve_remote(mocker):
+    mock_metadata = {
+                "species": "ch4",
+                "site": "tac",
+                "station_long_name": "Tacolneston",
+                "inlet": "185m",
+                "instrument": "picarro",
+                "network": "decc",
+                "source_format": "icos",
+                "data_source": "icoscp",
+                "icos_data_level": 1,
+            }
+    n_days = 100
+    epoch = datetime.datetime(1970, 1, 1, 1, 1)
+    mock_data = pd.DataFrame(
+        data={"A": range(0, n_days), "time": pd.date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D")}
+    ).set_index("time").to_xarray()
+
+    mocker.patch("openghg.retrieve.icos._retrieve._retrieve_remote", return_value={"ch4": {"metadata": mock_metadata, "data": mock_data}})
+
+
+
+def test_retrieved_hash_prevents_storing_twice(mock_retrieve_remote, caplog):
+    """Test if retrieving the same data twice issues a warning the second time."""
+    clear_test_stores()
+
+    retrieve_atmospheric(site="tac", store="user")
+    assert "There is no new data to process." not in caplog.text
+
+    retrieve_atmospheric(site="tac", store="user")
+    assert "There is no new data to process." in caplog.text
+
+
+def test_force_allows_storing_twice(mock_retrieve_remote, caplog):
+    """Test if retrieving the same data twice does *not* issue a warning if
+    `force=True` is passed to `retrieve_atmospheric` (and hence propegated down
+    to `ObsSurface.store_data`).
+    """
+    clear_test_stores()
+
+    retrieve_atmospheric(site="tac", store="user")
+    assert "There is no new data to process." not in caplog.text
+
+    retrieve_atmospheric(site="tac", store="user", force=True)
+    assert "There is no new data to process." not in caplog.text

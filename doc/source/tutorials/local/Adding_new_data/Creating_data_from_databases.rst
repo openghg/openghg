@@ -1,3 +1,4 @@
+.. _using-databases-edgar:
 Using databases to add data
 ===========================
 
@@ -31,15 +32,14 @@ affect your use of OpenGHG outside of this tutorial.
 ---------------------------------------------
 
 To create emissions maps from an underlying database, we can use the
-``transform_data(...)`` method for the ``Emissions`` object (from
-``openghg.store``). The general form for this is as follows (same as
-``Emissions.read_file()``):
+``transform_emissions_data(...)`` function in the ``openghg.transform``
+module.
 
 .. code:: python
 
-   from openghg.store import Emissions
+   from openghg.transform import transform_emissions_data
 
-   Emissions.transform_data(datapath, database, ...)  # Additional keywords
+   transform_emissions_data(datapath, database, ...)  # Additional keywords
 
 This function expects the path, the name of the database as well as
 keyword inputs which will be determined by the underlying function being
@@ -52,7 +52,7 @@ interest. A flux map of the correct format will then be created and
 added to the openghg object store with the associated keywords.
 
 In the background, this will call the
-``openghg.transform.emissions.parse_edgar`` function 
+``openghg.transform.emissions.parse_edgar`` function
 and we can look at this function for details of what keywords we need to
 provide:
 
@@ -87,13 +87,18 @@ For example, this would create a new emissions map for methane, “ch4”,
 for the area over Europe, “EUROPE” domain for 2014. The edgar database
 provided is v6.0, annual, global and for methane.
 
+.. note::
+    Outside of this tutorial, if you have write access to multiple object stores you
+    will need to pass the name of the object store you wish to write to to
+    the ``store`` argument of the ``transform_data`` function.
+
 .. code:: python
 
-   from openghg.store import Emissions
+   from openghg.transform import transform_emissions_data
 
    database = "edgar"
 
-   Emissions.transform_data(edgar_datapath, database, date=2014, domain="EUROPE", species="ch4")
+   transform_emissions_data(datapath=edgar_datapath, database=database, date=2014, domain="EUROPE", species="ch4")
 
 *Note: this can take a few minutes to complete.*
 

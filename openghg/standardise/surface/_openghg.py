@@ -20,6 +20,7 @@ def parse_openghg(
     calibration_scale: Optional[str] = None,
     data_owner: Optional[str] = None,
     data_owner_email: Optional[str] = None,
+    update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
     **kwargs: str,
 ) -> Dict:
@@ -48,6 +49,12 @@ def parse_openghg(
             e.g. "WMOX2007"
         data_owner: Name of data owner.
         data_owner_email: Email address for data owner.
+        update_mismatch: This determines how mismatches between the internal data
+            "attributes" and the supplied / derived "metadata" are handled.
+            This includes the options:
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
         kwargs: Any additional attributes to be associated with the data.
@@ -93,7 +100,7 @@ def parse_openghg(
             # If attributes are present, check these match to inputs passed
             if key in attributes:
                 attributes_value = attributes[key]
-                if value != attributes_value:
+                if str(value).lower() != str(attributes_value).lower():
                     # If inputs do not match attribute values, raise a ValueError
                     raise ValueError(
                         f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
@@ -193,7 +200,9 @@ def parse_openghg(
     # Define sources of attributes to use when defining metadata
     # The order here influences the hierarchy if keys appear multiple times.
     # kwargs allow additional variables such as "station_longitude" to be included if needed.
-    attribute_sources = [attributes, kwargs, site_info, site_attributes]
+    # 2023-04: Re-ordered to be - values explicitly passed, stored data (2), attributes from dataset
+    # # attribute_sources = [attributes, kwargs, site_info, site_attributes]
+    attribute_sources = [kwargs, site_info, site_attributes, attributes]
 
     # Search attributes sources (in order) and populate metadata
     for param in metadata_needed:
@@ -208,6 +217,12 @@ def parse_openghg(
 
     gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
-    gas_data = assign_attributes(data=gas_data, site=site, network=network, site_filepath=site_filepath)
+    gas_data = assign_attributes(
+        data=gas_data,
+        site=site,
+        network=network,
+        update_mismatch=update_mismatch,
+        site_filepath=site_filepath,
+    )
 
     return gas_data

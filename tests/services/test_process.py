@@ -9,7 +9,7 @@
 
 # # @pytest.fixture(autouse=True, scope="module")
 # # def run_before_tests(monkeypatch):
-# #     # clear_test_store()
+# #     # clear_test_stores()
 # #     monkeypatch.setenv("OPENGHG_CLOUD", "TESTCLOUD")
 
 # @pytest.fixture()
@@ -19,7 +19,7 @@
 
 # @pytest.mark.skip("Marked for removal")
 # def test_process_CRDS_files(authenticated_user):
-#     clear_test_store()
+#     clear_test_stores()
 
 #     service_url = "openghg"
 

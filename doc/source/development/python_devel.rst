@@ -8,7 +8,7 @@ The source code for OpenGHG is available on `GitHub <https://github.com/openghg/
 Setting up your computer
 =========================
 
-You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.8, so please make sure you have both installed before continuing
+You'll need `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_ and Python >= 3.9, so please make sure you have both installed before continuing
 further.
 
 
@@ -129,7 +129,7 @@ To ensure everything is working on your system running the tests is a good idea.
 Coding Style
 ============
 
-OpenGHG is written in Python 3 (>= 3.8). We aim as much as possible to follow a
+OpenGHG is written in Python 3 (>= 3.9). We aim as much as possible to follow a
 `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ python coding style and
 recommend that use a linter such as `flake8 <https://flake8.pycqa.org/en/latest/>`__.
 
@@ -384,3 +384,24 @@ When the feature is complete, create a *pull request* on GitHub so that the
 changes can be merged back into the development branch.
 For information, see the documentation
 `here <https://help.github.com/articles/about-pull-requests>`__.
+
+Creating a release
+==================
+
+The creation of the packages required by PyPI and conda is handled in the GitHub actions workflow files
+under ``.github/workflows/workflow.yaml``. The package build and release workflow will only be triggered by a
+tagged commit. Before we get to this step we need to make sure everything is setup to do a release.
+
+1. Ensure all issues in a `milestone <https://github.com/openghg/openghg/milestones>`__ are complete
+2. Ensure all tests are passing and no runners are failing
+3. Update CHANGELOG.md with notes of each fix and links to the pull requests
+4. Ensure all documentation is up to date
+5. Create a tagged commit and push it to origin
+
+For example, when I released version 0.5.1 of OpenGHG I created a tag and pushed it like so
+
+.. code-block:: bash
+
+   git tag -a 0.5.1 -m "OpenGHG release v0.5.1" && git push origin 0.5.1
+
+6. Update the website with the new release and information about any new features or tutorials added.

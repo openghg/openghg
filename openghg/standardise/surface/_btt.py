@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
+import warnings
 
 
 def parse_btt(
@@ -8,6 +9,7 @@ def parse_btt(
     network: Optional[str] = "LGHG",
     inlet: Optional[str] = None,
     instrument: Optional[str] = None,
+    update_mismatch: str = "never",
 ) -> Dict:
     """Reads NPL data files and returns the UUIDS of the Datasources
     the processed data has been assigned to
@@ -15,6 +17,12 @@ def parse_btt(
     Args:
         data_filepath: Path of file to load
         site: Site name
+        update_mismatch: This determines how mismatches between the internal data
+            "attributes" and the supplied / derived "metadata" are handled.
+            This includes the options:
+              - "never" - don't update mismatches and raise an AttrMismatchError
+              - "from_source" / "attributes" - update mismatches based on input data (e.g. data attributes)
+              - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
     Returns:
         dict: Dictionary of gas data
     """
@@ -28,6 +36,7 @@ def parse_btt(
 
     data_filepath = Path(data_filepath)
 
+    warnings.warn("This function will be removed in a future release", DeprecationWarning)
     site = "BTT"
 
     # Rename these columns
@@ -96,6 +105,6 @@ def parse_btt(
             "attributes": site_attributes,
         }
 
-    gas_data = assign_attributes(data=gas_data, site=site, network=network)
+    gas_data = assign_attributes(data=gas_data, site=site, network=network, update_mismatch=update_mismatch)
 
     return gas_data
