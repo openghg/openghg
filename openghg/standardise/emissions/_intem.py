@@ -6,6 +6,8 @@ def parse_intem(
     filepath: Path,
     species: str,
     source: str,
+    database: str,
+    database_version: str,
     data_type: str = "emissions",
     domain: str = "europe",
     model: str = "intem",

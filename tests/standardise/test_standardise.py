@@ -325,7 +325,7 @@ def test_standardise_flux_intem():
     proc_results = standardise_flux(
         filepath=test_datapath,
         species="ch4",
-        source="intem",
+        source="total",
         source_format="intem",
         domain="europe",
         high_time_resolution=False,
@@ -334,7 +334,7 @@ def test_standardise_flux_intem():
     )
 
     print(proc_results)
-    assert "ch4_intem_europe" in proc_results
+    assert "ch4_total_europe" in proc_results
 
 
 def test_standardise_flux_additional_keywords():

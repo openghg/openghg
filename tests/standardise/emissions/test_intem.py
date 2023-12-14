@@ -21,10 +21,11 @@ def test_read_file():
         filepath,
         domain=domain,
         species=species,
+        source="total",
         data_type="emissions",
     )
-    assert "ch4_intem_europe" in data
-    output_ch4 = data["ch4_intem_europe"]
+    assert "ch4_total_europe" in data
+    output_ch4 = data["ch4_total_europe"]
     data_ch4 = output_ch4["data"]
 
     time = data_ch4["time"]
