@@ -6,6 +6,14 @@ This tutorial demonstrates how OpenGHG can be used to process new
 measurement data, search the data present and to retrieve this for
 analysis and visualisation.
 
+.. _what-is-object-store:
+
+What is Object Store?
+-------------------------------
+
+Each object and piece of data in the object store is stored at a specific key, which can be thought of as the address of the data. The data is stored in a bucket which in the cloud is a section of the OpenGHG object store. Locally a bucket is just a normal directory in the user’s filesystem specified by the path given in the configuration file at ~/.config/openghg/openghg.conf.
+
+
 .. _using-the-tutorial-object-store:
 
 Using the tutorial object store
@@ -62,6 +70,20 @@ For instance, the Tacolneston site in the UK (site code “TAC”) has four entr
 .. ipython:: python
 
     summary[summary["Site code"] == "TAC"]
+
+
+Let's see what data is available for a given source.
+First, we'll list all source formats.
+
+.. ipython:: python
+
+    summary["Source format"].unique()
+
+Now we'll find all data with source format ``"CRDS"``.
+
+.. ipython:: python
+
+    summary[summary["Source format"] == "CRDS"]
 
 DECC network
 ~~~~~~~~~~~~

@@ -43,10 +43,10 @@ def test_read_binary_data(mocker, clear_stores):
         data_type="emissions",
         binary_data=binary_data,
         metadata=metadata,
-        file_metadata=file_metadata)
+        file_metadata=file_metadata,
+    )
 
-    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2",
-                                                        "new": True}}
+    expected_results = {"co2_gpp-cardamom_europe": {"uuid": "test-uuid-2", "new": True}}
 
     assert results == expected_results
 
@@ -54,14 +54,15 @@ def test_read_binary_data(mocker, clear_stores):
 def test_read_file():
     test_datapath = get_emissions_datapath("co2-gpp-cardamom_EUROPE_2012.nc")
 
-    proc_results = standardise_flux(store="user",
-                                    filepath=test_datapath,
-                                    species="co2",
-                                    source="gpp-cardamom",
-                                    domain="europe",
-                                    high_time_resolution=False,
-                                    overwrite=True,
-                                    )
+    proc_results = standardise_flux(
+        store="user",
+        filepath=test_datapath,
+        species="co2",
+        source="gpp-cardamom",
+        domain="europe",
+        high_time_resolution=False,
+        overwrite=True,
+    )
 
     assert "co2_gpp-cardamom_europe" in proc_results
 
@@ -142,6 +143,7 @@ def load_edgar():
         if database_version:
             kwargs["database_version"] = version.replace(".", "")
         return standardise_flux(store="user", **kwargs)
+
     return _load_edgar
 
 
@@ -264,7 +266,9 @@ def test_add_edgar_database(clear_stores):
     database = "EDGAR"
     date = "2015"
 
-    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date)
+    proc_results = transform_emissions_data(
+        store="user", datapath=test_datapath, database=database, date=date
+    )
 
     default_domain = "globaledgar"
 
@@ -325,7 +329,9 @@ def test_transform_and_add_edgar_database(clear_stores):
     date = "2015"
     domain = "EUROPE"
 
-    proc_results = transform_emissions_data(store="user", datapath=test_datapath, database=database, date=date, domain=domain)
+    proc_results = transform_emissions_data(
+        store="user", datapath=test_datapath, database=database, date=date, domain=domain
+    )
 
     version = "v6.0"
     species = "ch4"

@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `force` option to `retrieve_atmospheric` and `ObsSurface.store_data` so that retrieved hashes can be ignored - [PR #819](https://github.com/openghg/openghg/pull/819)
 )
 
+- Added `SafetyCachingMiddleware` to metastore, which caches writes and only saves them to disk if the underlying file
+has not changed. This is to prevent errors when concurrent writes are made to the metastore. [PR #836](https://github.com/openghg/openghg/pull/836)
 
 ### Fixed
 
@@ -37,15 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bug where `radon` was not fetched using `retrieve_atmospheric` from icos data. - [PR #794](https://github.com/openghg/openghg/pull/794)
 
 - Bug with CRDS parse function where data for all species was being dropped if only one species was missing - [PR #829](https://github.com/openghg/openghg/pull/829)
-
 - Datetime processing has been updated to be compatible with Pandas 2.0: the `date_parser` argument of `read_csv` was deprecated in favour of `date_format`. [PR #816](https://github.com/openghg/openghg/pull/816)
-
+- Added "parse_intem" function to parse intem emissions files - [PR #804](https://github.com/openghg/openghg/pull/804)
 
 ### Changed
 
 - Datasource UUIDs are no longer stored in the storage class and are now only stored in the metadata store - [PR #752](https://github.com/openghg/openghg/pull/752)
 
-- Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818)
+- Support dropped for Python 3.8 - [PR #818](https://github.com/openghg/openghg/pull/818). OpenGHG now supports Python >= 3.9.
 
 ## [0.6.2] - 2023-08-07
 
