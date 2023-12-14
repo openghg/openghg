@@ -273,6 +273,7 @@ def test_search_footprints_multiple():
         domain="TEST",
         model="NAME",
         high_time_resolution=False,
+        store="user",
     )
 
     key = next(iter(res.metadata))

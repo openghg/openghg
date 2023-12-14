@@ -66,7 +66,6 @@ def test_get_obs_surface_average_works_without_longname():
     ],
 )
 def test_get_obs_surface(inlet_keyword, inlet_value):
-
     if inlet_keyword == "inlet":
         obsdata = get_obs_surface(site="bsd", species="co2", inlet=inlet_value)
     elif inlet_keyword == "height":

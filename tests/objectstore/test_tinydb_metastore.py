@@ -18,7 +18,7 @@ def metastore(tmp_path):
     Note: `tmp_path` is function scope, so the metastore is
     reset for each test that uses this fixture.
     """
-    filename = str(tmp_path / 'metastore._data')
+    filename = str(tmp_path / "metastore._data")
     with tinydb.TinyDB(filename) as database:
         metastore = TinyDBMetaStore(database=database)
         yield metastore
@@ -31,7 +31,7 @@ def alternate_metastore(tmp_path):
     This will be used to show that two different
     metastore will not interact.
     """
-    filename = str(tmp_path / 'alternate_metastore._data')
+    filename = str(tmp_path / "alternate_metastore._data")
     with tinydb.TinyDB(filename) as database:
         metastore = TinyDBMetaStore(database=database)
         yield metastore
@@ -48,7 +48,7 @@ def test_add(metastore):
 
     assert len(result) == 1
 
-    assert result[0]['key1'] == 'val1'
+    assert result[0]["key1"] == "val1"
 
 
 def test_search(metastore):
@@ -62,13 +62,13 @@ def test_search(metastore):
 
     assert len(result_all) == 2
 
-    result1 = metastore.search({'key': 'val1'})
+    result1 = metastore.search({"key": "val1"})
 
-    assert result1[0]['key'] == 'val1'
+    assert result1[0]["key"] == "val1"
 
-    result2 = metastore.search({'key': 'val2'})
+    result2 = metastore.search({"key": "val2"})
 
-    assert result2[0]['key'] == 'val2'
+    assert result2[0]["key"] == "val2"
 
 
 def test_lowercase_add_search(metastore):
@@ -89,9 +89,9 @@ def test_lowercase_add_search(metastore):
 
 def test_select(metastore):
     for i in range(10):
-        metastore.insert({'uuid': i, 'key': 'val'})
+        metastore.insert({"uuid": i, "key": "val"})
 
-    results = metastore.select('uuid')
+    results = metastore.select("uuid")
 
     assert results == list(range(10))
 
@@ -105,7 +105,7 @@ def test_alternate_metastore(alternate_metastore):
 
     assert len(result) == 1
 
-    assert result[0]['key1'] == 'val1'
+    assert result[0]["key1"] == "val1"
 
 
 def test_multiple_metastores(metastore, alternate_metastore):

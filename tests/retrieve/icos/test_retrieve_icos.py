@@ -199,24 +199,33 @@ def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
 @pytest.fixture
 def mock_retrieve_remote(mocker):
     mock_metadata = {
-                "species": "ch4",
-                "site": "tac",
-                "station_long_name": "Tacolneston",
-                "inlet": "185m",
-                "instrument": "picarro",
-                "network": "decc",
-                "source_format": "icos",
-                "data_source": "icoscp",
-                "icos_data_level": 1,
-            }
+        "species": "ch4",
+        "site": "tac",
+        "station_long_name": "Tacolneston",
+        "inlet": "185m",
+        "instrument": "picarro",
+        "network": "decc",
+        "source_format": "icos",
+        "data_source": "icoscp",
+        "icos_data_level": 1,
+    }
     n_days = 100
     epoch = datetime.datetime(1970, 1, 1, 1, 1)
-    mock_data = pd.DataFrame(
-        data={"A": range(0, n_days), "time": pd.date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D")}
-    ).set_index("time").to_xarray()
+    mock_data = (
+        pd.DataFrame(
+            data={
+                "A": range(0, n_days),
+                "time": pd.date_range(epoch, epoch + datetime.timedelta(n_days - 1), freq="D"),
+            }
+        )
+        .set_index("time")
+        .to_xarray()
+    )
 
-    mocker.patch("openghg.retrieve.icos._retrieve._retrieve_remote", return_value={"ch4": {"metadata": mock_metadata, "data": mock_data}})
-
+    mocker.patch(
+        "openghg.retrieve.icos._retrieve._retrieve_remote",
+        return_value={"ch4": {"metadata": mock_metadata, "data": mock_data}},
+    )
 
 
 def test_retrieved_hash_prevents_storing_twice(mock_retrieve_remote, caplog):
