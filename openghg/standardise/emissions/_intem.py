@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Any, Dict, Literal, Optional, Union
 
 
 def parse_intem(
@@ -13,7 +13,7 @@ def parse_intem(
     high_time_resolution: Optional[bool] = False,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
-    **kwargs
+    **kwargs: Any,
 ) -> Dict:
     """
     Parse INTEM emissions data from the specified file.
