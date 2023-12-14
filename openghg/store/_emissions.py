@@ -124,12 +124,12 @@ class Emissions(BaseStore):
             "chunks": chunks,
         }
 
-        optional_keywords = {"database": database, "database_version": database_version, "model": model}
+        optional_keywords: dict[Any, Any] = {"database": database, "database_version": database_version, "model": model}
 
         signature = inspect.signature(parser_fn)
         fn_accepted_parameters = [param.name for param in signature.parameters.values()]
 
-        input_parameters = param.copy()
+        input_parameters: dict[Any, Any] = param.copy()
 
         # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
         for param, param_value in optional_keywords.items():
