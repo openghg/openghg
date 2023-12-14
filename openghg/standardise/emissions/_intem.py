@@ -6,7 +6,7 @@ def parse_intem(
     filepath: Path,
     species: str,
     data_type: str,
-    source: str = "intem",
+    source: str,
     domain: str = "europe",
     model: str = "intem",
     period: Optional[Union[str, tuple]] = None,
