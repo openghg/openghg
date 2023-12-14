@@ -38,7 +38,7 @@ dependencies:
   - pytest-mock
   - requests-mock
   - pytest-tornasync
-  - mypy==1.4.0
+  - mypy==1.7.1
   - types-PyYAML
   - types-requests
   - types-toml
