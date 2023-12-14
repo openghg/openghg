@@ -21,7 +21,7 @@ def parse_intem(
         filepath: Path to the '.nc' file containing INTEM emissions data.
         species: Name of species
         data_type: Type of data, default is 'emissions'.
-        source: Source of the emissions data, default is 'intem'.
+        source: Source of the emissions data
         domain: Geographic domain, default is 'europe'.
         database: Database name if applicable.
         database_version: Version of the database if applicable.
