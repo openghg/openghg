@@ -5,8 +5,8 @@ from typing import Dict, Literal, Optional, Union
 def parse_intem(
     filepath: Path,
     species: str,
-    data_type: str,
     source: str,
+    data_type: str = "emissions",
     domain: str = "europe",
     model: str = "intem",
     period: Optional[Union[str, tuple]] = None,
@@ -20,13 +20,14 @@ def parse_intem(
     Args:
         filepath: Path to the '.nc' file containing INTEM emissions data.
         species: Name of species
-        data_type: Type of data, default is 'emissions'.
         source: Source of the emissions data
+        data_type: Type of data, default is 'emissions'.
         domain: Geographic domain, default is 'europe'.
         model: Model name if applicable.
         period: The time period for which data is to be parsed.
-        chunks: (Union[int, Dict, Literal["auto"], None]): Chunking configuration.
-        continuous (bool): "Flag indicating whether the data is continuous or not"
+        high_time_resolution: If this is a high resolution file.
+        chunks: Chunking configuration.
+        continuous : "Flag indicating whether the data is continuous or not"
 
     Returns:
         Dict: Parsed emissions data in dictionary format.
@@ -53,8 +54,8 @@ def parse_intem(
     metadata["species"] = species
     metadata["domain"] = domain
     metadata["source"] = source
-
-    optional_keywords = {"database": database, "database_version": database_version, "model": model}
+    
+    optional_keywords = {"model": model}
 
     for key, value in optional_keywords.items():
         if value is not None:
@@ -62,9 +63,9 @@ def parse_intem(
 
     metadata["author"] = author_name
     metadata["processed"] = str(timestamp_now())
-    metadata["data_type"] = "emissions"
+    metadata["data_type"] = data_type
     metadata["source_format"] = "openghg"
-
+    metadata["time_resolution"] = "high" if high_time_resolution else "standard"
     dataset_time = emissions_dataset["time"]
 
     # Fetching start_date and end_date from dataset time dimension
