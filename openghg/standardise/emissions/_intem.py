@@ -13,7 +13,6 @@ def parse_intem(
     high_time_resolution: Optional[bool] = False,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
-    **kwargs: Any,
 ) -> Dict:
     """
     Parse INTEM emissions data from the specified file.
@@ -29,7 +28,6 @@ def parse_intem(
         high_time_resolution: If this is a high resolution file.
         chunks: Chunking configuration.
         continuous : "Flag indicating whether the data is continuous or not"
-        **kwargs: For extra not required arguments,
     Returns:
         Dict: Parsed emissions data in dictionary format.
     """
