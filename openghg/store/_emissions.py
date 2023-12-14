@@ -124,7 +124,11 @@ class Emissions(BaseStore):
             "chunks": chunks,
         }
 
-        optional_keywords: dict[Any, Any] = {"database": database, "database_version": database_version, "model": model}
+        optional_keywords: dict[Any, Any] = {
+            "database": database,
+            "database_version": database_version,
+            "model": model,
+        }
 
         signature = inspect.signature(parser_fn)
         fn_accepted_parameters = [param.name for param in signature.parameters.values()]
