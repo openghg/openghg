@@ -8,7 +8,6 @@ def parse_intem(
     data_type: str,
     source: str = "intem",
     domain: str = "europe",
-    database: Optional[str] = None,
     model: Optional[str] = "None",
     period: Optional[Union[str, tuple]] = None,
     high_time_resolution: Optional[bool] = False,
