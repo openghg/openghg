@@ -10,7 +10,7 @@ def parse_intem(
     domain: str = "europe",
     database: Optional[str] = None,
     database_version: Optional[str] = None,
-    model: Optional[str] = None,
+    model: Optional[str] = "None",
     period: Optional[Union[str, tuple]] = None,
     high_time_resolution: Optional[bool] = False,
     chunks: Union[int, Dict, Literal["auto"], None] = None,
@@ -22,15 +22,15 @@ def parse_intem(
     Args:
         filepath: Path to the '.nc' file containing INTEM emissions data.
         species: Name of species
+        data_type: Type of data, default is 'emissions'.
         source: Source of the emissions data, default is 'intem'.
         domain: Geographic domain, default is 'europe'.
-        data_type: Type of data, default is 'emissions'.
         database: Database name if applicable.
         database_version: Version of the database if applicable.
         model: Model name if applicable.
-        period: "needs explainer"
+        period: The time period for which data is to be parsed.
         chunks: (Union[int, Dict, Literal["auto"], None]): Chunking configuration.
-        continuous (bool): "needs explainer"
+        continuous (bool): "Flag indicating whether the data is continuous or not"
 
     Returns:
         Dict: Parsed emissions data in dictionary format.
@@ -87,9 +87,6 @@ def parse_intem(
     key = "_".join((species, source, domain))
 
     emissions_dataset = emissions_dataset.rename_vars({"flux_mean": "flux"})
-
-    # Dataset validation
-    Emissions.validate_data(emissions_dataset)
 
     # Creation of final dictionary with data and metadata as key
     emissions_data: Dict[str, dict] = {}
