@@ -29,7 +29,7 @@ def parse_intem(
         high_time_resolution: If this is a high resolution file.
         chunks: Chunking configuration.
         continuous : "Flag indicating whether the data is continuous or not"
-
+        **kwargs: For extra not required arguments,
     Returns:
         Dict: Parsed emissions data in dictionary format.
     """
