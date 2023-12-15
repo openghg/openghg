@@ -22,19 +22,18 @@ These methods are only needed by `store.BaseStore`.
 """
 from __future__ import annotations
 
+import json
 from collections.abc import Generator
 from contextlib import contextmanager
-import json
-from typing import Any, cast, Literal, Optional, Type
+from typing import Any, Literal, Optional, Type, cast
 
+import tinydb
 from filelock import FileLock
-from openghg.objectstore import exists, get_object, set_object_from_json, get_object_lock_path
+from openghg.objectstore import exists, get_object, get_object_lock_path, set_object_from_json
 from openghg.objectstore.metastore import TinyDBMetaStore
 from openghg.types import MetastoreError
 from openghg.util import hash_string
-import tinydb
 from tinydb.middlewares import Middleware
-
 
 object_store_data_classes = {  # TODO: move this to central location after ObjectStore PR
     "surface": {"_root": "ObsSurface", "_uuid": "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"},

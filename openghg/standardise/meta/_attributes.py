@@ -1,7 +1,8 @@
-from typing import Any, Dict, Hashable, List, Optional, Tuple, Union, cast
 import logging
-from xarray import Dataset
+from typing import Any, Dict, Hashable, List, Optional, Tuple, Union, cast
+
 from openghg.types import optionalPathType
+from xarray import Dataset
 
 __all__ = [
     "assign_attributes",
@@ -139,7 +140,7 @@ def get_attributes(
         site_filepath: Alternative site info file
         species_filepath: Alternative species info file
     """
-    from openghg.util import load_internal_json, timestamp_now, get_species_info
+    from openghg.util import get_species_info, load_internal_json, timestamp_now
     from pandas import Timestamp as pd_Timestamp
 
     if not isinstance(ds, Dataset):

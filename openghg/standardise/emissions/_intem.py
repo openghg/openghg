@@ -31,8 +31,8 @@ def parse_intem(
     Returns:
         Dict: Parsed emissions data in dictionary format.
     """
-    from openghg.util import timestamp_now
     from openghg.store import infer_date_range
+    from openghg.util import timestamp_now
     from xarray import open_dataset
 
     emissions_dataset = open_dataset(filepath).chunk(chunks)

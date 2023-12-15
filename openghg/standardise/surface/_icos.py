@@ -1,6 +1,6 @@
+import logging
 from pathlib import Path
 from typing import Dict, Optional, Union
-import logging
 
 from openghg.types import optionalPathType
 
@@ -117,7 +117,7 @@ def _read_data_large_header(
     Returns:
         dict: Dictionary of gas data
     """
-    from openghg.util import read_header, format_inlet
+    from openghg.util import format_inlet, read_header
     from pandas import read_csv
 
     # Read metadata from the filename and cross check to make sure the passed
@@ -291,7 +291,7 @@ def _read_data_small_header(
     Returns:
         dict: Dictionary of gas data
     """
-    from openghg.util import read_header, format_inlet
+    from openghg.util import format_inlet, read_header
     from pandas import read_csv
 
     # Read some metadata from the filename

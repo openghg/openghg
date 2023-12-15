@@ -1,8 +1,8 @@
+import logging
 from pathlib import Path
 from typing import Dict, Optional, Union, cast
-import logging
-import xarray as xr
 
+import xarray as xr
 from openghg.types import optionalPathType
 
 logger = logging.getLogger("openghg.standardise.surface")
@@ -61,8 +61,12 @@ def parse_openghg(
     Returns:
         Dict: Dictionary of source_name : data, metadata, attributes
     """
-    from openghg.util import clean_string, format_inlet, load_internal_json, get_site_info
-    from openghg.standardise.meta import metadata_default_keys, define_species_label, assign_attributes
+    from openghg.standardise.meta import (
+        assign_attributes,
+        define_species_label,
+        metadata_default_keys,
+    )
+    from openghg.util import clean_string, format_inlet, get_site_info, load_internal_json
 
     data_filepath = Path(data_filepath)
 

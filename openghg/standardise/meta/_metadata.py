@@ -1,7 +1,8 @@
 import logging
 import math
 from copy import deepcopy
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
+
 from openghg.types import AttrMismatchError
 from openghg.util import is_number
 

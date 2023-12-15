@@ -1,12 +1,12 @@
 from __future__ import annotations
-import logging
-from typing import List, Optional, Union, Dict, Tuple
-import plotly.graph_objects as go
-import numpy as np
-import base64
-from typing import TYPE_CHECKING
 
-from openghg.util import get_species_info, synonyms, get_datapath
+import base64
+import logging
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+
+import numpy as np
+import plotly.graph_objects as go
+from openghg.util import get_datapath, get_species_info, synonyms
 
 if TYPE_CHECKING:
     from openghg.dataobjects import ObsData

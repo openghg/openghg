@@ -1,4 +1,5 @@
 from typing import Optional
+
 from xarray import Dataset
 
 __all__ = ["plot_footprint"]

@@ -21,9 +21,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 import tinydb
-from tinydb.operations import delete as tinydb_delete
-
 from openghg.types import MetastoreError
+from tinydb.operations import delete as tinydb_delete
 
 MetaData = Dict[str, Any]
 QueryResults = List[Dict[str, Any]]  # ...to avoid clashes with `SearchResults` object

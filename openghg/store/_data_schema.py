@@ -1,6 +1,7 @@
+import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
-import logging
+
 import numpy as np
 from xarray import Dataset
 

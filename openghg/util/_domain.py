@@ -1,9 +1,8 @@
-from typing import Any, Dict, Tuple, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from numpy import ndarray
-
-from openghg.types import optionalPathType, ArrayLikeMatch, ArrayLike, XrDataLike, XrDataLikeMatch
+from openghg.types import ArrayLike, ArrayLikeMatch, XrDataLike, XrDataLikeMatch, optionalPathType
 
 __all__ = ["get_domain_info", "find_domain", "convert_longitude"]
 
@@ -18,8 +17,8 @@ def get_domain_info(domain_filepath: optionalPathType = None) -> Dict[str, Any]:
     Returns:
         dict: Data from domain JSON file
     """
-    from openghg_defs import domain_info_file
     from openghg.util import load_json
+    from openghg_defs import domain_info_file
 
     if domain_filepath is None:
         domain_info_json = load_json(path=domain_info_file)

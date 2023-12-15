@@ -105,7 +105,13 @@ def _read_data(
         dict: Dictionary of gas data
     """
     import warnings
-    from openghg.util import clean_string, find_duplicate_timestamps, format_inlet, load_internal_json
+
+    from openghg.util import (
+        clean_string,
+        find_duplicate_timestamps,
+        format_inlet,
+        load_internal_json,
+    )
     from pandas import RangeIndex, read_csv, to_datetime
 
     split_fname = data_filepath.stem.split(".")
@@ -303,7 +309,7 @@ def _get_site_attributes(
     Returns:
         dict: Dictionary of attributes
     """
-    from openghg.util import get_site_info, format_inlet
+    from openghg.util import format_inlet, get_site_info
 
     try:
         site_attributes: Dict = crds_metadata["sites"][site.upper()]

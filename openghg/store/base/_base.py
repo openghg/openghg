@@ -7,13 +7,11 @@ import logging
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 
-from pandas import Timestamp
-
-from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore import exists, get_object_from_json, set_object_from_json
 from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_now, to_lowercase
-
+from pandas import Timestamp
 
 T = TypeVar("T", bound="BaseStore")
 
@@ -270,6 +268,7 @@ class BaseStore:
         """
         raise NotImplementedError("Ranking is being reworked and will be reactivated in a future release.")
         from collections import defaultdict
+
         from openghg.util import create_daterange_str, daterange_overlap
 
         if uuid not in self._rank_data:

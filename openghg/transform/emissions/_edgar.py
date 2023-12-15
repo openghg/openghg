@@ -1,9 +1,10 @@
+import logging
 import re
 import zipfile
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Union, cast
 from zipfile import ZipFile
-import logging
+
 import numpy as np
 import xarray as xr
 from numpy import ndarray
@@ -69,10 +70,10 @@ def parse_edgar(
     from openghg.store import infer_date_range
     from openghg.util import (
         clean_string,
+        convert_internal_longitude,
+        find_coord_name,
         molar_mass,
         synonyms,
-        find_coord_name,
-        convert_internal_longitude,
         timestamp_now,
     )
 

@@ -45,24 +45,24 @@ on which data types are missing.
 """
 
 import logging
-from rich.progress import track
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 from openghg.dataobjects import BoundaryConditionsData, FluxData, FootprintData, ObsData
 from openghg.retrieve import (
-    get_obs_surface,
     get_bc,
     get_flux,
     get_footprint,
-    search_surface,
+    get_obs_surface,
     search_bc,
     search_flux,
     search_footprints,
+    search_surface,
 )
-from openghg.util import synonyms
 from openghg.types import SearchError
+from openghg.util import synonyms
 from pandas import Timestamp
+from rich.progress import track
 from xarray import DataArray, Dataset
 
 __all__ = ["ModelScenario", "combine_datasets", "stack_datasets", "calc_dim_resolution", "match_dataset_dims"]
@@ -337,12 +337,7 @@ class ModelScenario:
         """
         Add footprint data based on keywords or direct FootprintData object.
         """
-        from openghg.util import (
-            clean_string,
-            format_inlet,
-            species_lifetime,
-            extract_height_name,
-        )
+        from openghg.util import clean_string, extract_height_name, format_inlet, species_lifetime
 
         # Search for footprint data based on keywords
         # - site, domain, inlet (can extract from obs / height_name), model, metmodel

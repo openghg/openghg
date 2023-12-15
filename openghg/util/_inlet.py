@@ -1,5 +1,6 @@
-from typing import Optional, Union, cast, overload
 import logging
+from typing import Optional, Union, cast, overload
+
 from openghg.types import optionalPathType
 
 __all__ = ["format_inlet", "extract_height_name"]
