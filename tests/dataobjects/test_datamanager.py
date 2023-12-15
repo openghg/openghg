@@ -86,7 +86,7 @@ def test_delete_footprint_data(footprint_read):
 
     bucket = get_writable_bucket(name="user")
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        uuid = metastore.select('uuid')[0]
+        uuid = metastore.select("uuid")[0]
 
     ds = Datasource.load(bucket=bucket, uuid=uuid, shallow=True)
     key = ds.key()
@@ -100,7 +100,7 @@ def test_delete_footprint_data(footprint_read):
         assert k.exists()
 
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        assert metastore.search({'uuid': uuid})
+        assert metastore.search({"uuid": uuid})
 
     res.delete_datasource(uuid=uuid)
 
@@ -110,7 +110,7 @@ def test_delete_footprint_data(footprint_read):
         assert not k.exists()
 
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        assert metastore.search({'uuid': uuid}) == []
+        assert metastore.search({"uuid": uuid}) == []
 
 
 def test_object_store_not_in_metadata():
@@ -311,7 +311,7 @@ def test_delete_data():
     key = d.key()
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        assert metastore.search({'uuid': uid})
+        assert metastore.search({"uuid": uid})
 
     datasource_path = key_to_local_filepath(key=key)[0]
 
@@ -333,7 +333,7 @@ def test_delete_data():
         assert not k.exists()
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        assert metastore.search({'uuid': uid}) == []
+        assert metastore.search({"uuid": uid}) == []
 
 
 @pytest.mark.xfail(reason="Failing due to the Datasource save bug - issue 724", raises=AssertionError)

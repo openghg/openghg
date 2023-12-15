@@ -30,8 +30,8 @@ def test_site_info_file_mock():
         ("ICOS", "MHD"),
         ("icos", "MHD"),
         ("DECC", "TAC"),
-        ("nonetwork", None)
-    ]
+        ("nonetwork", None),
+    ],
 )
 def test_sites_in_network(network, expected_site):
     """
