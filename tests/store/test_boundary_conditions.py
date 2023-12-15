@@ -1,10 +1,10 @@
+import numpy as np
 from helpers import get_bc_datapath
 from openghg.retrieve import search
-from openghg.store import BoundaryConditions
 from openghg.standardise import standardise_bc, standardise_from_binary_data
+from openghg.store import BoundaryConditions
 from openghg.util import hash_bytes
 from xarray import open_dataset
-import numpy as np
 
 
 def test_read_data_monthly(mocker):

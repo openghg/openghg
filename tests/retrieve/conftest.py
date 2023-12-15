@@ -1,21 +1,21 @@
 import pytest
 from helpers import (
+    clear_test_stores,
     get_bc_datapath,
     get_column_datapath,
     get_emissions_datapath,
     get_eulerian_datapath,
     get_footprint_datapath,
     get_surface_datapath,
-    clear_test_stores,
 )
 from openghg.objectstore import get_bucket
 from openghg.standardise import (
-    standardise_surface,
-    standardise_footprint,
-    standardise_flux,
     standardise_bc,
     standardise_column,
     standardise_eulerian,
+    standardise_flux,
+    standardise_footprint,
+    standardise_surface,
 )
 
 

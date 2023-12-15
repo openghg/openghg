@@ -2,9 +2,10 @@ import bz2
 import datetime
 import json
 import pickle
+
 import pandas as pd
 import pytest
-from helpers import get_retrieval_datapath, metadata_checker_obssurface, clear_test_stores
+from helpers import clear_test_stores, get_retrieval_datapath, metadata_checker_obssurface
 from icoscp.cpb.dobj import Dobj  # type: ignore
 from icoscp.station.station import Station
 from openghg.cloud import package_from_function

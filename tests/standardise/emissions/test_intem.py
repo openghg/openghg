@@ -1,8 +1,9 @@
 import logging
+
 from helpers import get_emissions_datapath
 from openghg.standardise.emissions import parse_intem
-from pandas import Timestamp
 from openghg.standardise.meta import metadata_default_keys
+from pandas import Timestamp
 
 mpl_logger = logging.getLogger("matplotlib")
 mpl_logger.setLevel(logging.WARNING)

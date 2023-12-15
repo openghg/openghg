@@ -1,23 +1,23 @@
-import os
 import json
-import pytest
-import numpy as np
-import xarray as xr
-from pandas import Timestamp
-from helpers import attributes_checker_obssurface, get_surface_datapath, clear_test_stores
+import os
 from pathlib import Path
+
+import numpy as np
+import pytest
+import xarray as xr
+from helpers import attributes_checker_obssurface, clear_test_stores, get_surface_datapath
 from openghg.objectstore import (
     exists,
     get_bucket,
+    get_object_from_json,
     get_writable_bucket,
     set_object_from_json,
-    get_object_from_json,
 )
+from openghg.objectstore.metastore import open_metastore
+from openghg.retrieve import get_obs_surface, search_surface
+from openghg.standardise import standardise_from_binary_data, standardise_surface
 from openghg.store import ObsSurface
 from openghg.store.base import Datasource
-from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import search_surface, get_obs_surface
-from openghg.standardise import standardise_surface, standardise_from_binary_data
 from openghg.util import create_daterange_str
 from pandas import Timestamp
 
