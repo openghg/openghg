@@ -1,19 +1,17 @@
-from openghg.dataobjects import data_manager
-from openghg.store.base import Datasource
-from openghg.objectstore.metastore import open_metastore
-from openghg.retrieve import search_surface
-from openghg.standardise import standardise_surface, standardise_footprint
-from openghg.objectstore import get_writable_bucket
-from openghg.dataobjects import DataManager
-
 import pytest
 from helpers import (
-    get_surface_datapath,
-    clear_test_stores,
-    key_to_local_filepath,
     all_datasource_keys,
+    clear_test_stores,
     get_footprint_datapath,
+    get_surface_datapath,
+    key_to_local_filepath,
 )
+from openghg.dataobjects import DataManager, data_manager
+from openghg.objectstore import get_writable_bucket
+from openghg.objectstore.metastore import open_metastore
+from openghg.retrieve import search_surface
+from openghg.standardise import standardise_footprint, standardise_surface
+from openghg.store.base import Datasource
 
 
 @pytest.fixture(autouse=True)
@@ -86,7 +84,7 @@ def test_delete_footprint_data(footprint_read):
 
     bucket = get_writable_bucket(name="user")
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        uuid = metastore.select('uuid')[0]
+        uuid = metastore.select("uuid")[0]
 
     ds = Datasource.load(bucket=bucket, uuid=uuid, shallow=True)
     key = ds.key()
@@ -100,7 +98,7 @@ def test_delete_footprint_data(footprint_read):
         assert k.exists()
 
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        assert metastore.search({'uuid': uuid})
+        assert metastore.search({"uuid": uuid})
 
     res.delete_datasource(uuid=uuid)
 
@@ -110,7 +108,7 @@ def test_delete_footprint_data(footprint_read):
         assert not k.exists()
 
     with open_metastore(bucket=bucket, data_type="footprints") as metastore:
-        assert metastore.search({'uuid': uuid}) == []
+        assert metastore.search({"uuid": uuid}) == []
 
 
 def test_object_store_not_in_metadata():
@@ -311,7 +309,7 @@ def test_delete_data():
     key = d.key()
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        assert metastore.search({'uuid': uid})
+        assert metastore.search({"uuid": uid})
 
     datasource_path = key_to_local_filepath(key=key)[0]
 
@@ -333,7 +331,7 @@ def test_delete_data():
         assert not k.exists()
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        assert metastore.search({'uuid': uid}) == []
+        assert metastore.search({"uuid": uid}) == []
 
 
 @pytest.mark.xfail(reason="Failing due to the Datasource save bug - issue 724", raises=AssertionError)

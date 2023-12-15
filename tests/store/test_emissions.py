@@ -1,15 +1,14 @@
-import pytest
-from helpers import get_emissions_datapath
 from typing import Any, Union
+
+import pytest
+from helpers import clear_test_stores, get_emissions_datapath
 from openghg.retrieve import search, search_flux
-from openghg.store import Emissions
 from openghg.standardise import standardise_flux, standardise_from_binary_data
+from openghg.store import Emissions
 from openghg.transform import transform_emissions_data
 from openghg.util import hash_bytes
-from xarray import open_dataset
 from pandas import Timestamp
-
-from helpers import clear_test_stores
+from xarray import open_dataset
 
 
 @pytest.fixture
