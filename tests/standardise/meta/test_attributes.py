@@ -1,6 +1,6 @@
 import logging
-import pytest
 
+import pytest
 from openghg.standardise.meta import get_attributes
 
 # flake8: noqa
@@ -11,8 +11,8 @@ mpl_logger.setLevel(logging.WARNING)
 
 def make_dummy_dataset(species_name: str):
     """Make simple Dataset with correct variable name for the species"""
-    import xarray as xr
     import numpy as np
+    import xarray as xr
 
     ds = xr.Dataset(
         {species_name: ("time", np.arange(0, 2, 1))},

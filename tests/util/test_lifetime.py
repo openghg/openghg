@@ -1,5 +1,6 @@
-import pytest
 from pathlib import Path
+
+import pytest
 from openghg.util import check_lifetime_monthly, species_lifetime
 
 

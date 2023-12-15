@@ -1,12 +1,17 @@
 import pytest
 from helpers import (
+    clear_test_stores,
     get_bc_datapath,
     get_emissions_datapath,
     get_footprint_datapath,
     get_surface_datapath,
 )
-from openghg.standardise import standardise_surface, standardise_flux, standardise_bc, standardise_footprint
-from helpers import clear_test_stores
+from openghg.standardise import (
+    standardise_bc,
+    standardise_flux,
+    standardise_footprint,
+    standardise_surface,
+)
 
 
 @pytest.fixture(scope="module", autouse=True)

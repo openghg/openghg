@@ -1,15 +1,16 @@
 # from pathlib import Path
 
+import tempfile
+
 import pytest
 from openghg.objectstore import (
-    get_user_objectstore_path,
     get_bucket,
-    get_writable_bucket,
     get_object_data_path,
     get_object_lock_path,
+    get_user_objectstore_path,
+    get_writable_bucket,
 )
 from openghg.types import ObjectStoreError
-import tempfile
 
 
 def test_get_bucket_tutorial_store_works(monkeypatch):

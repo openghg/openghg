@@ -1,5 +1,5 @@
 import numpy as np
-from openghg.standardise import summary_source_formats, summary_site_codes
+from openghg.standardise import summary_site_codes, summary_source_formats
 
 
 def test_summarise_format():

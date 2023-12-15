@@ -1,8 +1,8 @@
 from threading import Thread
 from timeit import default_timer
 
-from openghg.objectstore.metastore import DataClassMetaStore
 import pytest
+from openghg.objectstore.metastore import DataClassMetaStore
 
 
 @pytest.fixture
