@@ -9,7 +9,14 @@ from helpers import (
     clear_test_stores,
 )
 from openghg.objectstore import get_bucket
-from openghg.standardise import standardise_surface, standardise_footprint, standardise_flux, standardise_bc, standardise_column, standardise_eulerian
+from openghg.standardise import (
+    standardise_surface,
+    standardise_footprint,
+    standardise_flux,
+    standardise_bc,
+    standardise_column,
+    standardise_eulerian,
+)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -40,23 +47,25 @@ def data_read():
     data_filepath = get_surface_datapath(filename="capegrim-medusa.18.C", source_format="GC")
     prec_filepath = get_surface_datapath(filename="capegrim-medusa.18.precisions.C", source_format="GC")
 
-    standardise_surface(store="user",
-                             filepath=(data_filepath, prec_filepath),
-                             site="CGO",
-                             source_format="GCWERKS",
-                             network="AGAGE"
-                             )
+    standardise_surface(
+        store="user",
+        filepath=(data_filepath, prec_filepath),
+        site="CGO",
+        source_format="GCWERKS",
+        network="AGAGE",
+    )
 
     mhd_data_filepath = get_surface_datapath(filename="macehead.12.C", source_format="GC")
     mhd_prec_filepath = get_surface_datapath(filename="macehead.12.precisions.C", source_format="GC")
 
-    standardise_surface(store="user",
-                             filepath=(mhd_data_filepath, mhd_prec_filepath),
-                             site="MHD",
-                             source_format="GCWERKS",
-                             network="AGAGE",
-                             instrument="GCMD",
-                             )
+    standardise_surface(
+        store="user",
+        filepath=(mhd_data_filepath, mhd_prec_filepath),
+        site="MHD",
+        source_format="GCWERKS",
+        network="AGAGE",
+        instrument="GCMD",
+    )
 
     # with ObsSurface(bucket=bucket) as obs:
 
@@ -76,25 +85,27 @@ def data_read():
     openghg_path = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-185m-20220929_cut.nc", source_format="OPENGHG"
     )
-    standardise_surface(store="user",
-                             filepath=openghg_path,
-                             source_format="OPENGHG",
-                             site="tac",
-                             network="DECC",
-                             instrument="picarro",
-                             sampling_period="1H",
-                             )
+    standardise_surface(
+        store="user",
+        filepath=openghg_path,
+        source_format="OPENGHG",
+        site="tac",
+        network="DECC",
+        instrument="picarro",
+        sampling_period="1H",
+    )
 
     # Obs Column data
     column_datapath = get_column_datapath("gosat-fts_gosat_20170318_ch4-column.nc")
 
-    standardise_column(store="user",
-                             filepath=column_datapath,
-                             source_format="OPENGHG",
-                             satellite="GOSAT",
-                             domain="BRAZIL",
-                             species="methane",
-                             )
+    standardise_column(
+        store="user",
+        filepath=column_datapath,
+        source_format="OPENGHG",
+        satellite="GOSAT",
+        domain="BRAZIL",
+        species="methane",
+    )
 
     # Emissions data - added consecutive data for 2012-2013
     # This will be seen as "yearly" data and each file only contains one time point.
@@ -104,20 +115,22 @@ def data_read():
     species = "co2"
     source = "gpp-cardamom"
     domain = "europe"
-    standardise_flux(store="user",
-                             filepath=test_datapath1,
-                             species=species,
-                             source=source,
-                             domain=domain,
-                             high_time_resolution=False,
-                             )
-    standardise_flux(store="user",
-                             filepath=test_datapath2,
-                             species=species,
-                             source=source,
-                             domain=domain,
-                             high_time_resolution=False,
-                             )
+    standardise_flux(
+        store="user",
+        filepath=test_datapath1,
+        species=species,
+        source=source,
+        domain=domain,
+        high_time_resolution=False,
+    )
+    standardise_flux(
+        store="user",
+        filepath=test_datapath2,
+        species=species,
+        source=source,
+        domain=domain,
+        high_time_resolution=False,
+    )
 
     # Footprint data
     datapath = get_footprint_datapath("footprint_test.nc")
@@ -128,15 +141,16 @@ def data_read():
     domain = "EUROPE"
     model = "test_model"
 
-    standardise_footprint(store="user",
-                             filepath=datapath,
-                             site=site,
-                             model=model,
-                             network=network,
-                             height=height,
-                             domain=domain,
-                             high_spatial_resolution=True,
-                             )
+    standardise_footprint(
+        store="user",
+        filepath=datapath,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        high_spatial_resolution=True,
+    )
 
     # Add two footprints with the same inputs but covering different time periods
     fp_datapath2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
@@ -149,38 +163,41 @@ def data_read():
     model = "NAME"
     metmodel = "UKV"
 
-    standardise_footprint(store="user",
-                             filepath=fp_datapath2,
-                             site=site,
-                             model=model,
-                             network=network,
-                             height=height,
-                             domain=domain,
-                             metmodel=metmodel,
-                             )
+    standardise_footprint(
+        store="user",
+        filepath=fp_datapath2,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        metmodel=metmodel,
+    )
 
-    standardise_footprint(store="user",
-                             filepath=fp_datapath3,
-                             site=site,
-                             model=model,
-                             network=network,
-                             height=height,
-                             domain=domain,
-                             metmodel=metmodel,
-                             )
+    standardise_footprint(
+        store="user",
+        filepath=fp_datapath3,
+        site=site,
+        model=model,
+        network=network,
+        height=height,
+        domain=domain,
+        metmodel=metmodel,
+    )
 
     # High time resolution footprints
     hitres_fp_datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-    standardise_footprint(store="user",
-                             filepath=hitres_fp_datapath,
-                             site="TAC",
-                             model="NAME",
-                             network="DECC",
-                             height="100m",
-                             domain="TEST",
-                             metmodel="UKV",
-                             high_time_resolution=True,
-                             )
+    standardise_footprint(
+        store="user",
+        filepath=hitres_fp_datapath,
+        site="TAC",
+        model="NAME",
+        network="DECC",
+        height="100m",
+        domain="TEST",
+        metmodel="UKV",
+        high_time_resolution=True,
+    )
 
     # Boundary conditions
     test_datapath = get_bc_datapath("n2o_EUROPE_2012.nc")
@@ -189,12 +206,13 @@ def data_read():
     bc_input = "MOZART"
     domain = "EUROPE"
 
-    standardise_bc(store="user",
-                             filepath=test_datapath,
-                             species=species,
-                             bc_input=bc_input,
-                             domain=domain,
-                             )
+    standardise_bc(
+        store="user",
+        filepath=test_datapath,
+        species=species,
+        bc_input=bc_input,
+        domain=domain,
+    )
 
     test_datapath = get_eulerian_datapath("GEOSChem.SpeciesConc.20150101_0000z_reduced.nc4")
 

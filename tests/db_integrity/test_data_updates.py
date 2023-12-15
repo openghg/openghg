@@ -47,7 +47,9 @@ def bsd_data_read_crds():
     network = "DECC"
     source_format1 = "CRDS"
     bsd_path1 = get_surface_datapath(filename="bsd.picarro.1minute.108m.min.dat", source_format="CRDS")
-    standardise_surface(store="user", filepath=bsd_path1, source_format=source_format1, site=site, network=network)
+    standardise_surface(
+        store="user", filepath=bsd_path1, source_format=source_format1, site=site, network=network
+    )
 
 
 def bsd_data_read_gcmd():
@@ -324,6 +326,7 @@ def test_obs_data_read_data_diff():
 
 # TODO: Add test for different time values as well.
 
+
 #  Look at different data frequencies for the same data
 def bsd_data_read_crds_diff_frequency():
     """
@@ -336,7 +339,9 @@ def bsd_data_read_crds_diff_frequency():
 
     bsd_path_hourly = get_surface_datapath(filename="bsd.picarro.hourly.108m.min.dat", source_format="CRDS")
 
-    standardise_surface(store="user", filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network)
+    standardise_surface(
+        store="user", filepath=bsd_path_hourly, source_format=source_format1, site=site, network=network
+    )
 
 
 def test_obs_data_read_two_frequencies():
@@ -412,6 +417,7 @@ def test_obs_data_read_two_frequencies():
 
     # TODO: Can we check if this has been saved as a new version?
 
+
 def bsd_data_read_crds_internal_overlap(overwrite=False):
     """
     Add Bilsdale *hourly* data for CRDS instrument to object store
@@ -423,13 +429,14 @@ def bsd_data_read_crds_internal_overlap(overwrite=False):
     bsd_path_hourly = get_surface_datapath(
         filename="bsd.picarro.hourly.108m.overlap-dates.dat", source_format="CRDS"
     )
-    standardise_surface(store="user",
-                        filepath=bsd_path_hourly,
-                        site=site,
-                        network=network,
-                        source_format=source_format1,
-                        overwrite=overwrite
-                        )
+    standardise_surface(
+        store="user",
+        filepath=bsd_path_hourly,
+        site=site,
+        network=network,
+        source_format=source_format1,
+        overwrite=overwrite,
+    )
 
 
 #  Look at replacing data with different / overlapping internal time stamps
@@ -451,7 +458,7 @@ def test_obs_data_representative_date_overlap():
     bsd_data_read_crds_internal_overlap(overwrite=True)
 
     with open_metastore(bucket=bucket, data_type="surface") as metastore:
-        uuids = metastore.select('uuid')
+        uuids = metastore.select("uuid")
 
     datasources = []
     for uuid in uuids:
@@ -551,8 +558,12 @@ def bsd_data_read_crds_overwrite():
 
     standardise_surface(
         store="user",
-        filepath=bsd_path1, source_format=source_format1, site=site, network=network, overwrite=True
-        )
+        filepath=bsd_path1,
+        source_format=source_format1,
+        site=site,
+        network=network,
+        overwrite=True,
+    )
 
 
 # def test_obs_data_read_overwrite():
@@ -634,10 +645,12 @@ def bsd_data_read_crds_overwrite():
             "UKV",
             "100m",
             "rn",
-        )
+        ),
     ],
 )
-def test_standardising_footprint_with_additional_keys(standard_filename, special_filename, site, domain, model, metmodel, inlet, species):
+def test_standardising_footprint_with_additional_keys(
+    standard_filename, special_filename, site, domain, model, metmodel, inlet, species
+):
     """
     Expected behavior: adding a high time resolution
     (or short_lifetime) footprint whose other metadata
@@ -650,24 +663,26 @@ def test_standardising_footprint_with_additional_keys(standard_filename, special
 
     clear_test_stores()
 
-    standard_standardised = standardise_footprint(standard_datapath,
-                                                site=site,
-                                                domain=domain,
-                                                model=model,
-                                                inlet=inlet,
-                                                metmodel=metmodel,
-                                                store="user",
-                                                )
+    standard_standardised = standardise_footprint(
+        standard_datapath,
+        site=site,
+        domain=domain,
+        model=model,
+        inlet=inlet,
+        metmodel=metmodel,
+        store="user",
+    )
 
-    special_standardised = standardise_footprint(special_datapath,
-                                                site=site,
-                                                domain=domain,
-                                                model=model,
-                                                inlet=inlet,
-                                                metmodel=metmodel,
-                                                species=species,
-                                                store="user",
-                                                )
+    special_standardised = standardise_footprint(
+        special_datapath,
+        site=site,
+        domain=domain,
+        model=model,
+        inlet=inlet,
+        metmodel=metmodel,
+        species=species,
+        store="user",
+    )
 
     standard_dict = standard_standardised[next(iter(standard_standardised))]
     special_dict = special_standardised[next(iter(special_standardised))]

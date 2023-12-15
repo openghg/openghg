@@ -75,7 +75,11 @@ def test_check_config(mocker, caplog, monkeypatch, tmpdir):
 
     mock_uuid = "179dcd5f-d5bb-439d-a3c2-9f690ac6d3b8"
     mock_path = "/tmp/mock_store"
-    mock_conf = {"object_store": {"user": {"path": mock_path, "permissions": "rw"}}, "user_id": mock_uuid, "config_version": "2"}
+    mock_conf = {
+        "object_store": {"user": {"path": mock_path, "permissions": "rw"}},
+        "user_id": mock_uuid,
+        "config_version": "2",
+    }
     mocker.patch("openghg.util._user.read_local_config", return_value=mock_conf)
 
     mock_config_path.write_text("testing-123")
