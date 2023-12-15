@@ -2,12 +2,12 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="../../../" >
 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>openghg.store._obssurface &#8212; OpenGHG 0+untagged.1.g6d1ea92 documentation</title>
+    <title>openghg.store._obssurface &#8212; OpenGHG 0.7.0 documentation</title>
   
   
   
@@ -17,12 +17,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -32,10 +32,11 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../../../_static/documentation_options.js?v=4a118a66"></script>
+    <script src="../../../_static/documentation_options.js?v=fe7df9b0"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -50,6 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Dec 15, 2023"/>
   </head>
   
   
@@ -58,6 +60,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -98,9 +109,11 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
+
   
 
 <a class="navbar-brand logo" href="../../../index.html">
@@ -108,25 +121,26 @@
   
   
   
+  
     
     
       
     
     
-    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.0 documentation - Home"/>`);</script>
   
   
 </a></div>
     
   </div>
   
-  
   <div class="col-lg-9 navbar-header-items">
     
     <div class="me-auto navbar-header-items__center">
       
-        <div class="navbar-item"><nav class="navbar-nav">
+        <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -179,23 +193,27 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
         <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -206,13 +224,16 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -233,7 +254,8 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -286,12 +308,13 @@ document.write(`
       <div class="sidebar-header-items__end">
         
           <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -324,8 +347,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../../index.html" class="nav-link" aria-label="Home">
@@ -335,7 +358,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">openghg.store._obssurface</li>
+    <li class="breadcrumb-item active" aria-current="page">openghg.stor...</li>
   </ul>
 </nav>
 </div>
@@ -365,7 +388,6 @@ document.write(`
 <span class="kn">from</span> <span class="nn">openghg.store</span> <span class="kn">import</span> <span class="n">DataSchema</span>
 <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">BaseStore</span>
 <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">multiPathType</span><span class="p">,</span> <span class="n">pathType</span><span class="p">,</span> <span class="n">resultsType</span><span class="p">,</span> <span class="n">optionalPathType</span>
-<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">TracebackType</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;openghg.store&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># Have to set level for logger as well as handler</span>
@@ -376,23 +398,10 @@ document.write(`
 <span class="k">class</span> <span class="nc">ObsSurface</span><span class="p">(</span><span class="n">BaseStore</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class is used to process surface observation data&quot;&quot;&quot;</span>
 
+    <span class="n">_data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
     <span class="n">_root</span> <span class="o">=</span> <span class="s2">&quot;ObsSurface&quot;</span>
     <span class="n">_uuid</span> <span class="o">=</span> <span class="s2">&quot;da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1&quot;</span>
     <span class="n">_metakey</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_root</span><span class="si">}</span><span class="s2">/uuid/</span><span class="si">{</span><span class="n">_uuid</span><span class="si">}</span><span class="s2">/metastore&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ObsSurface</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span>
-
-    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">exc_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">],</span>
-        <span class="n">exc_val</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">],</span>
-        <span class="n">exc_tb</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TracebackType</span><span class="p">],</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exc_type</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">exc_tb</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
 <div class="viewcode-block" id="ObsSurface.read_data">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.read_data">[docs]</a>
@@ -465,7 +474,9 @@ document.write(`
                 <span class="n">precision_filepath</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">precision_data</span><span class="p">)</span>
                 <span class="c1"># Create the expected GCWERKS tuple</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
-                    <span class="n">filepath</span><span class="o">=</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="p">),</span> <span class="n">site_filepath</span><span class="o">=</span><span class="n">site_filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">meta_kwargs</span>
+                    <span class="n">filepath</span><span class="o">=</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">precision_filepath</span><span class="p">),</span>
+                    <span class="n">site_filepath</span><span class="o">=</span><span class="n">site_filepath</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">meta_kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">result</span></div>
@@ -523,11 +534,15 @@ document.write(`
 <span class="sd">        TODO: Should &quot;measurement_type&quot; be changed to &quot;platform&quot; to align</span>
 <span class="sd">        with ModelScenario and ObsColumn?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">sys</span>
         <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
         <span class="kn">from</span> <span class="nn">openghg.types</span> <span class="kn">import</span> <span class="n">SurfaceTypes</span>
-        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="n">clean_string</span><span class="p">,</span> <span class="n">format_inlet</span><span class="p">,</span> <span class="n">hash_file</span><span class="p">,</span> <span class="n">load_surface_parser</span><span class="p">,</span> <span class="n">verify_site</span>
-        <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+        <span class="kn">from</span> <span class="nn">openghg.util</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">clean_string</span><span class="p">,</span>
+            <span class="n">format_inlet</span><span class="p">,</span>
+            <span class="n">hash_file</span><span class="p">,</span>
+            <span class="n">load_surface_parser</span><span class="p">,</span>
+            <span class="n">verify_site</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">filepath</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
@@ -599,139 +614,134 @@ document.write(`
         <span class="n">results</span><span class="p">:</span> <span class="n">resultsType</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
         <span class="c1"># Create a progress bar object using the filepaths, iterate over this below</span>
-        <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">filepath</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span> <span class="k">as</span> <span class="n">progress_bar</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;For GCWERKS data we expect a tuple of (data file, precision file).&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepath</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;For GCWERKS data we expect a tuple of (data file, precision file).&quot;</span><span class="p">)</span>
 
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                        <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                            <span class="s2">&quot;For GCWERKS data both data and precision filepaths must be given as a tuple.&quot;</span>
-                        <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
-
-                <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="s2">&quot;This file has been uploaded previously with the filename : &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">precision_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="s2">&quot;For GCWERKS data both data and precision filepaths must be given as a tuple.&quot;</span>
                     <span class="p">)</span>
-                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data_filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
 
-                <span class="c1"># Define required input parameters for parser function</span>
-                <span class="n">required_parameters</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;data_filepath&quot;</span><span class="p">:</span> <span class="n">data_filepath</span><span class="p">,</span>
-                    <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
-                    <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
-                    <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">inlet</span><span class="p">,</span>
-                    <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">instrument</span><span class="p">,</span>
-                    <span class="s2">&quot;sampling_period&quot;</span><span class="p">:</span> <span class="n">sampling_period_seconds</span><span class="p">,</span>
-                    <span class="s2">&quot;measurement_type&quot;</span><span class="p">:</span> <span class="n">measurement_type</span><span class="p">,</span>
-                    <span class="s2">&quot;site_filepath&quot;</span><span class="p">:</span> <span class="n">site_filepath</span><span class="p">,</span>
-                <span class="p">}</span>
-                <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
-                    <span class="n">required_parameters</span><span class="p">[</span><span class="s2">&quot;precision_filepath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">precision_filepath</span>
+            <span class="n">file_hash</span> <span class="o">=</span> <span class="n">hash_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="n">data_filepath</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">file_hash</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span> <span class="ow">and</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;This file has been uploaded previously with the filename : &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span><span class="si">}</span><span class="s2"> - skipping.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">break</span>
 
-                <span class="c1"># Collect together optional parameters (not required but</span>
-                <span class="c1"># may be accepted by underlying parser function)</span>
-                <span class="n">optional_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;update_mismatch&quot;</span><span class="p">:</span> <span class="n">update_mismatch</span><span class="p">}</span>
-                <span class="c1"># TODO: extend optional_parameters to include kwargs when added</span>
+            <span class="c1"># Define required input parameters for parser function</span>
+            <span class="n">required_parameters</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;data_filepath&quot;</span><span class="p">:</span> <span class="n">data_filepath</span><span class="p">,</span>
+                <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+                <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="n">network</span><span class="p">,</span>
+                <span class="s2">&quot;inlet&quot;</span><span class="p">:</span> <span class="n">inlet</span><span class="p">,</span>
+                <span class="s2">&quot;instrument&quot;</span><span class="p">:</span> <span class="n">instrument</span><span class="p">,</span>
+                <span class="s2">&quot;sampling_period&quot;</span><span class="p">:</span> <span class="n">sampling_period_seconds</span><span class="p">,</span>
+                <span class="s2">&quot;measurement_type&quot;</span><span class="p">:</span> <span class="n">measurement_type</span><span class="p">,</span>
+                <span class="s2">&quot;site_filepath&quot;</span><span class="p">:</span> <span class="n">site_filepath</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="n">source_format</span> <span class="o">==</span> <span class="s2">&quot;GCWERKS&quot;</span><span class="p">:</span>
+                <span class="n">required_parameters</span><span class="p">[</span><span class="s2">&quot;precision_filepath&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">precision_filepath</span>
 
-                <span class="n">input_parameters</span> <span class="o">=</span> <span class="n">required_parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c1"># Collect together optional parameters (not required but</span>
+            <span class="c1"># may be accepted by underlying parser function)</span>
+            <span class="n">optional_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;update_mismatch&quot;</span><span class="p">:</span> <span class="n">update_mismatch</span><span class="p">}</span>
+            <span class="c1"># TODO: extend optional_parameters to include kwargs when added</span>
 
-                <span class="c1"># Find parameters that parser_fn accepts (must accept all required arguments already)</span>
-                <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">parser_fn</span><span class="p">)</span>
-                <span class="n">fn_accepted_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="n">input_parameters</span> <span class="o">=</span> <span class="n">required_parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-                <span class="c1"># Check if optional parameters are present in function call and only use those which are.</span>
-                <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">param_value</span> <span class="ow">in</span> <span class="n">optional_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">fn_accepted_parameters</span><span class="p">:</span>
-                        <span class="n">input_parameters</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_value</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Input: &#39;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">&#39; (value: </span><span class="si">{</span><span class="n">param_value</span><span class="si">}</span><span class="s2">) is not being used as part of the standardisation process.&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;This is not accepted by the current standardisation function: </span><span class="si">{</span><span class="n">parser_fn</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="p">)</span>
+            <span class="c1"># Find parameters that parser_fn accepts (must accept all required arguments already)</span>
+            <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">parser_fn</span><span class="p">)</span>
+            <span class="n">fn_accepted_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
 
-                <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-                <span class="c1"># Call appropriate standardisation function with input parameters</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">input_parameters</span><span class="p">)</span>
-
-                <span class="c1"># Current workflow: if any species fails, whole filepath fails</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">species</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">ObsSurface</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
-                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Unable to validate and store data from file: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
-                            <span class="sa">f</span><span class="s2">&quot; Problem with species: </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-                        <span class="p">)</span>
-                        <span class="n">validated</span> <span class="o">=</span> <span class="kc">False</span>
-                        <span class="k">break</span>
+            <span class="c1"># Check if optional parameters are present in function call and only use those which are.</span>
+            <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">param_value</span> <span class="ow">in</span> <span class="n">optional_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">fn_accepted_parameters</span><span class="p">:</span>
+                    <span class="n">input_parameters</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_value</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">validated</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Input: &#39;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">&#39; (value: </span><span class="si">{</span><span class="n">param_value</span><span class="si">}</span><span class="s2">) is not being used as part of the standardisation process.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;This is not accepted by the current standardisation function: </span><span class="si">{</span><span class="n">parser_fn</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
 
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">validated</span><span class="p">:</span>
-                    <span class="k">continue</span>
+            <span class="c1"># Call appropriate standardisation function with input parameters</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">parser_fn</span><span class="p">(</span><span class="o">**</span><span class="n">input_parameters</span><span class="p">)</span>
 
-                <span class="c1"># Alternative workflow: Would only stops certain species within a</span>
-                <span class="c1"># file being written to the object store.</span>
-                <span class="c1"># to_remove = []</span>
-                <span class="c1"># for key, value in data.items():</span>
-                <span class="c1">#     species = key.split(&#39;_&#39;)[0]</span>
-                <span class="c1">#     try:</span>
-                <span class="c1">#         ObsSurface.validate_data(value[&quot;data&quot;], species=species)</span>
-                <span class="c1">#     except ValueError:</span>
-                <span class="c1">#         print(f&quot;WARNING: standardised data for &#39;{source_format}&#39; is not in expected OpenGHG format.&quot;)</span>
-                <span class="c1">#         print(f&quot;Check data for {species}&quot;)</span>
-                <span class="c1">#         print(value[&quot;data&quot;])</span>
-                <span class="c1">#         print(&quot;Not writing to object store.&quot;)</span>
-                <span class="c1">#         to_remove.append(key)</span>
-                <span class="c1">#</span>
-                <span class="c1"># for remove in to_remove:</span>
-                <span class="c1">#     data.pop(remove)</span>
+            <span class="c1"># Current workflow: if any species fails, whole filepath fails</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">species</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ObsSurface</span><span class="o">.</span><span class="n">validate_data</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">species</span><span class="o">=</span><span class="n">species</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Unable to validate and store data from file: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">&quot; Problem with species: </span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">validated</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">validated</span> <span class="o">=</span> <span class="kc">True</span>
 
-                <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">&quot;species&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;site&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;sampling_period&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;station_long_name&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;network&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;source_format&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;data_source&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;icos_data_level&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">validated</span><span class="p">:</span>
+                <span class="k">continue</span>
 
-                <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
-                <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
-                <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
-                    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-                    <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-                    <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
-                    <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span><span class="p">,</span>
-                    <span class="n">min_keys</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="c1"># Alternative workflow: Would only stops certain species within a</span>
+            <span class="c1"># file being written to the object store.</span>
+            <span class="c1"># to_remove = []</span>
+            <span class="c1"># for key, value in data.items():</span>
+            <span class="c1">#     species = key.split(&#39;_&#39;)[0]</span>
+            <span class="c1">#     try:</span>
+            <span class="c1">#         ObsSurface.validate_data(value[&quot;data&quot;], species=species)</span>
+            <span class="c1">#     except ValueError:</span>
+            <span class="c1">#         print(f&quot;WARNING: standardised data for &#39;{source_format}&#39; is not in expected OpenGHG format.&quot;)</span>
+            <span class="c1">#         print(f&quot;Check data for {species}&quot;)</span>
+            <span class="c1">#         print(value[&quot;data&quot;])</span>
+            <span class="c1">#         print(&quot;Not writing to object store.&quot;)</span>
+            <span class="c1">#         to_remove.append(key)</span>
+            <span class="c1">#</span>
+            <span class="c1"># for remove in to_remove:</span>
+            <span class="c1">#     data.pop(remove)</span>
 
-                <span class="n">results</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">][</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
+            <span class="n">required_keys</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;species&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;site&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;sampling_period&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;station_long_name&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;inlet&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;instrument&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;network&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;source_format&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data_source&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;icos_data_level&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;data_type&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
 
-                <span class="c1"># Store the hash as the key for easy searching, store the filename as well for</span>
-                <span class="c1"># ease of checking by user</span>
-                <span class="c1"># TODO - maybe add a timestamp to this string?</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
+            <span class="c1"># Create Datasources, save them to the object store and get their UUIDs</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;surface&quot;</span>
+            <span class="n">datasource_uuids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assign_data</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+                <span class="n">data_type</span><span class="o">=</span><span class="n">data_type</span><span class="p">,</span>
+                <span class="n">required_keys</span><span class="o">=</span><span class="n">required_keys</span><span class="p">,</span>
+                <span class="n">min_keys</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="p">)</span>
 
-                <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s2">&quot;processed&quot;</span><span class="p">][</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasource_uuids</span>
 
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="c1"># Store the hash as the key for easy searching, store the filename as well for</span>
+            <span class="c1"># ease of checking by user</span>
+            <span class="c1"># TODO - maybe add a timestamp to this string?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file_hashes</span><span class="p">[</span><span class="n">file_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed processing: </span><span class="si">{</span><span class="n">data_filepath</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
 
@@ -763,7 +773,6 @@ document.write(`
         <span class="c1"># from openghg.standardise.surface import parse_aqmesh</span>
         <span class="c1"># from openghg.store import assign_data</span>
         <span class="c1"># from openghg.util import hash_file</span>
-        <span class="c1"># from tqdm import tqdm</span>
 
         <span class="c1"># data_filepath = Path(data_filepath)</span>
         <span class="c1"># metadata_filepath = Path(metadata_filepath)</span>
@@ -772,7 +781,7 @@ document.write(`
         <span class="c1"># processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)</span>
 
         <span class="c1"># results: resultsType = defaultdict(dict)</span>
-        <span class="c1"># for site, site_data in tqdm(processed_data.items()):</span>
+        <span class="c1"># for site, site_data in processed_data.items():</span>
         <span class="c1">#     metadata = site_data[&quot;metadata&quot;]</span>
         <span class="c1">#     measurement_data = site_data[&quot;data&quot;]</span>
 
@@ -879,18 +888,23 @@ document.write(`
 <div class="viewcode-block" id="ObsSurface.store_data">
 <a class="viewcode-back" href="../../../api/devapi_store.html#openghg.store.ObsSurface.store_data">[docs]</a>
     <span class="k">def</span> <span class="nf">store_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">required_metakeys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">required_metakeys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This expects already standardised data such as ICOS / CEDA</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Dictionary of data in standard format, see the data spec under</span>
-<span class="sd">            Development -&gt; Data specifications in the documentation</span>
+<span class="sd">                Development -&gt; Data specifications in the documentation</span>
 <span class="sd">            overwrite: If True overwrite currently stored data</span>
+<span class="sd">            force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).</span>
 <span class="sd">            required_metakeys: Keys in the metadata we should use to store this metadata in the object store</span>
-<span class="sd">            if None it defaults to:</span>
-<span class="sd">            {&quot;species&quot;, &quot;site&quot;, &quot;station_long_name&quot;, &quot;inlet&quot;, &quot;instrument&quot;,</span>
-<span class="sd">            &quot;network&quot;, &quot;source_format&quot;, &quot;data_source&quot;, &quot;icos_data_level&quot;}</span>
+<span class="sd">                if None it defaults to:</span>
+<span class="sd">                {&quot;species&quot;, &quot;site&quot;, &quot;station_long_name&quot;, &quot;inlet&quot;, &quot;instrument&quot;,</span>
+<span class="sd">                &quot;network&quot;, &quot;source_format&quot;, &quot;data_source&quot;, &quot;icos_data_level&quot;}</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict or None:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -899,17 +913,20 @@ document.write(`
         <span class="c1"># Very rudimentary hash of the data and associated metadata</span>
         <span class="n">hashes</span> <span class="o">=</span> <span class="n">hash_retrieved_data</span><span class="p">(</span><span class="n">to_hash</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
         <span class="c1"># Find the keys in data we&#39;ve seen before</span>
-        <span class="n">seen_before</span> <span class="o">=</span> <span class="p">{</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">force</span><span class="p">:</span>
+            <span class="n">file_hashes_to_compare</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_hashes_to_compare</span> <span class="o">=</span> <span class="p">{</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hashes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieved_hashes</span><span class="p">}</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seen_before</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_hashes_to_compare</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Note: There is no new data to process.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">keys_to_process</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">seen_before</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">file_hashes_to_compare</span><span class="p">:</span>
             <span class="c1"># TODO - add this to log</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: We&#39;ve seen </span><span class="si">{</span><span class="n">seen_before</span><span class="si">}</span><span class="s2"> before. Processing new data only.&quot;</span><span class="p">)</span>
-            <span class="n">keys_to_process</span> <span class="o">-=</span> <span class="n">seen_before</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: We&#39;ve seen </span><span class="si">{</span><span class="n">file_hashes_to_compare</span><span class="si">}</span><span class="s2"> before. Processing new data only.&quot;</span><span class="p">)</span>
+            <span class="n">keys_to_process</span> <span class="o">-=</span> <span class="n">file_hashes_to_compare</span>
 
         <span class="n">to_process</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys_to_process</span><span class="p">}</span>
 
@@ -973,7 +990,6 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">openghg.objectstore</span> <span class="kn">import</span> <span class="n">delete_object</span>
         <span class="kn">from</span> <span class="nn">openghg.store.base</span> <span class="kn">import</span> <span class="n">Datasource</span>
-        <span class="kn">from</span> <span class="nn">tinydb</span> <span class="kn">import</span> <span class="n">where</span>
 
         <span class="c1"># Load the Datasource and get all its keys</span>
         <span class="c1"># iterate over these keys and delete them</span>
@@ -993,9 +1009,7 @@ document.write(`
         <span class="n">delete_object</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
 
         <span class="c1"># Delete the UUID from the metastore</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_metastore</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;uuid&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">uuid</span><span class="p">)</span>
-
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datasource_uuids</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metastore</span><span class="o">.</span><span class="n">delete</span><span class="p">({</span><span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uuid</span><span class="p">})</span></div>
 
 
     <span class="k">def</span> <span class="nf">seen_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -1010,16 +1024,12 @@ document.write(`
               
               
               
-                <footer class="bd-footer-article">
+              
+              
+                <footer class="prev-next-footer">
                   
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -1037,8 +1047,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1046,6 +1056,7 @@ document.write(`
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
       © Copyright 2023 OpenGHG development team.
@@ -1057,10 +1068,12 @@ document.write(`
     </div>
   
   
+  
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
 </p></div>
       
     </div>

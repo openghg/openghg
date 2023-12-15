@@ -2,13 +2,13 @@
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Analyse &#8212; OpenGHG 0+untagged.1.g6d1ea92 documentation</title>
+    <title>Analyse &#8212; OpenGHG 0.7.0 documentation</title>
   
   
   
@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -33,10 +33,11 @@
     <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=db7899ab" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script src="../_static/documentation_options.js?v=4a118a66"></script>
+    <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -53,6 +54,7 @@
     <link rel="prev" title="User API" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Dec 15, 2023"/>
   </head>
   
   
@@ -61,6 +63,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -101,9 +112,11 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -111,25 +124,26 @@
   
   
   
+  
     
     
       
     
     
-    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-light" alt="OpenGHG 0.7.0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/OpenGHG_Logo_NoText.png" class="logo__image only-dark" alt="OpenGHG 0.7.0 documentation - Home"/>`);</script>
   
   
 </a></div>
     
   </div>
   
-  
   <div class="col-lg-9 navbar-header-items">
     
     <div class="me-auto navbar-header-items__center">
       
-        <div class="navbar-item"><nav class="navbar-nav">
+        <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -182,23 +196,27 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
         <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -209,18 +227,21 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -240,7 +261,8 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -293,12 +315,13 @@ document.write(`
       <div class="sidebar-header-items__end">
         
           <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -308,7 +331,8 @@ document.write(`
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
@@ -360,8 +384,8 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
@@ -420,22 +444,22 @@ will be used to extract the relevant data. Related keywords are as follows:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>site</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Site code e.g. “TAC”</p></li>
-<li><p><strong>species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Species code e.g. “ch4”</p></li>
-<li><p><strong>inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Inlet value e.g. “10m”</p></li>
-<li><p><strong>height</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Alias for inlet.</p></li>
-<li><p><strong>network</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Network name e.g. “AGAGE”</p></li>
-<li><p><strong>domain</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Domain name e.g. “EUROPE”</p></li>
-<li><p><strong>model</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Model name used in creation of footprint e.g. “NAME”</p></li>
-<li><p><strong>metmodel</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Name of met model used in creation of footprint e.g. “UKV”</p></li>
-<li><p><strong>fp_inlet</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Specify footprint release height options if this doesn’t match to site value.</p></li>
-<li><p><strong>sources</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Emissions sources</p></li>
-<li><p><strong>bc_input</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Input keyword for boundary conditions e.g. “mozart” or “cams”</p></li>
-<li><p><strong>start_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Start of date range to use. Note for flux this may not be applied</p></li>
-<li><p><strong>end_date</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – End of date range to use. Note for flux this may not be applied</p></li>
-<li><p><strong>obs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>]) – Supply ObsData object directly (e.g. from get_obs…() functions)</p></li>
-<li><p><strong>footprint</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.FootprintData" title="openghg.dataobjects._footprint_data.FootprintData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FootprintData</span></code></a>]) – Supply FootprintData object directly (e.g. from get_footprint() function)</p></li>
-<li><p><strong>flux</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.FluxData" title="openghg.dataobjects._flux_data.FluxData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FluxData</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.FluxData" title="openghg.dataobjects._flux_data.FluxData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FluxData</span></code></a>], <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Supply FluxData object directly (e.g. from get_flux() function)</p></li>
+<li><p><strong>site</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Site code e.g. “TAC”</p></li>
+<li><p><strong>species</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Species code e.g. “ch4”</p></li>
+<li><p><strong>inlet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Inlet value e.g. “10m”</p></li>
+<li><p><strong>height</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Alias for inlet.</p></li>
+<li><p><strong>network</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Network name e.g. “AGAGE”</p></li>
+<li><p><strong>domain</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Domain name e.g. “EUROPE”</p></li>
+<li><p><strong>model</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Model name used in creation of footprint e.g. “NAME”</p></li>
+<li><p><strong>metmodel</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Name of met model used in creation of footprint e.g. “UKV”</p></li>
+<li><p><strong>fp_inlet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Specify footprint release height options if this doesn’t match to site value.</p></li>
+<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Emissions sources</p></li>
+<li><p><strong>bc_input</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Input keyword for boundary conditions e.g. “mozart” or “cams”</p></li>
+<li><p><strong>start_date</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Start of date range to use. Note for flux this may not be applied</p></li>
+<li><p><strong>end_date</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timestamp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – End of date range to use. Note for flux this may not be applied</p></li>
+<li><p><strong>obs</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.ObsData" title="openghg.dataobjects._obsdata.ObsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ObsData</span></code></a>]</span>) – Supply ObsData object directly (e.g. from get_obs…() functions)</p></li>
+<li><p><strong>footprint</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.FootprintData" title="openghg.dataobjects._footprint_data.FootprintData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FootprintData</span></code></a>]</span>) – Supply FootprintData object directly (e.g. from get_footprint() function)</p></li>
+<li><p><strong>flux</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.FluxData" title="openghg.dataobjects._flux_data.FluxData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FluxData</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="devapi_dataobjects.html#openghg.dataobjects.FluxData" title="openghg.dataobjects._flux_data.FluxData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FluxData</span></code></a>], <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Supply FluxData object directly (e.g. from get_flux() function)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -454,7 +478,7 @@ these into the appropriate class?</p>
 <dd><p>Add boundary conditions data based on keywords or direct BoundaryConditionsData object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -466,7 +490,7 @@ these into the appropriate class?</p>
 Can add flux datasets for multiple sources.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -477,7 +501,7 @@ Can add flux datasets for multiple sources.</p>
 <dd><p>Add footprint data based on keywords or direct FootprintData object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -488,7 +512,7 @@ Can add flux datasets for multiple sources.</p>
 <dd><p>Add observation data based on keywords or direct ObsData object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -504,7 +528,7 @@ to derive the time points where appropriate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>resample_to</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <dl class="simple">
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
@@ -513,9 +537,9 @@ to derive the time points where appropriate.</p>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Observation platform used to decide whether to resample e.g. “site”, “satellite”.</p></li>
-<li><p><strong>cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Cache this data after calculation. Default = True.</p></li>
-<li><p><strong>recalculate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “site”, “satellite”.</p></li>
+<li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
+<li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -543,8 +567,8 @@ to derive the time points where appropriate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sources</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
-<li><p><strong>resample_to</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <dl class="simple">
+<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
@@ -553,9 +577,9 @@ to derive the time points where appropriate.</p>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Observation platform used to decide whether to resample e.g. “site”, “satellite”.</p></li>
-<li><p><strong>cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Cache this data after calculation. Default = True.</p></li>
-<li><p><strong>recalculate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “site”, “satellite”.</p></li>
+<li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
+<li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -581,8 +605,8 @@ the time of the highest frequency flux source both for time range and frequency.
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sources</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Names of sources to combine. Should already be attached to ModelScenario.</p></li>
-<li><p><strong>cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Cache this data after calculation. Default = True</p></li>
+<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Names of sources to combine. Should already be attached to ModelScenario.</p></li>
+<li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -607,7 +631,7 @@ axis. This will both slice and resample the data to align this axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>resample_to</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <dl class="simple">
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
@@ -616,8 +640,8 @@ axis. This will both slice and resample the data to align this axis.</p>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Observation platform used to decide whether to resample</p></li>
-<li><p><strong>cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Cache this data after calculation. Default = True.</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample</p></li>
+<li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -642,7 +666,7 @@ Can also include modelled timeseries data derived from flux.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>resample_to</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <dl class="simple">
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
@@ -651,13 +675,13 @@ Can also include modelled timeseries data derived from flux.</p>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Observation platform used to decide whether to resample.</p></li>
-<li><p><strong>calc_timeseries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Calculate modelled timeseries based on flux sources.</p></li>
-<li><p><strong>sources</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Sources to use for flux if calc_timseries is True.
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample.</p></li>
+<li><p><strong>calc_timeseries</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Calculate modelled timeseries based on flux sources.</p></li>
+<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Sources to use for flux if calc_timseries is True.
 All will be used and stacked if not specified.</p></li>
 <li><p><strong>calc_baseline</strong> – Calculate modelled baseline.</p></li>
-<li><p><strong>cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Cache this data after calculation. Default = True.</p></li>
-<li><p><strong>recalculate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
+<li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
+<li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -676,12 +700,12 @@ All will be used and stacked if not specified.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>baseline</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Add baseline to data. One of:
+<li><p><strong>baseline</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Add baseline to data. One of:
 - “boundary_conditions” - Uses added boundary conditions to calculate modelled baseline
 - “percentile” - Calculates the 1% value across the whole time period
 - None - don’t add a baseline and only plot the modelled observations</p></li>
-<li><p><strong>sources</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
-<li><p><strong>resample_to</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <dl class="simple">
+<li><p><strong>sources</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Sources to use for flux. All will be used and stacked if not specified.</p></li>
+<li><p><strong>resample_to</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <dl class="simple">
 <dt>Resample option to use for averaging:</dt><dd><ul>
 <li><p>either one of [“coarsest”, “obs”, “footprint”] to match to the datasets</p></li>
 <li><p>or using a valid pandas resample period e.g. “2H”.</p></li>
@@ -690,13 +714,13 @@ All will be used and stacked if not specified.</p></li>
 </dl>
 <p>Default = “coarsest”.</p>
 </p></li>
-<li><p><strong>platform</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Observation platform used to decide whether to resample e.g. “site”, “satellite”.</p></li>
-<li><p><strong>cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Cache this data after calculation. Default = True.</p></li>
-<li><p><strong>recalculate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
+<li><p><strong>platform</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Observation platform used to decide whether to resample e.g. “site”, “satellite”.</p></li>
+<li><p><strong>cache</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Cache this data after calculation. Default = True.</p></li>
+<li><p><strong>recalculate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Make sure to recalculate this data rather than return from cache. Default = False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><p>Plotly Figure</p>
@@ -712,7 +736,7 @@ All will be used and stacked if not specified.</p></li>
 <dd><p>Plot the observation timeseries data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>Plotly Figure</p>
@@ -731,11 +755,10 @@ All will be used and stacked if not specified.</p></li>
               
               
               
-                <footer class="bd-footer-article">
+              
+              
+                <footer class="prev-next-footer">
                   
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
        href="index.html"
@@ -755,10 +778,7 @@ All will be used and stacked if not specified.</p></li>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -768,6 +788,7 @@ All will be used and stacked if not specified.</p></li>
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
   <div class="sidebar-secondary-item">
+
   <div class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
@@ -804,8 +825,8 @@ All will be used and stacked if not specified.</p></li>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -813,6 +834,7 @@ All will be used and stacked if not specified.</p></li>
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
       © Copyright 2023 OpenGHG development team.
@@ -824,10 +846,12 @@ All will be used and stacked if not specified.</p></li>
     </div>
   
   
+  
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
 </p></div>
       
     </div>
