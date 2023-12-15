@@ -27,6 +27,7 @@ else:
         get_bucket,
         get_object,
         get_object_data_path,
+        get_object_lock_path,
         get_object_from_json,
         get_object_names,
         get_objectstore_info,

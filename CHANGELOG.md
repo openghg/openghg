@@ -5,7 +5,9 @@ All notable changes to OpenGHG will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/openghg/openghg/compare/0.6.2...HEAD)
+## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
+
+## [0.7.0] - 2023-12-15
 
 ### Added
 
@@ -27,6 +29,8 @@ has not changed. This is to prevent errors when concurrent writes are made to th
 - Bug where `radon` was not fetched using `retrieve_atmospheric` from icos data. - [PR #794](https://github.com/openghg/openghg/pull/794)
 - Bug with CRDS parse function where data for all species was being dropped if only one species was missing - [PR #829](https://github.com/openghg/openghg/pull/829)
 - Updated ICOS retrieval functionality to match new metadata retrieved from ICOS Carbon Portal - [PR #806](https://github.com/openghg/openghg/pull/806)
+
+- Added "parse_intem" function to parse intem emissions files - [PR #804](https://github.com/openghg/openghg/pull/804)
 
 ### Changed
 
