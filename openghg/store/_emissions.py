@@ -1,4 +1,5 @@
 from __future__ import annotations
+import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Literal, Optional, Tuple, Union
@@ -8,7 +9,6 @@ from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
-from types import TracebackType
 import warnings
 
 ArrayType = Optional[Union[ndarray, DataArray]]
@@ -20,23 +20,10 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class Emissions(BaseStore):
     """This class is used to process emissions / flux data"""
 
+    _data_type = "emissions"
     _root = "Emissions"
     _uuid = "c5c88168-0498-40ac-9ad3-949e91a30872"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> Emissions:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
@@ -76,7 +63,7 @@ class Emissions(BaseStore):
         chunks: Union[int, Dict, Literal["auto"], None] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read emissions file
 
         Args:
@@ -121,7 +108,7 @@ class Emissions(BaseStore):
             warnings.warn(
                 f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -137,11 +124,27 @@ class Emissions(BaseStore):
             "chunks": chunks,
         }
 
-        optional_keywords = {"database": database, "database_version": database_version, "model": model}
+        optional_keywords: dict[Any, Any] = {
+            "database": database,
+            "database_version": database_version,
+            "model": model,
+        }
 
-        param.update(optional_keywords)
+        signature = inspect.signature(parser_fn)
+        fn_accepted_parameters = [param.name for param in signature.parameters.values()]
 
-        emissions_data = parser_fn(**param)
+        input_parameters: dict[Any, Any] = param.copy()
+
+        # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
+        for param, param_value in optional_keywords.items():
+            if param in fn_accepted_parameters:
+                input_parameters[param] = param_value
+            else:
+                logger.warning(
+                    f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
+                    f"This is not accepted by the current standardisation function: {parser_fn}"
+                )
+        emissions_data = parser_fn(**input_parameters)
 
         # Checking against expected format for Emissions
         for split_data in emissions_data.values():
@@ -174,7 +177,7 @@ class Emissions(BaseStore):
         """
         Read and transform an emissions database. This will find the appropriate
         parser function to use for the database specified. The necessary inputs
-        are determined by which database ie being used.
+        are determined by which database is being used.
 
         The underlying parser functions will be of the form:
             - openghg.transform.emissions.parse_{database.lower()}

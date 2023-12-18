@@ -10,7 +10,6 @@ import inspect
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from openghg.types import multiPathType, pathType, resultsType, optionalPathType
-from types import TracebackType
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -19,23 +18,10 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class ObsSurface(BaseStore):
     """This class is used to process surface observation data"""
 
+    _data_type = "surface"
     _root = "ObsSurface"
     _uuid = "da0b8b44-6f85-4d3c-b6a3-3dde34f6dea1"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> ObsSurface:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_data(
         self,
@@ -106,7 +92,9 @@ class ObsSurface(BaseStore):
                 precision_filepath.write_bytes(precision_data)
                 # Create the expected GCWERKS tuple
                 result = self.read_file(
-                    filepath=(filepath, precision_filepath), site_filepath=site_filepath, **meta_kwargs
+                    filepath=(filepath, precision_filepath),
+                    site_filepath=site_filepath,
+                    **meta_kwargs,
                 )
 
         return result
@@ -161,11 +149,15 @@ class ObsSurface(BaseStore):
         TODO: Should "measurement_type" be changed to "platform" to align
         with ModelScenario and ObsColumn?
         """
-        import sys
         from collections import defaultdict
         from openghg.types import SurfaceTypes
-        from openghg.util import clean_string, format_inlet, hash_file, load_surface_parser, verify_site
-        from tqdm import tqdm
+        from openghg.util import (
+            clean_string,
+            format_inlet,
+            hash_file,
+            load_surface_parser,
+            verify_site,
+        )
 
         if not isinstance(filepath, list):
             filepath = [filepath]
@@ -237,139 +229,134 @@ class ObsSurface(BaseStore):
         results: resultsType = defaultdict(dict)
 
         # Create a progress bar object using the filepaths, iterate over this below
-        with tqdm(total=len(filepath), file=sys.stdout) as progress_bar:
-            for fp in filepath:
-                if source_format == "GCWERKS":
-                    if not isinstance(fp, tuple):
-                        raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
+        for fp in filepath:
+            if source_format == "GCWERKS":
+                if not isinstance(fp, tuple):
+                    raise TypeError("For GCWERKS data we expect a tuple of (data file, precision file).")
 
-                    try:
-                        data_filepath = Path(fp[0])
-                        precision_filepath = Path(fp[1])
-                    except (ValueError, TypeError):
-                        raise TypeError(
-                            "For GCWERKS data both data and precision filepaths must be given as a tuple."
-                        )
-                else:
-                    data_filepath = Path(fp)
-
-                file_hash = hash_file(filepath=data_filepath)
-                if file_hash in self._file_hashes and overwrite is False:
-                    logger.warning(
-                        "This file has been uploaded previously with the filename : "
-                        f"{self._file_hashes[file_hash]} - skipping."
+                try:
+                    data_filepath = Path(fp[0])
+                    precision_filepath = Path(fp[1])
+                except (ValueError, TypeError):
+                    raise TypeError(
+                        "For GCWERKS data both data and precision filepaths must be given as a tuple."
                     )
-                    break
+            else:
+                data_filepath = Path(fp)
 
-                # Define required input parameters for parser function
-                required_parameters = {
-                    "data_filepath": data_filepath,
-                    "site": site,
-                    "network": network,
-                    "inlet": inlet,
-                    "instrument": instrument,
-                    "sampling_period": sampling_period_seconds,
-                    "measurement_type": measurement_type,
-                    "site_filepath": site_filepath,
-                }
-                if source_format == "GCWERKS":
-                    required_parameters["precision_filepath"] = precision_filepath
+            file_hash = hash_file(filepath=data_filepath)
+            if file_hash in self._file_hashes and overwrite is False:
+                logger.warning(
+                    "This file has been uploaded previously with the filename : "
+                    f"{self._file_hashes[file_hash]} - skipping."
+                )
+                break
 
-                # Collect together optional parameters (not required but
-                # may be accepted by underlying parser function)
-                optional_parameters = {"update_mismatch": update_mismatch}
-                # TODO: extend optional_parameters to include kwargs when added
+            # Define required input parameters for parser function
+            required_parameters = {
+                "data_filepath": data_filepath,
+                "site": site,
+                "network": network,
+                "inlet": inlet,
+                "instrument": instrument,
+                "sampling_period": sampling_period_seconds,
+                "measurement_type": measurement_type,
+                "site_filepath": site_filepath,
+            }
+            if source_format == "GCWERKS":
+                required_parameters["precision_filepath"] = precision_filepath
 
-                input_parameters = required_parameters.copy()
+            # Collect together optional parameters (not required but
+            # may be accepted by underlying parser function)
+            optional_parameters = {"update_mismatch": update_mismatch}
+            # TODO: extend optional_parameters to include kwargs when added
 
-                # Find parameters that parser_fn accepts (must accept all required arguments already)
-                signature = inspect.signature(parser_fn)
-                fn_accepted_parameters = [param.name for param in signature.parameters.values()]
+            input_parameters = required_parameters.copy()
 
-                # Check if optional parameters are present in function call and only use those which are.
-                for param, param_value in optional_parameters.items():
-                    if param in fn_accepted_parameters:
-                        input_parameters[param] = param_value
-                    else:
-                        logger.warning(
-                            f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
-                            f"This is not accepted by the current standardisation function: {parser_fn}"
-                        )
+            # Find parameters that parser_fn accepts (must accept all required arguments already)
+            signature = inspect.signature(parser_fn)
+            fn_accepted_parameters = [param.name for param in signature.parameters.values()]
 
-                progress_bar.set_description(f"Processing: {data_filepath.name}")
-
-                # Call appropriate standardisation function with input parameters
-                data = parser_fn(**input_parameters)
-
-                # Current workflow: if any species fails, whole filepath fails
-                for key, value in data.items():
-                    species = key.split("_")[0]
-                    try:
-                        ObsSurface.validate_data(value["data"], species=species)
-                    except ValueError:
-                        logger.error(
-                            f"Unable to validate and store data from file: {data_filepath.name}.",
-                            f" Problem with species: {species}\n",
-                        )
-                        validated = False
-                        break
+            # Check if optional parameters are present in function call and only use those which are.
+            for param, param_value in optional_parameters.items():
+                if param in fn_accepted_parameters:
+                    input_parameters[param] = param_value
                 else:
-                    validated = True
+                    logger.warning(
+                        f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
+                        f"This is not accepted by the current standardisation function: {parser_fn}"
+                    )
 
-                if not validated:
-                    continue
+            # Call appropriate standardisation function with input parameters
+            data = parser_fn(**input_parameters)
 
-                # Alternative workflow: Would only stops certain species within a
-                # file being written to the object store.
-                # to_remove = []
-                # for key, value in data.items():
-                #     species = key.split('_')[0]
-                #     try:
-                #         ObsSurface.validate_data(value["data"], species=species)
-                #     except ValueError:
-                #         print(f"WARNING: standardised data for '{source_format}' is not in expected OpenGHG format.")
-                #         print(f"Check data for {species}")
-                #         print(value["data"])
-                #         print("Not writing to object store.")
-                #         to_remove.append(key)
-                #
-                # for remove in to_remove:
-                #     data.pop(remove)
+            # Current workflow: if any species fails, whole filepath fails
+            for key, value in data.items():
+                species = key.split("_")[0]
+                try:
+                    ObsSurface.validate_data(value["data"], species=species)
+                except ValueError:
+                    logger.error(
+                        f"Unable to validate and store data from file: {data_filepath.name}.",
+                        f" Problem with species: {species}\n",
+                    )
+                    validated = False
+                    break
+            else:
+                validated = True
 
-                required_keys = (
-                    "species",
-                    "site",
-                    "sampling_period",
-                    "station_long_name",
-                    "inlet",
-                    "instrument",
-                    "network",
-                    "source_format",
-                    "data_source",
-                    "icos_data_level",
-                    "data_type",
-                )
+            if not validated:
+                continue
 
-                # Create Datasources, save them to the object store and get their UUIDs
-                data_type = "surface"
-                datasource_uuids = self.assign_data(
-                    data=data,
-                    overwrite=overwrite,
-                    data_type=data_type,
-                    required_keys=required_keys,
-                    min_keys=5,
-                )
+            # Alternative workflow: Would only stops certain species within a
+            # file being written to the object store.
+            # to_remove = []
+            # for key, value in data.items():
+            #     species = key.split('_')[0]
+            #     try:
+            #         ObsSurface.validate_data(value["data"], species=species)
+            #     except ValueError:
+            #         print(f"WARNING: standardised data for '{source_format}' is not in expected OpenGHG format.")
+            #         print(f"Check data for {species}")
+            #         print(value["data"])
+            #         print("Not writing to object store.")
+            #         to_remove.append(key)
+            #
+            # for remove in to_remove:
+            #     data.pop(remove)
 
-                results["processed"][data_filepath.name] = datasource_uuids
+            required_keys = (
+                "species",
+                "site",
+                "sampling_period",
+                "station_long_name",
+                "inlet",
+                "instrument",
+                "network",
+                "source_format",
+                "data_source",
+                "icos_data_level",
+                "data_type",
+            )
 
-                # Store the hash as the key for easy searching, store the filename as well for
-                # ease of checking by user
-                # TODO - maybe add a timestamp to this string?
-                self._file_hashes[file_hash] = data_filepath.name
+            # Create Datasources, save them to the object store and get their UUIDs
+            data_type = "surface"
+            datasource_uuids = self.assign_data(
+                data=data,
+                overwrite=overwrite,
+                data_type=data_type,
+                required_keys=required_keys,
+                min_keys=5,
+            )
 
-                progress_bar.update(1)
+            results["processed"][data_filepath.name] = datasource_uuids
 
-                logger.info(f"Completed processing: {data_filepath.name}.")
+            # Store the hash as the key for easy searching, store the filename as well for
+            # ease of checking by user
+            # TODO - maybe add a timestamp to this string?
+            self._file_hashes[file_hash] = data_filepath.name
+
+            logger.info(f"Completed processing: {data_filepath.name}.")
 
         return dict(results)
 
@@ -397,7 +384,6 @@ class ObsSurface(BaseStore):
         # from openghg.standardise.surface import parse_aqmesh
         # from openghg.store import assign_data
         # from openghg.util import hash_file
-        # from tqdm import tqdm
 
         # data_filepath = Path(data_filepath)
         # metadata_filepath = Path(metadata_filepath)
@@ -406,7 +392,7 @@ class ObsSurface(BaseStore):
         # processed_data = parse_aqmesh(data_filepath=data_filepath, metadata_filepath=metadata_filepath)
 
         # results: resultsType = defaultdict(dict)
-        # for site, site_data in tqdm(processed_data.items()):
+        # for site, site_data in processed_data.items():
         #     metadata = site_data["metadata"]
         #     measurement_data = site_data["data"]
 
@@ -505,18 +491,23 @@ class ObsSurface(BaseStore):
         data_schema.validate_data(data)
 
     def store_data(
-        self, data: Dict, overwrite: bool = False, required_metakeys: Optional[Sequence] = None
+        self,
+        data: Dict,
+        overwrite: bool = False,
+        force: bool = False,
+        required_metakeys: Optional[Sequence] = None,
     ) -> Optional[Dict]:
         """This expects already standardised data such as ICOS / CEDA
 
         Args:
             data: Dictionary of data in standard format, see the data spec under
-            Development -> Data specifications in the documentation
+                Development -> Data specifications in the documentation
             overwrite: If True overwrite currently stored data
+            force: Force adding of data even if this is identical to data stored (checked based on previously retrieved file hashes).
             required_metakeys: Keys in the metadata we should use to store this metadata in the object store
-            if None it defaults to:
-            {"species", "site", "station_long_name", "inlet", "instrument",
-            "network", "source_format", "data_source", "icos_data_level"}
+                if None it defaults to:
+                {"species", "site", "station_long_name", "inlet", "instrument",
+                "network", "source_format", "data_source", "icos_data_level"}
         Returns:
             Dict or None:
         """
@@ -525,17 +516,20 @@ class ObsSurface(BaseStore):
         # Very rudimentary hash of the data and associated metadata
         hashes = hash_retrieved_data(to_hash=data)
         # Find the keys in data we've seen before
-        seen_before = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
+        if force:
+            file_hashes_to_compare = set()
+        else:
+            file_hashes_to_compare = {next(iter(v)) for k, v in hashes.items() if k in self._retrieved_hashes}
 
-        if len(seen_before) == len(data):
+        if len(file_hashes_to_compare) == len(data):
             logger.warning("Note: There is no new data to process.")
             return None
 
         keys_to_process = set(data.keys())
-        if seen_before:
+        if file_hashes_to_compare:
             # TODO - add this to log
-            logger.warning(f"Note: We've seen {seen_before} before. Processing new data only.")
-            keys_to_process -= seen_before
+            logger.warning(f"Note: We've seen {file_hashes_to_compare} before. Processing new data only.")
+            keys_to_process -= file_hashes_to_compare
 
         to_process = {k: v for k, v in data.items() if k in keys_to_process}
 
@@ -593,7 +587,6 @@ class ObsSurface(BaseStore):
         """
         from openghg.objectstore import delete_object
         from openghg.store.base import Datasource
-        from tinydb import where
 
         # Load the Datasource and get all its keys
         # iterate over these keys and delete them
@@ -613,9 +606,7 @@ class ObsSurface(BaseStore):
         delete_object(bucket=self._bucket, key=key)
 
         # Delete the UUID from the metastore
-        self._metastore.remove(where("uuid") == uuid)
-
-        del self._datasource_uuids[uuid]
+        self._metastore.delete({"uuid": uuid})
 
     def seen_hash(self, file_hash: str) -> bool:
         return file_hash in self._file_hashes

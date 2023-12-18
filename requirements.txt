@@ -2,6 +2,7 @@ addict
 dask
 h5netcdf
 icoscp
+ipywidgets
 matplotlib
 msgpack
 netcdf4
@@ -9,7 +10,7 @@ nbformat
 numexpr
 numpy
 nc-time-axis
-pandas < 2.0
+pandas >= 2.0
 plotly
 pyvis
 rapidfuzz
@@ -17,8 +18,9 @@ requests >= 2.25
 scipy
 tinydb
 toml
-tqdm
+rich
 xarray
 urllib3 >= 1.26.3
 openghg_defs
 rich
+filelock

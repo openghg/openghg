@@ -7,7 +7,6 @@ import numpy as np
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import Dataset
-from types import TracebackType
 
 __all__ = ["Footprints"]
 
@@ -18,23 +17,10 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class Footprints(BaseStore):
     """This class is used to process footprints model output"""
 
+    _data_type = "footprints"
     _root = "Footprints"
     _uuid = "62db5bdf-c88d-4e56-97f4-40336d37f18c"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> Footprints:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
@@ -216,7 +202,7 @@ class Footprints(BaseStore):
         short_lifetime: bool = False,
         overwrite: bool = False,
         # model_params: Optional[Dict] = None,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Reads footprints data files and returns the UUIDS of the Datasources
         the processed data has been assigned to
 
@@ -272,7 +258,7 @@ class Footprints(BaseStore):
             logger.warning(
                 f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Load this into memory
         fp_data = xr.open_dataset(filepath, chunks=chunks)

@@ -1,37 +1,41 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
-from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
-from pandas import Timestamp
-import tinydb
+from __future__ import annotations
+
 import logging
-from openghg.types import DatasourceLookupError
+from types import TracebackType
+from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
+
+from pandas import Timestamp
+
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
+from openghg.objectstore.metastore import DataClassMetaStore
+from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_now, to_lowercase
 
 
 T = TypeVar("T", bound="BaseStore")
+
 
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class BaseStore:
+    _registry: dict[str, type[BaseStore]] = {}
+    _data_type = ""
     _root = "root"
     _uuid = "root_uuid"
 
     def __init__(self, bucket: str) -> None:
-        from openghg.store import load_metastore
-
         self._creation_datetime = str(timestamp_now())
         self._stored = False
-        # Keyed by Datasource UUID
-        self._datasource_uuids: Dict[str, str] = {}
         # Hashes of previously uploaded files
         self._file_hashes: Dict[str, str] = {}
         # Hashes of previously stored data from other data platforms
         self._retrieved_hashes: Dict[str, Dict] = {}
-        # Where we'll store this object
+        # Where we'll store this object's metastore
         self._metakey = ""
 
         if exists(bucket=bucket, key=self.key()):
@@ -39,8 +43,26 @@ class BaseStore:
             # Update myself
             self.__dict__.update(data)
 
-        self._metastore = load_metastore(bucket=bucket, key=self.metakey())
+        self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
+        self._datasource_uuids = self._metastore.select("uuid")
+
+    def __init_subclass__(cls) -> None:
+        BaseStore._registry[cls._data_type] = cls
+
+    def __enter__(self) -> BaseStore:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[BaseException],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        if exc_type is not None:
+            logger.error(msg=f"{exc_type}, {exc_tb}")
+        else:
+            self.save()
 
     @classmethod
     def metakey(cls) -> str:
@@ -57,8 +79,20 @@ class BaseStore:
     def to_data(self) -> Dict:
         # We don't need to store the metadata store, it has its own location
         # QUESTION - Is this cleaner than the previous specifying
-        DO_NOT_STORE = ["_metastore", "_bucket"]
+        DO_NOT_STORE = ["_metastore", "_bucket", "_datasource_uuids"]
         return {k: v for k, v in self.__dict__.items() if k not in DO_NOT_STORE}
+
+    def read_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+        raise NotImplementedError
+
+    def read_file(self, *args: Any, **kwargs: Any) -> dict:
+        raise NotImplementedError
+
+    def store_data(self, *args: Any, **kwargs: Any) -> Optional[dict]:
+        raise NotImplementedError
+
+    def transform_data(self, *args: Any, **kwargs: Any) -> dict:
+        raise NotImplementedError
 
     def assign_data(
         self,
@@ -85,75 +119,79 @@ class BaseStore:
 
         uuids = {}
 
-        lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
-        # TODO - remove this when the lowercasing of metadata gets removed
-        # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
-        skip_keys = ["object_store"]
+        self._metastore.acquire_lock()
+        try:
+            lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
+            # TODO - remove this when the lowercasing of metadata gets removed
+            # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
+            skip_keys = ["object_store"]
 
-        for key, parsed_data in data.items():
-            metadata = parsed_data["metadata"]
-            _data = parsed_data["data"]
+            for key, parsed_data in data.items():
+                metadata = parsed_data["metadata"]
+                _data = parsed_data["data"]
 
-            # Our lookup results and gas data have the same keys
-            uuid = lookup_results[key]
+                # Our lookup results and gas data have the same keys
+                uuid = lookup_results[key]
 
-            # Add the read metadata to the Dataset attributes being careful
-            # not to overwrite any attributes that are already there
-            def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
-                """Attributes in a netCDF file can be strings, numbers, or sequences:
-                http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
+                # Add the read metadata to the Dataset attributes being careful
+                # not to overwrite any attributes that are already there
+                def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
+                    """Attributes in a netCDF file can be strings, numbers, or sequences:
+                    http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
 
-                This function converts any data whose type is not int, float, str, or list
-                to strings.
-                Booleans are converted to strings, even though they are a subtype of int.
-                """
-                if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
-                    return value
+                    This function converts any data whose type is not int, float, str, or list
+                    to strings.
+                    Booleans are converted to strings, even though they are a subtype of int.
+                    """
+                    if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
+                        return value
+                    else:
+                        return str(value)
+
+                to_add = {k: convert_to_netcdf4_types(v) for k, v in metadata.items() if k not in _data.attrs}
+                _data.attrs.update(to_add)
+
+                # If we have a UUID for this Datasource load the existing object
+                # from the object store
+                # If we haven't stored data with this metadata before we create a new Datasource
+                # and add the metadata to our metastore
+
+                # Take a copy of the metadata so we can update it
+                meta_copy = metadata.copy()
+                new_ds = uuid is False
+
+                if new_ds:
+                    datasource = Datasource()
+                    uid = datasource.uuid()
+                    meta_copy["uuid"] = uid
+                    # Make sure all the metadata is lowercase for easier searching later
+                    # TODO - do we want to do this or should be just perform lowercase comparisons?
+                    meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
                 else:
-                    return str(value)
+                    datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
-            to_add = {k: convert_to_netcdf4_types(v) for k, v in metadata.items() if k not in _data.attrs}
-            _data.attrs.update(to_add)
+                # Add the dataframe to the datasource
+                datasource.add_data(
+                    metadata=meta_copy,
+                    data=_data,
+                    overwrite=overwrite,
+                    data_type=data_type,
+                    skip_keys=skip_keys,
+                )
+                # Save Datasource to object store
+                datasource.save(bucket=self._bucket)
 
-            # If we have a UUID for this Datasource load the existing object
-            # from the object store
-            # If we haven't stored data with this metadata before we create a new Datasource
-            # and add the metadata to our metastore
+                # Add the metadata to the metastore and make sure it's up to date with the metadata stored
+                # in the Datasource
+                datasource_metadata = datasource.metadata()
+                if new_ds:
+                    self._metastore.insert(datasource_metadata)
+                else:
+                    self._metastore.update(where={"uuid": datasource.uuid()}, to_update=datasource_metadata)
 
-            # Take a copy of the metadata so we can update it
-            meta_copy = metadata.copy()
-
-            new_ds = uuid is False
-
-            if new_ds:
-                datasource = Datasource()
-                uid = datasource.uuid()
-                meta_copy["uuid"] = uid
-                # Make sure all the metadata is lowercase for easier searching later
-                # TODO - do we want to do this or should be just perform lowercase comparisons?
-                meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
-                # TODO - 2023-05-25 - Remove the need for this key, this should just be a set
-                # so we can have rapid
-                self._datasource_uuids[uid] = key
-            else:
-                datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
-
-            # Add the dataframe to the datasource
-            datasource.add_data(
-                metadata=meta_copy, data=_data, overwrite=overwrite, data_type=data_type, skip_keys=skip_keys
-            )
-            # Save Datasource to object store
-            datasource.save(bucket=self._bucket)
-
-            # Add the metadata to the metastore and make sure it's up to date with the metadata stored
-            # in the Datasource
-            datasource_metadata = datasource.metadata()
-            if new_ds:
-                self._metastore.insert(datasource_metadata)
-            else:
-                self._metastore.update(datasource_metadata, tinydb.where("uuid") == datasource.uuid())
-
-            uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
+                uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
+        finally:
+            self._metastore.release_lock()
 
         return uuids
 
@@ -193,7 +231,7 @@ class BaseStore:
                     f"The given metadata doesn't contain enough information, we need: {required_keys}"
                 )
 
-            required_result = self._metastore.search(tinydb.Query().fragment(required_metadata))
+            required_result = self._metastore.search(required_metadata)
 
             if not required_result:
                 results[key] = False
@@ -218,18 +256,7 @@ class BaseStore:
         Returns:
             list: List of Datasource UUIDs
         """
-        return list(self._datasource_uuids.keys())
-
-    def remove_datasource(self, uuid: str) -> None:
-        """Remove the Datasource with the given uuid from the list
-        of Datasources
-
-        Args:
-            uuid: UUID of Datasource to be removed
-        Returns:
-            None
-        """
-        del self._datasource_uuids[uuid]
+        return self._datasource_uuids
 
     def get_rank(self, uuid: str, start_date: Timestamp, end_date: Timestamp) -> Dict:
         """Get the rank for the given Datasource for a given date range
@@ -438,3 +465,22 @@ class BaseStore:
         """
         self._datasource_uuids.clear()
         self._file_hashes.clear()
+
+
+def get_data_class(data_type: str) -> type[BaseStore]:
+    """Return data class corresponding to given data type.
+
+    Args:
+        data_type: one of "surface", "column", "emissions", "footprints",
+    "boundary_conditions", or "eulerian_model"
+
+    Returns:
+        Data class, one of `ObsSurface`, `ObsColumn`, `Emissions`, `EulerianModel`,
+    `Footprints`, `BoundaryConditions`.
+    """
+    try:
+        data_class = BaseStore._registry[data_type]
+    except KeyError:
+        raise ValueError(f"No data class for data type {data_type}.")
+    else:
+        return data_class

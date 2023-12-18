@@ -1,10 +1,9 @@
 import pytest
 from helpers import get_footprint_datapath
 from openghg.retrieve import search
-from openghg.objectstore import get_bucket
-from openghg.store import Footprints, load_metastore
+from openghg.standardise import standardise_footprint, standardise_from_binary_data
+from openghg.store import Footprints
 from openghg.util import hash_bytes
-from openghg.standardise import standardise_footprint
 
 
 @pytest.mark.xfail(reason="Need to add a better way of passing in binary data to the read_file functions.")
@@ -33,9 +32,13 @@ def test_read_footprint_co2_from_data(mocker):
 
     # Expect co2 data to be high time resolution
     # - could include high_time_resolution=True but don't need to as this will be set automatically
-    bucket = get_bucket()
-    with Footprints(bucket=bucket) as fps:
-        result = fps.read_data(binary_data=binary_data, metadata=metadata, file_metadata=file_metadata)
+    result = standardise_from_binary_data(
+        store="user",
+        data_type="footprints",
+        binary_data=binary_data,
+        metadata=metadata,
+        file_metadata=file_metadata,
+    )
 
     assert result == {"tac_test_NAME_100m": {"uuid": "test-uuid-1", "new": True}}
 
@@ -57,31 +60,18 @@ def test_read_footprint_standard(keyword, value):
      - coordinates: "height", "lat", "lev", "lon", "time"
     Check this for different variants of inlet and height inputs.
     """
-    datapath = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
-
     site = "TAC"
     domain = "EUROPE"
     model = "NAME"
-
-    bucket = get_bucket()
-    if keyword == "inlet":
-        with Footprints(bucket=bucket) as fps:
-            fps.read_file(
-                filepath=datapath,
-                site=site,
-                model=model,
-                inlet=value,
-                domain=domain,
-            )
-    elif keyword == "height":
-        with Footprints(bucket=bucket) as fps:
-            fps.read_file(
-                filepath=datapath,
-                site=site,
-                model=model,
-                height=value,
-                domain=domain,
-            )
+    kwargs = {keyword: value}  # can't pass `keyword=value` as argument to standardise_footprint
+    standardise_footprint(
+        filepath=get_footprint_datapath("TAC-100magl_EUROPE_201208.nc"),
+        site=site,
+        domain=domain,
+        model=model,
+        store="user",
+        **kwargs,
+    )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
@@ -129,27 +119,19 @@ def test_read_footprint_high_spatial_resolution():
      - expects keyword attributes to be set
        - "spatial_resolution": "high_spatial_resolution"
     """
-    datapath = get_footprint_datapath("footprint_test.nc")
-    # model_params = {"simulation_params": "123"}
-
     site = "TMB"
-    network = "LGHG"
-    inlet = "10m"
     domain = "EUROPE"
-    model = "test_model"
-
-    bucket = get_bucket()
-    with Footprints(bucket=bucket) as fps:
-        fps.read_file(
-            filepath=datapath,
-            site=site,
-            model=model,
-            network=network,
-            inlet=inlet,
-            domain=domain,
-            period="monthly",
-            high_spatial_resolution=True,
-        )
+    standardise_footprint(
+        store="user",
+        filepath=get_footprint_datapath("footprint_test.nc"),
+        site=site,
+        network="LGHG",
+        inlet="10m",
+        domain=domain,
+        model="test_model",
+        period="monthly",
+        high_spatial_resolution=True,
+    )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, data_type="footprints")
@@ -297,18 +279,16 @@ def test_read_footprint_co2(site, inlet, metmodel, start, end, filename):
 
     # Expect co2 data to be high time resolution
     # - could include high_time_resolution=True but don't need to as this will be set automatically
-
-    bucket = get_bucket()
-    with Footprints(bucket=bucket) as fps:
-        fps.read_file(
-            filepath=datapath,
-            site=site,
-            model=model,
-            metmodel=metmodel,
-            inlet=inlet,
-            species=species,
-            domain=domain,
-        )
+    standardise_footprint(
+        store="user",
+        filepath=datapath,
+        site=site,
+        model=model,
+        metmodel=metmodel,
+        inlet=inlet,
+        species=species,
+        domain=domain,
+    )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")
@@ -364,18 +344,16 @@ def test_read_footprint_short_lived():
 
     # Expect rn data to be short lived
     # - could include short_lifetime=True but shouldn't need to as this will be set automatically
-
-    bucket = get_bucket()
-    with Footprints(bucket=bucket) as fps:
-        fps.read_file(
-            filepath=datapath,
-            site=site,
-            model=model,
-            metmodel=metmodel,
-            inlet=inlet,
-            species=species,
-            domain=domain,
-        )
+    standardise_footprint(
+        store="user",
+        filepath=datapath,
+        site=site,
+        model=model,
+        metmodel=metmodel,
+        inlet=inlet,
+        species=species,
+        domain=domain,
+    )
 
     # Get the footprints data
     footprint_results = search(site=site, domain=domain, species=species, data_type="footprints")

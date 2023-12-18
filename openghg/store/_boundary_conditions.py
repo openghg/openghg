@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, DefaultDict, Dict, Optional, Tuple, Union
-from types import TracebackType
 import numpy as np
 from xarray import Dataset
 
@@ -22,23 +21,10 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class BoundaryConditions(BaseStore):
     """This class is used to process boundary condition data"""
 
+    _data_type = "boundary_conditions"
     _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> BoundaryConditions:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
@@ -72,7 +58,7 @@ class BoundaryConditions(BaseStore):
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read boundary conditions file
 
         Args:
@@ -113,7 +99,7 @@ class BoundaryConditions(BaseStore):
                 "This file has been uploaded previously with the filename : "
                 f"{self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         bc_data = open_dataset(filepath)
 

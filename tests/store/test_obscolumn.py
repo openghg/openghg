@@ -1,7 +1,7 @@
 import numpy as np
 from helpers import get_column_datapath
-from openghg.store import ObsColumn
 from openghg.objectstore import get_bucket
+from openghg.standardise import standardise_column
 from openghg.store.base import Datasource
 from pandas import Timestamp
 
@@ -20,13 +20,14 @@ def test_read_openghg_format():
     species = "methane"
 
     bucket = get_bucket()
-    with ObsColumn(bucket=bucket) as obs_col:
-        results = obs_col.read_file(filepath=datafile,
-                                    source_format="OPENGHG",
-                                    satellite=satellite,
-                                    domain=domain,
-                                    species=species,
-                                    )
+    results = standardise_column(
+        store="user",
+        filepath=datafile,
+        source_format="OPENGHG",
+        satellite=satellite,
+        domain=domain,
+        species=species,
+    )
 
     # Output style from ObsSurface - may want to use for ObsColumn as well
     # uuid = results["processed"][filename]["ch4"]["uuid"]
@@ -38,7 +39,7 @@ def test_read_openghg_format():
     bucket = get_bucket()
 
     ch4_data = Datasource.load(bucket=bucket, uuid=uuid, shallow=False).data()
-    ch4_data = ch4_data['2017-03-18-15:32:54+00:00_2017-03-18-17:22:23+00:00']
+    ch4_data = ch4_data["2017-03-18-15:32:54+00:00_2017-03-18-17:22:23+00:00"]
 
     assert ch4_data.time[0] == Timestamp("2017-03-18T15:32:54")
     assert np.isclose(ch4_data["xch4"][0], 1844.2019)

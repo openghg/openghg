@@ -1,14 +1,13 @@
 from __future__ import annotations
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from numpy import ndarray
 
 # from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray
-from types import TracebackType
 
 ArrayType = Optional[Union[ndarray, DataArray]]
 
@@ -19,23 +18,10 @@ logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handle
 class ObsColumn(BaseStore):
     """This class is used to process emissions / flux data"""
 
+    _data_type = "column"
     _root = "ObsColumn"
     _uuid = "5c567168-0287-11ed-9d0f-e77f5194a415"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"
-
-    def __enter__(self) -> ObsColumn:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[BaseException],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is not None:
-            logger.error(msg=f"{exc_type}, {exc_tb}")
-        else:
-            self.save()
 
     def read_file(
         self,
@@ -50,7 +36,7 @@ class ObsColumn(BaseStore):
         platform: str = "satellite",
         source_format: str = "openghg",
         overwrite: bool = False,
-    ) -> Optional[Dict]:
+    ) -> dict:
         """Read column observation file
 
         Args:
@@ -105,7 +91,7 @@ class ObsColumn(BaseStore):
                 "This file has been uploaded previously with the filename : "
                 f"{self._file_hashes[file_hash]} - skipping."
             )
-            return None
+            return {}
 
         # Define parameters to pass to the parser function
         param = {

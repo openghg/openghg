@@ -6,15 +6,26 @@ This tutorial demonstrates how OpenGHG can be used to process new
 measurement data, search the data present and to retrieve this for
 analysis and visualisation.
 
-0. Using the tutorial object store
-----------------------------------
+.. _what-is-object-store:
 
-To avoid adding the example data we use in this tutorial to your normal
-object store, we need to tell OpenGHG to use a separate sandboxed object
-store that we'll call the tutorial store. To do this we use the
-``use_tutorial_store`` function from ``openghg.tutorial``. This sets the
-``OPENGHG_TUT_STORE`` environment variable for this session and won't
-affect your use of OpenGHG outside of this tutorial.
+What is Object Store?
+-------------------------------
+
+Each object and piece of data in the object store is stored at a specific key, which can be thought of as the address of the data. The data is stored in a bucket which in the cloud is a section of the OpenGHG object store. Locally a bucket is just a normal directory in the user’s filesystem specified by the path given in the configuration file at ~/.config/openghg/openghg.conf.
+
+
+.. _using-the-tutorial-object-store:
+
+Using the tutorial object store
+-------------------------------
+
+An object store is a folder with a fixed structure within which openghg 
+can read and write data. To avoid adding the example data we use in this 
+tutorial to your normal object store, we need to tell OpenGHG to use a 
+separate sandboxed object store that we'll call the tutorial store. To do 
+this we use the ``use_tutorial_store`` function from ``openghg.tutorial``. 
+This sets the ``OPENGHG_TUT_STORE`` environment variable for this session and 
+won't affect your use of OpenGHG outside of this tutorial.
 
 .. code:: ipython3
 
@@ -33,20 +44,16 @@ affect your use of OpenGHG outside of this tutorial.
 Source formats
 ~~~~~~~~~~~~~~
 
-Within OpenGHG there are several source formats which can be processed and
-stored within the object store. This includes data from the AGAGE, DECC,
-NOAA, LondonGHG, BEAC2ON networks.
+OpenGHG can process and store several source formats in the object store,
+including data from the AGAGE, DECC, NOAA, LondonGHG, BEAC2ON networks.
+The process of adding data to the object store is called *standardisation*.
 
-When uploading a new data file, the data type must be specified
-alongside some additional details so OpenGHG can recognise the format
-and the correct standardisation can occur. The details needed will vary
-by the type of data being uploaded but will often include the
-measurement reference (e.g. a site code) and the name of any network.
+To standardise a new data file, you must specify the *source format* and
+other details about the data.
+For the full list of accepted observation inputs and source formats, call
+the function ``summary_source_formats``:
 
-For the full list of accepted observation inputs and source formats, there
-is a summary function which can be called:
-
-.. code:: ipython3
+.. ipython:: python
 
     from openghg.standardise import summary_source_formats
 
@@ -57,20 +64,34 @@ is a summary function which can be called:
 
     summary
 
-Note: there may be multiple source formats applicable for a give site. This
-is can be dependent on various factors including the instrument type
-used to measure the data e.g. for Tacolneston (“TAC”):
+There may be multiple source formats for a given site.
+For instance, the Tacolneston site in the UK (site code “TAC”) has four entries:
 
-.. code:: ipython3
+.. ipython:: python
 
     summary[summary["Site code"] == "TAC"]
+
+
+Let's see what data is available for a given source.
+First, we'll list all source formats.
+
+.. ipython:: python
+
+    summary["Source format"].unique()
+
+Now we'll find all data with source format ``"CRDS"``.
+
+.. ipython:: python
+
+    summary[summary["Source format"] == "CRDS"]
 
 DECC network
 ~~~~~~~~~~~~
 
-We will start by adding data to the object store from a surface site
-within the DECC network. Here we have accessed a subset of data from the
-Tacolneston site (site code “TAC”) in the UK.
+We will start by adding data to the object store from Tacolneston, which is a *surface site*
+in the DECC network. (Data at surface sites is measured in-situ.)
+
+First we retrieve the raw data.
 
 .. code:: ipython3
 
@@ -80,33 +101,37 @@ Tacolneston site (site code “TAC”) in the UK.
 
     tac_data = retrieve_example_data(url=data_url)
 
-As this data is measured in-situ, this is classed as a surface site and
-we need to use the ``ObsSurface`` class to interpret this data. We can
-pass our list of files to the ``read_file`` method associated within the
-``ObsSurface`` class, also providing details on: - site code - ``"TAC"``
-for Tacolneston - type of data we want to process, known as the data
-type - ``"CRDS"`` - network - ``"DECC"``
 
-This is shown below:
+Now we add this data to the object store using ``standardise_surface``, passing the
+following arguments:
 
-.. code:: ipython3
+* ``filepaths``: list of paths to ``.dat`` files
+* ``site``:  ``"TAC"``, the site code for Tacolneston
+* ``source_format``: ``"CRDS"``, the type of data we want to process
+* ``network``: ``"DECC"``
 
-    from openghg.standardise import standardise_surface
+.. ipython::
 
-    decc_results = standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC")
+    In [1]: from openghg.standardise import standardise_surface
 
-.. code:: ipython3
+    @verbatim
+    In [2]: decc_results = standardise_surface(filepaths=tac_data, source_format="CRDS", site="TAC", network="DECC")
 
-    print(decc_results)
+    @verbatim
+    In [3]: decc_results
+    Out[3]: {'processed': {'tac.picarro.hourly.54m.dat': {'ch4': {'uuid': 'e2339fdf-c0d5-46b8-b5b9-3d682610e9fe', 'new': True}, 'co2': {'uuid': '1b4603e6-cac2-458c-b47e-e441864b29eb', 'new': True}},
+    'tac.picarro.hourly.100m.dat': {'ch4': {'uuid': '2e5935cc-07e3-4c0f-bd7c-8c6e4e2b13b7', 'new': True}, 'co2': {'uuid': '64c020b8-35dd-483f-b38c-99de83ea412d', 'new': True}},
+    'tac.picarro.hourly.185m.dat': {'ch4': {'uuid': '13172db7-7859-4f38-90cf-219c1fbe3b99', 'new': True}, 'co2': {'uuid': 'c79a3473-9f50-47d8-83d8-66a62fd085f7', 'new': True}}}}
 
-Here this extracts the data (and metadata) from the supplied files,
-standardises them and adds these to our created object store.
 
-The returned ``decc_results`` will give us a dictionary of how the data
-has been stored. The data itself may have been split into different
-entries, each one stored with a unique ID (UUID). Each entry is known as
-a *Datasource* (see below for a note on Datasources). The
-``decc_results`` output includes details of the processed data and tells
+This extracts the data and metadata from the files,
+standardises them, and adds them to our object store.
+
+The returned ``decc_results`` dictionary shows how the data
+has been stored: each file has been split into several entries, each with a unique ID (UUID).
+Each entry is known as a *Datasource* (see :ref:`note-on-datasources`).
+
+The ``decc_results`` output includes details of the processed data and tells
 us that the data has been stored correctly. This will also tell us if
 any errors have been encountered when trying to access and standardise
 this data.
@@ -131,44 +156,41 @@ to more than one store.
 AGAGE data
 ~~~~~~~~~~
 
-Another data type which can be added is data from the AGAGE network. The
-functions that process the AGAGE data expect data to have an
-accompanying precisions file. For each data file we create a tuple with
-the data filename and the precisions filename. *Note: A simpler method
-of uploading these file types is planned.*
+OpenGHG can also process data from the `AGAGE network <https://agage.mit.edu/>`_.
 
-We can now retrieve the example data for Capegrim as we did above
+The functions that process the AGAGE data expect data to have an
+accompanying *precisions file*. For each data file we create a tuple with
+the data filename and the precisions filename.
+
+First we retrieve example data from the  Cape Grim station in Australia (site code "CGO"").
 
 .. code:: ipython3
 
     cgo_url = "https://github.com/openghg/example_data/raw/main/timeseries/capegrim_example.tar.gz"
 
-.. code:: ipython3
-
     capegrim_data = retrieve_example_data(url=cgo_url)
 
-.. code:: ipython3
+``capegrim_data`` is a list of two file paths, one for the data file and one for the precisions file:
 
-    capegrim_data
+.. code::
 
-We must create a ``tuple`` associated with each data file to link this
-to a precision file:
+    [PosixPath('/Users/bm13805/openghg_store/tutorial_store/extracted_files/capegrim.18.C'),
+    PosixPath('/Users/bm13805/openghg_store/tutorial_store/extracted_files/capegrim.18.precisions.C')]
 
-.. code:: python
-
-   list_of_tuples = [(data1_filepath, precision1_filepath), (data2_filepath, precision2_filepath), ...]
+We put the data file and precisions file into a tuple:
 
 .. code:: ipython3
 
-    capegrim_data.sort()
     capegrim_tuple = (capegrim_data[0], capegrim_data[1])
 
-The data being uploaded here is from the Cape Grim station in Australia,
-site code “CGO”.
-
 We can add these files to the object store in the same way as the DECC
-data by including the right keywords: - site code - ``"CGO"`` for Cape
-Grim - data type - ``"GCWERKS"`` - network - ``"AGAGE"``
+data by including the right arguments:
+
+* ``filepaths``: tuple (or list of tuples) with paths to data and precision files
+* ``site`` (site code): ``"CGO"``
+* ``source_format`` (data type): ``"GCWERKS"``
+* ``network``: ``"AGAGE"``
+* ``instrument``: ``"medusa"``
 
 .. code:: ipython3
 
@@ -179,15 +201,32 @@ When viewing ``agage_results`` there will be a large number of
 Datasource UUIDs shown due to the large number of gases in each data
 file
 
-.. code:: ipython3
+.. ipython::
+   :verbatim:
 
-    agage_results
+   In [15]: agage_results
+   Out[15]:
+   {'processed': {'capegrim.18.C': {'ch4_70m': {'uuid': '200d8a1b-bc41-4f9f-86c4-448c2427d780',
+   'new': True},
+   'cfc12_70m': {'uuid': 'e507358e-ade3-4c83-914e-e486628640ce', 'new': True},
+   'n2o_70m': {'uuid': 'ad381148-76af-4d8c-aaec-f7cc2a0088b7', 'new': True},
+   'cfc11_70m': {'uuid': '2563a11b-2a54-4287-8705-670f34330e33', 'new': True},
+   'cfc113_70m': {'uuid': '6a6e28d9-4242-4c6f-a71a-0d56915a485b', 'new': True},
+   'chcl3_70m': {'uuid': '36af68d9-f421-4feb-9bfd-c719ec603f05', 'new': True},
+   'ch3ccl3_70m': {'uuid': 'f096f4c3-e86f-4d99-8a92-e35dd193cfbc',
+   'new': True},
+   'ccl4_70m': {'uuid': '396be43c-f29a-408e-9a88-c16ffd79da3b', 'new': True},
+   'h2_70m': {'uuid': '62045a91-bac9-4b7d-84b8-696ec8484002', 'new': True},
+   'co_70m': {'uuid': 'a1bd7ab9-4ae0-46aa-8570-ec961f929431', 'new': True},
+   'ne_70m': {'uuid': '950e94fe-6cf9-48e3-b920-275935761885', 'new': True}}}}
 
-A note on Datasources
-^^^^^^^^^^^^^^^^^^^^^
 
-Datasources are objects that are stored in the object store (++add link
-to object store notes++) that hold the data and metadata associated with
+.. _note-on-datasources:
+
+Note on Datasources
+^^^^^^^^^^^^^^^^^^^
+
+Datasources are objects that are stored in the `object store <https://docs.openghg.org/api/devapi_objectstore.html>`_ that hold the data and metadata associated with
 each measurement we upload to the platform.
 
 For example, if we upload a file that contains readings for three gas
@@ -207,7 +246,8 @@ Searching the object store
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can search the object store by property using the
-``search_surface(...)`` function.
+``search_surface(...)`` function. This function retrieves metadata from the
+data in the object store.
 
 For example we can find all sites which have measurements for carbon
 tetrafluoride (“cf4”) using the ``species`` keyword:
@@ -219,8 +259,8 @@ tetrafluoride (“cf4”) using the ``species`` keyword:
     cfc_results = search_surface(species="cfc11")
     cfc_results
 
-We could also look for details of all the data measured at the Billsdale
-(“BSD”) site using the ``site`` keyword:
+We could also look for details of all the data measured at the Tacolneston
+(“TAC”) site using the ``site`` keyword:
 
 .. code:: ipython3
 
@@ -238,9 +278,11 @@ Quickly retrieve data
 ~~~~~~~~~~~~~~~~~~~~~
 
 Say we want to retrieve all the ``co2`` data from Tacolneston, we can
-perform perform a search and expect a
-```SearchResults`` <https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult>`__
+perform perform a search and expect a |SearchResults|_
 object to be returned. If no results are found ``None`` is returned.
+
+.. |SearchResults| replace:: ``SearchResults``
+.. _SearchResults: https://docs.openghg.org/api/api_dataobjects.html#openghg.dataobjects.SearchResult
 
 .. code:: ipython3
 
@@ -250,7 +292,7 @@ object to be returned. If no results are found ``None`` is returned.
 
     results.results
 
-We can retrive either some or all of the data easily using the
+We can retrieve either some or all of the data easily using the
 ``retrieve`` function.
 
 .. code:: ipython3

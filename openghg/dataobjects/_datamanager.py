@@ -1,12 +1,12 @@
 from collections import defaultdict
 import copy
-from openghg.store.base import Datasource
-from openghg.store.spec import define_data_type_classes
-from openghg.store import load_metastore
-from openghg.objectstore import delete_object, get_writable_bucket
 import logging
-import tinydb
 from typing import DefaultDict, Dict, List, Set, Optional, Union
+
+from openghg.store.base import Datasource
+from openghg.objectstore.metastore import open_metastore
+from openghg.objectstore import get_writable_bucket, get_writable_buckets
+from openghg.types import ObjectStoreError
 
 logger = logging.getLogger("openghg.dataobjects")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -112,16 +112,11 @@ class DataManager:
         version = str(version)
 
         dtype = self._check_datatypes(uuid=uuid)
-
-        data_objs = define_data_type_classes()
-        data_class = data_objs[dtype]
-
-        with data_class(bucket=self._bucket) as dclass:
-            metastore = dclass._metastore
+        with open_metastore(data_type=dtype, bucket=self._bucket) as metastore:
             backup = self._backup[uuid][version]
             self.metadata[uuid] = backup
 
-            metastore.remove(tinydb.where("uuid") == uuid)
+            metastore.delete({"uuid": uuid})
             metastore.insert(backup)
 
             d = Datasource.load(bucket=self._bucket, uuid=uuid)
@@ -153,7 +148,8 @@ class DataManager:
         to_delete: Union[str, List, None] = None,
     ) -> None:
         """Update the metadata associated with data. This takes UUIDs of Datasources and updates
-        the associated metadata. If you want to delete some metadata
+        the associated metadata. To update metadata pass in a dictionary of key/value pairs to update.
+        To delete metadata pass in a list of keys to delete.
 
         Args:
             uuid: UUID(s) of Datasources to be updated.
@@ -163,8 +159,6 @@ class DataManager:
         Returns:
             None
         """
-        from tinydb.operations import delete as tinydb_delete
-
         if to_update is None and to_delete is None:
             return None
 
@@ -173,15 +167,12 @@ class DataManager:
 
         dtype = self._check_datatypes(uuid=uuid)
 
-        data_objs = define_data_type_classes()
-        metakey = data_objs[dtype]._metakey
-
-        with load_metastore(bucket=self._bucket, key=metakey) as store:
+        with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for u in uuid:
                 updated = False
                 d = Datasource.load(bucket=self._bucket, uuid=u, shallow=True)
                 # Save a backup of the metadata for now
-                found_record = store.search(tinydb.where("uuid") == u)
+                found_record = metastore.search({"uuid": u})
                 current_metadata = found_record[0]
 
                 version = str(len(self._backup[u].keys()) + 1)
@@ -206,9 +197,7 @@ class DataManager:
                         internal_copy.pop(k)
 
                     try:
-                        store.update_multiple(
-                            [(tinydb_delete(k), tinydb.where("uuid") == u) for k in to_delete]
-                        )
+                        metastore.update(where={"uuid": u}, to_delete=to_delete)
                     except KeyError:
                         raise ValueError(
                             "Unable to remove keys from metadata store, please ensure they exist."
@@ -222,10 +211,7 @@ class DataManager:
 
                     d._metadata.update(to_update)
                     internal_copy.update(to_update)
-                    response = store.update(to_update, tinydb.where("uuid") == u)
-
-                    if not response:
-                        raise ValueError("Unable to update metadata, possible metadata sync error.")
+                    metastore.update(where={"uuid": u}, to_update=to_update)
 
                     updated = True
 
@@ -236,7 +222,7 @@ class DataManager:
                     logger.info(f"Modified metadata for {u}.")
 
     def delete_datasource(self, uuid: Union[List, str]) -> None:
-        """Delete a Datasource in the object store.
+        """Delete Datasource(s) in the object store.
         At the moment we only support deleting the complete Datasource.
 
         NOTE: Make sure you really want to delete the Datasource(s)
@@ -246,25 +232,47 @@ class DataManager:
         Returns:
             None
         """
+        from openghg.objectstore import delete_object
+
         # Add in ability to delete metadata keys
         if not isinstance(uuid, list):
             uuid = [uuid]
 
         dtype = self._check_datatypes(uuid=uuid)
-        data_objs = define_data_type_classes()
-        dclass = data_objs[dtype]
 
-        with dclass(bucket=self._bucket) as dc:
+        with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for uid in uuid:
                 # First remove the data from the metadata store
-                dc._metastore.remove(tinydb.where("uuid") == uid)
+                metastore.delete({"uuid": uid})
+
                 # Delete all the data associated with a Datasource
                 d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)
                 d.delete_all_data()
+
                 # Then delete the Datasource itself
-                key = d.key()
-                delete_object(bucket=self._bucket, key=key)
-                # Remove from the list of Datasources the object knows about
-                dc.remove_datasource(uuid=uid)
+                delete_object(bucket=self._bucket, key=d.key())
 
                 logger.info(f"Deleted Datasource with UUID {uid}.")
+
+
+def data_manager(data_type: str, store: str, **kwargs: Dict) -> DataManager:
+    """Lookup the data / metadata you'd like to modify.
+
+    Args:
+        data_type: Type of data, for example surface, flux, footprint
+        store: Name of store
+        kwargs: Any pair of keyword arguments for searching
+    Returns:
+        DataManager: A handler object to help modify the metadata
+    """
+    from openghg.dataobjects import DataManager
+    from openghg.retrieve import search
+
+    writable_stores = get_writable_buckets()
+
+    if store not in writable_stores:
+        raise ObjectStoreError(f"You do not have permission to write to the {store} store.")
+
+    res = search(data_type=data_type, **kwargs)
+    metadata = res.metadata
+    return DataManager(metadata=metadata, store=store)
