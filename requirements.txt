@@ -18,7 +18,6 @@ pyvis
 rapidfuzz
 requests >= 2.25
 rich
-rich
 scipy
 tinydb
 toml
