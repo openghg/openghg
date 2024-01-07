@@ -462,6 +462,7 @@ def _retrieve_remote(
 
     # for n, dobj_url in enumerate(dobj_urls):
     for n, dobj_url, the_species, units, measurement_type in species_and_dobj_url.itertuples():
+        print(n, dobj_url, the_species, units, measurement_type)
         dobj = Dobj(dobj_url)
         logger.info(f"Retrieving {dobj_url}...")
         # We've got to jump through some hoops here to try and avoid the NOAA
