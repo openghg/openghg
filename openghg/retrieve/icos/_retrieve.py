@@ -503,7 +503,7 @@ def _retrieve_remote(
 
         species_info = next(
             item
-            for item in dobj_info["specificInfo"]["column"]
+            for item in dobj_info["specificInfo"]["columns"]
             if str(item["label"]).lower() == the_species.lower()
         )
 
