@@ -617,8 +617,11 @@ def _retrieve_remote(
         # if flag_col:
         #     flag_str = flag_col[0]
         #     dataframe = dataframe.astype({flag_str: str})
-
-        dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
+        try:
+            dataframe = dataframe.rename(columns=rename_cols).set_index("timestamp")
+        except KeyError:
+            # flask data has sampling start instead of timestamp
+            dataframe = dataframe.rename(columns=rename_cols).set_index("samplingstart")
 
         dataframe.index.name = "time"
         dataframe.index = to_datetime(dataframe.index, format="%Y-%m-%d %H:%M:%S")
