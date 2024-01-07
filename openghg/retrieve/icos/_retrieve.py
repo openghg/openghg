@@ -470,7 +470,7 @@ def _retrieve_remote(
             if "globalview" in dobj.meta["references"]["doi"]["titles"][0]["title"].lower():
                 logger.info(f"Skipping {dobj_url} as ObsPack GlobalView detected.")
                 continue
-        except KeyError:
+        except (KeyError, TypeError):
             pass
 
         try:
