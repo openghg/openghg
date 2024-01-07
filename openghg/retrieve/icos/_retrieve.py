@@ -1,9 +1,12 @@
-from typing import Any, Dict, List, Optional, Union
+import logging
+import re
+from typing import Any, cast, Dict, List, Optional, Union
+
 from openghg.dataobjects import ObsData
 from openghg.objectstore import get_writable_bucket
 from openghg.util import running_on_hub, load_json
 import openghg_defs
-import logging
+import pandas as pd
 
 logger = logging.getLogger("openghg.retrieve")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
@@ -250,6 +253,90 @@ def local_retrieve(
         return obs_data[0]
     else:
         return obs_data
+
+
+def _get_dobjs(
+    site: str,
+    data_level: int,
+    species: List,
+    inlet: Optional[str] = None,
+    ignore_obs_pack: bool = True,
+) -> pd.DataFrame:
+    """Get icoscp Dobjs for given site and data level, keyed by species. Additonal parameters filter the results.
+
+    Args:
+        site: ICOS site code, for site codes see
+        https://www.icos-cp.eu/observations/atmosphere/stations
+        data_level: ICOS data level (1, 2)
+            - Data level 1: Near Real Time Data (NRT) or Internal Work data (IW).
+            - Data level 2: The final quality checked ICOS RI data set, published by the CFs,
+                            to be distributed through the Carbon Portal.
+                            This level is the ICOS-data product and free available for users.
+            See https://icos-carbon-portal.github.io/pylib/modules/#stationdatalevelnone
+        species: Species name
+        inlet: Height of the inlet for sampling in metres.
+        ignore_obs_pack: if True, ignore ObsPack data. Default = True.
+
+    Returns:
+        dict: Dictionary of icos Dobjs for given site, species, and keywords, keyed by species.
+    """
+    # icoscp isn't available to conda so we've got to resort to this for now
+    try:
+        from icoscp.cpb.dobj import Dobj  # type: ignore
+        from icoscp.station import station  # type: ignore
+    except ImportError:
+        raise ImportError(
+            "Cannot import icoscp, if you've installed OpenGHG using conda please run: pip install icoscp"
+        )
+
+    stat = station.get(stationId=site.upper())
+
+    if not stat.valid:
+        raise ValueError("Please check you have passed a valid ICOS site.")
+
+    data_pids = cast(pd.DataFrame, stat.data(level=data_level))
+
+    if ignore_obs_pack:
+        data_pids = data_pids[~data_pids["specLevel"].str.contains("ObsPack")]
+
+    # first, try searching the "specLabel" column of data_pids
+
+    # match words containing species (ignore case e.g. for HFC-134a)
+    pat = re.compile(r"\b({})\b".format("|".join(map(re.escape, species))), re.IGNORECASE)
+
+    data_pids["species"] = data_pids["specLevel"].str.extract(pat)
+
+    # next, for rows where a species wasn't found, we will check the 'colNames' of the associated Dobj
+    def get_species_from_col_names(url: str) -> Optional[str]:
+        """Get species or None given "dobj" url."""
+        dobj = Dobj(url)
+
+        names = dobj.colNames
+        if names is None:
+            return None
+
+        # match the species string (upper or lower) *exactly*
+        pat = re.compile(r"^({})$".format("|".join(map(re.escape, species))), re.IGNORECASE)
+
+        for name in names:
+            if re.search(pat, name):
+                return name
+
+        return None
+
+    filt = pd.isna(data_pids["species"])
+    data_pids.loc[filt, "species"] = data_pids.loc[filt, "dobj"].apply(get_species_from_col_names)
+
+    # drop rows where no species is found
+    data_pids = data_pids.dropna(subset="species")
+
+    # filter by inlet
+    if inlet is not None:
+        inlet = str(float(inlet.rstrip("m")))
+        filt = data_pids["samplingheight"].str.contains(inlet)
+        data_pids = data_pids[filt]
+
+    return data_pids
 
 
 def _retrieve_remote(
