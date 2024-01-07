@@ -501,14 +501,8 @@ def _retrieve_remote(
         # units = species_info["valueType"]["unit"].lower()
         # the_species = species_info["label"]
 
-        species_info = next(
-            item
-            for item in dobj_info["specificInfo"]["columns"]
-            if str(item["label"]).lower() == the_species.lower()
-        )
-
         attributes["species"] = the_species
-        acq_data = cast(dict[str, Any], species_info["acquisition"])  # type: ignore
+        acq_data = cast(dict[str, Any], dobj_info["specificInfo"]["acquisition"])  # type: ignore
         station_data = acq_data["station"]
 
         to_store: Dict[str, Any] = {}
