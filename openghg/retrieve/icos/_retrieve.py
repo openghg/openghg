@@ -279,6 +279,8 @@ def _get_species_and_dobjs_url(
 
     Returns:
         dict: Dictionary of icos Dobjs for given site, species, and keywords, keyed by species.
+
+    TODO: refactor into two functions: 1) get Dobjs (filter ObsPack and inlet), 2) extract metadata
     """
     # icoscp isn't available to conda so we've got to resort to this for now
     try:
@@ -299,25 +301,32 @@ def _get_species_and_dobjs_url(
     if ignore_obs_pack:
         data_pids = data_pids[~data_pids["specLabel"].str.contains("ObsPack")]
 
-    # extract species from dobj metadata
-    def get_species_from_col_names(url: str) -> Optional[str]:
-        """Get species or None given "dobj" url."""
+    # extract species, unit, measurement_type from dobj metadata
+    def get_species_from_col_names(url: str, species: list[str]) -> pd.Series:
+        """Get species, unit, and measurement type given "dobj" url."""
         dobj = Dobj(url)
 
         names = dobj.colNames
         if names is None:
-            return None
+            return pd.Series({"species": None, "units": None, "measurement_type": None})
+
+        col_data = dobj.meta["specificInfo"]["columns"]  # type: ignore
 
         # match the species string (upper or lower) *exactly*
         pat = re.compile(r"^({})$".format("|".join(map(re.escape, species))), re.IGNORECASE)
 
-        for name in names:
+        for name, data in zip(names, col_data):
             if re.search(pat, name):
-                return name
+                species = name
+                units = data["valueType"]["unit"]  # type: ignore
+                measurement_type = data["valueType"]["self"]["label"]  # type: ignore
 
-        return None
+                return pd.Series({"species": species, "units": units, "measurement_type": measurement_type})
 
-    data_pids["species"] = data_pids["dobj"].apply(get_species_from_col_names)
+        return pd.Series({"species": None, "units": None, "measurement_type": None})
+
+    info_df = data_pids["dobj"].apply(lambda x: get_species_from_col_names(x, species))
+    data_pids = pd.concat([data_pids, info_df])
 
     # drop rows where no species is found
     data_pids = data_pids.dropna(subset="species")
@@ -325,10 +334,10 @@ def _get_species_and_dobjs_url(
     # filter by inlet
     if inlet is not None:
         inlet = str(float(inlet.rstrip("m")))
-        filt = data_pids["samplingheight"].str.contains(inlet)
+        filt = data_pids["samplingheight"].astype("string").str.contains(inlet)  # astype needed for tests...
         data_pids = data_pids[filt]
 
-    return data_pids
+    return data_pids[["dobj", "species", "units", "measurement_type"]]
 
 
 def _retrieve_remote(
@@ -393,11 +402,11 @@ def _retrieve_remote(
     # We should first check if it's stored in the object store
     # Will need to make sure ObsSurface can accept the datasets we
     # create from the ICOS data
-    # stat = station.get(stationId=site.upper())
+    stat = station.get(stationId=site.upper())
 
-    # if not stat.valid:
-    #     logger.error("Please check you have passed a valid ICOS site.")
-    #     return None
+    if not stat.valid:
+        logger.error("Please check you have passed a valid ICOS site.")
+        return None
 
     # data_pids = stat.data(level=data_level)
 
@@ -452,7 +461,7 @@ def _retrieve_remote(
     standardised_data: Dict[str, Dict] = {}
 
     # for n, dobj_url in enumerate(dobj_urls):
-    for n, dobj_url, the_species in species_and_dobj_url[["dobj", "species"]].itertuples():
+    for n, dobj_url, the_species, units, measurement_type in species_and_dobj_url.itertuples():
         dobj = Dobj(dobj_url)
         logger.info(f"Retrieving {dobj_url}...")
         # We've got to jump through some hoops here to try and avoid the NOAA
@@ -476,25 +485,25 @@ def _retrieve_remote(
         # We need to pull the data down as .info (metadata) is populated further on this step
         dataframe = dobj.get()
         # This is the metadata, dobj.info and dobj.meta are equal
-        dobj_info = dobj.meta
+        dobj_info = cast(dict[str, dict[str, Any]], dobj.meta)
 
         attributes = {}
 
-        specific_info = dobj_info["specificInfo"]
-        col_data = specific_info["columns"]
+        # specific_info = dobj_info["specificInfo"]
+        # col_data = specific_info["columns"]
 
-        # Get the species this dobj holds information for
-        not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
-        species_info = next(i for i in col_data if i["label"] not in not_the_species)
+        # # Get the species this dobj holds information for
+        # not_the_species = {"TIMESTAMP", "Flag", "NbPoints", "Stdev"}
+        # species_info = next(i for i in col_data if i["label"] not in not_the_species)
 
-        measurement_type = species_info["valueType"]["self"]["label"].lower()
-        units = species_info["valueType"]["unit"].lower()
-        the_species = species_info["label"]
+        # measurement_type = species_info["valueType"]["self"]["label"].lower()
+        # units = species_info["valueType"]["unit"].lower()
+        # the_species = species_info["label"]
 
-        species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
+        # species_info = next(item for item in col_data if str(item["label"]).lower() == the_species.lower())
 
         attributes["species"] = the_species
-        acq_data = specific_info["acquisition"]
+        acq_data = cast(dict[str, Any], dobj_info["specificInfo"]["columns"]["acquisition"])  # type: ignore
         station_data = acq_data["station"]
 
         to_store: Dict[str, Any] = {}
