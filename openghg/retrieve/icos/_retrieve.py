@@ -255,7 +255,7 @@ def local_retrieve(
         return obs_data
 
 
-def _get_dobjs(
+def _get_species_and_dobjs_url(
     site: str,
     data_level: int,
     species: List,
@@ -297,16 +297,9 @@ def _get_dobjs(
     data_pids = cast(pd.DataFrame, stat.data(level=data_level))
 
     if ignore_obs_pack:
-        data_pids = data_pids[~data_pids["specLevel"].str.contains("ObsPack")]
+        data_pids = data_pids[~data_pids["specLabel"].str.contains("ObsPack")]
 
-    # first, try searching the "specLabel" column of data_pids
-
-    # match words containing species (ignore case e.g. for HFC-134a)
-    pat = re.compile(r"\b({})\b".format("|".join(map(re.escape, species))), re.IGNORECASE)
-
-    data_pids["species"] = data_pids["specLevel"].str.extract(pat)
-
-    # next, for rows where a species wasn't found, we will check the 'colNames' of the associated Dobj
+    # extract species from dobj metadata
     def get_species_from_col_names(url: str) -> Optional[str]:
         """Get species or None given "dobj" url."""
         dobj = Dobj(url)
@@ -324,8 +317,7 @@ def _get_dobjs(
 
         return None
 
-    filt = pd.isna(data_pids["species"])
-    data_pids.loc[filt, "species"] = data_pids.loc[filt, "dobj"].apply(get_species_from_col_names)
+    data_pids["species"] = data_pids["dobj"].apply(get_species_from_col_names)
 
     # drop rows where no species is found
     data_pids = data_pids.dropna(subset="species")
@@ -401,44 +393,56 @@ def _retrieve_remote(
     # We should first check if it's stored in the object store
     # Will need to make sure ObsSurface can accept the datasets we
     # create from the ICOS data
-    stat = station.get(stationId=site.upper())
+    # stat = station.get(stationId=site.upper())
 
-    if not stat.valid:
+    # if not stat.valid:
+    #     logger.error("Please check you have passed a valid ICOS site.")
+    #     return None
+
+    # data_pids = stat.data(level=data_level)
+
+    # # We want to get the PIDs of the data for each species here
+    # species_upper = [s.upper() for s in species]
+    # # For this see https://stackoverflow.com/a/55335207
+    # search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
+    # # Now filter the dataframe so we can extract the PIDS
+    # # Remove ObsPack results - GJ 2023-10-11 - added as a quick fix for now
+    # filtered_sources = data_pids[
+    #     data_pids["specLabel"].str.contains(search_str) & ~data_pids["specLabel"].str.contains("Obspack")
+    # ]
+
+    # if filtered_sources.empty:
+    #     species_lower = [s.lower() for s in species]
+    #     # For this see https://stackoverflow.com/a/55335207
+    #     search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
+    #     # Now filter the dataframe so we can extract the PIDS
+    #     filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
+
+    # if inlet is not None:
+    #     inlet = str(float(inlet.rstrip("m")))
+    #     height_filter = [inlet in str(x) for x in filtered_sources["samplingheight"]]
+    #     filtered_sources = filtered_sources[height_filter]
+
+    # if filtered_sources.empty:
+    #     logger.error(
+    #         f"No sources found for {species} at {site}. Please check with the ICOS Carbon Portal that this data is available."
+    #     )
+    #     return None
+
+    # # Now extract the PIDs along with some data about them
+    # dobj_urls = filtered_sources["dobj"].tolist()
+
+    try:
+        species_and_dobj_url = _get_species_and_dobjs_url(site, data_level, species, inlet)
+    except ValueError:
         logger.error("Please check you have passed a valid ICOS site.")
         return None
 
-    data_pids = stat.data(level=data_level)
-
-    # We want to get the PIDs of the data for each species here
-    species_upper = [s.upper() for s in species]
-    # For this see https://stackoverflow.com/a/55335207
-    search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
-    # Now filter the dataframe so we can extract the PIDS
-    # Remove ObsPack results - GJ 2023-10-11 - added as a quick fix for now
-    filtered_sources = data_pids[
-        data_pids["specLabel"].str.contains(search_str) & ~data_pids["specLabel"].str.contains("Obspack")
-    ]
-
-    if filtered_sources.empty:
-        species_lower = [s.lower() for s in species]
-        # For this see https://stackoverflow.com/a/55335207
-        search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_lower)))
-        # Now filter the dataframe so we can extract the PIDS
-        filtered_sources = data_pids[data_pids["specLabel"].str.contains(search_str)]
-
-    if inlet is not None:
-        inlet = str(float(inlet.rstrip("m")))
-        height_filter = [inlet in str(x) for x in filtered_sources["samplingheight"]]
-        filtered_sources = filtered_sources[height_filter]
-
-    if filtered_sources.empty:
+    if species_and_dobj_url.empty:
         logger.error(
             f"No sources found for {species} at {site}. Please check with the ICOS Carbon Portal that this data is available."
         )
         return None
-
-    # Now extract the PIDs along with some data about them
-    dobj_urls = filtered_sources["dobj"].tolist()
 
     # Load our site metadata for a few things like the station's long_name that
     # isn't in the ICOS metadata in the way we want it at the momenet - 2023-03-20
@@ -447,7 +451,8 @@ def _retrieve_remote(
 
     standardised_data: Dict[str, Dict] = {}
 
-    for n, dobj_url in enumerate(dobj_urls):
+    # for n, dobj_url in enumerate(dobj_urls):
+    for n, dobj_url, the_species in species_and_dobj_url[["dobj", "species"]].itertuples():
         dobj = Dobj(dobj_url)
         logger.info(f"Retrieving {dobj_url}...")
         # We've got to jump through some hoops here to try and avoid the NOAA
