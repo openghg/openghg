@@ -326,7 +326,7 @@ def _get_species_and_dobjs_url(
         return pd.Series({"species": None, "units": None, "measurement_type": None})
 
     info_df = data_pids["dobj"].apply(lambda x: get_species_from_col_names(x, species))
-    data_pids = pd.concat([data_pids, info_df])
+    data_pids = pd.concat([data_pids, info_df], axis=1)
 
     # drop rows where no species is found
     data_pids = data_pids.dropna(subset="species")
@@ -471,7 +471,7 @@ def _retrieve_remote(
             if "globalview" in dobj.meta["references"]["doi"]["titles"][0]["title"].lower():
                 logger.info(f"Skipping {dobj_url} as ObsPack GlobalView detected.")
                 continue
-        except (KeyError, TypeError):
+        except KeyError:
             pass
 
         try:
