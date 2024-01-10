@@ -27,6 +27,9 @@ def clean_string(to_clean: Optional[str]) -> Union[str, None]:
     if to_clean is None:
         return None
 
+    if isinstance(to_clean, bool):
+        return str(to_clean).lower()
+
     try:
         # This might be used with numbers
         if is_number(to_clean):

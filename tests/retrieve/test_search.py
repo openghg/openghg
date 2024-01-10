@@ -288,7 +288,7 @@ def test_search_footprints_multiple():
         height="100m",
         domain="TEST",
         model="NAME",
-        high_time_resolution=False,
+        high_time_resolution=False
     )
 
     key = next(iter(res.metadata))
@@ -363,7 +363,7 @@ def test_search_footprints_high_time_resolution():
 
     # check attributes
     metadata = res.retrieve().metadata
-    assert metadata["high_time_resolution"] == True
+    assert metadata["high_time_resolution"] == "true"
 
 
 def test_search_flux():
