@@ -10,6 +10,7 @@ dependencies:
   - addict
   - dask
   - h5netcdf
+  - filelock
   - matplotlib
   - msgpack-python
   - netcdf4
