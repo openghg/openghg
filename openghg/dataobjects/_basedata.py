@@ -78,9 +78,10 @@ class _BaseData:
 
             self.data = self._zarrstore.get(version=version)
             if slice_time:
-                start_date = start_date - Timedelta("1s")
-                end_date = end_date - Timedelta("1s")
-                self.data = self.data.sel(time=slice(start_date, end_date))
+                if self.data.time.size > 1:
+                    start_date = start_date - Timedelta("1s")
+                    end_date = end_date - Timedelta("1s")
+                    self.data = self.data.sel(time=slice(start_date, end_date))
         else:
             raise ValueError(
                 "Must supply either data or uuid and version, cannot create an empty data object."

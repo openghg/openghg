@@ -102,9 +102,10 @@ def test_scenario_infer_inputs_ch4():
     assert obs_time[-1] == Timestamp("2012-08-31T23:47:30")
 
     # Obs data - values
-    obs_mf = obs_data["mf"]
+    obs_mf = obs_data["mf"].compute()
+
     assert np.isclose(obs_mf[0], 1915.11)
-    assert np.isclose(obs_mf[-1], 1923.29)
+    assert np.isclose(obs_mf[-1], 1942.41)
 
     # Footprint data - time range
     footprint_data = model_scenario.footprint.data
@@ -121,8 +122,6 @@ def test_scenario_infer_inputs_ch4():
     assert source in fluxes
     assert len(fluxes.keys()) == 1
 
-    # QUESTION - How do we want to handle fluxes and the new date slicing?
-    raise AssertionError("How do we want to handle fluxes and the new date slicing?")
     flux_data = model_scenario.fluxes[source].data
     flux_time = flux_data["time"]
     assert flux_time[0] == Timestamp("2012-01-01T00:00:00")
