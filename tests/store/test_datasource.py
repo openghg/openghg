@@ -493,12 +493,10 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
     with d.get_data(version="v0") as stored_ds:
         assert stored_ds.equals(ch4_data)
 
-    assert timestamp_tzaware(stored_ds["ch4"].time[0].values) == timestamp_tzaware(start)
-    # QUESTION - why is there a ~ minute difference here?
-    # Is it because of the use of the representative daterange function?
-    # Should we have some kind of tolerance we accept?
-    assert timestamp_tzaware(stored_ds["ch4"].time[-1].values) == timestamp_tzaware(end)
-
+    assert timestamp_tzaware(stored_ds["ch4"].time[0].values) == timestamp_tzaware("2014-01-30T11:12:30")
+    assert timestamp_tzaware(start) == timestamp_tzaware("2014-01-30 11:12:30+00:00")
+    assert timestamp_tzaware(stored_ds["ch4"].time[-1].values) == timestamp_tzaware("2020-12-01T22:31:30")
+    assert timestamp_tzaware(end) == timestamp_tzaware("2020-12-01 22:32:29")
 
 def test_to_memory_store(data, bucket):
     d = Datasource(bucket=bucket)

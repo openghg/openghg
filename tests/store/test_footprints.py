@@ -507,10 +507,6 @@ def test_footprint_read_using_mfdataset():
     )
 
 
-def test_passing_chunks_reduces_memory_consumption():
-    assert False
-
-
 def test_process_footprints():
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")

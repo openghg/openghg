@@ -157,7 +157,7 @@ class LocalZarrStore(Store):
             raise KeyError(f"Invalid version - {version}")
 
         store = self._stores[version]
-        ds: xr.Dataset = xr.open_zarr(store=store)
+        ds: xr.Dataset = xr.open_zarr(store=store, consolidated=True)
         return ds
 
     def pop(self, version: str) -> xr.Dataset:
