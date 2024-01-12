@@ -274,3 +274,16 @@ def get_logfile_path() -> Path:
         return Path.home().joinpath("openghg.log")
     else:
         return Path("/tmp/openghg.log")
+
+
+def get_folder_size(path: Union[Path, str]) -> int:
+    """Get the size of a folder in bytes
+
+    Thanks to https://stackoverflow.com/a/1392549/1303032
+
+    Args:
+        path: Path to folder
+    Returns:
+        int: Size of folder in bytes
+    """
+    return sum(f.stat().st_size for f in Path(path).glob("**/*") if f.is_file())

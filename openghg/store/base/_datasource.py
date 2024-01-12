@@ -1,7 +1,7 @@
 from __future__ import annotations
 from collections import defaultdict
 import warnings
-from typing import Any, cast, Dict, List, Literal, Optional, Tuple, TypeVar, Union, TYPE_CHECKING
+from typing import Any, cast, Dict, List, Literal, Optional, Tuple, TypeVar, Union
 from types import TracebackType
 import logging
 from pandas import DataFrame, Timestamp, Timedelta
@@ -12,7 +12,7 @@ from openghg.objectstore import exists, get_object_from_json
 from openghg.util import split_daterange_str, timestamp_tzaware
 from openghg.store.spec import define_data_types
 from openghg.types import DataOverlapError, ObjectStoreError
-
+from openghg.store.storage import LocalZarrStore
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
@@ -32,7 +32,6 @@ class Datasource:
 
     def __init__(self, bucket: str, uuid: Optional[str] = None, mode: Literal["r", "rw"] = "rw") -> None:
         from openghg.util import timestamp_now
-        from openghg.store.storage import LocalZarrStore
 
         if uuid is not None:
             key = f"{Datasource._datasource_root}/uuid/{uuid}"
@@ -59,9 +58,7 @@ class Datasource:
             raise ValueError("Invalid mode. Please select r or rw.")
 
         self._mode = mode
-        # TODO - add in selection of other store types, this could NetCDF, sparse, whatever
         self._store = LocalZarrStore(bucket=bucket, datasource_uuid=self._uuid, mode=mode)
-        # So we know where to write out to
         self._bucket = bucket
 
         self.update_daterange()
@@ -80,13 +77,13 @@ class Datasource:
         else:
             self.save()
 
-    def store(self) -> LocalZarrStore:
-        """Return the LocalZarrStore associated with this Datasource
+    def store_size(self, version: Optional[str] = None) -> int:
+        """Return the size of the zarr store associated with this Datasource
 
         Returns:
-            LocalZarrStore: LocalZarrStore object
+            int: Size of zarr store in bytes
         """
-        return self._store
+        return self._store.size(version=version)
 
     def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource

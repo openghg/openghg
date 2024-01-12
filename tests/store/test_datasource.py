@@ -144,6 +144,21 @@ def test_add_data(data, bucket):
     assert d.metadata().items() >= expected_metadata.items()
 
 
+def test_get_store_size(data, bucket):
+    d = Datasource(bucket=bucket)
+
+    metadata = data["ch4"]["metadata"]
+    ch4_data = data["ch4"]["data"]
+
+    d.add_data(metadata=metadata, data=ch4_data, sort=False, drop_duplicates=False, data_type="surface")
+
+    assert d.store_size() == 9897
+
+    d._store._stores.clear()
+
+    assert d.store_size() == 0
+
+
 def test_versioning(capfd, bucket):
     min_tac_filepath = get_surface_datapath(filename="tac.picarro.1minute.100m.min.dat", source_format="CRDS")
     detailed_tac_filepath = get_surface_datapath(
@@ -497,6 +512,7 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
     assert timestamp_tzaware(start) == timestamp_tzaware("2014-01-30 11:12:30+00:00")
     assert timestamp_tzaware(stored_ds["ch4"].time[-1].values) == timestamp_tzaware("2020-12-01T22:31:30")
     assert timestamp_tzaware(end) == timestamp_tzaware("2020-12-01 22:32:29")
+
 
 def test_to_memory_store(data, bucket):
     d = Datasource(bucket=bucket)

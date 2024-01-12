@@ -59,6 +59,14 @@ class LocalZarrStore(Store):
         iterator: Iterator = self._stores[version].keys()
         return iterator
 
+    def empty(self) -> bool:
+        """Check if the store is empty
+
+        Returns:
+            bool: True if store is empty
+        """
+        return not self._stores
+
     def close(self) -> None:
         """Close the zarr store.
 
@@ -96,6 +104,27 @@ class LocalZarrStore(Store):
             bool: True if version exists
         """
         return version.lower() in self._stores
+
+    def size(self, version: Optional[str] = None) -> int:
+        """Get the size of a version of the zarr store
+
+        Args:
+            version: Version e.g. v0, v1
+        Returns:
+            int: Size of version in bytes
+        """
+        from openghg.util import get_folder_size
+
+        if self.empty():
+            return 0
+
+        if version is None:
+            version = "v0"
+            path = self.store_path(version=version).parent
+        else:
+            path = self.store_path(version=version)
+
+        return get_folder_size(path=path)
 
     def add(
         self,

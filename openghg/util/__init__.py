@@ -20,6 +20,7 @@ from ._file import (
     decompress_json,
     decompress_str,
     get_datapath,
+    get_folder_size,
     get_logfile_path,
     load_column_parser,
     load_column_source_parser,
