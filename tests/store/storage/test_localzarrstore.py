@@ -64,22 +64,22 @@ def test_update(store):
         assert ds.equals(ds_loaded)
 
 
-def test_bytes_stored(store):
+def test_nbytes(store):
     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds, compressor=None)
-        assert store.bytes_stored() == 446038
+        assert store.nbytes() == 446038
 
 
-def test_bytes_stored_compression(store):
+def test_size_smaller_with_compression(store):
     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
     original_size = datapath.stat().st_size
     compressor = numcodecs.Blosc(cname="zstd", clevel=5, shuffle=numcodecs.Blosc.SHUFFLE)
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds, compressor=compressor)
-        assert store.bytes_stored() == 294552
+        assert store.nbytes() == 294552
 
-        assert store.bytes_stored() < original_size
+        assert store.nbytes() < original_size
 
 
 def test_delete_version(store):
@@ -156,7 +156,7 @@ def test_copy_actually_copies(store):
     assert np.sum(np.isnan(ds_2.mf.values))
 
     store.add(version="v0", dataset=data_a)
-    # If we call compute and load everything into memory before deleting the 
+    # If we call compute and load everything into memory before deleting the
     # data from disk then it works
     ds_a_from_store = store.get(version="v0")
     ds_a_from_store = ds_a_from_store.compute()

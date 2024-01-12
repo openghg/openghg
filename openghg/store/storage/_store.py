@@ -73,6 +73,6 @@ class Store(ABC):
         pass
 
     @abstractmethod
-    def bytes_stored(self) -> int:
+    def nbytes(self) -> int:
         """Return the number of bytes stored in the zarr store"""
         pass

@@ -154,6 +154,11 @@ def test_get_store_size(data, bucket):
 
     assert d.store_size() == 9897
 
+    assert d.store_size(version="v0")
+
+    with pytest.raises(ValueError):
+        d.store_size(version="spam")
+
     d._store._stores.clear()
 
     assert d.store_size() == 0

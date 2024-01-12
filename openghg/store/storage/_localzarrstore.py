@@ -13,8 +13,8 @@ import shutil
 
 from openghg.types import ZarrStoreError
 from pathlib import Path
-from openghg.objectstore import get_folder_size
 from openghg.store.storage import Store
+from openghg.util import get_folder_size
 
 logger = logging.getLogger("openghg.store.base")
 logger.setLevel(logging.DEBUG)
@@ -105,24 +105,29 @@ class LocalZarrStore(Store):
         """
         return version.lower() in self._stores
 
-    def size(self, version: Optional[str] = None) -> int:
-        """Get the size of a version of the zarr store
+    def nbytes(self, version: Optional[str] = None) -> int:
+        """Get the size in bytes of a version of the zarr store
 
         Args:
             version: Version e.g. v0, v1
         Returns:
             int: Size of version in bytes
         """
-        from openghg.util import get_folder_size
-
         if self.empty():
             return 0
+
+        if version is not None and version not in self._stores:
+            raise ValueError(f"Invalid version - {version}")
 
         if version is None:
             version = "v0"
             path = self.store_path(version=version).parent
         else:
             path = self.store_path(version=version)
+
+        # This should exist but lets check
+        if not path.exists():
+            raise FileNotFoundError(f"Path {path} does not exist")
 
         return get_folder_size(path=path)
 
@@ -312,15 +317,3 @@ class LocalZarrStore(Store):
 
         self.delete_version(version=version)
         self.add(version=version, dataset=dataset, compressor=compressor, filters=filters)
-
-    def bytes_stored(self) -> int:
-        """Return the number of bytes stored in the zarr store
-
-        Returns:
-            int: Number of bytes stored in zarr store
-        """
-        bytes_stored = 0
-        for version in self._stores:
-            bytes_stored += get_folder_size(folder_path=self.store_path(version=version))
-
-        return bytes_stored

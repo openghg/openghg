@@ -78,12 +78,13 @@ class Datasource:
             self.save()
 
     def store_size(self, version: Optional[str] = None) -> int:
-        """Return the size of the zarr store associated with this Datasource
+        """Return the sizein bytes of either the data version or
+        complete zarr store associated with this Datasource
 
         Returns:
             int: Size of zarr store in bytes
         """
-        return self._store.size(version=version)
+        return self._store.nbytes(version=version)
 
     def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource
