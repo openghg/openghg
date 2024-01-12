@@ -327,9 +327,11 @@ def _retrieve_remote(
     # For this see https://stackoverflow.com/a/55335207
     search_str = r"\b(?:{})\b".format("|".join(map(re.escape, species_upper)))
     # Now filter the dataframe so we can extract the PIDS
-    # Remove ObsPack results - GJ 2023-10-11 - added as a quick fix for now
+    # We filter out any data that contains "Obspack" or "csv" in the specLabel
     filtered_sources = data_pids[
-        data_pids["specLabel"].str.contains(search_str) & ~data_pids["specLabel"].str.contains("Obspack")
+        data_pids["specLabel"].str.contains(search_str)
+        & ~data_pids["specLabel"].str.contains("Obspack")
+        & ~data_pids["specLabel"].str.contains("csv")
     ]
 
     if filtered_sources.empty:
