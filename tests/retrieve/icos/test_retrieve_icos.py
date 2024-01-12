@@ -14,7 +14,7 @@ from openghg.retrieve.icos import retrieve_atmospheric
 from openghg.util import get_logfile_path
 
 
-def test_retrieve_icos_cloud(monkeypatch, mocker):
+def test_retrieve_icos_cloud(monkeypatch, mocker, socket_disabled):
     monkeypatch.setenv("OPENGHG_HUB", "1")
     mocker.patch("openghg.cloud.call_function", return_value={"content": {"found": False}})
 
@@ -48,7 +48,7 @@ def test_retrieve_icos_cloud(monkeypatch, mocker):
     assert res == mock_obs
 
 
-def test_icos_retrieve_invalid_site(mocker, caplog):
+def test_icos_retrieve_invalid_site(mocker, caplog, socket_disabled):
     s = Station()
     s._valid = False
 
@@ -61,7 +61,23 @@ def test_icos_retrieve_invalid_site(mocker, caplog):
     assert "Please check you have passed a valid ICOS site." in caplog.text
 
 
-def test_icos_retrieve_skips_obspack_globalview(mocker, caplog):
+def test_ensure_we_have_no_network_access(socket_disabled):
+    d = retrieve_atmospheric(
+        site="BIR",
+        species="co2",
+        force_retrieval=True,
+        update_mismatch="metadata",
+        store="user",
+    )
+
+    assert d is None
+
+
+def test_icos_retrieve_skips_datalevel_1_csv_files(mocker, caplog, socket_disabled):
+    assert False
+
+
+def test_icos_retrieve_skips_obspack_globalview(mocker, caplog, socket_disabled):
     pids_csv = get_retrieval_datapath(filename="wao_pids.csv.bz2")
     pid_df = pd.read_csv(pids_csv)
 
