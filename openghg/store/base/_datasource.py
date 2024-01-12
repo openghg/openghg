@@ -1,7 +1,7 @@
 from __future__ import annotations
 from collections import defaultdict
 import warnings
-from typing import Any, cast, Dict, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import Any, cast, Dict, List, Literal, Optional, Tuple, TypeVar, Union, TYPE_CHECKING
 from types import TracebackType
 import logging
 from pandas import DataFrame, Timestamp, Timedelta
@@ -79,6 +79,14 @@ class Datasource:
             logger.error(msg=f"{exc_type}, {exc_tb}")
         else:
             self.save()
+
+    def store(self) -> LocalZarrStore:
+        """Return the LocalZarrStore associated with this Datasource
+
+        Returns:
+            LocalZarrStore: LocalZarrStore object
+        """
+        return self._store
 
     def start_date(self) -> Timestamp:
         """Returns the starting datetime for the data in this Datasource
