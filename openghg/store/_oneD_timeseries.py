@@ -28,6 +28,30 @@ class OneDTtimeseries(BaseStore):
     """ _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"""
+    
+    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
+        """Ready a footprint from binary data
+
+        Args:
+            binary_data: Footprint data
+            metadata: Dictionary of metadata
+            file_metadat: File metadata
+        Returns:
+            dict: UUIDs of Datasources data has been assigned to
+        """
+        with TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+
+            try:
+                filename = file_metadata["filename"]
+            except KeyError:
+                raise KeyError("We require a filename key for metadata read.")
+
+            filepath = tmpdir_path.joinpath(filename)
+            filepath.write_bytes(binary_data)
+
+            return self.read_file(filepath=filepath, **metadata)
+
 
     def read_file(
         self,
