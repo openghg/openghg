@@ -200,9 +200,7 @@ class OneDTtimeseries(BaseStore):
         """
         from openghg.store import DataSchema
 
-        data_vars: Dict[str, Tuple[str, ...]] = {
-            "Yobs": ("time", "")
-        }
+        data_vars: Dict[str, Tuple[str, ...]] = {"Yobs": ("time", "")}
         dtypes = {
             "time": np.datetime64,
             "Yobs": np.floating,
