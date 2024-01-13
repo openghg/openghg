@@ -17,6 +17,7 @@ __all__ = ["OneDTtimeseries"]
 logger = logging.getLogger("openghg.store")
 logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
+
 class OneDTtimeseries(BaseStore):
     """This class is used to process ond dimension timeseries data"""
 
@@ -27,7 +28,7 @@ class OneDTtimeseries(BaseStore):
     """ _root = "BoundaryConditions"
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"""
-    
+
     def read_file(
         self,
         filepath: Union[str, Path],
