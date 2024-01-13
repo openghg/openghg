@@ -99,19 +99,19 @@ class OneDTtimeseries(BaseStore):
             )
             return {}
 
-        oneD_data = open_dataset(filepath)
+        oned_data = open_dataset(filepath)
 
         # Some attributes are numpy types we can't serialise to JSON so convert them
         # to their native types here
         attrs = {}
-        for key, value in oneD_data.attrs.items():
+        for key, value in oned_data.attrs.items():
             try:
                 attrs[key] = value.item()
             except AttributeError:
                 attrs[key] = value
 
         author_name = "OpenGHG Cloud"
-        oneD_data.attrs["author"] = author_name
+        oned_data.attrs["author"] = author_name
 
         metadata = {}
         metadata.update(attrs)
@@ -122,18 +122,18 @@ class OneDTtimeseries(BaseStore):
         metadata["processed"] = str(timestamp_now())
 
         # Check if time has 0-dimensions and, if so, expand this so time is 1D
-        if "time" in oneD_data.coords:
-            oneD_data = update_zero_dim(oneD_data, dim="time")
+        if "time" in oned_data.coords:
+            oned_data = update_zero_dim(oned_data, dim="time")
 
         # Currently ACRG boundary conditions are split by month or year
-        oneD_time = oneD_data["time"]
+        oneD_time = oned_data["time"]
 
         start_date, end_date, period_str = infer_date_range(
             oneD_time, filepath=filepath, period=period, continuous=continuous
         )
 
         # Checking against expected format for boundary conditions
-        OneDTtimeseries.validate_data(oneD_data)
+        OneDTtimeseries.validate_data(oned_data)
         data_type = "1d_timeseries"
 
         metadata["start_date"] = str(start_date)
@@ -147,7 +147,7 @@ class OneDTtimeseries(BaseStore):
         key = "_".join((species, domain))
 
         oneD_data: DefaultDict[str, Dict[str, Union[Dict, Dataset]]] = defaultdict(dict)
-        oneD_data[key]["data"] = oneD_data
+        oneD_data[key]["data"] = oned_data
         oneD_data[key]["metadata"] = metadata
 
         required_keys = ("species", "domain")
