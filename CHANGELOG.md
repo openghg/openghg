@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
 
+### Fixed
+
+- Bug fix for conversion of species parameter inside get_obs_surface_local. [PR #871](https://github.com/openghg/openghg/pull/871)
+
 ## [0.7.0] - 2023-12-15
 
 ### Added
