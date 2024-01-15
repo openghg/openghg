@@ -19,7 +19,7 @@ def find_files(
         data_path: Folder path to search
         skip_str: String or list of strings, if found in filename these files are skipped
     Returns:
-        list: List of tuples
+        list: Sorted list of filepaths
     """
     import re
     from pathlib import Path
@@ -189,6 +189,7 @@ def _read_data(
     from pandas import Series
     from pandas import Timedelta as pd_Timedelta
     from openghg.standardise.meta import define_species_label
+    from openghg.util import load_internal_json
 
 
     # Extract the species name from the filename. This is the bit after the final underscore but before the .nc
@@ -236,7 +237,23 @@ def _read_data(
     units = {}
     scale = {}
 
-    units[species]=dataset.units
+    # this is a horrible bit of code but it should work. But it can't pick out
+    # if there are multiple names for the units (e.g. ppt vs pmol mol-1). Currently
+    # just picks out the first one. 
+
+    species_attributes = load_internal_json(filename="attributes.json")
+    if dataset.units in species_attributes['unit_interpret'].values():
+        for key, value in species_attributes['unit_interpret'].items():
+            if dataset.units == value:
+                units[species] = key
+                break
+    else:
+        units[species] = dataset.units
+    
+    # this line just copies over Matt's units, which are 1e-12-format. 
+    
+    # units[species] = dataset.units
+
     scale[species]=dataset.calibration_scale
 
     # These .nc files do not have flags attached to them. 
