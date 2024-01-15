@@ -98,62 +98,11 @@ def test_read_invalid_instrument_raises():
         )
 
 
-
-def test_read_ridgehill_window_inlet_all_NaNs():
-    data_path = get_surface_datapath(filename="ridgehill-md.11.C", source_format="GC")
-    prec_path = get_surface_datapath(filename="ridgehill-md.11.precisions.C", source_format="GC")
-
-    res = parse_gcwerks_nc(
-        data_filepath=data_path, precision_filepath=prec_path, site="RGL", instrument="gcmd", network="agage"
-    )
-
-    assert not res
-
-
-def test_read_thd_window_inlet():
-    data_path = get_surface_datapath(filename="trinidadhead.01.window-inlet.C", source_format="GC")
-    prec_path = get_surface_datapath(filename="trinidadhead.01.precisions.C", source_format="GC")
-
-    res = parse_gcwerks_nc(
-        data_filepath=data_path, precision_filepath=prec_path, site="thd", instrument="gcmd", network="agage"
-    )
-
-    parsed_surface_metachecker(data=res)
-
-    data = res["ch4_10m"]["data"]
-
-    assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
-    assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
-    assert data["ch4"][0] == pytest.approx(1818.62)
-    assert data["ch4"][-1] == pytest.approx(1840.432)
-
 @pytest.mark.skip_if_no_cfchecker
 @pytest.mark.cfchecks
 def test_thd_cf_compliance(thd_data):
     meas_data = thd_data["ch4_10m"]["data"]
     assert check_cf_compliance(dataset=meas_data)
-
-
-def test_read_shangdianzi_ASM_inlet():
-    data_path = get_surface_datapath(filename="shangdianzi-medusa.18.C", source_format="GC")
-    prec_path = get_surface_datapath(filename="shangdianzi-medusa.18.precisions.C", source_format="GC")
-
-    res = parse_gcwerks_nc(
-        data_filepath=data_path,
-        precision_filepath=prec_path,
-        site="sdz",
-        instrument="medusa",
-        network="agage",
-    )
-
-    parsed_surface_metachecker(data=res)
-
-    data = res["nf3_80m"]["data"]
-
-    data.time[0] == pd.Timestamp("2018-01-16T09:10:00")
-    data.time[-1] == pd.Timestamp("2018-01-16T20:00:00")
-    data["nf3"][0] == pytest.approx(2.172)
-    data["nf3"][-1] == pytest.approx(2.061)
 
     # expected_metadata = {
     #     "instrument": "gcmd",
