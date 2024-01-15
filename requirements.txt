@@ -3,24 +3,26 @@ dask
 h5netcdf
 icoscp
 ipywidgets
-scitools-iris
 matplotlib
 msgpack
-netcdf4
 nbformat
+nc-time-axis
+netcdf4
+numcodecs
 numexpr
 numpy
-nc-time-axis
+openghg_defs
 pandas < 2.0
 plotly
 pyvis
 rapidfuzz
 requests >= 2.25
+rich
+rich
 scipy
+scitools-iris
 tinydb
 toml
-rich
-xarray
 urllib3 >= 1.26.3
-openghg_defs
-rich
+xarray
+zarr
