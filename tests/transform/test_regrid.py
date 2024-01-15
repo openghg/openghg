@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import xarray as xr
-from openghg.transform import regrid_uniform_cc
+from openghg.transform import regrid_uniform_cc, regrid_2d
 
 
 @pytest.fixture()
@@ -131,8 +131,8 @@ def test_regrid_uneven_lat_lon(grid_da):
     dlat = lat_in.diff(dim="lat").mean()
     dlon = lon_in.diff(dim="lon").mean()
 
-    lat_out = np.arange(lat_in.min(), lat_in.max(), dlat*2.0)
-    lon_out = np.arange(lon_in.min(), lon_in.max(), dlon*1.5)
+    lat_out = np.arange(lat_in.min(), lat_in.max(), dlat * 2.0)
+    lon_out = np.arange(lon_in.min(), lon_in.max(), dlon * 1.5)
 
     out = regrid_uniform_cc(grid_da, lat_out, lon_out)
     data = out.data
@@ -168,3 +168,25 @@ def test_unmatched_size_array(grid_da, grid_out):
 
     with pytest.raises(ValueError) as e_info:
         regrid_uniform_cc(grid, lat_out, lon_out, lat_in_wrong, lon_in)
+
+
+def test_regrid_2d():
+    """Test that regridding a grid with twice as many lat and lon coords
+    as the EUROPE grid results in regridded data that preserves the area weighted sum.
+    """
+    # grid with twice the lat/lon density of EUROPE domain
+    lat_incr = 0.234
+    lon_incr = 0.352
+    lat = np.arange(10.729, 79.057 + lat_incr / 2, lat_incr / 2)
+    lon = np.arange(-97.900, 39.380 + lon_incr / 2, lon_incr / 2)
+    data = np.ones((len(lat), len(lon)))
+    grid = xr.DataArray(data, coords={"lat": lat, "lon": lon}, dims=("lat", "lon"))
+
+    result = regrid_2d(grid)
+
+    # the sum of the regridded values should be roughly 1/4 of the original, since the
+    # original values were constant and the regridded regions have roughly 4x the area.
+    rel_error = np.abs(4 * np.nansum(result.flux.values) - len(lat) * len(lon)) / (
+        len(lat) * len(lon)
+    )
+    assert rel_error < 0.01

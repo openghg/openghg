@@ -602,8 +602,10 @@ def standardise_flux(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    source_format: str = "openghg",
 ) -> Dict:
     """Process flux / emissions data
+
 
     Args:
         filepath: Path of flux / emissions file
@@ -634,6 +636,7 @@ def standardise_flux(
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
         filters: Filters to apply to the data on storage, this defaults to no filtering. See
             https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+        source_format: format of raw data file (e.g. "openghg" or "edgar")
     returns:
         dict: Dictionary of Datasource UUIDs data assigned to
     """
@@ -691,6 +694,7 @@ def standardise_flux(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            source_format=source_format,
         )
 
 

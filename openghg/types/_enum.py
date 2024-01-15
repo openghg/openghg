@@ -37,6 +37,7 @@ class FluxTypes(Enum):
     """For standardising flux/emissions inputs"""
 
     OPENGHG = "OPENGHG"
+    EDGAR = "EDGAR"
 
 
 class FluxDatabases(Enum):

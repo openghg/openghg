@@ -3,6 +3,7 @@ dask
 h5netcdf
 icoscp
 ipywidgets
+scitools-iris
 matplotlib
 msgpack
 netcdf4

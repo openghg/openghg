@@ -1,19 +1,27 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Callable, Dict, Literal, Optional, Union
+
+import numpy as np
+from openghg.transform import regrid_2d
+import pandas as pd
+import xarray as xr
 
 
-def parse_openghg(
+chunk_type = Union[int, Dict, Literal["auto"]]
+
+
+def _parse_generic(
     filepath: Path,
     species: str,
     source: str,
     domain: str,
     data_type: str,
+    raw_file_hook: Callable[[Path], xr.Dataset],
     database: Optional[str] = None,
     database_version: Optional[str] = None,
     model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
     continuous: bool = True,
 ) -> Dict:
     """
@@ -29,9 +37,8 @@ def parse_openghg(
     from openghg.standardise.meta import assign_flux_attributes
     from openghg.store import infer_date_range, update_zero_dim
     from openghg.util import timestamp_now
-    from xarray import open_dataset
 
-    em_data = open_dataset(filepath, chunks=chunks)
+    em_data = raw_file_hook(filepath)
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -41,6 +48,11 @@ def parse_openghg(
             attrs[key] = value.item()
         except AttributeError:
             attrs[key] = value
+        except ValueError:
+            if isinstance(value, np.ndarray):
+                attrs[key] = value.tolist()
+            else:
+                raise
 
     author_name = "OpenGHG Cloud"
     em_data.attrs["author"] = author_name
@@ -52,7 +64,11 @@ def parse_openghg(
     metadata["domain"] = domain
     metadata["source"] = source
 
-    optional_keywords = {"database": database, "database_version": database_version, "model": model}
+    optional_keywords = {
+        "database": database,
+        "database_version": database_version,
+        "model": model,
+    }
     for key, value in optional_keywords.items():
         if value is not None:
             metadata[key] = value
@@ -99,3 +115,122 @@ def parse_openghg(
     flux_data = assign_flux_attributes(flux_data)
 
     return flux_data
+
+
+def parse_openghg(
+    filepath: Path,
+    species: str,
+    source: str,
+    domain: str,
+    data_type: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
+    high_time_resolution: Optional[bool] = False,
+    period: Optional[Union[str, tuple]] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    continuous: bool = True,
+) -> Dict:
+    """
+    Read and parse input emissions data already in OpenGHG format.
+
+    Args:
+        filepath: Path to data file
+        chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
+        Passing "auto" will ask xarray to calculate a chunk size.
+    Returns:
+        dict: Dictionary of data
+    """
+
+    def raw_file_hook(filepath: Path) -> xr.Dataset:
+        return xr.open_dataset(filepath, chunks=chunks)
+
+    return _parse_generic(
+        filepath=filepath,
+        species=species,
+        source=source,
+        domain=domain,
+        raw_file_hook=raw_file_hook,
+        data_type=data_type,
+        database=database,
+        database_version=database_version,
+        model=model,
+        high_time_resolution=high_time_resolution,
+        period=period,
+        continuous=continuous,
+    )
+
+
+def parse_edgar(
+    filepath: Path,
+    species: str,
+    source: str,
+    domain: str,
+    data_type: str,
+    database: Optional[str] = None,
+    database_version: Optional[str] = None,
+    model: Optional[str] = None,
+    high_time_resolution: Optional[bool] = False,
+    period: Optional[Union[str, tuple]] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    continuous: bool = True,
+    year: Optional[str] = None,
+    flux_data_var: str = "fluxes",
+) -> Dict:
+    """
+    Read and parse input emissions data downloaded from EDGAR in netCDF format.
+
+    The expected units are kg / (m^2 s). For v8.0, these are the "flx" files from
+    the EDGAR website (not the "emi" files).
+
+    Args:
+        filepath: Path to data file
+        chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
+            Passing "auto" will ask xarray to calculate a chunk size.
+    Returns:
+        dict: Dictionary of data
+    """
+    import re
+    from openghg.standardise.meta import define_species_label
+    from openghg.util import molar_mass
+
+    def raw_file_hook(filepath: Path) -> xr.Dataset:
+        raw_data = xr.open_dataset(filepath, chunks=chunks)
+        regridded_data = regrid_2d(raw_data.fluxes, in_data_var=flux_data_var, domain=domain)
+
+        nonlocal year  # need to specify that we want `year` from `parse_edgar`
+        if year is None:
+            try:
+                year = raw_data[flux_data_var].attrs["year"]
+            except KeyError:
+                match = re.search(r"[0-9]{4}", filepath.name)
+                if match:
+                    year = match.group(0)
+                else:
+                    raise ValueError("Could not infer year, please specify the year explicitly.")
+
+        regridded_data = regridded_data.expand_dims({"time": [pd.to_datetime(year)]}, axis=2)
+
+        # convert kg/m^2/s to mol/m^2/s
+        kg_to_g = 1e3
+        species_name = define_species_label(species, filepath)[0]
+        species_molar_mass = molar_mass(species_name)
+        regridded_data[flux_data_var] = regridded_data[flux_data_var] * kg_to_g / species_molar_mass
+        regridded_data[flux_data_var].attrs["units"] = "mol/m2/s"
+
+        return regridded_data.rename_vars({flux_data_var: "flux"})
+
+    return _parse_generic(
+        filepath=filepath,
+        species=species,
+        source=source,
+        domain=domain,
+        raw_file_hook=raw_file_hook,
+        data_type=data_type,
+        database=database,
+        database_version=database_version,
+        model=model,
+        high_time_resolution=high_time_resolution,
+        period=period,
+        continuous=continuous,
+    )
