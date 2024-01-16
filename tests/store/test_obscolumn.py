@@ -1,8 +1,7 @@
 import numpy as np
-import xarray as xr
 from helpers import get_column_datapath
-from openghg.standardise import standardise_column
 from openghg.objectstore import get_bucket
+from openghg.standardise import standardise_column
 from openghg.store.base import Datasource
 from pandas import Timestamp
 
@@ -21,13 +20,14 @@ def test_read_openghg_format():
     species = "methane"
 
     bucket = get_bucket()
-    results = standardise_column(store="user",
-                                 filepath=datafile,
-                                 source_format="OPENGHG",
-                                 satellite=satellite,
-                                 domain=domain,
-                                 species=species,
-                                 )
+    results = standardise_column(
+        store="user",
+        filepath=datafile,
+        source_format="OPENGHG",
+        satellite=satellite,
+        domain=domain,
+        species=species,
+    )
 
     # Output style from ObsSurface - may want to use for ObsColumn as well
     # uuid = results["processed"][filename]["ch4"]["uuid"]

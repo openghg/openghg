@@ -1,9 +1,9 @@
 import pytest
 from helpers import get_footprint_datapath
 from openghg.retrieve import search
+from openghg.standardise import standardise_footprint, standardise_from_binary_data
 from openghg.store import Footprints
 from openghg.util import hash_bytes
-from openghg.standardise import standardise_footprint, standardise_from_binary_data
 import xarray as xr
 from pathlib import Path
 

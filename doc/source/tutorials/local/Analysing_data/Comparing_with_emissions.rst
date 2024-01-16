@@ -36,6 +36,8 @@ Omit this step if you want to analyse data in your local object store.
 
 We begin by adding observation, footprint, flux, and (optionally)
 boundary conditions data to the object store.
+See :ref:`Adding ancillary spatial data <Adding ancillary spatial data>` for more details
+on these inputs.
 This data relates to Tacolneston (TAC) site within the DECC
 network and the area around Europe (EUROPE domain).
 

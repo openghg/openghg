@@ -148,7 +148,8 @@ class DataManager:
         to_delete: Union[str, List, None] = None,
     ) -> None:
         """Update the metadata associated with data. This takes UUIDs of Datasources and updates
-        the associated metadata. If you want to delete some metadata
+        the associated metadata. To update metadata pass in a dictionary of key/value pairs to update.
+        To delete metadata pass in a list of keys to delete.
 
         Args:
             uuid: UUID(s) of Datasources to be updated.

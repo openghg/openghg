@@ -9,7 +9,7 @@ import pytest
 import xarray as xr
 from addict import Dict as aDict
 from helpers import get_surface_datapath, get_footprint_datapath
-from openghg.objectstore import get_bucket, get_object_names, delete_object, get_writable_bucket, exists
+from openghg.objectstore import get_bucket, exists
 from openghg.standardise.surface import parse_crds
 from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
@@ -497,6 +497,7 @@ def test_surface_data_stored_and_dated_correctly(data, bucket):
     assert timestamp_tzaware(start) == timestamp_tzaware("2014-01-30 11:12:30+00:00")
     assert timestamp_tzaware(stored_ds["ch4"].time[-1].values) == timestamp_tzaware("2020-12-01T22:31:30")
     assert timestamp_tzaware(end) == timestamp_tzaware("2020-12-01 22:32:29")
+
 
 def test_to_memory_store(data, bucket):
     d = Datasource(bucket=bucket)

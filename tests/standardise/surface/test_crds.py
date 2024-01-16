@@ -29,7 +29,6 @@ def test_file_with_dupes_doesnt_raise():
     parse_crds(data_filepath=dupe_file, site="bsd", inlet="42m", network="DECC", drop_duplicates=True)
 
 
-
 def test_read_file_wrong_sampling_period_raises():
     hfd_filepath = get_surface_datapath(filename="hfd.picarro.1minute.100m.min.dat", source_format="CRDS")
 

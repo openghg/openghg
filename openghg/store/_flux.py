@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging
+import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Literal, Optional, Tuple, Union
@@ -170,11 +171,28 @@ class Flux(BaseStore):
             "chunks": chunks,
         }
 
-        optional_keywords = {"database": database, "database_version": database_version, "model": model}
+        optional_keywords: dict[Any, Any] = {
+            "database": database,
+            "database_version": database_version,
+            "model": model,
+        }
 
-        param.update(optional_keywords)
+        signature = inspect.signature(parser_fn)
+        fn_accepted_parameters = [param.name for param in signature.parameters.values()]
 
-        flux_data = parser_fn(**param)
+        input_parameters: dict[Any, Any] = param.copy()
+
+        # Checks if optional parameters are present in function call and includes them else ignores its inclusion in input_parameters.
+        for param, param_value in optional_keywords.items():
+            if param in fn_accepted_parameters:
+                input_parameters[param] = param_value
+            else:
+                logger.warning(
+                    f"Input: '{param}' (value: {param_value}) is not being used as part of the standardisation process."
+                    f"This is not accepted by the current standardisation function: {parser_fn}"
+                )
+
+        flux_data = parser_fn(**input_parameters)
 
         # Checking against expected format for Flux
         for split_data in flux_data.values():
