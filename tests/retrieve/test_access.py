@@ -5,9 +5,16 @@ import pandas as pd
 import pytest
 from helpers import call_function_packager
 from openghg.dataobjects import ObsData
-from openghg.retrieve import get_flux, get_bc, get_footprint, get_obs_column, get_obs_surface, search
-from openghg.util import compress, compress_str, hash_bytes
+from openghg.retrieve import (
+    get_bc,
+    get_flux,
+    get_footprint,
+    get_obs_column,
+    get_obs_surface,
+    search,
+)
 from openghg.types import SearchError
+from openghg.util import compress, compress_str, hash_bytes
 from pandas import Timedelta, Timestamp
 
 # a = [
@@ -59,7 +66,6 @@ def test_get_obs_surface_average_works_without_longname():
     ],
 )
 def test_get_obs_surface(inlet_keyword, inlet_value):
-
     if inlet_keyword == "inlet":
         obsdata = get_obs_surface(site="bsd", species="co2", inlet=inlet_value)
     elif inlet_keyword == "height":

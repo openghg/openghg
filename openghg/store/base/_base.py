@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
 from pandas import Timestamp
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
-from openghg.objectstore.metastore import ClassicMetaStore
+from openghg.objectstore.metastore import DataClassMetaStore
 from openghg.types import DatasourceLookupError
 from openghg.util import timestamp_now, to_lowercase
 
@@ -43,7 +43,7 @@ class BaseStore:
             # Update myself
             self.__dict__.update(data)
 
-        self._metastore = ClassicMetaStore.from_bucket(bucket=bucket, data_type=self._data_type)
+        self._metastore = DataClassMetaStore(bucket=bucket, data_type=self._data_type)
         self._bucket = bucket
         self._datasource_uuids = self._metastore.select("uuid")
 
@@ -128,71 +128,79 @@ class BaseStore:
 
         uuids = {}
 
-        lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
-        # TODO - remove this when the lowercasing of metadata gets removed
-        # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
-        skip_keys = ["object_store"]
+        self._metastore.acquire_lock()
+        try:
+            lookup_results = self.datasource_lookup(data=data, required_keys=required_keys, min_keys=min_keys)
+            # TODO - remove this when the lowercasing of metadata gets removed
+            # We currently lowercase all the metadata and some keys we don't want to change, such as paths to the object store
+            skip_keys = ["object_store"]
 
-        for key, parsed_data in data.items():
-            metadata = parsed_data["metadata"]
-            _data = parsed_data["data"]
+            for key, parsed_data in data.items():
+                metadata = parsed_data["metadata"]
+                _data = parsed_data["data"]
 
-            # Our lookup results and gas data have the same keys
-            uuid = lookup_results[key]
+                # Our lookup results and gas data have the same keys
+                uuid = lookup_results[key]
 
-            # Add the read metadata to the Dataset attributes being careful
-            # not to overwrite any attributes that are already there
-            def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
-                """Attributes in a netCDF file can be strings, numbers, or sequences:
-                http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
+                # Add the read metadata to the Dataset attributes being careful
+                # not to overwrite any attributes that are already there
+                def convert_to_netcdf4_types(value: Any) -> Union[int, float, str, list]:
+                    """Attributes in a netCDF file can be strings, numbers, or sequences:
+                    http://unidata.github.io/netcdf4-python/#attributes-in-a-netcdf-file
 
-                This function converts any data whose type is not int, float, str, or list
-                to strings.
-                Booleans are converted to strings, even though they are a subtype of int.
-                """
-                if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
-                    return value
+                    This function converts any data whose type is not int, float, str, or list
+                    to strings.
+                    Booleans are converted to strings, even though they are a subtype of int.
+                    """
+                    if isinstance(value, (int, float, str, list)) and not isinstance(value, bool):
+                        return value
+                    else:
+                        return str(value)
+
+                to_add = {k: convert_to_netcdf4_types(v) for k, v in metadata.items() if k not in _data.attrs}
+                _data.attrs.update(to_add)
+
+                # If we have a UUID for this Datasource load the existing object
+                # from the object store
+                # If we haven't stored data with this metadata before we create a new Datasource
+                # and add the metadata to our metastore
+
+                # Take a copy of the metadata so we can update it
+                meta_copy = metadata.copy()
+                new_ds = uuid is False
+
+                if new_ds:
+                    datasource = Datasource()
+                    uid = datasource.uuid()
+                    meta_copy["uuid"] = uid
+                    # Make sure all the metadata is lowercase for easier searching later
+                    # TODO - do we want to do this or should be just perform lowercase comparisons?
+                    meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
                 else:
-                    return str(value)
+                    datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
 
-            to_add = {k: convert_to_netcdf4_types(v) for k, v in metadata.items() if k not in _data.attrs}
-            _data.attrs.update(to_add)
+                # Add the dataframe to the datasource
+                datasource.add_data(
+                    metadata=meta_copy,
+                    data=_data,
+                    skip_keys=skip_keys,
+                    if_exists=if_exists,
+                    data_type=data_type,
+                )
+                # Save Datasource to object store
+                datasource.save(bucket=self._bucket, new_version=new_version)
 
-            # If we have a UUID for this Datasource load the existing object
-            # from the object store
-            # If we haven't stored data with this metadata before we create a new Datasource
-            # and add the metadata to our metastore
+                # Add the metadata to the metastore and make sure it's up to date with the metadata stored
+                # in the Datasource
+                datasource_metadata = datasource.metadata()
+                if new_ds:
+                    self._metastore.insert(datasource_metadata)
+                else:
+                    self._metastore.update(where={"uuid": datasource.uuid()}, to_update=datasource_metadata)
 
-            # Take a copy of the metadata so we can update it
-            meta_copy = metadata.copy()
-            new_ds = uuid is False
-
-            if new_ds:
-                datasource = Datasource()
-                uid = datasource.uuid()
-                meta_copy["uuid"] = uid
-                # Make sure all the metadata is lowercase for easier searching later
-                # TODO - do we want to do this or should be just perform lowercase comparisons?
-                meta_copy = to_lowercase(d=meta_copy, skip_keys=skip_keys)
-            else:
-                datasource = Datasource.load(bucket=self._bucket, uuid=uuid)
-
-            # Add the dataframe to the datasource
-            datasource.add_data(
-                metadata=meta_copy, data=_data, skip_keys=skip_keys, if_exists=if_exists, data_type=data_type
-            )
-            # Save Datasource to object store
-            datasource.save(bucket=self._bucket, new_version=new_version)
-
-            # Add the metadata to the metastore and make sure it's up to date with the metadata stored
-            # in the Datasource
-            datasource_metadata = datasource.metadata()
-            if new_ds:
-                self._metastore.insert(datasource_metadata)
-            else:
-                self._metastore.update(where={"uuid": datasource.uuid()}, to_update=datasource_metadata)
-
-            uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
+                uuids[key] = {"uuid": datasource.uuid(), "new": new_ds}
+        finally:
+            self._metastore.release_lock()
 
         return uuids
 

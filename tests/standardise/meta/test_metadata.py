@@ -128,10 +128,7 @@ def test_ensure_mismatch_raises():
         "measurement_type": "flask",
     }
 
-    attrs = {
-        "site": "sum",
-        "network": "NOAA",
-        "measurement_type": "swallow-carrying-a-flask"}
+    attrs = {"site": "sum", "network": "NOAA", "measurement_type": "swallow-carrying-a-flask"}
 
     with pytest.raises(AttrMismatchError):
         sync_surface_metadata(metadata, attrs)
@@ -148,12 +145,8 @@ def test_ensure_mismatch_replaced():
         "measurement_type": "flask",
     }
 
-    attrs = {
-        "site": "sum",
-        "network": "NOAA",
-        "measurement_type": "swallow-carrying-a-flask"}
+    attrs = {"site": "sum", "network": "NOAA", "measurement_type": "swallow-carrying-a-flask"}
 
     meta_new, attr_new = sync_surface_metadata(metadata, attrs, update_mismatch="attributes")
 
     assert meta_new["measurement_type"] == "swallow-carrying-a-flask"
-

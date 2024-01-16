@@ -293,6 +293,22 @@ def get_object_data_path(bucket: str, key: str) -> Path:
         raise ObjectStoreError(f"No object at key '{key}'")
 
 
+def get_object_lock_path(bucket: str, key: str) -> Path:
+    """Get path to object lock file at key in passed bucket.
+
+    Args:
+        bucket: Bucket containing data
+        key: Key for data in bucket
+    Returns:
+        Path to object lock file
+    """
+    lock_path = Path(f"{bucket}/{key}._data.lock")
+    if not lock_path.parent.exists():
+        lock_path.parent.mkdir(parents=True)
+
+    return lock_path
+
+
 def set_object(bucket: str, key: str, data: bytes) -> None:
     """Store data in bucket at key
 
