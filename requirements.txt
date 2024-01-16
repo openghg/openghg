@@ -7,12 +7,9 @@ ipywidgets
 matplotlib
 msgpack
 nbformat
-<<<<<<< HEAD
 numcodecs
-=======
 nc-time-axis
 netcdf4
->>>>>>> devel
 numexpr
 numpy
 openghg_defs
@@ -26,10 +23,5 @@ scipy
 tinydb
 toml
 urllib3 >= 1.26.3
-<<<<<<< HEAD
-openghg_defs
-rich
-zarr
-=======
 xarray
->>>>>>> devel
+zarr
