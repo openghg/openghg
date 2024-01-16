@@ -183,7 +183,7 @@ class Flux(BaseStore):
                     f"This is not accepted by the current standardisation function: {parser_fn}"
                 )
 
-        flux_data = parser_fn(**param)
+        flux_data = parser_fn(**input_parameters)
 
         # Checking against expected format for Flux
         for split_data in flux_data.values():

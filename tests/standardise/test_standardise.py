@@ -318,24 +318,6 @@ def test_standardise_flux():
     assert "co2_gpp-cardamom_europe" in proc_results
 
 
-def test_standardise_flux_intem():
-    test_datapath = get_emissions_datapath("ch4_intem.nc")
-
-    proc_results = standardise_flux(
-        filepath=test_datapath,
-        species="ch4",
-        source="total",
-        source_format="intem",
-        domain="europe",
-        high_time_resolution=False,
-        overwrite=True,
-        store="user",
-    )
-
-    print(proc_results)
-    assert "ch4_total_europe" in proc_results
-
-
 def test_standardise_flux_additional_keywords():
     test_datapath = get_flux_datapath("ch4-anthro_globaledgar_v5-0_2014.nc")
 

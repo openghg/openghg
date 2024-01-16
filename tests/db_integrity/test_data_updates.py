@@ -1,4 +1,5 @@
 import pytest
+import pandas as pd
 import numpy as np
 from helpers import get_surface_datapath, get_flux_datapath, get_footprint_datapath
 from openghg.store.base import Datasource
