@@ -82,6 +82,7 @@ class _BaseData:
                     start_date = start_date - Timedelta("1s")
                     end_date = end_date - Timedelta("1s")
 
+                    # TODO - I feel we should do this in a tider way
                     start_date = start_date.tz_localize(None)
                     end_date = end_date.tz_localize(None)
 
