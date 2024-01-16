@@ -13,6 +13,7 @@ from openghg.standardise import standardise_footprint, standardise_surface
 from openghg.store.base import Datasource
 from openghg.types import ObjectStoreError
 
+
 @pytest.fixture(autouse=True)
 def add_data(mocker):
     clear_test_stores()
@@ -145,17 +146,11 @@ def test_find_modify_metadata():
         "station_latitude": 52.51775,
         "station_long_name": "tacolneston tower, uk",
         "station_height_masl": 50.0,
-        "uuid": uuid,
+        "latest_version": "v0",
         "start_date": "2012-07-31 14:50:30+00:00",
         "end_date": "2019-06-26 15:54:29+00:00",
-        "latest_version": "v1",
+        "versions": {"v0": ["2012-07-31-14:50:30+00:00_2019-06-26-15:54:29+00:00"]},
     }
-
-    start_metadata = {'data_type': 'surface', 'site': 'tac', 'instrument': 'picarro', 'sampling_period': '60.0', 'inlet': '100m', 'port': '9', 'type': 'air', 'network': 'decc', 'species': 'co2', 'calibration_scale': 'wmo-x2019', 'long_name': 'tacolneston', 'inlet_height_magl': '100', 'data_owner': "simon o'doherty", 'data_owner_email': 's.odoherty@bristol.ac.uk', 'station_longitude': 1.13872, 'station_latitude': 52.51775, 'station_long_name': 'tacolneston tower, uk', 'station_height_masl': 50.0, 'uuid': 'b9b8f762-89c7-45f9-90ba-f3d440c96e04', 'latest_version': 'v0', 'timestamp': '2023-11-06 12:29:30.068632+00:00', 'start_date': '2012-07-31 14:50:30+00:00', 'end_date': '2019-06-26 15:54:29+00:00', 'versions': {'v0': {'keys': ['2012-07-31-14:50:30+00:00_2019-06-26-15:54:29+00:00'], 'timestamp': '2023-11-06 12:29:30.068632+00:00'}}}
-
-    print(search_res.metadata[uuid])
-
-    return
 
     assert search_res.metadata[uuid].items() >= start_metadata.items()
 
