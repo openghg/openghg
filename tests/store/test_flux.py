@@ -1,5 +1,4 @@
 import pytest
-from typing import Any, Union
 from helpers import clear_test_stores, get_flux_datapath
 from openghg.retrieve import search, search_flux
 from openghg.store import Flux
@@ -8,6 +7,7 @@ from openghg.transform import transform_flux_data
 from openghg.util import hash_bytes
 from pandas import Timestamp
 from xarray import open_dataset
+from typing import Any, Union
 
 
 @pytest.fixture
