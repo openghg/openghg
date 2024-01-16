@@ -81,6 +81,10 @@ class _BaseData:
                 if self.data.time.size > 1:
                     start_date = start_date - Timedelta("1s")
                     end_date = end_date - Timedelta("1s")
+
+                    start_date = start_date.tz_localize(None)
+                    end_date = end_date.tz_localize(None)
+
                     self.data = self.data.sel(time=slice(start_date, end_date))
         else:
             raise ValueError(
