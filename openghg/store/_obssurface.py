@@ -268,7 +268,7 @@ class ObsSurface(BaseStore):
 
             # Collect together optional parameters (not required but
             # may be accepted by underlying parser function)
-            optional_parameters = {"update_mismatch": update_mismatch}
+            optional_parameters = {"update_mismatch": update_mismatch, "calibration_scale": calibration_scale}
             # TODO: extend optional_parameters to include kwargs when added
 
             input_parameters = required_parameters.copy()
