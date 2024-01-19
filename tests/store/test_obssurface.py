@@ -999,21 +999,18 @@ def test_drop_only_correct_nan():
     assert len(rgl_co2_data["time"]) == 1
     assert np.isclose(rgl_co2_data.sel(time=time_str2)["mf"].values, 405.30)
 
-def test_passing_optional_parameters():
+def test_optional_parameters():
     """ Test to check if the optional parameters like `calibration_scale`
     are supplied to the parser functions. Can be used in future to add the 
     """
 
-    data_filepath = get_surface_datapath(filename="DECC-picarro_TAC_20120726_co2-54m-20231106.nc", source_format="OPENGHG")
+    data_filepath = get_surface_datapath(filename="tac_co2_openghg.nc",source_format="OPENGHG")
 
-    data_dict = standardise_surface(filepath=data_filepath, 
+    with pytest.raises(ValueError, match="Input for 'calibration_scale': unknown does not match value in file attributes: WMO-X2007"):
+        standardise_surface(filepath=data_filepath, 
                         source_format="OPENGHG", 
                         site="TAC", 
                         network="DECC",
-                        calibration_scale="SIO-05",
-                        instrument='NA',
-                        sampling_period="2H",
+                        calibration_scale="unknown",
+                        instrument='picarro',
                         store="group" )
-
-    print(data_dict)
-    # assert "SIO-05" in search_data.retrieve().data.attrs['calibration_scale']
