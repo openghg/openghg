@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
 
+### Fixed
+
+- Bug fix for passing calibration_scale as optional parameter to the parser function. [PR #872](https://github.com/openghg/openghg/pull/872)
+
 ## [0.7.0] - 2023-12-15
 
 ### Added
