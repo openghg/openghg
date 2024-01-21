@@ -30,10 +30,7 @@ class OneDTtimeseries(BaseStore):
     _uuid = "4e787366-be91-4fc5-ad1b-4adcb213d478"
     _metakey = f"{_root}/uuid/{_uuid}/metastore"""
 
-    def read_data(self, 
-                  binary_data: bytes,
-                  metadata: Dict, 
-                  file_metadata: Dict) -> Optional[Dict]:
+    def read_data(self, binary_data: bytes, metadata: Dict, file_metadata: Dict) -> Optional[Dict]:
         """Ready a footprint from binary data
 
         Args:
@@ -60,6 +57,7 @@ class OneDTtimeseries(BaseStore):
         self,
         filepath: Union[str, Path],
         species: str,
+        domain: str,
         model: str,
         period: Optional[Union[str, tuple]] = None,
         continuous: bool = True,
@@ -104,10 +102,10 @@ class OneDTtimeseries(BaseStore):
             )
             return {}
 
-        if filepath.endswith(".nc"):
+        if filepath.suffix.endswith(".nc"):
             oned_data = open_dataset(filepath)
-        elif filepath.endswith(".xlsx") or (".csv"):
-    # TODO: Determine the index, and values to be fetched from the csv files inorder to be converted into xarray dataset compatible for further operations
+        elif filepath.suffix.endswith(".xlsx") or (".csv"):
+            # TODO: Determine the index, and values to be fetched from the csv files inorder to be converted into xarray dataset compatible for further operations
             oned_data = pd.read_csv(filepath)
             oned_data = Dataset.from_dataframe(oned_data)
         # Some attributes are numpy types we can't serialise to JSON so convert them
