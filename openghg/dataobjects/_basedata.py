@@ -5,6 +5,10 @@ from typing import Dict, Optional, Union
 from openghg.store.storage import LocalZarrStore
 import xarray as xr
 from pandas import Timestamp, Timedelta
+import logging
+
+logger = logging.getLogger("openghg.dataobjects")
+logger.setLevel(logging.DEBUG)  # Have to set level for logger as well as handler
 
 
 class _BaseData:
@@ -16,7 +20,7 @@ class _BaseData:
         version: Optional[str] = None,
         start_date: Optional[Union[str, Timestamp]] = None,
         end_date: Optional[Union[str, Timestamp]] = None,
-        sort: bool = False,
+        sort: bool = True,
         elevate_inlet: bool = False,
         attrs_to_check: Optional[Dict] = None,
     ) -> None:
@@ -57,9 +61,6 @@ class _BaseData:
         if attrs_to_check is not None:
             raise NotImplementedError("attrs_to_check not implemented yet")
 
-        if sort:
-            raise NotImplementedError("sort not implemented yet")
-
         if data is not None:
             self.data = data
         elif uuid is not None and version is not None:
@@ -91,6 +92,12 @@ class _BaseData:
             raise ValueError(
                 "Must supply either data or uuid and version, cannot create an empty data object."
             )
+
+        if sort:
+            try:
+                self.data = self.data.sortby("time")
+            except KeyError:
+                logger.debug("Cannot sort data by time as no time dimension present")
 
     def __bool__(self) -> bool:
         return bool(self.data)

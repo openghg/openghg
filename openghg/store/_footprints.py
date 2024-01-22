@@ -333,7 +333,7 @@ class Footprints(BaseStore):
 
         # This accepts both single and multiple files
         # Using open_mfdataset handles chunks different so we have this setup
-        with xr_open_fn(filepath).reset_encoding().chunk(chunks) as fp_data:
+        with xr_open_fn(filepath).chunk("auto") as fp_data:
             if chunks:
                 logger.info(f"Rechunking with chunks={chunks}")
 
