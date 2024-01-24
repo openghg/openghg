@@ -3,17 +3,20 @@
     "instruments": {
       "gcmd": "",
       "gcms": "",
-      "medusa": ""
+      "medusa": "",
+      "combined": ""
     },
     "instruments_suffix": {
       "gcmd": ["", "-md"],
-      "gcms": ["", "-gcms"],
-      "medusa": ["-medusa"]
+      "gcms": ["", "-gcms", "-tof"],
+      "medusa": ["-medusa"],
+      "combined": ["-combined"]
     },
     "suffix_to_instrument": {
       "md": "gcmd",
       "gcms": "gcms",
-      "medusa": "medusa"
+      "medusa": "medusa",
+      "combined": "combined"
     },
     "instruments_out": {
       "gcmd": {
@@ -27,17 +30,22 @@
       },
       "medusa": {
         "else": "gcmsMedusa"
+      },
+      "combined": {
+        "else": "combined"
       }
     },
     "sampling_period": {
       "gcmd": 75,
       "gcms": 1200,
-      "medusa": 1200
+      "medusa": 1200,
+      "combined": "mixed"
     },
     "comment": {
       "gcmd": "Gas chromatograph measurements. Output from GCWerks.",
       "gcms": "Gas chromatograph-mass spectrometer measurements. Output from GCWerks.",
-      "medusa": "Medusa measurements. Output from GCWerks. See Miller et al. (2008)."
+      "medusa": "Medusa measurements. Output from GCWerks. See Miller et al. (2008).",
+      "combined": "Combined AGAGE/GAGE/ALE dataset"
     },
     "sites": {
       "ASP": {
@@ -222,6 +230,16 @@
         "global_attributes": {
           "data_owner": "Ray Weiss",
           "data_owner_email": "rfweiss@ucsd.edu"
+        }
+      },
+      "TOB" : {
+        "gcwerks_site_name": "taunus",
+        "long_name": "Taunus Observatory, Germany",
+        "inlets": ["any"],
+        "inlet_label": ["12m"],
+        "global_attributes": {
+          "data_owner": "Andreas Engel",
+          "data_owner_email": "an.engel@iau.uni-frankfurt.de"
         }
       },
       "TTA": {
