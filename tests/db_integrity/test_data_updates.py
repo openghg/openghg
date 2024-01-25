@@ -497,7 +497,7 @@ def test_metadata_update():
 
     # Set expectations for start and end date (for GC data this is altered from file details
     # based on known sampling period).
-    sampling_period = 75
+    sampling_period = 1
     sampling_period_td = pd.Timedelta(seconds=int(sampling_period))
     time_buffer = pd.Timedelta(seconds=1)  # Buffer subtracted from end to make this exclusive end.
     expected_start_1 = str(pd.Timestamp("2014-01-01T00:13", tz="utc") - sampling_period_td / 2.0)

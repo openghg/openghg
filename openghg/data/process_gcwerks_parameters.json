@@ -36,7 +36,7 @@
       }
     },
     "sampling_period": {
-      "gcmd": 75,
+      "gcmd": 1,
       "gcms": 1200,
       "medusa": 1200,
       "combined": "mixed"

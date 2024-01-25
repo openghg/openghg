@@ -22,7 +22,7 @@ def thd_data():
     gas_data = parse_gcwerks_nc(
         data_filepath=thd_path,
         site="THD",
-        instrument="medusa",
+        instrument="gcmd",
         network="agage",
     )
 
@@ -36,7 +36,7 @@ def cgo_data():
     gas_data = parse_gcwerks_nc(
         data_filepath=cgo_data,
         site="cgo",
-        instrument="gcms",
+        instrument="medusa",
         network="agage",
     )
 
@@ -62,7 +62,7 @@ def test_read_file_thd():
         site="thd",
         network="agage",
         instrument="gcmd",
-        sampling_period="75",  # Checking this can be compared successfully
+        sampling_period="1",  # Checking this can be compared successfully
     )
 
     parsed_surface_metachecker(data=gas_data)
@@ -73,8 +73,8 @@ def test_read_file_thd():
 
     meas_data = gas_data["cfc11_10m"]["data"]
 
-    assert meas_data.time[0] == pd.Timestamp("1995-09-30T17:21:22.5")
-    assert meas_data.time[-1] == pd.Timestamp("2022-12-31T23:06:22.5")
+    assert meas_data.time[0] == pd.Timestamp("1995-09-30T17:22:00")
+    assert meas_data.time[-1] == pd.Timestamp("2022-12-31T23:07:00")
 
     assert meas_data["cfc11"][0].values.item() == 267.0292663574219
     assert meas_data["cfc11"][-1] == 218.2406005859375
@@ -87,12 +87,12 @@ def test_gc_thd_cf_compliance(thd_data):
 
 
 def test_read_invalid_instrument_raises():
-    thd_path = get_surface_datapath(filename="trinidadhead.01.C", source_format="GC")
+    thd_path = get_surface_datapath(filename="AGAGE-GCMD_THD_cfc-11.nc", source_format="GC_nc")
 
     with pytest.raises(ValueError):
         parse_gcwerks_nc(
             data_filepath=thd_path,
-            site="CGO",
+            site="THD",
             instrument="fish",
             network="agage",
         )

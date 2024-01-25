@@ -18,7 +18,7 @@ def thd_data():
         data_filepath=thd_path,
         precision_filepath=thd_prec_path,
         site="THD",
-        instrument="medusa",
+        instrument="gcmd",
         network="agage",
     )
 
@@ -74,7 +74,7 @@ def test_read_file_thd():
         site="thd",
         network="agage",
         instrument="gcmd",
-        sampling_period="75",  # Checking this can be compared successfully
+        sampling_period="1",  # Checking this can be compared successfully
     )
 
     parsed_surface_metachecker(data=gas_data)
@@ -94,8 +94,8 @@ def test_read_file_thd():
 
     meas_data = gas_data["ch3ccl3_10m"]["data"]
 
-    assert meas_data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
-    assert meas_data.time[-1] == pd.Timestamp("2001-12-31T23:18:22.5")
+    assert meas_data.time[0] == pd.Timestamp("2001-01-01T01:05:59.5")
+    assert meas_data.time[-1] == pd.Timestamp("2001-12-31T23:18:59.5")
 
     assert meas_data["ch3ccl3"][0] == 41.537
     assert meas_data["ch3ccl3"][-1] == 34.649
@@ -154,8 +154,8 @@ def test_read_thd_window_inlet():
 
     data = res["ch4_10m"]["data"]
 
-    assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
-    assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
+    assert data.time[0] == pd.Timestamp("2001-01-01T01:05:59.5")
+    assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:59.5")
     assert data["ch4"][0] == pytest.approx(1818.62)
     assert data["ch4"][-1] == pytest.approx(1840.432)
 
@@ -203,7 +203,7 @@ def test_read_shangdianzi_ASM_inlet():
 
     # data = res["ch4_10m"]["data"]
 
-    # assert data.time[0] == pd.Timestamp("2001-01-01T01:05:22.5")
-    # assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:22.5")
+    # assert data.time[0] == pd.Timestamp("2001-01-01T01:05:59.5")
+    # assert data.time[-1] == pd.Timestamp("2001-01-01T10:25:59.5")
     # assert data["ch4"][0] == pytest.approx(1818.62)
     # assert data["ch4"][-1] == pytest.approx(1840.432)

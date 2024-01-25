@@ -262,7 +262,7 @@ def test_timeslice_slices_correctly_exclusive():
 
     sliced_mhd_data = timeslice_data.data
 
-    sampling_period = Timedelta(75, unit="seconds")
+    sampling_period = Timedelta(1, unit="seconds")
 
     assert sliced_mhd_data.time[0] == (Timestamp("2012-01-11T00:13") - sampling_period / 2.0)
     assert sliced_mhd_data.time[-1] == (Timestamp("2012-02-04T23:47") - sampling_period / 2.0)
