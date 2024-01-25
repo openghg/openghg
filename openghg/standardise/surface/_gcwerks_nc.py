@@ -143,9 +143,8 @@ def _check_instrument(filepath: Path, gc_params: Dict, should_raise: bool = Fals
     Returns:
         str: Instrument name
     """
-    from re import findall
 
-    instrument: str = findall(r"[\w']+", str(filepath.name))[1].lower()
+    instrument: str = filepath.name.split("_")[0].split("-", 1)[1].lower()
     try:
         if instrument in gc_params["instruments"]:
             return instrument
@@ -188,8 +187,10 @@ def _read_data(
     """
     from pandas import Series
     from pandas import Timedelta as pd_Timedelta
+    from pandas import to_timedelta as pd_to_timedelta
     from openghg.standardise.meta import define_species_label
     from openghg.util import load_internal_json
+    from numpy import floor
 
 
     # Extract the species name from the filename. This is the bit after the final underscore but before the .nc
@@ -265,7 +266,10 @@ def _read_data(
         )
 
     # Apply timestamp correction, because GCwerks currently outputs the centre of the sampling period
-    data["new_time"] = data.index - pd_Timedelta(seconds=int(metadata["sampling_period"]) / 2.0)
+    # Do this based on the sampling_period recording in the file (can be time-varying)
+    # For GC-MD data the sampling_period is recorded as 1 second, but this is really instantaneous
+    # so use floor to leave these timestamps unchanged
+    data["new_time"] = data.index - pd_to_timedelta(floor(data.sampling_period/2), unit="s")
 
     data = data.set_index("new_time", inplace=False, drop=True)
     data.index.name = "time"
