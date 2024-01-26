@@ -340,32 +340,38 @@ def _format_species(
     # Here inlet is the inlet in the data and inlet_label is the label we want to use as metadata
     for inlet, inlet_label in expected_inlets.items(): # iterates through the two pairs above
         inlet_label = format_inlet(inlet_label)
+
         # Create a copy of metadata for local modification and give it the species-specific metadata
+        
         species_metadata = metadata.copy()
         species_metadata["units"] = units[species]
+        
         species_metadata["calibration_scale"] = scale[species]
+        
         # If we've only got a single inlet, pick out the mf and mf_repeatability
         if inlet == "any" or inlet == "air": 
             species_data = data[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
             species_metadata["inlet"] = inlet_label
+        
         elif "date" in inlet: 
             dates = inlet.split("_")[1:] # this is the two dates in the string
             data_sliced = data.loc[dates[0] : dates[1]] # this slices up the dataframe between these two dates
             species_data = data_sliced[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
             species_metadata["inlet"] = inlet_label
+        
         else: # this is when there are multiple inlets
-            # Find the inlet
+
+            # Find the inlet(s) corresponding to inlet
+            
             matching_inlets = [i for i in data_inlets if re.match(inlet, str(i))] 
             if not matching_inlets:
                 continue
             # Only set the label in metadata when we have the correct label
             species_metadata["inlet"] = inlet_label
-            # There should only be one matching label
-            select_inlet = matching_inlets[0]
             # Take only data for this inlet from the dataframe
-            inlet_data = data.loc[data["inlet_height"] == select_inlet]
+            inlet_data = data.loc[data["inlet_height"].isin(matching_inlets)]
 
             species_data = inlet_data[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
@@ -386,7 +392,7 @@ def _format_species(
         comp_species = define_species_label(species)[0]
 
         # change the column names
-        species_data=species_data.rename({'mf':comp_species, 'mf_repeatability':f'{comp_species}_repeatability'})
+        species_data=species_data.rename(name_dict={'mf':comp_species, 'mf_repeatability':f'{comp_species}_repeatability'})
 
 
         # Add the cleaned species name to the metadata and alternative name if present
@@ -404,7 +410,7 @@ def _format_species(
                 new_name = new_name.replace("-","")
                 to_rename[var] = new_name
 
-        species_data = species_data.rename(to_rename)
+        species_data = species_data.rename(name_dict=to_rename)
 
         # As a single species may have measurements from multiple inlets we
         # use the species and inlet as a key

@@ -221,7 +221,7 @@ class DataManager:
                     self.metadata[u] = internal_copy
                     logger.info(f"Modified metadata for {u}.")
 
-    def delete_datasource(self, uuid: Union[List, str]) -> None:
+    def delete_datasource(self, uuid: Union[List, str], delete_one: bool = True) -> None:
         """Delete Datasource(s) in the object store.
         At the moment we only support deleting the complete Datasource.
 
@@ -243,7 +243,7 @@ class DataManager:
         with open_metastore(bucket=self._bucket, data_type=dtype) as metastore:
             for uid in uuid:
                 # First remove the data from the metadata store
-                metastore.delete({"uuid": uid})
+                metastore.delete({"uuid": uid}, delete_one=delete_one)
 
                 # Delete all the data associated with a Datasource
                 d = Datasource.load(bucket=self._bucket, uuid=uid, shallow=True)
