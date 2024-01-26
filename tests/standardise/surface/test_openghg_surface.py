@@ -93,7 +93,8 @@ def test_read_file_no_attr():
 #   - for this create file for *new* site and with no attributes
 
 
-#%% Compliance checks for processed data for this standardisation method
+# %% Compliance checks for processed data for this standardisation method
+
 
 @pytest.fixture(scope="session")
 def openghg_data():
@@ -104,6 +105,7 @@ def openghg_data():
 
 def test_data_metachecker(openghg_data):
     parsed_surface_metachecker(data=openghg_data)
+
 
 @pytest.mark.cfchecks
 def test_openghg_cf_compliance(openghg_data):
