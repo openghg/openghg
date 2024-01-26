@@ -629,7 +629,7 @@ class ModelScenario:
             sampling_period = obs_attributes["sampling_period"]
             if sampling_period == "NOT_SET":
                 infer_sampling_period = True
-            elif sampling_period == "varies":
+            elif sampling_period == "multiple":
                 # If we have a varying sampling_period, make sure we always resample to footprint
                 obs_data_period_s = 1.0
             else:

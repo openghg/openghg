@@ -39,7 +39,7 @@
       "gcmd": 1,
       "gcms": 1200,
       "medusa": 1200,
-      "combined": "varies"
+      "combined": "multiple"
     },
     "comment": {
       "gcmd": "Gas chromatograph measurements. Output from GCWerks.",
