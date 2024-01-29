@@ -33,6 +33,11 @@ def compare_compression(filepath: Path) -> Dict:
     compression_info: Dict[str, Any] = {"original_filesize": orig_size}
     print(f"Original file size: {orig_size}")
 
+    best_ratio = 0.0
+    shortest_time = 1.0e9
+    quickest_codec = ""
+    best_compression_codec = ""
+
     with tempfile.TemporaryDirectory() as tmpdir:
         for codec, comp_level, shuffle in codec_combinations:
             with xr.open_dataset(filepath) as ds:
@@ -58,5 +63,16 @@ def compare_compression(filepath: Path) -> Dict:
                     "compressed_size_bytes": compressed_size,
                     "time_taken": time_taken,
                 }
+
+                if ratio > best_ratio:
+                    best_ratio = ratio
+                    best_compression_codec = codec_str
+
+                if time_taken < shortest_time:
+                    shortest_time = time_taken
+                    quickest_codec = codec_str
+
+    compression_info["best_compression_codec"] = best_compression_codec
+    compression_info["quickest_codec"] = quickest_codec
 
     return compression_info
