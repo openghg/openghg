@@ -512,6 +512,32 @@ def test_process_footprints():
         xr.concat([ds, ds2], dim="time").identical(fp_obs.data)
 
 
+def test_hash_checking_seen_unseen_works(capfd, caplog):
+    file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
+    file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")
+
+    standardise_footprint(
+        filepath=[file1],
+        site="TAC",
+        inlet="100m",
+        domain="TEST_SEEN_DOMAIN",
+        model="UKV",
+        store="user",
+    )
+    assert "We've seen the following files before, skipping these files:" not in caplog.text
+
+    standardise_footprint(
+        filepath=[file1, file2],
+        site="TAC",
+        inlet="100m",
+        domain="TEST_SEEN_DOMAIN",
+        model="UKV",
+        store="user",
+    )
+
+    assert "We've seen the following files before, skipping these files:" in caplog.text
+
+
 def test_passing_in_different_chunks_to_same_store_works():
     file1 = get_footprint_datapath("TAC-100magl_UKV_TEST_201607.nc")
     file2 = get_footprint_datapath("TAC-100magl_UKV_TEST_201608.nc")

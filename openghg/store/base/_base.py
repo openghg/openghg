@@ -2,16 +2,16 @@
     modules inherit.
 """
 from __future__ import annotations
-
 import logging
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
+from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
 from pandas import Timestamp
+
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore.metastore import DataClassMetaStore
-from openghg.types import DatasourceLookupError
-from openghg.util import timestamp_now, to_lowercase
+from openghg.types import DatasourceLookupError, multiPathType
+from openghg.util import timestamp_now, to_lowercase, hash_file
 
 
 T = TypeVar("T", bound="BaseStore")
@@ -95,6 +95,46 @@ class BaseStore:
 
     def transform_data(self, *args: Any, **kwargs: Any) -> dict:
         raise NotImplementedError
+
+    def check_hashes(self, filepaths: multiPathType, force: bool) -> Tuple[List, Dict[str, Dict]]:
+        """Check the hashes of the files passed against the hashes of previously
+        uploaded files.
+
+        Args:
+            filepaths: List of filepaths
+            force: If force is True then we will expect to process all the filepaths, not just the
+            unseen ones
+        Returns:
+            tuple: Tuple of list of filepaths to process and dictionary of hash checking results
+        """
+        if not isinstance(filepaths, list):
+            filepaths = [filepaths]
+
+        results: Dict[str, Dict] = {"seen": {}, "unseen": {}}
+
+        to_process = []
+
+        for filepath in filepaths:
+            file_hash = hash_file(filepath=filepath)
+            if file_hash in self._file_hashes:
+                results["seen"][file_hash] = str(filepath)
+            else:
+                results["unseen"][file_hash] = str(filepath)
+                to_process.append(filepath)
+
+        if results["seen"]:
+            logger.warning(
+                "We've seen the following files before, "
+                + f"skipping these files:\n{list(results['seen'].values())}"
+            )
+
+        if force:
+            to_process = filepaths
+
+        to_process.sort()
+        logger.info(f"Processing the following files:\n{list(results['unseen'].values())}")
+
+        return to_process, results
 
     def assign_data(
         self,
