@@ -30,7 +30,7 @@ def test_files_checked_and_hashed():
     assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in hash_results["seen"]
     assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in hash_results["unseen"]
 
-    b._file_hashes.update(**hash_results["unseen"])
+    b._file_hashes.update(hash_results["unseen"])
 
     to_process, hash_results = b.check_hashes(filepaths=filepaths, force=False)
 

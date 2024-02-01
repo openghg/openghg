@@ -305,6 +305,9 @@ class Footprints(BaseStore):
 
         filepath, hash_results = self.check_hashes(filepaths=filepath, force=force)
 
+        if not filepath:
+            return {}
+
         if chunks is None:
             chunks = {}
 
