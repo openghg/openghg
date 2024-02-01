@@ -391,7 +391,7 @@ def _format_species(
         comp_species = define_species_label(species)[0]
 
         # change the column names
-        species_data=species_data.rename(columns={'mf':f'{comp_species}', 'mf_repeatability':f'{comp_species}_repeatability'})
+        species_data=species_data.rename(columns={'mf':f'{comp_species}', 'mf_repeatability':f'{comp_species} repeatability'})
 
         # We want an xarray Dataset
         species_data = species_data.to_xarray()
