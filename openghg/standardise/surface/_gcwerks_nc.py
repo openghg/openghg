@@ -328,8 +328,12 @@ def _format_species(
         data_inlets = data["inlet_height"].unique().tolist() 
     except KeyError:
         raise KeyError(
-            "Unable to read inlets from data, please ensure this data is of the GC type expected by this retrieve module"
+            "Unable to read inlets from data, please ensure this data is of the GC type expected by this standardise module"
         )
+
+    # inlet heights are just the numbers here in Matt's files, rather than having the units attached. 
+
+    data_inlets = [format_inlet(i) for i in data_inlets]
 
     # Skip this species if the data is all NaNs
     if data['mf'].isnull().all():
@@ -355,23 +359,22 @@ def _format_species(
             species_metadata["inlet"] = inlet_label
         
         elif "date" in inlet: 
-            dates = inlet.split("_")[1:] # this is the two dates in the string
+            dates = inlet.split("_")[1:] # this is the two dates in the string; only true for Shangdianzi 
             data_sliced = data.loc[dates[0] : dates[1]] # this slices up the dataframe between these two dates
             species_data = data_sliced[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
             species_metadata["inlet"] = inlet_label
         
-        else: # this is when there are multiple inlets
-
+        else: # this is when there are multiple inlets;
             # Find the inlet(s) corresponding to inlet
             
-            matching_inlets = [i for i in data_inlets if re.match(inlet, str(i))] 
+            matching_inlets = [i for i in data_inlets if fnmatch(i, inlet)]
             if not matching_inlets:
                 continue
             # Only set the label in metadata when we have the correct label
             species_metadata["inlet"] = inlet_label
             # Take only data for this inlet from the dataframe
-            inlet_data = data.loc[data["inlet_height"].isin(matching_inlets)]
+            inlet_data = data.loc[data["inlet_height"].apply(format_inlet).isin(matching_inlets)]
 
             species_data = inlet_data[['mf', 'mf_repeatability']]
             species_data = species_data.dropna(axis="index", how="any")
@@ -390,7 +393,7 @@ def _format_species(
         # Create a standardised / cleaned species label
         comp_species = define_species_label(species)[0]
 
-        # change the column names
+        # change the column names to {species} and {species} repeatability, which is what the get_obs_surface function expects
         species_data=species_data.rename(columns={'mf':f'{comp_species}', 'mf_repeatability':f'{comp_species} repeatability'})
 
         # We want an xarray Dataset
