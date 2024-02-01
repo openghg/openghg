@@ -385,15 +385,16 @@ def _format_species(
         )
         attributes = attributes.copy()
 
-        # We want an xarray Dataset
-        species_data = species_data.to_xarray()
+
 
         # Create a standardised / cleaned species label
         comp_species = define_species_label(species)[0]
 
         # change the column names
-        species_data=species_data.rename(name_dict={'mf':comp_species, 'mf_repeatability':f'{comp_species}_repeatability'})
+        species_data=species_data.rename(columns={'mf':f'{comp_species}', 'mf_repeatability':f'{comp_species}_repeatability'})
 
+        # We want an xarray Dataset
+        species_data = species_data.to_xarray()
 
         # Add the cleaned species name to the metadata and alternative name if present
         species_metadata["species"] = comp_species
