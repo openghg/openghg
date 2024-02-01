@@ -75,7 +75,6 @@ class EulerianModel(BaseStore):
         from collections import defaultdict
         from openghg.util import (
             clean_string,
-            hash_file,
             timestamp_now,
             timestamp_tzaware,
             check_if_need_new_version,
@@ -104,12 +103,11 @@ class EulerianModel(BaseStore):
 
         filepath = Path(filepath)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not force:
-            raise ValueError(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]}.\n"
-                "If necessary, use force=True to bypass this to add this data."
-            )
+        # Check the hashes
+        to_process, hash_results = self.check_hashes(filepaths=filepath, force=force)
+
+        if not to_process:
+            return {}
 
         with open_dataset(filepath) as em_data:
             # Check necessary 4D coordinates are present and rename if necessary (for consistency)
@@ -212,6 +210,7 @@ class EulerianModel(BaseStore):
             # )
 
             # Record the file hash in case we see this file again
-            self._file_hashes[file_hash] = filepath.name
+            unseen_hashes = hash_results["unseen"]
+            self._file_hashes.update(unseen_hashes)
 
             return datasource_uuids

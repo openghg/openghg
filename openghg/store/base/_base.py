@@ -98,7 +98,13 @@ class BaseStore:
 
     def check_hashes(self, filepaths: multiPathType, force: bool) -> Tuple[List, Dict[str, Dict]]:
         """Check the hashes of the files passed against the hashes of previously
-        uploaded files.
+        uploaded files. If the file has been seen before it's added a dictionary of "seen" files
+        and if it's new it's add it to a dictionary of "unseen" files.
+
+        A list of the unseen files is returned along with the dictionary of the hashes of the seen
+        and unseen files.
+
+        Files we have seen before will be skipped unless force is True.
 
         Args:
             filepaths: List of filepaths
@@ -131,7 +137,11 @@ class BaseStore:
         if force:
             to_process = filepaths
 
-        to_process.sort()
+        if to_process:
+            to_process.sort()
+        else:
+            logger.info("No new files to process.")
+
         logger.info(f"Processing the following files:\n{list(results['unseen'].values())}")
 
         return to_process, results
