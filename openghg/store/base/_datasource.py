@@ -736,6 +736,14 @@ class Datasource:
 
         return self._store.get(version=version)
 
+    def bytes_stored(self) -> int:
+        """Get the amount of data stored in the zarr store in bytes
+
+        Returns:
+            int: Number of bytes
+        """
+        return self._store.bytes_stored()
+
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource
 
