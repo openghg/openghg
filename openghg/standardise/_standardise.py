@@ -35,6 +35,7 @@ def standardise(data_type: str, filepath: multiPathType, store: Optional[str] = 
     if compression:
         if compressor is None:
             compressor = Blosc(cname="zstd", clevel=5, shuffle=Blosc.SHUFFLE)
+        logger.info(f"Using compressor: {compressor}")
     else:
         logger.info("Compression is disabled")
         compressor = None
