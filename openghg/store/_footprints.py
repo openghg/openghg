@@ -303,7 +303,12 @@ class Footprints(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        filepath, hash_results = self.check_hashes(filepaths=filepath, force=force)
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
+
+        if not unseen_hashes:
+            return {}
+
+        filepath = list(unseen_hashes.values())
 
         if not filepath:
             return {}
@@ -471,7 +476,6 @@ class Footprints(BaseStore):
             # )
 
             # Record the file hash in case we see the file(s) again
-            unseen_hashes = hash_results["unseen"]
             self._file_hashes.update(unseen_hashes)
 
             return datasource_uuids

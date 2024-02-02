@@ -107,7 +107,6 @@ class BoundaryConditions(BaseStore):
         )
         from openghg.util import (
             clean_string,
-            hash_file,
             timestamp_now,
             check_if_need_new_version,
         )
@@ -133,14 +132,12 @@ class BoundaryConditions(BaseStore):
 
         filepath = Path(filepath)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not force:
-            logger.warning(
-                "This file has been uploaded previously with the filename : "
-                f"{self._file_hashes[file_hash]} - skipping.\n"
-                "If necessary, use force=True to bypass this to add this data."
-            )
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
+
+        if not unseen_hashes:
             return {}
+
+        filepath = next(iter(unseen_hashes.values()))
 
         with open_dataset(filepath) as bc_data:
             # Some attributes are numpy types we can't serialise to JSON so convert them
@@ -228,7 +225,7 @@ class BoundaryConditions(BaseStore):
             # )
 
             # Record the file hash in case we see this file again
-            self._file_hashes[file_hash] = filepath.name
+            self._file_hashes.update(unseen_hashes)
 
             return datasource_uuids
 

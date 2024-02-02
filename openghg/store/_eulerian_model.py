@@ -103,11 +103,12 @@ class EulerianModel(BaseStore):
 
         filepath = Path(filepath)
 
-        # Check the hashes
-        to_process, hash_results = self.check_hashes(filepaths=filepath, force=force)
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
-        if not to_process:
+        if not unseen_hashes:
             return {}
+
+        filepath = next(iter(unseen_hashes.values()))
 
         with open_dataset(filepath) as em_data:
             # Check necessary 4D coordinates are present and rename if necessary (for consistency)
@@ -210,7 +211,6 @@ class EulerianModel(BaseStore):
             # )
 
             # Record the file hash in case we see this file again
-            unseen_hashes = hash_results["unseen"]
             self._file_hashes.update(unseen_hashes)
 
             return datasource_uuids

@@ -122,12 +122,12 @@ class ObsColumn(BaseStore):
         # Load the data retrieve object
         parser_fn = load_column_parser(source_format=source_format)
 
-        to_process, hash_results = self.check_hashes(filepaths=filepath, force=force)
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
-        if not to_process:
+        if not unseen_hashes:
             return {}
 
-        filepath = to_process[0]
+        filepath = next(iter(unseen_hashes.values()))
 
         # Define parameters to pass to the parser function
         param = {
@@ -177,7 +177,7 @@ class ObsColumn(BaseStore):
         # )
 
         # Record the file hash in case we see this file again
-        self._file_hashes.update(hash_results["unseen"])
+        self._file_hashes.update(unseen_hashes)
 
         return datasource_uuids
 
