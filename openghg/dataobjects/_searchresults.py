@@ -57,13 +57,13 @@ class SearchResults:
 
         self.hub = running_on_hub()
 
-    # def __str__(self) -> str:
-        # SearchResults.df_to_table_console_output(df=DataFrame.from_dict(data=self.metadata))
+    def __str__(self) -> str:
+        SearchResults.df_to_table_console_output(df=DataFrame.from_dict(data=self.metadata))
 
-        # return f"Found {len(self.results)} results.\nView the results DataFrame using the results property."
+        return f"Found {len(self.results)} results.\nView the results DataFrame using the results property."
 
-    # def __repr__(self) -> str:
-    #     return self.__str__()
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def __bool__(self) -> bool:
         return bool(self.metadata)
