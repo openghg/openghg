@@ -11,7 +11,7 @@ from uuid import uuid4
 from openghg.objectstore import exists, get_object_from_json
 from openghg.util import split_daterange_str, timestamp_tzaware
 from openghg.store.spec import define_data_types
-from openghg.types import DataOverlapError, ObjectStoreError
+from openghg.types import ChunkError, DataOverlapError, ObjectStoreError
 
 
 logger = logging.getLogger("openghg.store.base")
@@ -146,6 +146,12 @@ class Datasource:
         data_type = data_type.lower()
         if data_type not in expected_data_types:
             raise TypeError(f"Incorrect data type selected. Please select from one of {expected_data_types}")
+
+        # Make sure the chunks match
+        if "chunks" in metadata:
+            if "chunks" in self._metadata:
+                if metadata["chunks"] != self._metadata["chunks"]:
+                    raise ChunkError("Chunks do not match between metadata and currently stored data.")
 
         self.add_metadata(metadata=metadata, skip_keys=skip_keys)
 

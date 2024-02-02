@@ -65,6 +65,10 @@ class ZarrStoreError(OpenGHGError):
     """Raised for errors with the zarr store"""
 
 
+class ChunkError(OpenGHGError):
+    """Raised when chunk mismatch is detected"""
+
+
 class KeyExistsError(ZarrStoreError):
     """Raised if key already exists in zarr store"""
 

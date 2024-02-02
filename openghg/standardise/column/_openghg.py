@@ -14,6 +14,7 @@ def parse_openghg(
     network: Optional[str] = None,
     instrument: Optional[str] = None,
     platform: str = "satellite",
+    chunks: Optional[Dict] = None,
     **kwargs: str,
 ) -> Dict:
     """
@@ -62,60 +63,114 @@ def parse_openghg(
     if data_filepath.suffix != ".nc":
         raise ValueError("Input file must be a .nc (netcdf) file.")
 
-    with xr.open_dataset(data_filepath) as temp:
-        data = temp
+    with xr.open_dataset(data_filepath).chunk(chunks) as data:
+        # Extract current attributes from input data
+        attributes = cast(MutableMapping, data.attrs)
 
-    # Extract current attributes from input data
-    attributes = cast(MutableMapping, data.attrs)
+        if satellite is not None or platform == "satellite":
+            metadata_required = metadata_default_satellite_column()
+            metadata_required.remove("selection")
+            platform = "satellite"
+        elif site is not None or platform == "site":
+            metadata_required = metadata_default_site_column()
+            platform = "site"
 
-    if satellite is not None or platform == "satellite":
-        metadata_required = metadata_default_satellite_column()
-        metadata_required.remove("selection")
-        platform = "satellite"
-    elif site is not None or platform == "site":
-        metadata_required = metadata_default_site_column()
-        platform = "site"
+        if platform == "satellite":
+            if domain is None:
+                raise ValueError(
+                    "For satellite data, please specify selected domain."
+                    "This can be 'global' if no selection has been made."
+                )
 
-    if platform == "satellite":
-        if domain is None:
-            raise ValueError(
-                "For satellite data, please specify selected domain."
-                "This can be 'global' if no selection has been made."
-            )
+        # Define metadata based on input arguments.
+        metadata_initial = {
+            "site": site,
+            "satellite": satellite,
+            "instrument": instrument,
+            "species": species,
+            "domain": domain,
+            "network": network,
+            "platform": platform,
+            "data_type": "column",
+            "source_format": "openghg",
+        }
 
-    # Define metadata based on input arguments.
-    metadata_initial = {
-        "site": site,
-        "satellite": satellite,
-        "instrument": instrument,
-        "species": species,
-        "domain": domain,
-        "network": network,
-        "platform": platform,
-        "data_type": "column",
-        "source_format": "openghg",
-    }
+        # TODO: Tidy this up a bit (maybe split some into a separate function?)
+        # and incorporate kwargs
 
-    # TODO: Tidy this up a bit (maybe split some into a separate function?)
-    # and incorporate kwargs
+        metadata = {}
+        key_translation = satellite_attribute_translation()
+        # Populate metadata with values from attributes if inputs have not been passed
+        for key, value in metadata_initial.items():
+            if key in metadata_required:
+                # Extract equivalent key from passed file if present using translation
+                try:
+                    attr_keys = key_translation[key]
+                except KeyError:
+                    attr_keys = key
 
-    metadata = {}
-    key_translation = satellite_attribute_translation()
-    # Populate metadata with values from attributes if inputs have not been passed
-    for key, value in metadata_initial.items():
-        if key in metadata_required:
-            # Extract equivalent key from passed file if present using translation
+                # Make sure this is a list for cases with multiple options
+                if isinstance(attr_keys, str):
+                    attr_keys = [attr_keys]
+
+                if value is None:
+                    # Extract value from attributes if this has not been specified
+                    for attr_key in attr_keys:
+                        try:
+                            metadata[key] = attributes[attr_key]
+                        except KeyError:
+                            continue
+                        else:
+                            break
+                    else:
+                        raise ValueError(
+                            f"Input '{key}' must be specified if not included in data attributes."
+                        )
+                else:
+                    # If attributes are present, check these match to inputs passed
+                    for attr_key in attr_keys:
+                        if attr_key in key_translation and attr_key in attributes:
+                            attributes_value = attributes[attr_key]
+                            if value != attributes_value:
+                                # If inputs do not match attribute values, raise a ValueError
+                                raise ValueError(
+                                    f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
+                                )
+                    metadata[key] = value
+
+        # metadata = cast(Dict[str, str], metadata_initial)
+
+        if selection is not None:
+            metadata["selection"] = selection
+        elif platform == "satellite":
+            metadata["selection"] = domain
+
+        # TODO: Add loose domain checking? If known domain is specified, make sure points
+        # are within this for example.
+
+        species = define_species_label(metadata["species"])[0]
+        metadata["species"] = species
+
+        if "site" in metadata:
+            metadata["site"] = clean_string(metadata["site"])
+
+        # Add data type to metadata
+        metadata["data_type"] = "column"
+        metadata["chunks"] = chunks
+
+        # Define remaining keys needed for metadata
+        metadata_needed = [param for param in metadata_required if param not in metadata]
+
+        for key in metadata_needed:
             try:
                 attr_keys = key_translation[key]
             except KeyError:
                 attr_keys = key
 
-            # Make sure this is a list for cases with multiple options
             if isinstance(attr_keys, str):
                 attr_keys = [attr_keys]
 
-            if value is None:
-                # Extract value from attributes if this has not been specified
+            for attr_key in attr_keys:
                 for attr_key in attr_keys:
                     try:
                         metadata[key] = attributes[attr_key]
@@ -125,147 +180,94 @@ def parse_openghg(
                         break
                 else:
                     raise ValueError(f"Input '{key}' must be specified if not included in data attributes.")
-            else:
-                # If attributes are present, check these match to inputs passed
-                for attr_key in attr_keys:
-                    if attr_key in key_translation and attr_key in attributes:
-                        attributes_value = attributes[attr_key]
-                        if value != attributes_value:
-                            # If inputs do not match attribute values, raise a ValueError
-                            raise ValueError(
-                                f"Input for '{key}': {value} does not match value in file attributes: {attributes_value}"
-                            )
-                metadata[key] = value
 
-    # metadata = cast(Dict[str, str], metadata_initial)
+        # In GOSAT UoL files (and copied into our files)
+        #  - platform = "GOSAT"; sensor = "TANSO-FTS"
+        # In TROPOMI S5P_OFFL_...nc files
+        #  - platform = 'S5P'; sensor = "TROPOMI"
+        # Could "platform" --> "satellite" perhaps?
 
-    if selection is not None:
-        metadata["selection"] = selection
-    elif platform == "satellite":
-        metadata["selection"] = domain
+        # site = metadata["site"]
+        # network = metadata["network"]
+        # species = metadata["species"]
 
-    # TODO: Add loose domain checking? If known domain is specified, make sure points
-    # are within this for example.
+        # # Allow site and network data to be treated in a case insensitive way
+        # site_case_options = [site, site.upper(), site.lower()]
+        # network_case_options = [network, network.upper(), network.lower()]
 
-    species = define_species_label(metadata["species"])[0]
-    metadata["species"] = species
+        # # Extract centralised data for site (if present)
+        # site_data = load_json(filename="site_info.json")
+        # for site_value in site_case_options:
+        #     if site_value in site_data:
+        #         site_info_all = site_data[site_value]
+        #         break
+        # else:
+        #     print("Unknown site. Will attempt to extract metadata from dataset attributes or input keywords")
+        #     site_info_all = {}
 
-    if "site" in metadata:
-        metadata["site"] = clean_string(metadata["site"])
+        # for network_value in network_case_options:
+        #     if network_value in site_info_all:
+        #         site_info = site_info_all[network_value]
+        #         break
+        # else:
+        #     print(
+        #         "Network {network} does not match with site {site}. Will attempt to extract metadata from dataset attributes or input keywords"
+        #     )
+        #     site_info = {}
 
-    # Add data type to metadata
-    metadata["data_type"] = "column"
+        # if site_info:
+        #     # Ensure keywords match to metadata names for station values
+        #     # e.g. "station_longitude" derived from "longitude"
+        #     for key in metadata_needed:
+        #         prefix = "station_"
+        #         if key.startswith(prefix):
+        #             split_key = key.split("_")[1:]
+        #             short_key_option1 = "_".join(split_key)
 
-    # Define remaining keys needed for metadata
-    metadata_needed = [param for param in metadata_required if param not in metadata]
+        #             split_key.insert(1, "station")  # to catch "height_station_masl"
+        #             short_key_option2 = "_".join(split_key)
 
-    for key in metadata_needed:
-        try:
-            attr_keys = key_translation[key]
-        except KeyError:
-            attr_keys = key
+        #             short_key_options = [short_key_option1, short_key_option2]
+        #             for short_key in short_key_options:
+        #                 if short_key in site_info:
+        #                     site_info[key] = site_info[short_key]
+        #                     break
 
-        if isinstance(attr_keys, str):
-            attr_keys = [attr_keys]
+        # # Load attributes data for network if present
+        # param_data = load_json(filename="attributes.json")
+        # for network_value in network_case_options:
+        #     if network_value in param_data:
+        #         network_params = param_data[network_value]
+        #         site_attributes = network_params["global_attributes"]
+        #         break
+        # else:
+        #     site_attributes = {}
 
-        for attr_key in attr_keys:
-            for attr_key in attr_keys:
-                try:
-                    metadata[key] = attributes[attr_key]
-                except KeyError:
-                    continue
-                else:
-                    break
-            else:
-                raise ValueError(f"Input '{key}' must be specified if not included in data attributes.")
+        # # Define sources of attributes to use when defining metadata
+        # # The order here influences the hierarchy if keys appear multiple times.
+        # # kwargs allow additional variables such as "station_longitude" to be included if needed.
+        # attribute_sources = [attributes, kwargs, site_info, site_attributes]
 
-    # In GOSAT UoL files (and copied into our files)
-    #  - platform = "GOSAT"; sensor = "TANSO-FTS"
-    # In TROPOMI S5P_OFFL_...nc files
-    #  - platform = 'S5P'; sensor = "TROPOMI"
-    # Could "platform" --> "satellite" perhaps?
+        # # Search attributes sources (in order) and populate metadata
+        # for param in metadata_needed:
+        #     for source in attribute_sources:
+        #         if param in source:
+        #             metadata[param] = source[param]
+        #             break
+        #     else:
+        #         raise ValueError(
+        #             f"Cannot extract or infer '{param}' parameter needed for metadata from stored data, attributes or keywords"
+        #         )
 
-    # site = metadata["site"]
-    # network = metadata["network"]
-    # species = metadata["species"]
+        # Update attributes to match metadata after cleaning
+        attributes.update(metadata)
 
-    # # Allow site and network data to be treated in a case insensitive way
-    # site_case_options = [site, site.upper(), site.lower()]
-    # network_case_options = [network, network.upper(), network.lower()]
+        # TODO: Decide if the key here should be more descriptive that just `species`
+        gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
 
-    # # Extract centralised data for site (if present)
-    # site_data = load_json(filename="site_info.json")
-    # for site_value in site_case_options:
-    #     if site_value in site_data:
-    #         site_info_all = site_data[site_value]
-    #         break
-    # else:
-    #     print("Unknown site. Will attempt to extract metadata from dataset attributes or input keywords")
-    #     site_info_all = {}
+        # gas_data = assign_attributes(data=gas_data, site=site, network=network)
 
-    # for network_value in network_case_options:
-    #     if network_value in site_info_all:
-    #         site_info = site_info_all[network_value]
-    #         break
-    # else:
-    #     print(
-    #         "Network {network} does not match with site {site}. Will attempt to extract metadata from dataset attributes or input keywords"
-    #     )
-    #     site_info = {}
-
-    # if site_info:
-    #     # Ensure keywords match to metadata names for station values
-    #     # e.g. "station_longitude" derived from "longitude"
-    #     for key in metadata_needed:
-    #         prefix = "station_"
-    #         if key.startswith(prefix):
-    #             split_key = key.split("_")[1:]
-    #             short_key_option1 = "_".join(split_key)
-
-    #             split_key.insert(1, "station")  # to catch "height_station_masl"
-    #             short_key_option2 = "_".join(split_key)
-
-    #             short_key_options = [short_key_option1, short_key_option2]
-    #             for short_key in short_key_options:
-    #                 if short_key in site_info:
-    #                     site_info[key] = site_info[short_key]
-    #                     break
-
-    # # Load attributes data for network if present
-    # param_data = load_json(filename="attributes.json")
-    # for network_value in network_case_options:
-    #     if network_value in param_data:
-    #         network_params = param_data[network_value]
-    #         site_attributes = network_params["global_attributes"]
-    #         break
-    # else:
-    #     site_attributes = {}
-
-    # # Define sources of attributes to use when defining metadata
-    # # The order here influences the hierarchy if keys appear multiple times.
-    # # kwargs allow additional variables such as "station_longitude" to be included if needed.
-    # attribute_sources = [attributes, kwargs, site_info, site_attributes]
-
-    # # Search attributes sources (in order) and populate metadata
-    # for param in metadata_needed:
-    #     for source in attribute_sources:
-    #         if param in source:
-    #             metadata[param] = source[param]
-    #             break
-    #     else:
-    #         raise ValueError(
-    #             f"Cannot extract or infer '{param}' parameter needed for metadata from stored data, attributes or keywords"
-    #         )
-
-    # Update attributes to match metadata after cleaning
-    attributes.update(metadata)
-
-    # TODO: Decide if the key here should be more descriptive that just `species`
-    gas_data = {species: {"metadata": metadata, "data": data, "attributes": attributes}}
-
-    # gas_data = assign_attributes(data=gas_data, site=site, network=network)
-
-    return gas_data
+        return gas_data
 
 
 def metadata_default_satellite_column() -> List[str]:

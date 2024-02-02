@@ -123,6 +123,7 @@ class ObsSurface(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
     ) -> Dict:
         """Process files and store in the object store. This function
             utilises the process functions of the other classes in this submodule
@@ -171,6 +172,7 @@ class ObsSurface(BaseStore):
             See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
         Returns:
             dict: Dictionary of Datasource UUIDs
 

@@ -67,7 +67,7 @@ class Flux(BaseStore):
         source_format: str = "openghg",
         high_time_resolution: Optional[bool] = False,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        chunks: Optional[Dict] = None,
         continuous: bool = True,
         if_exists: str = "auto",
         save_current: str = "auto",
@@ -111,6 +111,7 @@ class Flux(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """

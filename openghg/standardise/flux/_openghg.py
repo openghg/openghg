@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, Optional, Union
 
 
 def parse_openghg(
@@ -13,7 +13,7 @@ def parse_openghg(
     model: Optional[str] = None,
     high_time_resolution: Optional[bool] = False,
     period: Optional[Union[str, tuple]] = None,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    chunks: Optional[Dict] = None,
     continuous: bool = True,
 ) -> Dict:
     """
@@ -31,7 +31,7 @@ def parse_openghg(
     from openghg.util import timestamp_now
     from xarray import open_dataset
 
-    em_data = open_dataset(filepath, chunks=chunks)
+    em_data = open_dataset(filepath).chunk(chunks)
 
     # Some attributes are numpy types we can't serialise to JSON so convert them
     # to their native types here
@@ -62,6 +62,7 @@ def parse_openghg(
     metadata["processed"] = str(timestamp_now())
     metadata["data_type"] = "flux"
     metadata["source_format"] = "openghg"
+    metadata["chunks"] = chunks
 
     # As flux / emissions files handle things slightly differently we need to check the time values
     # more carefully.

@@ -63,6 +63,7 @@ class BoundaryConditions(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
     ) -> dict:
         """Read boundary conditions file
 
@@ -96,6 +97,7 @@ class BoundaryConditions(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
         Returns:
             dict: Dictionary of datasource UUIDs data assigned to
         """
@@ -142,7 +144,10 @@ class BoundaryConditions(BaseStore):
             )
             return {}
 
-        with open_dataset(filepath) as bc_data:
+        if chunks is None:
+            chunks = {}
+
+        with open_dataset(filepath).chunk(chunks) as bc_data:
             # Some attributes are numpy types we can't serialise to JSON so convert them
             # to their native types here
             attrs = {}
@@ -193,6 +198,7 @@ class BoundaryConditions(BaseStore):
             metadata["input_filename"] = filepath.name
 
             metadata["time_period"] = period_str
+            metadata["chunks"] = chunks
 
             key = "_".join((species, bc_input, domain))
 

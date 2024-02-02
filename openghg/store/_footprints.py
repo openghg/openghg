@@ -194,7 +194,7 @@ class Footprints(BaseStore):
         species: Optional[str] = None,
         network: Optional[str] = None,
         period: Optional[Union[str, tuple]] = None,
-        chunks: Union[int, Dict, Literal["auto"], None] = None,
+        chunks: Optional[Dict] = None,
         continuous: bool = True,
         retrieve_met: bool = False,
         high_spatial_resolution: bool = False,
@@ -430,6 +430,8 @@ class Footprints(BaseStore):
             metadata["heights"] = [float(h) for h in fp_data.height.values]
             # Do we also need to save all the variables we have available in this footprints?
             metadata["variables"] = list(fp_data.data_vars)
+
+            metadata["chunks"] = chunks
 
             # if model_params is not None:
             #     metadata["model_parameters"] = model_params

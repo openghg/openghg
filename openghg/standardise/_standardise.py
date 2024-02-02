@@ -75,6 +75,7 @@ def standardise_surface(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
 ) -> Dict:
     """Standardise surface measurements and store the data in the object store.
 
@@ -235,6 +236,7 @@ def standardise_surface(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            chunks=chunks,
         )
 
 
@@ -257,6 +259,7 @@ def standardise_column(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
 ) -> Dict:
     """Read column observation file
 
@@ -351,6 +354,7 @@ def standardise_column(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            chunks=chunks,
         )
 
 
@@ -369,6 +373,7 @@ def standardise_bc(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
 ) -> Dict:
     """Standardise boundary condition data and store it in the object store.
 
@@ -445,6 +450,7 @@ def standardise_bc(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            chunks=chunks,
         )
 
 
@@ -713,6 +719,7 @@ def standardise_eulerian(
     compression: bool = True,
     compressor: Optional[Any] = None,
     filters: Optional[Any] = None,
+    chunks: Union[int, Dict, Literal["auto"], None] = None,
 ) -> Dict:
     """Read Eulerian model output
 
@@ -766,6 +773,7 @@ def standardise_eulerian(
             compression=compression,
             compressor=compressor,
             filters=filters,
+            chunks=chunks,
         )
 
 

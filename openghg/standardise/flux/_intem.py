@@ -11,7 +11,7 @@ def parse_intem(
     model: str = "intem",
     period: Optional[Union[str, tuple]] = None,
     high_time_resolution: Optional[bool] = False,
-    chunks: Union[int, Dict, Literal["auto"], None] = None,
+    chunks: Optional[Dict] = None,
     continuous: bool = True,
 ) -> Dict:
     """
@@ -65,6 +65,7 @@ def parse_intem(
     metadata["data_type"] = data_type
     metadata["source_format"] = "openghg"
     metadata["time_resolution"] = "high" if high_time_resolution else "standard"
+    metadata["chunks"] = chunks
     dataset_time = emissions_dataset["time"]
 
     # Fetching start_date and end_date from dataset time dimension

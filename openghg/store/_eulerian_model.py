@@ -41,6 +41,7 @@ class EulerianModel(BaseStore):
         force: bool = False,
         compressor: Optional[Any] = None,
         filters: Optional[Any] = None,
+        chunks: Optional[Dict] = None,
     ) -> Dict:
         """Read Eulerian model output
 
@@ -68,6 +69,7 @@ class EulerianModel(BaseStore):
                 See https://zarr.readthedocs.io/en/stable/api/codecs.html for more information on compressors.
             filters: Filters to apply to the data on storage, this defaults to no filtering. See
                 https://zarr.readthedocs.io/en/stable/tutorial.html#filters for more information on picking filters.
+            chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
         """
         # TODO: As written, this currently includes some light assumptions that we're dealing with GEOSChem SpeciesConc format.
         # May need to split out into multiple modules (like with ObsSurface) or into separate retrieve functions as needed.
@@ -111,7 +113,10 @@ class EulerianModel(BaseStore):
                 "If necessary, use force=True to bypass this to add this data."
             )
 
-        with open_dataset(filepath) as em_data:
+        if chunks is None:
+            chunks = {}
+
+        with open_dataset(filepath).chunk(chunks) as em_data:
             # Check necessary 4D coordinates are present and rename if necessary (for consistency)
             check_coords = {
                 "time": ["time"],
@@ -141,6 +146,7 @@ class EulerianModel(BaseStore):
             metadata["species"] = species
             metadata["processed"] = str(timestamp_now())
             metadata["data_type"] = "eulerian_model"
+            metadata["chunks"] = chunks
 
             if start_date is None:
                 if len(em_data["time"]) > 1:

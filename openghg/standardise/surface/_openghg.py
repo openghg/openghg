@@ -22,6 +22,7 @@ def parse_openghg(
     data_owner_email: Optional[str] = None,
     update_mismatch: str = "never",
     site_filepath: optionalPathType = None,
+    chunks: Optional[Dict] = None,
     **kwargs: str,
 ) -> Dict:
     """
@@ -57,6 +58,7 @@ def parse_openghg(
               - "from_definition" / "metadata" - update mismatches based on associated data (e.g. site_info.json)
         site_filepath: Alternative site info file (see openghg/supplementary_data repository for format).
             Otherwise will use the data stored within openghg_defs/data/site_info JSON file by default.
+        chunks: Chunk size to use when parsing NetCDF, useful for large datasets.
         kwargs: Any additional attributes to be associated with the data.
     Returns:
         Dict: Dictionary of source_name : data, metadata, attributes

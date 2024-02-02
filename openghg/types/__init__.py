@@ -9,6 +9,7 @@ from ._enum import (
 )
 from ._errors import (
     OpenGHGError,
+    ChunkError,
     InvalidSiteError,
     UnknownDataError,
     FunctionError,
