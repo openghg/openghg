@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/openghg/openghg/compare/0.7.0...HEAD)
 
-## [0.7.0] - 2023-12-15
+## 0.8.0 - xxxx-xx-xx
 
-## 0.8.0 - xxxx.xx.xx
+### Added
+
+### Fixed
+
+- Issue caused when passing a list of files to be processed. If OpenGHG had seen some of the files before it would refuse to process any of them - [PR #890](https://github.com/openghg/openghg/pull/890)
 
 ### Changed
 
