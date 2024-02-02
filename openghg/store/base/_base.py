@@ -98,6 +98,17 @@ class BaseStore:
     def transform_data(self, *args: Any, **kwargs: Any) -> dict:
         raise NotImplementedError
 
+    def store_hashes(self, hashes: Dict[str, Path]) -> None:
+        """Store the hashes of files we've seen before
+
+        Args:
+            hahes: Dictionary of hashes
+        Returns:
+            None
+        """
+        name_only = {k: v.name for k, v in hashes.items()}
+        self._file_hashes.update(name_only)
+
     def check_hashes(self, filepaths: multiPathType, force: bool) -> Tuple[Dict[str, Path], Dict[str, Path]]:
         """Check the hashes of the files passed against the hashes of previously
         uploaded files. Two dictionaries are returned, one containing the hashes

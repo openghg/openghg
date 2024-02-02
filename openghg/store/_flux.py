@@ -9,7 +9,6 @@ from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
-import warnings
 
 __all__ = ["Flux"]
 
@@ -117,7 +116,6 @@ class Flux(BaseStore):
         from openghg.types import FluxTypes
         from openghg.util import (
             clean_string,
-            hash_file,
             load_flux_parser,
             check_if_need_new_version,
         )
@@ -217,7 +215,7 @@ class Flux(BaseStore):
         )
 
         # Record the file hash in case we see this file again
-        self._file_hashes.update(unseen_hashes)
+        self.store_hashes(unseen_hashes)
 
         return datasource_uuids
 

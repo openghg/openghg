@@ -270,11 +270,6 @@ class ObsSurface(BaseStore):
 
         results: resultsType = defaultdict(dict)
 
-        to_process, hash_results = self.check_hashes(filepaths=filepath, force=force)
-
-        if not to_process:
-            return {}
-
         # Create a progress bar object using the filepaths, iterate over this below
         for fp in filepath:
             if source_format == "GCWERKS":
@@ -285,6 +280,17 @@ class ObsSurface(BaseStore):
                 precision_filepath = Path(fp[1])
             else:
                 data_filepath = Path(fp)
+
+            # This hasn't been updated to use the new check_hashes function due to
+            # the added complication of the GCWERKS precision file handling,
+            # so we'll just use the old method for now.
+            file_hash = hash_file(filepath=data_filepath)
+            if file_hash in self._file_hashes and overwrite is False:
+                logger.warning(
+                    "This file has been uploaded previously with the filename : "
+                    f"{self._file_hashes[file_hash]} - skipping."
+                )
+                continue
 
             # Define required input parameters for parser function
             required_parameters = {
@@ -372,7 +378,7 @@ class ObsSurface(BaseStore):
             results["processed"][data_filepath.name] = datasource_uuids
             logger.info(f"Completed processing: {data_filepath.name}.")
 
-        self._file_hashes.update(hash_results["unseen"])
+        self._file_hashes[file_hash] = data_filepath.name
 
         return dict(results)
 

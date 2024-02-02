@@ -85,7 +85,6 @@ class ObsColumn(BaseStore):
         from openghg.types import ColumnTypes
         from openghg.util import (
             clean_string,
-            hash_file,
             load_column_parser,
             check_if_need_new_version,
         )
@@ -177,7 +176,7 @@ class ObsColumn(BaseStore):
         # )
 
         # Record the file hash in case we see this file again
-        self._file_hashes.update(unseen_hashes)
+        self.store_hashes(unseen_hashes)
 
         return datasource_uuids
 

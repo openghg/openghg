@@ -13,33 +13,26 @@ def test_files_checked_and_hashed():
 
     filepaths = [file1, file2]
 
-    to_process, hash_results = b.check_hashes(filepaths=filepaths, force=False)
+    seen, unseen = b.check_hashes(filepaths=filepaths, force=False)
 
-    print(to_process)
-
-    assert to_process == filepaths
-
-    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in hash_results["unseen"]
-    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in hash_results["unseen"]
+    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in unseen
+    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in unseen
 
     b._file_hashes.update({"3920587db1d5e5c1455842d54238eaaa8a47b3df": file1})
 
-    to_process, hash_results = b.check_hashes(filepaths=filepaths, force=False)
+    seen, unseen = b.check_hashes(filepaths=filepaths, force=False)
 
-    assert to_process == [file2]
-    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in hash_results["seen"]
-    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in hash_results["unseen"]
+    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in seen
+    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in unseen
 
-    b._file_hashes.update(hash_results["unseen"])
+    b._file_hashes.update(unseen)
 
-    to_process, hash_results = b.check_hashes(filepaths=filepaths, force=False)
+    seen, unseen = b.check_hashes(filepaths=filepaths, force=False)
 
-    assert to_process == []
-    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in hash_results["seen"]
-    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in hash_results["seen"]
+    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in seen
+    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in seen
 
-    to_process, hash_results = b.check_hashes(filepaths=filepaths, force=True)
+    seen, unseen = b.check_hashes(filepaths=filepaths, force=True)
 
-    assert to_process == filepaths
-    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in hash_results["seen"]
-    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in hash_results["seen"]
+    assert "3920587db1d5e5c1455842d54238eaaa8a47b3df" in seen
+    assert "944374a2bf570f54c9066ed4a7bb7e4108a31280" in seen

@@ -476,7 +476,7 @@ class Footprints(BaseStore):
             # )
 
             # Record the file hash in case we see the file(s) again
-            self._file_hashes.update(unseen_hashes)
+            self.store_hashes(unseen_hashes)
 
             return datasource_uuids
 
