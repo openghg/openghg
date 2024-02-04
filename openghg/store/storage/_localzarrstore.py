@@ -2,6 +2,7 @@
 A zarr store on the local filesystem. This is used by Datasource to handle the
 storage of data on the local filesystem and different versions of data.
 """
+
 from __future__ import annotations
 import logging
 from typing import Any, Dict, Literal, Iterator, Union, Optional, MutableMapping
@@ -295,3 +296,48 @@ class LocalZarrStore(Store):
             bytes_stored += get_folder_size(folder_path=self.store_path(version=version))
 
         return bytes_stored
+
+    def get_chunking(self, version: str) -> Dict:
+        """Get the chunking of a version of the data in the store
+
+        Args:
+            version: Version of data
+        Returns:
+            dict: Chunking of data
+        """
+        if version.lower() not in self._stores:
+            raise KeyError(f"Invalid version - {version}")
+        return dict(self.get(version=version).chunks)
+
+    def _check_chunking(self, dataset: xr.Dataset, version: str) -> None:
+        """Ensure that chunks of incoming data and that already stored are the same
+
+        Args:
+            version: Version of data
+        Returns:
+            None
+        """
+        raise NotImplementedError("This function is not yet fully implemented.")
+
+        incoming_chunks = dict(dataset.chunks)
+        if not incoming_chunks:
+            return None
+
+        stored_chunks = dict(self.get(version=version).chunks)
+        # Only take chunks that aren't whole dimensions
+        actually_chunked = {k: v for k, v in stored_chunks.items() if len(v) > 1}
+
+        errors = []
+        for k, v in incoming_chunks.items():
+            if k not in actually_chunked:
+                errors.append(f"Chunking for {k} not found in stored data")
+
+            if v != max(stored_chunks[k]):
+                error = f"For {k} we have {v} but stored data has {max(v)}"
+                errors.append(error)
+
+        if errors:
+            suggestion = f"Current chunking of data: {actually_chunked}"
+            raise ValueError("\n".join(errors))
+
+        return None
