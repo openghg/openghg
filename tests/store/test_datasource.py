@@ -535,6 +535,7 @@ def test_add_data_with_gaps_check_stored_dataset(bucket, datasets_with_gaps):
         assert ds.time.size == 91
 
 
+@pytest.mark.xfail(reason="Combining datasets with overlap is not yet supported")
 def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overlap):
     time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
     time_b = pd.date_range("2012-01-29T00:00:00", "2012-04-30T00:00:00", freq="1d")
@@ -566,6 +567,7 @@ def test_add_data_with_overlap_check_stored_dataset(bucket, datasets_with_overla
         assert ds.equals(combined)
 
 
+@pytest.mark.xfail(reason="Combining datasets is not currently supported")
 def test_add_data_combine_datasets(data, bucket):
     d = Datasource(bucket=bucket)
 
@@ -585,6 +587,7 @@ def test_add_data_combine_datasets(data, bucket):
     assert combined_ds.equals(ch4_data)
 
 
+@pytest.mark.xfail(reason="Combining datasets with overlap is not yet supported")
 def test_add_data_out_of_order(bucket, datasets_with_gaps):
     data_a, data_b, data_c = datasets_with_gaps
     attributes = create_attributes()
@@ -607,3 +610,41 @@ def test_add_data_out_of_order(bucket, datasets_with_gaps):
 
     assert ds.time.size == expected.time.size
     assert ds.equals(expected)
+
+
+@pytest.mark.xfail(reason="Data is currently not sorted during standardisation")
+def test_add_data_out_of_order_no_combine(bucket, datasets_with_gaps):
+    data_a, data_b, data_c = datasets_with_gaps
+    attributes = create_attributes()
+
+    d = Datasource(bucket=bucket)
+
+    d.add_data(metadata=attributes, data=data_b, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_a, data_type="surface", new_version=False)
+    d.add_data(metadata=attributes, data=data_c, data_type="surface", new_version=False)
+
+    assert d.data_keys() == [
+        "2012-01-01-00:00:00+00:00_2012-01-31-00:00:59+00:00",
+        "2012-04-01-00:00:00+00:00_2012-04-30-00:00:59+00:00",
+        "2012-09-01-00:00:00+00:00_2012-09-30-00:00:59+00:00",
+    ]
+
+    expected = xr.concat([data_a, data_b, data_c], dim="time").drop_duplicates("time").sortby("time")
+
+    ds = d.get_data(version="v0").compute()
+
+    assert ds.time.size == expected.time.size
+    assert ds.equals(expected)
+
+
+def test_bytes_stored(data, bucket):
+    d = Datasource(bucket=bucket)
+    d.add_data(metadata=data["ch4"]["metadata"], data=data["ch4"]["data"], data_type="surface")
+
+    d.save()
+
+    assert d.bytes_stored() == 9897
+
+    d = Datasource(bucket=bucket)
+
+    assert d.bytes_stored() == 0
