@@ -2,6 +2,7 @@
 A zarr store on the local filesystem. This is used by Datasource to handle the
 storage of data on the local filesystem and different versions of data.
 """
+
 from __future__ import annotations
 import logging
 from typing import Any, Dict, Literal, Iterator, Union, Optional, MutableMapping
