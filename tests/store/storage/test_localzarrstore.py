@@ -160,6 +160,12 @@ def test_match_chunking(store):
 
     assert chunking == {"time": 16}
 
+    store.add(version="v0", dataset=data_b_chunked)
+    # Let's check that the chunks in the store are correct
+    chunked_dataset = store.get(version="v0")
+
+    assert dict(chunked_dataset.chunks) == {'time': (16, 16, 16, 16, 16, 16, 16, 9)}
+
     # Now try it with two datasets with the same chunking, should return an empty dictionary
     store.delete_all()
 
