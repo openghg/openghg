@@ -224,17 +224,20 @@ class Datasource:
         # TODO - This can raise errors with open_mfdataset is used for a whole year of files with footprints
         # add some tests during the populate stage
         # Test this
-        try:
-            time_chunksize: Union[str, int] = data.chunksizes[time_coord][0]
-        except (KeyError, IndexError):
-            time_chunksize = "auto"
+        # try:
+        #     time_chunksize: Union[str, int] = data.chunksizes[time_coord][0]
+        # except (KeyError, IndexError):
+        #     time_chunksize = "auto"
 
         # We'll sort and drop duplicates here
         if sort and drop_duplicates:
+            logger.info("Dropping duplicates and sorting by time variable in add_timed_data.")
             data = data.drop_duplicates(time_coord, keep="first").sortby(time_coord)
         elif sort:
+            logger.info("Sorting by time variable in add_timed_data.")
             data = data.sortby(time_coord)
         elif drop_duplicates:
+            logger.info("Dropping duplicates in add_timed_data.")
             data = data.drop_duplicates(time_coord, keep="first")
 
         # We'll only do a concat if we actually have overlapping data
@@ -246,15 +249,15 @@ class Datasource:
         ]
 
         # We'll only need to sort the new dataset if the data we add comes before the current data
-        already_sorted = True
+        # already_sorted = True
 
         # If we don't have any data in this Datasource or we have no overlap we'll just add the new data
         if not self._store or not overlapping:
             self._store.add(version=version_str, dataset=data, compressor=compressor, filters=filters)
             date_keys.append(new_daterange_str)
 
-            if not overlapping and sorted(date_keys) != date_keys:
-                already_sorted = False
+            # if sorted(date_keys) != date_keys:
+            #     already_sorted = False
         # Otherwise if we have data already stored in the Datasource
         else:
             # If we have existing data we'll just keep the new data
@@ -270,6 +273,7 @@ class Datasource:
                 # Only save the current daterange string for this version
                 date_keys = [new_daterange_str]
             elif if_exists == "combine":
+                raise NotImplementedError("Combining data not yet implemented.")
                 # We'll copy the data into a temporary store and then combine the data
                 memory_store = self._store.copy_to_memorystore(version=self._latest_version)
                 existing = xr.open_zarr(store=memory_store, consolidated=True)
@@ -303,9 +307,9 @@ class Datasource:
                 # combined_daterange = self.get_dataset_daterange_str(dataset=combined)
                 combined_daterange = self.get_representative_daterange_str(dataset=combined, period=period)
 
-                logger.warning(
-                    f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize} and sorting."
-                )
+                # logger.warning(
+                #     f"Dropping duplicates and rechunking data with time chunks of size {time_chunksize} and sorting."
+                # )
 
                 if data_type == "footprints":
                     logger.warning("Sorting footprints by time may consume large amounts of memory.")
@@ -316,7 +320,7 @@ class Datasource:
 
                 combined = (
                     combined.drop_duplicates(dim=time_coord, keep="first")
-                    .chunk({"time": time_chunksize})
+                    # .chunk({"time": time_chunksize})
                     .sortby(time_coord)
                 )
 
@@ -345,13 +349,14 @@ class Datasource:
         # the data into a new zarr store and if it's before the current data
         # just create a new larger empty zarr store, add the earlier data
         # and then add back in the old data? Would that be more efficient?
-        if not already_sorted:
-            logger.debug("Sorting data by time coordinate in add_timed_data.")
-            memory_store = self._store.copy_to_memorystore(version=version_str)
-            existing = xr.open_zarr(store=memory_store, consolidated=True)
-            logger.debug("Sorting and chunking data in add_timed_data.")
-            existing = existing.chunk(chunks={"time": time_chunksize}).sortby(time_coord)
-            self._store.update(version=version_str, dataset=existing)
+        # if not already_sorted:
+        #     logger.info("Sorting data by time coordinate in add_timed_data.")
+        #     memory_store = self._store.copy_to_memorystore(version=version_str)
+        #     existing = xr.open_zarr(store=memory_store, consolidated=True)
+        #     # Need to check what chunking
+        #     existing = existing.sortby(time_coord)
+        #     # existing = existing.chunk(chunks={"time": time_chunksize}).sortby(time_coord)
+        #     self._store.update(version=version_str, dataset=existing)
 
         self._data_type = data_type
         self.add_metadata_key(key="data_type", value=data_type)
@@ -730,6 +735,14 @@ class Datasource:
             version = self._latest_version
 
         return self._store.get(version=version)
+
+    def bytes_stored(self) -> int:
+        """Get the amount of data stored in the zarr store in bytes
+
+        Returns:
+            int: Number of bytes
+        """
+        return self._store.bytes_stored()
 
     def update_daterange(self) -> None:
         """Update the dates stored by this Datasource
