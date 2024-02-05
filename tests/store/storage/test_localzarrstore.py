@@ -36,23 +36,18 @@ def test_localzarrstore_add_retrieve(store):
     assert store.version_exists(version="v0")
 
 
-# def test_copy_to_memory_store(store):
-#     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-#     with xr.open_dataset(datapath) as ds:
-#         store.add(version="v0", dataset=ds)
+def test_copy_to_memory_store(store):
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    with xr.open_dataset(datapath) as ds:
+        store.add(version="v0", dataset=ds)
 
-#         memory_store = store.copy_to_memorystore(keys=["test"], version="v0")
-#         ds_recombined = xr.open_mfdataset(
-#             paths=memory_store, engine="zarr", combine="by_coords", consolidated=True
-#         )
-
-#         # Let's not let xarray mess around
-#         ds_recombined = ds_recombined.compute()
-#         assert ds.equals(ds_recombined)
+        memory_store = store.copy_to_memorystore(version="v0")
+        ds_recombined = xr.open_zarr(store=memory_store)
+        assert ds.equals(ds_recombined)
 
 
 def test_update(store):
-    fp_1 = get_footprint_datapath("TAC-100magl_EUROPE_20.nc")
+    fp_1 = get_footprint_datapath("TAC-100magl_UKV_EUROPE_201607.nc")
     fp_2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
 
     with xr.open_dataset(fp_1) as ds:
@@ -178,22 +173,16 @@ def test_match_chunking(store):
     assert not chunking
 
 
-def test_dataset_retrieved_same_shape_etc(store):
+def test_dataset_retrieved_identical(store):
     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds)
 
         retrieved = store.get(version="v0")
-        assert ds.dims == retrieved.dims
-        assert ds.coords.equals(retrieved.coords)
         assert ds.identical(retrieved)
 
 
 def test_copy_actually_copies(store):
-    import pandas as pd
-    import numpy as np
-    import timeit
-
     time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
     time_b = pd.date_range("2012-01-29T00:00:00", "2012-04-30T00:00:00", freq="1d")
 
