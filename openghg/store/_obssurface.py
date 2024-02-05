@@ -281,12 +281,14 @@ class ObsSurface(BaseStore):
             else:
                 data_filepath = Path(fp)
 
+            # This hasn't been updated to use the new check_hashes function due to
+            # the added complication of the GCWERKS precision file handling,
+            # so we'll just use the old method for now.
             file_hash = hash_file(filepath=data_filepath)
-            if file_hash in self._file_hashes and not force:
+            if file_hash in self._file_hashes and overwrite is False:
                 logger.warning(
                     "This file has been uploaded previously with the filename : "
-                    f"{self._file_hashes[file_hash]} - skipping.\n"
-                    "If necessary, use force=True to bypass this to add this data."
+                    f"{self._file_hashes[file_hash]} - skipping."
                 )
                 continue
 
@@ -374,13 +376,9 @@ class ObsSurface(BaseStore):
             )
 
             results["processed"][data_filepath.name] = datasource_uuids
-
-            # Store the hash as the key for easy searching, store the filename as well for
-            # ease of checking by user
-            # TODO - maybe add a timestamp to this string?
-            self._file_hashes[file_hash] = data_filepath.name
-
             logger.info(f"Completed processing: {data_filepath.name}.")
+
+        self._file_hashes[file_hash] = data_filepath.name
 
         return dict(results)
 
