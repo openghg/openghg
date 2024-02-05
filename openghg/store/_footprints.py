@@ -263,7 +263,6 @@ class Footprints(BaseStore):
         from openghg.util import (
             clean_string,
             format_inlet,
-            hash_file,
             species_lifetime,
             timestamp_now,
             check_if_need_new_version,
@@ -304,18 +303,15 @@ class Footprints(BaseStore):
 
         new_version = check_if_need_new_version(if_exists, save_current)
 
-        # Save the hashes so we don't have to compute them again
-        new_files_hashes = {}
-        for f in filepath:
-            file_hash = hash_file(filepath=f)
-            if file_hash in self._file_hashes and not force:
-                logger.warning(
-                    f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping.\n"
-                    "If necessary, use force=True to bypass this to add this data."
-                )
-                return {}
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
-            new_files_hashes[file_hash] = f.name
+        if not unseen_hashes:
+            return {}
+
+        filepath = list(unseen_hashes.values())
+
+        if not filepath:
+            return {}
 
         if chunks is None:
             chunks = {}
@@ -480,7 +476,7 @@ class Footprints(BaseStore):
             # )
 
             # Record the file hash in case we see the file(s) again
-            self._file_hashes.update(new_files_hashes)
+            self.store_hashes(unseen_hashes)
 
             return datasource_uuids
 

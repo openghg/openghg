@@ -85,7 +85,6 @@ class ObsColumn(BaseStore):
         from openghg.types import ColumnTypes
         from openghg.util import (
             clean_string,
-            hash_file,
             load_column_parser,
             check_if_need_new_version,
         )
@@ -122,16 +121,12 @@ class ObsColumn(BaseStore):
         # Load the data retrieve object
         parser_fn = load_column_parser(source_format=source_format)
 
-        # Load in the metadata store
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not force:
-            logger.warning(
-                "This file has been uploaded previously with the filename : "
-                f"{self._file_hashes[file_hash]} - skipping.\n"
-                "If necessary, use force=True to bypass this to add this data."
-            )
+        if not unseen_hashes:
             return {}
+
+        filepath = next(iter(unseen_hashes.values()))
 
         # Define parameters to pass to the parser function
         param = {
@@ -181,7 +176,7 @@ class ObsColumn(BaseStore):
         # )
 
         # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+        self.store_hashes(unseen_hashes)
 
         return datasource_uuids
 

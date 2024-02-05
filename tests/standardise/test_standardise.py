@@ -223,13 +223,15 @@ def test_local_obs_metadata_mismatch_fail():
 
     Same attributes / metadata as described in 'test_local_obs_metadata_mismatch()'.
     """
+    from helpers import clear_test_stores
+    clear_test_stores()
     filepath = get_surface_datapath(
         filename="DECC-picarro_TAC_20130131_co2-999m-20220929_mismatch.nc", source_format="OPENGHG"
     )
 
     with pytest.raises(AttrMismatchError) as e_info:
         standardise_surface(
-            filepaths=filepath,
+            filepath=filepath,
             site="TAC",
             network="DECC",
             inlet="999m",

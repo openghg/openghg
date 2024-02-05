@@ -1,18 +1,18 @@
 """ This file contains the BaseStore class from which other storage
     modules inherit.
 """
-
 from __future__ import annotations
-
 import logging
-from types import TracebackType
-from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union
+from pathlib import Path
 from pandas import Timestamp
+from types import TracebackType
+from typing import Any, Dict, List, Optional, Sequence, TypeVar, Union, Tuple
+
 
 from openghg.objectstore import get_object_from_json, exists, set_object_from_json
 from openghg.objectstore.metastore import DataClassMetaStore
-from openghg.types import DatasourceLookupError
-from openghg.util import timestamp_now, to_lowercase
+from openghg.types import DatasourceLookupError, multiPathType
+from openghg.util import timestamp_now, to_lowercase, hash_file
 
 
 T = TypeVar("T", bound="BaseStore")
@@ -96,6 +96,63 @@ class BaseStore:
 
     def transform_data(self, *args: Any, **kwargs: Any) -> dict:
         raise NotImplementedError
+
+    def store_hashes(self, hashes: Dict[str, Path]) -> None:
+        """Store the hashes of files we've seen before
+
+        Args:
+            hahes: Dictionary of hashes
+        Returns:
+            None
+        """
+        name_only = {k: v.name for k, v in hashes.items()}
+        self._file_hashes.update(name_only)
+
+    def check_hashes(self, filepaths: multiPathType, force: bool) -> Tuple[Dict[str, Path], Dict[str, Path]]:
+        """Check the hashes of the files passed against the hashes of previously
+        uploaded files. Two dictionaries are returned, one containing the hashes
+        of files we've seen before and one containing the hashes of files we haven't.
+
+        A warning is logged if we've seen any of the files before
+
+        Args:
+            filepaths: List of filepaths
+            force: If force is True then we will expect to process all the filepaths, not just the
+            unseen ones
+        Returns:
+            tuple: seen files, unseen files
+        """
+        if not isinstance(filepaths, list):
+            filepaths = [filepaths]
+
+        unseen: Dict[str, Path] = {}
+        seen: Dict[str, Path] = {}
+
+        for filepath in filepaths:
+            file_hash = hash_file(filepath=filepath)
+            if file_hash in self._file_hashes:
+                seen[file_hash] = filepath
+            else:
+                unseen[file_hash] = filepath
+
+        if force:
+            unseen = {**seen, **unseen}
+
+        if seen:
+            logger.warning("Skipping previously standardised files, see log for list.")
+            seen_files_msg = "\n".join([str(v) for v in seen.values()])
+            logger.debug(f"We've seen the following files before:\n{seen_files_msg}")
+
+            if unseen:
+                logger.info(f"Processing {len(unseen)} files of {len(filepaths)}.")
+
+        if unseen:
+            to_process = "\n".join([str(v) for v in unseen.values()])
+            logger.debug(f"Processing the following files:\n{to_process}")
+        else:
+            logger.info("No new files to process.")
+
+        return seen, unseen
 
     def assign_data(
         self,

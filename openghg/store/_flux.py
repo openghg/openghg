@@ -9,7 +9,6 @@ from numpy import ndarray
 from openghg.store import DataSchema
 from openghg.store.base import BaseStore
 from xarray import DataArray, Dataset
-import warnings
 
 __all__ = ["Flux"]
 
@@ -117,7 +116,6 @@ class Flux(BaseStore):
         from openghg.types import FluxTypes
         from openghg.util import (
             clean_string,
-            hash_file,
             load_flux_parser,
             check_if_need_new_version,
         )
@@ -149,13 +147,12 @@ class Flux(BaseStore):
         # Load the data retrieve object
         parser_fn = load_flux_parser(source_format=source_format)
 
-        file_hash = hash_file(filepath=filepath)
-        if file_hash in self._file_hashes and not force:
-            warnings.warn(
-                f"This file has been uploaded previously with the filename : {self._file_hashes[file_hash]} - skipping.\n"
-                "If necessary, use force=True to bypass this to add this data."
-            )
+        _, unseen_hashes = self.check_hashes(filepaths=filepath, force=force)
+
+        if not unseen_hashes:
             return {}
+
+        filepath = next(iter(unseen_hashes.values()))
 
         # Define parameters to pass to the parser function
         # TODO: Update this to match against inputs for parser function.
@@ -216,8 +213,9 @@ class Flux(BaseStore):
             compressor=compressor,
             filters=filters,
         )
+
         # Record the file hash in case we see this file again
-        self._file_hashes[file_hash] = filepath.name
+        self.store_hashes(unseen_hashes)
 
         return datasource_uuids
 
