@@ -140,7 +140,8 @@ class BaseStore:
 
         if seen:
             logger.warning("Skipping previously standardised files, see log for list.")
-            logger.debug(f"We've seen the following files before:\n{list(seen.values())}")
+            seen_files_msg = "\n".join([str(v) for v in seen.values()])
+            logger.debug(f"We've seen the following files before:\n{seen_files_msg}")
 
             if unseen:
                 logger.info(f"Processing {len(unseen)} files of {len(filepaths)}.")
