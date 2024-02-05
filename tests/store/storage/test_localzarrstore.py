@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 import pytest
 import xarray as xr
 import numcodecs
@@ -34,23 +36,18 @@ def test_localzarrstore_add_retrieve(store):
     assert store.version_exists(version="v0")
 
 
-# def test_copy_to_memory_store(store):
-#     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
-#     with xr.open_dataset(datapath) as ds:
-#         store.add(version="v0", dataset=ds)
+def test_copy_to_memory_store(store):
+    datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
+    with xr.open_dataset(datapath) as ds:
+        store.add(version="v0", dataset=ds)
 
-#         memory_store = store.copy_to_memorystore(keys=["test"], version="v0")
-#         ds_recombined = xr.open_mfdataset(
-#             paths=memory_store, engine="zarr", combine="by_coords", consolidated=True
-#         )
-
-#         # Let's not let xarray mess around
-#         ds_recombined = ds_recombined.compute()
-#         assert ds.equals(ds_recombined)
+        memory_store = store.copy_to_memorystore(version="v0")
+        ds_recombined = xr.open_zarr(store=memory_store)
+        assert ds.equals(ds_recombined)
 
 
 def test_update(store):
-    fp_1 = get_footprint_datapath("TAC-100magl_EUROPE_201208.nc")
+    fp_1 = get_footprint_datapath("TAC-100magl_UKV_EUROPE_201607.nc")
     fp_2 = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
 
     with xr.open_dataset(fp_1) as ds:
@@ -116,22 +113,82 @@ def test_delete_all(store):
     assert not parent.exists()
 
 
-def test_dataset_retrieved_same_shape_etc(store):
+def test_match_chunking(store):
+    time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
+    time_b = pd.date_range("2012-02-01T00:00:00", "2012-04-30T00:00:00", freq="1d")
+
+    values_a = np.zeros(len(time_a))
+    values_b = np.full(len(time_b), 1)
+
+    data_a = xr.Dataset({"mf": ("time", values_a)}, coords={"time": time_a})
+    data_b = xr.Dataset({"mf": ("time", values_b)}, coords={"time": time_b})
+
+    store.add(version="v0", dataset=data_a)
+
+    chunking = store.match_chunking(version="v0", dataset=data_b)
+
+    assert not chunking
+
+    store.delete_all()
+
+    chunks = {"time": 4}
+    data_a_chunked = data_a.chunk(chunks)
+    store.add(version="v0", dataset=data_a)
+    chunking = store.match_chunking(version="v0", dataset=data_a_chunked)
+
+    assert not chunking
+
+    # Now try it the other way round, add chunked data and then try to match it with unchunked data
+    store.delete_all()
+
+    store.add(version="v0", dataset=data_a_chunked)
+    chunking = store.match_chunking(version="v0", dataset=data_a)
+
+    assert chunking == {"time": 4}
+
+    # Now try it with two chunked datasets, should return the chunking of the first dataset
+    store.delete_all()
+
+    chunks_a = {"time": 16}
+
+    data_a_chunked = data_a.chunk(chunks_a)
+    store.add(version="v0", dataset=data_a_chunked)
+
+    chunks_b = {"time": 12}
+    data_b_chunked = data_b.chunk(chunks_b)
+    chunking = store.match_chunking(version="v0", dataset=data_b_chunked)
+
+    assert chunking == {"time": 16}
+
+    store.add(version="v0", dataset=data_b_chunked)
+    # Let's check that the chunks in the store are correct
+    chunked_dataset = store.get(version="v0")
+
+    assert dict(chunked_dataset.chunks) == {'time': (16, 16, 16, 16, 16, 16, 16, 9)}
+
+    # Now try it with two datasets with the same chunking, should return an empty dictionary
+    store.delete_all()
+
+    chunks = {"time": 12}
+    data_a_chunked = data_a.chunk(chunks)
+    store.add(version="v0", dataset=data_a_chunked)
+
+    data_b_chunked = data_b.chunk(chunks)
+    chunking = store.match_chunking(version="v0", dataset=data_b_chunked)
+
+    assert not chunking
+
+
+def test_dataset_retrieved_identical(store):
     datapath = get_footprint_datapath("TAC-100magl_UKV_co2_TEST_201407.nc")
     with xr.open_dataset(datapath) as ds:
         store.add(version="v0", dataset=ds)
 
         retrieved = store.get(version="v0")
-        assert ds.dims == retrieved.dims
-        assert ds.coords.equals(retrieved.coords)
         assert ds.identical(retrieved)
 
 
 def test_copy_actually_copies(store):
-    import pandas as pd
-    import numpy as np
-    import timeit
-
     time_a = pd.date_range("2012-01-01T00:00:00", "2012-01-31T00:00:00", freq="1d")
     time_b = pd.date_range("2012-01-29T00:00:00", "2012-04-30T00:00:00", freq="1d")
 
@@ -156,7 +213,7 @@ def test_copy_actually_copies(store):
     assert np.sum(np.isnan(ds_2.mf.values))
 
     store.add(version="v0", dataset=data_a)
-    # If we call compute and load everything into memory before deleting the 
+    # If we call compute and load everything into memory before deleting the
     # data from disk then it works
     ds_a_from_store = store.get(version="v0")
     ds_a_from_store = ds_a_from_store.compute()

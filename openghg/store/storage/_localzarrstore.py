@@ -127,6 +127,11 @@ class LocalZarrStore(Store):
 
         # Used to append new data to the current version's zarr store
         if version in self._stores:
+            # We want to ensure the chunking of the incoming data matches the chunking of the stored data
+            chunking = self.match_chunking(version=version, dataset=dataset)
+            if chunking:
+                dataset = dataset.chunk(chunking)
+
             dataset.to_zarr(
                 store=self._stores[version], mode="a", consolidated=True, append_dim=append_dim, compute=True
             )
@@ -296,3 +301,46 @@ class LocalZarrStore(Store):
             bytes_stored += get_folder_size(folder_path=self.store_path(version=version))
 
         return bytes_stored
+
+    def match_chunking(self, version: str, dataset: xr.Dataset) -> Dict[str, int]:
+        """Ensure that chunks of incoming data match the chunking of the stored data.
+
+        If no chunking is found then an empty dictionary is returned.
+        If there is no mismatch then an empty dictionary is returned.
+        Returns the chunking scheme of the stored data if there is a mismatch.
+
+        Args:
+            version: Version of data to compare against
+            dataset: Incoming dataset
+        Returns:
+            dict: Chunking scheme
+        """
+        if version.lower() not in self._stores:
+            raise KeyError(f"Invalid version - {version}")
+
+        incoming_chunks = dict(dataset.chunks)
+        incoming_actually_chunked = {k: max(v) for k, v in incoming_chunks.items() if len(v) > 1}
+
+        stored_chunks = {str(k): v for k, v in self.get(version=version).chunksizes.items()}
+        # Only take chunks that aren't whole dimensions
+        stored_actually_chunked = {k: max(v) for k, v in stored_chunks.items() if len(v) > 1}
+
+        if not incoming_actually_chunked and not stored_actually_chunked:
+            return {}
+
+        if incoming_actually_chunked != stored_actually_chunked:
+            if not incoming_actually_chunked:
+                msg = (
+                    f"Incoming data is not chunked, using stored chunking schema: {stored_actually_chunked}."
+                )
+            else:
+                msg = (
+                    f"Chunking scheme of incoming data ({incoming_actually_chunked}) does not match stored data."
+                    + f"\nUsing stored chunking schema: {stored_actually_chunked}."
+                    + "\nThis may result in an increased processing time. Not passing the chunks argument may be faster."
+                )
+
+            logger.warning(msg)
+            return stored_actually_chunked
+
+        return {}
