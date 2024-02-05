@@ -136,16 +136,21 @@ class BaseStore:
             else:
                 unseen[file_hash] = filepath
 
-        if seen:
-            logger.warning(f"We've seen the following files before:\n{list(seen.values())}")
-
         if force:
             unseen = {**seen, **unseen}
 
-        if not unseen:
-            logger.info("No new files to process.")
+        if seen:
+            logger.warning("Skipping previously standardised files, see log for list.")
+            logger.debug(f"We've seen the following files before:\n{list(seen.values())}")
 
-        logger.info(f"Processing the following files:\n{list(unseen.values())}")
+            if unseen:
+                logger.info(f"Processing {len(unseen)} files of {len(filepaths)}.")
+
+        if unseen:
+            to_process = "\n".join([str(v) for v in unseen.values()])
+            logger.debug(f"Processing the following files:\n{to_process}")
+        else:
+            logger.info("No new files to process.")
 
         return seen, unseen
 
