@@ -329,10 +329,18 @@ class LocalZarrStore(Store):
             return {}
 
         if incoming_actually_chunked != stored_actually_chunked:
-            logger.warning(
-                f"Chunking of incoming data {incoming_actually_chunked} does not match stored data {stored_actually_chunked}\n"
-                "Using stored chunking schema."
-            )
+            if not incoming_actually_chunked:
+                msg = (
+                    f"Incoming data is not chunked, using stored chunking schema: {stored_actually_chunked}."
+                )
+            else:
+                msg = (
+                    f"Chunking scheme of incoming data ({incoming_actually_chunked}) does not match stored data."
+                    + f"\nUsing stored chunking schema: {stored_actually_chunked}."
+                    + "\nThis may result in an increased processing time. Not passing the chunks argument may be faster."
+                )
+
+            logger.warning(msg)
             return stored_actually_chunked
 
         return {}
